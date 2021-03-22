@@ -359,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Người dùng mới"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"An toàn với máy bay"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Có mạng"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Không có mạng"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Chưa được kết nối"</string>
@@ -378,7 +377,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"TỰ ĐỘNG"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Đảo ngược màu"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Chế độ chỉnh màu"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Cài đặt khác"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Chế độ cài đặt khác"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Xong"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Đã kết nối"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Đã kết nối, mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -516,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Thiết bị này do cha mẹ của bạn quản lý"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Tổ chức của bạn sở hữu thiết bị này và có thể giám sát lưu lượng truy cập mạng"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> sở hữu thiết bị này và có thể giám sát lưu lượng truy cập mạng"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Thiết bị này do <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> cung cấp"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Thiết bị này thuộc về tổ chức của bạn và đã kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Thiết bị này thuộc về <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> và đã kết nối với <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Thiết bị này thuộc về tổ chức của bạn"</string>
@@ -529,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Hồ sơ công việc của bạn đã kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Hồ sơ cá nhân của bạn đã kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Thiết bị này đã kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Thiết bị này do <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> cung cấp"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Quản lý thiết bị"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Giám sát hồ sơ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Giám sát mạng"</string>
@@ -540,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Xem chính sách"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Xem các quyền kiểm soát"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Thiết bị này thuộc về <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nQuản trị viên CNTT có thể giám sát và quản lý các tùy chọn cài đặt, quyền truy cập vào dữ liệu công ty, ứng dụng, dữ liệu liên kết với thiết bị và thông tin vị trí thiết bị của bạn.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên CNTT của bạn."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> có thể truy cập vào dữ liệu liên kết với thiết bị này, quản lý ứng dụng và thay đổi các chế độ cài đặt trên thiết bị này.\n\nNếu bạn có thắc mắc, hãy liên hệ với <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Thiết bị này thuộc về tổ chức của bạn.\n\nQuản trị viên CNTT có thể giám sát và quản lý các tùy chọn cài đặt, quyền truy cập vào dữ liệu công ty, ứng dụng, dữ liệu liên kết với thiết bị và thông tin vị trí thiết bị của bạn.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên CNTT của bạn."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Tổ chức của bạn đã cài đặt một tổ chức phát hành chứng chỉ trên thiết bị này. Lưu lượng truy cập mạng bảo mật của bạn có thể được giám sát hoặc sửa đổi."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Tổ chức của bạn đã cài đặt một tổ chức phát hành chứng chỉ trong hồ cơ công việc của bạn. Lưu lượng truy cập mạng bảo mật của bạn có thể được giám sát hoặc sửa đổi."</string>
@@ -650,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Hiển thị chế độ trình diễn"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Báo thức"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ máy bay"</string>
     <string name="add_tile" msgid="6239678623873086686">"Thêm ô"</string>
@@ -746,7 +752,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Đã mở điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Đã đóng điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Cho phép thông báo từ kênh này"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"Cài đặt khác"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"Chế độ cài đặt khác"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Tùy chỉnh"</string>
     <string name="notification_done" msgid="6215117625922713976">"Xong"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Hoàn tác"</string>
@@ -896,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Đóng cài đặt nhanh."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Đã đặt báo thức."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Đã đăng nhập là <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"chọn người dùng"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Không có Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Mở chi tiết."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"Không sử dụng được do <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Mở cài đặt <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Chỉnh sửa thứ tự cài đặt."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Trình đơn nguồn"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Trang <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Màn hình khóa"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Điện thoại đã tắt do nhiệt"</string>
@@ -1008,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Di chuyển sang trái"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Di chuyển sang phải"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Nút chuyển phóng to"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"Phóng to toàn bộ màn hình"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Phóng to toàn màn hình"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Phóng to một phần màn hình"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Chuyển"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Nút hỗ trợ tiếp cận đã thay thế cử chỉ hỗ trợ tiếp cận\n\n"<annotation id="link">"Xem chế độ cài đặt"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Di chuyển nút sang cạnh để ẩn nút tạm thời"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Điều khiển thiết bị"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Thêm các tùy chọn điều khiển cho các thiết bị đã kết nối của bạn"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Thiết lập các tùy chọn điều khiển thiết bị"</string>
@@ -1078,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Ghép nối thiết bị mới"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Số bản dựng"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Đã sao chép số bản dựng vào bảng nhớ tạm."</string>
+    <string name="basic_status" msgid="2315371112182658176">"Mở cuộc trò chuyện"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Tiện ích trò chuyện"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Nhấn vào một cuộc trò chuyện để thêm cuộc trò chuyện đó vào Màn hình chính"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> trước"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"Chưa đầy <xliff:g id="DURATION">%1$s</xliff:g> trước"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"Hơn <xliff:g id="DURATION">%1$s</xliff:g> trước"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"Sinh nhật"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"Sắp đến sinh nhật"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"Ngày kỷ niệm"</string>
+    <string name="location_status" msgid="1294990572202541812">"Đang chia sẻ vị trí"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"Tin bài mới"</string>
+    <string name="video_status" msgid="4548544654316843225">"Đang xem"</string>
+    <string name="audio_status" msgid="4237055636967709208">"Đang nghe"</string>
+    <string name="game_status" msgid="1340694320630973259">"Đang chơi"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"Bạn bè"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Cùng trò chuyện tối nay nhé!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"Cuộc gọi nhỡ"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Xem các tin nhắn, cuộc gọi nhỡ và thông tin cập nhật trạng thái gần đây"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"Cuộc trò chuyện"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Đã xảy ra vấn đề khi đọc dung lượng pin của bạn"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Nhấn để biết thêm thông tin"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Chưa đặt chuông báo"</string>
 </resources>

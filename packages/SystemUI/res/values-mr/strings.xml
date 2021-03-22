@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"रद्द करा"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"शेअर करा"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"स्क्रीन रेकॉर्डिंग रद्द केले"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रीन रेकॉर्डिंग सेव्ह केली"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"पाहण्यासाठी टॅप करा"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रेकॉर्डिंग हटवताना एरर आली"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"परवानग्या मिळवता आल्या नाहीत"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन रेकॉर्डिंग सुरू करताना एरर आली"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"नवीन वापरकर्ता"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"वाय-फाय"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"इंटरनेट"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"विमानासाठी सुरक्षित"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"नेटवर्क उपलब्ध आहेत"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"नेटवर्क उपलब्ध नाहीत"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"कनेक्ट केले नाही"</string>
@@ -518,6 +515,8 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"हे डिव्हाइस तुमच्या पालकाने व्यवस्थापित केले आहे"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"तुमच्‍या संस्‍थेकडे या डिव्हाइसची मालकी आहे आणि ती नेटवर्क ट्रॅफिकचे परीक्षण करू शकते"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> च्या मालकीचे आहे आणि ती नेटवर्क ट्रॅफिकचे परीक्षण करू शकते"</string>
+    <!-- no translation found for quick_settings_financed_disclosure_named_management (2307703784594859524) -->
+    <skip />
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"हे डिव्हाइस तुमच्या संस्थेचे आहे आणि ते <xliff:g id="VPN_APP">%1$s</xliff:g> ला कनेक्ट केले आहे"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> चे आहे आणि ते <xliff:g id="VPN_APP">%2$s</xliff:g> ला कनेक्ट केले आहे"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"हे डिव्हाइस तुमच्या संस्थेचे आहे"</string>
@@ -531,6 +530,8 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"तुमची कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> ला कनेक्ट केली"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"तुमची वैयक्‍तिक प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> ला कनेक्‍ट केली आहे"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"हे डिव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> ला कनेक्ट केले आहे"</string>
+    <!-- no translation found for monitoring_title_financed_device (3659962357973919387) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"डिव्हाइस व्‍यवस्‍थापन"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"प्रोफाईल परीक्षण"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"नेटवर्क परीक्षण"</string>
@@ -542,6 +543,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"धोरणे पहा"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"नियंत्रणे पाहा"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> चे आहे.\n\nतुमचा आयटी ॲडमिन सेटिंग्ज, कॉर्पोरेट अ‍ॅक्सेस, ॲप्‍स, तुमच्‍या डिव्‍हाइसशी संबंधित डेटा आणि तुमच्‍या डिव्‍हाइसच्‍या स्‍थानाची माहिती यांचे परीक्षण व व्‍यवस्‍थापन करू शकतो.\n\nअधिक माहितीसाठी तुमच्‍या आयटी ॲडमिनशी संपर्क साधा."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> कदाचित या डिव्हाइसशी संलग्न असलेला डेटा अ‍ॅक्सेस करू शकते, ॲप्सचे व्यवस्थापन करू शकते आणि ही डिव्हाइस सेटिंग्ज बदलू शकते.\n\nतुम्हाला प्रश्न असल्यास, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> शी संपर्क साधा."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"हे डिव्हाइस तुमच्या संस्थेचे आहे.\n\nतुमचा आयटी ॲडमिन सेटिंग्ज, कॉर्पोरेट अ‍ॅक्सेस, ॲप्‍स, तुमच्‍या डिव्‍हाइसशी संबंधित डेटा आणि तुमच्‍या डिव्‍हाइसच्‍या स्‍थानाची माहिती यांचे परीक्षण व व्‍यवस्‍थापन करू शकतो.\n\nअधिक माहितीसाठी तुमच्‍या आयटी ॲडमिनशी संपर्क साधा."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"आपल्या संस्थेने या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"आपल्या संस्थेने आपल्या कार्य प्रोफाइलवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
@@ -652,6 +654,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"डेमो मोड दर्शवा"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"इथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"कार्य प्रोफाईल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"विमान मोड"</string>
     <string name="add_tile" msgid="6239678623873086686">"टाइल जोडा"</string>
@@ -898,11 +904,14 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"जलद सेटिंग्ज बंद करा."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"अलार्म सेट केला."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> म्हणून साइन इन केले"</string>
+    <!-- no translation found for accessibility_quick_settings_choose_user_action (4554388498186576087) -->
+    <skip />
     <string name="data_connection_no_internet" msgid="691058178914184544">"इंटरनेट नाही"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"तपशील उघडा."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> मुळे उपलब्ध नाही"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> सेटिंग्ज उघडा."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिंग्जचा क्रम संपादित करा."</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पॉवर मेनू"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पृष्ठ <xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"तापल्‍यामुळे फोन बंद झाला"</string>
@@ -1010,9 +1019,13 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"डावीकडे हलवा"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"उजवीकडे हलवा"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"मॅग्निफिकेशन स्विच"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"संपूर्ण स्क्रीन मॅग्निफाय करा"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"फुल स्क्रीन मॅग्निफाय करा"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीनचा काही भाग मॅग्निफाय करा"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच करा"</string>
+    <!-- no translation found for accessibility_floating_button_migration_tooltip (4431046858918714564) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_docking_tooltip (6814897496767461517) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"डिव्हाइस नियंत्रणे"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"तुमच्या कनेक्ट केलेल्या डिव्हाइससाठी नियंत्रणे जोडा"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिव्हाइस नियंत्रणे सेट करा"</string>
@@ -1080,6 +1093,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नवीन डिव्हाइससोबत पेअर करा"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर क्लिपबोर्डवर कॉपी केला."</string>
+    <string name="basic_status" msgid="2315371112182658176">"संभाषण उघडा"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"संभाषण विजेट"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"तुमच्या होम स्क्रीन वर संभाषण जोडण्यासाठी त्यावर टॅप करा"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> पूर्वी"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> पेक्षा कमी"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> पेक्षा आधी"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"वाढदिवस"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"वाढदिवस लवकरच आहे"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"वर्धापन दिन"</string>
+    <string name="location_status" msgid="1294990572202541812">"स्थान शेअर करत आहे"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"नवीन स्टोरी"</string>
+    <string name="video_status" msgid="4548544654316843225">"पाहत आहे"</string>
+    <string name="audio_status" msgid="4237055636967709208">"ऐकत आहे"</string>
+    <string name="game_status" msgid="1340694320630973259">"प्ले करत आहे"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"मित्रमैत्रिणी"</string>
+    <string name="empty_status" msgid="5938893404951307749">"चला, आज रात्री चॅट करूया!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"मिस्ड कॉल"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"अलीकडील मेसेज, मिस्ड कॉल आणि स्टेटस अपडेट पाहा"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"संभाषण"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"तुमचे बॅटरी मीटर वाचताना समस्या आली"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"अधिक माहितीसाठी टॅप करा"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"अलार्म सेट केला नाही"</string>
 </resources>

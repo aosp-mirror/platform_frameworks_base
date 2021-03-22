@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"रद्द गर्नुहोस्"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"सेयर गर्नुहोस्"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"स्क्रिन रेकर्ड गर्ने कार्य रद्द गरियो"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रिन रेकर्डिङ सुरक्षित गरियो"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"हेर्नका लागि ट्याप गर्नुहोस्"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रिनको रेकर्डिङ मेट्ने क्रममा त्रुटि"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"अनुमति प्राप्त गर्न सकिएन"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रिन रेकर्ड गर्न थाल्ने क्रममा त्रुटि भयो"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"नयाँ प्रयोगकर्ता"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"इन्टरनेट"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"हवाइजहाज मोडमा काम गर्ने सुरक्षित नेटवर्क"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"उपलब्ध नेटवर्कहरू"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"नेटवर्क उपलब्ध छैन"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"जोडिएको छैन"</string>
@@ -471,9 +468,9 @@
     <string name="user_add_user" msgid="4336657383006913022">"प्रयोगकर्ता थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नयाँ प्रयोगकर्ता"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि हटाउने हो?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यस सत्रमा सबै एपहरू र डेटा मेटाइनेछ।"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यो सत्रमा भएका सबै एपहरू र डेटा मेटाइने छ।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"हटाउनुहोस्"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"पुनः स्वागत, अतिथि!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"तपाईंलाई फेरि स्वागत छ, अतिथि"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तपाईं आफ्नो सत्र जारी गर्न चाहनुहुन्छ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"सुरु गर्नुहोस्"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"हो, जारी राख्नुहोस्"</string>
@@ -484,7 +481,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"वर्तमान प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"नयाँ प्रयोगकर्ता थप्ने हो?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि एपहरू अद्यावधिक गर्न सक्छन्।"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nसबै प्रयोगकर्ताले अरू प्रयोगकर्ताका एपहरू अपडेट गर्न सक्छन्।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"प्रयोगकर्ताको सीमा पुग्यो"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">तपाईं अधिकतम <xliff:g id="COUNT">%d</xliff:g> प्रयोगहरू मात्र थप्न सक्नुहुन्छ।</item>
@@ -518,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"यो यन्त्र तपाईंका अभिभावक व्यवस्थापन गर्नुहुन्छ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"यो यन्त्र तपाईंको सङ्गठनको स्वामित्वमा छ र उक्त सङ्गठनले यसको नेटवर्क ट्राफिक अनुगमन गर्न सक्छ"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"यो यन्त्र <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> को स्वामित्वमा छ र उक्त सङ्गठनले यसको नेटवर्क ट्राफिक अनुगमन गर्न सक्छ"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ले यो यन्त्र उपलब्ध गराएको हो"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"यो यन्त्र तपाईंको सङ्गठनको स्वामित्वमा छ र <xliff:g id="VPN_APP">%1$s</xliff:g> मा कनेक्ट गरिएको छ"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"यो यन्त्र <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> को स्वामित्वमा छ र <xliff:g id="VPN_APP">%2$s</xliff:g> मा कनेक्ट गरिएको छ"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"यो यन्त्र तपाईंको सङ्गठनको स्वामित्वमा छ"</string>
@@ -531,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"तपाईंको कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> मा कनेक्ट गरिएको छ"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"तपाईंको व्यक्तिगत प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> मा कनेक्ट गरिएको छ"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"यो यन्त्र <xliff:g id="VPN_APP">%1$s</xliff:g> मा कनेक्ट गरिएको छ"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ले यो यन्त्र उपलब्ध गराएको हो"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"यन्त्रको व्यवस्थापन"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"प्रोफाइल अनुगमन गर्दै"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"सञ्जाल अनुगमन"</string>
@@ -542,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"नीतिहरू हेर्नुहोस्"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"नियन्त्रणहरू हेर्नुहोस्"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"यो यन्त्र <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> को स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको निगरानी र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> ले यो यन्त्रसँग सम्बन्धित डेटा प्रयोग गर्न, एपहरू व्यवस्थापन गर्न र यी यन्त्रहरूको सेटिङ बदल्न सक्छ।\n\nतपाईंसँग प्रश्नहरू छन् भने <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> मा सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"यो यन्त्र तपाईंको सङ्गठनको स्वामित्वमा छ।\n\nतपाईंका IT एड्मिन सेटिङ, संस्थागत पहुँच, एप, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको निगरानी र व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्ना IT एड्मिनसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापित गऱ्यो। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरेको छ। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
@@ -652,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"डेमो मोड देखाउनुहोस्"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"इथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"कार्य प्रोफाइल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"हवाइजहाज मोड"</string>
     <string name="add_tile" msgid="6239678623873086686">"टाइल थप्नुहोस्"</string>
@@ -898,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"द्रुत सेटिङहरूलाई बन्द गर्नुहोस्।"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"अलार्म सेट गरियो।"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> को रूपमा साइन इन गरियो"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"प्रयोगकर्ता छान्नुहोस्"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"इन्टरनेट छैन"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"विवरणहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> का कारण उपलब्ध छैन"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> सम्बन्धी सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिङहरूको क्रमलाई सम्पादन गर्नुहोस्।"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पावर मेनु"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> मध्ये पृष्ठ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लक स्क्रिन"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"फोन अति नै तातिएकाले चिसिन बन्द भयो"</string>
@@ -1010,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"बायाँ सार्नुहोस्"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"दायाँ सार्नुहोस्"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"म्याग्निफिकेसन स्विच"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"पूरै स्क्रिन म्याग्निफाइ गर्नुहोस्"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"पूरै स्क्रिन जुम इन गर्नुहोस्"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रिनको केही भाग म्याग्निफाइ गर्नुहोस्"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"बदल्नुहोस्"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"एक्सेसिबिलिटी इसाराका स्थानमा एक्सेसिबिलिटी बटन प्रयोग हुन थालेको छ\n\n"<annotation id="link">"सेटिङ हेर्नुहोस्"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"यो बटन केही बेर नदेखिने पार्न किनारातिर सार्नुहोस्"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"यन्त्र नियन्त्रण गर्ने विजेटहरू"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"आफ्ना जोडिएका यन्त्रहरूका लागि नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"यन्त्र नियन्त्रण गर्ने विजेटहरू सेटअप गर्नुहोस्"</string>
@@ -1080,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नयाँ यन्त्रको जोडा बनाउनुहोस्"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नम्बर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नम्बर कपी गरी क्लिपबोर्डमा सारियो।"</string>
+    <string name="basic_status" msgid="2315371112182658176">"वार्तालाप खोल्नुहोस्"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"वार्तालापसम्बन्धी विजेटहरू"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"कुनै वार्तालाप होम स्क्रिनमा हाल्न उक्त वार्तालापमा ट्याप गर्नुहोस्"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> अघि"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> भन्दा कम समयअघि"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> भन्दा बढी समयअघि"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"जन्मदिन"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"आगामी जन्मदिन"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"वार्षिकोत्सव"</string>
+    <string name="location_status" msgid="1294990572202541812">"स्थानसम्बन्धी जानकारी सेयर गरिँदै छ"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"नयाँ स्टोरी"</string>
+    <string name="video_status" msgid="4548544654316843225">"भिडियो हेरिँदै छ"</string>
+    <string name="audio_status" msgid="4237055636967709208">"सुनिँदै छ"</string>
+    <string name="game_status" msgid="1340694320630973259">"खेलिँदै छ"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"साथीहरू"</string>
+    <string name="empty_status" msgid="5938893404951307749">"आज राति च्याट गरौँ!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"मिस कल"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"हालसालैका म्यासेज, मिस कल र स्ट्याटस अपडेट हेर्नुहोस्"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"वार्तालाप"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"यन्त्रको ब्याट्रीको मिटर रिडिङ क्रममा समस्या भयो"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"थप जानकारी प्राप्त गर्न ट्याप गर्नुहोस्"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"अलार्म राखिएको छैन"</string>
 </resources>

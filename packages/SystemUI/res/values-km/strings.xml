@@ -116,10 +116,8 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"បោះបង់"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ចែករំលែក"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"បាន​បោះបង់​ការថត​សកម្មភាព​អេក្រង់"</string>
-    <!-- no translation found for screenrecord_save_title (1886652605520893850) -->
-    <skip />
-    <!-- no translation found for screenrecord_save_text (3008973099800840163) -->
-    <skip />
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"បានរក្សាទុក​ការថតវីដេអូអេក្រង់"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"ចុចដើម្បីមើល"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"មានបញ្ហា​ក្នុងការ​លុបការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"មិនអាច​ទទួលបាន​ការអនុញ្ញាត​ទេ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"មានបញ្ហា​ក្នុងការ​ចាប់ផ្ដើម​ថត​អេក្រង់"</string>
@@ -361,7 +359,6 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"អ្នកប្រើ​ថ្មី"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"អ៊ីនធឺណិត"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"សុវត្ថិភាព​ពេលជិះ​យន្តហោះ"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"បណ្ដាញ​ដែលអាច​ប្រើបាន"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"​មិនអាចប្រើ​បណ្តាញ​បានទេ"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"មិន​បាន​តភ្ជាប់"</string>
@@ -468,23 +465,23 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"ប្ដូរ​អ្នកប្រើ ​អ្នកប្រើ​បច្ចុប្បន្ន <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"អ្នកប្រើបច្ចុប្បន្ន <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"បង្ហាញ​ប្រវត្តិរូប"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"បន្ថែម​អ្នកប្រើ"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"បញ្ចូល​អ្នកប្រើ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"អ្នកប្រើ​ថ្មី"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"លុប​ភ្ញៀវ​?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ទិន្នន័យ និង​កម្មវិធី​ទាំងអស់​ក្នុង​សម័យ​នេះ​នឹង​ត្រូវ​បាន​លុប។"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"លុបចេញ"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ដកភ្ញៀវចេញឬ?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"កម្មវិធី និងទិន្នន័យ​ទាំងអស់​ក្នុង​វគ្គ​នេះ​នឹង​ត្រូវ​លុប។"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ដកចេញ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"សូម​ស្វាគមន៍​ការ​ត្រឡប់​មកវិញ, ភ្ញៀវ!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"តើ​អ្នក​ចង់​បន្ត​សម័យ​របស់​អ្នក​?"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ចាប់ផ្ដើម"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"តើ​អ្នក​ចង់​បន្ត​វគ្គ​របស់​អ្នក​ទេ?"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ចាប់ផ្ដើមសាជាថ្មី"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"បាទ​/ចាស ​បន្ត"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"អ្នកប្រើភ្ញៀវ"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"ដើម្បីលុបកម្មវិធី និងទិន្នន័យ សូមយកអ្នកប្រើជាភ្ញៀវចេញ"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"យកភ្ញៀវចេញ"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"ដកភ្ញៀវចេញ"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"ចុះឈ្មោះអ្នកប្រើចេញ"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ចុះឈ្មោះអ្នកប្រើបច្ចុប្បន្នចេញ"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ចុះឈ្មោះអ្នកប្រើចេញ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"បន្ថែម​អ្នកប្រើ​ថ្មី?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"ពេល​អ្នក​បន្ថែម​អ្នកប្រើ​ថ្មី អ្នកប្រើ​នោះ​ត្រូវ​កំណត់​ទំហំ​ផ្ទាល់​របស់​គេ។\n\nអ្នក​ប្រើ​ណាមួយ​ក៏​អាច​ធ្វើ​បច្ចុប្បន្នភាព​កម្មវិធី​សម្រាប់​អ្នកប្រើ​ផ្សេង​បាន​ដែរ។"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"បញ្ចូល​អ្នកប្រើ​ថ្មីឬ?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"នៅពេល​អ្នក​បញ្ចូល​អ្នកប្រើ​ថ្មី អ្នកប្រើ​នោះ​ត្រូវ​រៀបចំកន្លែងរបស់​គេ។\n\nអ្នក​ប្រើ​ណា​ក៏​អាច​ដំឡើងកំណែ​កម្មវិធី​សម្រាប់​អ្នកប្រើទាំងអស់ផ្សេងទៀត​បាន​ដែរ។"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"​បាន​ឈាន​ដល់ចំនួន​កំណត់អ្នកប្រើប្រាស់"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">អ្នកអាចបញ្ចូល​អ្នក​ប្រើប្រាស់បាន​រហូតដល់ <xliff:g id="COUNT">%d</xliff:g> នាក់។</item>
@@ -492,7 +489,7 @@
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"យកអ្នកប្រើចេញ?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"កម្មវិធី និងទិន្នន័យទាំងអស់របស់អ្នកប្រើនេះនឹងត្រូវបានលុប។"</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"យកចេញ"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"ដកចេញ"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"មុខងារ​សន្សំ​ថ្មបានបើក"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"ការ​បន្ថយ​ការ​ប្រតិបត្តិ និង​ទិន្នន័យ​ផ្ទៃ​ខាងក្រោយ"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"បិទ​មុខងារ​សន្សំ​ថ្ម"</string>
@@ -518,6 +515,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ឧបករណ៍​នេះ​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់មាតាបិតាអ្នក"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ស្ថាប័ន​របស់អ្នក​ជាម្ចាស់​ឧបករណ៍​នេះ ហើយ​អាចនឹង​តាមដាន​ចរាចរណ៍បណ្តាញ"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ជាម្ចាស់​ឧបករណ៍​នេះ ហើយ​អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ឧបករណ៍នេះត្រូវបានផ្ដល់ដោយ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័នអ្នក និងត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> និងត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
@@ -531,6 +529,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"កម្រងព័ត៌មានការងារ​របស់អ្នក​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"កម្រងព័ត៌មាន​ផ្ទាល់ខ្លួន​របស់អ្នក​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ឧបករណ៍នេះ​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ឧបករណ៍នេះត្រូវបានផ្ដល់ដោយ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ការ​គ្រប់គ្រង​ឧបករណ៍"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"តាមដានប្រវត្ថិរូប"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ការ​ត្រួតពិនិត្យ​បណ្ដាញ"</string>
@@ -542,6 +541,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"មើល​គោលការណ៍"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"មើលការគ្រប់គ្រង"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ឧបករណ៍នេះ​ជាគឺកម្មសិទ្ធិ​របស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>។\n\nអ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​អាចតាមដាន និងគ្រប់គ្រង​ការកំណត់ ការចូលប្រើជាលក្ខណៈក្រុមហ៊ុន កម្មវិធី ទិន្នន័យដែលពាក់ព័ន្ធ​នឹង​ឧបករណ៍​របស់អ្នក និងព័ត៌មាន​ទីតាំង​របស់​ឧបករណ៍​អ្នក។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក។"</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> ប្រហែលជាអាច​ចូលប្រើ​ទិន្នន័យដែល​ពាក់ព័ន្ធនឹង​ឧបករណ៍នេះ គ្រប់គ្រងកម្មវិធី និងប្ដូរ​ការកំណត់​ឧបករណ៍នេះ។\n\nប្រសិនបើអ្នក​មានសំណួរ សូមទាក់ទង <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>។"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"ឧបករណ៍នេះ​គឺជាកម្មសិទ្ធិ​របស់ស្ថាប័នអ្នក។\n\nអ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​អាចតាមដាន និងគ្រប់គ្រង​ការកំណត់ ការចូលប្រើជាលក្ខណៈក្រុមហ៊ុន កម្មវិធី ទិន្នន័យដែលពាក់ព័ន្ធ​នឹង​ឧបករណ៍​របស់អ្នក និងព័ត៌មាន​ទីតាំង​របស់ឧបករណ៍​អ្នក។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក។"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ស្ថាប័ន​របស់អ្នក​បានដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រនៅលើ​ឧបករណ៍​នេះ។ ចរាចរណ៍​បណ្តាញដែលមាន​សុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ស្ថាប័នរបស់អ្នក​បានដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ។ ចរាចរណ៍​បណ្តាញដែលមាន​សុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
@@ -652,6 +652,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"បង្ហាញរបៀបសាកល្បង"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"អ៊ីសឺរណិត"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ម៉ោងរោទ៍"</string>
+    <!-- no translation found for wallet_title (5369767670735827105) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"ប្រវត្តិរូបការងារ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"របៀបក្នុងយន្តហោះ"</string>
     <string name="add_tile" msgid="6239678623873086686">"បន្ថែមក្រឡាល្អិត"</string>
@@ -898,11 +902,13 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"បិទការកំណត់រហ័ស"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"បានកំណត់ម៉ោងរោទិ៍"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"បានចូលជា <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ជ្រើសរើស​អ្នកប្រើប្រាស់"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"គ្មាន​អ៊ីនធឺណិតទេ"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"បើកព័ត៌មានលម្អិត"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"មិនអាច​ប្រើបានទេ ដោយសារ <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"បើការកំណត់ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"កែលំដាប់ការកំណត់"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ម៉ឺនុយ​ថាមពល"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ទំព័រ <xliff:g id="ID_1">%1$d</xliff:g> នៃ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"អេក្រង់​ចាក់សោ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ទូរសព្ទ​បាន​បិទដោយសារ​វា​ឡើងកម្តៅ"</string>
@@ -1010,9 +1016,11 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"ផ្លាស់ទី​ទៅ​ឆ្វេង"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"ផ្លាស់ទីទៅ​ស្តាំ"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ប៊ូតុងបិទបើកការ​ពង្រីក"</string>
-    <string name="magnification_mode_switch_state_full_screen" msgid="2882507327576770574">"ពង្រីក​អេក្រង់​ទាំងមូល"</string>
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ពង្រីក​ពេញអេក្រង់"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ពង្រីក​ផ្នែកនៃ​អេក្រង់"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ប៊ូតុងបិទបើក"</string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ប៊ូតុង​ភាពងាយស្រួល​បានជំនួស​ចលនាភាពងាយស្រួល\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ផ្លាស់ទី​ប៊ូតុង​ទៅគែម ដើម្បីលាក់វា​ជាបណ្ដោះអាសន្ន"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"បញ្ចូល​ផ្ទាំងគ្រប់គ្រង​សម្រាប់​ឧបករណ៍​ដែលអ្នកបានភ្ជាប់"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"រៀបចំ​ផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
@@ -1080,6 +1088,26 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"លេខ​កំណែបង្កើត"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"បានចម្លងលេខ​កំណែបង្កើតទៅឃ្លីបបត។"</string>
+    <string name="basic_status" msgid="2315371112182658176">"បើកការសន្ទនា"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"ធាតុ​ក្រាហ្វិកនៃការសន្ទនា"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"ចុចការសន្ទនា ដើម្បីបញ្ចូលវាទៅក្នុងអេក្រង់ដើមរបស់អ្នក"</string>
+    <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>
+    <string name="less_than_timestamp" msgid="6598972791137724517">"តិចជាង <xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>
+    <string name="over_timestamp" msgid="4765793502859358634">"ជាង <xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>
+    <string name="birthday_status" msgid="2596961629465396761">"ថ្ងៃកំណើត"</string>
+    <string name="upcoming_birthday_status" msgid="2005452239256870351">"ថ្ងៃកំណើតឆាប់ៗនេះ"</string>
+    <string name="anniversary_status" msgid="1790034157507590838">"គម្រប់ខួប"</string>
+    <string name="location_status" msgid="1294990572202541812">"កំពុងចែករំលែកទីតាំង"</string>
+    <string name="new_story_status" msgid="9012195158584846525">"រឿងថ្មី"</string>
+    <string name="video_status" msgid="4548544654316843225">"កំពុង​មើល"</string>
+    <string name="audio_status" msgid="4237055636967709208">"កំពុងស្តាប់"</string>
+    <string name="game_status" msgid="1340694320630973259">"កំពុងលេង"</string>
+    <string name="empty_user_name" msgid="3389155775773578300">"មិត្តភ័ក្ដិ"</string>
+    <string name="empty_status" msgid="5938893404951307749">"តោះជជែកគ្នាយប់នេះ!"</string>
+    <string name="missed_call" msgid="4228016077700161689">"ខកខាន​ទទួល"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"មើលព័ត៌មាន​ថ្មីៗ​អំពីស្ថានភាព ការខកខាន​ទទួល និងសារថ្មីៗ"</string>
+    <string name="people_tile_title" msgid="6589377493334871272">"ការ​សន្ទនា"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"មានបញ្ហាក្នុង​ការអាន​ឧបករណ៍រង្វាស់កម្រិតថ្មរបស់អ្នក"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ចុចដើម្បីទទួលបាន​ព័ត៌មានបន្ថែម"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"មិនបាន​កំណត់​ម៉ោងរោទ៍​ទេ"</string>
 </resources>
