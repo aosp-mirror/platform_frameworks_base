@@ -1131,6 +1131,8 @@ public class Vpn {
      * @return a Network if there is a running VPN network or null if there is no running VPN
      *         network or network is null.
      */
+    @VisibleForTesting
+    @Nullable
     public synchronized Network getNetwork() {
         final NetworkAgent agent = mNetworkAgent;
         if (null == agent) return null;
