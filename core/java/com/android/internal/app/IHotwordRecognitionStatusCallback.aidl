@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.hardware.soundtrigger.SoundTrigger;
+import android.service.voice.HotwordRejectedResult;
 
 /**
  * @hide
@@ -41,11 +42,13 @@ oneway interface IHotwordRecognitionStatusCallback {
     void onGenericSoundTriggerDetected(in SoundTrigger.GenericRecognitionEvent recognitionEvent);
 
     /**
-     * Called when the validated result is invalid.
+     * Called when the {@link HotwordDetectionService second stage detection} did not detect the
+     * keyphrase.
      *
-     * @param reason The reason why the validated result is invalid.
+     * @param result Info about the second stage detection result, provided by the
+     *         {@link HotwordDetectionService}.
      */
-    void onRejected(int reason);
+    void onRejected(in HotwordRejectedResult result);
 
     /**
      * Called when the detection fails due to an error.

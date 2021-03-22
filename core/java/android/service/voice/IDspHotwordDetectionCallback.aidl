@@ -16,6 +16,8 @@
 
 package android.service.voice;
 
+import android.service.voice.HotwordRejectedResult;
+
 /**
  * Callback for returning the detected result from the HotwordDetectionService.
  *
@@ -28,7 +30,7 @@ oneway interface IDspHotwordDetectionCallback {
     void onDetected();
 
     /**
-     * Called when the detected result is invalid.
+     * Sends {@code result} to the HotwordDetector.
      */
-    void onRejected();
+    void onRejected(in HotwordRejectedResult result);
 }
