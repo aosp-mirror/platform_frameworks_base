@@ -1467,7 +1467,7 @@
     <string name="data_connection_5g_plus" translatable="false">5G+</string>
 
     <!-- Content description of the data connection type Carrier WiFi. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_carrier_wifi">CWF</string>
+    <string name="data_connection_carrier_wifi">W+</string>
 
     <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
     <string name="cell_data_off_content_description">Mobile data off</string>
