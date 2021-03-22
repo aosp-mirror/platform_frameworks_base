@@ -202,7 +202,7 @@
     <color name="global_screenshot_background_protection_start">#40000000</color> <!-- 25% black -->
 
     <!-- Long screenshot UI -->
-    <color name="screenshot_crop_scrim">#9444</color>
+    <color name="screenshot_crop_scrim">#6444</color>
 
     <!-- GM2 colors -->
     <color name="GM2_grey_50">#F8F9FA</color>
