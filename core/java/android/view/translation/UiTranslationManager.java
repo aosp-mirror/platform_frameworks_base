@@ -127,10 +127,13 @@ public final class UiTranslationManager {
      * @param destSpec {@link TranslationSpec} for the translated data.
      * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
      * @param taskId the Activity Task id which needs ui translation
+     * @deprecated Use {@code startTranslation(TranslationSpec, TranslationSpec, List<AutofillId>,
+     * ActivityId)} instead.
      *
      * @hide
+     * @removed
      */
-    // TODO, hide the APIs
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     @SystemApi
     public void startTranslation(@NonNull TranslationSpec sourceSpec,
@@ -193,10 +196,13 @@ public final class UiTranslationManager {
      * NOTE: Please use {@code finishTranslation(ActivityId)} instead.
      *
      * @param taskId the Activity Task id which needs ui translation
+     * @deprecated Use {@code finishTranslation(ActivityId)} instead.
      *
      * @hide
+     * @removed
+     *
      */
-    // TODO, hide the APIs
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     @SystemApi
     public void finishTranslation(int taskId) {
@@ -240,10 +246,12 @@ public final class UiTranslationManager {
      * NOTE: Please use {@code pauseTranslation(ActivityId)} instead.
      *
      * @param taskId the Activity Task id which needs ui translation
+     * @deprecated Use {@code pauseTranslation(ActivityId)} instead.
      *
      * @hide
+     * @removed
      */
-    // TODO, hide the APIs
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     @SystemApi
     public void pauseTranslation(int taskId) {
@@ -287,10 +295,12 @@ public final class UiTranslationManager {
      * NOTE: Please use {@code resumeTranslation(ActivityId)} instead.
      *
      * @param taskId the Activity Task id which needs ui translation
+     * @deprecated Use {@code resumeTranslation(ActivityId)} instead.
      *
      * @hide
+     * @removed
      */
-    // TODO, hide the APIs
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
     @SystemApi
     public void resumeTranslation(int taskId) {
