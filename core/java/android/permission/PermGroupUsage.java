@@ -18,6 +18,7 @@ package android.permission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 
 /**
  * Represents the usage of a permission group by an app. Supports package name, user, permission
@@ -26,6 +27,7 @@ import android.annotation.Nullable;
  *
  * @hide
  */
+@TestApi
 public final class PermGroupUsage {
 
     private final String mPackageName;
@@ -36,7 +38,19 @@ public final class PermGroupUsage {
     private final boolean mIsPhoneCall;
     private final CharSequence mAttribution;
 
-    PermGroupUsage(@NonNull String packageName, int uid,
+    /**
+     *
+     * @param packageName The package name of the using app
+     * @param uid The uid of the using app
+     * @param permGroupName The name of the permission group being used
+     * @param lastAccess The time of last access
+     * @param isActive Whether this is active
+     * @param isPhoneCall Whether this is a usage by the phone
+     * @param attribution An optional string attribution to show
+     * @hide
+     */
+    @TestApi
+    public PermGroupUsage(@NonNull String packageName, int uid,
             @NonNull String permGroupName, long lastAccess, boolean isActive, boolean isPhoneCall,
             @Nullable CharSequence attribution) {
         this.mPackageName = packageName;
@@ -48,30 +62,58 @@ public final class PermGroupUsage {
         this.mAttribution = attribution;
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
     public @NonNull String getPackageName() {
         return mPackageName;
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
     public int getUid() {
         return mUid;
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
     public @NonNull String getPermGroupName() {
         return mPermGroupName;
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
     public long getLastAccess() {
         return mLastAccess;
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
     public boolean isActive() {
         return mIsActive;
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
     public boolean isPhoneCall() {
         return mIsPhoneCall;
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
     public @Nullable CharSequence getAttribution() {
         return mAttribution;
     }
@@ -80,6 +122,7 @@ public final class PermGroupUsage {
     public String toString() {
         return getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(this))
                 + " packageName: " + mPackageName + ", UID: " + mUid + ", permGroup: "
-                + mPermGroupName + ", isActive: " + mIsActive + ", attribution: " + mAttribution;
+                + mPermGroupName + ", lastAccess: " + mLastAccess + ", isActive: " + mIsActive
+                + ", attribution: " + mAttribution;
     }
 }
