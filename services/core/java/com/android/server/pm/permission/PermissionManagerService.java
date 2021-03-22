@@ -2085,6 +2085,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
+    @Nullable
+    private List<String> getDelegatedShellPermissionsInternal() {
+        synchronized (mLock) {
+            if (mCheckPermissionDelegate == null) {
+                return Collections.EMPTY_LIST;
+            }
+            return mCheckPermissionDelegate.getDelegatedPermissionNames();
+        }
+    }
+
     private void setCheckPermissionDelegateLocked(@Nullable CheckPermissionDelegate delegate) {
         if (delegate != null || mCheckPermissionDelegate != null) {
             PackageManager.invalidatePackageInfoCache();
@@ -5042,6 +5052,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
+        @NonNull
+        public List<String> getDelegatedShellPermissions() {
+            return getDelegatedShellPermissionsInternal();
+        }
+
+        @Override
         public void onUserCreated(@UserIdInt int userId) {
             Preconditions.checkArgumentNonNegative(userId, "userId");
             // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
@@ -5234,6 +5250,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
          */
         int checkUidPermission(int uid, @NonNull String permissionName,
                 BiFunction<Integer, String, Integer> superImpl);
+
+        /**
+         * @return list of delegated permissions
+         */
+        List<String> getDelegatedPermissionNames();
     }
 
     private class ShellDelegate implements CheckPermissionDelegate {
@@ -5282,6 +5303,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
             }
             return superImpl.apply(uid, permissionName);
+        }
+
+        @Override
+        public List<String> getDelegatedPermissionNames() {
+            return mDelegatedPermissionNames == null
+                    ? null
+                    : new ArrayList<>(mDelegatedPermissionNames);
         }
 
         private boolean isDelegatedPermission(@NonNull String permissionName) {

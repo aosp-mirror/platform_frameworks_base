@@ -184,6 +184,11 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     void stopShellPermissionIdentityDelegation();
 
     /**
+     * Get all delegated shell permissions.
+     */
+    @NonNull List<String> getDelegatedShellPermissions();
+
+    /**
      * Read legacy permissions from legacy permission settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose
