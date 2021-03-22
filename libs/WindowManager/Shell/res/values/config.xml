@@ -52,9 +52,6 @@
      when the PIP menu is shown in center. -->
     <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
 
-    <!-- Animation duration when exit starting window: icon going away -->
-    <integer name="starting_window_icon_exit_anim_duration">166</integer>
-
     <!-- Animation duration when exit starting window: reveal app -->
     <integer name="starting_window_app_reveal_anim_duration">333</integer>
 </resources>
