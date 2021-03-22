@@ -27,11 +27,17 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.window.util.BaseDisplayFeature;
-import androidx.window.util.SettingsConfigProvider;
+import androidx.window.common.DeviceStateManagerPostureProducer;
+import androidx.window.common.DisplayFeature;
+import androidx.window.common.ResourceConfigDisplayFeatureProducer;
+import androidx.window.common.SettingsDevicePostureProducer;
+import androidx.window.common.SettingsDisplayFeatureProducer;
+import androidx.window.util.DataProducer;
+import androidx.window.util.PriorityDataProducer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Reference implementation of androidx.window.extensions OEM interface for use with
@@ -41,23 +47,46 @@ import java.util.List;
  * production builds since the interface can still change before reaching stable version.
  * Please refer to {@link androidx.window.sidecar.SampleSidecarImpl} instead.
  */
-class SampleExtensionImpl extends StubExtension implements
-        SettingsConfigProvider.StateChangeCallback {
+class SampleExtensionImpl extends StubExtension {
     private static final String TAG = "SampleExtension";
 
-    private final SettingsConfigProvider mConfigProvider;
+    private final SettingsDevicePostureProducer mSettingsDevicePostureProducer;
+    private final DataProducer<Integer> mDevicePostureProducer;
+
+    private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
+    private final DataProducer<List<DisplayFeature>> mDisplayFeatureProducer;
 
     SampleExtensionImpl(Context context) {
-        mConfigProvider = new SettingsConfigProvider(context, this);
+        mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
+        mDevicePostureProducer = new PriorityDataProducer<>(List.of(
+                mSettingsDevicePostureProducer,
+                new DeviceStateManagerPostureProducer(context)
+        ));
+
+        mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
+        mDisplayFeatureProducer = new PriorityDataProducer<>(List.of(
+                mSettingsDisplayFeatureProducer,
+                new ResourceConfigDisplayFeatureProducer(context)
+        ));
+
+        mDevicePostureProducer.addDataChangedCallback(this::onDevicePostureChanged);
+        mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
-    @Override
-    public void onDevicePostureChanged() {
-        updateDeviceState(new ExtensionDeviceState(mConfigProvider.getDeviceState()));
+    private void onDevicePostureChanged() {
+        updateDeviceState(new ExtensionDeviceState(getDevicePosture()));
+
+        // Trigger a change in display features as the posture will be used in place of the feature
+        // state if the state is left unset by the producer.
+        onDisplayFeaturesChanged();
     }
 
-    @Override
-    public void onDisplayFeaturesChanged() {
+    private int getDevicePosture() {
+        Optional<Integer> posture = mDevicePostureProducer.getData();
+        return posture.orElse(ExtensionDeviceState.POSTURE_UNKNOWN);
+    }
+
+    private void onDisplayFeaturesChanged() {
         for (Activity activity : getActivitiesListeningForLayoutChanges()) {
             ExtensionWindowLayoutInfo newLayout = getWindowLayoutInfo(activity);
             updateWindowLayout(activity, newLayout);
@@ -84,13 +113,20 @@ class SampleExtensionImpl extends StubExtension implements
             return features;
         }
 
-        List<BaseDisplayFeature> storedFeatures = mConfigProvider.getDisplayFeatures();
-        for (BaseDisplayFeature baseFeature : storedFeatures) {
-            Rect featureRect = baseFeature.getRect();
-            rotateRectToDisplayRotation(displayId, featureRect);
-            transformToWindowSpaceRect(activity, featureRect);
-            features.add(new ExtensionFoldingFeature(featureRect, baseFeature.getType(),
-                    baseFeature.getState()));
+        Optional<List<DisplayFeature>> storedFeatures = mDisplayFeatureProducer.getData();
+        if (storedFeatures.isPresent()) {
+            int posture = getDevicePosture();
+
+            for (DisplayFeature baseFeature : storedFeatures.get()) {
+                Rect featureRect = baseFeature.getRect();
+                rotateRectToDisplayRotation(displayId, featureRect);
+                transformToWindowSpaceRect(activity, featureRect);
+
+                Integer featureState = baseFeature.getState();
+
+                features.add(new ExtensionFoldingFeature(featureRect, baseFeature.getType(),
+                        featureState == null ? posture : featureState));
+            }
         }
         return features;
     }
@@ -98,9 +134,11 @@ class SampleExtensionImpl extends StubExtension implements
     @Override
     protected void onListenersChanged() {
         if (hasListeners()) {
-            mConfigProvider.registerObserversIfNeeded();
+            mSettingsDevicePostureProducer.registerObserversIfNeeded();
+            mSettingsDisplayFeatureProducer.registerObserversIfNeeded();
         } else {
-            mConfigProvider.unregisterObserversIfNeeded();
+            mSettingsDevicePostureProducer.unregisterObserversIfNeeded();
+            mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
         }
 
         onDevicePostureChanged();
