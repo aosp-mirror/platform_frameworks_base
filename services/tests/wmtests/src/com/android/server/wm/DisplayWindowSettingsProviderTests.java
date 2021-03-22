@@ -102,7 +102,7 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
 
         SettingsEntry expectedSettings = new SettingsEntry();
         expectedSettings.mWindowingMode = WINDOWING_MODE_PINNED;
-        readAndAssertExpectedSettings(mPrimaryDisplay, expectedSettings);
+        readAndAssertExpectedSettings(mSecondaryDisplay, expectedSettings);
     }
 
     @Test
@@ -176,17 +176,17 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
         // Expected settings should be empty because the default is to read from the primary vendor
         // settings location.
         SettingsEntry expectedSettings = new SettingsEntry();
-        assertEquals(expectedSettings, provider.getSettings(mPrimaryDisplay.getDisplayInfo()));
+        assertEquals(expectedSettings, provider.getSettings(mSecondaryDisplay.getDisplayInfo()));
 
         // Now switch to secondary vendor settings and assert proper settings.
         provider.setBaseSettingsStorage(mSecondaryVendorSettingsStorage);
         expectedSettings.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
-        assertEquals(expectedSettings, provider.getSettings(mPrimaryDisplay.getDisplayInfo()));
+        assertEquals(expectedSettings, provider.getSettings(mSecondaryDisplay.getDisplayInfo()));
 
         // Switch back to primary and assert settings are empty again.
         provider.setBaseSettingsStorage(mDefaultVendorSettingsStorage);
         expectedSettings.mWindowingMode = WINDOWING_MODE_UNDEFINED;
-        assertEquals(expectedSettings, provider.getSettings(mPrimaryDisplay.getDisplayInfo()));
+        assertEquals(expectedSettings, provider.getSettings(mSecondaryDisplay.getDisplayInfo()));
     }
 
     @Test
@@ -204,7 +204,7 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
         // take precedence over the vendor provided settings.
         SettingsEntry expectedSettings = new SettingsEntry();
         expectedSettings.mWindowingMode = WINDOWING_MODE_PINNED;
-        assertEquals(expectedSettings, provider.getSettings(mPrimaryDisplay.getDisplayInfo()));
+        assertEquals(expectedSettings, provider.getSettings(mSecondaryDisplay.getDisplayInfo()));
     }
 
     @Test
