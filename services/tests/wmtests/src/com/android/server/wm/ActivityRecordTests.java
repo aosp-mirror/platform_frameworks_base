@@ -2157,6 +2157,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         attrs.setTitle("AppWindow");
         final TestWindowState appWindow = createWindowState(attrs, activity);
         activity.addWindow(appWindow);
+        spyOn(appWindow);
+        doNothing().when(appWindow).onStartFreezingScreen();
 
         // Set initial orientation and update.
         activity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
@@ -2193,6 +2195,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         attrs.setTitle("RotationByPolicy");
         final TestWindowState appWindow = createWindowState(attrs, activity);
         activity.addWindow(appWindow);
+        spyOn(appWindow);
+        doNothing().when(appWindow).onStartFreezingScreen();
 
         // Set initial orientation and update.
         performRotation(displayRotation, Surface.ROTATION_90);
