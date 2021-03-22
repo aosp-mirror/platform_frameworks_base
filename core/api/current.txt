@@ -5830,8 +5830,8 @@ package android.app {
     method @NonNull public android.app.Notification.BigPictureStyle bigLargeIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.BigPictureStyle bigPicture(@Nullable android.graphics.Bitmap);
     method @NonNull public android.app.Notification.BigPictureStyle bigPicture(@Nullable android.graphics.drawable.Icon);
-    method @NonNull public android.app.Notification.BigPictureStyle bigPictureContentDescription(@Nullable CharSequence);
     method @NonNull public android.app.Notification.BigPictureStyle setBigContentTitle(@Nullable CharSequence);
+    method @NonNull public android.app.Notification.BigPictureStyle setContentDescription(@Nullable CharSequence);
     method @NonNull public android.app.Notification.BigPictureStyle setSummaryText(@Nullable CharSequence);
     method @NonNull public android.app.Notification.BigPictureStyle showBigPictureWhenCollapsed(boolean);
   }
