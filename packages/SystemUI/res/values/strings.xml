@@ -2865,6 +2865,8 @@
     <string name="empty_status">Let’s chat tonight!</string>
     <!-- Default text for missed call notifications on their Conversation widget [CHAR LIMIT=20] -->
     <string name="missed_call">Missed call</string>
+    <!-- Text when a Notification may have more messages than the number indicated [CHAR LIMIT=5] -->
+    <string name="messages_count_overflow_indicator"><xliff:g id="number" example="7">%d</xliff:g>+</string>
     <!-- Description text for adding a Conversation widget [CHAR LIMIT=100] -->
     <string name="people_tile_description">See recent messages, missed calls, and status updates</string>
     <!-- Title text displayed for the Conversation widget [CHAR LIMIT=50] -->
