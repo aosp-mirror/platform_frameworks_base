@@ -14602,6 +14602,38 @@ public final class Settings {
         public static final int HEADS_UP_ON = 1;
 
         /**
+         * The refresh rate chosen by the user.
+         *
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String USER_PREFERRED_REFRESH_RATE = "user_preferred_refresh_rate";
+
+        /**
+         * The resolution height chosen by the user.
+         *
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String USER_PREFERRED_RESOLUTION_HEIGHT =
+                "user_preferred_resolution_height";
+
+        /**
+         * The resolution width chosen by the user.
+         *
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String USER_PREFERRED_RESOLUTION_WIDTH =
+                "user_preferred_resolution_width";
+
+        /**
          * The name of the device
          */
         @Readable
