@@ -8967,6 +8967,8 @@ package android.bluetooth {
     field public static final String ACTION_NAME_CHANGED = "android.bluetooth.device.action.NAME_CHANGED";
     field public static final String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
     field public static final String ACTION_UUID = "android.bluetooth.device.action.UUID";
+    field public static final int ADDRESS_TYPE_PUBLIC = 0; // 0x0
+    field public static final int ADDRESS_TYPE_RANDOM = 1; // 0x1
     field public static final int BOND_BONDED = 12; // 0xc
     field public static final int BOND_BONDING = 11; // 0xb
     field public static final int BOND_NONE = 10; // 0xa
