@@ -1355,6 +1355,18 @@
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
+    <dimen name="required_width_for_medium">146dp</dimen>
+    <dimen name="required_width_for_large">138dp</dimen>
+    <dimen name="required_height_for_large">182dp</dimen>
+    <dimen name="default_width">146dp</dimen>
+    <dimen name="default_height">92dp</dimen>
+    <dimen name="avatar_size_for_medium">52dp</dimen>
+    <dimen name="max_people_avatar_size_for_large_content">64dp</dimen>
+    <dimen name="max_people_avatar_size">108dp</dimen>
+    <dimen name="name_text_size_for_small">14sp</dimen>
+    <dimen name="name_text_size_for_large">24sp</dimen>
+    <dimen name="content_text_size_for_medium">12sp</dimen>
+    <dimen name="content_text_size_for_large">14sp</dimen>
 
     <!-- Accessibility floating menu -->
     <dimen name="accessibility_floating_menu_elevation">5dp</dimen>
