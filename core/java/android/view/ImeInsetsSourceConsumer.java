@@ -50,10 +50,6 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         super(ITYPE_IME, state, transactionSupplier, controller);
     }
 
-    public void applyImeVisibility(boolean setVisible) {
-        mController.applyImeVisibility(setVisible);
-    }
-
     @Override
     public void onWindowFocusGained() {
         super.onWindowFocusGained();
