@@ -16,8 +16,15 @@
 
 package com.android.keyguard;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.app.WallpaperManager;
+import android.app.smartspace.SmartspaceConfig;
+import android.app.smartspace.SmartspaceManager;
+import android.app.smartspace.SmartspaceSession;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -25,6 +32,7 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
@@ -32,8 +40,12 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -43,6 +55,7 @@ import com.android.systemui.util.ViewController;
 
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -67,6 +80,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private FrameLayout mNewLockScreenClockFrame;
     private AnimatableClockController mNewLockScreenLargeClockViewController;
     private FrameLayout mNewLockScreenLargeClockFrame;
+
+    private PluginManager mPluginManager;
+    private boolean mIsSmartspaceEnabled;
+    PluginListener mPluginListener;
+    private Executor mUiExecutor;
+    private SmartspaceSession mSmartspaceSession;
+    private SmartspaceSession.Callback mSmartspaceCallback;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
@@ -96,6 +116,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
     private String mTimeFormat;
 
+    // If set, will replace keyguard_status_area
+    private BcSmartspaceDataPlugin.SmartspaceView mSmartspaceView;
+
     @Inject
     public KeyguardClockSwitchController(
             KeyguardClockSwitch keyguardClockSwitch,
@@ -105,7 +128,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             KeyguardSliceViewController keyguardSliceViewController,
             NotificationIconAreaController notificationIconAreaController,
             ContentResolver contentResolver,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            PluginManager pluginManager,
+            FeatureFlags featureFlags,
+            @Main Executor uiExecutor) {
         super(keyguardClockSwitch);
         mResources = resources;
         mStatusBarStateController = statusBarStateController;
@@ -115,6 +141,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mNotificationIconAreaController = notificationIconAreaController;
         mBroadcastDispatcher = broadcastDispatcher;
         mTimeFormat = Settings.System.getString(contentResolver, Settings.System.TIME_12_24);
+        mPluginManager = pluginManager;
+        mIsSmartspaceEnabled = featureFlags.isSmartspaceEnabled();
+        mUiExecutor = uiExecutor;
     }
 
     /**
@@ -137,6 +166,63 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         updateAodIcons();
         mNewLockScreenClockFrame = mView.findViewById(R.id.new_lockscreen_clock_view);
         mNewLockScreenLargeClockFrame = mView.findViewById(R.id.new_lockscreen_clock_view_large);
+
+        // If a smartspace plugin is detected, replace the existing smartspace
+        // (keyguard_status_area), and initialize a new session
+        mPluginListener = new PluginListener<BcSmartspaceDataPlugin>() {
+
+            @Override
+            public void onPluginConnected(BcSmartspaceDataPlugin plugin, Context pluginContext) {
+                if (!mIsSmartspaceEnabled) return;
+
+                View ksa = mView.findViewById(R.id.keyguard_status_area);
+                int ksaIndex = mView.indexOfChild(ksa);
+                ksa.setVisibility(View.GONE);
+
+                mSmartspaceView = plugin.getView(mView);
+                mSmartspaceView.registerDataProvider(plugin);
+
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                        MATCH_PARENT, WRAP_CONTENT);
+                lp.addRule(RelativeLayout.BELOW, R.id.new_lockscreen_clock_view);
+                mView.addView((View) mSmartspaceView, ksaIndex, lp);
+
+                View nic = mView.findViewById(
+                        com.android.systemui.R.id.left_aligned_notification_icon_container);
+                lp = (RelativeLayout.LayoutParams) nic.getLayoutParams();
+                lp.addRule(RelativeLayout.BELOW, ((View) mSmartspaceView).getId());
+                nic.setLayoutParams(lp);
+
+                createSmartspaceSession(plugin);
+            }
+
+            @Override
+            public void onPluginDisconnected(BcSmartspaceDataPlugin plugin) {
+                if (!mIsSmartspaceEnabled) return;
+
+                mView.removeView((View) mSmartspaceView);
+                mView.findViewById(R.id.keyguard_status_area).setVisibility(View.VISIBLE);
+
+                View nic = mView.findViewById(
+                        com.android.systemui.R.id.left_aligned_notification_icon_container);
+                RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)
+                        nic.getLayoutParams();
+                lp.addRule(RelativeLayout.BELOW, R.id.keyguard_status_area);
+                nic.setLayoutParams(lp);
+
+                mSmartspaceView = null;
+            }
+
+            private void createSmartspaceSession(BcSmartspaceDataPlugin plugin) {
+                mSmartspaceSession = getContext().getSystemService(SmartspaceManager.class)
+                        .createSmartspaceSession(
+                                new SmartspaceConfig.Builder(getContext(), "lockscreen").build());
+                mSmartspaceCallback = targets -> plugin.onTargetsAvailable(targets);
+                mSmartspaceSession.registerSmartspaceUpdates(mUiExecutor, mSmartspaceCallback);
+                mSmartspaceSession.requestSmartspaceUpdate();
+            }
+        };
+        mPluginManager.addPluginListener(mPluginListener, BcSmartspaceDataPlugin.class, false);
     }
 
     @Override
@@ -147,6 +233,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mStatusBarStateController.removeCallback(mStateListener);
         mColorExtractor.removeOnColorsChangedListener(mColorsListener);
         mView.setClockPlugin(null, mStatusBarStateController.getState());
+
+        if (mSmartspaceSession != null) {
+            mSmartspaceSession.unregisterSmartspaceUpdates(mSmartspaceCallback);
+            mSmartspaceSession.destroy();
+            mSmartspaceSession = null;
+        }
+        mPluginManager.removePluginListener(mPluginListener);
     }
 
     /**
@@ -221,6 +314,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     scale, props, animate);
             PropertyAnimator.setProperty(mNewLockScreenLargeClockFrame, AnimatableProperty.SCALE_Y,
                     scale, props, animate);
+        }
+
+        if (mSmartspaceView != null) {
+            PropertyAnimator.setProperty((View) mSmartspaceView, AnimatableProperty.TRANSLATION_X,
+                    x, props, animate);
         }
         mKeyguardSliceViewController.updatePosition(x, props, animate);
         mNotificationIconAreaController.updatePosition(x, props, animate);

@@ -102,4 +102,8 @@ public class FeatureFlags {
     public boolean isOngoingCallStatusBarChipEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_ongoing_call_status_bar_chip);
     }
+
+    public boolean isSmartspaceEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_smartspace);
+    }
 }

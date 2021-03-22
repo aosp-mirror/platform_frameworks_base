@@ -16,7 +16,9 @@
 
 package com.android.systemui.plugins;
 
+import android.app.smartspace.SmartspaceTarget;
 import android.os.Parcelable;
+import android.view.ViewGroup;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
@@ -36,9 +38,23 @@ public interface BcSmartspaceDataPlugin extends Plugin {
     /** Unregister a listener. */
     void unregisterListener(SmartspaceTargetListener listener);
 
+    /**
+     * Create a view to be shown within the parent. Do not add the view, as the parent
+     * will be responsible for correctly setting the LayoutParams
+     */
+    SmartspaceView getView(ViewGroup parent);
+
+    /** Updates Smartspace data and propagates it to any listeners. */
+    void onTargetsAvailable(List<SmartspaceTarget> targets);
+
     /** Provides Smartspace data to registered listeners. */
     interface SmartspaceTargetListener {
         /** Each Parcelable is a SmartspaceTarget that represents a card. */
         void onSmartspaceTargetsUpdated(List<? extends Parcelable> targets);
+    }
+
+    /** View to which this plugin can be registered, in order to get updates. */
+    interface SmartspaceView {
+        void registerDataProvider(BcSmartspaceDataPlugin plugin);
     }
 }
