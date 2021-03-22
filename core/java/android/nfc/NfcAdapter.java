@@ -2254,7 +2254,7 @@ public final class NfcAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
     public boolean setAlwaysOn(boolean value) {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
@@ -2286,7 +2286,7 @@ public final class NfcAdapter {
      */
 
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
     public boolean isAlwaysOnEnabled() {
         try {
             return sService.isAlwaysOnEnabled();
@@ -2315,7 +2315,7 @@ public final class NfcAdapter {
      */
 
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
     public boolean isAlwaysOnSupported() {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
