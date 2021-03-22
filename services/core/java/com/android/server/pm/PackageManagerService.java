@@ -22899,9 +22899,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getWellbeingPackageName() {
-        return CollectionUtils.firstOrNull(
-                mContext.getSystemService(RoleManager.class).getRoleHolders(
-                        RoleManager.ROLE_SYSTEM_WELLBEING));
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return CollectionUtils.firstOrNull(
+                    mContext.getSystemService(RoleManager.class).getRoleHolders(
+                            RoleManager.ROLE_SYSTEM_WELLBEING));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
