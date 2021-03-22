@@ -1475,6 +1475,14 @@ package android.media.audiopolicy {
 
 }
 
+package android.media.metrics {
+
+  public final class LogSessionId {
+    method @NonNull public String getStringId();
+  }
+
+}
+
 package android.media.tv {
 
   public final class TvInputManager {

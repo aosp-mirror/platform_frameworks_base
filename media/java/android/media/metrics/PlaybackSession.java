@@ -80,14 +80,7 @@ public final class PlaybackSession implements AutoCloseable {
         mManager.reportTrackChangeEvent(mId, event);
     }
 
-    public @NonNull String getId() {
-        // TODO: remove this method and use getSessionId();
-        return mId;
-    }
-
-    /** @hide */
     public @NonNull LogSessionId getSessionId() {
-        // TODO: remove getId() and use this method;
         return mLogSessionId;
     }
 

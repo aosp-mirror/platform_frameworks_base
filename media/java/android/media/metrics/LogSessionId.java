@@ -16,19 +16,28 @@
 
 package android.media.metrics;
 
+import android.annotation.NonNull;
+import android.annotation.TestApi;
+
 /**
  * An instances of this class represents the ID of a log session.
- * @hide
  */
-public class LogSessionId {
+public final class LogSessionId {
     private final String mSessionId;
 
-    /* package */ LogSessionId(String id) {
+    /* package */ LogSessionId(@NonNull String id) {
         mSessionId = id;
     }
 
     /** @hide */
+    @TestApi
+    @NonNull
     public String getStringId() {
+        return mSessionId;
+    }
+
+    @Override
+    public String toString() {
         return mSessionId;
     }
 }
