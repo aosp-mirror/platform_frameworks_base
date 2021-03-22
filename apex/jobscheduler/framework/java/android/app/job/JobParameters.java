@@ -16,10 +16,14 @@
 
 package android.app.job;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.usage.UsageStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
+import android.content.pm.PackageManager;
 import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.Uri;
@@ -29,6 +33,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Contains the parameters used to configure/identify your job. You do not create this object
@@ -82,7 +89,7 @@ public class JobParameters implements Parcelable {
      */
     // TODO(142420609): make it @SystemApi for mainline
     @NonNull
-    public static String getReasonCodeDescription(int reasonCode) {
+    public static String getLegacyReasonCodeDescription(int reasonCode) {
         switch (reasonCode) {
             case REASON_CANCELED: return "canceled";
             case REASON_CONSTRAINTS_NOT_SATISFIED: return "constraints";
@@ -96,10 +103,117 @@ public class JobParameters implements Parcelable {
     }
 
     /** @hide */
-    // @SystemApi TODO make it a system api for mainline
+    // TODO: move current users of legacy reasons to new public reasons
     @NonNull
     public static int[] getJobStopReasonCodes() {
         return JOB_STOP_REASON_CODES;
+    }
+
+    /**
+     * There is no reason the job is stopped. This is the value returned from the JobParameters
+     * object passed to {@link JobService#onStartJob(JobParameters)}.
+     */
+    public static final int STOP_REASON_UNDEFINED = 0;
+    /**
+     * The job was cancelled directly by the app, either by calling
+     * {@link JobScheduler#cancel(int)}, {@link JobScheduler#cancelAll()}, or by scheduling a
+     * new job with the same job ID.
+     */
+    public static final int STOP_REASON_CANCELLED_BY_APP = 1;
+    /** The job was stopped to run a higher priority job of the app. */
+    public static final int STOP_REASON_PREEMPT = 2;
+    /**
+     * The job used up its maximum execution time and timed out. Each individual job has a maximum
+     * execution time limit, regardless of how much total quota the app has. See the note on
+     * {@link JobScheduler} for the execution time limits.
+     */
+    public static final int STOP_REASON_TIMEOUT = 3;
+    /**
+     * The device state (eg. Doze, battery saver, memory usage, etc) requires JobScheduler stop this
+     * job.
+     */
+    public static final int STOP_REASON_DEVICE_STATE = 4;
+    /**
+     * The requested battery-not-low constraint is no longer satisfied.
+     *
+     * @see JobInfo.Builder#setRequiresBatteryNotLow(boolean)
+     */
+    public static final int STOP_REASON_CONSTRAINT_BATTERY_NOT_LOW = 5;
+    /**
+     * The requested charging constraint is no longer satisfied.
+     *
+     * @see JobInfo.Builder#setRequiresCharging(boolean)
+     */
+    public static final int STOP_REASON_CONSTRAINT_CHARGING = 6;
+    /**
+     * The requested connectivity constraint is no longer satisfied.
+     *
+     * @see JobInfo.Builder#setRequiredNetwork(NetworkRequest)
+     * @see JobInfo.Builder#setRequiredNetworkType(int)
+     */
+    public static final int STOP_REASON_CONSTRAINT_CONNECTIVITY = 7;
+    /**
+     * The requested idle constraint is no longer satisfied.
+     *
+     * @see JobInfo.Builder#setRequiresDeviceIdle(boolean)
+     */
+    public static final int STOP_REASON_CONSTRAINT_DEVICE_IDLE = 8;
+    /**
+     * The requested storage-not-low constraint is no longer satisfied.
+     *
+     * @see JobInfo.Builder#setRequiresStorageNotLow(boolean)
+     */
+    public static final int STOP_REASON_CONSTRAINT_STORAGE_NOT_LOW = 9;
+    /**
+     * The app has consumed all of its current quota. Each app is assigned a quota of how much
+     * it can run jobs within a certain time frame. The quota is informed, in part, by app standby
+     * buckets. Once an app has used up all of its quota, it won't be able to start jobs until
+     * quota is replenished, is changed, or is temporarily not applied.
+     *
+     * @see UsageStatsManager#getAppStandbyBucket()
+     */
+    public static final int STOP_REASON_QUOTA = 10;
+    /**
+     * The app is restricted from running in the background.
+     *
+     * @see ActivityManager#isBackgroundRestricted()
+     * @see PackageManager#isInstantApp()
+     */
+    public static final int STOP_REASON_BACKGROUND_RESTRICTION = 11;
+    /**
+     * The current standby bucket requires that the job stop now.
+     *
+     * @see UsageStatsManager#STANDBY_BUCKET_RESTRICTED
+     */
+    public static final int STOP_REASON_APP_STANDBY = 12;
+    /**
+     * The user stopped the job. This can happen either through force-stop, or via adb shell
+     * commands.
+     */
+    public static final int STOP_REASON_USER = 13;
+    /** The system is doing some processing that requires stopping this job. */
+    public static final int STOP_REASON_SYSTEM_PROCESSING = 14;
+
+    /** @hide */
+    @IntDef(prefix = {"STOP_REASON_"}, value = {
+            STOP_REASON_UNDEFINED,
+            STOP_REASON_CANCELLED_BY_APP,
+            STOP_REASON_PREEMPT,
+            STOP_REASON_TIMEOUT,
+            STOP_REASON_DEVICE_STATE,
+            STOP_REASON_CONSTRAINT_BATTERY_NOT_LOW,
+            STOP_REASON_CONSTRAINT_CHARGING,
+            STOP_REASON_CONSTRAINT_CONNECTIVITY,
+            STOP_REASON_CONSTRAINT_DEVICE_IDLE,
+            STOP_REASON_CONSTRAINT_STORAGE_NOT_LOW,
+            STOP_REASON_QUOTA,
+            STOP_REASON_BACKGROUND_RESTRICTION,
+            STOP_REASON_APP_STANDBY,
+            STOP_REASON_USER,
+            STOP_REASON_SYSTEM_PROCESSING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StopReason {
     }
 
     @UnsupportedAppUsage
@@ -116,7 +230,8 @@ public class JobParameters implements Parcelable {
     private final String[] mTriggeredContentAuthorities;
     private final Network network;
 
-    private int stopReason; // Default value of stopReason is REASON_CANCELED
+    private int mStopReason = STOP_REASON_UNDEFINED;
+    private int mLegacyStopReason; // Default value of stopReason is REASON_CANCELED
     private String debugStopReason; // Human readable stop reason for debugging.
 
     /** @hide */
@@ -145,15 +260,23 @@ public class JobParameters implements Parcelable {
     }
 
     /**
-     * Reason onStopJob() was called on this job.
-     * @hide
+     * @return The reason {@link JobService#onStopJob(JobParameters)} was called on this job. Will
+     * be {@link #STOP_REASON_UNDEFINED} if {@link JobService#onStopJob(JobParameters)} has not
+     * yet been called.
      */
+    @StopReason
     public int getStopReason() {
-        return stopReason;
+        return mStopReason;
+    }
+
+    /** @hide */
+    public int getLegacyStopReason() {
+        return mLegacyStopReason;
     }
 
     /**
      * Reason onStopJob() was called on this job.
+     *
      * @hide
      */
     public String getDebugStopReason() {
@@ -368,13 +491,16 @@ public class JobParameters implements Parcelable {
         } else {
             network = null;
         }
-        stopReason = in.readInt();
+        mStopReason = in.readInt();
+        mLegacyStopReason = in.readInt();
         debugStopReason = in.readString();
     }
 
     /** @hide */
-    public void setStopReason(int reason, String debugStopReason) {
-        stopReason = reason;
+    public void setStopReason(@StopReason int reason, int legacyStopReason,
+            String debugStopReason) {
+        mStopReason = reason;
+        mLegacyStopReason = legacyStopReason;
         this.debugStopReason = debugStopReason;
     }
 
@@ -406,7 +532,8 @@ public class JobParameters implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        dest.writeInt(stopReason);
+        dest.writeInt(mStopReason);
+        dest.writeInt(mLegacyStopReason);
         dest.writeString(debugStopReason);
     }
 

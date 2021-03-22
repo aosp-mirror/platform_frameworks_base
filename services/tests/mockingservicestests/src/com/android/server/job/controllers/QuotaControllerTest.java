@@ -384,7 +384,8 @@ public class QuotaControllerTest {
         // Make sure Doze and background-not-restricted don't affect tests.
         js.setDeviceNotDozingConstraintSatisfied(/* nowElapsed */ sElapsedRealtimeClock.millis(),
                 /* state */ true, /* allowlisted */false);
-        js.setBackgroundNotRestrictedConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
+        js.setBackgroundNotRestrictedConstraintSatisfied(
+                sElapsedRealtimeClock.millis(), true, false);
         return js;
     }
 

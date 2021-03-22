@@ -34,7 +34,7 @@ public class ThermalStatusRestriction extends JobRestriction {
     private PowerManager mPowerManager;
 
     public ThermalStatusRestriction(JobSchedulerService service) {
-        super(service, JobParameters.REASON_DEVICE_THERMAL);
+        super(service, JobParameters.STOP_REASON_DEVICE_STATE, JobParameters.REASON_DEVICE_THERMAL);
     }
 
     @Override
