@@ -47,11 +47,6 @@ bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs, ResourceType 
 }
 
 template <typename T>
-bool less_than_type_and_id(const T& lhs, const std::pair<ResourceType, Maybe<uint8_t>>& rhs) {
-  return lhs.id != rhs.second ? lhs.id < rhs.second : lhs.type < rhs.first;
-}
-
-template <typename T>
 bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, const StringPiece& rhs) {
   return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
 }
@@ -78,12 +73,6 @@ bool less_than_struct_with_name_and_id(const T& lhs,
     return lhs.id < rhs.second;
   }
   return lhs.name.compare(0, lhs.name.size(), rhs.first.data(), rhs.first.size()) < 0;
-}
-
-template <typename T, typename U>
-bool less_than_struct_with_name_and_id_pointer(const T* lhs,
-                                               const std::pair<std::string_view, Maybe<U>>& rhs) {
-  return less_than_struct_with_name_and_id(*lhs, rhs);
 }
 
 template <typename T, typename Func, typename Elements>
@@ -307,49 +296,113 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
   return CollisionResult::kConflict;
 }
 
+template <typename T, typename Comparer>
+struct SortedVectorInserter : public Comparer {
+  std::pair<bool, typename std::vector<T>::iterator> LowerBound(std::vector<T>& el,
+                                                                const T& value) {
+    auto it = std::lower_bound(el.begin(), el.end(), value, [&](auto& lhs, auto& rhs) {
+      return Comparer::operator()(lhs, rhs);
+    });
+    bool found =
+        it != el.end() && !Comparer::operator()(*it, value) && !Comparer::operator()(value, *it);
+    return std::make_pair(found, it);
+  }
+
+  T* Insert(std::vector<T>& el, T&& value) {
+    auto [found, it] = LowerBound(el, value);
+    if (found) {
+      return &*it;
+    }
+    return &*el.insert(it, std::move(value));
+  }
+};
+
+struct PackageViewComparer {
+  bool operator()(const ResourceTablePackageView& lhs, const ResourceTablePackageView& rhs) {
+    return less_than_struct_with_name_and_id<ResourceTablePackageView, uint8_t>(
+        lhs, std::make_pair(rhs.name, rhs.id));
+  }
+};
+
+struct TypeViewComparer {
+  bool operator()(const ResourceTableTypeView& lhs, const ResourceTableTypeView& rhs) {
+    return lhs.id != rhs.id ? lhs.id < rhs.id : lhs.type < rhs.type;
+  }
+};
+
+struct EntryViewComparer {
+  bool operator()(const ResourceEntry* lhs, const ResourceEntry* rhs) {
+    return less_than_struct_with_name_and_id<ResourceEntry, ResourceId>(
+        *lhs, std::make_pair(rhs->name, rhs->id));
+  }
+};
+
 ResourceTableView ResourceTable::GetPartitionedView() const {
   ResourceTableView view;
+  SortedVectorInserter<ResourceTablePackageView, PackageViewComparer> package_inserter;
+  SortedVectorInserter<ResourceTableTypeView, TypeViewComparer> type_inserter;
+  SortedVectorInserter<const ResourceEntry*, EntryViewComparer> entry_inserter;
+
   for (const auto& package : packages) {
     for (const auto& type : package->types) {
       for (const auto& entry : type->entries) {
-        std::pair<std::string_view, Maybe<uint8_t>> package_key(package->name, {});
-        std::pair<std::string_view, Maybe<ResourceId>> entry_key(entry->name, {});
-        std::pair<ResourceType, Maybe<uint8_t>> type_key(type->type, {});
-        if (entry->id) {
-          // If the entry has a defined id, use the id to determine insertion position.
-          package_key.second = entry->id.value().package_id();
-          type_key.second = entry->id.value().type_id();
-          entry_key.second = entry->id.value();
-        }
+        ResourceTablePackageView new_package{
+            package->name, entry->id ? entry->id.value().package_id() : Maybe<uint8_t>{}};
+        auto view_package = package_inserter.Insert(view.packages, std::move(new_package));
 
-        auto package_it =
-            std::lower_bound(view.packages.begin(), view.packages.end(), package_key,
-                             less_than_struct_with_name_and_id<ResourceTablePackageView, uint8_t>);
-        if (package_it == view.packages.end() || package_it->name != package_key.first ||
-            package_it->id != package_key.second) {
-          ResourceTablePackageView new_package{std::string(package_key.first), package_key.second};
-          package_it = view.packages.insert(package_it, new_package);
-        }
-
-        auto type_it = std::lower_bound(package_it->types.begin(), package_it->types.end(),
-                                        type_key, less_than_type_and_id<ResourceTableTypeView>);
-        if (type_it == package_it->types.end() || type_key.first != type_it->type ||
-            type_it->id != type_key.second) {
-          ResourceTableTypeView new_type{type_key.first, type_key.second};
-          type_it = package_it->types.insert(type_it, new_type);
-        }
+        ResourceTableTypeView new_type{type->type,
+                                       entry->id ? entry->id.value().type_id() : Maybe<uint8_t>{}};
+        auto view_type = type_inserter.Insert(view_package->types, std::move(new_type));
 
         if (entry->visibility.level == Visibility::Level::kPublic) {
           // Only mark the type visibility level as public, it doesn't care about being private.
-          type_it->visibility_level = Visibility::Level::kPublic;
+          view_type->visibility_level = Visibility::Level::kPublic;
         }
 
-        auto entry_it =
-            std::lower_bound(type_it->entries.begin(), type_it->entries.end(), entry_key,
-                             less_than_struct_with_name_and_id_pointer<ResourceEntry, ResourceId>);
-        type_it->entries.insert(entry_it, entry.get());
+        entry_inserter.Insert(view_type->entries, entry.get());
       }
     }
+  }
+
+  // The android runtime does not support querying resources when the there are multiple type ids
+  // for the same resource type within the same package. For this reason, if there are types with
+  // multiple type ids, each type needs to exist in its own package in order to be queried by name.
+  std::vector<ResourceTablePackageView> new_packages;
+  for (auto& package : view.packages) {
+    // If a new package was already created for a different type within this package, then
+    // we can reuse those packages for other types that need to be extracted from this package.
+    // `start_index` is the index of the first newly created package that can be reused.
+    const size_t start_index = new_packages.size();
+    std::map<ResourceType, size_t> type_new_package_index;
+    for (auto type_it = package.types.begin(); type_it != package.types.end();) {
+      auto& type = *type_it;
+      auto type_index_iter = type_new_package_index.find(type.type);
+      if (type_index_iter == type_new_package_index.end()) {
+        // First occurrence of the resource type in this package. Keep it in this package.
+        type_new_package_index.insert(type_index_iter, std::make_pair(type.type, start_index));
+        ++type_it;
+        continue;
+      }
+
+      // The resource type has already been seen for this package, so this type must be extracted to
+      // a new separate package.
+      const size_t index = type_index_iter->second;
+      if (new_packages.size() == index) {
+        new_packages.emplace_back(ResourceTablePackageView{package.name, package.id});
+        type_new_package_index[type.type] = index + 1;
+      }
+
+      // Move the type into a new package
+      auto& other_package = new_packages[index];
+      type_inserter.Insert(other_package.types, std::move(type));
+      type_it = package.types.erase(type_it);
+    }
+  }
+
+  for (auto& new_package : new_packages) {
+    // Insert newly created packages after their original packages
+    auto [_, it] = package_inserter.LowerBound(view.packages, new_package);
+    view.packages.insert(++it, std::move(new_package));
   }
 
   return view;
@@ -423,6 +476,10 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
     if (res.visibility->level > entry->visibility.level) {
       // This symbol definition takes precedence, replace.
       entry->visibility = res.visibility.value();
+    }
+
+    if (res.visibility->staged_api) {
+      entry->visibility.staged_api = entry->visibility.staged_api;
     }
   }
 

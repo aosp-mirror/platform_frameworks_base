@@ -99,6 +99,7 @@ class ResourceParser {
 
   bool ParsePublic(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource* out_resource);
+  bool ParseStagingPublicGroup(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseSymbolImpl(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseSymbol(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseOverlayable(xml::XmlPullParser* parser, ParsedResource* out_resource);
