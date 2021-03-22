@@ -32,10 +32,7 @@ import java.util.Objects;
  * Media network event.
  */
 public final class NetworkEvent extends Event implements Parcelable {
-    /** Network type is not specified. Default type. */
-    public static final int NETWORK_TYPE_NONE = 0;
-    // TODO: replace NONE with UNKNOWN
-    /** @hide */
+    /** Network type is not known. Default type. */
     public static final int NETWORK_TYPE_UNKNOWN = 0;
     /** Other network type */
     public static final int NETWORK_TYPE_OTHER = 1;
@@ -54,7 +51,6 @@ public final class NetworkEvent extends Event implements Parcelable {
     /** 5G SA network */
     public static final int NETWORK_TYPE_5G_SA = 8;
     /** Not network connected */
-    /** @hide */
     public static final int NETWORK_TYPE_OFFLINE = 9;
 
     private final int mNetworkType;
@@ -62,7 +58,6 @@ public final class NetworkEvent extends Event implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = "NETWORK_TYPE_", value = {
-        NETWORK_TYPE_NONE,
         NETWORK_TYPE_UNKNOWN,
         NETWORK_TYPE_OTHER,
         NETWORK_TYPE_WIFI,
@@ -83,8 +78,8 @@ public final class NetworkEvent extends Event implements Parcelable {
      */
     public static String networkTypeToString(@NetworkType int value) {
         switch (value) {
-            case NETWORK_TYPE_NONE:
-                return "NETWORK_TYPE_NONE";
+            case NETWORK_TYPE_UNKNOWN:
+                return "NETWORK_TYPE_UNKNOWN";
             case NETWORK_TYPE_OTHER:
                 return "NETWORK_TYPE_OTHER";
             case NETWORK_TYPE_WIFI:
@@ -114,10 +109,10 @@ public final class NetworkEvent extends Event implements Parcelable {
      * @hide
      */
     public NetworkEvent(@NetworkType int type, long timeSinceCreatedMillis,
-            @Nullable Bundle extras) {
+            @NonNull Bundle extras) {
         this.mNetworkType = type;
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
-        this.mExtras = extras == null ? null : extras.deepCopy();
+        this.mMetricsBundle = extras == null ? null : extras.deepCopy();
     }
 
     /**
@@ -136,6 +131,16 @@ public final class NetworkEvent extends Event implements Parcelable {
     @IntRange(from = -1)
     public long getTimeSinceCreatedMillis() {
         return mTimeSinceCreatedMillis;
+    }
+
+    /**
+     * Gets metrics-related information that is not supported by dedicated methods.
+     * <p>It is intended to be used for backwards compatibility by the metrics infrastructure.
+     */
+    @Override
+    @NonNull
+    public Bundle getMetricsBundle() {
+        return mMetricsBundle;
     }
 
     @Override
@@ -162,12 +167,9 @@ public final class NetworkEvent extends Event implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
-        byte flg = 0;
-        if (mExtras != null) flg |= 0x1;
-        dest.writeByte(flg);
         dest.writeInt(mNetworkType);
         dest.writeLong(mTimeSinceCreatedMillis);
-        if (mExtras != null) dest.writeBundle(mExtras);
+        dest.writeBundle(mMetricsBundle);
     }
 
     @Override
@@ -177,14 +179,13 @@ public final class NetworkEvent extends Event implements Parcelable {
 
     /** @hide */
     /* package-private */ NetworkEvent(@NonNull android.os.Parcel in) {
-        byte flg = in.readByte();
         int type = in.readInt();
         long timeSinceCreatedMillis = in.readLong();
-        Bundle extras = (flg & 0x2) == 0 ? null : in.readBundle();
+        Bundle extras = in.readBundle();
 
         this.mNetworkType = type;
         this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
-        this.mExtras = extras;
+        this.mMetricsBundle = extras;
     }
 
     /**
@@ -207,9 +208,9 @@ public final class NetworkEvent extends Event implements Parcelable {
      * A builder for {@link NetworkEvent}
      */
     public static final class Builder {
-        private int mNetworkType = NETWORK_TYPE_NONE;
+        private int mNetworkType = NETWORK_TYPE_UNKNOWN;
         private long mTimeSinceCreatedMillis = -1;
-        private Bundle mExtras;
+        private Bundle mMetricsBundle = new Bundle();
 
         /**
          * Creates a new Builder.
@@ -236,18 +237,20 @@ public final class NetworkEvent extends Event implements Parcelable {
         }
 
         /**
-         * Set extras for compatibility.
-         * <p>Should be used by support library only.
-         * @hide
+         * Sets metrics-related information that is not supported by dedicated
+         * methods.
+         * <p>It is intended to be used for backwards compatibility by the
+         * metrics infrastructure.
          */
-        public @NonNull Builder setExtras(@NonNull Bundle extras) {
-            mExtras = extras;
+        public @NonNull Builder setMetricsBundle(@NonNull Bundle metricsBundle) {
+            mMetricsBundle = metricsBundle;
             return this;
         }
 
         /** Builds the instance. */
         public @NonNull NetworkEvent build() {
-            NetworkEvent o = new NetworkEvent(mNetworkType, mTimeSinceCreatedMillis, mExtras);
+            NetworkEvent o =
+                    new NetworkEvent(mNetworkType, mTimeSinceCreatedMillis, mMetricsBundle);
             return o;
         }
     }
