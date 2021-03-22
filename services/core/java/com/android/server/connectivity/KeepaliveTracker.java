@@ -36,6 +36,7 @@ import static android.net.SocketKeepalive.SUCCESS;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.net.ConnectivityResources;
 import android.net.ISocketKeepaliveCallback;
 import android.net.InetAddresses;
 import android.net.InvalidPacketException;
@@ -56,7 +57,7 @@ import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
 
-import com.android.internal.R;
+import com.android.connectivity.resources.R;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.net.module.util.HexDump;
 import com.android.net.module.util.IpUtils;
@@ -111,10 +112,19 @@ public class KeepaliveTracker {
         mTcpController = new TcpKeepaliveController(handler);
         mContext = context;
         mSupportedKeepalives = KeepaliveUtils.getSupportedKeepalives(mContext);
-        mReservedPrivilegedSlots = mContext.getResources().getInteger(
-                R.integer.config_reservedPrivilegedKeepaliveSlots);
-        mAllowedUnprivilegedSlotsForUid = mContext.getResources().getInteger(
-                R.integer.config_allowedUnprivilegedKeepalivePerUid);
+
+        // TODO (b/183076074): stop reading legacy resources after migrating overlays
+        final int legacyReservedSlots = mContext.getResources().getInteger(
+                mContext.getResources().getIdentifier(
+                        "config_reservedPrivilegedKeepaliveSlots", "integer", "android"));
+        final int legacyAllowedSlots = mContext.getResources().getInteger(
+                mContext.getResources().getIdentifier(
+                        "config_allowedUnprivilegedKeepalivePerUid", "integer", "android"));
+        final ConnectivityResources res = new ConnectivityResources(mContext);
+        mReservedPrivilegedSlots = Math.min(legacyReservedSlots, res.get().getInteger(
+                R.integer.config_reservedPrivilegedKeepaliveSlots));
+        mAllowedUnprivilegedSlotsForUid = Math.min(legacyAllowedSlots, res.get().getInteger(
+                R.integer.config_allowedUnprivilegedKeepalivePerUid));
     }
 
     /**
