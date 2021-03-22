@@ -1962,14 +1962,20 @@ public class WallpaperManager {
     }
 
     /**
-     * Set the current zoom out level of the wallpaper
+     * Set the current zoom out level of the wallpaper.
+     *
+     * @param windowToken window requesting wallpaper zoom. Zoom level will only be applier while
+     *                    such window is visible.
      * @param zoom from 0 to 1 (inclusive) where 1 means fully zoomed out, 0 means fully zoomed in
      *
      * @hide
      */
-    public void setWallpaperZoomOut(IBinder windowToken, float zoom) {
+    public void setWallpaperZoomOut(@NonNull IBinder windowToken, float zoom) {
         if (zoom < 0 || zoom > 1f) {
-            throw new IllegalArgumentException("zoom must be between 0 and one: " + zoom);
+            throw new IllegalArgumentException("zoom must be between 0 and 1: " + zoom);
+        }
+        if (windowToken == null) {
+            throw new IllegalArgumentException("windowToken must not be null");
         }
         try {
             WindowManagerGlobal.getWindowSession().setWallpaperZoomOut(windowToken, zoom);

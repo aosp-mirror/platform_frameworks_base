@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar
 
 import android.app.WallpaperManager
+import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
@@ -64,6 +65,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var root: View
     @Mock private lateinit var viewRootImpl: ViewRootImpl
+    @Mock private lateinit var windowToken: IBinder
     @Mock private lateinit var shadeSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var shadeAnimation: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var globalActionsSpring: NotificationShadeDepthController.DepthAnimation
@@ -80,6 +82,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         `when`(root.viewRootImpl).thenReturn(viewRootImpl)
+        `when`(root.windowToken).thenReturn(windowToken)
         `when`(root.isAttachedToWindow).thenReturn(true)
         `when`(statusBarStateController.state).then { statusBarState }
         `when`(blurUtils.blurRadiusOfRatio(anyFloat())).then { answer ->
