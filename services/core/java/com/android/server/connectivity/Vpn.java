@@ -17,7 +17,6 @@
 package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
-import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
@@ -1127,17 +1126,17 @@ public class Vpn {
     }
 
     /**
-     * Return netId of current running VPN network.
+     * Return Network of current running VPN network.
      *
-     * @return a netId if there is a running VPN network or NETID_UNSET if there is no running VPN
+     * @return a Network if there is a running VPN network or null if there is no running VPN
      *         network or network is null.
      */
-    public synchronized int getNetId() {
+    public synchronized Network getNetwork() {
         final NetworkAgent agent = mNetworkAgent;
-        if (null == agent) return NETID_UNSET;
+        if (null == agent) return null;
         final Network network = agent.getNetwork();
-        if (null == network) return NETID_UNSET;
-        return network.getNetId();
+        if (null == network) return null;
+        return network;
     }
 
     private LinkProperties makeLinkProperties() {

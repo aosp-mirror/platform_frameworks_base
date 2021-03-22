@@ -1178,11 +1178,6 @@ public class ConnectivityServiceTest {
         }
 
         @Override
-        public int getNetId() {
-            return (mMockNetworkAgent == null) ? NETID_UNSET : mMockNetworkAgent.getNetwork().netId;
-        }
-
-        @Override
         public int getActiveVpnType() {
             return mVpnType;
         }
@@ -1206,10 +1201,12 @@ public class ConnectivityServiceTest {
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
 
-            verify(mMockNetd, times(1)).networkAddUidRanges(eq(mMockVpn.getNetId()),
+            final int expectedNetId = mMockVpn.getNetwork() == null ? NETID_UNSET
+                    : mMockVpn.getNetwork().getNetId();
+            verify(mMockNetd, times(1)).networkAddUidRanges(eq(expectedNetId),
                     eq(toUidRangeStableParcels(uids)));
             verify(mMockNetd, never())
-                    .networkRemoveUidRanges(eq(mMockVpn.getNetId()), any());
+                    .networkRemoveUidRanges(eq(expectedNetId), any());
             mAgentRegistered = true;
             updateState(NetworkInfo.DetailedState.CONNECTED, "registerAgent");
             mNetworkCapabilities.set(mMockNetworkAgent.getNetworkCapabilities());
@@ -9801,11 +9798,14 @@ public class ConnectivityServiceTest {
                 exemptUidCaptor.capture());
         assertContainsExactly(exemptUidCaptor.getValue(), Process.VPN_UID, exemptUid);
 
+        final int expectedNetId = mMockVpn.getNetwork() == null ? NETID_UNSET
+                : mMockVpn.getNetwork().getNetId();
+
         if (add) {
-            inOrder.verify(mMockNetd, times(1)).networkAddUidRanges(eq(mMockVpn.getNetId()),
+            inOrder.verify(mMockNetd, times(1)).networkAddUidRanges(eq(expectedNetId),
                     eq(toUidRangeStableParcels(vpnRanges)));
         } else {
-            inOrder.verify(mMockNetd, times(1)).networkRemoveUidRanges(eq(mMockVpn.getNetId()),
+            inOrder.verify(mMockNetd, times(1)).networkRemoveUidRanges(eq(expectedNetId),
                     eq(toUidRangeStableParcels(vpnRanges)));
         }
 
