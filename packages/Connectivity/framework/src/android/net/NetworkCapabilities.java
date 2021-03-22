@@ -38,7 +38,6 @@ import android.util.Range;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 
@@ -2174,8 +2173,9 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     private static void checkValidTransportType(@Transport int transport) {
-        Preconditions.checkArgument(
-                isValidTransport(transport), "Invalid TransportType " + transport);
+        if (!isValidTransport(transport)) {
+            throw new IllegalArgumentException("Invalid TransportType " + transport);
+        }
     }
 
     private static boolean isValidCapability(@NetworkCapabilities.NetCapability int capability) {
@@ -2183,8 +2183,9 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     private static void checkValidCapability(@NetworkCapabilities.NetCapability int capability) {
-        Preconditions.checkArgument(isValidCapability(capability),
-                "NetworkCapability " + capability + "out of range");
+        if (!isValidCapability(capability)) {
+            throw new IllegalArgumentException("NetworkCapability " + capability + "out of range");
+        }
     }
 
     /**

@@ -25,7 +25,6 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
 import com.android.net.module.util.MacAddressUtils;
 
 import java.lang.annotation.Retention;
@@ -34,6 +33,7 @@ import java.net.Inet6Address;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Representation of a MAC address.
@@ -229,7 +229,7 @@ public final class MacAddress implements Parcelable {
      * @hide
      */
     public static @NonNull byte[] byteAddrFromStringAddr(String addr) {
-        Preconditions.checkNotNull(addr);
+        Objects.requireNonNull(addr);
         String[] parts = addr.split(":");
         if (parts.length != ETHER_ADDR_LEN) {
             throw new IllegalArgumentException(addr + " was not a valid MAC address");
@@ -275,7 +275,7 @@ public final class MacAddress implements Parcelable {
     // Internal conversion function equivalent to longAddrFromByteAddr(byteAddrFromStringAddr(addr))
     // that avoids the allocation of an intermediary byte[].
     private static long longAddrFromStringAddr(String addr) {
-        Preconditions.checkNotNull(addr);
+        Objects.requireNonNull(addr);
         String[] parts = addr.split(":");
         if (parts.length != ETHER_ADDR_LEN) {
             throw new IllegalArgumentException(addr + " was not a valid MAC address");
@@ -364,8 +364,8 @@ public final class MacAddress implements Parcelable {
      *
      */
     public boolean matches(@NonNull MacAddress baseAddress, @NonNull MacAddress mask) {
-        Preconditions.checkNotNull(baseAddress);
-        Preconditions.checkNotNull(mask);
+        Objects.requireNonNull(baseAddress);
+        Objects.requireNonNull(mask);
         return (mAddr & mask.mAddr) == (baseAddress.mAddr & mask.mAddr);
     }
 
