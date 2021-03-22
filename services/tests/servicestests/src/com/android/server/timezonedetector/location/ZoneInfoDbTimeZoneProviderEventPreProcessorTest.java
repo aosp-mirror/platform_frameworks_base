@@ -19,6 +19,7 @@ package com.android.server.timezonedetector.location;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.platform.test.annotations.Presubmit;
+import android.service.timezone.TimeZoneProviderSuggestion;
 
 import org.junit.Test;
 
@@ -26,29 +27,44 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
+/** Tests for {@link ZoneInfoDbTimeZoneProviderEventPreProcessor}. */
 @Presubmit
-public class ZoneInfoDbTimeZoneIdValidatorTest {
-    private final LocationTimeZoneProvider.TimeZoneIdValidator mTzChecker =
-            new ZoneInfoDbTimeZoneIdValidator();
+public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
+
+    private static final long ARBITRARY_TIME_MILLIS = 11223344;
+
+    private final ZoneInfoDbTimeZoneProviderEventPreProcessor mPreProcessor =
+            new ZoneInfoDbTimeZoneProviderEventPreProcessor();
 
     @Test
     public void timeZoneIdsFromZoneInfoDbAreValid() {
         for (String timeZone : TimeZone.getAvailableIDs()) {
+            TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone);
             assertWithMessage("Time zone %s should be supported", timeZone)
-                    .that(mTzChecker.isValid(timeZone)).isTrue();
+                    .that(mPreProcessor.preProcess(event)).isEqualTo(event);
         }
     }
 
     @Test
-    public void nonExistingZones_areNotSupported() {
+    public void eventWithNonExistingZones_areMappedToUncertainEvent() {
         List<String> nonExistingTimeZones = Arrays.asList(
-                "SystemV/HST10", "Atlantic/Atlantis", "EUROPE/LONDON", "Etc/GMT-5:30"
-        );
+                "SystemV/HST10", "Atlantic/Atlantis", "EUROPE/LONDON", "Etc/GMT-5:30");
 
         for (String timeZone : nonExistingTimeZones) {
+            TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone);
+
             assertWithMessage(timeZone + " is not a valid time zone")
-                    .that(mTzChecker.isValid(timeZone))
-                    .isFalse();
+                    .that(mPreProcessor.preProcess(event))
+                    .isEqualTo(TimeZoneProviderEvent.createUncertainEvent());
         }
     }
+
+    private static TimeZoneProviderEvent timeZoneProviderEvent(String... timeZoneIds) {
+        return TimeZoneProviderEvent.createSuggestionEvent(
+                new TimeZoneProviderSuggestion.Builder()
+                        .setTimeZoneIds(Arrays.asList(timeZoneIds))
+                        .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
+                .build());
+    }
+
 }

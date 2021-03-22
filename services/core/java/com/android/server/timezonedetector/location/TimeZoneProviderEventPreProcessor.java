@@ -18,13 +18,16 @@ package com.android.server.timezonedetector.location;
 
 import android.annotation.NonNull;
 
-import com.android.i18n.timezone.ZoneInfoDb;
+/**
+ * Used by {@link LocationTimeZoneProvider} to ensure that all time zone IDs are understood by the
+ * platform.
+ */
+public interface TimeZoneProviderEventPreProcessor {
 
-class ZoneInfoDbTimeZoneIdValidator implements
-        LocationTimeZoneProvider.TimeZoneIdValidator {
+    /**
+     * May return uncertain event if {@code timeZoneProviderEvent} is ill-formed or drop/rewrite
+     * time zone IDs.
+     */
+    TimeZoneProviderEvent preProcess(@NonNull TimeZoneProviderEvent timeZoneProviderEvent);
 
-    @Override
-    public boolean isValid(@NonNull String timeZoneId) {
-        return ZoneInfoDb.getInstance().hasTimeZone(timeZoneId);
-    }
 }
