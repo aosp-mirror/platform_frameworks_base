@@ -476,11 +476,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 return;
             }
 
-            if (mAlternateAuthInterceptor != null
-                    && mAlternateAuthInterceptor.showAlternativeAuthMethod()) {
-                mStatusBar.updateScrimController();
+            if (mAlternateAuthInterceptor != null) {
                 mAfterKeyguardGoneAction = r;
                 mKeyguardGoneCancelAction = cancelAction;
+                if (mAlternateAuthInterceptor.showAlternativeAuthMethod()) {
+                    mStatusBar.updateScrimController();
+                }
                 return;
             }
 
@@ -528,7 +529,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Stop showing any alternate auth methods
      */
     public void resetAlternateAuth() {
-        if (mAlternateAuthInterceptor != null && mAlternateAuthInterceptor.reset()) {
+        if (mAlternateAuthInterceptor != null && mAlternateAuthInterceptor.resetForceShow()) {
             mStatusBar.updateScrimController();
         }
     }
@@ -1125,18 +1126,27 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         setDozing(isDozing);
     }
 
+    /**
+     * Set whether qs is currently expanded
+     */
+    public void setQsExpanded(boolean expanded) {
+        if (mAlternateAuthInterceptor != null) {
+            mAlternateAuthInterceptor.setQsExpanded(expanded);
+        }
+    }
+
     public KeyguardBouncer getBouncer() {
         return mBouncer;
     }
 
-    public boolean isShowingAlternativeAuth() {
+    public boolean isShowingAlternateAuth() {
         return mAlternateAuthInterceptor != null
-                && mAlternateAuthInterceptor.isShowingAlternativeAuth();
+                && mAlternateAuthInterceptor.isShowingAlternateAuth();
     }
 
-    public boolean isShowingAlternativeAuthOrAnimating() {
+    public boolean isShowingAlternateAuthOrAnimating() {
         return mAlternateAuthInterceptor != null
-                && (mAlternateAuthInterceptor.isShowingAlternativeAuth()
+                && (mAlternateAuthInterceptor.isShowingAlternateAuth()
                 || mAlternateAuthInterceptor.isAnimating());
     }
 
@@ -1169,12 +1179,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          * reset the state to the default (only keyguard showing, no auth methods showing)
          * @return whether alternative auth method was newly hidden
          */
-        boolean reset();
+        boolean resetForceShow();
 
         /**
          * @return true if alternative auth method is showing
          */
-        boolean isShowingAlternativeAuth();
+        boolean isShowingAlternateAuth();
 
         /**
          * print information for the alternate auth interceptor registered
@@ -1185,5 +1195,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          * @return true if the new auth method is currently animating in or out.
          */
         boolean isAnimating();
+
+        /**
+         * Set whether qs is currently expanded
+         */
+        void setQsExpanded(boolean expanded);
     }
 }
