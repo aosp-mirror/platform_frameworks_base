@@ -319,7 +319,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int[] mDataEnabledReason;
 
-    private Map<Integer, Long> mAllowedNetworkTypesList;
+    private int[] mAllowedNetworkTypeReason;
+    private long[] mAllowedNetworkTypeValue;
 
     private List<List<LinkCapacityEstimate>> mLinkCapacityEstimateLists;
 
@@ -388,7 +389,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private boolean isPrivilegedPhoneStatePermissionRequired(Set<Integer> events) {
         return events.contains(TelephonyCallback.EVENT_SRVCC_STATE_CHANGED)
                 || events.contains(TelephonyCallback.EVENT_VOICE_ACTIVATION_STATE_CHANGED)
-                || events.contains(TelephonyCallback.EVENT_RADIO_POWER_STATE_CHANGED);
+                || events.contains(TelephonyCallback.EVENT_RADIO_POWER_STATE_CHANGED)
+                || events.contains(TelephonyCallback.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED);
     }
 
     private static final int MSG_USER_SWITCHED = 1;
@@ -532,6 +534,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mTelephonyDisplayInfos = copyOf(mTelephonyDisplayInfos, mNumPhones);
         mIsDataEnabled= copyOf(mIsDataEnabled, mNumPhones);
         mDataEnabledReason = copyOf(mDataEnabledReason, mNumPhones);
+        mAllowedNetworkTypeReason = copyOf(mAllowedNetworkTypeReason, mNumPhones);
+        mAllowedNetworkTypeValue = copyOf(mAllowedNetworkTypeValue, mNumPhones);
 
         // ds -> ss switch.
         if (mNumPhones < oldNumPhones) {
@@ -577,6 +581,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+            mAllowedNetworkTypeReason[i] = -1;
+            mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, new ArrayList<>());
         }
     }
@@ -637,10 +643,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mBarringInfo = new ArrayList<>();
         mTelephonyDisplayInfos = new TelephonyDisplayInfo[numPhones];
         mPhysicalChannelConfigs = new ArrayList<>();
+        mAllowedNetworkTypeReason = new int[numPhones];
+        mAllowedNetworkTypeValue = new long[numPhones];
         mIsDataEnabled = new boolean[numPhones];
         mDataEnabledReason = new int[numPhones];
-        mAllowedNetworkTypesList = new HashMap<>();
         mLinkCapacityEstimateLists = new ArrayList<>();
+
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -673,6 +681,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
             mIsDataEnabled[i] = false;
             mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
+            mAllowedNetworkTypeReason[i] = -1;
+            mAllowedNetworkTypeValue[i] = -1;
             mLinkCapacityEstimateLists.add(i, new ArrayList<>());
         }
 
@@ -1170,14 +1180,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onDataEnabledChanged(
                                 mIsDataEnabled[phoneId], mDataEnabledReason[phoneId]);
-                    } catch (RemoteException ex) {
-                        remove(r.binder);
-                    }
-                }
-                if (events.contains(
-                        TelephonyCallback.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED)) {
-                    try {
-                        r.callback.onAllowedNetworkTypesChanged(mAllowedNetworkTypesList);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -2443,18 +2445,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      *
      * @param phoneId the phone id.
      * @param subId the subId.
-     * @param allowedNetworkTypesList Map associating all allowed network type reasons with reason's
-     *                                allowed network type values.
+     * @param reason the allowed network type reason.
+     * @param allowedNetworkType the allowed network type value.
      */
-    public void notifyAllowedNetworkTypesChanged(int phoneId, int subId,
-            Map allowedNetworkTypesList) {
+    public void notifyAllowedNetworkTypesChanged(int phoneId, int subId, int reason,
+            long allowedNetworkType) {
         if (!checkNotifyPermission("notifyAllowedNetworkTypesChanged()")) {
             return;
         }
 
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                mAllowedNetworkTypesList = allowedNetworkTypesList;
+                mAllowedNetworkTypeReason[phoneId] = reason;
+                mAllowedNetworkTypeValue[phoneId] = allowedNetworkType;
 
                 for (Record r : mRecords) {
                     if (r.matchTelephonyCallbackEvent(
@@ -2462,10 +2465,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             && idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (VDBG) {
-                                log("notifyAllowedNetworkTypesChanged: AllowedNetworkTypesList= "
-                                        + mAllowedNetworkTypesList.toString());
+                                log("notifyAllowedNetworkTypesChanged: reason= " + reason
+                                        + ", allowed network type:"
+                                        + TelephonyManager.convertNetworkTypeBitmaskToString(
+                                        allowedNetworkType));
                             }
-                            r.callback.onAllowedNetworkTypesChanged(mAllowedNetworkTypesList);
+                            r.callback.onAllowedNetworkTypesChanged(reason, allowedNetworkType);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -2556,6 +2561,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mTelephonyDisplayInfo=" + mTelephonyDisplayInfos[i]);
                 pw.println("mIsDataEnabled=" + mIsDataEnabled);
                 pw.println("mDataEnabledReason=" + mDataEnabledReason);
+                pw.println("mAllowedNetworkTypeReason=" + mAllowedNetworkTypeReason[i]);
+                pw.println("mAllowedNetworkTypeValue=" + mAllowedNetworkTypeValue[i]);
                 pw.println("mLinkCapacityEstimateList=" + mLinkCapacityEstimateLists.get(i));
                 pw.decreaseIndent();
             }
