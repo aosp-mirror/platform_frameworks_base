@@ -7836,7 +7836,10 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean isTouchOrFaketouchDevice() {
             synchronized (mGlobalLock) {
-                // All touchable devices are also faketouchable.
+                if (mIsTouchDevice && !mIsFakeTouchDevice) {
+                    throw new IllegalStateException(
+                            "touchscreen supported device must report faketouch.");
+                }
                 return mIsFakeTouchDevice;
             }
         }
