@@ -287,6 +287,11 @@ class ActivityMetricsLogger {
             if (mLastLaunchedActivity == r) {
                 return;
             }
+            if (mLastLaunchedActivity != null) {
+                // Transfer the launch cookie because it is a consecutive launch event.
+                r.mLaunchCookie = mLastLaunchedActivity.mLaunchCookie;
+                mLastLaunchedActivity.mLaunchCookie = null;
+            }
             mLastLaunchedActivity = r;
             if (!r.noDisplay && !r.isReportedDrawn()) {
                 if (DEBUG_METRICS) Slog.i(TAG, "Add pending draw " + r);
