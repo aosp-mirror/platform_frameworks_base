@@ -435,11 +435,12 @@ public final class Permission {
                 }
             }
         }
+        boolean wasNonRuntime = permission != null && permission.mType != TYPE_CONFIG
+                && !permission.isRuntime();
         if (permission == null) {
             permission = new Permission(permissionInfo.name, permissionInfo.packageName,
                     TYPE_MANIFEST);
         }
-        boolean wasNonRuntime = !permission.isRuntime();
         StringBuilder r = null;
         if (!permission.mReconciled) {
             if (permission.mPermissionInfo.packageName == null
