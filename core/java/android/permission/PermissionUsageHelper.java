@@ -283,9 +283,7 @@ public class PermissionUsageHelper {
                         continue;
                     }
 
-                    if (packageName.equals(SYSTEM_PKG)
-                            || (!shouldShowPermissionsHub()
-                            && !isUserSensitive(packageName, user, op))) {
+                    if (!shouldShowPermissionsHub() && !isUserSensitive(packageName, user, op)) {
                         continue;
                     }
 
@@ -372,8 +370,10 @@ public class PermissionUsageHelper {
                 proxyLabels.put(usage, new ArrayList<>());
                 proxyUids.add(usage.uid);
             }
-            if (!mostRecentUsages.containsKey(usage.uid) || usage.lastAccessTime
-                    > mostRecentUsages.get(usage.uid).lastAccessTime) {
+            // If this usage is not by the system, and is more recent than the next-most recent
+            // for it's uid, save it.
+            if (!usage.packageName.equals(SYSTEM_PKG) && (!mostRecentUsages.containsKey(usage.uid)
+                    || usage.lastAccessTime > mostRecentUsages.get(usage.uid).lastAccessTime)) {
                 mostRecentUsages.put(usage.uid, usage);
             }
         }
@@ -416,20 +416,22 @@ public class PermissionUsageHelper {
                 }
 
                 proxyUids.add(currentUsage.uid);
-                try {
-                    PackageManager userPkgManager =
-                            getUserContext(currentUsage.getUser()).getPackageManager();
-                    ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
-                            currentUsage.packageName, 0);
-                    CharSequence appLabel = appInfo.loadLabel(userPkgManager);
-                    // If we don't already have the app label, and it's not the same as the main
-                    // app, add it
-                    if (!proxyLabelList.contains(appLabel)
-                            && !currentUsage.packageName.equals(start.packageName)) {
-                        proxyLabelList.add(appLabel);
+                // Don't add an app label for the main app, or the system app
+                if (!currentUsage.packageName.equals(start.packageName)
+                        && !currentUsage.packageName.equals(SYSTEM_PKG)) {
+                    try {
+                        PackageManager userPkgManager =
+                                getUserContext(currentUsage.getUser()).getPackageManager();
+                        ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
+                                currentUsage.packageName, 0);
+                        CharSequence appLabel = appInfo.loadLabel(userPkgManager);
+                        // If we don't already have the app label add it
+                        if (!proxyLabelList.contains(appLabel)) {
+                            proxyLabelList.add(appLabel);
+                        }
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // Ignore
                     }
-                } catch (PackageManager.NameNotFoundException e) {
-                    // Ignore
                 }
                 iterNum++;
             }
