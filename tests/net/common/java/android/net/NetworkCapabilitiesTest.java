@@ -329,8 +329,7 @@ public class NetworkCapabilitiesTest {
         if (isAtLeastS()) {
             netCap.setSubIds(Set.of(TEST_SUBID1, TEST_SUBID2));
             netCap.setUids(uids);
-        }
-        if (isAtLeastR()) {
+        } else if (isAtLeastR()) {
             netCap.setOwnerUid(123);
             netCap.setAdministratorUids(new int[] {5, 11});
         }
