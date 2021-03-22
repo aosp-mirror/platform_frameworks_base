@@ -33,7 +33,6 @@ import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
@@ -77,8 +76,6 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     private lateinit var qsTileHost: QSTileHost
     @Mock
     private lateinit var statusBarIconController: StatusBarIconController
-    @Mock
-    private lateinit var commandQueue: CommandQueue
     @Mock
     private lateinit var demoModeController: DemoModeController
     @Mock
@@ -130,7 +127,6 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 uiEventLogger,
                 qsTileHost,
                 statusBarIconController,
-                commandQueue,
                 demoModeController,
                 userTracker,
                 quickQSPanelController,
