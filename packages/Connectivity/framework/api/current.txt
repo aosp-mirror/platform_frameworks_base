@@ -396,6 +396,7 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     ctor public NetworkRequest.Builder();
+    ctor public NetworkRequest.Builder(@NonNull android.net.NetworkRequest);
     method public android.net.NetworkRequest.Builder addCapability(int);
     method public android.net.NetworkRequest.Builder addTransportType(int);
     method public android.net.NetworkRequest build();
