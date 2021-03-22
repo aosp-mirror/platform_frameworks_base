@@ -107,7 +107,6 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
-    field public static final long DROP_CLOSE_SYSTEM_DIALOGS = 174664120L; // 0xa6929b8L
     field public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L; // 0xa692aadL
     field public static final int PROCESS_CAPABILITY_ALL = 15; // 0xf
     field public static final int PROCESS_CAPABILITY_ALL_EXPLICIT = 1; // 0x1
