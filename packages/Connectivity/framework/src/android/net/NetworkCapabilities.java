@@ -749,6 +749,23 @@ public final class NetworkCapabilities implements Parcelable {
         return ((mNetworkCapabilities & CONNECTIVITY_MANAGED_CAPABILITIES) != 0);
     }
 
+    /**
+     * Get the name of the given capability that carriers use.
+     * If the capability does not have a carrier-name, returns null.
+     *
+     * @param capability The capability to get the carrier-name of.
+     * @return The carrier-name of the capability, or null if it doesn't exist.
+     * @hide
+     */
+    @SystemApi
+    public static @Nullable String getCapabilityCarrierName(@NetCapability int capability) {
+        if (capability == NET_CAPABILITY_ENTERPRISE) {
+            return capabilityNameOf(capability);
+        } else {
+            return null;
+        }
+    }
+
     private void combineNetCapabilities(@NonNull NetworkCapabilities nc) {
         final long wantedCaps = this.mNetworkCapabilities | nc.mNetworkCapabilities;
         final long unwantedCaps =
