@@ -1013,6 +1013,10 @@ public class PipTouchHandler {
                 : mPipBoundsState.getBounds();
     }
 
+    void setOhmOffset(int offset) {
+        mPipResizeGestureHandler.setOhmOffset(offset);
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
