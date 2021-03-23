@@ -106,6 +106,17 @@ class HostClipboardMonitor implements Runnable {
         return false;
     }
 
+    private void closePipe() {
+        try {
+            final RandomAccessFile pipe = mPipe;
+            mPipe = null;
+            if (pipe != null) {
+                pipe.close();
+            }
+        } catch (IOException ignore) {
+        }
+    }
+
     public HostClipboardMonitor(HostClipboardCallback cb) {
         mHostClipboardCallback = cb;
     }
@@ -127,10 +138,7 @@ class HostClipboardMonitor implements Runnable {
                 mHostClipboardCallback.onHostClipboardUpdated(
                     new String(receivedData));
             } catch (IOException e) {
-                try {
-                    mPipe.close();
-                } catch (IOException ee) {}
-                mPipe = null;
+                closePipe();
             } catch (InterruptedException e) {}
         }
     }
