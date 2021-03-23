@@ -206,7 +206,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.charging.ChargingRippleView;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -385,7 +384,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
     private LightRevealScrim mLightRevealScrim;
-    private ChargingRippleView mChargingRipple;
     private WiredChargingRippleController mChargingRippleAnimationController;
     private PowerButtonReveal mPowerButtonReveal;
     private CircleReveal mCircleReveal;
@@ -1058,7 +1056,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mMainThreadHandler.post(() -> {
                             mOverlays.remove(plugin);
                             mNotificationShadeWindowController
-                                    .setForcePluginOpen(mOverlays.size() != 0);
+                                    .setForcePluginOpen(mOverlays.size() != 0, this);
                         });
                     }
 
@@ -1081,7 +1079,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                                         .setStateListener(b -> mOverlays.forEach(
                                                 o -> o.setCollapseDesired(b)));
                                 mNotificationShadeWindowController
-                                        .setForcePluginOpen(mOverlays.size() != 0);
+                                        .setForcePluginOpen(mOverlays.size() != 0, this);
                             });
                         }
                     }
@@ -1519,6 +1517,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
         mLockscreenLockIconController = statusBarComponent.getLockscreenLockIconController();
         mLockscreenLockIconController.init();
+        statusBarComponent.getAuthRippleController().init();
 
         mNotificationPanelViewController.setLaunchAffordanceListener(
                 mLockscreenLockIconController::onShowingLaunchAffordanceChanged);

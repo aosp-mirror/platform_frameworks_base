@@ -119,7 +119,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testSetForcePluginOpen_beforeStatusBarInitialization() {
-        mNotificationShadeWindowController.setForcePluginOpen(true);
+        mNotificationShadeWindowController.setForcePluginOpen(true, this);
     }
 
     @Test

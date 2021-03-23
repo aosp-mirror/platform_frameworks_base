@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone.dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
@@ -79,4 +80,10 @@ public interface StatusBarComponent {
      */
     @StatusBarScope
     LockscreenLockIconController getLockscreenLockIconController();
+
+    /**
+     * Creates an AuthRippleController
+     */
+    @StatusBarScope
+    AuthRippleController getAuthRippleController();
 }

@@ -642,4 +642,11 @@
 
     <!-- Whether to use window background blur for the volume dialog. -->
     <bool name="config_volumeDialogUseBackgroundBlur">false</bool>
+
+    <!-- The properties of the face auth camera in pixels -->
+    <integer-array name="config_face_auth_props">
+        <!-- sensorLocationX -->
+        <!-- sensorLocationY -->
+        <!--sensorRadius -->
+    </integer-array>
 </resources>

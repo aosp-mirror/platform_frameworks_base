@@ -17,17 +17,19 @@
 package com.android.systemui.biometrics
 
 import android.content.Context
+import android.content.res.Configuration
+import android.graphics.PointF
 import android.hardware.biometrics.BiometricSourceType
-import android.view.View
-import android.view.ViewGroup
-import com.android.internal.annotations.VisibleForTesting
+import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.ViewController
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -35,30 +37,82 @@ import javax.inject.Inject
  * Controls the ripple effect that shows when authentication is successful.
  * The ripple uses the accent color of the current theme.
  */
-@SysUISingleton
+@StatusBarScope
 class AuthRippleController @Inject constructor(
-    commandRegistry: CommandRegistry,
-    configurationController: ConfigurationController,
-    private val context: Context,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor
-) {
-    @VisibleForTesting
-    var rippleView: AuthRippleView = AuthRippleView(context, attrs = null)
+    private val sysuiContext: Context,
+    private val authController: AuthController,
+    private val configurationController: ConfigurationController,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val commandRegistry: CommandRegistry,
+    private val notificationShadeWindowController: NotificationShadeWindowController,
+    rippleView: AuthRippleView?
+) : ViewController<AuthRippleView>(rippleView) {
+    private var fingerprintSensorLocation: PointF? = null
+    private var faceSensorLocation: PointF? = null
 
-    val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
-        override fun onBiometricAuthenticated(
-            userId: Int,
-            biometricSourceType: BiometricSourceType?,
-            isStrongBiometric: Boolean
-        ) {
-            if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
-                rippleView.startRipple()
-            }
+    @VisibleForTesting
+    public override fun onViewAttached() {
+        updateRippleColor()
+        updateSensorLocation()
+        configurationController.addCallback(configurationChangedListener)
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        commandRegistry.registerCommand("auth-ripple") { AuthRippleCommand() }
+    }
+
+    @VisibleForTesting
+    public override fun onViewDetached() {
+        keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
+        configurationController.removeCallback(configurationChangedListener)
+        commandRegistry.unregisterCommand("auth-ripple")
+
+        notificationShadeWindowController.setForcePluginOpen(false, this)
+    }
+
+    private fun showRipple(biometricSourceType: BiometricSourceType?) {
+        if (biometricSourceType == BiometricSourceType.FINGERPRINT &&
+            fingerprintSensorLocation != null) {
+            mView.setSensorLocation(fingerprintSensorLocation!!)
+            showRipple()
+        } else if (biometricSourceType == BiometricSourceType.FACE &&
+            faceSensorLocation != null) {
+            mView.setSensorLocation(faceSensorLocation!!)
+            showRipple()
         }
     }
 
-    init {
-        val configurationChangedListener = object : ConfigurationController.ConfigurationListener {
+    private fun showRipple() {
+        notificationShadeWindowController.setForcePluginOpen(true, this)
+        mView.startRipple(Runnable {
+            notificationShadeWindowController.setForcePluginOpen(false, this)
+        })
+    }
+
+    private fun updateSensorLocation() {
+        fingerprintSensorLocation = authController.udfpsSensorLocation
+        faceSensorLocation = authController.faceAuthSensorLocation
+    }
+
+    private fun updateRippleColor() {
+        mView.setColor(
+            Utils.getColorAttr(sysuiContext, android.R.attr.colorAccent).defaultColor)
+    }
+
+    val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onBiometricAuthenticated(
+                userId: Int,
+                biometricSourceType: BiometricSourceType?,
+                isStrongBiometric: Boolean
+            ) {
+                showRipple(biometricSourceType)
+            }
+    }
+
+    val configurationChangedListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                updateSensorLocation()
+            }
             override fun onUiModeChanged() {
                 updateRippleColor()
             }
@@ -68,43 +122,50 @@ class AuthRippleController @Inject constructor(
             override fun onOverlayChanged() {
                 updateRippleColor()
             }
-        }
-        configurationController.addCallback(configurationChangedListener)
-
-        commandRegistry.registerCommand("auth-ripple") { AuthRippleCommand() }
-    }
-
-    fun setSensorLocation(x: Float, y: Float) {
-        rippleView.setSensorLocation(x, y)
-    }
-
-    fun setViewHost(viewHost: View) {
-        // Add the ripple view to its host layout
-        viewHost.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewDetachedFromWindow(view: View?) {}
-
-            override fun onViewAttachedToWindow(view: View?) {
-                (viewHost as ViewGroup).addView(rippleView)
-                keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
-                viewHost.removeOnAttachStateChangeListener(this)
-            }
-        })
-
-        updateRippleColor()
-    }
-
-    private fun updateRippleColor() {
-        rippleView.setColor(
-            Utils.getColorAttr(context, android.R.attr.colorAccent).defaultColor)
     }
 
     inner class AuthRippleCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
-            rippleView.startRipple()
+            if (args.isEmpty()) {
+                invalidCommand(pw)
+            } else {
+                when (args[0]) {
+                    "fingerprint" -> {
+                        pw.println("fingerprint ripple sensorLocation=$fingerprintSensorLocation")
+                        showRipple(BiometricSourceType.FINGERPRINT)
+                    }
+                    "face" -> {
+                        pw.println("face ripple sensorLocation=$faceSensorLocation")
+                        showRipple(BiometricSourceType.FACE)
+                    }
+                    "custom" -> {
+                        if (args.size != 3 ||
+                            args[1].toFloatOrNull() == null ||
+                            args[2].toFloatOrNull() == null) {
+                            invalidCommand(pw)
+                            return
+                        }
+                        pw.println("custom ripple sensorLocation=" + args[1].toFloat() + ", " +
+                            args[2].toFloat())
+                        mView.setSensorLocation(PointF(args[1].toFloat(), args[2].toFloat()))
+                        showRipple()
+                    }
+                    else -> invalidCommand(pw)
+                }
+            }
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar auth-ripple")
+            pw.println("Usage: adb shell cmd statusbar auth-ripple <command>")
+            pw.println("Available commands:")
+            pw.println("  fingerprint")
+            pw.println("  face")
+            pw.println("  custom <x-location: int> <y-location: int>")
+        }
+
+        fun invalidCommand(pw: PrintWriter) {
+            pw.println("invalid command")
+            help(pw)
         }
     }
 }

@@ -89,7 +89,6 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @NonNull private final StatusBarStateController mStatusBarStateController;
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final DumpManager mDumpManager;
-    @NonNull private final AuthRippleController mAuthRippleController;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
@@ -311,7 +310,6 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @NonNull StatusBar statusBar,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
-            @NonNull AuthRippleController authRippleController,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull KeyguardViewMediator keyguardViewMediator) {
         mContext = context;
@@ -325,7 +323,6 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mStatusBarStateController = statusBarStateController;
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mDumpManager = dumpManager;
-        mAuthRippleController = authRippleController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewMediator = keyguardViewMediator;
 
@@ -353,10 +350,6 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter);
-
-        mAuthRippleController.setViewHost(mStatusBar.getNotificationShadeWindowView());
-        mAuthRippleController.setSensorLocation(getSensorLocation().centerX(),
-                getSensorLocation().centerY());
     }
 
     @Nullable
