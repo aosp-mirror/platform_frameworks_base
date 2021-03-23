@@ -76,6 +76,8 @@ import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
+import android.os.vibrator.StepSegment;
+import android.os.vibrator.VibrationEffectSegment;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -1917,9 +1919,9 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private static class VibrationInfo {
-        private long[] mPattern = new long[0];
-        private int[] mAmplitudes = new int[0];
-        private int mRepeat = -1;
+        private final long[] mPattern;
+        private final int[] mAmplitudes;
+        private final int mRepeat;
 
         public long[] getPattern() {
             return mPattern;
@@ -1934,40 +1936,55 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         VibrationInfo(VibrationEffect effect) {
-            // First replace prebaked effects with its fallback, if any available.
-            if (effect instanceof VibrationEffect.Prebaked) {
-                VibrationEffect fallback = ((VibrationEffect.Prebaked) effect).getFallbackEffect();
-                if (fallback != null) {
-                    effect = fallback;
+            long[] pattern = null;
+            int[] amplitudes = null;
+            int patternRepeatIndex = -1;
+            int amplitudeCount = -1;
+
+            if (effect instanceof VibrationEffect.Composed) {
+                VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+                int segmentCount = composed.getSegments().size();
+                pattern = new long[segmentCount];
+                amplitudes = new int[segmentCount];
+                patternRepeatIndex = composed.getRepeatIndex();
+                amplitudeCount = 0;
+                for (int i = 0; i < segmentCount; i++) {
+                    VibrationEffectSegment segment = composed.getSegments().get(i);
+                    if (composed.getRepeatIndex() == i) {
+                        patternRepeatIndex = amplitudeCount;
+                    }
+                    if (!(segment instanceof StepSegment)) {
+                        Slog.w(TAG, "Input devices don't support segment " + segment);
+                        amplitudeCount = -1;
+                        break;
+                    }
+                    float amplitude = ((StepSegment) segment).getAmplitude();
+                    if (Float.compare(amplitude, VibrationEffect.DEFAULT_AMPLITUDE) == 0) {
+                        amplitudes[amplitudeCount] = DEFAULT_VIBRATION_MAGNITUDE;
+                    } else {
+                        amplitudes[amplitudeCount] =
+                                (int) (amplitude * VibrationEffect.MAX_AMPLITUDE);
+                    }
+                    pattern[amplitudeCount++] = segment.getDuration();
                 }
             }
-            if (effect instanceof VibrationEffect.OneShot) {
-                VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
-                mPattern = new long[] { 0, oneShot.getDuration() };
-                int amplitude = oneShot.getAmplitude();
-                // android framework uses DEFAULT_AMPLITUDE to signal that the vibration
-                // should use some built-in default value, denoted here as
-                // DEFAULT_VIBRATION_MAGNITUDE
-                if (amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
-                    amplitude = DEFAULT_VIBRATION_MAGNITUDE;
-                }
-                mAmplitudes = new int[] { 0, amplitude };
+
+            if (amplitudeCount < 0) {
+                Slog.w(TAG, "Only oneshot and step waveforms are supported on input devices");
+                mPattern = new long[0];
+                mAmplitudes = new int[0];
                 mRepeat = -1;
-            } else if (effect instanceof VibrationEffect.Waveform) {
-                VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
-                mPattern = waveform.getTimings();
-                mAmplitudes = waveform.getAmplitudes();
-                for (int i = 0; i < mAmplitudes.length; i++) {
-                    if (mAmplitudes[i] == VibrationEffect.DEFAULT_AMPLITUDE) {
-                        mAmplitudes[i] = DEFAULT_VIBRATION_MAGNITUDE;
-                    }
-                }
-                mRepeat = waveform.getRepeatIndex();
-                if (mRepeat >= mPattern.length) {
-                    throw new ArrayIndexOutOfBoundsException();
-                }
             } else {
-                Slog.w(TAG, "Pre-baked and composed effects aren't supported on input devices");
+                mRepeat = patternRepeatIndex;
+                mPattern = new long[amplitudeCount];
+                mAmplitudes = new int[amplitudeCount];
+                System.arraycopy(pattern, 0, mPattern, 0, amplitudeCount);
+                System.arraycopy(amplitudes, 0, mAmplitudes, 0, amplitudeCount);
+                if (mRepeat >= mPattern.length) {
+                    throw new ArrayIndexOutOfBoundsException("Repeat index " + mRepeat
+                            + " must be within the bounds of the pattern.length "
+                            + mPattern.length);
+                }
             }
         }
     }

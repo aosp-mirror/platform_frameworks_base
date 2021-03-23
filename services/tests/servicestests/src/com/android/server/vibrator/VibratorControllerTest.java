@@ -39,6 +39,8 @@ import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.VibrationEffect;
 import android.os.test.TestLooper;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.PrimitiveSegment;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -49,7 +51,6 @@ import com.android.internal.util.test.FakeSettingsProviderRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -161,9 +162,9 @@ public class VibratorControllerTest {
     @Test
     public void updateAlwaysOn_withCapability_enablesAlwaysOnEffect() {
         mockVibratorCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
-        VibrationEffect.Prebaked effect = (VibrationEffect.Prebaked)
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
-        createController().updateAlwaysOn(1, effect);
+        PrebakedSegment prebaked = createPrebaked(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        createController().updateAlwaysOn(1, prebaked);
 
         verify(mNativeWrapperMock).alwaysOnEnable(
                 eq(1L), eq((long) VibrationEffect.EFFECT_CLICK),
@@ -179,9 +180,9 @@ public class VibratorControllerTest {
 
     @Test
     public void updateAlwaysOn_withoutCapability_ignoresEffect() {
-        VibrationEffect.Prebaked effect = (VibrationEffect.Prebaked)
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
-        createController().updateAlwaysOn(1, effect);
+        PrebakedSegment prebaked = createPrebaked(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        createController().updateAlwaysOn(1, prebaked);
 
         verify(mNativeWrapperMock, never()).alwaysOnDisable(anyLong());
         verify(mNativeWrapperMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
@@ -201,9 +202,9 @@ public class VibratorControllerTest {
         when(mNativeWrapperMock.perform(anyLong(), anyLong(), anyLong())).thenReturn(10L);
         VibratorController controller = createController();
 
-        VibrationEffect.Prebaked effect = (VibrationEffect.Prebaked)
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
-        assertEquals(10L, controller.on(effect, 11));
+        PrebakedSegment prebaked = createPrebaked(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        assertEquals(10L, controller.on(prebaked, 11));
 
         assertTrue(controller.isVibrating());
         verify(mNativeWrapperMock).perform(eq((long) VibrationEffect.EFFECT_CLICK),
@@ -216,24 +217,13 @@ public class VibratorControllerTest {
         when(mNativeWrapperMock.compose(any(), anyLong())).thenReturn(15L);
         VibratorController controller = createController();
 
-        VibrationEffect.Composed effect = (VibrationEffect.Composed)
-                VibrationEffect.startComposition()
-                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
-                        .compose();
-        assertEquals(15L, controller.on(effect, 12));
-
-        ArgumentCaptor<VibrationEffect.Composition.PrimitiveEffect[]> primitivesCaptor =
-                ArgumentCaptor.forClass(VibrationEffect.Composition.PrimitiveEffect[].class);
+        PrimitiveSegment[] primitives = new PrimitiveSegment[]{
+                new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
+        };
+        assertEquals(15L, controller.on(primitives, 12));
 
         assertTrue(controller.isVibrating());
-        verify(mNativeWrapperMock).compose(primitivesCaptor.capture(), eq(12L));
-
-        // Check all primitive effect fields are passed down to the HAL.
-        assertEquals(1, primitivesCaptor.getValue().length);
-        VibrationEffect.Composition.PrimitiveEffect primitive = primitivesCaptor.getValue()[0];
-        assertEquals(VibrationEffect.Composition.PRIMITIVE_CLICK, primitive.id);
-        assertEquals(0.5f, primitive.scale, /* delta= */ 1e-2);
-        assertEquals(10, primitive.delay);
+        verify(mNativeWrapperMock).compose(eq(primitives), eq(12L));
     }
 
     @Test
@@ -285,5 +275,9 @@ public class VibratorControllerTest {
 
     private void mockVibratorCapabilities(int capabilities) {
         when(mNativeWrapperMock.getCapabilities()).thenReturn((long) capabilities);
+    }
+
+    private PrebakedSegment createPrebaked(int effectId, int effectStrength) {
+        return new PrebakedSegment(effectId, /* shouldFallback= */ false, effectStrength);
     }
 }

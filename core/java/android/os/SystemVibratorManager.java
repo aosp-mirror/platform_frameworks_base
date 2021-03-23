@@ -211,7 +211,7 @@ public class SystemVibratorManager extends VibratorManager {
 
         @Override
         public boolean[] arePrimitivesSupported(
-                @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+                @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
             boolean[] supported = new boolean[primitiveIds.length];
             for (int i = 0; i < primitiveIds.length; i++) {
                 supported[i] = mVibratorInfo.isPrimitiveSupported(primitiveIds[i]);
