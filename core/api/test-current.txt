@@ -817,6 +817,7 @@ package android.content.pm {
     method public int describeContents();
     method public android.os.UserHandle getUserHandle();
     method public boolean isAdmin();
+    method public boolean isCloneProfile();
     method public boolean isDemo();
     method public boolean isEnabled();
     method public boolean isEphemeral();
