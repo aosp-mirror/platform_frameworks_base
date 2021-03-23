@@ -4101,7 +4101,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @BinderThread
     @Override
-    @GuardedBy("mMethodMap")
     public void startProtoDump(byte[] protoDump, int source, String where,
             IVoidResultCallback resultCallback) {
         CallbackUtils.onResult(resultCallback, () -> {
@@ -4198,7 +4197,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         });
     }
 
-    @GuardedBy("mMethodMap")
     private void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (mMethodMap) {
             final long token = proto.start(fieldId);
