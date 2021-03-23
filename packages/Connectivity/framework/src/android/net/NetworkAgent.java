@@ -390,7 +390,6 @@ public abstract class NetworkAgent {
      * @param score the initial score of this network. Update with sendNetworkScore.
      * @param config an immutable {@link NetworkAgentConfig} for this agent.
      * @param provider the {@link NetworkProvider} managing this agent.
-     * @hide TODO : unhide when impl is complete
      */
     public NetworkAgent(@NonNull Context context, @NonNull Looper looper, @NonNull String logTag,
             @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp,
