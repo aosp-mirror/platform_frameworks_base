@@ -448,7 +448,7 @@ public final class DropBoxManagerService extends SystemService {
                 final GZIPOutputStream gzipOutputStream =
                         new GZIPOutputStream(new FileOutputStream(fd));
                 FileUtils.copy(in, gzipOutputStream);
-                gzipOutputStream.finish();
+                gzipOutputStream.close();
             } else {
                 FileUtils.copy(in, new FileOutputStream(fd));
             }
