@@ -55,36 +55,68 @@ public abstract class SocketKeepalive implements AutoCloseable {
     static final String TAG = "SocketKeepalive";
 
     /**
-     * No errors.
+     * Success. It indicates there is no error.
      * @hide
      */
     @SystemApi
     public static final int SUCCESS = 0;
 
-    /** @hide */
+    /**
+     * No keepalive. This should only be internally as it indicates There is no keepalive.
+     * It should not propagate to applications.
+     * @hide
+     */
     public static final int NO_KEEPALIVE = -1;
 
-    /** @hide */
+    /**
+     * Data received.
+     * @hide
+     */
     public static final int DATA_RECEIVED = -2;
 
-    /** @hide */
+    /**
+     * The binder died.
+     * @hide
+     */
     public static final int BINDER_DIED = -10;
 
-    /** The specified {@code Network} is not connected. */
+    /**
+     * The invalid network. It indicates the specified {@code Network} is not connected.
+     */
     public static final int ERROR_INVALID_NETWORK = -20;
-    /** The specified IP addresses are invalid. For example, the specified source IP address is
-     * not configured on the specified {@code Network}. */
+
+    /**
+     * The invalid IP addresses. Indicates the specified IP addresses are invalid.
+     * For example, the specified source IP address is not configured on the
+     * specified {@code Network}.
+     */
     public static final int ERROR_INVALID_IP_ADDRESS = -21;
-    /** The requested port is invalid. */
+
+    /**
+     * The port is invalid.
+     */
     public static final int ERROR_INVALID_PORT = -22;
-    /** The packet length is invalid (e.g., too long). */
+
+    /**
+     * The length is invalid (e.g. too long).
+     */
     public static final int ERROR_INVALID_LENGTH = -23;
-    /** The packet transmission interval is invalid (e.g., too short). */
+
+    /**
+     * The interval is invalid (e.g. too short).
+     */
     public static final int ERROR_INVALID_INTERVAL = -24;
-    /** The target socket is invalid. */
+
+    /**
+     * The socket is invalid.
+     */
     public static final int ERROR_INVALID_SOCKET = -25;
-    /** The target socket is not idle. */
+
+    /**
+     * The socket is not idle.
+     */
     public static final int ERROR_SOCKET_NOT_IDLE = -26;
+
     /**
      * The stop reason is uninitialized. This should only be internally used as initial state
      * of stop reason, instead of propagating to application.
@@ -92,15 +124,29 @@ public abstract class SocketKeepalive implements AutoCloseable {
      */
     public static final int ERROR_STOP_REASON_UNINITIALIZED = -27;
 
-    /** The device does not support this request. */
+    /**
+     * The request is unsupported.
+     */
     public static final int ERROR_UNSUPPORTED = -30;
-    /** @hide TODO: delete when telephony code has been updated. */
-    public static final int ERROR_HARDWARE_UNSUPPORTED = ERROR_UNSUPPORTED;
-    /** The hardware returned an error. */
+
+    /**
+     * There was a hardware error.
+     */
     public static final int ERROR_HARDWARE_ERROR = -31;
-    /** The limitation of resource is reached. */
+
+    /**
+     * Resources are insufficient (e.g. all hardware slots are in use).
+     */
     public static final int ERROR_INSUFFICIENT_RESOURCES = -32;
 
+    /**
+     * There was no such slot. This should only be internally as it indicates
+     * a programming error in the system server. It should not propagate to
+     * applications.
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_NO_SUCH_SLOT = -33;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -111,7 +157,8 @@ public abstract class SocketKeepalive implements AutoCloseable {
             ERROR_INVALID_LENGTH,
             ERROR_INVALID_INTERVAL,
             ERROR_INVALID_SOCKET,
-            ERROR_SOCKET_NOT_IDLE
+            ERROR_SOCKET_NOT_IDLE,
+            ERROR_NO_SUCH_SLOT
     })
     public @interface ErrorCode {}
 
@@ -122,7 +169,6 @@ public abstract class SocketKeepalive implements AutoCloseable {
             ERROR_INVALID_LENGTH,
             ERROR_UNSUPPORTED,
             ERROR_INSUFFICIENT_RESOURCES,
-            ERROR_HARDWARE_UNSUPPORTED
     })
     public @interface KeepaliveEvent {}
 
