@@ -9186,9 +9186,12 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class CallStyle extends Style {
-        private static final int CALL_TYPE_INCOMING = 1;
-        private static final int CALL_TYPE_ONGOING = 2;
-        private static final int CALL_TYPE_SCREENING = 3;
+        /** @hide */
+        public static final int CALL_TYPE_INCOMING = 1;
+        /** @hide */
+        public static final int CALL_TYPE_ONGOING = 2;
+        /** @hide */
+        public static final int CALL_TYPE_SCREENING = 3;
 
         /**
          * This is a key used privately on the action.extras to give spacing priority

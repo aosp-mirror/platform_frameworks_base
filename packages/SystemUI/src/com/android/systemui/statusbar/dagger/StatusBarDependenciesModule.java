@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -57,6 +58,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -226,4 +228,16 @@ public interface StatusBarDependenciesModule {
     @Binds
     StatusBarIconController provideStatusBarIconController(
             StatusBarIconControllerImpl controllerImpl);
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static OngoingCallController provideOngoingCallController(
+            CommonNotifCollection notifCollection, FeatureFlags featureFlags) {
+        OngoingCallController ongoingCallController =
+                new OngoingCallController(notifCollection, featureFlags);
+        ongoingCallController.init();
+        return ongoingCallController;
+    }
 }

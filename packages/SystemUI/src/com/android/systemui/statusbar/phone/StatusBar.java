@@ -224,6 +224,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -423,6 +424,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final DemoModeController mDemoModeController;
     private NotificationsController mNotificationsController;
+    private final OngoingCallController mOngoingCallController;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -787,6 +789,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSlider.Factory brightnessSliderFactory,
             WiredChargingRippleController chargingRippleAnimationController,
+            OngoingCallController ongoingCallController,
             FeatureFlags featureFlags) {
         super(context);
         mNotificationsController = notificationsController;
@@ -866,6 +869,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationIconAreaController = notificationIconAreaController;
         mBrightnessSliderFactory = brightnessSliderFactory;
         mChargingRippleAnimationController = chargingRippleAnimationController;
+        mOngoingCallController = ongoingCallController;
         mFeatureFlags = featureFlags;
 
         mExpansionChangedListeners = new ArrayList<>();
@@ -1152,7 +1156,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     checkBarModes();
                 }).getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.status_bar_container, new CollapsedStatusBarFragment(),
+                .replace(R.id.status_bar_container,
+                        new CollapsedStatusBarFragment(mOngoingCallController),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 

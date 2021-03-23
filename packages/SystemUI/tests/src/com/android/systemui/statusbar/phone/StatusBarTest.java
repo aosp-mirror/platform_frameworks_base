@@ -132,6 +132,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -263,6 +264,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
+    @Mock private OngoingCallController mOngoingCallController;
     @Mock private FeatureFlags mFeatureFlags;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -427,6 +429,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationIconAreaController,
                 mBrightnessSliderFactory,
                 mWiredChargingRippleController,
+                mOngoingCallController,
                 mFeatureFlags);
 
         when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
