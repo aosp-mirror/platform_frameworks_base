@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
+import android.content.pm.verify.domain.DomainVerificationManager;
 
 import com.android.server.pm.verify.domain.DomainVerificationService;
 
@@ -44,5 +45,17 @@ class DomainVerificationJavaUtil {
             @UserIdInt int userId)
             throws PackageManager.NameNotFoundException {
         return service.setDomainVerificationUserSelection(domainSetId, domains, enabled, userId);
+    }
+
+    static int setStatusForceNullable(@NonNull DomainVerificationManager manager,
+            @Nullable UUID domainSetId, @Nullable Set<String> domains, int state)
+            throws PackageManager.NameNotFoundException {
+        return manager.setDomainVerificationStatus(domainSetId, domains, state);
+    }
+
+    static int setUserSelectionForceNullable(@NonNull DomainVerificationManager manager,
+            @Nullable UUID domainSetId, @Nullable Set<String> domains, boolean enabled)
+            throws PackageManager.NameNotFoundException {
+        return manager.setDomainVerificationUserSelection(domainSetId, domains, enabled);
     }
 }

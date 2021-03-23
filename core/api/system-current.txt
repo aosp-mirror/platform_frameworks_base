@@ -2873,14 +2873,11 @@ package android.content.pm.verify.domain {
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public java.util.List<android.content.pm.verify.domain.DomainOwner> getOwnersForDomain(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public java.util.List<java.lang.String> queryValidVerificationPackageNames();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public void setDomainVerificationLinkHandlingAllowed(@NonNull String, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public int setDomainVerificationStatus(@NonNull java.util.UUID, @NonNull java.util.Set<java.lang.String>, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public int setDomainVerificationUserSelection(@NonNull java.util.UUID, @NonNull java.util.Set<java.lang.String>, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @CheckResult @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public int setDomainVerificationStatus(@NonNull java.util.UUID, @NonNull java.util.Set<java.lang.String>, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @CheckResult @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public int setDomainVerificationUserSelection(@NonNull java.util.UUID, @NonNull java.util.Set<java.lang.String>, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
     field public static final int ERROR_DOMAIN_SET_ID_INVALID = 1; // 0x1
-    field public static final int ERROR_DOMAIN_SET_ID_NULL = 2; // 0x2
-    field public static final int ERROR_DOMAIN_SET_NULL_OR_EMPTY = 3; // 0x3
-    field public static final int ERROR_INVALID_STATE_CODE = 6; // 0x6
-    field public static final int ERROR_UNABLE_TO_APPROVE = 5; // 0x5
-    field public static final int ERROR_UNKNOWN_DOMAIN = 4; // 0x4
+    field public static final int ERROR_UNABLE_TO_APPROVE = 3; // 0x3
+    field public static final int ERROR_UNKNOWN_DOMAIN = 2; // 0x2
     field public static final String EXTRA_VERIFICATION_REQUEST = "android.content.pm.verify.domain.extra.VERIFICATION_REQUEST";
     field public static final int STATUS_OK = 0; // 0x0
   }
