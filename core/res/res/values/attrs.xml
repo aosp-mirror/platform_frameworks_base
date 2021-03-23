@@ -1125,6 +1125,15 @@
              to framework controls (via colorControlActivated). -->
         <attr name="colorAccent" format="color" />
 
+        <!-- Light accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentPrimary" format="color" />
+
+        <!-- Secondary accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentSecondary" format="color" />
+
+        <!-- Tertiary accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentTertiary" format="color" />
+
         <!-- The color applied to framework controls in their normal state. -->
         <attr name="colorControlNormal" format="color" />
 
