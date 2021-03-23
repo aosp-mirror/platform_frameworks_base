@@ -1497,7 +1497,7 @@ public class JobInfo implements Parcelable {
          * <ol>
          *     <li>Run as soon as possible</li>
          *     <li>Be less restricted during Doze and battery saver</li>
-         *     <li>Have the same network access as foreground services</li>
+         *     <li>Bypass Doze, app standby, and battery saver network restrictions</li>
          *     <li>Be less likely to be killed than regular jobs</li>
          *     <li>Be subject to background location throttling</li>
          * </ol>
@@ -1518,7 +1518,7 @@ public class JobInfo implements Parcelable {
          *
          * <p>
          * Assuming all constraints remain satisfied (including ideal system load conditions),
-         * expedited jobs are guaranteed to have a minimum allowed runtime of 1 minute. If your
+         * expedited jobs will have a maximum execution time of at least 1 minute. If your
          * app has remaining expedited job quota, then the expedited job <i>may</i> potentially run
          * longer until remaining quota is used up. Just like with regular jobs, quota is not
          * consumed while the app is on top and visible to the user.
