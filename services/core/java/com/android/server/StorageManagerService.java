@@ -3377,18 +3377,27 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public void notifyAppIoBlocked(String volumeUuid, int uid, int tid, int reason) {
+    public void notifyAppIoBlocked(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
         enforceExternalStorageService();
 
         mStorageSessionController.notifyAppIoBlocked(volumeUuid, uid, tid, reason);
     }
 
     @Override
-    public void notifyAppIoResumed(String volumeUuid, int uid, int tid, int reason) {
+    public void notifyAppIoResumed(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
         enforceExternalStorageService();
 
         mStorageSessionController.notifyAppIoResumed(volumeUuid, uid, tid, reason);
     }
+
+    @Override
+    public boolean isAppIoBlocked(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        return isAppIoBlocked(uid);
+    }
+
 
     private boolean isAppIoBlocked(int uid) {
         return mStorageSessionController.isAppIoBlocked(uid);

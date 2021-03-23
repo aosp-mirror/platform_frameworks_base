@@ -265,6 +265,10 @@ public final class StorageUserConnection {
         synchronized (mSessionsLock) {
             int ioBlockedCounter = mUidsBlockedOnIo.get(uid, 0);
             if (ioBlockedCounter == 0) {
+                Slog.w(TAG, "Unexpected app IO resumption for uid: " + uid);
+            }
+
+            if (ioBlockedCounter <= 1) {
                 mUidsBlockedOnIo.remove(uid);
             } else {
                 mUidsBlockedOnIo.put(uid, --ioBlockedCounter);
