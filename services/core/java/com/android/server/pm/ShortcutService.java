@@ -171,7 +171,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final int DEFAULT_MAX_UPDATES_PER_INTERVAL = 10;
 
     @VisibleForTesting
-    static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = 15;
+    static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = Integer.MAX_VALUE;
 
     @VisibleForTesting
     static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
