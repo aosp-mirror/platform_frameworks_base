@@ -2187,6 +2187,10 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     @VisibleForTesting
     boolean isReadyToBeExecutedLocked(JobStatus job) {
+        return isReadyToBeExecutedLocked(job, true);
+    }
+
+    boolean isReadyToBeExecutedLocked(JobStatus job, boolean rejectActive) {
         final boolean jobReady = job.isReady();
 
         if (DEBUG) {
@@ -2225,7 +2229,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         final boolean jobPending = mPendingJobs.contains(job);
-        final boolean jobActive = isCurrentlyActiveLocked(job);
+        final boolean jobActive = rejectActive && isCurrentlyActiveLocked(job);
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()

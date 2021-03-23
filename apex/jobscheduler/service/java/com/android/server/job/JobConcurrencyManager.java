@@ -891,7 +891,7 @@ class JobConcurrencyManager {
         }
 
         // Only expedited jobs can replace expedited jobs.
-        if (js.shouldTreatAsExpeditedJob()) {
+        if (js.shouldTreatAsExpeditedJob() || js.startedAsExpeditedJob) {
             // Keep fg/bg user distinction.
             if (workType == WORK_TYPE_BGUSER_IMPORTANT || workType == WORK_TYPE_BGUSER) {
                 // Let any important bg user job replace a bg user expedited job.

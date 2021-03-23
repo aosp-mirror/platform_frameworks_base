@@ -151,6 +151,14 @@ public final class JobServiceContext implements ServiceConnection {
     /** The absolute maximum amount of time the job can run */
     private long mMaxExecutionTimeMillis;
 
+    /**
+     * The stop reason for a pending cancel. If there's not pending cancel, then the value should be
+     * {@link JobParameters#STOP_REASON_UNDEFINED}.
+     */
+    private int mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
+    private int mPendingLegacyStopReason;
+    private String mPendingDebugStopReason;
+
     // Debugging: reason this job was last stopped.
     public String mStoppedReason;
 
@@ -328,6 +336,7 @@ public final class JobServiceContext implements ServiceConnection {
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;
+            job.startedAsExpeditedJob = job.shouldTreatAsExpeditedJob();
             return true;
         }
     }
@@ -625,6 +634,19 @@ public final class JobServiceContext implements ServiceConnection {
             }
             return;
         }
+        if (mRunningJob.startedAsExpeditedJob
+                && stopReasonCode == JobParameters.STOP_REASON_QUOTA) {
+            // EJs should be able to run for at least the min upper limit regardless of quota.
+            final long earliestStopTimeElapsed =
+                    mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            if (nowElapsed < earliestStopTimeElapsed) {
+                mPendingStopReason = stopReasonCode;
+                mPendingLegacyStopReason = legacyStopReason;
+                mPendingDebugStopReason = debugReason;
+                return;
+            }
+        }
         mParams.setStopReason(stopReasonCode, legacyStopReason, debugReason);
         if (legacyStopReason == JobParameters.REASON_PREEMPT) {
             mPreferredUid = mRunningJob != null ? mRunningJob.getUid() :
@@ -777,6 +799,23 @@ public final class JobServiceContext implements ServiceConnection {
                 closeAndCleanupJobLocked(true /* needsReschedule */, "timed out while stopping");
                 break;
             case VERB_EXECUTING:
+                if (mPendingStopReason != JobParameters.STOP_REASON_UNDEFINED) {
+                    if (mService.isReadyToBeExecutedLocked(mRunningJob, false)) {
+                        // Job became ready again while we were waiting to stop it (for example,
+                        // the device was temporarily taken off the charger). Ignore the pending
+                        // stop and see what the manager says.
+                        mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
+                        mPendingLegacyStopReason = 0;
+                        mPendingDebugStopReason = null;
+                    } else {
+                        Slog.i(TAG, "JS was waiting to stop this job."
+                                + " Sending onStop: " + getRunningJobNameLocked());
+                        mParams.setStopReason(mPendingStopReason, mPendingLegacyStopReason,
+                                mPendingDebugStopReason);
+                        sendStopMessageLocked(mPendingDebugStopReason);
+                        break;
+                    }
+                }
                 final long latestStopTimeElapsed =
                         mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
                 final long nowElapsed = sElapsedRealtimeClock.millis();
@@ -886,6 +925,9 @@ public final class JobServiceContext implements ServiceConnection {
         mCancelled = false;
         service = null;
         mAvailable = true;
+        mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
+        mPendingLegacyStopReason = 0;
+        mPendingDebugStopReason = null;
         removeOpTimeOutLocked();
         mCompletedListener.onJobCompletedLocked(completedJob, legacyStopReason, reschedule);
         mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
@@ -972,7 +1014,16 @@ public final class JobServiceContext implements ServiceConnection {
             pw.print(", ");
             TimeUtils.formatDuration(
                     (mExecutionStartTimeElapsed + mMaxExecutionTimeMillis) - nowElapsed, pw);
-            pw.println("]");
+            pw.print("]");
+            if (mPendingStopReason != JobParameters.STOP_REASON_UNDEFINED) {
+                pw.print(" Pending stop because ");
+                pw.print(mPendingStopReason);
+                pw.print("/");
+                pw.print(mPendingLegacyStopReason);
+                pw.print("/");
+                pw.print(mPendingDebugStopReason);
+            }
+            pw.println();
             pw.decreaseIndent();
         }
     }
