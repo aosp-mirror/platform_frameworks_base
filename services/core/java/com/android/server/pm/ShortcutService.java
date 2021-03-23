@@ -2590,7 +2590,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
         ps.findAll(ret, query, cloneFlags);
-
         return new ParceledListSlice<>(setReturnedByServer(ret));
     }
 
@@ -5074,6 +5073,17 @@ public class ShortcutService extends IShortcutService.Stub {
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
+        }
+    }
+
+    @VisibleForTesting
+    void updatePackageShortcutForTest(String packageName, String shortcutId, int userId,
+            Consumer<ShortcutInfo> cb) {
+        synchronized (mLock) {
+            final ShortcutPackage pkg = getPackageShortcutForTest(packageName, userId);
+            if (pkg == null) return;
+
+            pkg.mutateShortcut(shortcutId, null, cb);
         }
     }
 
