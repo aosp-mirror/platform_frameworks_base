@@ -73,7 +73,7 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 
 const val SERVICE_BIND_TIMEOUT_MS = 5_000L
-const val TEST_TIMEOUT_MS = 1_000L
+const val TEST_TIMEOUT_MS = 10_000L
 
 /**
  * Test that exercises an instrumented version of ConnectivityService against an instrumented
