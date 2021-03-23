@@ -352,7 +352,10 @@ public class VpnManagerService extends IVpnManager.Stub {
     @Override
     public void startLegacyVpn(VpnProfile profile) {
         int user = UserHandle.getUserId(mDeps.getCallingUid());
-        final LinkProperties egress = mCm.getActiveLinkProperties();
+        // Note that if the caller is not system (uid >= Process.FIRST_APPLICATION_UID),
+        // the code might not work well since getActiveNetwork might return null if the uid is
+        // blocked by NetworkPolicyManagerService.
+        final LinkProperties egress = mCm.getLinkProperties(mCm.getActiveNetwork());
         if (egress == null) {
             throw new IllegalStateException("Missing active network connection");
         }

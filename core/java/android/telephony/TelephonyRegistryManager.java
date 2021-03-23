@@ -825,16 +825,18 @@ public class TelephonyRegistryManager {
     }
 
     /**
-     * Notify emergency number list changed on certain subscription.
-     *
-     * @param slotIndex for which emergency number list changed. Can be derived from subId except
-     * when subId is invalid.
-     * @param subId for which emergency number list changed.
+     * Notify the allowed network types has changed for a specific subscription and the specific
+     * reason.
+     * @param slotIndex for which allowed network types changed.
+     * @param subId for which allowed network types changed.
+     * @param reason an allowed network type reasons.
+     * @param allowedNetworkType an allowed network type bitmask value.
      */
     public void notifyAllowedNetworkTypesChanged(int slotIndex, int subId,
-            Map<Integer, Long> allowedNetworkTypeList) {
+            int reason, long allowedNetworkType) {
         try {
-            sRegistry.notifyAllowedNetworkTypesChanged(slotIndex, subId, allowedNetworkTypeList);
+            sRegistry.notifyAllowedNetworkTypesChanged(slotIndex, subId, reason,
+                    allowedNetworkType);
         } catch (RemoteException ex) {
             // system process is dead
         }

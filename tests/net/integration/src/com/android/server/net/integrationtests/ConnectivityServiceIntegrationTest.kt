@@ -44,12 +44,10 @@ import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.ConnectivityService
-import com.android.server.LocalServices
 import com.android.server.NetworkAgentWrapper
 import com.android.server.TestNetIdManager
 import com.android.server.connectivity.MockableSystemProperties
 import com.android.server.connectivity.ProxyTracker
-import com.android.server.net.NetworkPolicyManagerInternal
 import com.android.testutils.TestableNetworkCallback
 import org.junit.After
 import org.junit.Before
@@ -161,10 +159,6 @@ class ConnectivityServiceIntegrationTest {
         networkStackClient = TestNetworkStackClient(realContext)
         networkStackClient.init()
         networkStackClient.start()
-
-        LocalServices.removeServiceForTest(NetworkPolicyManagerInternal::class.java)
-        LocalServices.addService(NetworkPolicyManagerInternal::class.java,
-                mock(NetworkPolicyManagerInternal::class.java))
 
         service = TestConnectivityService(makeDependencies())
         cm = ConnectivityManager(context, service)

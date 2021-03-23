@@ -62,6 +62,7 @@ interface INetworkPolicyManager {
         3 - enabled
     */
     int getRestrictBackgroundByCaller();
+    int getRestrictBackgroundStatus(int uid);
 
     void setDeviceIdleMode(boolean enabled);
     void setWifiMeteredOverride(String networkId, int meteredOverride);

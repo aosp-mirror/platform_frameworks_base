@@ -52,4 +52,41 @@
         <item>12,60000</item><!-- mobile_cbs -->
     </string-array>
 
+    <!-- Whether the APF Filter in the device should filter out IEEE 802.3 Frames
+         Those frames are identified by the field Eth-type having values
+         less than 0x600 -->
+    <bool translatable="false" name="config_apfDrop802_3Frames">true</bool>
+
+    <!-- An array of Denylisted EtherType, packets with EtherTypes within this array
+         will be dropped
+         TODO: need to put proper values, these are for testing purposes only -->
+    <integer-array translatable="false" name="config_apfEthTypeDenyList">
+        <item>0x88A2</item>
+        <item>0x88A4</item>
+        <item>0x88B8</item>
+        <item>0x88CD</item>
+        <item>0x88E3</item>
+    </integer-array>
+
+    <!-- Default supported concurrent socket keepalive slots per transport type, used by
+         ConnectivityManager.createSocketKeepalive() for calculating the number of keepalive
+         offload slots that should be reserved for privileged access. This string array should be
+         overridden by the device to present the capability of creating socket keepalives. -->
+    <!-- An Array of "[NetworkCapabilities.TRANSPORT_*],[supported keepalives] -->
+    <string-array translatable="false" name="config_networkSupportedKeepaliveCount">
+        <item>0,1</item>
+        <item>1,3</item>
+    </string-array>
+
+
+    <!-- Default value for ConnectivityManager.getMultipathPreference() on metered networks. Actual
+         device behaviour is controlled by the metered multipath preference in
+         ConnectivitySettingsManager. This is the default value of that setting. -->
+    <integer translatable="false" name="config_networkMeteredMultipathPreference">0</integer>
+
+    <!-- Whether the device should automatically switch away from Wi-Fi networks that lose
+         Internet access. Actual device behaviour is controlled by
+         Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
+    <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
+
 </resources>

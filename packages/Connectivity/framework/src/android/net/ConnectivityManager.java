@@ -62,7 +62,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -74,9 +73,7 @@ import android.util.Log;
 import android.util.Range;
 import android.util.SparseIntArray;
 
-import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import libcore.net.event.NetworkEventDispatcher;
 
@@ -842,7 +839,6 @@ public class ConnectivityManager {
 
     private final Context mContext;
 
-    private INetworkPolicyManager mNPManager;
     private final TetheringManager mTetheringManager;
 
     /**
@@ -1777,7 +1773,9 @@ public class ConnectivityManager {
         // Map from type to transports.
         final int NOT_FOUND = -1;
         final int transport = sLegacyTypeToTransport.get(type, NOT_FOUND);
-        Preconditions.checkArgument(transport != NOT_FOUND, "unknown legacy type: " + type);
+        if (transport == NOT_FOUND) {
+            throw new IllegalArgumentException("unknown legacy type: " + type);
+        }
         nc.addTransportType(transport);
 
         // Map from type to capabilities.
@@ -1882,8 +1880,8 @@ public class ConnectivityManager {
         }
 
         private PacketKeepalive(Network network, PacketKeepaliveCallback callback) {
-            Preconditions.checkNotNull(network, "network cannot be null");
-            Preconditions.checkNotNull(callback, "callback cannot be null");
+            Objects.requireNonNull(network, "network cannot be null");
+            Objects.requireNonNull(callback, "callback cannot be null");
             mNetwork = network;
             mExecutor = Executors.newSingleThreadExecutor();
             mCallback = new ISocketKeepaliveCallback.Stub() {
@@ -2258,7 +2256,9 @@ public class ConnectivityManager {
      */
     public void removeDefaultNetworkActiveListener(@NonNull OnNetworkActiveListener l) {
         INetworkActivityListener rl = mNetworkActivityListeners.get(l);
-        Preconditions.checkArgument(rl != null, "Listener was not registered.");
+        if (rl == null) {
+            throw new IllegalArgumentException("Listener was not registered.");
+        }
         try {
             mService.registerNetworkActivityListener(rl);
         } catch (RemoteException e) {
@@ -2286,8 +2286,8 @@ public class ConnectivityManager {
      * {@hide}
      */
     public ConnectivityManager(Context context, IConnectivityManager service) {
-        mContext = Preconditions.checkNotNull(context, "missing context");
-        mService = Preconditions.checkNotNull(service, "missing IConnectivityManager");
+        mContext = Objects.requireNonNull(context, "missing context");
+        mService = Objects.requireNonNull(service, "missing IConnectivityManager");
         mTetheringManager = (TetheringManager) mContext.getSystemService(Context.TETHERING_SERVICE);
         sInstance = this;
     }
@@ -2554,7 +2554,7 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public void startTethering(int type, boolean showProvisioningUi,
             final OnStartTetheringCallback callback, Handler handler) {
-        Preconditions.checkNotNull(callback, "OnStartTetheringCallback cannot be null.");
+        Objects.requireNonNull(callback, "OnStartTetheringCallback cannot be null.");
 
         final Executor executor = new Executor() {
             @Override
@@ -2647,7 +2647,7 @@ public class ConnectivityManager {
     public void registerTetheringEventCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull final OnTetheringEventCallback callback) {
-        Preconditions.checkNotNull(callback, "OnTetheringEventCallback cannot be null.");
+        Objects.requireNonNull(callback, "OnTetheringEventCallback cannot be null.");
 
         final TetheringEventCallback tetherCallback =
                 new TetheringEventCallback() {
@@ -2945,7 +2945,7 @@ public class ConnectivityManager {
     public void getLatestTetheringEntitlementResult(int type, boolean showEntitlementUi,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull final OnTetheringEntitlementResultListener listener) {
-        Preconditions.checkNotNull(listener, "TetheringEntitlementResultListener cannot be null.");
+        Objects.requireNonNull(listener, "TetheringEntitlementResultListener cannot be null.");
         ResultReceiver wrappedListener = new ResultReceiver(null) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -3318,7 +3318,9 @@ public class ConnectivityManager {
         }
 
         public NetworkCallback(@Flag int flags) {
-            Preconditions.checkArgument((flags & VALID_FLAGS) == flags);
+            if ((flags & VALID_FLAGS) != flags) {
+                throw new IllegalArgumentException("Invalid flags");
+            }
             mFlags = flags;
         }
 
@@ -3604,7 +3606,7 @@ public class ConnectivityManager {
         }
 
         CallbackHandler(Handler handler) {
-            this(Preconditions.checkNotNull(handler, "Handler cannot be null.").getLooper());
+            this(Objects.requireNonNull(handler, "Handler cannot be null.").getLooper());
         }
 
         @Override
@@ -3698,13 +3700,14 @@ public class ConnectivityManager {
     private static final HashMap<NetworkRequest, NetworkCallback> sCallbacks = new HashMap<>();
     private static CallbackHandler sCallbackHandler;
 
-    private NetworkRequest sendRequestForNetwork(NetworkCapabilities need, NetworkCallback callback,
-            int timeoutMs, NetworkRequest.Type reqType, int legacyType, CallbackHandler handler) {
+    private NetworkRequest sendRequestForNetwork(int asUid, NetworkCapabilities need,
+            NetworkCallback callback, int timeoutMs, NetworkRequest.Type reqType, int legacyType,
+            CallbackHandler handler) {
         printStackTrace();
         checkCallbackNotNull(callback);
-        Preconditions.checkArgument(
-                reqType == TRACK_DEFAULT || reqType == TRACK_SYSTEM_DEFAULT || need != null,
-                "null NetworkCapabilities");
+        if (reqType != TRACK_DEFAULT && reqType != TRACK_SYSTEM_DEFAULT && need == null) {
+            throw new IllegalArgumentException("null NetworkCapabilities");
+        }
         final NetworkRequest request;
         final String callingPackageName = mContext.getOpPackageName();
         try {
@@ -3724,8 +3727,8 @@ public class ConnectivityManager {
                             getAttributionTag());
                 } else {
                     request = mService.requestNetwork(
-                            need, reqType.ordinal(), messenger, timeoutMs, binder, legacyType,
-                            callbackFlags, callingPackageName, getAttributionTag());
+                            asUid, need, reqType.ordinal(), messenger, timeoutMs, binder,
+                            legacyType, callbackFlags, callingPackageName, getAttributionTag());
                 }
                 if (request != null) {
                     sCallbacks.put(request, callback);
@@ -3738,6 +3741,12 @@ public class ConnectivityManager {
             throw convertServiceException(e);
         }
         return request;
+    }
+
+    private NetworkRequest sendRequestForNetwork(NetworkCapabilities need, NetworkCallback callback,
+            int timeoutMs, NetworkRequest.Type reqType, int legacyType, CallbackHandler handler) {
+        return sendRequestForNetwork(Process.INVALID_UID, need, callback, timeoutMs, reqType,
+                legacyType, handler);
     }
 
     /**
@@ -4051,15 +4060,17 @@ public class ConnectivityManager {
     }
 
     private static void checkPendingIntentNotNull(PendingIntent intent) {
-        Preconditions.checkNotNull(intent, "PendingIntent cannot be null.");
+        Objects.requireNonNull(intent, "PendingIntent cannot be null.");
     }
 
     private static void checkCallbackNotNull(NetworkCallback callback) {
-        Preconditions.checkNotNull(callback, "null NetworkCallback");
+        Objects.requireNonNull(callback, "null NetworkCallback");
     }
 
     private static void checkTimeout(int timeoutMs) {
-        Preconditions.checkArgumentPositive(timeoutMs, "timeoutMs must be strictly positive.");
+        if (timeoutMs <= 0) {
+            throw new IllegalArgumentException("timeoutMs must be strictly positive.");
+        }
     }
 
     /**
@@ -4223,8 +4234,40 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
             @NonNull Handler handler) {
+        registerDefaultNetworkCallbackAsUid(Process.INVALID_UID, networkCallback, handler);
+    }
+
+    /**
+     * Registers to receive notifications about changes in the default network for the specified
+     * UID. This may be a physical network or a virtual network, such as a VPN that applies to the
+     * UID. The callbacks will continue to be called until either the application exits or
+     * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
+     *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * all variants of this method, of {@link #requestNetwork} as well as
+     * {@link ConnectivityDiagnosticsManager#registerConnectivityDiagnosticsCallback}.
+     * Requesting a network with this method will count toward this limit. If this limit is
+     * exceeded, an exception will be thrown. To avoid hitting this issue and to conserve resources,
+     * make sure to unregister the callbacks with
+     * {@link #unregisterNetworkCallback(NetworkCallback)}.
+     *
+     * @param uid the UID for which to track default network changes.
+     * @param networkCallback The {@link NetworkCallback} that the system will call as the
+     *                        UID's default network changes.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @throws RuntimeException if the app already has too many callbacks registered.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @SuppressLint({"ExecutorRegistration", "PairedRegistration"})
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    public void registerDefaultNetworkCallbackAsUid(int uid,
+            @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
-        sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
+        sendRequestForNetwork(uid, null /* need */, networkCallback, 0 /* timeoutMs */,
                 TRACK_DEFAULT, TYPE_NONE, cbHandler);
     }
 
@@ -4339,8 +4382,9 @@ public class ConnectivityManager {
         // Find all requests associated to this callback and stop callback triggers immediately.
         // Callback is reusable immediately. http://b/20701525, http://b/35921499.
         synchronized (sCallbacks) {
-            Preconditions.checkArgument(networkCallback.networkRequest != null,
-                    "NetworkCallback was not registered");
+            if (networkCallback.networkRequest == null) {
+                throw new IllegalArgumentException("NetworkCallback was not registered");
+            }
             if (networkCallback.networkRequest == ALREADY_UNREGISTERED) {
                 Log.d(TAG, "NetworkCallback was already unregistered");
                 return;
@@ -4794,17 +4838,6 @@ public class ConnectivityManager {
     public @interface RestrictBackgroundStatus {
     }
 
-    private INetworkPolicyManager getNetworkPolicyManager() {
-        synchronized (this) {
-            if (mNPManager != null) {
-                return mNPManager;
-            }
-            mNPManager = INetworkPolicyManager.Stub.asInterface(ServiceManager
-                    .getService(Context.NETWORK_POLICY_SERVICE));
-            return mNPManager;
-        }
-    }
-
     /**
      * Determines if the calling application is subject to metered network restrictions while
      * running on background.
@@ -4815,7 +4848,7 @@ public class ConnectivityManager {
      */
     public @RestrictBackgroundStatus int getRestrictBackgroundStatus() {
         try {
-            return getNetworkPolicyManager().getRestrictBackgroundByCaller();
+            return mService.getRestrictBackgroundStatusByCaller();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4945,20 +4978,20 @@ public class ConnectivityManager {
      * {@link QosCallback#onError(QosCallbackException)}.  see: {@link QosCallbackException}.
      *
      * @param socketInfo the socket information used to match QoS events
-     * @param callback receives qos events that satisfy socketInfo
      * @param executor The executor on which the callback will be invoked. The provided
      *                 {@link Executor} must run callback sequentially, otherwise the order of
-     *                 callbacks cannot be guaranteed.
+     *                 callbacks cannot be guaranteed.onQosCallbackRegistered
+     * @param callback receives qos events that satisfy socketInfo
      *
      * @hide
      */
     @SystemApi
     public void registerQosCallback(@NonNull final QosSocketInfo socketInfo,
-            @NonNull final QosCallback callback,
-            @CallbackExecutor @NonNull final Executor executor) {
+            @CallbackExecutor @NonNull final Executor executor,
+            @NonNull final QosCallback callback) {
         Objects.requireNonNull(socketInfo, "socketInfo must be non-null");
-        Objects.requireNonNull(callback, "callback must be non-null");
         Objects.requireNonNull(executor, "executor must be non-null");
+        Objects.requireNonNull(callback, "callback must be non-null");
 
         try {
             synchronized (mQosCallbackConnections) {

@@ -544,9 +544,6 @@ public class TelephonyCallback {
     /**
      * Event for changes to allowed network list based on all active subscriptions.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
-     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
-     *
      * @hide
      * @see AllowedNetworkTypesListener#onAllowedNetworkTypesChanged
      */
@@ -1287,30 +1284,34 @@ public class TelephonyCallback {
     public interface AllowedNetworkTypesListener {
         /**
          * Callback invoked when the current allowed network type list has changed on the
-         * registered subscription.
+         * registered subscription for a specified reason.
          * Note, the registered subscription is associated with {@link TelephonyManager} object
-         * on which
-         * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}
+         * on which {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}
          * was called.
          * If this TelephonyManager object was created with
          * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
          * given subscription ID. Otherwise, this callback applies to
          * {@link SubscriptionManager#getDefaultSubscriptionId()}.
          *
-         * @param allowedNetworkTypesList Map associating all allowed network type reasons
-         * ({@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER},
-         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER},
-         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER}, and
-         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}) with reason's allowed
-         * network type values.
+         * @param reason an allowed network type reasons.
+         * @see TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER
+         * @see TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER
+         * @see TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER
+         * @see TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G
+         *
+         * @param allowedNetworkType an allowed network type bitmask value. (for example,
+         * the long bitmask value is {{@link TelephonyManager#NETWORK_TYPE_BITMASK_NR}|
+         * {@link TelephonyManager#NETWORK_TYPE_BITMASK_LTE}})
+         *
          * For example:
-         * map{{TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER, long type value},
-         *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER, long type value},
-         *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER, long type value},
-         *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G, long type value}}
+         * If the latest allowed network type is changed by user, then the system
+         * notifies the {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER} and
+         * long type value}.
          */
         @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-        void onAllowedNetworkTypesChanged(@NonNull Map<Integer, Long> allowedNetworkTypesList);
+        void onAllowedNetworkTypesChanged(
+                @TelephonyManager.AllowedNetworkTypesReason int reason,
+                @TelephonyManager.NetworkTypeBitMask long allowedNetworkType);
     }
 
     /**
@@ -1741,14 +1742,15 @@ public class TelephonyCallback {
                             enabled, reason)));
         }
 
-        public void onAllowedNetworkTypesChanged(Map allowedNetworkTypesList) {
+        public void onAllowedNetworkTypesChanged(int reason, long allowedNetworkType) {
             AllowedNetworkTypesListener listener =
                     (AllowedNetworkTypesListener) mTelephonyCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
-                            () -> listener.onAllowedNetworkTypesChanged(allowedNetworkTypesList)));
+                            () -> listener.onAllowedNetworkTypesChanged(reason,
+                                    allowedNetworkType)));
         }
 
         public void onLinkCapacityEstimateChanged(

@@ -20,8 +20,11 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.util.ArraySet;
+import android.util.Range;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * An inclusive range of UIDs.
@@ -148,5 +151,33 @@ public final class UidRange implements Parcelable {
             }
         }
         return false;
+    }
+
+    /**
+     *  Convert a set of {@code Range<Integer>} to a set of {@link UidRange}.
+     */
+    @Nullable
+    public static ArraySet<UidRange> fromIntRanges(@Nullable Set<Range<Integer>> ranges) {
+        if (null == ranges) return null;
+
+        final ArraySet<UidRange> uids = new ArraySet<>();
+        for (Range<Integer> range : ranges) {
+            uids.add(new UidRange(range.getLower(), range.getUpper()));
+        }
+        return uids;
+    }
+
+    /**
+     *  Convert a set of {@link UidRange} to a set of {@code Range<Integer>}.
+     */
+    @Nullable
+    public static ArraySet<Range<Integer>> toIntRanges(@Nullable Set<UidRange> ranges) {
+        if (null == ranges) return null;
+
+        final ArraySet<Range<Integer>> uids = new ArraySet<>();
+        for (UidRange range : ranges) {
+            uids.add(new Range<Integer>(range.start, range.stop));
+        }
+        return uids;
     }
 }
