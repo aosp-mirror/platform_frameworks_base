@@ -47,6 +47,7 @@ import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -145,8 +146,8 @@ public class RcsFeature extends ImsFeature {
                 throws RemoteException {
             OptionsResponseCallback callbackWrapper = new RcsOptionsResponseAidlWrapper(callback);
             executeMethodAsync(() -> mReference.getCapabilityExchangeImplBaseInternal()
-                    .sendOptionsCapabilityRequest(contactUri, myCapabilities, callbackWrapper),
-                    "sendOptionsCapabilityRequest");
+                    .sendOptionsCapabilityRequest(contactUri, new HashSet<>(myCapabilities),
+                        callbackWrapper), "sendOptionsCapabilityRequest");
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
