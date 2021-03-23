@@ -134,7 +134,7 @@ public class BatteryUsageStatsProvider {
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder =
                 new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount)
-                        .setStatsStartRealtime(mStats.getStatsStartRealtime() / 1000);
+                        .setStatsStartTimestamp(mStats.getStartClockTime());
 
         SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
         for (int i = uidStats.size() - 1; i >= 0; i--) {
