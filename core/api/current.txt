@@ -21340,6 +21340,7 @@ package android.media {
     method public void setCallback(@Nullable android.media.MediaCodec.Callback, @Nullable android.os.Handler);
     method public void setCallback(@Nullable android.media.MediaCodec.Callback);
     method public void setInputSurface(@NonNull android.view.Surface);
+    method public void setOnFirstTunnelFrameReadyListener(@Nullable android.os.Handler, @Nullable android.media.MediaCodec.OnFirstTunnelFrameReadyListener);
     method public void setOnFrameRenderedListener(@Nullable android.media.MediaCodec.OnFrameRenderedListener, @Nullable android.os.Handler);
     method public void setOutputSurface(@NonNull android.view.Surface);
     method public void setParameters(@Nullable android.os.Bundle);
@@ -21366,6 +21367,7 @@ package android.media {
     field public static final String PARAMETER_KEY_REQUEST_SYNC_FRAME = "request-sync";
     field public static final String PARAMETER_KEY_SUSPEND = "drop-input-frames";
     field public static final String PARAMETER_KEY_SUSPEND_TIME = "drop-start-time-us";
+    field public static final String PARAMETER_KEY_TUNNEL_PEEK = "tunnel-peek";
     field public static final String PARAMETER_KEY_VIDEO_BITRATE = "video-bitrate";
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1; // 0x1
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2; // 0x2
@@ -21454,6 +21456,10 @@ package android.media {
     field public static final String ROTATION = "android.media.mediacodec.rotation";
     field public static final String SECURE = "android.media.mediacodec.secure";
     field public static final String WIDTH = "android.media.mediacodec.width";
+  }
+
+  public static interface MediaCodec.OnFirstTunnelFrameReadyListener {
+    method public void onFirstTunnelFrameReady(@NonNull android.media.MediaCodec);
   }
 
   public static interface MediaCodec.OnFrameRenderedListener {
