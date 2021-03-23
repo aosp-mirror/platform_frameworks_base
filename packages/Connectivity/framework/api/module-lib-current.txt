@@ -27,6 +27,14 @@ package android.net {
     field public static final String ACTION_PROMPT_LOST_VALIDATION = "android.net.action.PROMPT_LOST_VALIDATION";
     field public static final String ACTION_PROMPT_PARTIAL_CONNECTIVITY = "android.net.action.PROMPT_PARTIAL_CONNECTIVITY";
     field public static final String ACTION_PROMPT_UNVALIDATED = "android.net.action.PROMPT_UNVALIDATED";
+    field public static final int BLOCKED_METERED_REASON_ADMIN_DISABLED = 262144; // 0x40000
+    field public static final int BLOCKED_METERED_REASON_DATA_SAVER = 65536; // 0x10000
+    field public static final int BLOCKED_METERED_REASON_USER_RESTRICTED = 131072; // 0x20000
+    field public static final int BLOCKED_REASON_APP_STANDBY = 4; // 0x4
+    field public static final int BLOCKED_REASON_BATTERY_SAVER = 1; // 0x1
+    field public static final int BLOCKED_REASON_DOZE = 2; // 0x2
+    field public static final int BLOCKED_REASON_NONE = 0; // 0x0
+    field public static final int BLOCKED_REASON_RESTRICTED_MODE = 8; // 0x8
     field public static final String PRIVATE_DNS_MODE_OFF = "off";
     field public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
     field public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
