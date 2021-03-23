@@ -487,8 +487,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 Slog.wtf(TAG, "Error updating external stats: ", e);
             }
 
-            synchronized (BatteryExternalStatsWorker.this) {
-                mLastCollectionTimeStamp = SystemClock.elapsedRealtime();
+            if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
+                synchronized (BatteryExternalStatsWorker.this) {
+                    mLastCollectionTimeStamp = SystemClock.elapsedRealtime();
+                }
             }
         }
     };
