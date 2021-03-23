@@ -120,6 +120,7 @@ import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
@@ -350,6 +351,7 @@ public class Dependency {
     @Inject Lazy<MediaOutputDialogFactory> mMediaOutputDialogFactory;
     @Inject Lazy<DeviceConfigProxy> mDeviceConfigProxy;
     @Inject Lazy<NavigationBarOverlayController> mNavbarButtonsControllerLazy;
+    @Inject Lazy<TelephonyListenerManager> mTelephonyListenerManager;
 
     @Inject
     public Dependency() {
@@ -545,6 +547,7 @@ public class Dependency {
         mProviders.put(StatusBar.class, mStatusBar::get);
         mProviders.put(ProtoTracer.class, mProtoTracer::get);
         mProviders.put(DeviceConfigProxy.class, mDeviceConfigProxy::get);
+        mProviders.put(TelephonyListenerManager.class, mTelephonyListenerManager::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add

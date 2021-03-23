@@ -61,8 +61,9 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Turn off mobile network support.
         when(mMockTm.isDataCapable()).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
-                mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
+                mTelephonyListenerManager, mMockWm, mMockNsm, mMockSm, mConfig,
+                Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController);
@@ -80,8 +81,9 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         when(mMockTm.getServiceState()).thenReturn(mServiceState);
         when(mMockSm.getCompleteActiveSubscriptionInfoList()).thenReturn(Collections.emptyList());
 
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
-                mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
+                mTelephonyListenerManager, mMockWm, mMockNsm, mMockSm, mConfig,
+                Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController);
@@ -147,8 +149,9 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Turn off mobile network support.
         when(mMockTm.isDataCapable()).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
-                mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
+                mTelephonyListenerManager, mMockWm, mMockNsm, mMockSm, mConfig,
+                Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController);
