@@ -108,6 +108,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_APP_HIBERNATION = "app_hibernation";
 
     /**
+     * Namespace for all AppSearch related features.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_APPSEARCH = "appsearch";
+
+    /**
      * Namespace for app standby configurations.
      *
      * @hide
