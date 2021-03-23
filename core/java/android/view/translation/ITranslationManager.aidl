@@ -18,7 +18,9 @@ package android.view.translation;
 
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.ResultReceiver;
 import android.view.autofill.AutofillId;
+import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
 import com.android.internal.os.IResultReceiver;
 
@@ -30,17 +32,17 @@ import java.util.List;
  * {@hide}
  */
 oneway interface ITranslationManager {
-    void getSupportedLocales(in IResultReceiver receiver, int userId);
-    void onSessionCreated(in TranslationSpec sourceSpec, in TranslationSpec destSpec,
+    void onTranslationCapabilitiesRequest(int sourceFormat, int destFormat,
+         in ResultReceiver receiver, int userId);
+    void onSessionCreated(in TranslationContext translationContext,
          int sessionId, in IResultReceiver receiver, int userId);
 
     void updateUiTranslationState(int state, in TranslationSpec sourceSpec,
-         in TranslationSpec destSpec, in List<AutofillId> viewIds, IBinder token, int taskId,
+         in TranslationSpec targetSpec, in List<AutofillId> viewIds, IBinder token, int taskId,
          int userId);
     // deprecated
     void updateUiTranslationStateByTaskId(int state, in TranslationSpec sourceSpec,
-         in TranslationSpec destSpec, in List<AutofillId> viewIds, int taskId,
-         int userId);
+         in TranslationSpec targetSpec, in List<AutofillId> viewIds, int taskId, int userId);
 
     void registerUiTranslationStateCallback(in IRemoteCallback callback, int userId);
     void unregisterUiTranslationStateCallback(in IRemoteCallback callback, int userId);
