@@ -1441,13 +1441,11 @@ public class Typeface {
 
     /** @hide */
     public boolean isSupportedAxes(int axis) {
-        if (mSupportedAxes == null) {
-            synchronized (this) {
+        synchronized (this) {
+            if (mSupportedAxes == null) {
+                mSupportedAxes = nativeGetSupportedAxes(native_instance);
                 if (mSupportedAxes == null) {
-                    mSupportedAxes = nativeGetSupportedAxes(native_instance);
-                    if (mSupportedAxes == null) {
-                        mSupportedAxes = EMPTY_AXES;
-                    }
+                    mSupportedAxes = EMPTY_AXES;
                 }
             }
         }
