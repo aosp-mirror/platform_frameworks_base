@@ -20,6 +20,7 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_SAME_PACKAGE;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -66,7 +67,8 @@ public class StartingSurfaceController {
     }
 
     int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
-            boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated) {
+            boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
+            boolean samePackage) {
         int parameter = 0;
         if (newTask) {
             parameter |= TYPE_PARAMETER_NEW_TASK;
@@ -82,6 +84,9 @@ public class StartingSurfaceController {
         }
         if (activityCreated) {
             parameter |= TYPE_PARAMETER_ACTIVITY_CREATED;
+        }
+        if (samePackage) {
+            parameter |= TYPE_PARAMETER_SAME_PACKAGE;
         }
         return parameter;
     }

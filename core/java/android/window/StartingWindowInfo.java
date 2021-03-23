@@ -50,12 +50,19 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public static final int STARTING_WINDOW_TYPE_SNAPSHOT = 2;
     /**
+     * Prefer empty splash screen starting window.
+     * @hide
+     */
+    public static final int STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN = 3;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = "STARTING_WINDOW_TYPE_", value = {
             STARTING_WINDOW_TYPE_NONE,
             STARTING_WINDOW_TYPE_SPLASH_SCREEN,
-            STARTING_WINDOW_TYPE_SNAPSHOT
+            STARTING_WINDOW_TYPE_SNAPSHOT,
+            STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
     })
     public @interface StartingWindowType {}
 
@@ -95,7 +102,8 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_TASK_SWITCH,
             TYPE_PARAMETER_PROCESS_RUNNING,
             TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT,
-            TYPE_PARAMETER_ACTIVITY_CREATED
+            TYPE_PARAMETER_ACTIVITY_CREATED,
+            TYPE_PARAMETER_SAME_PACKAGE
     })
     public @interface StartingTypeParams {}
 
@@ -112,6 +120,8 @@ public final class StartingWindowInfo implements Parcelable {
     public static final int TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT = 0x00000008;
     /** @hide */
     public static final int TYPE_PARAMETER_ACTIVITY_CREATED = 0x00000010;
+    /** @hide */
+    public static final int TYPE_PARAMETER_SAME_PACKAGE = 0x00000020;
 
     /**
      * The parameters which effect the starting window type.

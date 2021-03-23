@@ -105,8 +105,10 @@ public class StartingSurfaceDrawer {
 
     /**
      * Called when a task need a splash screen starting window.
+     * @param emptyView Whether drawing an empty frame without anything on it.
      */
-    public void addSplashScreenStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
+    void addSplashScreenStartingWindow(StartingWindowInfo windowInfo, IBinder appToken,
+            boolean emptyView) {
         final RunningTaskInfo taskInfo = windowInfo.taskInfo;
         final ActivityInfo activityInfo = taskInfo.topActivityInfo;
         if (activityInfo == null) {
@@ -203,7 +205,6 @@ public class StartingSurfaceDrawer {
         }
 
         final PhoneWindow win = new PhoneWindow(context);
-        win.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         win.setIsStartingWindow(true);
 
         CharSequence label = context.getResources().getText(labelRes, null);
@@ -270,17 +271,20 @@ public class StartingSurfaceDrawer {
         try {
             final View view = win.getDecorView();
             final WindowManager wm = mContext.getSystemService(WindowManager.class);
-            // splash screen content will be deprecated after S.
-            sView = SplashscreenContentDrawer.makeSplashscreenContent(
-                    context, splashscreenContentResId[0]);
-            final boolean splashscreenContentCompatible = sView != null;
-            if (splashscreenContentCompatible) {
-                win.setContentView(sView);
-            } else {
-                sView = mSplashscreenContentDrawer
-                        .makeSplashScreenContentView(context, activityInfo);
-                win.setContentView(sView);
-                sView.cacheRootWindow(win);
+            if (!emptyView) {
+                // splash screen content will be deprecated after S.
+                sView = SplashscreenContentDrawer.makeSplashscreenContent(
+                        context, splashscreenContentResId[0]);
+                final boolean splashscreenContentCompatible = sView != null;
+                if (splashscreenContentCompatible) {
+                    win.setContentView(sView);
+                } else {
+                    sView = mSplashscreenContentDrawer
+                            .makeSplashScreenContentView(context, activityInfo);
+                    win.setContentView(sView);
+                    win.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    sView.cacheRootWindow(win);
+                }
             }
             postAddWindow(taskId, appToken, view, wm, params);
         } catch (RuntimeException e) {
@@ -393,6 +397,9 @@ public class StartingSurfaceDrawer {
                         // animation
                         removeWindowInner(record.mDecorView, false);
                     }
+                } else {
+                    // no animation will be applied
+                    removeWindowInner(record.mDecorView, false);
                 }
             }
             if (record.mTaskSnapshotWindow != null) {
