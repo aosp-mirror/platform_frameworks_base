@@ -222,6 +222,7 @@ filegroup {
     srcs: [
         "java/com/android/server/ConnectivityService.java",
         "java/com/android/server/ConnectivityServiceInitializer.java",
+        "java/com/android/server/NetIdManager.java",
         "java/com/android/server/TestNetworkService.java",
         "java/com/android/server/connectivity/AutodestructReference.java",
         "java/com/android/server/connectivity/ConnectivityConstants.java",
@@ -235,7 +236,9 @@ filegroup {
         "java/com/android/server/connectivity/NetworkDiagnostics.java",
         "java/com/android/server/connectivity/NetworkNotificationManager.java",
         "java/com/android/server/connectivity/NetworkRanker.java",
+        "java/com/android/server/connectivity/OsCompat.java",
         "java/com/android/server/connectivity/PermissionMonitor.java",
+        "java/com/android/server/connectivity/ProfileNetworkPreferences.java",
         "java/com/android/server/connectivity/ProxyTracker.java",
         "java/com/android/server/connectivity/QosCallbackAgentConnection.java",
         "java/com/android/server/connectivity/QosCallbackTracker.java",
