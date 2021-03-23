@@ -16,8 +16,6 @@
 
 package com.android.server.location.injector;
 
-import com.android.server.location.eventlog.LocationEventLog;
-
 public class TestInjector implements Injector {
 
     private final FakeUserInfoHelper mUserInfoHelper;
@@ -35,17 +33,13 @@ public class TestInjector implements Injector {
     private final LocationUsageLogger mLocationUsageLogger;
 
     public TestInjector() {
-        this(new LocationEventLog());
-    }
-
-    public TestInjector(LocationEventLog eventLog) {
         mUserInfoHelper = new FakeUserInfoHelper();
         mAlarmHelper = new FakeAlarmHelper();
         mAppOpsHelper = new FakeAppOpsHelper();
         mLocationPermissionsHelper = new FakeLocationPermissionsHelper(mAppOpsHelper);
         mSettingsHelper = new FakeSettingsHelper();
         mAppForegroundHelper = new FakeAppForegroundHelper();
-        mLocationPowerSaveModeHelper = new FakeLocationPowerSaveModeHelper(eventLog);
+        mLocationPowerSaveModeHelper = new FakeLocationPowerSaveModeHelper();
         mScreenInteractiveHelper = new FakeScreenInteractiveHelper();
         mDeviceStationaryHelper = new FakeDeviceStationaryHelper();
         mDeviceIdleHelper = new FakeDeviceIdleHelper();
