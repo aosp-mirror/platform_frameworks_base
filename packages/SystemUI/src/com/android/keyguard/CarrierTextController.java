@@ -22,8 +22,8 @@ import static android.telephony.PhoneStateListener.LISTEN_NONE;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.PhoneStateListener;
@@ -179,8 +179,8 @@ public class CarrierTextController {
         mBgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mBgHandler.post(() -> {
-            boolean supported = ConnectivityManager.from(mContext).isNetworkSupported(
-                    ConnectivityManager.TYPE_MOBILE);
+            boolean supported =
+                    mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
             if (supported && mNetworkSupported.compareAndSet(false, supported)) {
                 // This will set/remove the listeners appropriately. Note that it will never double
                 // add the listeners.

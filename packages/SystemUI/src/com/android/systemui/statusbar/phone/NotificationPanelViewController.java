@@ -1325,6 +1325,9 @@ public class NotificationPanelViewController extends PanelViewController {
         traceQsJank(true /* startTracing */, false /* wasCancelled */);
         flingSettings(0 /* velocity */, FLING_EXPAND);
         mQSDetailDisplayer.showDetailAdapter(qsDetailAdapter, 0, 0);
+        if (mAccessibilityManager.isEnabled()) {
+            mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
+        }
     }
 
     public void expandWithoutQs() {
@@ -1824,6 +1827,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mNotificationContainerParent.setQsExpanded(expanded);
             mPulseExpansionHandler.setQsExpanded(expanded);
             mKeyguardBypassController.setQSExpanded(expanded);
+            mStatusBarKeyguardViewManager.setQsExpanded(expanded);
         }
     }
 
@@ -3389,7 +3393,7 @@ public class NotificationPanelViewController extends PanelViewController {
         return new TouchHandler() {
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
-                if (mStatusBarKeyguardViewManager.isShowingAlternativeAuthOrAnimating()) {
+                if (mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()) {
                     return true;
                 }
                 if (mBlockTouches || mQsFullyExpanded && mQs.disallowPanelTouches()) {
@@ -3420,8 +3424,8 @@ public class NotificationPanelViewController extends PanelViewController {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 final boolean showingOrAnimatingAltAuth =
-                        mStatusBarKeyguardViewManager.isShowingAlternativeAuthOrAnimating();
-                if (showingOrAnimatingAltAuth) {
+                        mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating();
+                if (showingOrAnimatingAltAuth && event.getAction() == MotionEvent.ACTION_DOWN) {
                     mStatusBarKeyguardViewManager.resetAlternateAuth();
                 }
 

@@ -128,7 +128,7 @@ public class LongScreenshotActivity extends Activity {
 
         mPreview.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
-                        updateCropLocation());
+                        updateImageDimensions());
 
         Intent intent = getIntent();
         mScrollCaptureResponse = intent.getParcelableExtra(EXTRA_CAPTURE_RESPONSE);
@@ -206,7 +206,7 @@ public class LongScreenshotActivity extends Activity {
         Log.d(TAG, "onCaptureCompleted(longScreenshot=" + longScreenshot + ")");
         mLongScreenshot = longScreenshot;
         mPreview.setImageDrawable(mLongScreenshot.getDrawable());
-        updateCropLocation();
+        updateImageDimensions();
         mMagnifierView.setDrawable(mLongScreenshot.getDrawable(),
                 mLongScreenshot.getWidth(), mLongScreenshot.getHeight());
         // Original boundaries go from the image tile set's y=0 to y=pageSize, so
@@ -363,10 +363,8 @@ public class LongScreenshotActivity extends Activity {
             return;
         }
 
-        Rect bounds = new Rect(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-        int height = bounds.height();
-        bounds.top = (int) (height * mCropView.getTopBoundary());
-        bounds.bottom = (int) (height * mCropView.getBottomBoundary());
+        Rect bounds = mCropView.getCropBoundaries(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight());
 
         if (bounds.isEmpty()) {
             Log.w(TAG, "Crop bounds empty, skipping export.");
@@ -404,14 +402,16 @@ public class LongScreenshotActivity extends Activity {
         }
     }
 
-    private void updateCropLocation() {
+    private void updateImageDimensions() {
         Drawable drawable = mPreview.getDrawable();
         if (drawable == null) {
             return;
         }
         Rect bounds = drawable.getBounds();
         float imageRatio = bounds.width() / (float) bounds.height();
-        float viewRatio = mPreview.getWidth() / (float) mPreview.getHeight();
+        int previewWidth = mPreview.getWidth() - mPreview.getPaddingLeft()
+                - mPreview.getPaddingRight();
+        float viewRatio = previewWidth / (float) mPreview.getHeight();
 
         if (imageRatio > viewRatio) {
             // Image is full width and height is constrained, compute extra padding to inform
@@ -419,9 +419,12 @@ public class LongScreenshotActivity extends Activity {
             float imageHeight = mPreview.getHeight() * viewRatio / imageRatio;
             int extraPadding = (int) (mPreview.getHeight() - imageHeight) / 2;
             mCropView.setExtraPadding(extraPadding, extraPadding);
+            mCropView.setImageWidth(previewWidth);
         } else {
             // Image is full height
             mCropView.setExtraPadding(0, 0);
+            mCropView.setImageWidth((int) (mPreview.getHeight() * imageRatio));
         }
+
     }
 }

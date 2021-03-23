@@ -68,7 +68,7 @@ private:
 };
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName, jlong surfaceControl,
-                          jlong width, jlong height, jint format, jboolean enableTripleBuffering) {
+                          jlong width, jlong height, jint format) {
     String8 str8;
     if (jName) {
         const jchar* str16 = env->GetStringCritical(jName, nullptr);
@@ -81,7 +81,7 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName, jlong surfac
     std::string name = str8.string();
     sp<BLASTBufferQueue> queue =
             new BLASTBufferQueue(name, reinterpret_cast<SurfaceControl*>(surfaceControl), width,
-                                 height, format, enableTripleBuffering);
+                                 height, format);
     queue->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(queue.get());
 }
@@ -140,7 +140,7 @@ static void nativeSetTransactionCompleteCallback(JNIEnv* env, jclass clazz, jlon
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
-        {"nativeCreate", "(Ljava/lang/String;JJJIZ)J", (void*)nativeCreate},
+        {"nativeCreate", "(Ljava/lang/String;JJJI)J", (void*)nativeCreate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},

@@ -114,12 +114,7 @@ class DomainVerificationEnforcerTest {
                     it,
                     mockThrowOnUnmocked { whenever(linkedApps) { ArraySet<String>() } },
                     mockThrowOnUnmocked {
-                        whenever(
-                            isChangeEnabled(
-                                anyLong(),
-                                any()
-                            )
-                        ) { true }
+                        whenever(isChangeEnabledInternalNoLogging(anyLong(), any())) { true }
                     }).apply {
                     setConnection(connection)
                 }

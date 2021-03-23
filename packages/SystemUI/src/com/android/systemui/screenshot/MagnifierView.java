@@ -58,6 +58,7 @@ public class MagnifierView extends View implements CropView.CropInteractionListe
     private float mCheckerboardBoxSize = 40;
 
     private float mLastCropPosition;
+    private float mLastCenter = 0.5f;
     private CropView.CropBoundary mCropBoundary;
 
     private ViewPropertyAnimator mTranslationAnimator;
@@ -131,7 +132,7 @@ public class MagnifierView extends View implements CropView.CropInteractionListe
             canvas.save();
             // Translate such that the center of this view represents the center of the crop
             // boundary.
-            canvas.translate(-mDrawable.getBounds().width() / 2 + getWidth() / 2,
+            canvas.translate(-mDrawable.getBounds().width() * mLastCenter + getWidth() / 2,
                     -mDrawable.getBounds().height() * mLastCropPosition + getHeight() / 2);
             mDrawable.draw(canvas);
             canvas.restore();
@@ -148,8 +149,9 @@ public class MagnifierView extends View implements CropView.CropInteractionListe
 
     @Override
     public void onCropMotionEvent(MotionEvent event, CropView.CropBoundary boundary,
-            float cropPosition, int cropPositionPx) {
+            float cropPosition, int cropPositionPx, float horizontalCenter) {
         mCropBoundary = boundary;
+        mLastCenter = horizontalCenter;
         boolean touchOnRight = event.getX() > getParentWidth() / 2;
         float translateXTarget = touchOnRight ? 0 : getParentWidth() - getWidth();
         switch (event.getAction()) {

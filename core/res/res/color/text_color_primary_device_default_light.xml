@@ -17,7 +17,6 @@
 <!-- Please see primary_text_material_light.xml -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false"
-          android:alpha="?attr/disabledAlpha"
-          android:color="@color/system_primary_900"/>
-    <item android:color="@color/system_primary_900"/>
+          android:color="@color/system_neutral1_400"/>
+    <item android:color="@color/system_neutral1_900"/>
 </selector>

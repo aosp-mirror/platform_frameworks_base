@@ -309,7 +309,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Deze instellingen zijn uitsluitend bedoeld voor ontwikkelingsgebruik. Je apparaat en apps kunnen hierdoor vastlopen of anders reageren."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Apps verifiëren via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Apps die zijn geïnstalleerd via ADB/ADT, controleren op schadelijk gedrag"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-apparaten zonder namen (alleen MAC-adressen) worden weergegeven"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-apparaten zonder naam (alleen MAC-adressen) worden weergegeven"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Hiermee wordt de functie voor absoluut volume van Bluetooth uitgeschakeld in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Hierdoor wordt de Gabeldorsche-functiestack voor bluetooth ingeschakeld."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Hiermee wordt de functie voor verbeterde connectiviteit ingeschakeld."</string>
