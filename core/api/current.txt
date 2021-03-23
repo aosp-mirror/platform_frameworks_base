@@ -48064,6 +48064,7 @@ package android.view {
   }
 
   public static final class SurfaceControlViewHost.SurfacePackage implements android.os.Parcelable {
+    ctor public SurfaceControlViewHost.SurfacePackage(@NonNull android.view.SurfaceControlViewHost.SurfacePackage);
     method public int describeContents();
     method public void release();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
