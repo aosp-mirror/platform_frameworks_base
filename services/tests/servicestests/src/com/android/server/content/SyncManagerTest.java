@@ -16,6 +16,7 @@
 
 package com.android.server.content;
 
+import android.content.ContentResolver;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -54,6 +55,23 @@ public class SyncManagerTest extends TestCase {
         b2.putString(KEY_2, "bla");
 
         assertTrue("Extras not properly compared between bundles.",
+                SyncManager.syncExtrasEquals(b1, b2, false /* don't care about system extras */));
+    }
+
+    public void testSyncExtrasEqualsFails_WithNull() throws Exception {
+        Bundle b1 = new Bundle();
+        b1.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b1.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        Bundle b2 = new Bundle();
+        b2.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b2.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        b2.putString(null, "Hello NPE!");
+        b2.putString("a", "b");
+        b2.putString("c", "d");
+        b2.putString("e", "f");
+
+        assertFalse("Extras not properly compared between bundles.",
                 SyncManager.syncExtrasEquals(b1, b2, false /* don't care about system extras */));
     }
 

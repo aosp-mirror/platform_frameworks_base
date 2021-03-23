@@ -3978,6 +3978,9 @@ public class SyncManager {
      * @return true if the provided key is used by the SyncManager in scheduling the sync.
      */
     private static boolean isSyncSetting(String key) {
+        if (key == null) {
+            return false;
+        }
         if (key.equals(ContentResolver.SYNC_EXTRAS_EXPEDITED)) {
             return true;
         }
