@@ -99,18 +99,10 @@ class ImeTracingClientImpl extends ImeTracing {
     }
 
     @Override
-    public void writeTracesToFiles() {
-    }
-
-    @Override
     public void startTrace(PrintWriter pw) {
     }
 
     @Override
     public void stopTrace(PrintWriter pw) {
-    }
-
-    @Override
-    public void stopTrace(PrintWriter pw, boolean writeToFile) {
     }
 }

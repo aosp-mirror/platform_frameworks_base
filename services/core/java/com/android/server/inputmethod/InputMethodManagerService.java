@@ -175,7 +175,6 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
@@ -5230,15 +5229,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         if (ArrayUtils.contains(args, PROTO_ARG)) {
-            final ImeTracing imeTracing = ImeTracing.getInstance();
-            if (imeTracing.isEnabled()) {
-                imeTracing.stopTrace(null, false /* writeToFile */);
-                BackgroundThread.getHandler().post(() -> {
-                    imeTracing.writeTracesToFiles();
-                    imeTracing.startTrace(null);
-                });
-            }
-
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
             dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
             proto.flush();
@@ -5816,7 +5806,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     /**
-     * Handles {@code adb shell ime tracing start/stop}.
+     * Handles {@code adb shell cmd input_method tracing start/stop/save-for-bugreport}.
      * @param shellCommand {@link ShellCommand} object that is handling this command.
      * @return Exit code of the command.
      */
@@ -5828,16 +5818,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         switch (cmd) {
             case "start":
                 ImeTracing.getInstance().getInstance().startTrace(pw);
-                break;
+                break;  // proceed to the next step to update the IME client processes.
             case "stop":
                 ImeTracing.getInstance().stopTrace(pw);
-                break;
+                break;  // proceed to the next step to update the IME client processes.
+            case "save-for-bugreport":
+                ImeTracing.getInstance().saveForBugreport(pw);
+                return ShellCommandResult.SUCCESS;  // no need to update the IME client processes.
             default:
                 pw.println("Unknown command: " + cmd);
                 pw.println("Input method trace options:");
                 pw.println("  start: Start tracing");
                 pw.println("  stop: Stop tracing");
-                return ShellCommandResult.FAILURE;
+                return ShellCommandResult.FAILURE;  // no need to update the IME client processes.
         }
         boolean isImeTraceEnabled = ImeTracing.getInstance().isEnabled();
         ArrayMap<IBinder, ClientState> clients;
