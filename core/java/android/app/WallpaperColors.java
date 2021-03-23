@@ -189,7 +189,7 @@ public final class WallpaperColors implements Parcelable {
         } else {
             palette = Palette
                     .from(bitmap, new CelebiQuantizer())
-                    .maximumColorCount(256)
+                    .maximumColorCount(5)
                     .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
                     .generate();
         }
