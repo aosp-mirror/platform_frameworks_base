@@ -22,6 +22,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.net.ConnectivityManager;
@@ -380,15 +381,23 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     }
 
+    private static NetworkCapabilities.Builder copyCapabilities(
+            @NonNull final NetworkRequest request) {
+        final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
+        for (int transport : request.getTransportTypes()) builder.addTransportType(transport);
+        for (int capability : request.getCapabilities()) builder.addCapability(capability);
+        return builder;
+    }
+
     private static boolean isStrictSatisfied(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
         // A restricted job that's out of quota MUST use an unmetered network.
         if (jobStatus.getEffectiveStandbyBucket() == RESTRICTED_INDEX
                 && !jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)) {
-            final NetworkCapabilities required = new NetworkCapabilities.Builder(
-                    jobStatus.getJob().getRequiredNetwork().networkCapabilities)
-                    .addCapability(NET_CAPABILITY_NOT_METERED).build();
-            return required.satisfiedByNetworkCapabilities(capabilities);
+            final NetworkCapabilities.Builder builder =
+                    copyCapabilities(jobStatus.getJob().getRequiredNetwork());
+            builder.addCapability(NET_CAPABILITY_NOT_METERED);
+            return builder.build().satisfiedByNetworkCapabilities(capabilities);
         } else {
             return jobStatus.getJob().getRequiredNetwork().canBeSatisfiedBy(capabilities);
         }
@@ -402,10 +411,10 @@ public final class ConnectivityController extends RestrictingController implemen
         }
 
         // See if we match after relaxing any unmetered request
-        final NetworkCapabilities relaxed = new NetworkCapabilities.Builder(
-                jobStatus.getJob().getRequiredNetwork().networkCapabilities)
-                        .removeCapability(NET_CAPABILITY_NOT_METERED).build();
-        if (relaxed.satisfiedByNetworkCapabilities(capabilities)) {
+        final NetworkCapabilities.Builder builder =
+                copyCapabilities(jobStatus.getJob().getRequiredNetwork());
+        builder.removeCapability(NET_CAPABILITY_NOT_METERED);
+        if (builder.build().satisfiedByNetworkCapabilities(capabilities)) {
             // TODO: treat this as "maybe" response; need to check quotas
             return jobStatus.getFractionRunTime() > constants.CONN_PREFETCH_RELAX_FRAC;
         } else {
