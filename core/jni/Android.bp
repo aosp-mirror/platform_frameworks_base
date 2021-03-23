@@ -238,6 +238,7 @@ cc_library_shared {
                 "android.hardware.camera.device@3.2",
                 "media_permission-aidl-cpp",
                 "libandroidicu",
+                "libandroid_net",
                 "libbpf_android",
                 "libnetdbpf",
                 "libnetdutils",
