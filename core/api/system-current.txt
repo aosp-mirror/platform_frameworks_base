@@ -8302,6 +8302,7 @@ package android.os {
     field public static final int REASON_UNKNOWN = 0; // 0x0
     field public static final int TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0; // 0x0
     field public static final int TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1; // 0x1
+    field public static final int TEMPORARY_ALLOW_LIST_TYPE_NONE = -1; // 0xffffffff
   }
 
   public final class PowerManager {
