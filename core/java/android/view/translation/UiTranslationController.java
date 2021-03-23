@@ -376,15 +376,17 @@ public class UiTranslationController {
     }
 
     private Translator createTranslatorIfNeeded(
-            TranslationSpec sourceSpec, TranslationSpec destSpec) {
+            TranslationSpec sourceSpec, TranslationSpec targetSpec) {
         final TranslationManager tm = mContext.getSystemService(TranslationManager.class);
         if (tm == null) {
             Log.e(TAG, "Can not find TranslationManager when trying to create translator.");
             return null;
         }
-        final Translator translator = tm.createTranslator(sourceSpec, destSpec);
+        final TranslationContext translationContext = new TranslationContext(sourceSpec,
+                targetSpec, /* translationFlags= */ 0);
+        final Translator translator = tm.createTranslator(translationContext);
         if (translator != null) {
-            final Pair<TranslationSpec, TranslationSpec> specs = new Pair<>(sourceSpec, destSpec);
+            final Pair<TranslationSpec, TranslationSpec> specs = new Pair<>(sourceSpec, targetSpec);
             mTranslators.put(specs, translator);
         }
         return translator;

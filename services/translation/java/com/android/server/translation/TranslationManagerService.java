@@ -34,6 +34,7 @@ import android.os.ShellCallback;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.translation.ITranslationManager;
+import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationManager.UiTranslationState;
 
@@ -142,29 +143,33 @@ public final class TranslationManagerService
     }
 
     final class TranslationManagerServiceStub extends ITranslationManager.Stub {
+
         @Override
-        public void getSupportedLocales(IResultReceiver receiver, int userId)
+        public void onTranslationCapabilitiesRequest(@TranslationSpec.DataFormat int sourceFormat,
+                @TranslationSpec.DataFormat int targetFormat,
+                ResultReceiver receiver, int userId)
                 throws RemoteException {
             synchronized (mLock) {
                 final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service != null && (isDefaultServiceLocked(userId)
-                        || isCalledByServiceAppLocked(userId, "getSupportedLocales"))) {
-                    service.getSupportedLocalesLocked(receiver);
+                        || isCalledByServiceAppLocked(userId, "getTranslationCapabilities"))) {
+                    service.onTranslationCapabilitiesRequestLocked(sourceFormat, targetFormat,
+                            receiver);
                 } else {
-                    Slog.v(TAG, "getSupportedLocales(): no service for " + userId);
+                    Slog.v(TAG, "onGetTranslationCapabilitiesLocked(): no service for " + userId);
                     receiver.send(STATUS_SYNC_CALL_FAIL, null);
                 }
             }
         }
 
         @Override
-        public void onSessionCreated(TranslationSpec sourceSpec, TranslationSpec destSpec,
+        public void onSessionCreated(TranslationContext translationContext,
                 int sessionId, IResultReceiver receiver, int userId) throws RemoteException {
             synchronized (mLock) {
                 final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service != null && (isDefaultServiceLocked(userId)
                         || isCalledByServiceAppLocked(userId, "onSessionCreated"))) {
-                    service.onSessionCreatedLocked(sourceSpec, destSpec, sessionId, receiver);
+                    service.onSessionCreatedLocked(translationContext, sessionId, receiver);
                 } else {
                     Slog.v(TAG, "onSessionCreated(): no service for " + userId);
                     receiver.send(STATUS_SYNC_CALL_FAIL, null);
@@ -174,7 +179,7 @@ public final class TranslationManagerService
 
         @Override
         public void updateUiTranslationStateByTaskId(@UiTranslationState int state,
-                TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
+                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
                 int taskId, int userId) {
             // deprecated
             enforceCallerHasPermission(MANAGE_UI_TRANSLATION);
@@ -183,7 +188,7 @@ public final class TranslationManagerService
                 if (service != null && (isDefaultServiceLocked(userId)
                         || isCalledByServiceAppLocked(userId,
                         "updateUiTranslationStateByTaskId"))) {
-                    service.updateUiTranslationStateLocked(state, sourceSpec, destSpec, viewIds,
+                    service.updateUiTranslationStateLocked(state, sourceSpec, targetSpec, viewIds,
                             taskId);
                 }
             }
@@ -191,14 +196,14 @@ public final class TranslationManagerService
 
         @Override
         public void updateUiTranslationState(@UiTranslationState int state,
-                TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
+                TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
                 IBinder token, int taskId, int userId) {
             enforceCallerHasPermission(MANAGE_UI_TRANSLATION);
             synchronized (mLock) {
                 final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service != null && (isDefaultServiceLocked(userId)
                         || isCalledByServiceAppLocked(userId, "updateUiTranslationState"))) {
-                    service.updateUiTranslationStateLocked(state, sourceSpec, destSpec, viewIds,
+                    service.updateUiTranslationStateLocked(state, sourceSpec, targetSpec, viewIds,
                             token, taskId);
                 }
             }

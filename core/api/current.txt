@@ -52522,9 +52522,43 @@ package android.view.textservice {
 
 package android.view.translation {
 
+  public final class TranslationCapability implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.view.translation.TranslationSpec getSourceSpec();
+    method public int getState();
+    method public int getSupportedTranslationFlags();
+    method @NonNull public android.view.translation.TranslationSpec getTargetSpec();
+    method public boolean isUiTranslationEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationCapability> CREATOR;
+    field public static final int STATE_AVAILABLE_TO_DOWNLOAD = 1; // 0x1
+    field public static final int STATE_DOWNLOADING = 2; // 0x2
+    field public static final int STATE_ON_DEVICE = 3; // 0x3
+  }
+
+  public final class TranslationContext implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.view.translation.TranslationSpec getSourceSpec();
+    method @NonNull public android.view.translation.TranslationSpec getTargetSpec();
+    method public int getTranslationFlags();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationContext> CREATOR;
+    field public static final int FLAG_DICTIONARY_DESCRIPTION = 4; // 0x4
+    field public static final int FLAG_LOW_LATENCY = 1; // 0x1
+    field public static final int FLAG_TRANSLITERATION = 2; // 0x2
+  }
+
+  public static final class TranslationContext.Builder {
+    ctor public TranslationContext.Builder(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec);
+    method @NonNull public android.view.translation.TranslationContext build();
+    method @NonNull public android.view.translation.TranslationContext.Builder setTranslationFlags(int);
+  }
+
   public final class TranslationManager {
-    method @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec);
-    method @NonNull @WorkerThread public java.util.List<java.lang.String> getSupportedLocales();
+    method public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
+    method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getTranslationCapabilities(int, int);
+    method public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
   }
 
   public final class TranslationRequest implements android.os.Parcelable {
