@@ -36,6 +36,7 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.FgThread;
 import com.android.server.location.provider.AbstractLocationProvider;
 import com.android.server.servicewatcher.ServiceWatcher;
 import com.android.server.servicewatcher.ServiceWatcher.BoundService;
@@ -54,6 +55,8 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
     private static final String KEY_EXTRA_ATTRIBUTION_TAGS = "android:location_allow_listed_tags";
     private static final String EXTRA_ATTRIBUTION_TAGS_SEPARATOR = ";";
+
+    private static final long RESET_DELAY_MS = 1000;
 
     /**
      * Creates and registers this proxy. If no suitable service is available for the proxy, returns
@@ -78,6 +81,9 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
     @GuardedBy("mLock")
     final ArrayList<Runnable> mFlushListeners = new ArrayList<>(0);
+
+    @GuardedBy("mLock")
+    @Nullable Runnable mResetter;
 
     @GuardedBy("mLock")
     Proxy mProxy;
@@ -111,6 +117,11 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
             mProxy = new Proxy();
             mService = boundService.component;
 
+            if (mResetter != null) {
+                FgThread.getHandler().removeCallbacks(mResetter);
+                mResetter = null;
+            }
+
             // update extra attribution tag info from manifest
             if (boundService.metadata != null) {
                 String tagsList = boundService.metadata.getString(KEY_EXTRA_ATTRIBUTION_TAGS);
@@ -134,7 +145,22 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
         synchronized (mLock) {
             mProxy = null;
             mService = null;
-            setState(prevState -> State.EMPTY_STATE);
+
+            // we need to clear the state - but most disconnections are very temporary. we give a
+            // grace period where we don't clear the state immediately so that transient
+            // interruptions are not visible to clients
+            mResetter = new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mLock) {
+                        if (mResetter == this) {
+                            setState(prevState -> State.EMPTY_STATE);
+                        }
+                    }
+                }
+            };
+            FgThread.getHandler().postDelayed(mResetter, RESET_DELAY_MS);
+
             flushListeners = mFlushListeners.toArray(new Runnable[0]);
             mFlushListeners.clear();
         }
@@ -245,7 +271,8 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
                     identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
                 }
 
-                setState(prevState -> prevState
+                setState(prevState -> State.EMPTY_STATE
+                        .withExtraAttributionTags(prevState.extraAttributionTags)
                         .withAllowed(allowed)
                         .withProperties(properties)
                         .withIdentity(identity));

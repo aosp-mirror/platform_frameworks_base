@@ -21,6 +21,7 @@ import static android.location.provider.ProviderRequest.INTERVAL_DISABLED;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
+import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 
 import android.annotation.Nullable;
 import android.location.Location;
@@ -33,7 +34,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
-import com.android.server.location.eventlog.LocationEventLog;
 import com.android.server.location.injector.DeviceIdleHelper;
 import com.android.server.location.injector.DeviceStationaryHelper;
 import com.android.server.location.injector.Injector;
@@ -54,12 +54,11 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
 
     private static final long MAX_STATIONARY_LOCATION_AGE_MS = 30000;
 
-    private final Object mLock = new Object();
+    final Object mLock = new Object();
 
     private final String mName;
     private final DeviceIdleHelper mDeviceIdleHelper;
     private final DeviceStationaryHelper mDeviceStationaryHelper;
-    private final LocationEventLog mEventLog;
 
     @GuardedBy("mLock")
     private boolean mDeviceIdle = false;
@@ -72,21 +71,19 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
     @GuardedBy("mLock")
     private ProviderRequest mOutgoingRequest = ProviderRequest.EMPTY_REQUEST;
     @GuardedBy("mLock")
-    private long mThrottlingIntervalMs = INTERVAL_DISABLED;
+    long mThrottlingIntervalMs = INTERVAL_DISABLED;
     @GuardedBy("mLock")
-    private @Nullable DeliverLastLocationRunnable mDeliverLastLocationCallback = null;
-
+    @Nullable DeliverLastLocationRunnable mDeliverLastLocationCallback = null;
     @GuardedBy("mLock")
-    private @Nullable Location mLastLocation;
+    @Nullable Location mLastLocation;
 
     public StationaryThrottlingLocationProvider(String name, Injector injector,
-            AbstractLocationProvider delegate, LocationEventLog eventLog) {
+            AbstractLocationProvider delegate) {
         super(DIRECT_EXECUTOR, delegate);
 
         mName = name;
         mDeviceIdleHelper = injector.getDeviceIdleHelper();
         mDeviceStationaryHelper = injector.getDeviceStationaryHelper();
-        mEventLog = eventLog;
 
         // must be last statement in the constructor because reference is escaping
         initializeDelegate();
@@ -209,7 +206,7 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
                 if (D) {
                     Log.d(TAG, mName + " provider stationary throttled");
                 }
-                mEventLog.logProviderStationaryThrottled(mName, true);
+                EVENT_LOG.logProviderStationaryThrottled(mName, true);
             }
 
             if (mDeliverLastLocationCallback != null) {
@@ -227,7 +224,7 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
             }
         } else {
             if (oldThrottlingIntervalMs != INTERVAL_DISABLED) {
-                mEventLog.logProviderStationaryThrottled(mName, false);
+                EVENT_LOG.logProviderStationaryThrottled(mName, false);
                 if (D) {
                     Log.d(TAG, mName + " provider stationary unthrottled");
                 }
@@ -257,6 +254,9 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
     }
 
     private class DeliverLastLocationRunnable implements Runnable {
+
+        DeliverLastLocationRunnable() {}
+
         @Override
         public void run() {
             Location location;
