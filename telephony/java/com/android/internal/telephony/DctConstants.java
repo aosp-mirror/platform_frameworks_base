@@ -130,4 +130,5 @@ public class DctConstants {
     public static final String RAT_NAME_LTE = "LTE";
     public static final String RAT_NAME_NR_NSA = "NR_NSA";
     public static final String RAT_NAME_NR_NSA_MMWAVE = "NR_NSA_MMWAVE";
+    public static final String RAT_NAME_NR_SA_MMWAVE = "NR_MMWAVE";
 }
