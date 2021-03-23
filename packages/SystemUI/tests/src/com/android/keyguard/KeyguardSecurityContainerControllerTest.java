@@ -94,6 +94,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     private KeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private EmergencyButtonController mEmergencyButtonController;
 
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
     private KeyguardPasswordViewController mKeyguardPasswordViewController;
@@ -112,11 +114,11 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardPasswordViewController = new KeyguardPasswordViewController(
                 (KeyguardPasswordView) mKeyguardPasswordView, mKeyguardUpdateMonitor,
                 SecurityMode.Password, mLockPatternUtils, null,
-                mKeyguardMessageAreaControllerFactory, null, null, null, mock(Resources.class),
-                null);
+                mKeyguardMessageAreaControllerFactory, null, null, mEmergencyButtonController,
+                null, mock(Resources.class), null);
 
         mKeyguardSecurityContainerController = new KeyguardSecurityContainerController.Factory(
-                mView,  mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
+                mView, mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                 mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                 mKeyguardStateController, mKeyguardSecurityViewFlipperController,
                 mConfigurationController)

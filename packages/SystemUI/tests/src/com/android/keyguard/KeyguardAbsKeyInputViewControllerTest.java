@@ -72,6 +72,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     @Mock
     private LatencyTracker mLatencyTracker;
     private final FalsingCollector mFalsingCollector = new FalsingCollectorFake();
+    @Mock
+    private EmergencyButtonController mEmergencyButtonController;
 
     private KeyguardAbsKeyInputViewController mKeyguardAbsKeyInputViewController;
 
@@ -87,7 +89,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardMessageArea);
         mKeyguardAbsKeyInputViewController = new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
-                mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector) {
+                mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector,
+                mEmergencyButtonController) {
             @Override
             void resetState() {
             }
