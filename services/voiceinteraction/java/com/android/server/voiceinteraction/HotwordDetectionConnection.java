@@ -30,8 +30,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
-import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.HotwordDetectionService;
+import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IHotwordDetectionService;
 import android.util.Pair;
@@ -206,13 +206,12 @@ final class HotwordDetectionConnection {
             }
 
             @Override
-            public void onRejected() throws RemoteException {
+            public void onRejected(HotwordRejectedResult result) throws RemoteException {
                 if (DEBUG) {
                     Slog.d(TAG, "onRejected");
                 }
                 cancelingFuture.cancel(true);
-                externalCallback.onRejected(
-                        AlwaysOnHotwordDetector.HOTWORD_DETECTION_FALSE_ALERT);
+                externalCallback.onRejected(result);
             }
         };
 

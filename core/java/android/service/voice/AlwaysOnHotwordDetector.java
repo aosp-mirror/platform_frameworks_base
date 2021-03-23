@@ -239,18 +239,6 @@ public class AlwaysOnHotwordDetector {
     public @interface ModelParams {}
 
     /**
-     * Indicates that the given audio data is a false alert for {@link VoiceInteractionService}.
-     */
-    public static final int HOTWORD_DETECTION_FALSE_ALERT = 0;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "HOTWORD_DETECTION_" }, value = {
-            HOTWORD_DETECTION_FALSE_ALERT,
-    })
-    public @interface HotwordDetectionResult {}
-
-    /**
      * Controls the sensitivity threshold adjustment factor for a given model.
      * Negative value corresponds to less sensitive model (high threshold) and
      * a positive value corresponds to a more sensitive model (low threshold).
@@ -478,11 +466,14 @@ public class AlwaysOnHotwordDetector {
         public abstract void onRecognitionResumed();
 
         /**
-         * Called when the validated result is invalid.
+         * Called when the {@link HotwordDetectionService second stage detection} did not detect the
+         * keyphrase.
          *
-         * @param reason The reason why the validated result is invalid.
+         * @param result Info about the second stage detection result, provided by the
+         *         {@link HotwordDetectionService}.
          */
-        public void onRejected(@HotwordDetectionResult int reason) {}
+        public void onRejected(@Nullable HotwordRejectedResult result) {
+        }
     }
 
     /**
@@ -1069,13 +1060,13 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onRejected(int reason) {
+        public void onRejected(HotwordRejectedResult result) {
             if (DBG) {
-                Slog.d(TAG, "onRejected(" + reason + ")");
+                Slog.d(TAG, "onRejected(" + result + ")");
             } else {
                 Slog.i(TAG, "onRejected");
             }
-            Message.obtain(mHandler, MSG_HOTWORD_REJECTED, reason).sendToTarget();
+            Message.obtain(mHandler, MSG_HOTWORD_REJECTED, result).sendToTarget();
         }
 
         @Override
@@ -1124,7 +1115,7 @@ public class AlwaysOnHotwordDetector {
                     mExternalCallback.onRecognitionResumed();
                     break;
                 case MSG_HOTWORD_REJECTED:
-                    mExternalCallback.onRejected(msg.arg1);
+                    mExternalCallback.onRejected((HotwordRejectedResult) msg.obj);
                     break;
                 default:
                     super.handleMessage(msg);
