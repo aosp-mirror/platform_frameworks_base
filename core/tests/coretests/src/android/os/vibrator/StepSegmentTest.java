@@ -38,16 +38,18 @@ public class StepSegmentTest {
 
     @Test
     public void testCreation() {
-        StepSegment step = new StepSegment(/* amplitude= */ 1f, /* duration= */ 100);
+        StepSegment step = new StepSegment(/* amplitude= */ 1f, /* frequency= */ -1f,
+                /* duration= */ 100);
 
         assertEquals(100, step.getDuration());
         assertTrue(step.hasNonZeroAmplitude());
         assertEquals(1f, step.getAmplitude());
+        assertEquals(-1f, step.getFrequency());
     }
 
     @Test
     public void testSerialization() {
-        StepSegment original = new StepSegment(0.5f, 10);
+        StepSegment original = new StepSegment(0.5f, 1f, 10);
         Parcel parcel = Parcel.obtain();
         original.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
@@ -56,31 +58,31 @@ public class StepSegmentTest {
 
     @Test
     public void testValidate() {
-        new StepSegment(/* amplitude= */ 0f, /* duration= */ 100).validate();
+        new StepSegment(/* amplitude= */ 0f, /* frequency= */ -1f, /* duration= */ 100).validate();
 
         assertThrows(IllegalArgumentException.class,
-                () -> new StepSegment(/* amplitude= */ -2, 10).validate());
+                () -> new StepSegment(/* amplitude= */ -2, 1f, 10).validate());
         assertThrows(IllegalArgumentException.class,
-                () -> new StepSegment(/* amplitude= */ 2, 10).validate());
+                () -> new StepSegment(/* amplitude= */ 2, 1f, 10).validate());
         assertThrows(IllegalArgumentException.class,
-                () -> new StepSegment(2, /* duration= */ -1).validate());
+                () -> new StepSegment(2, 1f, /* duration= */ -1).validate());
     }
 
     @Test
     public void testHasNonZeroAmplitude() {
-        assertTrue(new StepSegment(1f, 0).hasNonZeroAmplitude());
-        assertTrue(new StepSegment(0.01f, 0).hasNonZeroAmplitude());
-        assertTrue(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0).hasNonZeroAmplitude());
-        assertFalse(new StepSegment(0, 0).hasNonZeroAmplitude());
+        assertTrue(new StepSegment(1f, 0, 0).hasNonZeroAmplitude());
+        assertTrue(new StepSegment(0.01f, 0, 0).hasNonZeroAmplitude());
+        assertTrue(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0, 0).hasNonZeroAmplitude());
+        assertFalse(new StepSegment(0, 0, 0).hasNonZeroAmplitude());
     }
 
     @Test
     public void testResolve() {
-        StepSegment original = new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0);
+        StepSegment original = new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0, 0);
         assertEquals(1f, original.resolve(VibrationEffect.MAX_AMPLITUDE).getAmplitude());
         assertEquals(0.2f, original.resolve(51).getAmplitude(), TOLERANCE);
 
-        StepSegment resolved = new StepSegment(0, 0);
+        StepSegment resolved = new StepSegment(0, 0, 0);
         assertSame(resolved, resolved.resolve(100));
 
         assertThrows(IllegalArgumentException.class, () -> resolved.resolve(1000));
@@ -88,13 +90,13 @@ public class StepSegmentTest {
 
     @Test
     public void testApplyEffectStrength_ignoresAndReturnsSameEffect() {
-        StepSegment step = new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0);
+        StepSegment step = new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0, 0);
         assertSame(step, step.applyEffectStrength(VibrationEffect.EFFECT_STRENGTH_STRONG));
     }
 
     @Test
     public void testScale_fullAmplitude() {
-        StepSegment initial = new StepSegment(1f, 0);
+        StepSegment initial = new StepSegment(1f, 0, 0);
 
         assertEquals(1f, initial.scale(1).getAmplitude(), TOLERANCE);
         assertEquals(0.34f, initial.scale(0.5f).getAmplitude(), TOLERANCE);
@@ -108,7 +110,7 @@ public class StepSegmentTest {
 
     @Test
     public void testScale_halfAmplitude() {
-        StepSegment initial = new StepSegment(0.5f, 0);
+        StepSegment initial = new StepSegment(0.5f, 0, 0);
 
         assertEquals(0.5f, initial.scale(1).getAmplitude(), TOLERANCE);
         assertEquals(0.17f, initial.scale(0.5f).getAmplitude(), TOLERANCE);
@@ -122,7 +124,7 @@ public class StepSegmentTest {
 
     @Test
     public void testScale_zeroAmplitude() {
-        StepSegment initial = new StepSegment(0, 0);
+        StepSegment initial = new StepSegment(0, 0, 0);
 
         assertEquals(0f, initial.scale(1).getAmplitude(), TOLERANCE);
         assertEquals(0f, initial.scale(0.5f).getAmplitude(), TOLERANCE);
@@ -131,7 +133,7 @@ public class StepSegmentTest {
 
     @Test
     public void testScale_defaultAmplitude() {
-        StepSegment initial = new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0);
+        StepSegment initial = new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0, 0);
 
         assertEquals(VibrationEffect.DEFAULT_AMPLITUDE, initial.scale(1).getAmplitude(), TOLERANCE);
         assertEquals(VibrationEffect.DEFAULT_AMPLITUDE, initial.scale(0.5f).getAmplitude(),
