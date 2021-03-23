@@ -658,6 +658,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     mStats.updateDisplayMeasuredEnergyStatsLocked(displayChargeUC, screenState,
                             elapsedRealtime);
                 }
+
+                final long gnssChargeUC = measuredEnergyDeltas.gnssChargeUC;
+                if (gnssChargeUC != MeasuredEnergySnapshot.UNAVAILABLE) {
+                    mStats.updateGnssMeasuredEnergyStatsLocked(displayChargeUC, elapsedRealtime);
+                }
             }
             // Inform mStats about each applicable custom energy bucket.
             if (measuredEnergyDeltas != null
@@ -698,7 +703,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         }
 
         if (modemInfo != null) {
-            mStats.noteModemControllerActivity(modemInfo, elapsedRealtime, uptime);
+            final long mobileRadioChargeUC = measuredEnergyDeltas != null
+                    ? measuredEnergyDeltas.mobileRadioChargeUC : MeasuredEnergySnapshot.UNAVAILABLE;
+            mStats.noteModemControllerActivity(modemInfo, mobileRadioChargeUC, elapsedRealtime,
+                    uptime);
         }
 
         if (updateFlags == UPDATE_ALL) {
@@ -830,6 +838,12 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 case EnergyConsumerType.CPU_CLUSTER:
                     buckets[MeasuredEnergyStats.POWER_BUCKET_CPU] = true;
                     break;
+                case EnergyConsumerType.GNSS:
+                    buckets[MeasuredEnergyStats.POWER_BUCKET_GNSS] = true;
+                    break;
+                case EnergyConsumerType.MOBILE_RADIO:
+                    buckets[MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO] = true;
+                    break;
                 case EnergyConsumerType.DISPLAY:
                     buckets[MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON] = true;
                     buckets[MeasuredEnergyStats.POWER_BUCKET_SCREEN_DOZE] = true;
@@ -882,6 +896,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         }
         if ((flags & UPDATE_DISPLAY) != 0) {
             addEnergyConsumerIdLocked(energyConsumerIds, EnergyConsumerType.DISPLAY);
+        }
+        if ((flags & UPDATE_RADIO) != 0) {
+            addEnergyConsumerIdLocked(energyConsumerIds, EnergyConsumerType.MOBILE_RADIO);
         }
         if ((flags & UPDATE_WIFI) != 0) {
             addEnergyConsumerIdLocked(energyConsumerIds, EnergyConsumerType.WIFI);
