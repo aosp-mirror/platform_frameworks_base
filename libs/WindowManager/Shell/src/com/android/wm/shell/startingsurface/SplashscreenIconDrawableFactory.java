@@ -16,11 +16,15 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
@@ -28,11 +32,13 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.PathParser;
 import android.window.SplashScreenView;
 
@@ -47,12 +53,57 @@ import java.util.function.Consumer;
 public class SplashscreenIconDrawableFactory {
 
     static Drawable makeIconDrawable(@ColorInt int backgroundColor,
-            @NonNull Drawable foregroundDrawable) {
+            @NonNull Drawable foregroundDrawable, int iconSize) {
         if (foregroundDrawable instanceof Animatable) {
             return new AnimatableIconDrawable(backgroundColor, foregroundDrawable);
+        } else if (foregroundDrawable instanceof AdaptiveIconDrawable) {
+            return new ImmobileIconDrawable((AdaptiveIconDrawable) foregroundDrawable, iconSize);
         } else {
-            // TODO make a light weight drawable instead of AdaptiveIconDrawable
-            return new AdaptiveIconDrawable(new ColorDrawable(backgroundColor), foregroundDrawable);
+            return new ImmobileIconDrawable(new AdaptiveIconDrawable(
+                    new ColorDrawable(backgroundColor), foregroundDrawable), iconSize);
+        }
+    }
+
+    private static class ImmobileIconDrawable extends Drawable {
+        private Shader mLayersShader;
+        private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG
+                | Paint.FILTER_BITMAP_FLAG);
+
+        ImmobileIconDrawable(AdaptiveIconDrawable drawable, int iconSize) {
+            cachePaint(drawable, iconSize, iconSize);
+        }
+
+        private void cachePaint(AdaptiveIconDrawable drawable, int width, int height) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "cachePaint");
+            final Bitmap layersBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            final Canvas canvas = new Canvas(layersBitmap);
+            drawable.setBounds(0, 0, width, height);
+            drawable.draw(canvas);
+            mLayersShader = new BitmapShader(layersBitmap, Shader.TileMode.CLAMP,
+                    Shader.TileMode.CLAMP);
+            mPaint.setShader(mLayersShader);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            final Rect bounds = getBounds();
+            canvas.drawRect(bounds, mPaint);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+
+        }
+
+        @Override
+        public int getOpacity() {
+            return 1;
         }
     }
 
