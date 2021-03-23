@@ -16,6 +16,8 @@
 
 package android.security.keystore2;
 
+import android.security.keystore.KeyProperties;
+
 import java.security.KeyStore;
 import java.security.KeyStore.ProtectionParameter;
 
@@ -24,9 +26,9 @@ import java.security.KeyStore.ProtectionParameter;
  */
 public class AndroidKeyStoreLoadStoreParameter implements KeyStore.LoadStoreParameter {
 
-    private final int mNamespace;
+    private final @KeyProperties.Namespace int mNamespace;
 
-    public AndroidKeyStoreLoadStoreParameter(int namespace) {
+    public AndroidKeyStoreLoadStoreParameter(@KeyProperties.Namespace int namespace) {
         mNamespace = namespace;
     }
 
@@ -35,7 +37,7 @@ public class AndroidKeyStoreLoadStoreParameter implements KeyStore.LoadStorePara
         return null;
     }
 
-    int getNamespace() {
+    @KeyProperties.Namespace int getNamespace() {
         return mNamespace;
     }
 }
