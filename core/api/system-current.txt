@@ -65,6 +65,7 @@ package android {
     field public static final String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final String BRICK = "android.permission.BRICK";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
+    field public static final String BROADCAST_CLOSE_SYSTEM_DIALOGS = "android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS";
     field @Deprecated public static final String BROADCAST_NETWORK_PRIVILEGED = "android.permission.BROADCAST_NETWORK_PRIVILEGED";
     field public static final String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
     field public static final String CAMERA_OPEN_CLOSE_LISTENER = "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
@@ -1832,6 +1833,7 @@ package android.app.usage {
 package android.apphibernation {
 
   public final class AppHibernationManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public java.util.List<java.lang.String> getHibernatingPackagesForUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingForUser(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingGlobally(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingForUser(@NonNull String, boolean);
@@ -2138,7 +2140,19 @@ package android.bluetooth.le {
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.ResultStorageDescriptor> CREATOR;
   }
 
+  public final class ScanFilter implements android.os.Parcelable {
+    method public int getAddressType();
+    method @Nullable public byte[] getIrk();
+  }
+
+  public static final class ScanFilter.Builder {
+    method @NonNull public android.bluetooth.le.ScanFilter.Builder setDeviceAddress(@NonNull String, int);
+    method @NonNull public android.bluetooth.le.ScanFilter.Builder setDeviceAddress(@NonNull String, int, @NonNull byte[]);
+    field public static final int LEN_IRK_OCTETS = 16; // 0x10
+  }
+
   public final class ScanSettings implements android.os.Parcelable {
+    field public static final int SCAN_MODE_AMBIENT_DISCOVERY = 3; // 0x3
     field public static final int SCAN_RESULT_TYPE_ABBREVIATED = 1; // 0x1
     field public static final int SCAN_RESULT_TYPE_FULL = 0; // 0x0
   }
@@ -8254,9 +8268,10 @@ package android.os {
   public class PowerExemptionManager {
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToPermanentAllowList(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToPermanentAllowList(@NonNull java.util.List<java.lang.String>);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void addToTemporaryAllowList(@NonNull String, long, int, @Nullable String);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long addToTemporaryAllowListForEvent(@NonNull String, int, int, @Nullable String);
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void removeFromAllowList(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void addToTemporaryAllowList(@NonNull String, int, @Nullable String, long);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long addToTemporaryAllowListForEvent(@NonNull String, int, @Nullable String, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public int[] getAllowListedAppIds(boolean);
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void removeFromPermanentAllowList(@NonNull String);
     field public static final int EVENT_MMS = 2; // 0x2
     field public static final int EVENT_SMS = 1; // 0x1
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
@@ -11055,7 +11070,8 @@ package android.telephony {
 
   public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method @Deprecated @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method @Nullable public android.telephony.VopsSupportInfo getVopsSupportInfo();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
   }
@@ -11100,14 +11116,16 @@ package android.telephony {
     field public static final int LCE_TYPE_SECONDARY = 1; // 0x1
   }
 
-  public final class LteVopsSupportInfo implements android.os.Parcelable {
+  public final class LteVopsSupportInfo extends android.telephony.VopsSupportInfo {
     ctor public LteVopsSupportInfo(int, int);
-    method public int describeContents();
     method public int getEmcBearerSupport();
     method public int getVopsSupport();
-    method public void writeToParcel(android.os.Parcel, int);
+    method public boolean isEmergencyServiceFallbackSupported();
+    method public boolean isEmergencyServiceSupported();
+    method public boolean isVopsSupported();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.LteVopsSupportInfo> CREATOR;
-    field public static final int LTE_STATUS_NOT_AVAILABLE = 1; // 0x1
+    field @Deprecated public static final int LTE_STATUS_NOT_AVAILABLE = 1; // 0x1
     field public static final int LTE_STATUS_NOT_SUPPORTED = 3; // 0x3
     field public static final int LTE_STATUS_SUPPORTED = 2; // 0x2
   }
@@ -11195,6 +11213,29 @@ package android.telephony {
     field public static final int RESULT_ERROR_INVALID_ARG = 2; // 0x2
     field public static final int RESULT_ERROR_UNSUPPORTED = 1; // 0x1
     field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
+  public final class NrVopsSupportInfo extends android.telephony.VopsSupportInfo {
+    ctor public NrVopsSupportInfo(int, int, int);
+    method public int getEmcSupport();
+    method public int getEmfSupport();
+    method public int getVopsSupport();
+    method public boolean isEmergencyServiceFallbackSupported();
+    method public boolean isEmergencyServiceSupported();
+    method public boolean isVopsSupported();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NrVopsSupportInfo> CREATOR;
+    field public static final int NR_STATUS_EMC_5GCN_ONLY = 1; // 0x1
+    field public static final int NR_STATUS_EMC_EUTRA_5GCN_ONLY = 2; // 0x2
+    field public static final int NR_STATUS_EMC_NOT_SUPPORTED = 0; // 0x0
+    field public static final int NR_STATUS_EMC_NR_EUTRA_5GCN = 3; // 0x3
+    field public static final int NR_STATUS_EMF_5GCN_ONLY = 1; // 0x1
+    field public static final int NR_STATUS_EMF_EUTRA_5GCN_ONLY = 2; // 0x2
+    field public static final int NR_STATUS_EMF_NOT_SUPPORTED = 0; // 0x0
+    field public static final int NR_STATUS_EMF_NR_EUTRA_5GCN = 3; // 0x3
+    field public static final int NR_STATUS_VOPS_3GPP_SUPPORTED = 1; // 0x1
+    field public static final int NR_STATUS_VOPS_NON_3GPP_SUPPORTED = 2; // 0x2
+    field public static final int NR_STATUS_VOPS_NOT_SUPPORTED = 0; // 0x0
   }
 
   public interface NumberVerificationCallback {
@@ -11862,6 +11903,7 @@ package android.telephony {
     field public static final String CAPABILITY_ALLOWED_NETWORK_TYPES_USED = "CAPABILITY_ALLOWED_NETWORK_TYPES_USED";
     field public static final String CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE = "CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE";
     field public static final String CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE = "CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE";
+    field public static final String CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING = "CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING";
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
@@ -12021,6 +12063,16 @@ package android.telephony {
   public abstract class VisualVoicemailService extends android.app.Service {
     method public static final void sendVisualVoicemailSms(android.content.Context, android.telecom.PhoneAccountHandle, String, short, String, android.app.PendingIntent);
     method public static final void setSmsFilterSettings(android.content.Context, android.telecom.PhoneAccountHandle, android.telephony.VisualVoicemailSmsFilterSettings);
+  }
+
+  public abstract class VopsSupportInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public abstract boolean equals(Object);
+    method public abstract int hashCode();
+    method public abstract boolean isEmergencyServiceFallbackSupported();
+    method public abstract boolean isEmergencyServiceSupported();
+    method public abstract boolean isVopsSupported();
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.VopsSupportInfo> CREATOR;
   }
 
 }
@@ -13240,6 +13292,7 @@ package android.telephony.ims {
     method @Nullable public android.telephony.ims.RcsContactPresenceTuple getCapabilityTuple(@NonNull String);
     method @NonNull public java.util.List<android.telephony.ims.RcsContactPresenceTuple> getCapabilityTuples();
     method @NonNull public android.net.Uri getContactUri();
+    method @NonNull public java.util.Set<java.lang.String> getFeatureTags();
     method public int getRequestResult();
     method public int getSourceType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -13252,6 +13305,14 @@ package android.telephony.ims {
     field public static final int REQUEST_RESULT_UNKNOWN = 0; // 0x0
     field public static final int SOURCE_TYPE_CACHED = 1; // 0x1
     field public static final int SOURCE_TYPE_NETWORK = 0; // 0x0
+  }
+
+  public static final class RcsContactUceCapability.OptionsBuilder {
+    ctor public RcsContactUceCapability.OptionsBuilder(@NonNull android.net.Uri);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.OptionsBuilder addFeatureTag(@NonNull String);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.OptionsBuilder addFeatureTags(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability build();
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.OptionsBuilder setRequestResult(int);
   }
 
   public static final class RcsContactUceCapability.PresenceBuilder {
@@ -13547,7 +13608,7 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public interface CapabilityExchangeEventListener {
-    method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.List<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
+    method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.Set<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
     method public void onRequestPublishCapabilities(int) throws android.telephony.ims.ImsException;
     method public void onUnpublish() throws android.telephony.ims.ImsException;
   }
@@ -13744,7 +13805,7 @@ package android.telephony.ims.stub {
   public class RcsCapabilityExchangeImplBase {
     ctor public RcsCapabilityExchangeImplBase(@NonNull java.util.concurrent.Executor);
     method public void publishCapabilities(@NonNull String, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.PublishResponseCallback);
-    method public void sendOptionsCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.List<java.lang.String>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.OptionsResponseCallback);
+    method public void sendOptionsCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.Set<java.lang.String>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.OptionsResponseCallback);
     method public void subscribeForCapabilities(@NonNull java.util.Collection<android.net.Uri>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.SubscribeResponseCallback);
     field public static final int COMMAND_CODE_FETCH_ERROR = 3; // 0x3
     field public static final int COMMAND_CODE_GENERIC_FAILURE = 1; // 0x1

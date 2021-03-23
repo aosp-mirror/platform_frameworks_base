@@ -42,6 +42,9 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
  * and keyguard state. Also manages lifecycle to make sure the views it contains are being
@@ -69,6 +72,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private DarkIconManager mDarkIconManager;
     private View mOperatorNameFrame;
     private CommandQueue mCommandQueue;
+
+    private List<String> mBlockedIcons = new ArrayList<>();
 
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
@@ -101,9 +106,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
-        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons),
-                Dependency.get(CommandQueue.class));
+        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons));
         mDarkIconManager.setShouldLog(true);
+        mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_volume));
+        mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_alarm_clock));
+        mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_call_strength));
+        mDarkIconManager.setBlockList(mBlockedIcons);
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mClockView = mStatusBar.findViewById(R.id.clock);

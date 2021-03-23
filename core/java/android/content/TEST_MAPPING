@@ -44,9 +44,12 @@
         },
         {
           "include-filter": "android.content.ContextTest"
+        },
+        {
+          "include-filter": "android.content.ComponentCallbacksControllerTest"
         }
       ],
-      "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
+      "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java", "(/|^)ComponentCallbacksController.java"]
     }
   ]
 }

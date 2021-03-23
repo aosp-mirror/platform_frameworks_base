@@ -1150,7 +1150,8 @@ public abstract class WindowOrientationListener {
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.DEVICE_ROTATED,
                             event.timestamp,
-                            rotationToLogEnum(reportedRotation));
+                            rotationToLogEnum(reportedRotation),
+                            FrameworkStatsLog.DEVICE_ROTATED__ROTATION_EVENT_TYPE__ACTUAL_EVENT);
                 }
             }
 

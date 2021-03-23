@@ -18,6 +18,7 @@ package com.android.server.apphibernation;
 
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsArgAt;
 import static org.mockito.ArgumentMatchers.any;
@@ -67,6 +68,7 @@ public final class AppHibernationServiceTest {
     private static final String PACKAGE_SCHEME = "package";
     private static final String PACKAGE_NAME_1 = "package1";
     private static final String PACKAGE_NAME_2 = "package2";
+    private static final String PACKAGE_NAME_3 = "package3";
     private static final int USER_ID_1 = 1;
     private static final int USER_ID_2 = 2;
 
@@ -107,6 +109,8 @@ public final class AppHibernationServiceTest {
 
         List<PackageInfo> packages = new ArrayList<>();
         packages.add(makePackageInfo(PACKAGE_NAME_1));
+        packages.add(makePackageInfo(PACKAGE_NAME_2));
+        packages.add(makePackageInfo(PACKAGE_NAME_3));
         doReturn(new ParceledListSlice<>(packages)).when(mIPackageManager).getInstalledPackages(
                 intThat(arg -> (arg & MATCH_ANY_USER) != 0), anyInt());
         mAppHibernationService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
@@ -177,6 +181,26 @@ public final class AppHibernationServiceTest {
 
         // THEN the package is marked hibernating for the user
         assertTrue(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
+    @Test
+    public void testGetHibernatingPackagesForUser_returnsCorrectPackages() throws RemoteException {
+        // GIVEN an unlocked user with all packages installed
+        UserInfo userInfo =
+                addUser(USER_ID_2, new String[]{PACKAGE_NAME_1, PACKAGE_NAME_2, PACKAGE_NAME_3});
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+
+        // WHEN packages are hibernated for the user
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_2, USER_ID_2, true);
+
+        // THEN the hibernating packages returned matches
+        List<String> hibernatingPackages =
+                mAppHibernationService.getHibernatingPackagesForUser(USER_ID_2);
+        assertEquals(2, hibernatingPackages.size());
+        assertTrue(hibernatingPackages.contains(PACKAGE_NAME_1));
+        assertTrue(hibernatingPackages.contains(PACKAGE_NAME_2));
     }
 
     /**

@@ -35,7 +35,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -54,7 +53,6 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
@@ -172,7 +170,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockNsm = mock(NetworkScoreManager.class);
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mNetCapabilities = new NetworkCapabilities();
-        when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
+        when(mMockTm.isDataCapable()).thenReturn(true);
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
         doAnswer(invocation -> {
             int rssi = invocation.getArgument(0);
@@ -285,7 +283,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected NetworkControllerImpl setUpNoMobileData() {
-        when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
+        when(mMockTm.isDataCapable()).thenReturn(false);
         NetworkControllerImpl networkControllerNoMobile =
                 new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockNsm, mMockSm,
                         mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
@@ -308,27 +306,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 TelephonyManager.NETWORK_TYPE_UMTS);
         setConnectivityViaCallbackInNetworkController(
                 NetworkCapabilities.TRANSPORT_CELLULAR, true, true, null);
-        setConnectivityViaBroadcast(
-                NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
     }
 
-    public void setConnectivityViaBroadcastForVcn(
+    public void setConnectivityViaCallbackInNetworkControllerForVcn(
             int networkType, boolean validated, boolean isConnected, VcnTransportInfo info) {
         mNetCapabilities.setTransportInfo(info);
         setConnectivityCommon(networkType, validated, isConnected);
         mDefaultCallbackInNetworkController.onCapabilitiesChanged(
                 mock(Network.class), new NetworkCapabilities(mNetCapabilities));
-        Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
-        mNetworkController.onReceive(mContext, i);
-    }
-
-    public void setConnectivityViaBroadcast(
-        int networkType, boolean validated, boolean isConnected) {
-        setConnectivityCommon(networkType, validated, isConnected);
-        mDefaultCallbackInNetworkController.onCapabilitiesChanged(
-                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
-        Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
-        mNetworkController.onReceive(mContext, i);
     }
 
     public void setConnectivityViaCallbackInNetworkController(

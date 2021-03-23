@@ -98,12 +98,12 @@ public class ImeInsetsSourceConsumerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // test if setVisibility can show IME
             mImeConsumer.onWindowFocusGained();
-            mImeConsumer.applyImeVisibility(true);
+            mController.show(WindowInsets.Type.ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
 
             // test if setVisibility can hide IME
-            mImeConsumer.applyImeVisibility(false);
+            mController.hide(WindowInsets.Type.ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
         });
@@ -117,7 +117,7 @@ public class ImeInsetsSourceConsumerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // Request IME visible before control is available.
             mImeConsumer.onWindowFocusGained();
-            mImeConsumer.applyImeVisibility(true /* setVisible */);
+            mController.show(WindowInsets.Type.ime(), true /* fromIme */);
 
             // set control and verify visibility is applied.
             InsetsSourceControl control =
@@ -136,7 +136,7 @@ public class ImeInsetsSourceConsumerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // Request IME visible before control is available.
             mImeConsumer.onWindowFocusGained();
-            mImeConsumer.applyImeVisibility(true /* setVisible */);
+            mController.show(WindowInsets.Type.ime(), true /* fromIme */);
 
             // set control and verify visibility is applied.
             InsetsSourceControl control = Mockito.spy(

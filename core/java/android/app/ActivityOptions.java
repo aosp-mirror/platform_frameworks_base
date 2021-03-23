@@ -1606,7 +1606,8 @@ public class ActivityOptions {
 
     /**
      * Sets a launch cookie that can be used to track the activity and task that are launch as a
-     * result of this option.
+     * result of this option. If the launched activity is a trampoline that starts another activity
+     * immediately, the cookie will be transferred to the next activity.
      *
      * @hide
      */
