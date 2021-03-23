@@ -79,10 +79,6 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
      */
     void placeImeContainer(DisplayArea.Tokens imeContainer) {
         final RootDisplayArea previousRoot = imeContainer.getRootDisplayArea();
-        if (previousRoot == this) {
-            // No need to reparent if IME container is below the same root.
-            return;
-        }
 
         List<Feature> features = mFeatures;
         for (int i = 0; i < features.size(); i++) {
