@@ -133,6 +133,42 @@ public class KeyguardManager {
      */
     public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
 
+    /**
+     *
+     * Password lock type, see {@link #setLock}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PASSWORD = 0;
+
+    /**
+     *
+     * Pin lock type, see {@link #setLock}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PIN = 1;
+
+    /**
+     *
+     * Pattern lock type, see {@link #setLock}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PATTERN = 2;
+
+    /**
+     * Available lock types
+     */
+    @IntDef({
+            PASSWORD,
+            PIN,
+            PATTERN
+    })
+    @interface LockTypes {}
 
     /**
      * Get an intent to prompt the user to confirm credentials (pin, pattern, password or biometrics
@@ -695,7 +731,7 @@ public class KeyguardManager {
         PasswordMetrics adminMetrics =
                 devicePolicyManager.getPasswordMinimumMetrics(mContext.getUserId());
         // Check if the password fits the mold of a pin or pattern.
-        boolean isPinOrPattern = lockType != LockTypes.PASSWORD;
+        boolean isPinOrPattern = lockType != PASSWORD;
 
         return PasswordMetrics.validatePassword(
                 adminMetrics, complexity, isPinOrPattern, password).size() == 0;
@@ -759,7 +795,7 @@ public class KeyguardManager {
         boolean success = false;
         try {
             switch (lockType) {
-                case LockTypes.PASSWORD:
+                case PASSWORD:
                     CharSequence passwordStr = new String(password, Charset.forName("UTF-8"));
                     lockPatternUtils.setLockCredential(
                             LockscreenCredential.createPassword(passwordStr),
@@ -767,7 +803,7 @@ public class KeyguardManager {
                             userId);
                     success = true;
                     break;
-                case LockTypes.PIN:
+                case PIN:
                     CharSequence pinStr = new String(password);
                     lockPatternUtils.setLockCredential(
                             LockscreenCredential.createPin(pinStr),
@@ -775,7 +811,7 @@ public class KeyguardManager {
                             userId);
                     success = true;
                     break;
-                case LockTypes.PATTERN:
+                case PATTERN:
                     List<LockPatternView.Cell> pattern =
                             LockPatternUtils.byteArrayToPattern(password);
                     lockPatternUtils.setLockCredential(
@@ -795,19 +831,5 @@ public class KeyguardManager {
             Arrays.fill(password, (byte) 0);
         }
         return success;
-    }
-
-    /**
-    * Available lock types
-    */
-    @IntDef({
-            LockTypes.PASSWORD,
-            LockTypes.PIN,
-            LockTypes.PATTERN
-    })
-    @interface LockTypes {
-        int PASSWORD = 0;
-        int PIN = 1;
-        int PATTERN = 2;
     }
 }
