@@ -2124,7 +2124,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         0,
                         new HostingRecord("system"));
                 app.setPersistent(true);
-                app.pid = MY_PID;
+                app.pid = app.mPidForCompact = MY_PID;
                 app.getWindowProcessController().setPid(MY_PID);
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
@@ -5105,6 +5105,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, app.pid, app.processName);
 
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
+        synchronized (mOomAdjuster.mCachedAppOptimizer) {
+            app.mSetAdjForCompact = ProcessList.INVALID_ADJ;
+        }
         mOomAdjuster.setAttachingSchedGroupLocked(app);
         app.forcingToImportant = null;
         updateProcessForegroundLocked(app, false, 0, false);

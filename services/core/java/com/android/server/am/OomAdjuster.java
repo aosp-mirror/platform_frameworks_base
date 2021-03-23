@@ -2198,6 +2198,9 @@ public final class OomAdjuster {
             }
             app.setAdj = app.curAdj;
             app.verifiedAdj = ProcessList.INVALID_ADJ;
+            synchronized (mCachedAppOptimizer) {
+                app.mSetAdjForCompact = app.setAdj;
+            }
         }
 
         final int curSchedGroup = app.getCurrentSchedulingGroup();
