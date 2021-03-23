@@ -612,16 +612,17 @@ public class NetworkCapabilitiesTest {
             // From S, it is not allowed to have the same capability in both wanted and
             // unwanted list.
             assertThrows(IllegalArgumentException.class, () -> nc2.combineCapabilities(nc1));
+            // Remove unwanted capability to continue other tests.
+            nc1.removeUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
         } else {
             nc2.combineCapabilities(nc1);
             // We will get this capability in both requested and unwanted lists thus this request
             // will never be satisfied.
             assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
             assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
+            // For R or below, remove unwanted capability via removeCapability.
+            nc1.removeCapability(NET_CAPABILITY_NOT_ROAMING);
         }
-
-        // Remove unwanted capability to continue other tests.
-        nc1.removeUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
 
         nc1.setSSID(TEST_SSID);
         nc2.combineCapabilities(nc1);
