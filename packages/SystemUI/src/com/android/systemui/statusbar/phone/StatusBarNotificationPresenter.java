@@ -24,6 +24,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -187,7 +188,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                         boolean removedByUser,
                         int reason) {
                     StatusBarNotificationPresenter.this.onNotificationRemoved(
-                            entry.getKey(), entry.getSbn());
+                            entry.getKey(), entry.getSbn(), reason);
                     if (removedByUser) {
                         maybeEndAmbientPulse();
                     }
@@ -301,13 +302,14 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mNotificationPanel.updateNotificationViews(reason);
     }
 
-    public void onNotificationRemoved(String key, StatusBarNotification old) {
+    private void onNotificationRemoved(String key, StatusBarNotification old, int reason) {
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
         if (old != null) {
             if (CLOSE_PANEL_WHEN_EMPTIED && !hasActiveNotifications()
                     && !mNotificationPanel.isTracking() && !mNotificationPanel.isQsExpanded()) {
-                if (mStatusBarStateController.getState() == StatusBarState.SHADE) {
+                if (mStatusBarStateController.getState() == StatusBarState.SHADE
+                        && reason != NotificationListenerService.REASON_CLICK) {
                     mCommandQueue.animateCollapsePanels();
                 } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                         && !isCollapsing()) {
