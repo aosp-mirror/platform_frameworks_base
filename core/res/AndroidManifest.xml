@@ -4935,6 +4935,11 @@
     <permission android:name="android.permission.SET_INITIAL_LOCK"
         android:protectionLevel="signature|setup"/>
 
+    <!-- @TestApi Allows applications to set and verify lockscreen credentials.
+        @hide -->
+    <permission android:name="android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS"
+                android:protectionLevel="signature"/>
+
     <!-- Allows managing (adding, removing) fingerprint templates. Reserved for the system. @hide -->
     <permission android:name="android.permission.MANAGE_FINGERPRINT"
         android:protectionLevel="signature|privileged" />
