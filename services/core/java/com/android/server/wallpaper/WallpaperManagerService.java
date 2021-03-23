@@ -2389,13 +2389,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private IWallpaperEngine getEngine(int which, int userId, int displayId) {
         WallpaperData wallpaperData = findWallpaperAtDisplay(userId, displayId);
         if (wallpaperData == null) return null;
+        WallpaperConnection connection = wallpaperData.connection;
+        if (connection == null) return null;
         IWallpaperEngine engine = null;
         synchronized (mLock) {
-            for (int i = 0; i < wallpaperData.connection.mDisplayConnector.size(); i++) {
-                int id = wallpaperData.connection.mDisplayConnector.get(i).mDisplayId;
-                int currentWhich = wallpaperData.connection.mDisplayConnector.get(i).mDisplayId;
+            for (int i = 0; i < connection.mDisplayConnector.size(); i++) {
+                int id = connection.mDisplayConnector.get(i).mDisplayId;
+                int currentWhich = connection.mDisplayConnector.get(i).mDisplayId;
                 if (id != displayId && currentWhich != which) continue;
-                engine = wallpaperData.connection.mDisplayConnector.get(i).mEngine;
+                engine = connection.mDisplayConnector.get(i).mEngine;
                 break;
             }
         }
