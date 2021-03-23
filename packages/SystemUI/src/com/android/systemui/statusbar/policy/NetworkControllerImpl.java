@@ -79,6 +79,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
@@ -241,8 +242,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mSubscriptionManager = subManager;
         mSubDefaults = defaultsHandler;
         mConnectivityManager = connectivityManager;
-        mHasMobileDataFeature =
-                mConnectivityManager.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        mHasMobileDataFeature = telephonyManager.isDataCapable();
         mDemoModeController = demoModeController;
 
         // telephony
@@ -337,10 +337,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
                 // This callback is invoked a lot (i.e. when RSSI changes), so avoid updating
                 // icons when connectivity state has remained the same.
-                if (network.equals(mLastNetwork) &&
-                    networkCapabilities.equalsTransportTypes(mLastNetworkCapabilities) &&
-                    validated == lastValidated) {
-                    return;
+                if (network.equals(mLastNetwork) && validated == lastValidated) {
+                    // Should not rely on getTransportTypes() returning the same order of transport
+                    // types. So sort the array before comparing.
+                    int[] newTypes = networkCapabilities.getTransportTypes();
+                    Arrays.sort(newTypes);
+
+                    int[] lastTypes = (mLastNetworkCapabilities != null)
+                            ? mLastNetworkCapabilities.getTransportTypes() : null;
+                    if (lastTypes != null) Arrays.sort(lastTypes);
+
+                    if (Arrays.equals(newTypes, lastTypes)) {
+                        return;
+                    }
                 }
                 mLastNetwork = network;
                 mLastNetworkCapabilities = networkCapabilities;
@@ -430,14 +439,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(Intent.ACTION_SERVICE_STATE);
         filter.addAction(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
         mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mReceiverHandler);
         mListening = true;
 
         // Initial setup of connectivity. Handled as if we had received a sticky broadcast of
-        // ConnectivityManager.CONNECTIVITY_ACTION or ConnectivityManager.INET_CONDITION_ACTION.
+        // ConnectivityManager.CONNECTIVITY_ACTION.
         mReceiverHandler.post(this::updateConnectivity);
 
         // Initial setup of WifiSignalController. Handled as if we had received a sticky broadcast
@@ -682,7 +690,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         final String action = intent.getAction();
         switch (action) {
             case ConnectivityManager.CONNECTIVITY_ACTION:
-            case ConnectivityManager.INET_CONDITION_ACTION:
                 updateConnectivity();
                 break;
             case Intent.ACTION_AIRPLANE_MODE_CHANGED:

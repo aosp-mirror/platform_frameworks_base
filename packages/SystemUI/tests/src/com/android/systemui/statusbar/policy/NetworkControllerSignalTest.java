@@ -23,8 +23,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.net.wifi.WifiInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.telephony.CellSignalStrength;
@@ -59,7 +59,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     @Test
     public void testNoIconWithoutMobile() {
         // Turn off mobile network support.
-        when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
+        when(mMockTm.isDataCapable()).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
                 mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
@@ -145,7 +145,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     @Test
     public void testNoSimlessIconWithoutMobile() {
         // Turn off mobile network support.
-        when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
+        when(mMockTm.isDataCapable()).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
                 mMockNsm, mMockSm, mConfig, Looper.getMainLooper(), mCallbackHandler,
@@ -172,7 +172,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                     testStrength, DEFAULT_ICON);
 
             // Verify low inet number indexing.
-            setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, true);
+            setConnectivityViaCallbackInNetworkController(
+                    NetworkCapabilities.TRANSPORT_CELLULAR, false, true, null);
             verifyLastMobileDataIndicators(true,
                     testStrength, DEFAULT_ICON, false, false);
         }
@@ -259,8 +260,10 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     @Test
     public void testNoBangWithWifi() {
         setupDefaultSignal();
-        setConnectivityViaBroadcast(mMobileSignalController.mTransportType, false, false);
-        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_WIFI, true, true);
+        setConnectivityViaCallbackInNetworkController(
+                mMobileSignalController.mTransportType, false, false, null);
+        setConnectivityViaCallbackInNetworkController(
+                NetworkCapabilities.TRANSPORT_WIFI, true, true, mock(WifiInfo.class));
 
         verifyLastMobileDataIndicators(false, DEFAULT_LEVEL, 0);
     }

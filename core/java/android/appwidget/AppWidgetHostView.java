@@ -841,8 +841,8 @@ public class AppWidgetHostView extends FrameLayout {
      * Calling this method will trigger a full re-inflation of the App Widget.
      *
      * The color resources that can be overloaded are the ones whose name is prefixed with
-     * {@code system_primary_}, {@code system_secondary_} or {@code system_neutral_}, for example
-     * {@link android.R.color#system_primary_500}.
+     * {@code system_neutral} or {@code system_accent}, for example
+     * {@link android.R.color#system_neutral1_500}.
      */
     public void setColorResources(@NonNull SparseIntArray colorMapping) {
         mColorResources = RemoteViews.ColorResources.create(mContext, colorMapping);

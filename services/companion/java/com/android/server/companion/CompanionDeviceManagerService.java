@@ -1244,8 +1244,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         public void schedule() {
-            Slog.d(LOG_TAG,
-                    "TriggerDeviceDisappearedRunnable.schedule(address = " + mAddress + ")");
             mMainHandler.removeCallbacks(this);
             mMainHandler.postDelayed(this, this, DEVICE_DISAPPEARED_TIMEOUT_MS);
         }
@@ -1283,8 +1281,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void onDeviceNearby(String address) {
-        Slog.i(LOG_TAG, "onDeviceNearby(address = " + address + ")");
-
         Date timestamp = new Date();
         Date oldTimestamp = mDevicesLastNearby.put(address, timestamp);
 

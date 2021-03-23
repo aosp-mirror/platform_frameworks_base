@@ -24,6 +24,7 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.AppGlobals;
 import android.app.job.JobInfo;
+import android.app.job.JobParameters;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -353,6 +354,9 @@ public final class JobStatus {
      */
     private long mLastFailedRunTime;
 
+    /** Whether or not the app is background restricted by the user (FAS). */
+    private boolean mIsUserBgRestricted;
+
     /**
      * Transient: when a job is inflated from disk before we have a reliable RTC clock time,
      * we retain the canonical (delay, deadline) scheduling tuple read out of the persistent
@@ -408,6 +412,9 @@ public final class JobStatus {
 
     /** The job's dynamic requirements have been satisfied. */
     private boolean mReadyDynamicSatisfied;
+
+    /** The reason a job most recently went from ready to not ready. */
+    private int mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
 
     /** Provide a handle to the service that this job will be run on. */
     public int getServiceToken() {
@@ -1042,6 +1049,11 @@ public final class JobStatus {
         mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsed;
     }
 
+    @JobParameters.StopReason
+    public int getStopReason() {
+        return mReasonReadyToUnready;
+    }
+
     /**
      * Return the fractional position of "now" within the "run time" window of
      * this job.
@@ -1172,7 +1184,9 @@ public final class JobStatus {
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setBackgroundNotRestrictedConstraintSatisfied(final long nowElapsed, boolean state) {
+    boolean setBackgroundNotRestrictedConstraintSatisfied(final long nowElapsed, boolean state,
+            boolean isUserBgRestricted) {
+        mIsUserBgRestricted = isUserBgRestricted;
         if (setConstraintSatisfied(CONSTRAINT_BACKGROUND_NOT_RESTRICTED, nowElapsed, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyNotRestrictedInBg = state;
@@ -1226,6 +1240,7 @@ public final class JobStatus {
                     "Constraint " + constraint + " is " + (!state ? "NOT " : "") + "satisfied for "
                             + toShortString());
         }
+        final boolean wasReady = !state && isReady();
         satisfiedConstraints = (satisfiedConstraints&~constraint) | (state ? constraint : 0);
         mSatisfiedConstraintsOfInterest = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
         mReadyDynamicSatisfied = mDynamicConstraints != 0
@@ -1244,7 +1259,79 @@ public final class JobStatus {
         mConstraintChangeHistoryIndex =
                 (mConstraintChangeHistoryIndex + 1) % NUM_CONSTRAINT_CHANGE_HISTORY;
 
+        // Can't use isReady() directly since "cache booleans" haven't updated yet.
+        final boolean isReady = readinessStatusWithConstraint(constraint, state);
+        if (wasReady && !isReady) {
+            mReasonReadyToUnready = constraintToStopReason(constraint);
+        } else if (!wasReady && isReady) {
+            mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
+        }
+
         return true;
+    }
+
+    @JobParameters.StopReason
+    private int constraintToStopReason(int constraint) {
+        switch (constraint) {
+            case CONSTRAINT_BATTERY_NOT_LOW:
+                if ((requiredConstraints & constraint) != 0) {
+                    // The developer requested this constraint, so it makes sense to return the
+                    // explicit constraint reason.
+                    return JobParameters.STOP_REASON_CONSTRAINT_BATTERY_NOT_LOW;
+                }
+                // Hard-coding right now since the current dynamic constraint sets don't overlap
+                // TODO: return based on active dynamic constraint sets when they start overlapping
+                return JobParameters.STOP_REASON_APP_STANDBY;
+            case CONSTRAINT_CHARGING:
+                if ((requiredConstraints & constraint) != 0) {
+                    // The developer requested this constraint, so it makes sense to return the
+                    // explicit constraint reason.
+                    return JobParameters.STOP_REASON_CONSTRAINT_CHARGING;
+                }
+                // Hard-coding right now since the current dynamic constraint sets don't overlap
+                // TODO: return based on active dynamic constraint sets when they start overlapping
+                return JobParameters.STOP_REASON_APP_STANDBY;
+            case CONSTRAINT_CONNECTIVITY:
+                return JobParameters.STOP_REASON_CONSTRAINT_CONNECTIVITY;
+            case CONSTRAINT_IDLE:
+                if ((requiredConstraints & constraint) != 0) {
+                    // The developer requested this constraint, so it makes sense to return the
+                    // explicit constraint reason.
+                    return JobParameters.STOP_REASON_CONSTRAINT_DEVICE_IDLE;
+                }
+                // Hard-coding right now since the current dynamic constraint sets don't overlap
+                // TODO: return based on active dynamic constraint sets when they start overlapping
+                return JobParameters.STOP_REASON_APP_STANDBY;
+            case CONSTRAINT_STORAGE_NOT_LOW:
+                return JobParameters.STOP_REASON_CONSTRAINT_STORAGE_NOT_LOW;
+
+            case CONSTRAINT_BACKGROUND_NOT_RESTRICTED:
+                // The BACKGROUND_NOT_RESTRICTED constraint could be dissatisfied either because
+                // the app is background restricted, or because we're restricting background work
+                // in battery saver. Assume that background restriction is the reason apps that
+                // are background restricted have their jobs stopped, and battery saver otherwise.
+                // This has the benefit of being consistent for background restricted apps
+                // (they'll always get BACKGROUND_RESTRICTION) as the reason, regardless of
+                // battery saver state.
+                if (mIsUserBgRestricted) {
+                    return JobParameters.STOP_REASON_BACKGROUND_RESTRICTION;
+                }
+                return JobParameters.STOP_REASON_DEVICE_STATE;
+            case CONSTRAINT_DEVICE_NOT_DOZING:
+                return JobParameters.STOP_REASON_DEVICE_STATE;
+
+            case CONSTRAINT_WITHIN_QUOTA:
+            case CONSTRAINT_WITHIN_EXPEDITED_QUOTA:
+                return JobParameters.STOP_REASON_QUOTA;
+
+            // These should never be stop reasons since they can never go from true to false.
+            case CONSTRAINT_CONTENT_TRIGGER:
+            case CONSTRAINT_DEADLINE:
+            case CONSTRAINT_TIMING_DELAY:
+            default:
+                Slog.wtf(TAG, "Unsupported constraint (" + constraint + ") --stop reason mapping");
+                return JobParameters.STOP_REASON_UNDEFINED;
+        }
     }
 
     boolean isConstraintSatisfied(int constraint) {
@@ -1330,33 +1417,42 @@ public final class JobStatus {
      * granted, based on its requirements.
      */
     boolean wouldBeReadyWithConstraint(int constraint) {
+        return readinessStatusWithConstraint(constraint, true);
+    }
+
+    private boolean readinessStatusWithConstraint(int constraint, boolean value) {
         boolean oldValue = false;
         int satisfied = mSatisfiedConstraintsOfInterest;
         switch (constraint) {
             case CONSTRAINT_BACKGROUND_NOT_RESTRICTED:
                 oldValue = mReadyNotRestrictedInBg;
-                mReadyNotRestrictedInBg = true;
+                mReadyNotRestrictedInBg = value;
                 break;
             case CONSTRAINT_DEADLINE:
                 oldValue = mReadyDeadlineSatisfied;
-                mReadyDeadlineSatisfied = true;
+                mReadyDeadlineSatisfied = value;
                 break;
             case CONSTRAINT_DEVICE_NOT_DOZING:
                 oldValue = mReadyNotDozing;
-                mReadyNotDozing = true;
+                mReadyNotDozing = value;
                 break;
             case CONSTRAINT_WITHIN_QUOTA:
                 oldValue = mReadyWithinQuota;
-                mReadyWithinQuota = true;
+                mReadyWithinQuota = value;
                 break;
             case CONSTRAINT_WITHIN_EXPEDITED_QUOTA:
                 oldValue = mReadyWithinExpeditedQuota;
-                mReadyWithinExpeditedQuota = true;
+                mReadyWithinExpeditedQuota = value;
                 break;
             default:
-                satisfied |= constraint;
+                if (value) {
+                    satisfied |= constraint;
+                } else {
+                    satisfied &= ~constraint;
+                }
                 mReadyDynamicSatisfied = mDynamicConstraints != 0
                         && mDynamicConstraints == (satisfied & mDynamicConstraints);
+
                 break;
         }
 

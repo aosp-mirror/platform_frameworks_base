@@ -48,7 +48,6 @@ import com.android.systemui.privacy.logging.PrivacyLogger;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
@@ -86,7 +85,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final View mRingerContainer;
     private final QSTileHost mQSTileHost;
     private final StatusBarIconController mStatusBarIconController;
-    private final CommandQueue mCommandQueue;
     private final DemoModeController mDemoModeController;
     private final UserTracker mUserTracker;
     private final StatusIconContainer mIconContainer;
@@ -204,7 +202,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             PrivacyItemController privacyItemController, RingerModeTracker ringerModeTracker,
             ActivityStarter activityStarter, UiEventLogger uiEventLogger,
             QSTileHost qsTileHost, StatusBarIconController statusBarIconController,
-            CommandQueue commandQueue, DemoModeController demoModeController,
+            DemoModeController demoModeController,
             UserTracker userTracker, QuickQSPanelController quickQSPanelController,
             QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder,
             PrivacyLogger privacyLogger,
@@ -219,7 +217,6 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mUiEventLogger = uiEventLogger;
         mQSTileHost = qsTileHost;
         mStatusBarIconController = statusBarIconController;
-        mCommandQueue = commandQueue;
         mDemoModeController = demoModeController;
         mUserTracker = userTracker;
         mLifecycle = new LifecycleRegistry(mLifecycleOwner);
@@ -238,7 +235,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mRingerContainer = mView.findViewById(R.id.ringer_container);
         mIconContainer = mView.findViewById(R.id.statusIcons);
 
-        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, mCommandQueue);
+        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
         mColorExtractor = colorExtractor;
         mOnColorsChangedListener = (extractor, which) -> {

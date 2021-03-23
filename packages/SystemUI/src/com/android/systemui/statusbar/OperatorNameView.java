@@ -16,7 +16,6 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -123,8 +122,7 @@ public class OperatorNameView extends TextView implements DemoModeCommandReceive
                 .getValue(KEY_SHOW_OPERATOR_NAME, 1) != 0;
         setVisibility(showOperatorName ? VISIBLE : GONE);
 
-        boolean hasMobile = ConnectivityManager.from(mContext)
-                .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        boolean hasMobile = mContext.getSystemService(TelephonyManager.class).isDataCapable();
         boolean airplaneMode = WirelessUtils.isAirplaneModeOn(mContext);
         if (!hasMobile || airplaneMode) {
             setText(null);

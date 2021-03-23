@@ -26,15 +26,19 @@ import java.util.Formatter;
 import java.util.Locale;
 
 /**
+ * API for sending log output to the {@link Log#LOG_ID_SYSTEM} buffer.
+ *
+ * <p>Should be used by system components. Use {@code adb logcat --buffer=system} to fetch the logs.
+ *
  * @hide
  */
 public final class Slog {
 
-    @GuardedBy("sMessageBuilder")
-    private static final StringBuilder sMessageBuilder = new StringBuilder();
+    @GuardedBy("Slog.class")
+    private static StringBuilder sMessageBuilder;
 
-    @GuardedBy("sMessageBuilder")
-    private static final Formatter sFormatter = new Formatter(sMessageBuilder, Locale.ENGLISH);
+    @GuardedBy("Slog.class")
+    private static Formatter sFormatter;
 
     private Slog() {
     }
@@ -226,7 +230,12 @@ public final class Slog {
     }
 
     private static String getMessage(String format, @Nullable Object... args) {
-        synchronized (sMessageBuilder) {
+        synchronized (Slog.class) {
+            if (sMessageBuilder == null) {
+                // Lazy load so they're not created if not used by the process
+                sMessageBuilder = new StringBuilder();
+                sFormatter = new Formatter(sMessageBuilder, Locale.ENGLISH);
+            }
             sFormatter.format(format, args);
             String message = sMessageBuilder.toString();
             sMessageBuilder.setLength(0);

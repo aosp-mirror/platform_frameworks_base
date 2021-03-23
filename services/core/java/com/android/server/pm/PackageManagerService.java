@@ -17423,13 +17423,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         public void handleStartCopy() {
-            if ((installFlags & PackageManager.INSTALL_APEX) != 0) {
-                // Apex packages get verified in StagingManager currently.
-                // TODO(b/136257624): Move apex verification logic out of StagingManager
-                mRet = INSTALL_SUCCEEDED;
-                return;
-            }
-
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
                     mPackageLite, origin.resolvedPath, installFlags, packageAbiOverride);
 
@@ -17441,7 +17434,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // Perform package verification and enable rollback (unless we are simply moving the
             // package).
             if (!origin.existing) {
-                sendApkVerificationRequest(pkgLite);
+                if ((installFlags & PackageManager.INSTALL_APEX) == 0) {
+                    // TODO(b/182426975): treat APEX as APK when APK verification is concerned
+                    sendApkVerificationRequest(pkgLite);
+                }
                 if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
                     sendEnableRollbackRequest();
                 }
@@ -22903,9 +22899,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getWellbeingPackageName() {
-        return CollectionUtils.firstOrNull(
-                mContext.getSystemService(RoleManager.class).getRoleHolders(
-                        RoleManager.ROLE_SYSTEM_WELLBEING));
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return CollectionUtils.firstOrNull(
+                    mContext.getSystemService(RoleManager.class).getRoleHolders(
+                            RoleManager.ROLE_SYSTEM_WELLBEING));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
@@ -25894,6 +25895,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private int verifyReplacingVersionCode(PackageInfoLite pkgLite,
             long requiredInstalledVersionCode, int installFlags) {
+        if ((installFlags & PackageManager.INSTALL_APEX) != 0) {
+            return verifyReplacingVersionCodeForApex(
+                    pkgLite, requiredInstalledVersionCode, installFlags);
+        }
+
         String packageName = pkgLite.packageName;
         synchronized (mLock) {
             // Package which currently owns the data that the new package will own if installed.
@@ -25937,6 +25943,40 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
+        return PackageManager.INSTALL_SUCCEEDED;
+    }
+
+    private int verifyReplacingVersionCodeForApex(PackageInfoLite pkgLite,
+            long requiredInstalledVersionCode, int installFlags) {
+        String packageName = pkgLite.packageName;
+
+        final PackageInfo activePackage = mApexManager.getPackageInfo(packageName,
+                ApexManager.MATCH_ACTIVE_PACKAGE);
+        if (activePackage == null) {
+            Slog.w(TAG, "Attempting to install new APEX package " + packageName);
+            return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+        }
+
+        final long activeVersion = activePackage.getLongVersionCode();
+        if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST
+                && activeVersion != requiredInstalledVersionCode) {
+            Slog.w(TAG, "Installed version of APEX package " + packageName
+                    + " does not match required. Active version: " + activeVersion
+                    + " required: " + requiredInstalledVersionCode);
+            return PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+        }
+
+        final boolean isAppDebuggable = (activePackage.applicationInfo.flags
+                & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        final long newVersionCode = pkgLite.getLongVersionCode();
+        if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags, isAppDebuggable)
+                && newVersionCode < activeVersion) {
+            Slog.w(TAG, "Downgrade of APEX package " + packageName
+                    + " is not allowed. Active version: " + activeVersion
+                    + " attempted: " + newVersionCode);
+            return PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+        }
+
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
@@ -27324,30 +27364,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this.getPackageStartability(
                     packageName, callingUid, userId) == PACKAGE_STARTABILITY_FROZEN;
         }
-
-        @Override
-        public boolean isPackageUsesPermissionNeverForLocation(@NonNull String packageName,
-                @NonNull String permissionName) {
-            Objects.requireNonNull(packageName);
-            Objects.requireNonNull(permissionName);
-            final AndroidPackage pkg;
-            synchronized (mLock) {
-                pkg = mPackages.get(packageName);
-            }
-            if (pkg == null) return false;
-            final List<ParsedUsesPermission> usesPermissions = pkg.getUsesPermissions();
-            final int size = usesPermissions.size();
-            for (int i = 0; i < size; i++) {
-                final ParsedUsesPermission usesPermission = usesPermissions.get(i);
-                if (Objects.equals(usesPermission.name, permissionName)) {
-                    return (usesPermission.usesPermissionFlags
-                            & ParsedUsesPermission.FLAG_NEVER_FOR_LOCATION) != 0;
-                }
-            }
-            return false;
-        }
     }
-
 
     @GuardedBy("mLock")
     private SparseArray<String> getAppsWithSharedUserIdsLocked() {

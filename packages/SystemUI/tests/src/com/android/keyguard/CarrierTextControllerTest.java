@@ -37,7 +37,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.net.ConnectivityManager;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -99,7 +99,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
-    private ConnectivityManager mConnectivityManager;
+    private PackageManager mPackageManager;
     @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
@@ -123,8 +123,8 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         mContext.addMockSystemService(WifiManager.class, mWifiManager);
-        mContext.addMockSystemService(ConnectivityManager.class, mConnectivityManager);
-        when(mConnectivityManager.isNetworkSupported(anyInt())).thenReturn(true);
+        mContext.addMockSystemService(PackageManager.class, mPackageManager);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(true);
         mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
         mContext.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
         mContext.getOrCreateTestableResources().addOverride(

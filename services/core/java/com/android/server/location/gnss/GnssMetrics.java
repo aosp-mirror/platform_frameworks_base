@@ -35,6 +35,7 @@ import com.android.internal.location.nano.GnssLogsProto.GnssLog;
 import com.android.internal.location.nano.GnssLogsProto.PowerMetrics;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.location.gnss.hal.GnssNative;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,10 +53,13 @@ public class GnssMetrics {
 
     /** Default time between location fixes (in millisecs) */
     private static final int DEFAULT_TIME_BETWEEN_FIXES_MILLISECS = 1000;
+    private static final int CONVERT_MILLI_TO_MICRO = 1000;
+    private static final int VENDOR_SPECIFIC_POWER_MODES_SIZE = 10;
 
     /** Frequency range of GPS L5, Galileo E5a, QZSS J5 frequency band */
     private static final double L5_CARRIER_FREQ_RANGE_LOW_HZ = 1164 * 1e6;
     private static final double L5_CARRIER_FREQ_RANGE_HIGH_HZ = 1189 * 1e6;
+
 
     private long mLogStartInElapsedRealtimeMs;
 
@@ -88,8 +92,10 @@ public class GnssMetrics {
     long mL5SvStatusReportsUsedInFix;
 
     private final StatsManager mStatsManager;
+    private final GnssNative mGnssNative;
 
-    public GnssMetrics(Context context, IBatteryStats stats) {
+    public GnssMetrics(Context context, IBatteryStats stats, GnssNative gnssNative) {
+        mGnssNative = gnssNative;
         mGnssPowerMetrics = new GnssPowerMetrics(stats);
         mLocationFailureStatistics = new Statistics();
         mTimeToFirstFixSecStatistics = new Statistics();
@@ -189,8 +195,8 @@ public class GnssMetrics {
     }
 
     /**
-    * Logs sv status data
-    */
+     * Logs sv status data
+     */
     public void logSvStatus(GnssStatus status) {
         boolean isL5;
         // Calculate SvStatus Information
@@ -216,8 +222,8 @@ public class GnssMetrics {
     }
 
     /**
-    * Logs CN0 when at least 4 SVs are available L5 Only
-    */
+     * Logs CN0 when at least 4 SVs are available L5 Only
+     */
     private void logCn0L5(GnssStatus gnssStatus) {
         if (gnssStatus.getSatelliteCount() == 0) {
             return;
@@ -432,7 +438,8 @@ public class GnssMetrics {
         private double mSumSquare;
         private long mLongSum;
 
-        Statistics() {}
+        Statistics() {
+        }
 
         /** Resets statistics */
         public synchronized void reset() {
@@ -498,7 +505,7 @@ public class GnssMetrics {
         GnssPowerMetrics(IBatteryStats stats) {
             mBatteryStats = stats;
             // Used to initialize the variable to a very small value (unachievable in practice)
-          // so that
+            // so that
             // the first CNO report will trigger an update to BatteryStats
             mLastAverageCn0 = -100.0;
             mLastSignalLevel = GnssSignalQuality.GNSS_SIGNAL_QUALITY_UNKNOWN;
@@ -585,6 +592,10 @@ public class GnssMetrics {
                 FrameworkStatsLog.GNSS_STATS,
                 null, // use default PullAtomMetadata values
                 ConcurrentUtils.DIRECT_EXECUTOR, pullAtomCallback);
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.GNSS_POWER_STATS,
+                null, // use default PullAtomMetadata values
+                ConcurrentUtils.DIRECT_EXECUTOR, pullAtomCallback);
     }
 
     /**
@@ -593,25 +604,67 @@ public class GnssMetrics {
      */
     private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
 
-        StatsPullAtomCallbackImpl() {}
+        StatsPullAtomCallbackImpl() {
+        }
 
         @Override
         public int onPullAtom(int atomTag, List<StatsEvent> data) {
-            if (atomTag != FrameworkStatsLog.GNSS_STATS) {
+            if (atomTag == FrameworkStatsLog.GNSS_STATS) {
+                data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                        mLocationFailureReportsStatistics.getCount(),
+                        mLocationFailureReportsStatistics.getLongSum(),
+                        mTimeToFirstFixMilliSReportsStatistics.getCount(),
+                        mTimeToFirstFixMilliSReportsStatistics.getLongSum(),
+                        mPositionAccuracyMetersReportsStatistics.getCount(),
+                        mPositionAccuracyMetersReportsStatistics.getLongSum(),
+                        mTopFourAverageCn0DbmHzReportsStatistics.getCount(),
+                        mTopFourAverageCn0DbmHzReportsStatistics.getLongSum(),
+                        mL5TopFourAverageCn0DbmHzReportsStatistics.getCount(),
+                        mL5TopFourAverageCn0DbmHzReportsStatistics.getLongSum(), mSvStatusReports,
+                        mSvStatusReportsUsedInFix, mL5SvStatusReports,
+                        mL5SvStatusReportsUsedInFix));
+            } else if (atomTag == FrameworkStatsLog.GNSS_POWER_STATS) {
+                mGnssNative.requestPowerStats();
+                GnssPowerStats gnssPowerStats = mGnssNative.getPowerStats();
+                if (gnssPowerStats == null) {
+                    return StatsManager.PULL_SKIP;
+                }
+                double[] otherModesEnergyMilliJoule = new double[VENDOR_SPECIFIC_POWER_MODES_SIZE];
+                double[] tempGnssPowerStatsOtherModes =
+                        gnssPowerStats.getOtherModesEnergyMilliJoule();
+                if (tempGnssPowerStatsOtherModes.length < VENDOR_SPECIFIC_POWER_MODES_SIZE) {
+                    System.arraycopy(tempGnssPowerStatsOtherModes, 0,
+                            otherModesEnergyMilliJoule, 0,
+                            tempGnssPowerStatsOtherModes.length);
+                } else {
+                    System.arraycopy(tempGnssPowerStatsOtherModes, 0,
+                            otherModesEnergyMilliJoule, 0,
+                            VENDOR_SPECIFIC_POWER_MODES_SIZE);
+                }
+                data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                        (long) (gnssPowerStats.getElapsedRealtimeUncertaintyNanos()),
+                        (long) (gnssPowerStats.getTotalEnergyMilliJoule() * CONVERT_MILLI_TO_MICRO),
+                        (long) (gnssPowerStats.getSinglebandTrackingModeEnergyMilliJoule()
+                                * CONVERT_MILLI_TO_MICRO),
+                        (long) (gnssPowerStats.getMultibandTrackingModeEnergyMilliJoule()
+                                * CONVERT_MILLI_TO_MICRO),
+                        (long) (gnssPowerStats.getSinglebandAcquisitionModeEnergyMilliJoule()
+                                * CONVERT_MILLI_TO_MICRO),
+                        (long) (gnssPowerStats.getMultibandAcquisitionModeEnergyMilliJoule()
+                                * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[0] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[1] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[2] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[3] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[4] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[5] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[6] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[7] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[8] * CONVERT_MILLI_TO_MICRO),
+                        (long) (otherModesEnergyMilliJoule[9] * CONVERT_MILLI_TO_MICRO)));
+            } else {
                 throw new UnsupportedOperationException("Unknown tagId = " + atomTag);
             }
-            data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
-                    mLocationFailureReportsStatistics.getCount(),
-                    mLocationFailureReportsStatistics.getLongSum(),
-                    mTimeToFirstFixMilliSReportsStatistics.getCount(),
-                    mTimeToFirstFixMilliSReportsStatistics.getLongSum(),
-                    mPositionAccuracyMetersReportsStatistics.getCount(),
-                    mPositionAccuracyMetersReportsStatistics.getLongSum(),
-                    mTopFourAverageCn0DbmHzReportsStatistics.getCount(),
-                    mTopFourAverageCn0DbmHzReportsStatistics.getLongSum(),
-                    mL5TopFourAverageCn0DbmHzReportsStatistics.getCount(),
-                    mL5TopFourAverageCn0DbmHzReportsStatistics.getLongSum(), mSvStatusReports,
-                    mSvStatusReportsUsedInFix, mL5SvStatusReports, mL5SvStatusReportsUsedInFix));
             return StatsManager.PULL_SUCCESS;
         }
     }

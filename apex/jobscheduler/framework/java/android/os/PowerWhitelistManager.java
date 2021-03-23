@@ -439,12 +439,12 @@ public class PowerWhitelistManager {
      * whitelisted by default by the system cannot be removed.
      *
      * @param packageName The app to remove from the whitelist
-     * @deprecated Use {@link PowerExemptionManager#removeFromAllowList(String)} instead
+     * @deprecated Use {@link PowerExemptionManager#removeFromPermanentAllowList(String)} instead
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void removeFromWhitelist(@NonNull String packageName) {
-        mPowerExemptionManager.removeFromAllowList(packageName);
+        mPowerExemptionManager.removeFromPermanentAllowList(packageName);
     }
 
     /**
@@ -455,13 +455,13 @@ public class PowerWhitelistManager {
      * @param reasonCode one of {@link ReasonCode}, use {@link #REASON_UNKNOWN} if not sure.
      * @param reason a optional human readable reason string, could be null or empty string.
      * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowList(
-     *             String, long, int, String)} instead
+     *             String, int, String, long)} instead
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public void whitelistAppTemporarily(@NonNull String packageName, long durationMs,
             @ReasonCode int reasonCode, @Nullable String reason) {
-        mPowerExemptionManager.addToTemporaryAllowList(packageName, durationMs, reasonCode, reason);
+        mPowerExemptionManager.addToTemporaryAllowList(packageName, reasonCode, reason, durationMs);
     }
 
     /**
@@ -470,13 +470,13 @@ public class PowerWhitelistManager {
      * @param packageName The package to add to the temp whitelist
      * @param durationMs  How long to keep the app on the temp whitelist for (in milliseconds)
      * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowList(
-     *             String, long, int, String)} instead
+     *             String, int, String, long)} instead
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public void whitelistAppTemporarily(@NonNull String packageName, long durationMs) {
         mPowerExemptionManager.addToTemporaryAllowList(
-                packageName, durationMs, REASON_UNKNOWN, packageName);
+                packageName, REASON_UNKNOWN, packageName, durationMs);
     }
 
     /**
@@ -490,14 +490,14 @@ public class PowerWhitelistManager {
      *                    used for logging purposes. Could be null or empty string.
      * @return The duration (in milliseconds) that the app is whitelisted for
      * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowListForEvent(
-     *             String, int, int, String)} instead
+     *             String, int, String, int)} instead
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public long whitelistAppTemporarilyForEvent(@NonNull String packageName,
             @WhitelistEvent int event, @Nullable String reason) {
         return mPowerExemptionManager.addToTemporaryAllowListForEvent(
-                packageName, event, REASON_UNKNOWN, reason);
+                packageName, REASON_UNKNOWN, reason, event);
     }
 
     /**
@@ -512,14 +512,14 @@ public class PowerWhitelistManager {
      *                    used for logging purposes. Could be null or empty string.
      * @return The duration (in milliseconds) that the app is whitelisted for
      * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowListForEvent(
-     *             String, int, int, String)} instead
+     *             String, int, String, int)} instead
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public long whitelistAppTemporarilyForEvent(@NonNull String packageName,
             @WhitelistEvent int event, @ReasonCode int reasonCode, @Nullable String reason) {
         return mPowerExemptionManager.addToTemporaryAllowListForEvent(
-                packageName, event, reasonCode, reason);
+                packageName, reasonCode, reason, event);
     }
 
     /**

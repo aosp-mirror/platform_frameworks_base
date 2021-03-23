@@ -18,10 +18,6 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.View.GONE;
 
-import static com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ItemType.FIRST_ITEM;
-import static com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ItemType.LAST_ITEM;
-import static com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ItemType.REGULAR_ITEM;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,16 +43,16 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
     private final List<AccessibilityTarget> mTargets;
 
     @IntDef({
-            FIRST_ITEM,
-            REGULAR_ITEM,
-            LAST_ITEM
+            AccessibilityTargetAdapter.FIRST_ITEM,
+            AccessibilityTargetAdapter.REGULAR_ITEM,
+            AccessibilityTargetAdapter.LAST_ITEM
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface ItemType {
-        int FIRST_ITEM = 0;
-        int REGULAR_ITEM = 1;
-        int LAST_ITEM = 2;
-    }
+    @interface ItemType {}
+
+    private static final int FIRST_ITEM = 0;
+    private static final int REGULAR_ITEM = 1;
+    private static final int LAST_ITEM = 2;
 
     public AccessibilityTargetAdapter(List<AccessibilityTarget> targets) {
         mTargets = targets;

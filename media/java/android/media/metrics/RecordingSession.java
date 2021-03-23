@@ -25,7 +25,6 @@ import java.util.Objects;
 
 /**
  * An instances of this class represents a session of media recording.
- * @hide
  */
 public final class RecordingSession implements AutoCloseable {
     private final @NonNull String mId;
@@ -40,6 +39,10 @@ public final class RecordingSession implements AutoCloseable {
         AnnotationValidations.validate(NonNull.class, null, mId);
         AnnotationValidations.validate(NonNull.class, null, mManager);
         mLogSessionId = new LogSessionId(mId);
+    }
+
+    public @NonNull LogSessionId getSessionId() {
+        return mLogSessionId;
     }
 
     @Override

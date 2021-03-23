@@ -7492,9 +7492,11 @@ public class NotificationManagerService extends SystemService {
             boolean rateLimitingEnabled =
                     !mToastRateLimitingDisabledUids.contains(record.uid);
             boolean isWithinQuota =
-                    mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG);
+                    mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG)
+                            || isExemptFromRateLimiting(record.pkg, userId);
 
-            if (tryShowToast(record, rateLimitingEnabled, isWithinQuota)) {
+            if (tryShowToast(
+                    record, rateLimitingEnabled, isWithinQuota)) {
                 scheduleDurationReachedLocked(record, lastToastWasTextRecord);
                 mIsCurrentToastShown = true;
                 if (rateLimitingEnabled) {
@@ -7526,6 +7528,18 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         return record.show();
+    }
+
+    private boolean isExemptFromRateLimiting(String pkg, int userId) {
+        boolean isExemptFromRateLimiting = false;
+        try {
+            isExemptFromRateLimiting = mPackageManager.checkPermission(
+                    android.Manifest.permission.UNLIMITED_TOASTS, pkg, userId)
+                    == PackageManager.PERMISSION_GRANTED;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to connect with package manager");
+        }
+        return isExemptFromRateLimiting;
     }
 
     /** Reports rate limiting toasts compat change (used when the toast was blocked). */

@@ -29,7 +29,6 @@ package android {
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
     field public static final String OVERRIDE_DISPLAY_MODE_REQUESTS = "android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS";
     field public static final String QUERY_AUDIO_STATE = "android.permission.QUERY_AUDIO_STATE";
-    field public static final String QUERY_USERS = "android.permission.QUERY_USERS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
@@ -107,7 +106,6 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
-    field public static final long DROP_CLOSE_SYSTEM_DIALOGS = 174664120L; // 0xa6929b8L
     field public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L; // 0xa692aadL
     field public static final int PROCESS_CAPABILITY_ALL = 15; // 0xf
     field public static final int PROCESS_CAPABILITY_ALL_EXPLICIT = 1; // 0x1
@@ -1476,6 +1474,14 @@ package android.media.audiopolicy {
   public final class AudioProductStrategy implements android.os.Parcelable {
     method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
     method public int getVolumeGroupIdForAudioAttributes(@NonNull android.media.AudioAttributes);
+  }
+
+}
+
+package android.media.metrics {
+
+  public final class LogSessionId {
+    method @NonNull public String getStringId();
   }
 
 }

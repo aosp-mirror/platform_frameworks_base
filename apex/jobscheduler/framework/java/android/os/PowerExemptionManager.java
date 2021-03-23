@@ -40,9 +40,9 @@ import java.util.List;
 /**
  * Interface to access and modify the permanent and temporary power save allow list. The two lists
  * are kept separately. Apps placed on the permanent allow list are only removed via an explicit
- * {@link #removeFromAllowList(String)} call. Apps allow-listed by default by the system cannot be
- * removed. Apps placed on the temporary allow list are removed from that allow list after a
- * predetermined amount of time.
+ * {@link #removeFromPermanentAllowList(String)} call. Apps allow-listed by default by the system
+ * cannot be removed. Apps placed on the temporary allow list are removed from that allow list after
+ * a predetermined amount of time.
  *
  * @hide
  */
@@ -402,9 +402,9 @@ public class PowerExemptionManager {
      *
      * @param includingIdle Set to true if the app should be allow-listed from device idle as well
      *                      as other power save restrictions
-     * @hide
      */
     @NonNull
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public int[] getAllowListedAppIds(boolean includingIdle) {
         try {
             if (includingIdle) {
@@ -445,7 +445,7 @@ public class PowerExemptionManager {
      * @param packageName The app to remove from the allow list
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
-    public void removeFromAllowList(@NonNull String packageName) {
+    public void removeFromPermanentAllowList(@NonNull String packageName) {
         try {
             mService.removePowerSaveWhitelistApp(packageName);
         } catch (RemoteException e) {
@@ -463,8 +463,8 @@ public class PowerExemptionManager {
      */
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
-    public void addToTemporaryAllowList(@NonNull String packageName, long durationMs,
-            @ReasonCode int reasonCode, @Nullable String reason) {
+    public void addToTemporaryAllowList(@NonNull String packageName, @ReasonCode int reasonCode,
+            @Nullable String reason, long durationMs) {
         try {
             mService.addPowerSaveTempWhitelistApp(packageName, durationMs, mContext.getUserId(),
                     reasonCode, reason);
@@ -488,7 +488,7 @@ public class PowerExemptionManager {
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public long addToTemporaryAllowListForEvent(@NonNull String packageName,
-            @AllowListEvent int event, @ReasonCode int reasonCode, @Nullable String reason) {
+            @ReasonCode int reasonCode, @Nullable String reason, @AllowListEvent int event) {
         try {
             switch (event) {
                 case EVENT_MMS:

@@ -52,7 +52,7 @@ package android.net {
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_FACTORY}) public int registerNetworkProvider(@NonNull android.net.NetworkProvider);
-    method public void registerQosCallback(@NonNull android.net.QosSocketInfo, @NonNull android.net.QosCallback, @NonNull java.util.concurrent.Executor);
+    method public void registerQosCallback(@NonNull android.net.QosSocketInfo, @NonNull java.util.concurrent.Executor, @NonNull android.net.QosCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void requestNetwork(@NonNull android.net.NetworkRequest, int, int, @NonNull android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_AIRPLANE_MODE, android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
@@ -261,7 +261,6 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    ctor public NetworkCapabilities(@Nullable android.net.NetworkCapabilities, boolean);
     method @NonNull public int[] getAdministratorUids();
     method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
@@ -433,11 +432,6 @@ package android.net {
     field public final int tcpSeq;
     field public final int tcpWindow;
     field public final int tcpWindowScale;
-  }
-
-  public interface TransportInfo {
-    method public default boolean hasLocationSensitiveFields();
-    method @NonNull public default android.net.TransportInfo makeCopy(boolean);
   }
 
 }

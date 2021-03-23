@@ -14,14 +14,8 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.graphics.PixelFormat;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -30,12 +24,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.ImageView;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
@@ -43,7 +31,6 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.dagger.SysUISingleton;
@@ -97,8 +84,6 @@ public class AssistManager {
     // Note that VERBOSE logging may leak PII (e.g. transcription contents).
     private static final boolean VERBOSE = false;
 
-    private static final String ASSIST_ICON_METADATA_NAME =
-            "com.android.systemui.action_assist_icon";
     private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
     private static final String INVOCATION_PHONE_STATE_KEY = "invocation_phone_state";
     public static final String INVOCATION_TYPE_KEY = "invocation_type";
@@ -123,69 +108,29 @@ public class AssistManager {
     private static final long TIMEOUT_ACTIVITY = 1000;
 
     protected final Context mContext;
-    private final WindowManager mWindowManager;
     private final AssistDisclosure mAssistDisclosure;
-    private final InterestingConfigChanges mInterestingConfigChanges;
     private final PhoneStateMonitor mPhoneStateMonitor;
     private final AssistHandleBehaviorController mHandleController;
     private final UiController mUiController;
     protected final Lazy<SysUiState> mSysUiState;
     protected final AssistLogger mAssistLogger;
 
-    private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final CommandQueue mCommandQueue;
+    private final AssistOrbController mOrbController;
     protected final AssistUtils mAssistUtils;
-    private final boolean mShouldEnableOrb;
 
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
 
                 @Override
                 public void onFailed() throws RemoteException {
-                    mView.post(mHideRunnable);
+                    mOrbController.postHide();
                 }
 
                 @Override
                 public void onShown() throws RemoteException {
-                    mView.post(mHideRunnable);
-                }
-            };
-
-    private Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mView.removeCallbacks(this);
-            mView.show(false /* show */, true /* animate */);
-        }
-    };
-
-    private ConfigurationController.ConfigurationListener mConfigurationListener =
-            new ConfigurationController.ConfigurationListener() {
-                @Override
-                public void onConfigChanged(Configuration newConfig) {
-                    if (!mInterestingConfigChanges.applyNewConfig(mContext.getResources())) {
-                        return;
-                    }
-                    boolean visible = false;
-                    if (mView != null) {
-                        visible = mView.isShowing();
-                        if (mView.isAttachedToWindow()) {
-                            mWindowManager.removeView(mView);
-                        }
-                    }
-
-                    mView = (AssistOrbContainer) LayoutInflater.from(mContext).inflate(
-                            R.layout.assist_orb, null);
-                    mView.setVisibility(View.GONE);
-                    mView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-                    WindowManager.LayoutParams lp = getLayoutParams();
-                    mWindowManager.addView(mView, lp);
-                    if (visible) {
-                        mView.show(true /* show */, false /* animate */);
-                    }
+                    mOrbController.postHide();
                 }
             };
 
@@ -205,21 +150,15 @@ public class AssistManager {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = assistUtils;
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = phoneStateMonitor;
         mHandleController = handleController;
         mAssistLogger = assistLogger;
 
-        configurationController.addCallback(mConfigurationListener);
+        mOrbController = new AssistOrbController(configurationController, context);
 
         registerVoiceInteractionSessionListener();
-        mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
-                | ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_UI_MODE
-                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
-        mConfigurationListener.onConfigChanged(context.getResources().getConfiguration());
-        mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
 
         mUiController = defaultUiController;
 
@@ -282,7 +221,7 @@ public class AssistManager {
     }
 
     protected boolean shouldShowOrb() {
-        return false;
+        return !ActivityManager.isLowRamDeviceStatic();
     }
 
     public void startAssist(Bundle args) {
@@ -293,10 +232,8 @@ public class AssistManager {
 
         final boolean isService = assistComponent.equals(getVoiceInteractorComponentName());
         if (!isService || (!isVoiceSessionRunning() && shouldShowOrb())) {
-            showOrb(assistComponent, isService);
-            mView.postDelayed(mHideRunnable, isService
-                    ? TIMEOUT_SERVICE
-                    : TIMEOUT_ACTIVITY);
+            mOrbController.showOrb(assistComponent, isService);
+            mOrbController.postHideDelayed(isService ? TIMEOUT_SERVICE : TIMEOUT_ACTIVITY);
         }
 
         if (args == null) {
@@ -338,30 +275,6 @@ public class AssistManager {
 
     public void hideAssist() {
         mAssistUtils.hideCurrentSession();
-    }
-
-    private WindowManager.LayoutParams getLayoutParams() {
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                mContext.getResources().getDimensionPixelSize(R.dimen.assist_orb_scrim_height),
-                WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT);
-        lp.token = new Binder();
-        lp.gravity = Gravity.BOTTOM | Gravity.START;
-        lp.setTitle("AssistPreviewPanel");
-        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
-                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-        return lp;
-    }
-
-    private void showOrb(@NonNull ComponentName assistComponent, boolean isService) {
-        maybeSwapSearchIcon(assistComponent, isService);
-        if (mShouldEnableOrb) {
-            mView.show(true /* show */, true /* animate */);
-        }
     }
 
     private void startAssistInternal(Bundle args, @NonNull ComponentName assistComponent,
@@ -438,44 +351,6 @@ public class AssistManager {
 
     private boolean isVoiceSessionRunning() {
         return mAssistUtils.isSessionRunning();
-    }
-
-    private void maybeSwapSearchIcon(@NonNull ComponentName assistComponent, boolean isService) {
-        replaceDrawable(mView.getOrb().getLogo(), assistComponent, ASSIST_ICON_METADATA_NAME,
-                isService);
-    }
-
-    public void replaceDrawable(ImageView v, ComponentName component, String name,
-            boolean isService) {
-        if (component != null) {
-            try {
-                PackageManager packageManager = mContext.getPackageManager();
-                // Look for the search icon specified in the activity meta-data
-                Bundle metaData = isService
-                        ? packageManager.getServiceInfo(
-                        component, PackageManager.GET_META_DATA).metaData
-                        : packageManager.getActivityInfo(
-                                component, PackageManager.GET_META_DATA).metaData;
-                if (metaData != null) {
-                    int iconResId = metaData.getInt(name);
-                    if (iconResId != 0) {
-                        Resources res = packageManager.getResourcesForApplication(
-                                component.getPackageName());
-                        v.setImageDrawable(res.getDrawable(iconResId));
-                        return;
-                    }
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                if (VERBOSE) {
-                    Log.v(TAG, "Assistant component "
-                            + component.flattenToShortString() + " not found");
-                }
-            } catch (Resources.NotFoundException nfe) {
-                Log.w(TAG, "Failed to swap drawable from "
-                        + component.flattenToShortString(), nfe);
-            }
-        }
-        v.setImageDrawable(null);
     }
 
     protected AssistHandleBehaviorController getHandleBehaviorController() {
