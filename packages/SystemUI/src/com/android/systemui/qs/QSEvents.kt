@@ -118,7 +118,19 @@ enum class QSUserSwitcherEvent(private val _id: Int) : UiEventLogger.UiEventEnum
     QS_USER_DETAIL_CLOSE(426),
 
     @UiEvent(doc = "User switcher QS detail panel more settings pressed")
-    QS_USER_MORE_SETTINGS(427);
+    QS_USER_MORE_SETTINGS(427),
+
+    @UiEvent(doc = "The user has added a guest in the detail panel")
+    QS_USER_GUEST_ADD(754),
+
+    @UiEvent(doc = "The user selected 'Start over' after switching to the existing Guest user")
+    QS_USER_GUEST_WIPE(755),
+
+    @UiEvent(doc = "The user selected 'Yes, continue' after switching to the existing Guest user")
+    QS_USER_GUEST_CONTINUE(756),
+
+    @UiEvent(doc = "The user has pressed 'Remove guest' in the detail panel")
+    QS_USER_GUEST_REMOVE(757);
 
     override fun getId() = _id
 }

@@ -99,8 +99,7 @@ public class UserSwitcherController implements Dumpable {
     protected final Context mContext;
     protected final UserManager mUserManager;
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
-    private final GuestResumeSessionReceiver mGuestResumeSessionReceiver
-            = new GuestResumeSessionReceiver();
+    private final GuestResumeSessionReceiver mGuestResumeSessionReceiver;
     private final KeyguardStateController mKeyguardStateController;
     protected final Handler mHandler;
     private final ActivityStarter mActivityStarter;
@@ -132,6 +131,7 @@ public class UserSwitcherController implements Dumpable {
         mBroadcastDispatcher = broadcastDispatcher;
         mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
+        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(mUiEventLogger);
         mUserDetailAdapter = new UserDetailAdapter(this, mContext, mUiEventLogger);
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
@@ -388,6 +388,7 @@ public class UserSwitcherController implements Dumpable {
                 // haven't reloaded the user list yet.
                 return;
             }
+            mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_ADD);
             id = guest.id;
         } else if (record.isAddUser) {
             showAddUserDialog();
@@ -891,6 +892,7 @@ public class UserSwitcherController implements Dumpable {
             if (which == BUTTON_NEGATIVE) {
                 cancel();
             } else {
+                mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
                 dismiss();
                 exitGuest(mGuestId, mTargetId);
             }

@@ -32,7 +32,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 /**
@@ -45,6 +47,11 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
     private static final String SETTING_GUEST_HAS_LOGGED_IN = "systemui.guest_has_logged_in";
 
     private Dialog mNewSessionDialog;
+    private final UiEventLogger mUiEventLogger;
+
+    public GuestResumeSessionReceiver(UiEventLogger uiEventLogger) {
+        mUiEventLogger = uiEventLogger;
+    }
 
     /**
      * Register this receiver with the {@link BroadcastDispatcher}
@@ -83,7 +90,7 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
             int notFirstLogin = Settings.System.getIntForUser(
                     cr, SETTING_GUEST_HAS_LOGGED_IN, 0, userId);
             if (notFirstLogin != 0) {
-                mNewSessionDialog = new ResetSessionDialog(context, userId);
+                mNewSessionDialog = new ResetSessionDialog(context, mUiEventLogger, userId);
                 mNewSessionDialog.show();
             } else {
                 Settings.System.putIntForUser(
@@ -153,9 +160,10 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
         private static final int BUTTON_WIPE = BUTTON_NEGATIVE;
         private static final int BUTTON_DONTWIPE = BUTTON_POSITIVE;
 
+        private final UiEventLogger mUiEventLogger;
         private final int mUserId;
 
-        public ResetSessionDialog(Context context, int userId) {
+        ResetSessionDialog(Context context, UiEventLogger uiEventLogger, int userId) {
             super(context);
 
             setTitle(context.getString(R.string.guest_wipe_session_title));
@@ -167,15 +175,18 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
             setButton(BUTTON_DONTWIPE,
                     context.getString(R.string.guest_wipe_session_dontwipe), this);
 
+            mUiEventLogger = uiEventLogger;
             mUserId = userId;
         }
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
             if (which == BUTTON_WIPE) {
+                mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_WIPE);
                 wipeGuestSession(getContext(), mUserId);
                 dismiss();
             } else if (which == BUTTON_DONTWIPE) {
+                mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_CONTINUE);
                 cancel();
             }
         }
