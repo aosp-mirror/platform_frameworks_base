@@ -55,6 +55,20 @@ public final class CallerIdentity {
     }
 
     /**
+     * Returns a CallerIdentity with PID and listener ID information stripped. This is mostly
+     * useful for aggregating information for debug purposes, and should not be used in any API with
+     * security requirements.
+     */
+    public static CallerIdentity forAggregation(CallerIdentity callerIdentity) {
+        if (callerIdentity.getPid() == 0 && callerIdentity.getListenerId() == null) {
+            return callerIdentity;
+        }
+
+        return new CallerIdentity(callerIdentity.getUid(), 0, callerIdentity.getPackageName(),
+                callerIdentity.getAttributionTag(), null);
+    }
+
+    /**
      * Creates a CallerIdentity for the current process and context.
      */
     public static CallerIdentity fromContext(Context context) {
@@ -177,17 +191,6 @@ public final class CallerIdentity {
         } else {
             workSource.add(mUid, mPackageName);
             return workSource;
-        }
-    }
-
-    /**
-     * Returns a CallerIdentity corrosponding to this CallerIdentity but with a null listener id.
-     */
-    public CallerIdentity stripListenerId() {
-        if (mListenerId == null) {
-            return this;
-        } else {
-            return new CallerIdentity(mUid, mPid, mPackageName, mAttributionTag, null);
         }
     }
 
