@@ -1212,12 +1212,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                     + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
         } else {
-            // For incremental installs, continue publishing the install progress during committing.
-            mProgress = mIncrementalProgress;
+            // For incremental install, continue to publish incremental progress during committing.
+            if (isIncrementalInstallation() && (mIncrementalProgress - mProgress) >= 0.01) {
+                // It takes some time for data loader to write to incremental file system, so at the
+                // beginning of the commit, the incremental progress might be very small.
+                // Wait till the incremental progress is larger than what's already displayed.
+                // This way we don't see the progress ring going backwards.
+                mProgress = mIncrementalProgress;
+            }
         }
 
         // Only publish when meaningful change
-        if (forcePublish || Math.abs(mProgress - mReportedProgress) >= 0.01) {
+        if (forcePublish || (mProgress - mReportedProgress) >= 0.01) {
             mReportedProgress = mProgress;
             mCallback.onSessionProgressChanged(this, mProgress);
         }
