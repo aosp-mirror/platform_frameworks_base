@@ -40,6 +40,13 @@ message IntervalStatsObfuscatedProto {
     optional bool active = 5;
   }
 
+
+  // Stores the information of last time a package is used by any users
+  message PackageUsage {
+    optional string package_name = 1;
+    optional int64 time_ms = 2;
+  }
+
   // The following fields contain supplemental data used to build IntervalStats.
   optional int64 end_time_ms = 1;
   optional int32 major_version = 2;
@@ -57,6 +64,8 @@ message IntervalStatsObfuscatedProto {
   repeated EventObfuscatedProto event_log = 22;
   // The following field is only used to persist the reported events before a user unlock
   repeated PendingEventProto pending_events = 23;
+  // The following field is only used to persist the user-agnostic package usage before shut down
+  repeated PackageUsage package_usage = 24;
 }
 
 /**
