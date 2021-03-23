@@ -5317,5 +5317,15 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_VOIMS_OPT_IN_STATUS = "voims_opt_in_status";
+
+        /**
+         * TelephonyProvider column name for information selected contacts that allow device to
+         * device sharing.
+         *
+         * @hide
+         */
+        public static final String COLUMN_D2D_STATUS_SHARING_SELECTED_CONTACTS =
+                "d2d_sharing_contacts";
+
     }
 }
