@@ -8500,6 +8500,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean hasRestrictedProfiles();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean hasUserRestrictionForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isAdminUser();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isCloneProfile();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isGuestUser();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isManagedProfile(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isPrimaryUser();
@@ -8513,6 +8514,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean removeUser(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserIcon(@NonNull android.graphics.Bitmap) throws android.os.UserManager.UserOperationException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserName(@Nullable String);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean sharesMediaWithParent();
     field public static final String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field @Deprecated public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
     field public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
@@ -8526,6 +8528,7 @@ package android.os {
     field public static final int SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED = 2; // 0x2
     field public static final String USER_TYPE_FULL_SECONDARY = "android.os.usertype.full.SECONDARY";
     field public static final String USER_TYPE_FULL_SYSTEM = "android.os.usertype.full.SYSTEM";
+    field public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
     field public static final String USER_TYPE_PROFILE_MANAGED = "android.os.usertype.profile.MANAGED";
     field public static final String USER_TYPE_SYSTEM_HEADLESS = "android.os.usertype.system.HEADLESS";
   }

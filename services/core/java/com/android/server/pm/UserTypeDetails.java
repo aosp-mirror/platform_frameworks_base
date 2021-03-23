@@ -149,6 +149,13 @@ public final class UserTypeDetails {
      */
     private final @Nullable int[] mDarkThemeBadgeColors;
 
+    /**
+     * Denotes if the user shares media with its parent user.
+     *
+     * <p> Default value is false
+     */
+    private final boolean mSharesMediaWithParent;
+
     private UserTypeDetails(@NonNull String name, boolean enabled, int maxAllowed,
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
             int maxAllowedPerParent,
@@ -158,7 +165,8 @@ public final class UserTypeDetails {
             @Nullable Bundle defaultRestrictions,
             @Nullable Bundle defaultSystemSettings,
             @Nullable Bundle defaultSecureSettings,
-            @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters) {
+            @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
+            boolean sharesMediaWithParent) {
         this.mName = name;
         this.mEnabled = enabled;
         this.mMaxAllowed = maxAllowed;
@@ -177,6 +185,7 @@ public final class UserTypeDetails {
         this.mBadgeLabels = badgeLabels;
         this.mBadgeColors = badgeColors;
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
+        this.mSharesMediaWithParent = sharesMediaWithParent;
     }
 
     /**
@@ -291,6 +300,13 @@ public final class UserTypeDetails {
         return (mBaseType & UserInfo.FLAG_SYSTEM) != 0;
     }
 
+    /**
+     * Returns true if the user has shared media with parent user or false otherwise.
+     */
+    public boolean sharesMediaWithParent() {
+        return mSharesMediaWithParent;
+    }
+
     /** Returns a {@link Bundle} representing the default user restrictions. */
     @NonNull Bundle getDefaultRestrictions() {
         return BundleUtils.clone(mDefaultRestrictions);
@@ -317,7 +333,6 @@ public final class UserTypeDetails {
                 ? new ArrayList<>(mDefaultCrossProfileIntentFilters)
                 : Collections.emptyList();
     }
-
 
     /** Dumps details of the UserTypeDetails. Do not parse this. */
     public void dump(PrintWriter pw, String prefix) {
@@ -383,6 +398,7 @@ public final class UserTypeDetails {
         private @DrawableRes int mIconBadge = Resources.ID_NULL;
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
+        private boolean mSharesMediaWithParent = false;
 
         public Builder setName(String name) {
             mName = name;
@@ -473,6 +489,15 @@ public final class UserTypeDetails {
             return this;
         }
 
+        /**
+         * Sets shared media property for the user.
+         * @param sharesMediaWithParent the value to be set, true or false
+         */
+        public Builder setSharesMediaWithParent(boolean sharesMediaWithParent) {
+            mSharesMediaWithParent = sharesMediaWithParent;
+            return this;
+        }
+
         @UserInfoFlag int getBaseType() {
             return mBaseType;
         }
@@ -502,7 +527,7 @@ public final class UserTypeDetails {
                     mIconBadge, mBadgePlain, mBadgeNoBackground, mBadgeLabels, mBadgeColors,
                     mDarkThemeBadgeColors == null ? mBadgeColors : mDarkThemeBadgeColors,
                     mDefaultRestrictions, mDefaultSystemSettings, mDefaultSecureSettings,
-                    mDefaultCrossProfileIntentFilters);
+                    mDefaultCrossProfileIntentFilters, mSharesMediaWithParent);
         }
 
         private boolean hasBadge() {

@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -134,6 +135,16 @@ public class UserManager {
      */
     @SystemApi
     public static final String USER_TYPE_PROFILE_MANAGED = "android.os.usertype.profile.MANAGED";
+
+    /**
+     * User type representing a clone profile. Clone profile is a user profile type used to run
+     * second instance of an otherwise single user App (eg, messengers). Only the primary user
+     * is allowed to have a clone profile.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
 
     /**
      * User type representing a generic profile for testing purposes. Only on debuggable builds.
@@ -1984,6 +1995,14 @@ public class UserManager {
     }
 
     /**
+     * Returns whether the user type is a {@link UserManager#USER_TYPE_PROFILE_CLONE clone user}.
+     * @hide
+     */
+    public static boolean isUserTypeCloneProfile(String userType) {
+        return USER_TYPE_PROFILE_CLONE.equals(userType);
+    }
+
+    /**
      * Returns the enum defined in the statsd UserLifecycleJourneyReported atom corresponding to the
      * user type.
      * @hide
@@ -2227,6 +2246,31 @@ public class UserManager {
         }
         try {
             return mService.isManagedProfile(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if the context user is a clone profile.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission, otherwise the caller
+     * must be in the same profile group of the user.
+     *
+     * @return whether the context user is a clone profile.
+     *
+     * @see android.os.UserManager#USER_TYPE_PROFILE_CLONE
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @UserHandleAware
+    @SuppressAutoDoc
+    public boolean isCloneProfile() {
+        try {
+            return mService.isCloneProfile(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4058,6 +4102,31 @@ public class UserManager {
         try {
             final int resourceId = mService.getUserBadgeLabelResId(userId);
             return Resources.getSystem().getString(resourceId, label);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * If the user is a {@link UserManager#isProfile profile}, checks if the user
+     * shares media with its parent user (the user that created this profile).
+     * Returns false for any other type of user.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission, otherwise the
+     * caller must be in the same profile group as the user.
+     *
+     * @return true if the user shares media with its parent user, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @UserHandleAware
+    @SuppressAutoDoc
+    public boolean sharesMediaWithParent() {
+        try {
+            return mService.sharesMediaWithParent(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
