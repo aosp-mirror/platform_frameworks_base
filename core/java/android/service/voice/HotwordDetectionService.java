@@ -182,11 +182,14 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         /**
-         * Called when the detected result is invalid.
+         * Informs the {@link AlwaysOnHotwordDetector} that the keyphrase was not detected.
+         *
+         * @param result Info about the second stage detection result. This is provided to
+         *         the {@link AlwaysOnHotwordDetector}.
          */
-        public void onRejected() {
+        public void onRejected(@Nullable HotwordRejectedResult result) {
             try {
-                mRemoteCallback.onRejected();
+                mRemoteCallback.onRejected(result);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
