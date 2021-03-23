@@ -334,13 +334,15 @@ class UserController implements Handler.Callback {
     volatile boolean mBootCompleted;
 
     /**
-     * In this mode, user is always stopped when switched out but locking of user data is
+     * In this mode, user is always stopped when switched out (unless overridden by the
+     * {@code fw.stop_bg_users_on_switch} system property) but locking of user data is
      * postponed until total number of unlocked users in the system reaches mMaxRunningUsers.
      * Once total number of unlocked users reach mMaxRunningUsers, least recently used user
      * will be locked.
      */
     @GuardedBy("mLock")
     private boolean mDelayUserDataLocking;
+
     /**
      * Keep track of last active users for mDelayUserDataLocking.
      * The latest stopped user is placed in front while the least recently stopped user in back.
@@ -406,10 +408,9 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean isDelayUserDataLockingEnabled() {
-        synchronized (mLock) {
-            return mDelayUserDataLocking;
-        }
+    private boolean shouldStopBackgroundUsersOnSwitch() {
+        int property = SystemProperties.getInt("fw.stop_bg_users_on_switch", -1);
+        return property == -1 ? mDelayUserDataLocking : property == 1;
     }
 
     void finishUserSwitch(UserState uss) {
@@ -1041,6 +1042,11 @@ class UserController implements Handler.Callback {
 
     void finishUserStopped(UserState uss, boolean allowDelayedLocking) {
         final int userId = uss.mHandle.getIdentifier();
+        if (DEBUG_MU) {
+            Slog.i(TAG, "finishUserStopped(%d): allowDelayedLocking=%b", userId,
+                    allowDelayedLocking);
+        }
+
         EventLog.writeEvent(EventLogTags.UC_FINISH_USER_STOPPED, userId);
         final boolean stopped;
         boolean lockUser = true;
@@ -1153,11 +1159,9 @@ class UserController implements Handler.Callback {
                 Slog.i(TAG, "finishUserStopped, stopping user:" + userId
                         + " lock user:" + userIdToLock);
             } else {
-                Slog.i(TAG, "finishUserStopped, user:" + userId
-                        + ",skip locking");
+                Slog.i(TAG, "finishUserStopped, user:" + userId + ", skip locking");
                 // do not lock
                 userIdToLock = UserHandle.USER_NULL;
-
             }
         }
         return userIdToLock;
@@ -1192,6 +1196,7 @@ class UserController implements Handler.Callback {
     }
 
     private void forceStopUser(@UserIdInt int userId, String reason) {
+        if (DEBUG_MU) Slog.i(TAG, "forceStopUser(%d): %s", userId, reason);
         mInjector.activityManagerForceStopPackage(userId, reason);
         if (mInjector.getUserManager().isPreCreated(userId)) {
             // Don't fire intent for precreated.
@@ -1370,6 +1375,7 @@ class UserController implements Handler.Callback {
 
     private boolean startUserInternal(@UserIdInt int userId, boolean foreground,
             @Nullable IProgressListener unlockListener, @NonNull TimingsTraceAndSlog t) {
+        if (DEBUG_MU) Slog.i(TAG, "Starting user %d%s", userId, foreground ? " in foreground" : "");
         EventLog.writeEvent(EventLogTags.UC_START_USER_INTERNAL, userId);
 
         final int callingUid = Binder.getCallingUid();
@@ -1790,20 +1796,28 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.finishBroadcast();
     }
 
-    private void stopBackgroundUsersIfEnforced(int oldUserId) {
+    private void stopBackgroundUsersOnSwitchIfEnforced(@UserIdInt int oldUserId) {
         // Never stop system user
         if (oldUserId == UserHandle.USER_SYSTEM) {
             return;
         }
-        // If running in background is disabled or mDelayUserDataLocking mode, stop the user.
-        boolean disallowRunInBg = hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND,
-                oldUserId) || isDelayUserDataLockingEnabled();
-        if (!disallowRunInBg) {
-            return;
-        }
+        boolean hasRestriction =
+                hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, oldUserId);
         synchronized (mLock) {
-            if (DEBUG_MU) Slog.i(TAG, "stopBackgroundUsersIfEnforced stopping " + oldUserId
-                    + " and related users");
+            // If running in background is disabled or mStopBackgroundUsersOnSwitch mode,
+            // stop the user.
+            boolean disallowRunInBg = hasRestriction || shouldStopBackgroundUsersOnSwitch();
+            if (!disallowRunInBg) {
+                if (DEBUG_MU) {
+                    Slog.i(TAG, "stopBackgroundUsersIfEnforced() NOT stopping %d and related users",
+                            oldUserId);
+                }
+                return;
+            }
+            if (DEBUG_MU) {
+                Slog.i(TAG, "stopBackgroundUsersIfEnforced() stopping %d and related users",
+                        oldUserId);
+            }
             stopUsersLU(oldUserId, /* force= */ false, /* allowDelayedLocking= */ true,
                     null, null);
         }
@@ -1904,7 +1918,7 @@ class UserController implements Handler.Callback {
         mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
         stopGuestOrEphemeralUserIfBackground(oldUserId);
-        stopBackgroundUsersIfEnforced(oldUserId);
+        stopBackgroundUsersOnSwitchIfEnforced(oldUserId);
     }
 
     private void moveUserToForeground(UserState uss, int oldUserId, int newUserId) {
@@ -2594,6 +2608,8 @@ class UserController implements Handler.Callback {
             pw.println("  mTargetUserId:" + mTargetUserId);
             pw.println("  mLastActiveUsers:" + mLastActiveUsers);
             pw.println("  mDelayUserDataLocking:" + mDelayUserDataLocking);
+            pw.println("  shouldStopBackgroundUsersOnSwitch:"
+                    + shouldStopBackgroundUsersOnSwitch());
             pw.println("  mMaxRunningUsers:" + mMaxRunningUsers);
             pw.println("  mUserSwitchUiEnabled:" + mUserSwitchUiEnabled);
             pw.println("  mInitialized:" + mInitialized);
