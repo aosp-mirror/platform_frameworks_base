@@ -1488,14 +1488,13 @@ public class ChooserActivityTest {
         onView(withId(R.id.contentPanel))
                 .perform(swipeUp());
 
-        onView(withText(R.string.resolver_cant_share_with_work_apps))
+        onView(withText(R.string.resolver_cross_profile_blocked))
                 .check(matches(isDisplayed()));
     }
 
     @Test
     public void testWorkTab_workProfileDisabled_emptyStateShown() {
         // enable the work tab feature flag
-        ResolverActivity.ENABLE_TABBED_VIEW = true;
         markWorkProfileUserAvailable();
         int workProfileTargets = 4;
         List<ResolvedComponentInfo> personalResolvedComponentInfos =
@@ -1507,6 +1506,7 @@ public class ChooserActivityTest {
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
 
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
         final ChooserWrapperActivity activity =
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
         waitForIdle();
@@ -1566,7 +1566,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_cant_share_with_work_apps))
+        onView(withText(R.string.resolver_cross_profile_blocked))
                 .check(matches(isDisplayed()));
     }
 
@@ -1996,7 +1996,7 @@ public class ChooserActivityTest {
         onView(withId(R.id.contentPanel))
                 .perform(swipeUp());
 
-        onView(withText(R.string.resolver_cant_access_work_apps))
+        onView(withText(R.string.resolver_cross_profile_blocked))
                 .check(matches(isDisplayed()));
     }
 
