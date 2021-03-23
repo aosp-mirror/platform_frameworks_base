@@ -170,11 +170,11 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         mAltAuthInterceptor.showAlternativeAuthMethod(); // force show
         assertFalse(mController.shouldPauseAuth());
-        assertTrue(mAltAuthInterceptor.isShowingAlternativeAuth());
+        assertTrue(mAltAuthInterceptor.isShowingAlternateAuth());
 
-        mAltAuthInterceptor.reset(); // stop force show
+        mAltAuthInterceptor.resetForceShow(); // stop force show
         assertTrue(mController.shouldPauseAuth());
-        assertFalse(mAltAuthInterceptor.isShowingAlternativeAuth());
+        assertFalse(mAltAuthInterceptor.isShowingAlternateAuth());
     }
 
     @Test
@@ -190,7 +190,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         mController.onViewDetached();
 
         // THEN alt auth state reports not showing
-        assertFalse(mAltAuthInterceptor.isShowingAlternativeAuth());
+        assertFalse(mAltAuthInterceptor.isShowingAlternateAuth());
     }
 
     private void sendStatusBarStateChanged(int statusBarState) {

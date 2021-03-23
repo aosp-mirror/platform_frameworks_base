@@ -1111,7 +1111,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         when(service.asBinder()).thenReturn(mock(IBinder.class));
         ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
                 mIpm, APPROVAL_BY_PACKAGE);
-        services.registerSystemService(service, null, 10);
+        services.registerSystemService(service, null, 10, 1000);
         ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
         info.isSystem = true;
 
@@ -1163,10 +1163,10 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         ManagedServices.ManagedServiceInfo service0 = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("a/a"), 0, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 34);
         ManagedServices.ManagedServiceInfo service10 = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("b/b"), 10, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 345);
         Set<ManagedServices.ManagedServiceInfo> removableBoundServices = new ArraySet<>();
         removableBoundServices.add(service0);
         removableBoundServices.add(service10);
@@ -1199,13 +1199,13 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         ManagedServices.ManagedServiceInfo service0 = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("a/a"), 0, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 345);
         ManagedServices.ManagedServiceInfo service0a = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("c/c"), 0, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 3456);
         ManagedServices.ManagedServiceInfo service10 = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("b/b"), 10, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 34567);
         Set<ManagedServices.ManagedServiceInfo> removableBoundServices = new ArraySet<>();
         removableBoundServices.add(service0);
         removableBoundServices.add(service0a);

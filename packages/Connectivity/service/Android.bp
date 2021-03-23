@@ -68,7 +68,23 @@ java_library {
         "net-utils-framework-common",
         "netd-client",
         "PlatformProperties",
+        "service-connectivity-protos",
     ],
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.tethering",
+    ],
+}
+
+java_library {
+    name: "service-connectivity-protos",
+    proto: {
+        type: "nano",
+    },
+    srcs: [
+        ":system-messages-proto-src",
+    ],
+    libs: ["libprotobuf-java-nano"],
     apex_available: [
         "//apex_available:platform",
         "com.android.tethering",

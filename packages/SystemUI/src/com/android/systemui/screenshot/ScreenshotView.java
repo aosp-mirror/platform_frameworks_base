@@ -142,6 +142,8 @@ public class ScreenshotView extends FrameLayout implements
     private ScreenshotViewCallback mCallbacks;
     private Animator mDismissAnimation;
     private boolean mPendingSharedTransition;
+    private GestureDetector mSwipeDetector;
+    private SwipeDismissHandler mSwipeDismissHandler;
 
     private final ArrayList<ScreenshotActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
@@ -181,6 +183,23 @@ public class ScreenshotView extends FrameLayout implements
         mContext.getDisplay().getRealMetrics(mDisplayMetrics);
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
+
+        mSwipeDetector = new GestureDetector(mContext,
+                new GestureDetector.SimpleOnGestureListener() {
+                    final Rect mActionsRect = new Rect();
+
+                    @Override
+                    public boolean onScroll(
+                            MotionEvent ev1, MotionEvent ev2, float distanceX, float distanceY) {
+                        mActionsContainer.getBoundsOnScreen(mActionsRect);
+                        // return true if we aren't in the actions bar, or if we are but it isn't
+                        // scrollable in the direction of movement
+                        return !mActionsRect.contains((int) ev2.getRawX(), (int) ev2.getRawY())
+                                || !mActionsContainer.canScrollHorizontally((int) distanceX);
+                    }
+                });
+        mSwipeDetector.setIsLongpressEnabled(false);
+        mSwipeDismissHandler = new SwipeDismissHandler();
     }
 
     /**
@@ -228,6 +247,15 @@ public class ScreenshotView extends FrameLayout implements
         }
 
         inoutInfo.touchableRegion.set(touchRegion);
+    }
+
+    @Override // ViewGroup
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        // always pass through the down event so the swipe handler knows the initial state
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mSwipeDismissHandler.onTouch(this, ev);
+        }
+        return mSwipeDetector.onTouchEvent(ev);
     }
 
     @Override // View
@@ -455,11 +483,7 @@ public class ScreenshotView extends FrameLayout implements
 
                 createScreenshotActionsShadeAnimation().start();
 
-                SwipeDismissHandler swipeDismissHandler = new SwipeDismissHandler();
-                mScreenshotPreview.setOnTouchListener(swipeDismissHandler);
-                mActionsContainer.setOnTouchListener(swipeDismissHandler);
-                mActionsContainerBackground.setOnTouchListener(swipeDismissHandler);
-                mBackgroundProtection.setOnTouchListener(swipeDismissHandler);
+                setOnTouchListener(mSwipeDismissHandler);
             }
         });
 
@@ -776,30 +800,16 @@ public class ScreenshotView extends FrameLayout implements
     }
 
     class SwipeDismissHandler implements OnTouchListener {
-
-        // if distance moved on ACTION_UP is less than this, register a click
-        // otherwise, run return animator
-        private static final float CLICK_MOVEMENT_THRESHOLD_DP = 1;
         // distance needed to register a dismissal
         private static final float DISMISS_DISTANCE_THRESHOLD_DP = 30;
 
         private final GestureDetector mGestureDetector;
-        private final float mDismissStartX;
-        private final Rect mActionsRect = new Rect();
 
         private float mStartX;
-        private float mStartY;
-        private float mTranslationX = 0;
-
-        // tracks whether mStartX has been set for this interaction
-        private boolean mInteractionStarted = false;
-        // tracks whether we're dragging the UI (as opposed to scrolling the actions bar)
-        private boolean mIsDragging = false;
 
         SwipeDismissHandler() {
             GestureDetector.OnGestureListener gestureListener = new SwipeDismissGestureListener();
             mGestureDetector = new GestureDetector(mContext, gestureListener);
-            mDismissStartX = mDismissButton.getX();
         }
 
         @Override
@@ -807,13 +817,9 @@ public class ScreenshotView extends FrameLayout implements
             boolean gestureResult = mGestureDetector.onTouchEvent(event);
             mCallbacks.onUserInteraction();
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                mInteractionStarted = true;
                 mStartX = event.getRawX();
-                mStartY = event.getRawY();
                 return true;
             } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                mInteractionStarted = false;
-                mIsDragging = false;
                 if (isPastDismissThreshold()
                         && (mDismissAnimation == null || !mDismissAnimation.isRunning())) {
                     if (DEBUG_INPUT) {
@@ -821,87 +827,47 @@ public class ScreenshotView extends FrameLayout implements
                     }
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED);
                     animateDismissal(createSwipeDismissAnimation());
-                    return true;
-                } else if (MathUtils.dist(mStartX, mStartY, event.getRawX(), event.getRawY())
-                        > dpToPx(CLICK_MOVEMENT_THRESHOLD_DP)) {
-                    // if we've moved a non-negligible distance (but not past the threshold),
+                } else {
+                    // if we've moved, but not past the threshold, start the return animation
                     if (DEBUG_DISMISS) {
                         Log.d(TAG, "swipe gesture abandoned");
                     }
-                    // start the return animation
                     if ((mDismissAnimation == null || !mDismissAnimation.isRunning())) {
                         createSwipeReturnAnimation().start();
                     }
-                    return true;
-                } else {
-                    if (view == mScreenshotPreview) {
-                        mScreenshotPreview.performClick();
-                    }
                 }
+                return true;
             }
             return gestureResult;
         }
 
         class SwipeDismissGestureListener extends GestureDetector.SimpleOnGestureListener {
-
-            /**
-             * This is somewhat complicated to handle because we want to allow scrolling the actions
-             * bar (if it extends off the screen) as well as dismissing the UI horizontally by
-             * dragging the actions bar. In addition, we don't get the initial ACTION_DOWN because
-             * it is consumed by the action bar view.
-             *
-             * So, we use a gated system: first, keep track of the pointer location as we move;
-             * next, check whether the actions bar can scroll in the direction we're moving in. If
-             * it can, let the actions bar handle the event; otherwise, we've gone as far as we can
-             * and can start dragging the UI instead.
-             */
             @Override
             public boolean onScroll(
                     MotionEvent ev1, MotionEvent ev2, float distanceX, float distanceY) {
-                mActionsContainer.getBoundsOnScreen(mActionsRect);
-                if (!mInteractionStarted) {
-                    if (mActionsRect.contains((int) ev2.getRawX(), (int) ev2.getRawY())) {
-                        mStartX = ev2.getRawX();
-                        mInteractionStarted = true;
-                    }
-                } else {
-                    float distance = ev2.getRawX() - mStartX;
-                    if ((mIsDragging && distance * mTranslationX > 0)
-                            || !mActionsRect.contains((int) ev2.getRawX(), (int) ev2.getRawY())
-                            || !mActionsContainer.canScrollHorizontally(-1 * (int) distance)) {
-                        mIsDragging = true;
-                        mTranslationX = distance;
-                        mScreenshotStatic.setTranslationX(mTranslationX);
-                        return true;
-                    } else {
-                        mStartX = ev2.getRawX();
-                    }
-                }
-                return false;
+                mScreenshotStatic.setTranslationX(ev2.getRawX() - mStartX);
+                return true;
             }
         }
 
         private boolean isPastDismissThreshold() {
-            if (mDirectionLTR) {
-                return mTranslationX <= -1 * dpToPx(DISMISS_DISTANCE_THRESHOLD_DP);
-            } else {
-                return mTranslationX >= dpToPx(DISMISS_DISTANCE_THRESHOLD_DP);
-            }
+            float distance = Math.abs(mScreenshotStatic.getTranslationX());
+            return distance >= dpToPx(DISMISS_DISTANCE_THRESHOLD_DP);
         }
 
         private ValueAnimator createSwipeDismissAnimation() {
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-            float startX = mTranslationX;
-            float finalX = mDirectionLTR
-                    ? -1 * (mActionsContainerBackground.getX()
-                    + mActionsContainerBackground.getWidth())
+            float startX = mScreenshotStatic.getTranslationX();
+            // make sure the UI gets all the way off the screen in the direction of movement
+            // (the actions container background is guaranteed to be both the leftmost and
+            // rightmost UI element in LTR and RTL)
+            float finalX = startX < 0
+                    ? -1 * mActionsContainerBackground.getRight()
                     : mDisplayMetrics.widthPixels;
 
             anim.addUpdateListener(animation -> {
-                float translation = MathUtils.lerp(startX, finalX,
-                        animation.getAnimatedFraction());
+                float translation = MathUtils.lerp(startX, finalX, animation.getAnimatedFraction());
                 mScreenshotStatic.setTranslationX(translation);
-
                 setAlpha(1 - animation.getAnimatedFraction());
             });
             anim.setDuration(400);
@@ -910,9 +876,8 @@ public class ScreenshotView extends FrameLayout implements
 
         private ValueAnimator createSwipeReturnAnimation() {
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-            float startX = mTranslationX;
+            float startX = mScreenshotStatic.getTranslationX();
             float finalX = 0;
-            mTranslationX = 0;
 
             anim.addUpdateListener(animation -> {
                 float translation = MathUtils.lerp(

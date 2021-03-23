@@ -26,6 +26,10 @@ import java.util.Formatter;
 import java.util.Locale;
 
 /**
+ * API for sending log output to the {@link Log#LOG_ID_SYSTEM} buffer.
+ *
+ * <p>Should be used by system components. Use {@code adb logcat --buffer=system} to fetch the logs.
+ *
  * @hide
  */
 public final class Slog {
