@@ -71,7 +71,6 @@ import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.service.voice.VoiceInteractionSession;
-import android.speech.RecognitionService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -103,6 +102,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -404,9 +404,30 @@ public class VoiceInteractionManagerService extends SystemService {
                 ComponentName curInteractor = !TextUtils.isEmpty(curInteractorStr)
                         ? ComponentName.unflattenFromString(curInteractorStr) : null;
                 try {
-                    recognizerInfo = pm.getServiceInfo(curRecognizer,
+                    recognizerInfo = pm.getServiceInfo(
+                            curRecognizer,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                                    | PackageManager.GET_META_DATA,
+                            userHandle);
+                    if (recognizerInfo != null) {
+                        RecognitionServiceInfo rsi =
+                                RecognitionServiceInfo.parseInfo(
+                                        mContext.getPackageManager(), recognizerInfo);
+                        if (!TextUtils.isEmpty(rsi.getParseError())) {
+                            Log.w(TAG, "Parse error in getAvailableServices: "
+                                    + rsi.getParseError());
+                            // We still use the recognizer to preserve pre-existing behavior.
+                        }
+                        if (!rsi.isSelectableAsDefault()) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "Found non selectableAsDefault recognizer as"
+                                        + " default. Unsetting the default and looking for another"
+                                        + " one.");
+                            }
+                            recognizerInfo = null;
+                        }
+                    }
                     if (curInteractor != null) {
                         interactorInfo = pm.getServiceInfo(curInteractor,
                                 PackageManager.MATCH_DIRECT_BOOT_AWARE
@@ -650,19 +671,23 @@ public class VoiceInteractionManagerService extends SystemService {
                 prefPackage = getDefaultRecognizer();
             }
 
-            List<ResolveInfo> available =
-                    mContext.getPackageManager().queryIntentServicesAsUser(
-                            new Intent(RecognitionService.SERVICE_INTERFACE),
-                            PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
-            int numAvailable = available.size();
-            if (numAvailable == 0) {
+            List<RecognitionServiceInfo> available =
+                    RecognitionServiceInfo.getAvailableServices(mContext, userHandle);
+            if (available.size() == 0) {
                 Slog.w(TAG, "no available voice recognition services found for user " + userHandle);
                 return null;
             } else {
+                List<RecognitionServiceInfo> nonSelectableAsDefault =
+                        removeNonSelectableAsDefault(available);
+                if (available.size() == 0) {
+                    Slog.w(TAG, "No selectableAsDefault recognition services found for user "
+                            + userHandle + ". Falling back to non selectableAsDefault ones.");
+                    available = nonSelectableAsDefault;
+                }
+                int numAvailable = available.size();
                 if (prefPackage != null) {
-                    for (int i=0; i<numAvailable; i++) {
-                        ServiceInfo serviceInfo = available.get(i).serviceInfo;
+                    for (int i = 0; i < numAvailable; i++) {
+                        ServiceInfo serviceInfo = available.get(i).getServiceInfo();
                         if (prefPackage.equals(serviceInfo.packageName)) {
                             return new ComponentName(serviceInfo.packageName, serviceInfo.name);
                         }
@@ -672,9 +697,20 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "more than one voice recognition service found, picking first");
                 }
 
-                ServiceInfo serviceInfo = available.get(0).serviceInfo;
+                ServiceInfo serviceInfo = available.get(0).getServiceInfo();
                 return new ComponentName(serviceInfo.packageName, serviceInfo.name);
             }
+        }
+
+        private List<RecognitionServiceInfo> removeNonSelectableAsDefault(
+                List<RecognitionServiceInfo> services) {
+            List<RecognitionServiceInfo> nonSelectableAsDefault = new ArrayList<>();
+            for (int i = services.size() - 1; i >= 0; i--) {
+                if (!services.get(i).isSelectableAsDefault()) {
+                    nonSelectableAsDefault.add(services.remove(i));
+                }
+            }
+            return nonSelectableAsDefault;
         }
 
         @Nullable
