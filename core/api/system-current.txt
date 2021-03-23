@@ -1728,6 +1728,17 @@ package android.bluetooth.le {
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.ResultStorageDescriptor> CREATOR;
   }
 
+  public final class ScanFilter implements android.os.Parcelable {
+    method public int getAddressType();
+    method @Nullable public byte[] getIrk();
+  }
+
+  public static final class ScanFilter.Builder {
+    method @NonNull public android.bluetooth.le.ScanFilter.Builder setDeviceAddress(@NonNull String, int);
+    method @NonNull public android.bluetooth.le.ScanFilter.Builder setDeviceAddress(@NonNull String, int, @NonNull byte[]);
+    field public static final int LEN_IRK_OCTETS = 16; // 0x10
+  }
+
   public final class ScanSettings implements android.os.Parcelable {
     field public static final int SCAN_MODE_AMBIENT_DISCOVERY = 3; // 0x3
     field public static final int SCAN_RESULT_TYPE_ABBREVIATED = 1; // 0x1
@@ -10096,7 +10107,7 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.AllowedNetworkTypesListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onAllowedNetworkTypesChanged(@NonNull java.util.Map<java.lang.Integer,java.lang.Long>);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onAllowedNetworkTypesChanged(int, long);
   }
 
   public static interface TelephonyCallback.CallAttributesListener {
@@ -10323,6 +10334,7 @@ package android.telephony {
     field public static final String CAPABILITY_ALLOWED_NETWORK_TYPES_USED = "CAPABILITY_ALLOWED_NETWORK_TYPES_USED";
     field public static final String CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE = "CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE";
     field public static final String CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE = "CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE";
+    field public static final String CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING = "CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING";
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0

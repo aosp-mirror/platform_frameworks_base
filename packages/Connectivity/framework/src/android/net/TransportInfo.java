@@ -29,35 +29,47 @@ import android.annotation.SystemApi;
 public interface TransportInfo {
 
     /**
-     * Create a copy of a {@link TransportInfo} that will preserve location sensitive fields that
-     * were set based on the permissions of the process that originally received it.
+     * Create a copy of a {@link TransportInfo} with some fields redacted based on the permissions
+     * held by the receiving app.
      *
-     * <p>By default {@link TransportInfo} does not preserve such fields during parceling, as
-     * they should not be shared outside of the process that receives them without appropriate
-     * checks.
+     * <p>
+     * Usage by connectivity stack:
+     * <ul>
+     * <li> Connectivity stack will invoke {@link #getApplicableRedactions()} to find the list
+     * of redactions that are required by this {@link TransportInfo} instance.</li>
+     * <li> Connectivity stack then loops through each bit in the bitmask returned and checks if the
+     * receiving app holds the corresponding permission.
+     * <ul>
+     * <li> If the app holds the corresponding permission, the bit is cleared from the
+     * |redactions| bitmask. </li>
+     * <li> If the app does not hold the corresponding permission, the bit is retained in the
+     * |redactions| bitmask. </li>
+     * </ul>
+     * <li> Connectivity stack then invokes {@link #makeCopy(long)} with the necessary |redactions|
+     * to create a copy to send to the corresponding app. </li>
+     * </ul>
+     * </p>
      *
-     * @param parcelLocationSensitiveFields Whether the location sensitive fields should be kept
-     *                                      when parceling
-     * @return Copy of this instance.
+     * @param redactions bitmask of redactions that needs to be performed on this instance.
+     * @return Copy of this instance with the necessary redactions.
      * @hide
      */
-    @SystemApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
-    default TransportInfo makeCopy(boolean parcelLocationSensitiveFields) {
+    default TransportInfo makeCopy(@NetworkCapabilities.RedactionType long redactions) {
         return this;
     }
 
     /**
-     * Returns whether this TransportInfo type has location sensitive fields or not (helps
-     * to determine whether to perform a location permission check or not before sending to
-     * apps).
+     * Returns a bitmask of all the applicable redactions (based on the permissions held by the
+     * receiving app) to be performed on this TransportInfo.
      *
-     * @return {@code true} if this instance contains location sensitive info, {@code false}
-     * otherwise.
+     * @return bitmask of redactions applicable on this instance.
+     * @see #makeCopy(long)
      * @hide
      */
-    @SystemApi
-    default boolean hasLocationSensitiveFields() {
-        return false;
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    default @NetworkCapabilities.RedactionType long getApplicableRedactions() {
+        return NetworkCapabilities.REDACT_NONE;
     }
 }

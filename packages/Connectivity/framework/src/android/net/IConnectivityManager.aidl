@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.net.ConnectionInfo;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.IConnectivityDiagnosticsCallback;
+import android.net.INetworkAgent;
 import android.net.IOnCompleteListener;
 import android.net.INetworkActivityListener;
 import android.net.IQosCallback;
@@ -44,8 +45,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
-
-import com.android.connectivity.aidl.INetworkAgent;
 
 /**
  * Interface that answers queries about, and allows changing, the
@@ -143,7 +142,7 @@ interface IConnectivityManager
             in NetworkCapabilities nc, in NetworkScore score, in NetworkAgentConfig config,
             in int factorySerialNumber);
 
-    NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities, int reqType,
+    NetworkRequest requestNetwork(int uid, in NetworkCapabilities networkCapabilities, int reqType,
             in Messenger messenger, int timeoutSec, in IBinder binder, int legacy,
             int callbackFlags, String callingPackageName, String callingAttributionTag);
 
@@ -220,4 +219,6 @@ interface IConnectivityManager
 
     void setProfileNetworkPreference(in UserHandle profile, int preference,
             in IOnCompleteListener listener);
+
+    int getRestrictBackgroundStatusByCaller();
 }

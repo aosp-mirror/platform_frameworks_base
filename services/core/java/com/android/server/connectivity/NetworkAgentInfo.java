@@ -25,6 +25,8 @@ import android.content.Context;
 import android.net.CaptivePortalData;
 import android.net.IDnsResolver;
 import android.net.INetd;
+import android.net.INetworkAgent;
+import android.net.INetworkAgentRegistry;
 import android.net.INetworkMonitor;
 import android.net.LinkProperties;
 import android.net.NattKeepalivePacketData;
@@ -51,8 +53,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
-import com.android.connectivity.aidl.INetworkAgent;
-import com.android.connectivity.aidl.INetworkAgentRegistry;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.ConnectivityService;
 
