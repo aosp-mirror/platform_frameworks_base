@@ -1553,7 +1553,7 @@ public class ConnectivityServiceTest {
         doReturn(mNetworkStack).when(deps).getNetworkStack();
         doReturn(mSystemProperties).when(deps).getSystemProperties();
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
-        doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
+        doReturn(true).when(deps).queryUserAccess(anyInt(), any(), any());
         doAnswer(inv -> {
             mPolicyTracker = new WrappedMultinetworkPolicyTracker(
                     inv.getArgument(0), inv.getArgument(1), inv.getArgument(2));
