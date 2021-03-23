@@ -288,7 +288,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
 
     private final String mKeystoreAlias;
-    private final int mNamespace;
+    private final @KeyProperties.Namespace int mNamespace;
     private final int mKeySize;
     private final AlgorithmParameterSpec mSpec;
     private final X500Principal mCertificateSubject;
@@ -331,7 +331,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      */
     public KeyGenParameterSpec(
             String keyStoreAlias,
-            int namespace,
+            @KeyProperties.Namespace int namespace,
             int keySize,
             AlgorithmParameterSpec spec,
             X500Principal certificateSubject,
@@ -472,7 +472,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      * @hide
      */
     @SystemApi
-    public int getNamespace() {
+    public @KeyProperties.Namespace int getNamespace() {
         return mNamespace;
     }
 
@@ -896,7 +896,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private final String mKeystoreAlias;
         private @KeyProperties.PurposeEnum int mPurposes;
 
-        private int mNamespace = KeyProperties.NAMESPACE_APPLICATION;
+        private @KeyProperties.Namespace int mNamespace = KeyProperties.NAMESPACE_APPLICATION;
         private int mKeySize = -1;
         private AlgorithmParameterSpec mSpec;
         private X500Principal mCertificateSubject;
@@ -1051,7 +1051,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          */
         @SystemApi
         @NonNull
-        public Builder setNamespace(int namespace) {
+        public Builder setNamespace(@KeyProperties.Namespace int namespace) {
             mNamespace = namespace;
             return this;
         }
