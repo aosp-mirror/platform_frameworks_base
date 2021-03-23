@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.media.permission.Identity;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
 
@@ -229,13 +230,14 @@ interface IVoiceInteractionManagerService {
      * Set configuration and pass read-only data to hotword detection service.
      *
      * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
-     * contents that can be used to communicate with other processes.
+     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
      * @param sharedMemory The unrestricted data blob provided by the
      * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
      */
-    void setHotwordDetectionServiceConfig(in Bundle options, in SharedMemory sharedMemory);
+    void setHotwordDetectionServiceConfig(
+            in PersistableBundle options, in SharedMemory sharedMemory);
 
     /**
      * Requests to shutdown hotword detection service.
