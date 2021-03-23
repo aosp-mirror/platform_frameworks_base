@@ -25,6 +25,7 @@
     android:singleLine="true"
     android:clickable="true"
     android:background="@drawable/chooser_action_button_bg"
-    android:drawableTint="@color/chooser_chip_icon"
+    android:drawableTint="?android:textColorPrimary"
     android:drawableTintMode="src_in"
+    style="?android:attr/borderlessButtonStyle"
     />
