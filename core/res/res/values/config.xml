@@ -951,6 +951,11 @@
     -->
     <integer name="config_longPressOnPowerBehavior">1</integer>
 
+    <!-- Whether the setting to change long press on power behaviour from default to assistant (5)
+         is available in Settings.
+     -->
+    <bool name="config_longPressOnPowerForAssistantSettingAvailable">true</bool>
+
     <!-- Control the behavior when the user long presses the power button for a long time.
             0 - Nothing
             1 - Global actions menu
