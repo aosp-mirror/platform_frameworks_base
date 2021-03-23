@@ -96,6 +96,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_PROCESS_CRASH_COUNT_LIMIT = "process_crash_count_limit";
     static final String KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION = "boot_time_temp_allowlist_duration";
     static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
+    static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -135,7 +136,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int DEFAULT_PROCESS_CRASH_COUNT_LIMIT = 12;
     private static final int DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION = 10 * 1000;
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
-
+    private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -396,6 +397,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile long mFgToBgFgsGraceDuration = DEFAULT_FG_TO_BG_FGS_GRACE_DURATION;
 
+    /**
+     * When service started from background, before the timeout it can be promoted to FGS by calling
+     * Service.startForeground().
+     */
+    volatile long mFgsStartForegroundTimeoutMs = DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -585,6 +592,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_FG_TO_BG_FGS_GRACE_DURATION:
                                 updateFgToBgFgsGraceDuration();
+                                break;
+                            case KEY_FGS_START_FOREGROUND_TIMEOUT:
+                                updateFgsStartForegroundTimeout();
                                 break;
                             default:
                                 break;
@@ -869,6 +879,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_FG_TO_BG_FGS_GRACE_DURATION);
     }
 
+    private void updateFgsStartForegroundTimeout() {
+        mFgsStartForegroundTimeoutMs = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_START_FOREGROUND_TIMEOUT,
+                DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS);
+    }
+
     private void updateImperceptibleKillExemptions() {
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.clear();
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
@@ -1071,6 +1088,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(mBootTimeTempAllowlistDuration);
         pw.print("  "); pw.print(KEY_FG_TO_BG_FGS_GRACE_DURATION); pw.print("=");
         pw.println(mFgToBgFgsGraceDuration);
+        pw.print("  "); pw.print(KEY_FGS_START_FOREGROUND_TIMEOUT); pw.print("=");
+        pw.println(mFgsStartForegroundTimeoutMs);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
