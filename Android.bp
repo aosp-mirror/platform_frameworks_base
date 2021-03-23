@@ -306,8 +306,8 @@ filegroup {
 genrule {
     name: "statslog-telephony-common-java-gen",
     tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --module telephony_common"
-        + " --javaPackage com.android.internal.telephony --javaClass TelephonyCommonStatsLog",
+    cmd: "$(location stats-log-api-gen) --java $(out) --module telephony_common" +
+        " --javaPackage com.android.internal.telephony --javaClass TelephonyCommonStatsLog",
     out: ["com/android/internal/telephony/TelephonyCommonStatsLog.java"],
 }
 
@@ -607,7 +607,6 @@ java_library {
         // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
         "gps_debug.conf",
         "icu4j-platform-compat-config",
-        "libcore-platform-compat-config",
         "protolog.conf.json.gz",
         "services-platform-compat-config",
         "documents-ui-compat-config",
@@ -687,7 +686,7 @@ genrule {
     name: "statslog-framework-java-gen",
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out) --module framework" +
-         " --javaPackage com.android.internal.util --javaClass FrameworkStatsLog --worksource",
+        " --javaPackage com.android.internal.util --javaClass FrameworkStatsLog --worksource",
     out: ["com/android/internal/util/FrameworkStatsLog.java"],
 }
 
@@ -788,7 +787,7 @@ filegroup {
 
 java_library {
     name: "framework-annotations-lib",
-    srcs: [ ":framework-annotations" ],
+    srcs: [":framework-annotations"],
     sdk_version: "core_current",
 }
 
@@ -1015,7 +1014,6 @@ cc_library {
     },
 }
 
-
 // This is the full proto version of libplatformprotos. It may only
 // be used by test code that is not shipped on the device.
 cc_library {
@@ -1176,7 +1174,7 @@ java_library {
         "core/java/android/os/RemoteException.java",
         "core/java/android/util/AndroidException.java",
     ],
-    libs: [ "unsupportedappusage" ],
+    libs: ["unsupportedappusage"],
 
     dxflags: ["--core-library"],
     installable: false,
