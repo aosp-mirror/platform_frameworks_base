@@ -130,12 +130,6 @@ public final class SystemUiDeviceConfigFlags {
     // Flags related to media notifications
 
     /**
-     * (boolean) If {@code true}, enables the seekbar in compact media notifications.
-     */
-    public static final String COMPACT_MEDIA_SEEKBAR_ENABLED =
-            "compact_media_notification_seekbar_enabled";
-
-    /**
      * (int) Maximum number of days to retain the salt for hashing direct share targets in logging
      */
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
