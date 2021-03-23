@@ -149,8 +149,11 @@ class ZygoteConnection {
                     return null;
                 }
 
-                if (parsedArgs.mUsapPoolStatusSpecified) {
-                    // Handle this once we've released the argBuffer, to avoid opening a second one.
+                if (parsedArgs.mUsapPoolStatusSpecified
+                        || parsedArgs.mApiDenylistExemptions != null
+                        || parsedArgs.mHiddenApiAccessLogSampleRate != -1
+                        || parsedArgs.mHiddenApiAccessStatslogSampleRate != -1) {
+                    // Handle these once we've released argBuffer, to avoid opening a second one.
                     break;
                 }
 
@@ -181,18 +184,6 @@ class ZygoteConnection {
                         throw new IllegalArgumentException("Failed to deserialize --preload-app");
                     }
                     return null;
-                }
-
-                if (parsedArgs.mApiDenylistExemptions != null) {
-                    return handleApiDenylistExemptions(zygoteServer,
-                            parsedArgs.mApiDenylistExemptions);
-                }
-
-                if (parsedArgs.mHiddenApiAccessLogSampleRate != -1
-                        || parsedArgs.mHiddenApiAccessStatslogSampleRate != -1) {
-                    return handleHiddenApiAccessLogSampleRate(zygoteServer,
-                            parsedArgs.mHiddenApiAccessLogSampleRate,
-                            parsedArgs.mHiddenApiAccessStatslogSampleRate);
                 }
 
                 if (parsedArgs.mPermittedCapabilities != 0
@@ -311,9 +302,19 @@ class ZygoteConnection {
                 }
             }
         }
+        // Handle anything that may need a ZygoteCommandBuffer after we've released ours.
         if (parsedArgs.mUsapPoolStatusSpecified) {
-            // Now that we've released argBuffer:
             return handleUsapPoolStatusChange(zygoteServer, parsedArgs.mUsapPoolEnabled);
+        }
+        if (parsedArgs.mApiDenylistExemptions != null) {
+            return handleApiDenylistExemptions(zygoteServer,
+                    parsedArgs.mApiDenylistExemptions);
+        }
+        if (parsedArgs.mHiddenApiAccessLogSampleRate != -1
+                || parsedArgs.mHiddenApiAccessStatslogSampleRate != -1) {
+            return handleHiddenApiAccessLogSampleRate(zygoteServer,
+                    parsedArgs.mHiddenApiAccessLogSampleRate,
+                    parsedArgs.mHiddenApiAccessStatslogSampleRate);
         }
         throw new AssertionError("Shouldn't get here");
     }
