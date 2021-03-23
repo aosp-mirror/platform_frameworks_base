@@ -305,8 +305,27 @@ public class NetworkRequest implements Parcelable {
          *
          * @hide
          */
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         public Builder addUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.addUnwantedCapability(capability);
+            return this;
+        }
+
+        /**
+         * Removes (if found) the given unwanted capability from this builder instance.
+         *
+         * @param capability The unwanted capability to remove.
+         * @return The builder to facilitate chaining.
+         *
+         * @hide
+         */
+        @NonNull
+        @SuppressLint("BuilderSetStyle")
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        public Builder removeUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
+            mNetworkCapabilities.removeUnwantedCapability(capability);
             return this;
         }
 
@@ -567,6 +586,7 @@ public class NetworkRequest implements Parcelable {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean hasUnwantedCapability(@NetCapability int capability) {
         return networkCapabilities.hasUnwantedCapability(capability);
     }

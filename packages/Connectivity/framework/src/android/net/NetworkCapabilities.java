@@ -639,19 +639,31 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Removes (if found) the given capability from this {@code NetworkCapability} instance.
+     * Removes (if found) the given capability from this {@code NetworkCapability}
+     * instance that were added via addCapability(int) or setCapabilities(int[], int[]).
      *
      * @param capability the capability to be removed.
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public @NonNull NetworkCapabilities removeCapability(@NetCapability int capability) {
-        // Note that this method removes capabilities that were added via addCapability(int),
-        // addUnwantedCapability(int) or setCapabilities(int[], int[]).
         checkValidCapability(capability);
         final long mask = ~(1 << capability);
         mNetworkCapabilities &= mask;
-        mUnwantedNetworkCapabilities &= mask;
+        return this;
+    }
+
+    /**
+     * Removes (if found) the given unwanted capability from this {@code NetworkCapability}
+     * instance that were added via addUnwantedCapability(int) or setCapabilities(int[], int[]).
+     *
+     * @param capability the capability to be removed.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
+     * @hide
+     */
+    public @NonNull NetworkCapabilities removeUnwantedCapability(@NetCapability int capability) {
+        checkValidCapability(capability);
+        mUnwantedNetworkCapabilities &= ~(1 << capability);
         return this;
     }
 
@@ -723,6 +735,7 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /** @hide */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean hasUnwantedCapability(@NetCapability int capability) {
         return isValidCapability(capability)
                 && ((mUnwantedNetworkCapabilities & (1 << capability)) != 0);
@@ -736,10 +749,16 @@ public final class NetworkCapabilities implements Parcelable {
         return ((mNetworkCapabilities & CONNECTIVITY_MANAGED_CAPABILITIES) != 0);
     }
 
-    /** Note this method may result in having the same capability in wanted and unwanted lists. */
     private void combineNetCapabilities(@NonNull NetworkCapabilities nc) {
-        this.mNetworkCapabilities |= nc.mNetworkCapabilities;
-        this.mUnwantedNetworkCapabilities |= nc.mUnwantedNetworkCapabilities;
+        final long wantedCaps = this.mNetworkCapabilities | nc.mNetworkCapabilities;
+        final long unwantedCaps =
+                this.mUnwantedNetworkCapabilities | nc.mUnwantedNetworkCapabilities;
+        if ((wantedCaps & unwantedCaps) != 0) {
+            throw new IllegalArgumentException(
+                    "Cannot have the same capability in wanted and unwanted lists.");
+        }
+        this.mNetworkCapabilities = wantedCaps;
+        this.mUnwantedNetworkCapabilities = unwantedCaps;
     }
 
     /**
