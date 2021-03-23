@@ -121,8 +121,8 @@ public class SplashscreenContentDrawer {
         } else if (mTmpAttrs.mWindowBgResId != 0) {
             themeBGDrawable = context.getDrawable(mTmpAttrs.mWindowBgResId);
         } else {
-            Slog.w(TAG, "Window background not exist!");
             themeBGDrawable = createDefaultBackgroundDrawable();
+            Slog.w(TAG, "Window background does not exist, using " + themeBGDrawable);
         }
         final int estimatedWindowBGColor = estimateWindowBGColor(themeBGDrawable);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
