@@ -4343,6 +4343,11 @@
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
 
+    <!-- Boolean indicating whether all CB messages should be disabled on this device. This config
+         is intended to be used by OEMs who need to disable CB messages for regulatory requirements,
+         (e.g. the device is a tablet in a country where tablets should not receive CB messages) -->
+    <bool translatable="false" name="config_disable_all_cb_messages">false</bool>
+
     <!-- Screen Wake Keys
          Determines whether the specified key groups can be used to wake up the device. -->
     <bool name="config_wakeOnDpadKeyPress">true</bool>
