@@ -38,14 +38,12 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
 import static android.net.NetworkCapabilities.REDACT_FOR_ACCESS_FINE_LOCATION;
 import static android.net.NetworkCapabilities.REDACT_FOR_LOCAL_MAC_ADDRESS;
 import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
-import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
 import static android.net.NetworkCapabilities.SIGNAL_STRENGTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
-import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
 import static android.os.Process.INVALID_UID;
 
 import static com.android.modules.utils.build.SdkLevel.isAtLeastR;
@@ -103,20 +101,6 @@ public class NetworkCapabilitiesTest {
 
     @Test
     public void testMaybeMarkCapabilitiesRestricted() {
-        // verify EIMS is restricted
-        assertEquals((1 << NET_CAPABILITY_EIMS) & RESTRICTED_CAPABILITIES,
-                (1 << NET_CAPABILITY_EIMS));
-
-        // verify CBS is also restricted
-        assertEquals((1 << NET_CAPABILITY_CBS) & RESTRICTED_CAPABILITIES,
-                (1 << NET_CAPABILITY_CBS));
-
-        // verify default is not restricted
-        assertEquals((1 << NET_CAPABILITY_INTERNET) & RESTRICTED_CAPABILITIES, 0);
-
-        // just to see
-        assertEquals(RESTRICTED_CAPABILITIES & UNRESTRICTED_CAPABILITIES, 0);
-
         // check that internet does not get restricted
         NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
@@ -982,26 +966,6 @@ public class NetworkCapabilitiesTest {
         nc.setSignalStrength(-80);
         assertEquals(-80, nc.getSignalStrength());
         assertNotEquals(-50, nc.getSignalStrength());
-    }
-
-    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
-    public void testDeduceRestrictedCapability() {
-        final NetworkCapabilities nc = new NetworkCapabilities();
-        // Default capabilities don't have restricted capability.
-        assertFalse(nc.deduceRestrictedCapability());
-        // If there is a force restricted capability, then the network capabilities is restricted.
-        nc.addCapability(NET_CAPABILITY_OEM_PAID);
-        nc.addCapability(NET_CAPABILITY_INTERNET);
-        assertTrue(nc.deduceRestrictedCapability());
-        // Except for the force restricted capability, if there is any unrestricted capability in
-        // capabilities, then the network capabilities is not restricted.
-        nc.removeCapability(NET_CAPABILITY_OEM_PAID);
-        nc.addCapability(NET_CAPABILITY_CBS);
-        assertFalse(nc.deduceRestrictedCapability());
-        // Except for the force restricted capability, the network capabilities will only be treated
-        // as restricted when there is no any unrestricted capability.
-        nc.removeCapability(NET_CAPABILITY_INTERNET);
-        assertTrue(nc.deduceRestrictedCapability());
     }
 
     private void assertNoTransport(NetworkCapabilities nc) {
