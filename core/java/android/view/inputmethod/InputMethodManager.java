@@ -2017,10 +2017,12 @@ public final class InputMethodManager {
             }
             mServedInputConnectionWrapper = servedContext;
 
-            try {
-                if (DEBUG) Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
+            if (DEBUG) {
+                Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
                         + ic + " tba=" + tba + " startInputFlags="
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
+            }
+            try {
                 final Completable.InputBindResult value = Completable.createInputBindResult();
                 mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
@@ -2028,37 +2030,37 @@ public final class InputMethodManager {
                         view.getContext().getApplicationInfo().targetSdkVersion,
                         ResultCallbacks.of(value));
                 res = Completable.getResult(value);
-                if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
-                if (res == null) {
-                    Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
-                            + " null. startInputReason="
-                            + InputMethodDebug.startInputReasonToString(startInputReason)
-                            + " editorInfo=" + tba
-                            + " startInputFlags="
-                            + InputMethodDebug.startInputFlagsToString(startInputFlags));
-                    return false;
-                }
-                mActivityViewToScreenMatrix = res.getActivityViewToScreenMatrix();
-                mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
-                if (res.id != null) {
-                    setInputChannelLocked(res.channel);
-                    mBindSequence = res.sequence;
-                    mCurMethod = res.method; // for @UnsupportedAppUsage
-                    mCurrentInputMethodSession = InputMethodSessionWrapper.createOrNull(res.method);
-                    mCurId = res.id;
-                } else if (res.channel != null && res.channel != mCurChannel) {
-                    res.channel.dispose();
-                }
-                switch (res.result) {
-                    case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
-                        mRestartOnNextWindowFocus = true;
-                        break;
-                }
-                if (mCurrentInputMethodSession != null && mCompletions != null) {
-                    mCurrentInputMethodSession.displayCompletions(mCompletions);
-                }
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
+                throw e.rethrowFromSystemServer();
+            }
+            if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
+            if (res == null) {
+                Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
+                        + " null. startInputReason="
+                        + InputMethodDebug.startInputReasonToString(startInputReason)
+                        + " editorInfo=" + tba
+                        + " startInputFlags="
+                        + InputMethodDebug.startInputFlagsToString(startInputFlags));
+                return false;
+            }
+            mActivityViewToScreenMatrix = res.getActivityViewToScreenMatrix();
+            mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
+            if (res.id != null) {
+                setInputChannelLocked(res.channel);
+                mBindSequence = res.sequence;
+                mCurMethod = res.method; // for @UnsupportedAppUsage
+                mCurrentInputMethodSession = InputMethodSessionWrapper.createOrNull(res.method);
+                mCurId = res.id;
+            } else if (res.channel != null && res.channel != mCurChannel) {
+                res.channel.dispose();
+            }
+            switch (res.result) {
+                case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
+                    mRestartOnNextWindowFocus = true;
+                    break;
+            }
+            if (mCurrentInputMethodSession != null && mCompletions != null) {
+                mCurrentInputMethodSession.displayCompletions(mCompletions);
             }
         }
 
