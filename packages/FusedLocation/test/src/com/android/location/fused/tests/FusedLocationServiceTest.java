@@ -151,20 +151,14 @@ public class FusedLocationServiceTest {
         }
 
         @Override
-        public void onInitialize(boolean allowed, ProviderProperties properties, String packageName,
-                String attributionTag) {
-
-        }
+        public void onInitialize(boolean allowed, ProviderProperties properties,
+                String attributionTag) {}
 
         @Override
-        public void onSetAllowed(boolean allowed) {
-
-        }
+        public void onSetAllowed(boolean allowed) {}
 
         @Override
-        public void onSetProperties(ProviderProperties properties) {
-
-        }
+        public void onSetProperties(ProviderProperties properties) {}
 
         @Override
         public void onReportLocation(Location location) {
@@ -177,9 +171,7 @@ public class FusedLocationServiceTest {
         }
 
         @Override
-        public void onFlushComplete() {
-
-        }
+        public void onFlushComplete() {}
 
         public Location getNextLocation(long timeoutMs) throws InterruptedException {
             return mLocations.poll(timeoutMs, TimeUnit.MILLISECONDS);
