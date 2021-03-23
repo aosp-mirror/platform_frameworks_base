@@ -531,11 +531,22 @@ public class NetworkCapabilitiesTest {
         assertFalse(nc1.equalsNetCapabilities(nc2));
         nc2.addUnwantedCapability(NET_CAPABILITY_INTERNET);
         assertTrue(nc1.equalsNetCapabilities(nc2));
+        if (isAtLeastS()) {
+            // Remove a required capability doesn't affect unwanted capabilities.
+            // This is a behaviour change from S.
+            nc1.removeCapability(NET_CAPABILITY_INTERNET);
+            assertTrue(nc1.equalsNetCapabilities(nc2));
 
-        nc1.removeCapability(NET_CAPABILITY_INTERNET);
-        assertFalse(nc1.equalsNetCapabilities(nc2));
-        nc2.removeCapability(NET_CAPABILITY_INTERNET);
-        assertTrue(nc1.equalsNetCapabilities(nc2));
+            nc1.removeUnwantedCapability(NET_CAPABILITY_INTERNET);
+            assertFalse(nc1.equalsNetCapabilities(nc2));
+            nc2.removeUnwantedCapability(NET_CAPABILITY_INTERNET);
+            assertTrue(nc1.equalsNetCapabilities(nc2));
+        } else {
+            nc1.removeCapability(NET_CAPABILITY_INTERNET);
+            assertFalse(nc1.equalsNetCapabilities(nc2));
+            nc2.removeCapability(NET_CAPABILITY_INTERNET);
+            assertTrue(nc1.equalsNetCapabilities(nc2));
+        }
     }
 
     @Test
@@ -596,11 +607,20 @@ public class NetworkCapabilitiesTest {
         // This will effectively move NOT_ROAMING capability from required to unwanted for nc1.
         nc1.addUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
 
-        nc2.combineCapabilities(nc1);
-        // We will get this capability in both requested and unwanted lists thus this request
-        // will never be satisfied.
-        assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
+        if (isAtLeastS()) {
+            // From S, it is not allowed to have the same capability in both wanted and
+            // unwanted list.
+            assertThrows(IllegalArgumentException.class, () -> nc2.combineCapabilities(nc1));
+        } else {
+            nc2.combineCapabilities(nc1);
+            // We will get this capability in both requested and unwanted lists thus this request
+            // will never be satisfied.
+            assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+            assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
+        }
+
+        // Remove unwanted capability to continue other tests.
+        nc1.removeUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
 
         nc1.setSSID(TEST_SSID);
         nc2.combineCapabilities(nc1);
