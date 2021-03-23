@@ -578,10 +578,10 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testNonAppTarget_notSendNavBar_controlledByFixedRotation() throws Exception {
-        final FixedRotationAnimationController mockController =
-                mock(FixedRotationAnimationController.class);
-        doReturn(mockController).when(mDisplayContent).getFixedRotationAnimationController();
+    public void testNonAppTarget_notSendNavBar_controlledByFadeRotation() throws Exception {
+        final FadeRotationAnimationController mockController =
+                mock(FadeRotationAnimationController.class);
+        doReturn(mockController).when(mDisplayContent).getFadeRotationAnimationController();
         final int transit = TRANSIT_OLD_TASK_OPEN;
         setupForNonAppTargetNavBar(transit, true);
 

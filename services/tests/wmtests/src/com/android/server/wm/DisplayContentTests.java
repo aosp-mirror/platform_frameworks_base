@@ -46,6 +46,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -1267,6 +1268,42 @@ public class DisplayContentTests extends WindowTestsBase {
                 is(Configuration.ORIENTATION_PORTRAIT));
     }
 
+    @Test
+    public void testHybridRotationAnimation() {
+        final DisplayContent displayContent = mDefaultDisplay;
+        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "navBar");
+        final WindowState app = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        final WindowState[] windows = { statusBar, navBar, app };
+        makeWindowVisible(windows);
+        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
+        displayPolicy.addWindowLw(statusBar, statusBar.mAttrs);
+        displayPolicy.addWindowLw(navBar, navBar.mAttrs);
+        final ScreenRotationAnimation rotationAnim = new ScreenRotationAnimation(displayContent,
+                displayContent.getRotation());
+        spyOn(rotationAnim);
+        // Assume that the display rotation is changed so it is frozen in preparation for animation.
+        doReturn(true).when(rotationAnim).hasScreenshot();
+        mWm.mDisplayFrozen = true;
+        displayContent.setRotationAnimation(rotationAnim);
+        // The fade rotation animation also starts to hide some non-app windows.
+        assertNotNull(displayContent.getFadeRotationAnimationController());
+        assertTrue(statusBar.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
+
+        for (WindowState w : windows) {
+            w.setOrientationChanging(true);
+        }
+        // The display only waits for the app window to unfreeze.
+        assertFalse(displayContent.waitForUnfreeze(statusBar));
+        assertFalse(displayContent.waitForUnfreeze(navBar));
+        assertTrue(displayContent.waitForUnfreeze(app));
+        // If all windows animated by fade rotation animation have done the orientation change,
+        // the animation controller should be cleared.
+        statusBar.setOrientationChanging(false);
+        navBar.setOrientationChanging(false);
+        assertNull(displayContent.getFadeRotationAnimationController());
+    }
+
     @UseTestDisplay(addWindows = { W_ACTIVITY, W_WALLPAPER, W_STATUS_BAR, W_NAVIGATION_BAR })
     @Test
     public void testApplyTopFixedRotationTransform() {
@@ -1275,6 +1312,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(false).when(displayPolicy).navigationBarCanMove();
         displayPolicy.addWindowLw(mStatusBarWindow, mStatusBarWindow.mAttrs);
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
+        makeWindowVisible(mStatusBarWindow, mNavBarWindow);
         final Configuration config90 = new Configuration();
         mDisplayContent.computeScreenConfiguration(config90, ROTATION_90);
 
@@ -1297,7 +1335,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
                 false /* forceUpdate */));
 
-        assertNotNull(mDisplayContent.getFixedRotationAnimationController());
+        assertNotNull(mDisplayContent.getFadeRotationAnimationController());
         assertTrue(mStatusBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
                 ANIMATION_TYPE_FIXED_TRANSFORM));
         assertTrue(mNavBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
@@ -1381,7 +1419,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(app.hasFixedRotationTransform());
         assertFalse(app2.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
-        assertNull(mDisplayContent.getFixedRotationAnimationController());
+        assertNull(mDisplayContent.getFadeRotationAnimationController());
     }
 
     @Test
