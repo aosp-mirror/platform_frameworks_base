@@ -55,6 +55,12 @@ public final class Slog {
 
     /**
      * Logs a {@link Log.VERBOSE} message.
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
+     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
+     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
+     * calling this method in a critical path, make sure to explicitly do the check before calling
+     * it.
      */
     public static void v(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.VERBOSE)) return;
@@ -75,6 +81,12 @@ public final class Slog {
 
     /**
      * Logs a {@link Log.DEBUG} message.
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
+     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
+     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
+     * calling this method in a critical path, make sure to explicitly do the check before calling
+     * it.
      */
     public static void d(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.DEBUG)) return;
@@ -94,6 +106,12 @@ public final class Slog {
 
     /**
      * Logs a {@link Log.INFO} message.
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
+     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
+     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
+     * calling this method in a critical path, make sure to explicitly do the check before calling
+     * it.
      */
     public static void i(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.INFO)) return;
@@ -118,6 +136,12 @@ public final class Slog {
 
     /**
      * Logs a {@link Log.WARN} message.
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
+     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
+     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
+     * calling this method in a critical path, make sure to explicitly do the check before calling
+     * it.
      */
     public static void w(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.WARN)) return;
@@ -127,6 +151,12 @@ public final class Slog {
 
     /**
      * Logs a {@link Log.WARN} message with an exception
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
+     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
+     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
+     * calling this method in a critical path, make sure to explicitly do the check before calling
+     * it.
      */
     public static void w(String tag, Exception exception, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.WARN)) return;
@@ -147,6 +177,12 @@ public final class Slog {
 
     /**
      * Logs a {@link Log.ERROR} message.
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
+     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
+     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
+     * calling this method in a critical path, make sure to explicitly do the check before calling
+     * it.
      */
     public static void e(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.ERROR)) return;
@@ -156,6 +192,12 @@ public final class Slog {
 
     /**
      * Logs a {@link Log.ERROR} message with an exception
+     *
+     * <p><strong>Note: </strong>the message will only be formatted if {@link Log#WARN} logging is
+     * enabled for the given {@code tag}, but the compiler will still create an intermediate array
+     * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
+     * calling this method in a critical path, make sure to explicitly do the check before calling
+     * it.
      */
     public static void e(String tag, Exception exception, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.ERROR)) return;
