@@ -2250,10 +2250,12 @@ interface ITelephony {
      *
      * @param subId the id of the subscription
      * @param thermalMitigationRequest holds the parameters necessary for the request.
+     * @param callingPackage the package name of the calling package.
      * @throws InvalidThermalMitigationRequestException if the parametes are invalid.
      */
     int sendThermalMitigationRequest(int subId,
-            in ThermalMitigationRequest thermalMitigationRequest);
+            in ThermalMitigationRequest thermalMitigationRequest,
+            String callingPackage);
 
     /**
      * get the Generic Bootstrapping Architecture authentication keys
