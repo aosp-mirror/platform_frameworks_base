@@ -1337,7 +1337,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             boolean overridePolicy, int callingUid, final int userId, PermissionCallback callback) {
         if (PermissionManager.DEBUG_TRACE_GRANTS
                 && PermissionManager.shouldTraceGrant(packageName, permName, userId)) {
-            Log.i(TAG, "System is granting " + packageName + " "
+            Log.i(PermissionManager.LOG_TAG_TRACE_GRANTS, "System is granting " + packageName + " "
                     + permName + " for user " + userId + " on behalf of uid " + callingUid
                     + " " + mPackageManagerInt.getNameForUid(callingUid),
                     new RuntimeException());
