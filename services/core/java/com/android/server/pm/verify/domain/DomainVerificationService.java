@@ -148,6 +148,8 @@ public class DomainVerificationService extends SystemService
     @NonNull
     private DomainVerificationProxy mProxy = new DomainVerificationProxyUnavailable();
 
+    private boolean mCanSendBroadcasts;
+
     public DomainVerificationService(@NonNull Context context, @NonNull SystemConfig systemConfig,
             @NonNull PlatformCompat platformCompat) {
         super(context);
@@ -181,11 +183,18 @@ public class DomainVerificationService extends SystemService
     @Override
     public void onBootPhase(int phase) {
         super.onBootPhase(phase);
-        if (phase != SystemService.PHASE_BOOT_COMPLETED || !hasRealVerifier()) {
+        if (!hasRealVerifier()) {
             return;
         }
 
-        verifyPackages(null, false);
+        switch (phase) {
+            case PHASE_ACTIVITY_MANAGER_READY:
+                mCanSendBroadcasts = true;
+                break;
+            case PHASE_BOOT_COMPLETED:
+                verifyPackages(null, false);
+                break;
+        }
     }
 
     @Override
@@ -857,7 +866,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (sendBroadcast) {
-            sendBroadcastForPackage(pkgName);
+            sendBroadcast(pkgName);
         }
     }
 
@@ -936,7 +945,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (sendBroadcast && hasAutoVerifyDomains) {
-            sendBroadcastForPackage(pkgName);
+            sendBroadcast(pkgName);
         }
     }
 
@@ -1097,8 +1106,19 @@ public class DomainVerificationService extends SystemService
         return mCollector;
     }
 
-    private void sendBroadcastForPackage(@NonNull String packageName) {
-        mProxy.sendBroadcastForPackages(Collections.singleton(packageName));
+    private void sendBroadcast(@NonNull String packageName) {
+        sendBroadcast(Collections.singleton(packageName));
+    }
+
+    private void sendBroadcast(@NonNull Set<String> packageNames) {
+        if (!mCanSendBroadcasts) {
+            // If the system cannot send broadcasts, it's probably still in boot, so dropping this
+            // request should be fine. The verification agent should re-scan packages once boot
+            // completes.
+            return;
+        }
+
+        mProxy.sendBroadcastForPackages(packageNames);
     }
 
     private boolean hasRealVerifier() {
@@ -1182,7 +1202,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (!packagesToBroadcast.isEmpty()) {
-            mProxy.sendBroadcastForPackages(packagesToBroadcast);
+            sendBroadcast(packagesToBroadcast);
         }
     }
 
