@@ -656,11 +656,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         boolean beforeN = mEntry.targetSdk < Build.VERSION_CODES.N;
         boolean beforeP = mEntry.targetSdk < Build.VERSION_CODES.P;
         boolean beforeS = mEntry.targetSdk < Build.VERSION_CODES.S;
-        if (Notification.DevFlags.shouldBackportSNotifRules(mContext.getContentResolver())) {
-            // When back-porting S rules, if an app targets P/Q/R then enforce the new S rule on
-            // that notification.  If it's before P though, we still want to enforce legacy rules.
-            beforeS = beforeP;
-        }
         int smallHeight;
 
         View expandedView = layout.getExpandedChild();
