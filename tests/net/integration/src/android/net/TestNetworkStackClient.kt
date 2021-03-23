@@ -19,6 +19,7 @@ package android.net
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.networkstack.NetworkStackClientBase
 import android.os.IBinder
 import com.android.server.net.integrationtests.TestNetworkStackService
 import org.mockito.Mockito.any
@@ -29,28 +30,22 @@ import kotlin.test.fail
 
 const val TEST_ACTION_SUFFIX = ".Test"
 
-class TestNetworkStackClient(context: Context) : NetworkStackClient(TestDependencies(context)) {
+class TestNetworkStackClient(private val context: Context) : NetworkStackClientBase() {
     // TODO: consider switching to TrackRecord for more expressive checks
     private val lastCallbacks = HashMap<Network, INetworkMonitorCallbacks>()
+    private val moduleConnector = ConnectivityModuleConnector { _, action, _, _ ->
+        val intent = Intent(action)
+        val serviceName = TestNetworkStackService::class.qualifiedName
+                ?: fail("TestNetworkStackService name not found")
+        intent.component = ComponentName(context.packageName, serviceName)
+        return@ConnectivityModuleConnector intent
+    }.also { it.init(context) }
 
-    private class TestDependencies(private val context: Context) : Dependencies {
-        override fun addToServiceManager(service: IBinder) = Unit
-        override fun checkCallerUid() = Unit
-
-        override fun getConnectivityModuleConnector(): ConnectivityModuleConnector {
-            return ConnectivityModuleConnector { _, _, _, inSystemProcess ->
-                getNetworkStackIntent(inSystemProcess)
-            }.also { it.init(context) }
-        }
-
-        private fun getNetworkStackIntent(inSystemProcess: Boolean): Intent? {
-            // Simulate out-of-system-process config: in-process service not found (null intent)
-            if (inSystemProcess) return null
-            val intent = Intent(INetworkStackConnector::class.qualifiedName + TEST_ACTION_SUFFIX)
-            val serviceName = TestNetworkStackService::class.qualifiedName
-                    ?: fail("TestNetworkStackService name not found")
-            intent.component = ComponentName(context.packageName, serviceName)
-            return intent
+    fun start() {
+        moduleConnector.startModuleService(
+                INetworkStackConnector::class.qualifiedName + TEST_ACTION_SUFFIX,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) { connector ->
+            onNetworkStackConnected(INetworkStackConnector.Stub.asInterface(connector))
         }
     }
 
