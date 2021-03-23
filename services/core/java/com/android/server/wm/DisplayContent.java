@@ -3724,10 +3724,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // config. (Only happens when the target window is in a different root DA)
         if (target != null) {
             RootDisplayArea targetRoot = target.getRootDisplayArea();
-            if (targetRoot != null) {
+            if (targetRoot != null && targetRoot != mImeWindowsContainer.getRootDisplayArea()) {
                 // Reposition the IME container to the target root to get the correct bounds and
                 // config.
                 targetRoot.placeImeContainer(mImeWindowsContainer);
+                // Directly hide the IME window so it doesn't flash immediately after reparenting.
+                // InsetsController will make IME visible again before animating it.
+                if (mInputMethodWindow != null) {
+                    mInputMethodWindow.hide(false /* doAnimation */, false /* requestAnim */);
+                }
             }
         }
         // 2. Assign window layers based on the IME surface parent to make sure it is on top of the
