@@ -224,7 +224,22 @@
                       targetSdk="29">
         <new-permission name="android.permission.ACCESS_MEDIA_LOCATION" />
     </split-permission>
-
+    <split-permission name="android.permission.BLUETOOTH"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_SCAN" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH_ADMIN"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_SCAN" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH_ADMIN"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
+    </split-permission>
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->
