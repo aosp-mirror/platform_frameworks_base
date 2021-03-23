@@ -21,6 +21,8 @@ import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -42,6 +44,7 @@ import android.net.IpSecTunnelInterfaceResponse;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.IkeSessionCallback;
@@ -267,7 +270,12 @@ public class VcnGatewayConnectionTestBase {
                 expectCanceled);
     }
 
-    protected void verifySafeModeTimeoutNotifiesCallback(@NonNull State expectedState) {
+    protected void verifySafeModeTimeoutNotifiesCallbackAndUnregistersNetworkAgent(
+            @NonNull State expectedState) {
+        // Set a NetworkAgent, and expect it to be unregistered and cleared
+        final NetworkAgent mockNetworkAgent = mock(NetworkAgent.class);
+        mGatewayConnection.setNetworkAgent(mockNetworkAgent);
+
         // SafeMode timer starts when VcnGatewayConnection exits DisconnectedState (the initial
         // state)
         final Runnable delayedEvent =
@@ -275,7 +283,11 @@ public class VcnGatewayConnectionTestBase {
         delayedEvent.run();
         mTestLooper.dispatchAll();
 
-        verify(mGatewayStatusCallback).onEnteredSafeMode();
+        verify(mGatewayStatusCallback).onSafeModeStatusChanged();
         assertEquals(expectedState, mGatewayConnection.getCurrentState());
+        assertTrue(mGatewayConnection.isInSafeMode());
+
+        verify(mockNetworkAgent).unregister();
+        assertNull(mGatewayConnection.getNetworkAgent());
     }
 }

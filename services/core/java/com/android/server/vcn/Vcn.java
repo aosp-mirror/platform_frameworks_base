@@ -96,16 +96,20 @@ public class Vcn extends Handler {
      */
     private static final int MSG_EVENT_GATEWAY_CONNECTION_QUIT = MSG_EVENT_BASE + 3;
 
+    /**
+     * Triggers reevaluation of safe mode conditions.
+     *
+     * <p>Upon entering safe mode, the VCN will only provide gateway connections opportunistically,
+     * leaving the underlying networks marked as NOT_VCN_MANAGED.
+     *
+     * <p>Any VcnGatewayConnection in safe mode will result in the entire Vcn instance being put
+     * into safe mode. Upon receiving this message, the Vcn MUST query all VcnGatewayConnections to
+     * determine if any are in safe mode.
+     */
+    private static final int MSG_EVENT_SAFE_MODE_STATE_CHANGED = MSG_EVENT_BASE + 4;
+
     /** Triggers an immediate teardown of the entire Vcn, including GatewayConnections. */
     private static final int MSG_CMD_TEARDOWN = MSG_CMD_BASE;
-
-    /**
-     * Causes this VCN to immediately enter safe mode.
-     *
-     * <p>Upon entering safe mode, the VCN will unregister its RequestListener, tear down all of its
-     * VcnGatewayConnections, and notify VcnManagementService that it is in safe mode.
-     */
-    private static final int MSG_CMD_ENTER_SAFE_MODE = MSG_CMD_BASE + 1;
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
@@ -233,6 +237,11 @@ public class Vcn extends Handler {
 
     @Override
     public void handleMessage(@NonNull Message msg) {
+        if (mCurrentStatus != VCN_STATUS_CODE_ACTIVE
+                && mCurrentStatus != VCN_STATUS_CODE_SAFE_MODE) {
+            return;
+        }
+
         switch (msg.what) {
             case MSG_EVENT_CONFIG_UPDATED:
                 handleConfigUpdated((VcnConfig) msg.obj);
@@ -246,11 +255,11 @@ public class Vcn extends Handler {
             case MSG_EVENT_GATEWAY_CONNECTION_QUIT:
                 handleGatewayConnectionQuit((VcnGatewayConnectionConfig) msg.obj);
                 break;
+            case MSG_EVENT_SAFE_MODE_STATE_CHANGED:
+                handleSafeModeStatusChanged();
+                break;
             case MSG_CMD_TEARDOWN:
                 handleTeardown();
-                break;
-            case MSG_CMD_ENTER_SAFE_MODE:
-                handleEnterSafeMode();
                 break;
             default:
                 Slog.wtf(getLogTag(), "Unknown msg.what: " + msg.what);
@@ -263,40 +272,28 @@ public class Vcn extends Handler {
 
         mConfig = config;
 
-        // TODO(b/183174340): Remove this once opportunistic safe mode is supported.
-        if (mCurrentStatus == VCN_STATUS_CODE_ACTIVE) {
-            // VCN is already active - teardown any GatewayConnections whose configs have been
-            // removed and get all current requests
-            for (final Entry<VcnGatewayConnectionConfig, VcnGatewayConnection> entry :
-                    mVcnGatewayConnections.entrySet()) {
-                final VcnGatewayConnectionConfig gatewayConnectionConfig = entry.getKey();
-                final VcnGatewayConnection gatewayConnection = entry.getValue();
+        // Teardown any GatewayConnections whose configs have been removed and get all current
+        // requests
+        for (final Entry<VcnGatewayConnectionConfig, VcnGatewayConnection> entry :
+                mVcnGatewayConnections.entrySet()) {
+            final VcnGatewayConnectionConfig gatewayConnectionConfig = entry.getKey();
+            final VcnGatewayConnection gatewayConnection = entry.getValue();
 
-                // GatewayConnectionConfigs must match exactly (otherwise authentication or
-                // connection details may have changed).
-                if (!mConfig.getGatewayConnectionConfigs().contains(gatewayConnectionConfig)) {
-                    if (gatewayConnection == null) {
-                        Slog.wtf(
-                                getLogTag(),
-                                "Found gatewayConnectionConfig without GatewayConnection");
-                    } else {
-                        gatewayConnection.teardownAsynchronously();
-                    }
+            // GatewayConnectionConfigs must match exactly (otherwise authentication or
+            // connection details may have changed).
+            if (!mConfig.getGatewayConnectionConfigs().contains(gatewayConnectionConfig)) {
+                if (gatewayConnection == null) {
+                    Slog.wtf(
+                            getLogTag(), "Found gatewayConnectionConfig without GatewayConnection");
+                } else {
+                    gatewayConnection.teardownAsynchronously();
                 }
             }
-
-            // Trigger a re-evaluation of all NetworkRequests (to make sure any that can be
-            // satisfied start a new GatewayConnection)
-            mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
-        } else if (mCurrentStatus == VCN_STATUS_CODE_SAFE_MODE) {
-            // If this VCN was not previously active, it is exiting Safe Mode. Re-register the
-            // request listener to get NetworkRequests again (and all cached requests).
-            mVcnContext.getVcnNetworkProvider().registerListener(mRequestListener);
-        } else {
-            // Ignored; VCN was not active; config updates ignored.
-            return;
         }
-        mCurrentStatus = VCN_STATUS_CODE_ACTIVE;
+
+        // Trigger a re-evaluation of all NetworkRequests (to make sure any that can be
+        // satisfied start a new GatewayConnection)
+        mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
     }
 
     private void handleTeardown() {
@@ -309,21 +306,27 @@ public class Vcn extends Handler {
         mCurrentStatus = VCN_STATUS_CODE_INACTIVE;
     }
 
-    private void handleEnterSafeMode() {
-        // TODO(b/183174340): Remove this once opportunistic-safe-mode is supported
-        handleTeardown();
+    private void handleSafeModeStatusChanged() {
+        boolean hasSafeModeGatewayConnection = false;
 
-        mCurrentStatus = VCN_STATUS_CODE_SAFE_MODE;
-        mVcnCallback.onEnteredSafeMode();
+        // If any VcnGatewayConnection is in safe mode, mark the entire VCN as being in safe mode
+        for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
+            if (gatewayConnection.isInSafeMode()) {
+                hasSafeModeGatewayConnection = true;
+                break;
+            }
+        }
+
+        final int oldStatus = mCurrentStatus;
+        mCurrentStatus =
+                hasSafeModeGatewayConnection ? VCN_STATUS_CODE_SAFE_MODE : VCN_STATUS_CODE_ACTIVE;
+        if (oldStatus != mCurrentStatus) {
+            mVcnCallback.onSafeModeStatusChanged(hasSafeModeGatewayConnection);
+        }
     }
 
     private void handleNetworkRequested(
             @NonNull NetworkRequest request, int score, int providerId) {
-        if (mCurrentStatus != VCN_STATUS_CODE_ACTIVE) {
-            Slog.v(getLogTag(), "Received NetworkRequest while inactive. Ignore for now");
-            return;
-        }
-
         if (score > getNetworkScore()) {
             if (VDBG) {
                 Slog.v(
@@ -376,19 +379,16 @@ public class Vcn extends Handler {
         mVcnGatewayConnections.remove(config);
 
         // Trigger a re-evaluation of all NetworkRequests (to make sure any that can be satisfied
-        // start a new GatewayConnection), but only if the Vcn is still alive
-        if (mCurrentStatus == VCN_STATUS_CODE_ACTIVE) {
-            mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
-        }
+        // start a new GatewayConnection). VCN is always alive here, courtesy of the liveness check
+        // in handleMessage()
+        mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
     }
 
     private void handleSubscriptionsChanged(@NonNull TelephonySubscriptionSnapshot snapshot) {
         mLastSnapshot = snapshot;
 
-        if (mCurrentStatus == VCN_STATUS_CODE_ACTIVE) {
-            for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
-                gatewayConnection.updateSubscriptionSnapshot(mLastSnapshot);
-            }
+        for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
+            gatewayConnection.updateSubscriptionSnapshot(mLastSnapshot);
         }
     }
 
@@ -418,8 +418,8 @@ public class Vcn extends Handler {
     /** Callback used for passing status signals from a VcnGatewayConnection to its managing Vcn. */
     @VisibleForTesting(visibility = Visibility.PACKAGE)
     public interface VcnGatewayStatusCallback {
-        /** Called by a VcnGatewayConnection to indicate that it has entered safe mode. */
-        void onEnteredSafeMode();
+        /** Called by a VcnGatewayConnection to indicate that it's safe mode status has changed. */
+        void onSafeModeStatusChanged();
 
         /** Callback by a VcnGatewayConnection to indicate that an error occurred. */
         void onGatewayConnectionError(
@@ -445,8 +445,8 @@ public class Vcn extends Handler {
         }
 
         @Override
-        public void onEnteredSafeMode() {
-            sendMessage(obtainMessage(MSG_CMD_ENTER_SAFE_MODE));
+        public void onSafeModeStatusChanged() {
+            sendMessage(obtainMessage(MSG_EVENT_SAFE_MODE_STATE_CHANGED));
         }
 
         @Override

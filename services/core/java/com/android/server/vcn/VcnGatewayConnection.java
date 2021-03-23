@@ -44,6 +44,7 @@ import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
+import android.net.NetworkProvider;
 import android.net.RouteInfo;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.Uri;
@@ -92,6 +93,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * A single VCN Gateway Connection, providing a single public-facing VCN network.
@@ -504,6 +506,15 @@ public class VcnGatewayConnection extends StateMachine {
     private boolean mIsQuitting = false;
 
     /**
+     * Whether the VcnGatewayConnection is in safe mode.
+     *
+     * <p>Upon hitting the safe mode timeout, this will be set to {@code true}. In safe mode, this
+     * VcnGatewayConnection will continue attempting to connect, and if a successful connection is
+     * made, safe mode will be exited.
+     */
+    private boolean mIsInSafeMode = false;
+
+    /**
      * The token used by the primary/current/active session.
      *
      * <p>This token MUST be updated when a new stateful/async session becomes the
@@ -562,8 +573,7 @@ public class VcnGatewayConnection extends StateMachine {
      * <p>Set in Connected state, always @NonNull in Connected, Migrating states, @Nullable
      * otherwise.
      */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    NetworkAgent mNetworkAgent;
+    private NetworkAgent mNetworkAgent;
 
     @Nullable private WakeupMessage mTeardownTimeoutAlarm;
     @Nullable private WakeupMessage mDisconnectRequestAlarm;
@@ -626,6 +636,14 @@ public class VcnGatewayConnection extends StateMachine {
         setInitialState(mDisconnectedState);
         setDbg(VDBG);
         start();
+    }
+
+    /** Queries whether this VcnGatewayConnection is in safe mode. */
+    public boolean isInSafeMode() {
+        // Accessing internal state; must only be done on looper thread.
+        mVcnContext.ensureRunningOnLooperThread();
+
+        return mIsInSafeMode;
     }
 
     /**
@@ -1162,6 +1180,15 @@ public class VcnGatewayConnection extends StateMachine {
             }
         }
 
+        protected void handleSafeModeTimeoutExceeded() {
+            mSafeModeTimeoutAlarm = null;
+
+            // Connectivity for this GatewayConnection is broken; tear down the Network.
+            teardownNetwork();
+            mIsInSafeMode = true;
+            mGatewayStatusCallback.onSafeModeStatusChanged();
+        }
+
         protected void logUnexpectedEvent(int what) {
             Slog.d(TAG, String.format(
                     "Unexpected event code %d in state %s", what, this.getClass().getSimpleName()));
@@ -1315,8 +1342,7 @@ public class VcnGatewayConnection extends StateMachine {
                     }
                     break;
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafeMode();
-                    mSafeModeTimeoutAlarm = null;
+                    handleSafeModeTimeoutExceeded();
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1401,8 +1427,7 @@ public class VcnGatewayConnection extends StateMachine {
                     handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
                     break;
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafeMode();
-                    mSafeModeTimeoutAlarm = null;
+                    handleSafeModeTimeoutExceeded();
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1434,28 +1459,23 @@ public class VcnGatewayConnection extends StateMachine {
                     buildConnectedLinkProperties(mConnectionConfig, tunnelIface, childConfig);
 
             final NetworkAgent agent =
-                    new NetworkAgent(
-                            mVcnContext.getContext(),
-                            mVcnContext.getLooper(),
+                    mDeps.newNetworkAgent(
+                            mVcnContext,
                             TAG,
                             caps,
                             lp,
                             Vcn.getNetworkScore(),
                             new NetworkAgentConfig.Builder().build(),
-                            mVcnContext.getVcnNetworkProvider()) {
-                        @Override
-                        public void onNetworkUnwanted() {
-                            Slog.d(TAG, "NetworkAgent was unwanted");
-                            teardownAsynchronously();
-                        }
-
-                        @Override
-                        public void onValidationStatus(int status, @Nullable Uri redirectUri) {
-                            if (status == NetworkAgent.VALIDATION_STATUS_VALID) {
-                                clearFailedAttemptCounterAndSafeModeAlarm();
-                            }
-                        }
-                    };
+                            mVcnContext.getVcnNetworkProvider(),
+                            () -> {
+                                Slog.d(TAG, "NetworkAgent was unwanted");
+                                teardownAsynchronously();
+                            } /* networkUnwantedCallback */,
+                            (status) -> {
+                                if (status == NetworkAgent.VALIDATION_STATUS_VALID) {
+                                    clearFailedAttemptCounterAndSafeModeAlarm();
+                                }
+                            } /* validationStatusCallback */);
 
             agent.register();
             agent.markConnected();
@@ -1469,6 +1489,11 @@ public class VcnGatewayConnection extends StateMachine {
             // Validated connection, clear failed attempt counter
             mFailedAttempts = 0;
             cancelSafeModeAlarm();
+
+            if (mIsInSafeMode) {
+                mIsInSafeMode = false;
+                mGatewayStatusCallback.onSafeModeStatusChanged();
+            }
         }
 
         protected void applyTransform(
@@ -1587,8 +1612,7 @@ public class VcnGatewayConnection extends StateMachine {
                     handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
                     break;
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafeMode();
-                    mSafeModeTimeoutAlarm = null;
+                    handleSafeModeTimeoutExceeded();
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1692,8 +1716,7 @@ public class VcnGatewayConnection extends StateMachine {
                     handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
                     break;
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafeMode();
-                    mSafeModeTimeoutAlarm = null;
+                    handleSafeModeTimeoutExceeded();
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1935,6 +1958,16 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
+    NetworkAgent getNetworkAgent() {
+        return mNetworkAgent;
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    void setNetworkAgent(@Nullable NetworkAgent networkAgent) {
+        mNetworkAgent = networkAgent;
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
     void sendDisconnectRequestedAndAcquireWakelock(String reason, boolean shouldQuit) {
         sendMessageAndAcquireWakeLock(
                 EVENT_DISCONNECT_REQUESTED,
@@ -2016,6 +2049,38 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull String tag,
                 @NonNull Runnable runnable) {
             return new WakeupMessage(vcnContext.getContext(), handler, tag, runnable);
+        }
+
+        /** Builds a new NetworkAgent. */
+        public NetworkAgent newNetworkAgent(
+                @NonNull VcnContext vcnContext,
+                @NonNull String tag,
+                @NonNull NetworkCapabilities caps,
+                @NonNull LinkProperties lp,
+                @NonNull int score,
+                @NonNull NetworkAgentConfig nac,
+                @NonNull NetworkProvider provider,
+                @NonNull Runnable networkUnwantedCallback,
+                @NonNull Consumer<Integer> validationStatusCallback) {
+            return new NetworkAgent(
+                    vcnContext.getContext(),
+                    vcnContext.getLooper(),
+                    tag,
+                    caps,
+                    lp,
+                    score,
+                    nac,
+                    provider) {
+                @Override
+                public void onNetworkUnwanted() {
+                    networkUnwantedCallback.run();
+                }
+
+                @Override
+                public void onValidationStatus(int status, @Nullable Uri redirectUri) {
+                    validationStatusCallback.accept(status);
+                }
+            };
         }
 
         /** Gets the elapsed real time since boot, in millis. */
