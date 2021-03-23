@@ -3998,6 +3998,15 @@
     <permission android:name="android.permission.SET_KEYBOARD_LAYOUT"
         android:protectionLevel="signature" />
 
+    <!-- Allows an app to schedule a prioritized alarm that can be used to perform
+         background work even when the device is in doze.
+         <p>Not for use by third-party applications.
+         @hide
+         @SystemApi
+     -->
+    <permission android:name="android.permission.SCHEDULE_PRIORITIZED_ALARM"
+                android:protectionLevel="signature|privileged"/>
+
     <!-- Allows an app to use exact alarm scheduling APIs to perform timing
          sensitive background work.
      -->
