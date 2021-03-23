@@ -328,6 +328,12 @@ public final class JobStatus {
     /** The evaluated priority of the job when it started running. */
     public int lastEvaluatedPriority;
 
+    /**
+     * Whether or not this particular JobStatus instance was treated as an EJ when it started
+     * running. This isn't copied over when a job is rescheduled.
+     */
+    public boolean startedAsExpeditedJob = false;
+
     // If non-null, this is work that has been enqueued for the job.
     public ArrayList<JobWorkItem> pendingWork;
 
@@ -1122,18 +1128,19 @@ public final class JobStatus {
      */
     public boolean canRunInDoze() {
         return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
-                || (shouldTreatAsExpeditedJob()
+                || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                 && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
     }
 
     boolean canRunInBatterySaver() {
         return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0
-                || (shouldTreatAsExpeditedJob()
+                || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                 && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
     }
 
     boolean shouldIgnoreNetworkBlocking() {
-        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0 || shouldTreatAsExpeditedJob();
+        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
+                || (shouldTreatAsExpeditedJob() || startedAsExpeditedJob);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
@@ -2032,7 +2039,10 @@ public final class JobStatus {
         pw.println(serviceInfo != null);
         if ((getFlags() & JobInfo.FLAG_EXPEDITED) != 0) {
             pw.print("readyWithinExpeditedQuota: ");
-            pw.println(mReadyWithinExpeditedQuota);
+            pw.print(mReadyWithinExpeditedQuota);
+            pw.print(" (started as EJ: ");
+            pw.print(startedAsExpeditedJob);
+            pw.println(")");
         }
         pw.decreaseIndent();
 
