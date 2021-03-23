@@ -74,6 +74,17 @@ using StorageLoadingProgressListener = ::android::sp<IStorageLoadingProgressList
 
 using PerUidReadTimeouts = ::android::os::incremental::PerUidReadTimeouts;
 
+struct IfsState {
+    // If mount is fully loaded.
+    bool fullyLoaded = false;
+    // If read logs are enabled on this mount. Populated only if fullyLoaded == true.
+    bool readLogsEnabled = false;
+    // If there was an error fetching any of the above.
+    bool error = false;
+};
+// Returns true if wants to be called again.
+using IfsStateCallback = std::function<bool(StorageId, IfsState)>;
+
 class IncrementalService final {
 public:
     explicit IncrementalService(ServiceManagerWrapper&& sm, std::string_view rootDir);
@@ -366,7 +377,7 @@ private:
     void setUidReadTimeouts(StorageId storage,
                             std::vector<PerUidReadTimeouts>&& perUidReadTimeouts);
     void clearUidReadTimeouts(StorageId storage);
-    void updateUidReadTimeouts(StorageId storage, Clock::time_point timeLimit);
+    bool checkUidReadTimeouts(StorageId storage, IfsState state, Clock::time_point timeLimit);
 
     std::unordered_set<std::string_view> adoptMountedInstances();
     void mountExistingImages(const std::unordered_set<std::string_view>& mountedRootNames);
@@ -387,11 +398,6 @@ private:
 
     bool needStartDataLoaderLocked(IncFsMount& ifs);
 
-    DataLoaderStubPtr prepareDataLoader(IncFsMount& ifs,
-                                        content::pm::DataLoaderParamsParcel&& params,
-                                        DataLoaderStatusListener&& statusListener = {},
-                                        const StorageHealthCheckParams& healthCheckParams = {},
-                                        StorageHealthListener&& healthListener = {});
     void prepareDataLoaderLocked(IncFsMount& ifs, content::pm::DataLoaderParamsParcel&& params,
                                  DataLoaderStatusListener&& statusListener = {},
                                  const StorageHealthCheckParams& healthCheckParams = {},
@@ -410,8 +416,8 @@ private:
                                              std::string_view path) const;
     int makeDirs(const IncFsMount& ifs, StorageId storageId, std::string_view path, int mode);
 
-    int setStorageParams(IncFsMount& ifs, StorageId storageId, bool enableReadLogs);
-    binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
+    int disableReadLogsLocked(IncFsMount& ifs);
+    int applyStorageParamsLocked(IncFsMount& ifs, bool enableReadLogs);
 
     LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
 
@@ -431,6 +437,12 @@ private:
 
     bool addTimedJob(TimedQueueWrapper& timedQueue, MountId id, Milliseconds after, Job what);
     bool removeTimedJobs(TimedQueueWrapper& timedQueue, MountId id);
+
+    void addIfsStateCallback(StorageId storageId, IfsStateCallback callback);
+    void removeIfsStateCallbacks(StorageId storageId);
+    void processIfsStateCallbacks();
+    void processIfsStateCallbacks(StorageId storageId, std::vector<IfsStateCallback>& callbacks);
+
     bool updateLoadingProgress(int32_t storageId,
                                StorageLoadingProgressListener&& progressListener);
     long getMillsSinceOldestPendingRead(StorageId storage);
@@ -455,6 +467,10 @@ private:
 
     std::mutex mCallbacksLock;
     std::unordered_map<std::string, sp<AppOpsListener>> mCallbackRegistered;
+
+    using IfsStateCallbacks = std::unordered_map<StorageId, std::vector<IfsStateCallback>>;
+    std::mutex mIfsStateCallbacksLock;
+    IfsStateCallbacks mIfsStateCallbacks;
 
     std::atomic_bool mSystemReady = false;
     StorageId mNextId = 0;
