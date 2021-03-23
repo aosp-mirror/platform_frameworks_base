@@ -798,7 +798,7 @@ public final class HdmiControlManager {
     public static final String CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY =
             "tv_wake_on_one_touch_play";
     /**
-     * Name of a setting deciding whether the device will also turn off other CEC devices
+     * Name of a setting deciding whether the TV will also turn off other CEC devices
      * when it goes to standby mode.
      *
      * @hide

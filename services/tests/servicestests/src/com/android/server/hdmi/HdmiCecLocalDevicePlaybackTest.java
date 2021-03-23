@@ -687,9 +687,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_TV);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
@@ -715,9 +712,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
@@ -743,9 +737,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
@@ -771,9 +762,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
@@ -799,9 +787,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_TV);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
@@ -827,9 +812,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
@@ -855,9 +837,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
@@ -883,9 +862,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
@@ -911,9 +887,6 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_TV);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
-        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
-                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
         mHdmiCecLocalDevicePlayback.onStandby(true, HdmiControlService.STANDBY_SCREEN_OFF);
         mTestLooper.dispatchAll();
 
