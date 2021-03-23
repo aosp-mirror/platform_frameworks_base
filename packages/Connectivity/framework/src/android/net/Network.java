@@ -92,6 +92,7 @@ public class Network implements Parcelable {
     // value in the native/android/net.c NDK implementation.
     private static final long HANDLE_MAGIC = 0xcafed00dL;
     private static final int HANDLE_MAGIC_SIZE = 32;
+    private static final int USE_LOCAL_NAMESERVERS_FLAG = 0x80000000;
 
     // A boolean to control how getAllByName()/getByName() behaves in the face
     // of Private DNS.
@@ -189,7 +190,7 @@ public class Network implements Parcelable {
      */
     public int getNetIdForResolv() {
         return mPrivateDnsBypass
-                ? (int) (0x80000000L | (long) netId)  // Non-portable DNS resolution flag.
+                ? (USE_LOCAL_NAMESERVERS_FLAG | netId)  // Non-portable DNS resolution flag.
                 : netId;
     }
 
@@ -452,12 +453,13 @@ public class Network implements Parcelable {
             throw new IllegalArgumentException(
                     "Network.fromNetworkHandle refusing to instantiate NETID_UNSET Network.");
         }
-        if ((networkHandle & ((1L << HANDLE_MAGIC_SIZE) - 1)) != HANDLE_MAGIC
-                || networkHandle < 0) {
+        if ((networkHandle & ((1L << HANDLE_MAGIC_SIZE) - 1)) != HANDLE_MAGIC) {
             throw new IllegalArgumentException(
                     "Value passed to fromNetworkHandle() is not a network handle.");
         }
-        return new Network((int) (networkHandle >> HANDLE_MAGIC_SIZE));
+        final int netIdForResolv = (int) (networkHandle >>> HANDLE_MAGIC_SIZE);
+        return new Network((netIdForResolv & ~USE_LOCAL_NAMESERVERS_FLAG),
+                ((netIdForResolv & USE_LOCAL_NAMESERVERS_FLAG) != 0) /* privateDnsBypass */);
     }
 
     /**
@@ -485,7 +487,7 @@ public class Network implements Parcelable {
         if (netId == 0) {
             return 0L;  // make this zero condition obvious for debugging
         }
-        return (((long) netId) << HANDLE_MAGIC_SIZE) | HANDLE_MAGIC;
+        return (((long) getNetIdForResolv()) << HANDLE_MAGIC_SIZE) | HANDLE_MAGIC;
     }
 
     // implement the Parcelable interface
