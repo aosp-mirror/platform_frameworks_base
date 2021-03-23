@@ -25,7 +25,6 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
-import static com.android.systemui.screenshot.LogConfig.DEBUG_SCROLL;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
 import static com.android.systemui.screenshot.LogConfig.logTag;
@@ -56,7 +55,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -78,7 +76,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.internal.app.ChooserActivity;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.settingslib.applications.InterestingConfigChanges;
@@ -86,7 +83,6 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
-import com.android.systemui.util.DeviceConfigProxy;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -193,7 +189,6 @@ public class ScreenshotController {
     private final AccessibilityManager mAccessibilityManager;
     private final MediaActionSound mCameraSound;
     private final ScrollCaptureClient mScrollCaptureClient;
-    private final DeviceConfigProxy mConfigProxy;
     private final PhoneWindow mWindow;
     private final DisplayManager mDisplayManager;
 
@@ -237,7 +232,6 @@ public class ScreenshotController {
             ScreenshotNotificationsController screenshotNotificationsController,
             ScrollCaptureClient scrollCaptureClient,
             UiEventLogger uiEventLogger,
-            DeviceConfigProxy configProxy,
             ImageExporter imageExporter,
             @Main Executor mainExecutor) {
         mScreenshotSmartActions = screenshotSmartActions;
@@ -254,7 +248,6 @@ public class ScreenshotController {
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
-        mConfigProxy = configProxy;
 
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
@@ -525,22 +518,17 @@ public class ScreenshotController {
         // The window is focusable by default
         setWindowFocusable(true);
 
-        if (mConfigProxy.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SCREENSHOT_SCROLLING_ENABLED, true)) {
-            View decorView = mWindow.getDecorView();
-
-            // Wait until this window is attached to request because it is
-            // the reference used to locate the target window (below).
-            withWindowAttached(() -> {
-                mScrollCaptureClient.setHostWindowToken(decorView.getWindowToken());
-                if (mLastScrollCaptureRequest != null) {
-                    mLastScrollCaptureRequest.cancel(true);
-                }
-                mLastScrollCaptureRequest = mScrollCaptureClient.request(DEFAULT_DISPLAY);
-                mLastScrollCaptureRequest.addListener(() ->
-                        onScrollCaptureResponseReady(mLastScrollCaptureRequest), mMainExecutor);
-            });
-        }
+        // Wait until this window is attached to request because it is
+        // the reference used to locate the target window (below).
+        withWindowAttached(() -> {
+            mScrollCaptureClient.setHostWindowToken(mWindow.getDecorView().getWindowToken());
+            if (mLastScrollCaptureRequest != null) {
+                mLastScrollCaptureRequest.cancel(true);
+            }
+            mLastScrollCaptureRequest = mScrollCaptureClient.request(DEFAULT_DISPLAY);
+            mLastScrollCaptureRequest.addListener(() ->
+                    onScrollCaptureResponseReady(mLastScrollCaptureRequest), mMainExecutor);
+        });
 
         attachWindow();
         mScreenshotView.getViewTreeObserver().addOnPreDrawListener(
