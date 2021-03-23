@@ -251,7 +251,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     @ServiceThreadOnly
-    protected boolean handleUserControlPressed(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleUserControlPressed(HdmiCecMessage message) {
         assertRunOnServiceThread();
         wakeUpIfActiveSource();
         return super.handleUserControlPressed(message);
@@ -270,10 +271,11 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     }
 
     @ServiceThreadOnly
-    protected boolean handleSetMenuLanguage(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleSetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!SET_MENU_LANGUAGE) {
-            return false;
+            return Constants.ABORT_UNRECOGNIZED_OPCODE;
         }
 
         try {
@@ -283,7 +285,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                 // Do not switch language if the new language is the same as the current one.
                 // This helps avoid accidental country variant switching from en_US to en_AU
                 // due to the limitation of CEC. See the warning below.
-                return true;
+                return Constants.HANDLED;
             }
 
             // Don't use Locale.getAvailableLocales() since it returns a locale
@@ -298,36 +300,38 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     // will always be mapped to en-AU among other variants like en-US, en-GB,
                     // an en-IN, which may not be the expected one.
                     LocalePicker.updateLocale(localeInfo.getLocale());
-                    return true;
+                    return Constants.HANDLED;
                 }
             }
             Slog.w(TAG, "Can't handle <Set Menu Language> of " + iso3Language);
-            return false;
+            return Constants.ABORT_INVALID_OPERAND;
         } catch (UnsupportedEncodingException e) {
             Slog.w(TAG, "Can't handle <Set Menu Language>", e);
-            return false;
+            return Constants.ABORT_INVALID_OPERAND;
         }
     }
 
     @Override
-    protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleSetSystemAudioMode(HdmiCecMessage message) {
         // System Audio Mode only turns on/off when Audio System broadcasts on/off message.
         // For device with type 4 and 5, it can set system audio mode on/off
         // when there is another audio system device connected into the system first.
         if (message.getDestination() != Constants.ADDR_BROADCAST
                 || message.getSource() != Constants.ADDR_AUDIO_SYSTEM
                 || mService.audioSystem() != null) {
-            return true;
+            return Constants.HANDLED;
         }
         boolean setSystemAudioModeOn = HdmiUtils.parseCommandParamSystemAudioStatus(message);
         if (mService.isSystemAudioActivated() != setSystemAudioModeOn) {
             mService.setSystemAudioActivated(setSystemAudioModeOn);
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
-    protected boolean handleSystemAudioModeStatus(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleSystemAudioModeStatus(HdmiCecMessage message) {
         // Only directly addressed System Audio Mode Status message can change internal
         // system audio mode status.
         if (message.getDestination() == mAddress
@@ -337,25 +341,27 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                 mService.setSystemAudioActivated(setSystemAudioModeOn);
             }
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleRoutingChange(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRoutingChange(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams(), 2);
         handleRoutingChangeAndInformation(physicalAddress, message);
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleRoutingInformation(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRoutingInformation(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         handleRoutingChangeAndInformation(physicalAddress, message);
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override

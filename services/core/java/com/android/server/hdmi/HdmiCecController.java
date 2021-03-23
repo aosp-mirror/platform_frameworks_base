@@ -565,19 +565,24 @@ final class HdmiCecController {
     }
 
     @ServiceThreadOnly
-    private void onReceiveCommand(HdmiCecMessage message) {
+    @VisibleForTesting
+    void onReceiveCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if ((isAcceptableAddress(message.getDestination())
-            || !mService.isAddressAllocated())
-            && mService.handleCecCommand(message)) {
+        if (mService.isAddressAllocated() && !isAcceptableAddress(message.getDestination())) {
             return;
         }
-        // Not handled message, so we will reply it with <Feature Abort>.
-        maySendFeatureAbortCommand(message, Constants.ABORT_UNRECOGNIZED_OPCODE);
+        @Constants.HandleMessageResult int messageState = mService.handleCecCommand(message);
+        if (messageState == Constants.NOT_HANDLED) {
+            // Message was not handled
+            maySendFeatureAbortCommand(message, Constants.ABORT_UNRECOGNIZED_OPCODE);
+        } else if (messageState != Constants.HANDLED) {
+            // Message handler wants to send a feature abort
+            maySendFeatureAbortCommand(message, messageState);
+        }
     }
 
     @ServiceThreadOnly
-    void maySendFeatureAbortCommand(HdmiCecMessage message, int reason) {
+    void maySendFeatureAbortCommand(HdmiCecMessage message, @Constants.AbortReason int reason) {
         assertRunOnServiceThread();
         // Swap the source and the destination.
         int src = message.getDestination();
