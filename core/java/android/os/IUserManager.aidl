@@ -99,6 +99,8 @@ interface IUserManager {
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
     boolean isProfile(int userId);
     boolean isManagedProfile(int userId);
+    boolean isCloneProfile(int userId);
+    boolean sharesMediaWithParent(int userId);
     boolean isDemoUser(int userId);
     boolean isPreCreated(int userId);
     UserInfo createProfileForUserEvenWhenDisallowedWithThrow(in String name, in String userType, int flags,
