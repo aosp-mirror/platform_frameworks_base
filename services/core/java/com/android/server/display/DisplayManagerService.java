@@ -1134,13 +1134,9 @@ public final class DisplayManagerService extends SystemService {
             recordStableDisplayStatsIfNeededLocked(display);
             recordTopInsetLocked(display);
         }
-        final int groupId = mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(displayId);
-        if (groupId != Display.INVALID_DISPLAY_GROUP) {
-            addDisplayPowerControllerLocked(display);
-            mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
-        } else {
-            mDisplayStates.append(displayId, Display.STATE_ON);
-        }
+        addDisplayPowerControllerLocked(display);
+        mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
+
         mDisplayBrightnesses.append(displayId, display.getDisplayInfoLocked().brightnessDefault);
 
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
@@ -1943,8 +1939,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void initializeDisplayPowerControllersLocked() {
-        mLogicalDisplayMapper.forEachLocked((logicalDisplay) -> addDisplayPowerControllerLocked(
-                logicalDisplay));
+        mLogicalDisplayMapper.forEachLocked(this::addDisplayPowerControllerLocked);
     }
 
     private void addDisplayPowerControllerLocked(LogicalDisplay display) {
@@ -2839,10 +2834,16 @@ public final class DisplayManagerService extends SystemService {
                 final int size = displayGroup.getSizeLocked();
                 boolean ready = true;
                 for (int i = 0; i < size; i++) {
-                    final DisplayPowerController displayPowerController =
-                            mDisplayPowerControllers.get(displayGroup.getIdLocked(i));
-                    ready &= displayPowerController.requestPowerState(request,
-                            waitForNegativeProximity);
+                    final int id = displayGroup.getIdLocked(i);
+                    final DisplayDevice displayDevice = mLogicalDisplayMapper.getDisplayLocked(
+                            id).getPrimaryDisplayDeviceLocked();
+                    final int flags = displayDevice.getDisplayDeviceInfoLocked().flags;
+                    if ((flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
+                        final DisplayPowerController displayPowerController =
+                                mDisplayPowerControllers.get(id);
+                        ready &= displayPowerController.requestPowerState(request,
+                                waitForNegativeProximity);
+                    }
                 }
 
                 return ready;

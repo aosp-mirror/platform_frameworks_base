@@ -186,14 +186,11 @@ public class LogicalDisplayMapperTest {
         LogicalDisplay display2 = add(createDisplayDevice(Display.TYPE_INTERNAL, 600, 800, 0));
         LogicalDisplay display3 = add(createDisplayDevice(Display.TYPE_VIRTUAL, 600, 800, 0));
 
-        // Physical displays should be automatically put into the default group.
         assertEquals(Display.DEFAULT_DISPLAY_GROUP,
                 mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(display1)));
         assertEquals(Display.DEFAULT_DISPLAY_GROUP,
                 mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(display2)));
-
-        // Virtual displays should belong to no group by default.
-        assertEquals(Display.INVALID_DISPLAY_GROUP,
+        assertEquals(Display.DEFAULT_DISPLAY_GROUP,
                 mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(display3)));
     }
 
@@ -215,13 +212,13 @@ public class LogicalDisplayMapperTest {
         assertNotEquals(Display.DEFAULT_DISPLAY_GROUP,
                 mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(display3)));
 
-        // Now switch it to the invalid group by removing the flag and issuing an update
+        // Now switch it back to the default group by removing the flag and issuing an update
         DisplayDeviceInfo info = device3.getSourceInfo();
         info.flags = info.flags & ~DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP;
         mDisplayDeviceRepo.onDisplayDeviceEvent(device3, DISPLAY_DEVICE_EVENT_CHANGED);
 
-        // Verify the virtual display has not been placed into a group.
-        assertEquals(Display.INVALID_DISPLAY_GROUP,
+        // Verify the new group is correct.
+        assertEquals(Display.DEFAULT_DISPLAY_GROUP,
                 mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(display3)));
     }
 
