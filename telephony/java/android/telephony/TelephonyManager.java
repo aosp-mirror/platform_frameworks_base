@@ -14570,7 +14570,12 @@ public class TelephonyManager {
      * DataThrottlingRequest#DATA_THROTTLING_ACTION_NO_DATA_THROTTLING} can still be requested in
      * order to undo the mitigations above it (i.e {@link
      * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_VOICE_ONLY} and/or {@link
-     * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_RADIO_OFF}).
+     * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_RADIO_OFF}). </p>
+     *
+     * <p> In addition to the {@link Manifest.permission#MODIFY_PHONE_STATE} permission, callers of
+     * this API must also be listed in the device configuration as an authorized app in
+     * {@code packages/services/Telephony/res/values/config.xml} under the
+     * {@code thermal_mitigation_allowlisted_packages} key. </p>
      *
      * @param thermalMitigationRequest Thermal mitigation request. See {@link
      * ThermalMitigationRequest} for details.
@@ -14589,7 +14594,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.sendThermalMitigationRequest(getSubId(), thermalMitigationRequest);
+                return telephony.sendThermalMitigationRequest(getSubId(), thermalMitigationRequest,
+                        getOpPackageName());
             }
             throw new IllegalStateException("telephony service is null.");
         } catch (RemoteException ex) {
