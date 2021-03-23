@@ -43,16 +43,16 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
     private final List<AccessibilityTarget> mTargets;
 
     @IntDef({
-            AccessibilityTargetAdapter.FIRST_ITEM,
-            AccessibilityTargetAdapter.REGULAR_ITEM,
-            AccessibilityTargetAdapter.LAST_ITEM
+            ItemType.FIRST_ITEM,
+            ItemType.REGULAR_ITEM,
+            ItemType.LAST_ITEM
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface ItemType {}
-
-    private static final int FIRST_ITEM = 0;
-    private static final int REGULAR_ITEM = 1;
-    private static final int LAST_ITEM = 2;
+    @interface ItemType {
+        int FIRST_ITEM = 0;
+        int REGULAR_ITEM = 1;
+        int LAST_ITEM = 2;
+    }
 
     public AccessibilityTargetAdapter(List<AccessibilityTarget> targets) {
         mTargets = targets;
@@ -65,11 +65,11 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
                 R.layout.accessibility_floating_menu_item, parent,
                 /* attachToRoot= */ false);
 
-        if (itemType == FIRST_ITEM) {
+        if (itemType == ItemType.FIRST_ITEM) {
             return new TopViewHolder(root);
         }
 
-        if (itemType == LAST_ITEM) {
+        if (itemType == ItemType.LAST_ITEM) {
             return new BottomViewHolder(root);
         }
 
@@ -87,14 +87,14 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         if (position == 0) {
-            return FIRST_ITEM;
+            return ItemType.FIRST_ITEM;
         }
 
         if (position == (getItemCount() - 1)) {
-            return LAST_ITEM;
+            return ItemType.LAST_ITEM;
         }
 
-        return REGULAR_ITEM;
+        return ItemType.REGULAR_ITEM;
     }
 
     @Override
