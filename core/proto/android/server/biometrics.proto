@@ -178,4 +178,6 @@ enum ClientMonitorEnum {
     CM_DETECT_INTERACTION = 13;
     CM_INVALIDATION_REQUESTER = 14;
     CM_INVALIDATE = 15;
+    CM_STOP_USER = 16;
+    CM_START_USER = 17;
 }

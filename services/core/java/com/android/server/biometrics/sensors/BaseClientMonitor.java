@@ -197,7 +197,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         return mListener;
     }
 
-    public final int getTargetUserId() {
+    public int getTargetUserId() {
         return mTargetUserId;
     }
 
