@@ -378,6 +378,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // provider has unfortunate hard dependencies on the network provider
         ProxyLocationProvider networkProvider = ProxyLocationProvider.create(
                 mContext,
+                NETWORK_PROVIDER,
                 ACTION_NETWORK_PROVIDER,
                 com.android.internal.R.bool.config_enableNetworkLocationOverlay,
                 com.android.internal.R.string.config_networkLocationProviderPackageName);
@@ -397,6 +398,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         ProxyLocationProvider fusedProvider = ProxyLocationProvider.create(
                 mContext,
+                FUSED_PROVIDER,
                 ACTION_FUSED_PROVIDER,
                 com.android.internal.R.bool.config_enableFusedLocationOverlay,
                 com.android.internal.R.string.config_fusedLocationProviderPackageName);
