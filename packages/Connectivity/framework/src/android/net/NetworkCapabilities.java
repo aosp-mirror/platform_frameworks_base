@@ -35,7 +35,6 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Range;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.net.module.util.CollectionUtils;
@@ -2023,34 +2022,6 @@ public final class NetworkCapabilities implements Parcelable {
             bitMask >>= 1;
             ++bitPos;
         }
-    }
-
-    /** @hide */
-    public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-
-        for (int transport : getTransportTypes()) {
-            proto.write(NetworkCapabilitiesProto.TRANSPORTS, transport);
-        }
-
-        for (int capability : getCapabilities()) {
-            proto.write(NetworkCapabilitiesProto.CAPABILITIES, capability);
-        }
-
-        proto.write(NetworkCapabilitiesProto.LINK_UP_BANDWIDTH_KBPS, mLinkUpBandwidthKbps);
-        proto.write(NetworkCapabilitiesProto.LINK_DOWN_BANDWIDTH_KBPS, mLinkDownBandwidthKbps);
-
-        if (mNetworkSpecifier != null) {
-            proto.write(NetworkCapabilitiesProto.NETWORK_SPECIFIER, mNetworkSpecifier.toString());
-        }
-        if (mTransportInfo != null) {
-            // TODO b/120653863: write transport-specific info to proto?
-        }
-
-        proto.write(NetworkCapabilitiesProto.CAN_REPORT_SIGNAL_STRENGTH, hasSignalStrength());
-        proto.write(NetworkCapabilitiesProto.SIGNAL_STRENGTH, mSignalStrength);
-
-        proto.end(token);
     }
 
     /**

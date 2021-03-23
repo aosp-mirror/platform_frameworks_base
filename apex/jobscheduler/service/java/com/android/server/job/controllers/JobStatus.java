@@ -2171,9 +2171,6 @@ public final class JobStatus {
             if (uriPerms != null) {
                 uriPerms.dump(proto, JobStatusDumpProto.JobInfo.GRANTED_URI_PERMISSIONS);
             }
-            if (job.getRequiredNetwork() != null) {
-                job.getRequiredNetwork().dumpDebug(proto, JobStatusDumpProto.JobInfo.REQUIRED_NETWORK);
-            }
             if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
                 proto.write(JobStatusDumpProto.JobInfo.TOTAL_NETWORK_DOWNLOAD_BYTES,
                         mTotalNetworkDownloadBytes);
@@ -2260,10 +2257,6 @@ public final class JobStatus {
                 Uri u = changedUris.valueAt(i);
                 proto.write(JobStatusDumpProto.CHANGED_URIS, u.toString());
             }
-        }
-
-        if (network != null) {
-            network.dumpDebug(proto, JobStatusDumpProto.NETWORK);
         }
 
         if (pendingWork != null) {
