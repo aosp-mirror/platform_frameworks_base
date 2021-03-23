@@ -64,6 +64,16 @@ public final class NetworkAgentConfig implements Parcelable {
     }
 
     /**
+     * @return whether this VPN connection can be bypassed by the apps.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public boolean isBypassableVpn() {
+        return allowBypass;
+    }
+
+    /**
      * Set if the user desires to use this network even if it is unvalidated. This field has meaning
      * only if {@link explicitlySelected} is true. If it is, this field must also be set to the
      * appropriate value based on previous user choice.
@@ -378,6 +388,19 @@ public final class NetworkAgentConfig implements Parcelable {
         @NonNull
         public Builder setLegacyExtraInfo(@NonNull String legacyExtraInfo) {
             mConfig.mLegacyExtraInfo = legacyExtraInfo;
+            return this;
+        }
+
+        /**
+         * Sets whether the apps can bypass the VPN connection.
+         *
+         * @return this builder, to facilitate chaining.
+         * @hide
+         */
+        @NonNull
+        @SystemApi(client = MODULE_LIBRARIES)
+        public Builder setBypassableVpn(boolean allowBypass) {
+            mConfig.allowBypass = allowBypass;
             return this;
         }
 
