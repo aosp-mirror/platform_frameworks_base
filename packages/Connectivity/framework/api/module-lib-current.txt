@@ -11,6 +11,7 @@ package android.net {
     method @Nullable public android.net.ProxyInfo getGlobalProxy();
     method @NonNull public static android.util.Range<java.lang.Integer> getIpSecNetIdRange();
     method @NonNull public static String getPrivateDnsMode(@NonNull android.content.Context);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerDefaultNetworkCallbackAsUid(int, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerSystemDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void requestBackgroundNetwork(@NonNull android.net.NetworkRequest, @NonNull android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
     method @Deprecated public boolean requestRouteToHostAddress(int, java.net.InetAddress);
