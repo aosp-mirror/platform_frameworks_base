@@ -37,9 +37,11 @@ package android.net {
 
   public final class NetworkAgentConfig implements android.os.Parcelable {
     method @Nullable public String getSubscriberId();
+    method public boolean isBypassableVpn();
   }
 
   public static final class NetworkAgentConfig.Builder {
+    method @NonNull public android.net.NetworkAgentConfig.Builder setBypassableVpn(boolean);
     method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
   }
 
