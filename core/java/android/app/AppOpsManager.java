@@ -1073,6 +1073,8 @@ public class AppOpsManager {
     /** @hide */
     @UnsupportedAppUsage
     public static final int OP_BLUETOOTH_SCAN = AppProtoEnums.APP_OP_BLUETOOTH_SCAN;
+    /** @hide */
+    public static final int OP_BLUETOOTH_CONNECT = AppProtoEnums.APP_OP_BLUETOOTH_CONNECT;
     /** @hide Use the BiometricPrompt/BiometricManager APIs. */
     public static final int OP_USE_BIOMETRIC = AppProtoEnums.APP_OP_USE_BIOMETRIC;
     /** @hide Physical activity recognition. */
@@ -1221,7 +1223,7 @@ public class AppOpsManager {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 111;
+    public static final int _NUM_OP = 112;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1465,6 +1467,8 @@ public class AppOpsManager {
     public static final String OPSTR_START_FOREGROUND = "android:start_foreground";
     /** @hide */
     public static final String OPSTR_BLUETOOTH_SCAN = "android:bluetooth_scan";
+    /** @hide */
+    public static final String OPSTR_BLUETOOTH_CONNECT = "android:bluetooth_connect";
 
     /** @hide Use the BiometricPrompt/BiometricManager APIs. */
     public static final String OPSTR_USE_BIOMETRIC = "android:use_biometric";
@@ -1696,6 +1700,9 @@ public class AppOpsManager {
             OP_WRITE_MEDIA_VIDEO,
             OP_READ_MEDIA_IMAGES,
             OP_WRITE_MEDIA_IMAGES,
+            // Nearby devices
+            OP_BLUETOOTH_SCAN,
+            OP_BLUETOOTH_CONNECT,
 
             // APPOP PERMISSIONS
             OP_ACCESS_NOTIFICATIONS,
@@ -1801,7 +1808,7 @@ public class AppOpsManager {
             OP_ACCEPT_HANDOVER,                 // ACCEPT_HANDOVER
             OP_MANAGE_IPSEC_TUNNELS,            // MANAGE_IPSEC_HANDOVERS
             OP_START_FOREGROUND,                // START_FOREGROUND
-            OP_COARSE_LOCATION,                 // BLUETOOTH_SCAN
+            OP_BLUETOOTH_SCAN,                  // BLUETOOTH_SCAN
             OP_USE_BIOMETRIC,                   // BIOMETRIC
             OP_ACTIVITY_RECOGNITION,            // ACTIVITY_RECOGNITION
             OP_SMS_FINANCIAL_TRANSACTIONS,      // SMS_FINANCIAL_TRANSACTIONS
@@ -1835,6 +1842,7 @@ public class AppOpsManager {
             OP_FINE_LOCATION,                   // OP_FINE_LOCATION_SOURCE
             OP_COARSE_LOCATION,                 // OP_COARSE_LOCATION_SOURCE
             OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
+            OP_BLUETOOTH_CONNECT,               // OP_BLUETOOTH_CONNECT
     };
 
     /**
@@ -1952,6 +1960,7 @@ public class AppOpsManager {
             OPSTR_FINE_LOCATION_SOURCE,
             OPSTR_COARSE_LOCATION_SOURCE,
             OPSTR_MANAGE_MEDIA,
+            OPSTR_BLUETOOTH_CONNECT,
     };
 
     /**
@@ -2070,6 +2079,7 @@ public class AppOpsManager {
             "FINE_LOCATION_SOURCE",
             "COARSE_LOCATION_SOURCE",
             "MANAGE_MEDIA",
+            "BLUETOOTH_CONNECT",
     };
 
     /**
@@ -2155,7 +2165,7 @@ public class AppOpsManager {
             Manifest.permission.ACCEPT_HANDOVER,
             Manifest.permission.MANAGE_IPSEC_TUNNELS,
             Manifest.permission.FOREGROUND_SERVICE,
-            null, // no permission for OP_BLUETOOTH_SCAN
+            Manifest.permission.BLUETOOTH_SCAN,
             Manifest.permission.USE_BIOMETRIC,
             Manifest.permission.ACTIVITY_RECOGNITION,
             Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
@@ -2189,6 +2199,7 @@ public class AppOpsManager {
             null, // no permission for OP_ACCESS_FINE_LOCATION_SOURCE,
             null, // no permission for OP_ACCESS_COARSE_LOCATION_SOURCE,
             Manifest.permission.MANAGE_MEDIA,
+            Manifest.permission.BLUETOOTH_CONNECT,
     };
 
     /**
@@ -2308,6 +2319,7 @@ public class AppOpsManager {
             null, // ACCESS_FINE_LOCATION_SOURCE
             null, // ACCESS_COARSE_LOCATION_SOURCE
             null, // MANAGE_MEDIA
+            null, // BLUETOOTH_CONNECT
     };
 
     /**
@@ -2426,6 +2438,7 @@ public class AppOpsManager {
             null, // ACCESS_FINE_LOCATION_SOURCE
             null, // ACCESS_COARSE_LOCATION_SOURCE
             null, // MANAGE_MEDIA
+            null, // BLUETOOTH_CONNECT
     };
 
     /**
@@ -2543,6 +2556,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // ACCESS_FINE_LOCATION_SOURCE
             AppOpsManager.MODE_ALLOWED, // ACCESS_COARSE_LOCATION_SOURCE
             AppOpsManager.MODE_DEFAULT, // MANAGE_MEDIA
+            AppOpsManager.MODE_ALLOWED, // BLUETOOTH_CONNECT
     };
 
     /**
@@ -2664,6 +2678,7 @@ public class AppOpsManager {
             false, // ACCESS_FINE_LOCATION_SOURCE
             false, // ACCESS_COARSE_LOCATION_SOURCE
             false, // MANAGE_MEDIA
+            false, // BLUETOOTH_CONNECT
     };
 
     /**
