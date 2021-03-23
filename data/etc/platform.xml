@@ -48,6 +48,10 @@
         <group gid="uhid" />
     </permission>
 
+    <permission name="android.permission.VIRTUAL_INPUT_DEVICE" >
+        <group gid="uhid" />
+    </permission>
+
     <permission name="android.permission.NET_TUNNELING" >
         <group gid="vpn" />
     </permission>
