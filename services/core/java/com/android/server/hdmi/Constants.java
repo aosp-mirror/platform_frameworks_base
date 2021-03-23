@@ -250,7 +250,19 @@ final class Constants {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-        ABORT_NO_ERROR,
+            NOT_HANDLED,
+            HANDLED,
+            ABORT_UNRECOGNIZED_OPCODE,
+            ABORT_NOT_IN_CORRECT_MODE,
+            ABORT_CANNOT_PROVIDE_SOURCE,
+            ABORT_INVALID_OPERAND,
+            ABORT_REFUSED,
+            ABORT_UNABLE_TO_DETERMINE,
+    })
+    public @interface HandleMessageResult {}
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
         ABORT_UNRECOGNIZED_OPCODE,
         ABORT_NOT_IN_CORRECT_MODE,
         ABORT_CANNOT_PROVIDE_SOURCE,
@@ -260,8 +272,11 @@ final class Constants {
     })
     public @interface AbortReason {}
 
-    // Internal abort error code. It's the same as success.
-    static final int ABORT_NO_ERROR = -1;
+    // Indicates that a message was not handled, but could be handled by another local device.
+    // If no local devices handle the message, we send <Feature Abort>[Unrecognized Opcode].
+    static final int NOT_HANDLED = -2;
+    // Indicates that a message has been handled successfully; no feature abort needed.
+    static final int HANDLED = -1;
     // Constants related to operands of HDMI CEC commands.
     // Refer to CEC Table 29 in HDMI Spec v1.4b.
     // [Abort Reason]
