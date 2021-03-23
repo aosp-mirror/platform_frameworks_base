@@ -431,6 +431,7 @@
   <java-symbol type="integer" name="config_extraFreeKbytesAbsolute" />
   <java-symbol type="integer" name="config_immersive_mode_confirmation_panic" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />
+  <java-symbol type="bool" name="config_longPressOnPowerForAssistantSettingAvailable" />
   <java-symbol type="integer" name="config_veryLongPressOnPowerBehavior" />
   <java-symbol type="integer" name="config_veryLongPressTimeout" />
   <java-symbol type="integer" name="config_longPressOnBackBehavior" />
