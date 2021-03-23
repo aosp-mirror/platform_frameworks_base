@@ -1389,6 +1389,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             // If we are using BLAST, merge the transaction with the viewroot buffer transaction.
             viewRoot.mergeWithNextTransaction(mRtTransaction, frameNumber);
             return;
+        } else {
+            mRtTransaction.apply();
         }
     }
 
