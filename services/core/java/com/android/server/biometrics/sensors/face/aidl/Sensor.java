@@ -119,14 +119,14 @@ public class Sensor {
         @NonNull
         private final String mTag;
         @NonNull
-        private final BiometricScheduler mScheduler;
+        private final UserAwareBiometricScheduler mScheduler;
         private final int mSensorId;
         private final int mUserId;
         @NonNull
         private final Callback mCallback;
 
         HalSessionCallback(@NonNull Context context, @NonNull Handler handler, @NonNull String tag,
-                @NonNull BiometricScheduler scheduler, int sensorId, int userId,
+                @NonNull UserAwareBiometricScheduler scheduler, int sensorId, int userId,
                 @NonNull Callback callback) {
             mContext = context;
             mHandler = handler;
@@ -433,17 +433,7 @@ public class Sensor {
 
         @Override
         public void onSessionClosed() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceStopUserClient)) {
-                    Slog.e(mTag, "onSessionClosed for wrong consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FaceStopUserClient stopUserClient = (FaceStopUserClient) client;
-                stopUserClient.onUserStopped();
-            });
+            mHandler.post(mScheduler::onUserStopped);
         }
     }
 

@@ -52,6 +52,8 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
     @NonNull private final UserSwitchCallback mUserSwitchCallback;
     @NonNull @VisibleForTesting final ClientFinishedCallback mClientFinishedCallback;
 
+    @Nullable private StopUserClient<?> mStopUserClient;
+
     @VisibleForTesting
     class ClientFinishedCallback implements BaseClientMonitor.Callback {
         @Override
@@ -113,11 +115,26 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
             Slog.d(getTag(), "[Starting User] " + startClient);
             startClient.start(mClientFinishedCallback);
         } else {
-            final BaseClientMonitor stopClient = mUserSwitchCallback
-                    .getStopUserClient(currentUserId);
-            Slog.d(getTag(), "[Stopping User] current: " + currentUserId
-                    + ", next: " + nextUserId + ". " + stopClient);
-            stopClient.start(mClientFinishedCallback);
+            if (mStopUserClient != null) {
+                Slog.d(getTag(), "[Waiting for StopUser] " + mStopUserClient);
+            } else {
+                mStopUserClient = mUserSwitchCallback
+                        .getStopUserClient(currentUserId);
+                Slog.d(getTag(), "[Stopping User] current: " + currentUserId
+                        + ", next: " + nextUserId + ". " + mStopUserClient);
+                mStopUserClient.start(mClientFinishedCallback);
+            }
         }
+    }
+
+    public void onUserStopped() {
+        if (mStopUserClient == null) {
+            Slog.e(getTag(), "Unexpected onUserStopped");
+            return;
+        }
+
+        Slog.d(getTag(), "[OnUserStopped]: " + mStopUserClient);
+        mStopUserClient.onUserStopped();
+        mStopUserClient = null;
     }
 }
