@@ -47,7 +47,6 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Range;
-import android.util.proto.ProtoOutputStream;
 
 import java.util.Arrays;
 import java.util.List;
@@ -673,18 +672,6 @@ public class NetworkRequest implements Parcelable {
             default:
                 return NetworkRequestProto.TYPE_UNKNOWN;
         }
-    }
-
-    /** @hide */
-    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-
-        proto.write(NetworkRequestProto.TYPE, typeToProtoEnum(type));
-        proto.write(NetworkRequestProto.REQUEST_ID, requestId);
-        proto.write(NetworkRequestProto.LEGACY_TYPE, legacyType);
-        networkCapabilities.dumpDebug(proto, NetworkRequestProto.NETWORK_CAPABILITIES);
-
-        proto.end(token);
     }
 
     public boolean equals(@Nullable Object obj) {

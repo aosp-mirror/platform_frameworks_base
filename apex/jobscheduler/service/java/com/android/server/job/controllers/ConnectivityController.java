@@ -725,13 +725,6 @@ public final class ConnectivityController extends RestrictingController implemen
                     StateControllerProto.ConnectivityController.REQUESTED_STANDBY_EXCEPTION_UIDS,
                     mRequestedWhitelistJobs.keyAt(i));
         }
-        for (int i = 0; i < mAvailableNetworks.size(); i++) {
-            Network network = mAvailableNetworks.keyAt(i);
-            if (network != null) {
-                network.dumpDebug(proto,
-                        StateControllerProto.ConnectivityController.AVAILABLE_NETWORKS);
-            }
-        }
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
             for (int j = 0; j < jobs.size(); j++) {
@@ -745,12 +738,6 @@ public final class ConnectivityController extends RestrictingController implemen
                         StateControllerProto.ConnectivityController.TrackedJob.INFO);
                 proto.write(StateControllerProto.ConnectivityController.TrackedJob.SOURCE_UID,
                         js.getSourceUid());
-                NetworkRequest rn = js.getJob().getRequiredNetwork();
-                if (rn != null) {
-                    rn.dumpDebug(proto,
-                            StateControllerProto.ConnectivityController.TrackedJob
-                                    .REQUIRED_NETWORK);
-                }
                 proto.end(jsToken);
             }
         }
