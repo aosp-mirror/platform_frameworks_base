@@ -33,11 +33,13 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
         private final LockSettingsInternal mLockSettingsInternal;
         private final IBootControl mIBootControl;
         private final IMetricsReporter mIMetricsReporter;
+        private final RecoverySystemService.PreferencesManager mSharedPreferences;
 
         MockInjector(Context context, FakeSystemProperties systemProperties,
                 PowerManager powerManager, FileWriter uncryptPackageFileWriter,
                 UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal,
-                IBootControl bootControl, IMetricsReporter metricsReporter) {
+                IBootControl bootControl, IMetricsReporter metricsReporter,
+                RecoverySystemService.PreferencesManager preferences) {
             super(context);
             mSystemProperties = systemProperties;
             mPowerManager = powerManager;
@@ -46,6 +48,7 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
             mLockSettingsInternal = lockSettingsInternal;
             mIBootControl = bootControl;
             mIMetricsReporter = metricsReporter;
+            mSharedPreferences = preferences;
         }
 
         @Override
@@ -114,12 +117,14 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
                     requestedClientCount);
         }
 
+        @Override
         public void reportRebootEscrowLskfCapturedMetrics(int uid, int requestedClientCount,
                 int requestedToLskfCapturedDurationInSeconds) {
             mIMetricsReporter.reportRebootEscrowLskfCapturedMetrics(uid, requestedClientCount,
                     requestedToLskfCapturedDurationInSeconds);
         }
 
+        @Override
         public void reportRebootEscrowRebootMetrics(int errorCode, int uid, int preparedClientCount,
                 int requestCount, boolean slotSwitch, boolean serverBased,
                 int lskfCapturedToRebootDurationInSeconds, int lskfCapturedCounts) {
@@ -127,14 +132,25 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
                     requestCount, slotSwitch, serverBased, lskfCapturedToRebootDurationInSeconds,
                     lskfCapturedCounts);
         }
+
+        @Override
+        public long getCurrentTimeMillis() {
+            return 100_000;
+        }
+
+        @Override
+        public RecoverySystemService.PreferencesManager getMetricsPrefs() {
+            return mSharedPreferences;
+        }
     }
 
     RecoverySystemServiceTestable(Context context, FakeSystemProperties systemProperties,
             PowerManager powerManager, FileWriter uncryptPackageFileWriter,
             UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal,
-            IBootControl bootControl, IMetricsReporter metricsReporter) {
+            IBootControl bootControl, IMetricsReporter metricsReporter,
+            RecoverySystemService.PreferencesManager preferences) {
         super(new MockInjector(context, systemProperties, powerManager, uncryptPackageFileWriter,
-                uncryptSocket, lockSettingsInternal, bootControl, metricsReporter));
+                uncryptSocket, lockSettingsInternal, bootControl, metricsReporter, preferences));
     }
 
     public static class FakeSystemProperties {
@@ -176,5 +192,4 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
                 int requestCount, boolean slotSwitch, boolean serverBased,
                 int lskfCapturedToRebootDurationInSeconds, int lskfCapturedCounts);
     }
-
 }

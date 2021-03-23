@@ -22,6 +22,7 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -72,6 +73,7 @@ public class RecoverySystemServiceTest {
     private LockSettingsInternal mLockSettingsInternal;
     private IBootControl mIBootControl;
     private RecoverySystemServiceTestable.IMetricsReporter mMetricsReporter;
+    private RecoverySystemService.PreferencesManager mSharedPreferences;
 
     private static final String FAKE_OTA_PACKAGE_NAME = "fake.ota.package";
     private static final String FAKE_OTHER_PACKAGE_NAME = "fake.other.package";
@@ -97,10 +99,11 @@ public class RecoverySystemServiceTest {
         when(mIBootControl.getActiveBootSlot()).thenReturn(1);
 
         mMetricsReporter = mock(RecoverySystemServiceTestable.IMetricsReporter.class);
+        mSharedPreferences = mock(RecoverySystemService.PreferencesManager.class);
 
         mRecoverySystemService = new RecoverySystemServiceTestable(mContext, mSystemProperties,
                 powerManager, mUncryptUpdateFileWriter, mUncryptSocket, mLockSettingsInternal,
-                mIBootControl, mMetricsReporter);
+                mIBootControl, mMetricsReporter, mSharedPreferences);
     }
 
     @Test
@@ -237,6 +240,8 @@ public class RecoverySystemServiceTest {
                 is(true));
         verify(mMetricsReporter).reportRebootEscrowPreparationMetrics(
                 eq(1000), eq(0) /* need preparation */, eq(1) /* client count */);
+        verify(mSharedPreferences).putLong(eq(FAKE_OTA_PACKAGE_NAME
+                + RecoverySystemService.REQUEST_LSKF_TIMESTAMP_PREF_SUFFIX), eq(100_000L));
     }
 
 
@@ -245,10 +250,19 @@ public class RecoverySystemServiceTest {
         IntentSender intentSender = mock(IntentSender.class);
         assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, intentSender),
                 is(true));
+
+        when(mSharedPreferences.getLong(eq(FAKE_OTA_PACKAGE_NAME
+                + RecoverySystemService.REQUEST_LSKF_TIMESTAMP_PREF_SUFFIX), anyLong()))
+                .thenReturn(200_000L).thenReturn(5000L);
+        mRecoverySystemService.onPreparedForReboot(true);
+        verify(mMetricsReporter).reportRebootEscrowLskfCapturedMetrics(
+                eq(1000), eq(1) /* client count */,
+                eq(-1) /* invalid duration */);
+
         mRecoverySystemService.onPreparedForReboot(true);
         verify(intentSender).sendIntent(any(), anyInt(), any(), any(), any());
         verify(mMetricsReporter).reportRebootEscrowLskfCapturedMetrics(
-                eq(1000), eq(1) /* client count */, anyInt() /* duration */);
+                eq(1000), eq(1) /* client count */, eq(95) /* duration */);
     }
 
     @Test
@@ -352,12 +366,19 @@ public class RecoverySystemServiceTest {
     public void rebootWithLskf_Success() throws Exception {
         assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
         mRecoverySystemService.onPreparedForReboot(true);
+
+        when(mSharedPreferences.getInt(eq(FAKE_OTA_PACKAGE_NAME
+                + RecoverySystemService.REQUEST_LSKF_COUNT_PREF_SUFFIX), anyInt())).thenReturn(2);
+        when(mSharedPreferences.getInt(eq(RecoverySystemService.LSKF_CAPTURED_COUNT_PREF),
+                anyInt())).thenReturn(3);
+        when(mSharedPreferences.getLong(eq(RecoverySystemService.LSKF_CAPTURED_TIMESTAMP_PREF),
+                anyLong())).thenReturn(40_000L);
         assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true),
                 is(true));
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
         verify(mMetricsReporter).reportRebootEscrowRebootMetrics(eq(0), eq(1000),
-                eq(1) /* client count */, eq(1) /* request count */, eq(true) /* slot switch */,
-                anyBoolean(), anyInt(), eq(1) /* lskf capture count */);
+                eq(1) /* client count */, eq(2) /* request count */, eq(true) /* slot switch */,
+                anyBoolean(), eq(60) /* duration */, eq(3) /* lskf capture count */);
     }
 
 
@@ -400,13 +421,19 @@ public class RecoverySystemServiceTest {
         assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, null), is(true));
         mRecoverySystemService.onPreparedForReboot(true);
 
-        // Client B's clear won't affect client A's preparation.
+        when(mSharedPreferences.getInt(eq(FAKE_OTA_PACKAGE_NAME
+                + RecoverySystemService.REQUEST_LSKF_COUNT_PREF_SUFFIX), anyInt())).thenReturn(2);
+        when(mSharedPreferences.getInt(eq(RecoverySystemService.LSKF_CAPTURED_COUNT_PREF),
+                anyInt())).thenReturn(1);
+        when(mSharedPreferences.getLong(eq(RecoverySystemService.LSKF_CAPTURED_TIMESTAMP_PREF),
+                anyLong())).thenReturn(60_000L);
+
         assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true),
                 is(true));
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
         verify(mMetricsReporter).reportRebootEscrowRebootMetrics(eq(0), eq(1000),
-                eq(2) /* client count */, eq(1) /* request count */, eq(true) /* slot switch */,
-                anyBoolean(), anyInt(), eq(1) /* lskf capture count */);
+                eq(2) /* client count */, eq(2) /* request count */, eq(true) /* slot switch */,
+                anyBoolean(), eq(40), eq(1) /* lskf capture count */);
     }
 
     @Test
@@ -415,22 +442,30 @@ public class RecoverySystemServiceTest {
         mRecoverySystemService.onPreparedForReboot(true);
         assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, null), is(true));
 
+        when(mSharedPreferences.getInt(eq(FAKE_OTHER_PACKAGE_NAME
+                + RecoverySystemService.REQUEST_LSKF_COUNT_PREF_SUFFIX), anyInt())).thenReturn(2);
+        when(mSharedPreferences.getInt(eq(RecoverySystemService.LSKF_CAPTURED_COUNT_PREF),
+                anyInt())).thenReturn(1);
+        when(mSharedPreferences.getLong(eq(RecoverySystemService.LSKF_CAPTURED_TIMESTAMP_PREF),
+                anyLong())).thenReturn(60_000L);
+
         assertThat(mRecoverySystemService.clearLskf(FAKE_OTA_PACKAGE_NAME), is(true));
         assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true),
                 is(false));
         verifyNoMoreInteractions(mIPowerManager);
         verify(mMetricsReporter).reportRebootEscrowRebootMetrics(not(eq(0)), eq(1000),
-                eq(1) /* client count */, eq(1) /* request count */, eq(true) /* slot switch */,
-                anyBoolean(), anyInt(), eq(1) /* lskf capture count */);
+                eq(1) /* client count */, anyInt() /* request count */, eq(true) /* slot switch */,
+                anyBoolean(), eq(40), eq(1)/* lskf capture count */);
 
         assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, null), is(true));
         assertThat(
                 mRecoverySystemService.rebootWithLskf(FAKE_OTHER_PACKAGE_NAME, "ab-update", true),
                 is(true));
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
-        verify(mMetricsReporter).reportRebootEscrowRebootMetrics(eq(0), eq(2000),
-                eq(1) /* client count */, eq(1) /* request count */, eq(true) /* slot switch */,
-                anyBoolean(), anyInt(), eq(1) /* lskf capture count */);
+
+        verify(mMetricsReporter).reportRebootEscrowRebootMetrics((eq(0)), eq(2000),
+                eq(1) /* client count */, eq(2) /* request count */, eq(true) /* slot switch */,
+                anyBoolean(), eq(40), eq(1) /* lskf capture count */);
     }
 
     @Test
