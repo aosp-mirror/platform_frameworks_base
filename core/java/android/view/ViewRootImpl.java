@@ -330,7 +330,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean mUseBLASTAdapter;
     private boolean mForceDisableBLAST;
-    private boolean mEnableTripleBuffering;
 
     private boolean mFastScrollSoundEffectsEnabled;
 
@@ -474,6 +473,7 @@ public final class ViewRootImpl implements ViewParent,
         FrameInfo frameInfo = mChoreographer.mFrameInfo;
         mViewFrameInfo.populateFrameInfo(frameInfo);
         mViewFrameInfo.reset();
+        mInputEventAssigner.notifyFrameProcessed();
         return frameInfo;
     }
 
@@ -1178,9 +1178,6 @@ public final class ViewRootImpl implements ViewParent,
 
                 if ((res & WindowManagerGlobal.ADD_FLAG_USE_BLAST) != 0) {
                     mUseBLASTAdapter = true;
-                }
-                if ((res & WindowManagerGlobal.ADD_FLAG_USE_TRIPLE_BUFFERING) != 0) {
-                    mEnableTripleBuffering = true;
                 }
 
                 if (view instanceof RootViewSurfaceTaker) {
@@ -1907,7 +1904,7 @@ public final class ViewRootImpl implements ViewParent,
         Surface ret = null;
         if (mBlastBufferQueue == null) {
             mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl, width, height,
-                    format, mEnableTripleBuffering);
+                    format);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.createSurface();
@@ -8502,11 +8499,6 @@ public final class ViewRootImpl implements ViewParent,
             consumedBatches = false;
         }
         doProcessInputEvents();
-        if (consumedBatches) {
-            // Must be done after we processed the input events, to mark the completion of the frame
-            // from the input point of view
-            mInputEventAssigner.onChoreographerCallback();
-        }
         return consumedBatches;
     }
 

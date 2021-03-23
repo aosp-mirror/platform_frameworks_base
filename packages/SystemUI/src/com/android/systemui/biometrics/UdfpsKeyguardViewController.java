@@ -33,6 +33,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
 
     private boolean mForceShow;
+    private boolean mQsExpanded;
 
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
@@ -64,7 +65,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     protected void onViewDetached() {
         super.onViewDetached();
         mStatusBarStateController.removeCallback(mStateListener);
-        mAlternateAuthInterceptor.reset();
+        mAlternateAuthInterceptor.resetForceShow();
         mKeyguardViewManager.setAlternateAuthInterceptor(null);
     }
 
@@ -100,6 +101,11 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         if (mForceShow) {
             return false;
         }
+
+        if (mQsExpanded) {
+            return true;
+        }
+
         return super.shouldPauseAuth();
     }
 
@@ -130,7 +136,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 }
 
                 @Override
-                public boolean reset() {
+                public boolean resetForceShow() {
                     if (!mForceShow) {
                         return false;
                     }
@@ -140,13 +146,19 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 }
 
                 @Override
-                public boolean isShowingAlternativeAuth() {
+                public boolean isShowingAlternateAuth() {
                     return mForceShow;
                 }
 
                 @Override
                 public boolean isAnimating() {
                     return mView.isAnimating();
+                }
+
+                @Override
+                public void setQsExpanded(boolean expanded) {
+                    mQsExpanded = expanded;
+                    updatePauseAuth();
                 }
 
                 @Override

@@ -424,8 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"प्रोटानेमली (रातो, हरियो)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ट्रिटानोमेली (निलो-पंहेलो)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रङ्ग सुधार"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (2333641630205214702) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"तपाईंको यन्त्रमा रङहरू कस्ता देखिन्छन् भन्ने कुरा मिलाउनुहोस्। यो सुविधा निम्न अवस्थामा उपयोगी हुन सक्छ:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;तपाईं अझ सटीक रूपमा रङहरू देख्न चाहनुहुन्छ भने&lt;/li&gt; &lt;li&gt;&amp;nbsp;तपाईं कुनै कुरामा ध्यान केन्द्रित गर्न रङहरू हटाउन चाहनुहुन्छ भने&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>

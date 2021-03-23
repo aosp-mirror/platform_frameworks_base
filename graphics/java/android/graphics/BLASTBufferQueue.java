@@ -28,7 +28,7 @@ public final class BLASTBufferQueue {
     public long mNativeObject; // BLASTBufferQueue*
 
     private static native long nativeCreate(String name, long surfaceControl, long width,
-            long height, int format, boolean tripleBufferingEnabled);
+            long height, int format);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
@@ -53,9 +53,8 @@ public final class BLASTBufferQueue {
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
-            @PixelFormat.Format int format, boolean tripleBufferingEnabled) {
-        mNativeObject = nativeCreate(name, sc.mNativeObject, width, height, format,
-                tripleBufferingEnabled);
+            @PixelFormat.Format int format) {
+        mNativeObject = nativeCreate(name, sc.mNativeObject, width, height, format);
     }
 
     public void destroy() {

@@ -35,16 +35,17 @@
             android:layout_height="match_parent">
             <ImageView
                 android:id="@+id/person_icon"
-                android:layout_width="60dp"
-                android:layout_height="60dp"/>
+                android:layout_width="64dp"
+                android:layout_height="64dp"/>
             <ImageView
                 android:id="@+id/availability"
+                android:layout_marginStart="-2dp"
                 android:layout_width="10dp"
                 android:layout_height="10dp"
                 android:background="@drawable/circle_green_10dp"/>
             <LinearLayout
                 android:orientation="vertical"
-                android:paddingStart="4dp"
+                android:paddingStart="6dp"
                 android:gravity="top"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">

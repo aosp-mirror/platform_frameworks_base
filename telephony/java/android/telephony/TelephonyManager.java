@@ -11037,6 +11037,25 @@ public class TelephonyManager {
     }
 
     /**
+     * Determines the {@link PhoneAccountHandle} associated with this TelephonyManager.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * <p>Requires Permission android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE or that the
+     * calling app has carrier privileges (see {@link #hasCarrierPrivileges})
+     *
+     * @return The {@link PhoneAccountHandle} associated with the TelphonyManager, or {@code null}
+     * if there is no associated {@link PhoneAccountHandle}; this can happen if the subscription is
+     * data-only or an opportunistic subscription.
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable PhoneAccountHandle getPhoneAccountHandle() {
+        return getPhoneAccountHandleForSubscriptionId(getSubId());
+    }
+
+    /**
      * Determines the {@link PhoneAccountHandle} associated with a subscription Id.
      *
      * @param subscriptionId The subscription Id to check.
@@ -12388,12 +12407,6 @@ public class TelephonyManager {
      * "Data capable" means that this device supports packet-switched
      * data connections over the telephony network.
      * <p>
-     * Note: the meaning of this flag is subtly different from the
-     * PackageManager.FEATURE_TELEPHONY system feature, which is available
-     * on any device with a telephony radio, even if the device is
-     * voice-only.
-     *
-     * @hide
      */
     public boolean isDataCapable() {
         if (mContext == null) return true;
@@ -14928,12 +14941,23 @@ public class TelephonyManager {
     public static final String CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE =
             "CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE";
 
+    /**
+     * Indicates whether a data throttling request sent with {@link #sendThermalMitigationRequest}
+     * is supported. See comments on {@link #sendThermalMitigationRequest} for more information.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING =
+            "CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
             CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE,
             CAPABILITY_ALLOWED_NETWORK_TYPES_USED,
-            CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE
+            CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE,
+            CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING,
     })
     public @interface RadioInterfaceCapability {}
 
@@ -15043,11 +15067,24 @@ public class TelephonyManager {
      * and can be used at any time during data throttling to hold onto the current level of data
      * throttling.
      *
+     * <p> If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}({@link
+     * #CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING}) returns false, then sending a {@link
+     * DataThrottlingRequest#DATA_THROTTLING_ACTION_HOLD}, {@link
+     * DataThrottlingRequest#DATA_THROTTLING_ACTION_THROTTLE_SECONDARY_CARRIER}, or {@link
+     * DataThrottlingRequest#DATA_THROTTLING_ACTION_THROTTLE_PRIMARY_CARRIER} will result in {@link
+     * IllegalArgumentException} being thrown. However, on devices that do not
+     * support data throttling, {@link
+     * DataThrottlingRequest#DATA_THROTTLING_ACTION_NO_DATA_THROTTLING} can still be requested in
+     * order to undo the mitigations above it (i.e {@link
+     * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_VOICE_ONLY} and/or {@link
+     * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_RADIO_OFF}).
+     *
      * @param thermalMitigationRequest Thermal mitigation request. See {@link
      * ThermalMitigationRequest} for details.
      *
      * @throws IllegalStateException if the Telephony process is not currently available.
-     * @throws IllegalArgumentException if the thermalMitigationRequest had invalid parameters.
+     * @throws IllegalArgumentException if the thermalMitigationRequest had invalid parameters or
+     * if the device's modem does not support data throttling.
      *
      * @hide
      */

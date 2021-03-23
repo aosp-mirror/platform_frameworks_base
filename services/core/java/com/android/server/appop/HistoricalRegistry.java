@@ -246,6 +246,7 @@ final class HistoricalRegistry {
                                     + " by which to push history on next write");
                         }
                     }
+                    mDiscreteRegistry.systemReady();
                 }
             }
         }
