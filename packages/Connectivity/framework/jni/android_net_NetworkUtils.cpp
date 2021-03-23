@@ -123,11 +123,6 @@ static jint android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, job
     return setNetworkForSocket(netId, AFileDescriptor_getFD(env, javaFd));
 }
 
-static jboolean android_net_utils_queryUserAccess(JNIEnv *env, jobject thiz, jint uid, jint netId)
-{
-    return (jboolean) !queryUserAccess(uid, netId);
-}
-
 static bool checkLenAndCopy(JNIEnv* env, const jbyteArray& addr, int len, void* dst)
 {
     if (env->GetArrayLength(addr) != len) {
@@ -267,7 +262,6 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "getBoundNetworkHandleForProcess", "()J", (void*) android_net_utils_getBoundNetworkHandleForProcess },
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
     { "bindSocketToNetwork", "(Ljava/io/FileDescriptor;I)I", (void*) android_net_utils_bindSocketToNetwork },
-    { "queryUserAccess", "(II)Z", (void*)android_net_utils_queryUserAccess },
     { "attachDropAllBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDropAllBPFFilter },
     { "detachBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_detachBPFFilter },
     { "getTcpRepairWindow", "(Ljava/io/FileDescriptor;)Landroid/net/TcpRepairWindow;", (void*) android_net_utils_getTcpRepairWindow },

@@ -1145,8 +1145,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         /**
          * @see NetworkUtils#queryUserAccess(int, int)
          */
-        public boolean queryUserAccess(int uid, int netId) {
-            return NetworkUtils.queryUserAccess(uid, netId);
+        public boolean queryUserAccess(int uid, Network network, ConnectivityService cs) {
+            return cs.queryUserAccess(uid, network);
         }
 
         /**
@@ -4839,6 +4839,42 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.networkMonitor().forceReevaluation(uid);
     }
 
+    // TODO: call into netd.
+    private boolean queryUserAccess(int uid, Network network) {
+        final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+        if (nai == null) return false;
+
+        // Any UID can use its default network.
+        if (nai == getDefaultNetworkForUid(uid)) return true;
+
+        // Privileged apps can use any network.
+        if (mPermissionMonitor.hasRestrictedNetworksPermission(uid)) {
+            return true;
+        }
+
+        // An unprivileged UID can use a VPN iff the VPN applies to it.
+        if (nai.isVPN()) {
+            return nai.networkCapabilities.appliesToUid(uid);
+        }
+
+        // An unprivileged UID can bypass the VPN that applies to it only if it can protect its
+        // sockets, i.e., if it is the owner.
+        final NetworkAgentInfo vpn = getVpnForUid(uid);
+        if (vpn != null && !vpn.networkAgentConfig.allowBypass
+                && uid != vpn.networkCapabilities.getOwnerUid()) {
+            return false;
+        }
+
+        // The UID's permission must be at least sufficient for the network. Since the restricted
+        // permission was already checked above, that just leaves background networks.
+        if (!nai.networkCapabilities.hasCapability(NET_CAPABILITY_FOREGROUND)) {
+            return mPermissionMonitor.hasUseBackgroundNetworksPermission(uid);
+        }
+
+        // Unrestricted network. Anyone gets to use it.
+        return true;
+    }
+
     /**
      * Returns information about the proxy a certain network is using. If given a null network, it
      * it will return the proxy for the bound network for the caller app or the default proxy if
@@ -4859,7 +4895,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return null;
             }
             return getLinkPropertiesProxyInfo(activeNetwork);
-        } else if (mDeps.queryUserAccess(mDeps.getCallingUid(), network.getNetId())) {
+        } else if (mDeps.queryUserAccess(mDeps.getCallingUid(), network, this)) {
             // Don't call getLinkProperties() as it requires ACCESS_NETWORK_STATE permission, which
             // caller may not have.
             return getLinkPropertiesProxyInfo(network);
