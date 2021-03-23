@@ -1859,22 +1859,13 @@ public class Vpn {
     /**
      * Updates underlying network set.
      */
-    public synchronized boolean setUnderlyingNetworks(Network[] networks) {
+    public synchronized boolean setUnderlyingNetworks(@Nullable Network[] networks) {
         if (!isCallerEstablishedOwnerLocked()) {
             return false;
         }
-        if (networks == null) {
-            mConfig.underlyingNetworks = null;
-        } else {
-            mConfig.underlyingNetworks = new Network[networks.length];
-            for (int i = 0; i < networks.length; ++i) {
-                if (networks[i] == null) {
-                    mConfig.underlyingNetworks[i] = null;
-                } else {
-                    mConfig.underlyingNetworks[i] = new Network(networks[i].getNetId());
-                }
-            }
-        }
+        // Make defensive copy since the content of array might be altered by the caller.
+        mConfig.underlyingNetworks =
+                (networks != null) ? Arrays.copyOf(networks, networks.length) : null;
         mNetworkAgent.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
                 ? Arrays.asList(mConfig.underlyingNetworks) : null);
         return true;
