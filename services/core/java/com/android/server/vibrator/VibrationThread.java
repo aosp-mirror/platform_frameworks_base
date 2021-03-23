@@ -27,9 +27,11 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
 import android.os.WorkSource;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
@@ -91,6 +93,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private final WorkSource mWorkSource = new WorkSource();
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
+    private final VibrationEffectModifier<VibratorInfo> mDeviceEffectAdapter =
+            new DeviceVibrationEffectAdapter();
     private final Vibration mVibration;
     private final VibrationCallbacks mCallbacks;
     private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
@@ -628,6 +632,11 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         private long startVibrating(VibrationEffect effect, List<Step> nextSteps) {
+            // TODO(b/167947076): split this into 4 different step implementations:
+            // VibratorPerformStep, VibratorComposePrimitiveStep, VibratorComposePwleStep and
+            // VibratorAmplitudeStep.
+            // Make sure each step carries over the full VibrationEffect and an incremental segment
+            // index, and triggers a final VibratorOffStep once all segments are done.
             VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
             VibrationEffectSegment firstSegment = composed.getSegments().get(0);
             final long duration;
@@ -665,6 +674,28 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                         primitives[i] = new PrimitiveSegment(
                                 VibrationEffect.Composition.PRIMITIVE_NOOP,
                                 /* scale= */ 1, /* delay= */ 0);
+                    }
+                }
+                duration = controller.on(primitives, mVibration.id);
+                if (duration > 0) {
+                    nextSteps.add(new VibratorOffStep(now + duration + CALLBACKS_EXTRA_TIMEOUT,
+                            controller));
+                }
+            } else if (firstSegment instanceof RampSegment) {
+                int segmentCount = composed.getSegments().size();
+                RampSegment[] primitives = new RampSegment[segmentCount];
+                for (int i = 0; i < segmentCount; i++) {
+                    VibrationEffectSegment segment = composed.getSegments().get(i);
+                    if (segment instanceof RampSegment) {
+                        primitives[i] = (RampSegment) segment;
+                    } else if (segment instanceof StepSegment) {
+                        StepSegment stepSegment = (StepSegment) segment;
+                        primitives[i] = new RampSegment(
+                                stepSegment.getAmplitude(), stepSegment.getAmplitude(),
+                                stepSegment.getFrequency(), stepSegment.getFrequency(),
+                                (int) stepSegment.getDuration());
+                    } else {
+                        primitives[i] = new RampSegment(0, 0, 0, 0, 0);
                     }
                 }
                 duration = controller.on(primitives, mVibration.id);
@@ -851,7 +882,9 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             mVibratorIds = new int[mVibrators.size()];
             for (int i = 0; i < mVibrators.size(); i++) {
                 int vibratorId = mVibrators.keyAt(i);
-                mVibratorEffects.put(vibratorId, mono.getEffect());
+                VibratorInfo vibratorInfo = mVibrators.valueAt(i).getVibratorInfo();
+                VibrationEffect effect = mDeviceEffectAdapter.apply(mono.getEffect(), vibratorInfo);
+                mVibratorEffects.put(vibratorId, effect);
                 mVibratorIds[i] = vibratorId;
             }
             mRequiredSyncCapabilities = calculateRequiredSyncCapabilities(mVibratorEffects);
@@ -863,7 +896,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             for (int i = 0; i < stereoEffects.size(); i++) {
                 int vibratorId = stereoEffects.keyAt(i);
                 if (mVibrators.contains(vibratorId)) {
-                    mVibratorEffects.put(vibratorId, stereoEffects.valueAt(i));
+                    VibratorInfo vibratorInfo = mVibrators.valueAt(i).getVibratorInfo();
+                    VibrationEffect effect = mDeviceEffectAdapter.apply(
+                            stereoEffects.valueAt(i), vibratorInfo);
+                    mVibratorEffects.put(vibratorId, effect);
                 }
             }
             mVibratorIds = new int[mVibratorEffects.size()];
