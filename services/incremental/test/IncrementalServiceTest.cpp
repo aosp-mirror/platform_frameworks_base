@@ -272,12 +272,20 @@ public:
         }
         return binder::Status::ok();
     }
+    binder::Status bindToDataLoaderOkWith1sDelay(int32_t mountId,
+                                                 const DataLoaderParamsParcel& params,
+                                                 int bindDelayMs,
+                                                 const sp<IDataLoaderStatusListener>& listener,
+                                                 bool* _aidl_return) {
+        CHECK(100 * 9 <= bindDelayMs && bindDelayMs <= 100 * 11) << bindDelayMs;
+        return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
+    }
     binder::Status bindToDataLoaderOkWith10sDelay(int32_t mountId,
                                                   const DataLoaderParamsParcel& params,
                                                   int bindDelayMs,
                                                   const sp<IDataLoaderStatusListener>& listener,
                                                   bool* _aidl_return) {
-        CHECK(1000 * 9 <= bindDelayMs && bindDelayMs <= 1000 * 11) << bindDelayMs;
+        CHECK(100 * 9 * 9 <= bindDelayMs && bindDelayMs <= 100 * 11 * 11) << bindDelayMs;
         return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
     }
     binder::Status bindToDataLoaderOkWith100sDelay(int32_t mountId,
@@ -285,7 +293,7 @@ public:
                                                    int bindDelayMs,
                                                    const sp<IDataLoaderStatusListener>& listener,
                                                    bool* _aidl_return) {
-        CHECK(1000 * 9 * 9 < bindDelayMs && bindDelayMs < 1000 * 11 * 11) << bindDelayMs;
+        CHECK(100 * 9 * 9 * 9 < bindDelayMs && bindDelayMs < 100 * 11 * 11 * 11) << bindDelayMs;
         return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
     }
     binder::Status bindToDataLoaderOkWith1000sDelay(int32_t mountId,
@@ -293,7 +301,8 @@ public:
                                                     int bindDelayMs,
                                                     const sp<IDataLoaderStatusListener>& listener,
                                                     bool* _aidl_return) {
-        CHECK(1000 * 9 * 9 * 9 < bindDelayMs && bindDelayMs < 1000 * 11 * 11 * 11) << bindDelayMs;
+        CHECK(100 * 9 * 9 * 9 * 9 < bindDelayMs && bindDelayMs < 100 * 11 * 11 * 11 * 11)
+                << bindDelayMs;
         return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
     }
     binder::Status bindToDataLoaderOkWith10000sDelay(int32_t mountId,
@@ -301,7 +310,7 @@ public:
                                                      int bindDelayMs,
                                                      const sp<IDataLoaderStatusListener>& listener,
                                                      bool* _aidl_return) {
-        CHECK(1000 * 9 * 9 * 9 * 9 < bindDelayMs && bindDelayMs < 1000 * 11 * 11 * 11 * 11)
+        CHECK(100 * 9 * 9 * 9 * 9 * 9 < bindDelayMs && bindDelayMs < 100 * 11 * 11 * 11 * 11 * 11)
                 << bindDelayMs;
         return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
     }
@@ -865,10 +874,10 @@ TEST_F(IncrementalServiceTest, testDeleteStorageSuccess) {
 }
 
 TEST_F(IncrementalServiceTest, testDataLoaderDestroyedAndDelayed) {
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(6);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(7);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
-    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(6);
-    EXPECT_CALL(*mDataLoader, start(_)).Times(6);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(7);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(7);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
@@ -879,6 +888,11 @@ TEST_F(IncrementalServiceTest, testDataLoaderDestroyedAndDelayed) {
     mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, {}, {});
 
     // Simulated crash/other connection breakage.
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith1sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
 
     ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
             .WillByDefault(Invoke(mDataLoaderManager,
@@ -912,10 +926,10 @@ TEST_F(IncrementalServiceTest, testDataLoaderOnRestart) {
 
     constexpr auto bindRetryInterval = 5s;
 
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(10);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(11);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
-    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(6);
-    EXPECT_CALL(*mDataLoader, start(_)).Times(6);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(7);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(7);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(4);
@@ -993,6 +1007,11 @@ TEST_F(IncrementalServiceTest, testDataLoaderOnRestart) {
 
     // And test the rest of the backoff.
     // Simulated crash/other connection breakage.
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith1sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
     ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
             .WillByDefault(Invoke(mDataLoaderManager,
                                   &MockDataLoaderManager::bindToDataLoaderOkWith10sDelay));

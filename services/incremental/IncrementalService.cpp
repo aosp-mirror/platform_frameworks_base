@@ -81,8 +81,8 @@ struct Constants {
 
     static constexpr auto bindingTimeout = 1min;
 
-    // 10s, 100s (~2min), 1000s (~15min), 10000s (~3hrs)
-    static constexpr auto minBindDelay = 10s;
+    // 1s, 10s, 100s (~2min), 1000s (~15min), 10000s (~3hrs)
+    static constexpr auto minBindDelay = 1s;
     static constexpr auto maxBindDelay = 10000s;
     static constexpr auto bindDelayMultiplier = 10;
     static constexpr auto bindDelayJitterDivider = 10;
