@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
-import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -49,6 +48,7 @@ import static android.os.PowerWhitelistManager.REASON_UID_VISIBLE;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerWhitelistManager.getReasonCodeFromProcState;
 import static android.os.PowerWhitelistManager.reasonCodeToString;
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.NFC_UID;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
@@ -660,7 +660,7 @@ public final class ActiveServices {
         }
 
         ServiceRecord r = res.record;
-        setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, r,
+        setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, r, userId,
                 allowBackgroundActivityStarts);
 
         if (!mAm.mUserController.exists(r.userId)) {
@@ -693,19 +693,7 @@ public final class ActiveServices {
                         + r.shortInstanceName;
                 Slog.w(TAG, msg);
                 showFgsBgRestrictedNotificationLocked(r);
-                ApplicationInfo aInfo = null;
-                try {
-                    aInfo = AppGlobals.getPackageManager().getApplicationInfo(
-                            callingPackage, ActivityManagerService.STOCK_PM_FLAGS,
-                            userId);
-                } catch (android.os.RemoteException e) {
-                    // pm is in same process, this will never happen.
-                }
-                if (aInfo == null) {
-                    throw new SecurityException("startServiceLocked failed, "
-                            + "could not resolve client package " + callingPackage);
-                }
-                if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, aInfo.uid)) {
+                if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, callingUid)) {
                     throw new ForegroundServiceStartNotAllowedException(msg);
                 }
                 return null;
@@ -1808,7 +1796,7 @@ public final class ActiveServices {
                             final long delayMs = SystemClock.elapsedRealtime() - r.createRealTime;
                             if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
                                 setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
-                                        r.appInfo.uid, r.intent.getIntent(), r, false);
+                                        r.appInfo.uid, r.intent.getIntent(), r, r.userId,false);
                                 final String temp = "startForegroundDelayMs:" + delayMs;
                                 if (r.mInfoAllowStartForeground != null) {
                                     r.mInfoAllowStartForeground += "; " + temp;
@@ -1825,7 +1813,7 @@ public final class ActiveServices {
                                 r.mLastSetFgsRestrictionTime;
                         if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
                             setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
-                                    r.appInfo.uid, r.intent.getIntent(), r, false);
+                                    r.appInfo.uid, r.intent.getIntent(), r, r.userId,false);
                         }
                     }
                     logFgsBackgroundStart(r);
@@ -2579,7 +2567,8 @@ public final class ActiveServices {
                     return 0;
                 }
             }
-            setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, s, false);
+            setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, s, userId,
+                    false);
 
             if (s.app != null) {
                 ProcessServiceRecord servicePsr = s.app.mServices;
@@ -5469,7 +5458,7 @@ public final class ActiveServices {
      * @return true if allow, false otherwise.
      */
     private void setFgsRestrictionLocked(String callingPackage,
-            int callingPid, int callingUid, Intent intent, ServiceRecord r,
+            int callingPid, int callingUid, Intent intent, ServiceRecord r, int userId,
             boolean allowBackgroundActivityStarts) {
         r.mLastSetFgsRestrictionTime = SystemClock.elapsedRealtime();
         // Check DeviceConfig flag.
@@ -5487,7 +5476,7 @@ public final class ActiveServices {
             if (r.mAllowStartForeground == REASON_DENIED) {
                 r.mAllowStartForeground = shouldAllowFgsStartForegroundLocked(allowWhileInUse,
                         callingPackage, callingPid, callingUid, intent, r,
-                        allowBackgroundActivityStarts);
+                        userId);
             }
         }
     }
@@ -5630,13 +5619,20 @@ public final class ActiveServices {
      */
     private @ReasonCode int shouldAllowFgsStartForegroundLocked(
             @ReasonCode int allowWhileInUse, String callingPackage, int callingPid,
-            int callingUid, Intent intent, ServiceRecord r, boolean allowBackgroundActivityStarts) {
+            int callingUid, Intent intent, ServiceRecord r, int userId) {
         FgsStartTempAllowList.TempFgsAllowListEntry tempAllowListReason =
                 r.mInfoTempFgsAllowListReason = mAm.isAllowlistedForFgsStartLOSP(callingUid);
         int ret = shouldAllowFgsStartForegroundLocked(allowWhileInUse, callingPid, callingUid,
                 callingPackage, r);
 
         final int uidState = mAm.getUidStateLocked(callingUid);
+        int callerTargetSdkVersion = INVALID_UID;
+        try {
+            ApplicationInfo ai = mAm.mContext.getPackageManager().getApplicationInfoAsUser(
+                    callingPackage, PackageManager.MATCH_KNOWN_PACKAGES, userId);
+            callerTargetSdkVersion = ai.targetSdkVersion;
+        } catch (PackageManager.NameNotFoundException e) {
+        }
         final String debugInfo =
                 "[callingPackage: " + callingPackage
                         + "; callingUid: " + callingUid
@@ -5652,6 +5648,7 @@ public final class ActiveServices {
                                         + ",callingUid:" + tempAllowListReason.mCallingUid))
                         + ">"
                         + "; targetSdkVersion:" + r.appInfo.targetSdkVersion
+                        + "; callerTargetSdkVersion:" + callerTargetSdkVersion
                         + "; startForegroundCount:" + r.mStartForegroundCount
                         + "]";
         if (!debugInfo.equals(r.mInfoAllowStartForeground)) {
@@ -5823,7 +5820,12 @@ public final class ActiveServices {
 
     private boolean isBgFgsRestrictionEnabled(ServiceRecord r) {
         return mAm.mConstants.mFlagFgsStartRestrictionEnabled
-                && CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid);
+                // Checking service's targetSdkVersion.
+                && CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid)
+                && (!mAm.mConstants.mFgsStartRestrictionCheckCallerTargetSdk
+                    // Checking callingUid's targetSdkVersion.
+                    || CompatChanges.isChangeEnabled(
+                            FGS_BG_START_RESTRICTION_CHANGE_ID, r.mRecentCallingUid));
     }
 
     private void logFgsBackgroundStart(ServiceRecord r) {
