@@ -402,10 +402,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
-    public void setHotwordDetectionServiceConfigLocked(@Nullable PersistableBundle options,
+    public void updateStateLocked(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         if (DEBUG) {
-            Slog.d(TAG, "setHotwordDetectionServiceConfigLocked");
+            Slog.d(TAG, "updateStateLocked");
         }
         if (mHotwordDetectionComponentName == null) {
             Slog.w(TAG, "Hotword detection service name not found");
@@ -427,7 +427,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                     mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
                     options, sharedMemory);
         } else {
-            mHotwordDetectionConnection.setConfigLocked(options, sharedMemory);
+            mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }
     }
 

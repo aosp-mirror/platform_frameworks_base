@@ -82,10 +82,10 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         @Override
-        public void setConfig(PersistableBundle options, SharedMemory sharedMemory)
+        public void updateState(PersistableBundle options, SharedMemory sharedMemory)
                 throws RemoteException {
             if (DBG) {
-                Log.d(TAG, "#setConfig");
+                Log.d(TAG, "#updateState");
             }
             mHandler.sendMessage(obtainMessage(HotwordDetectionService::onUpdateState,
                     HotwordDetectionService.this,
@@ -139,14 +139,14 @@ public abstract class HotwordDetectionService extends Service {
     /**
      * Called when the {@link VoiceInteractionService#createAlwaysOnHotwordDetector(String, Locale,
      * PersistableBundle, SharedMemory, AlwaysOnHotwordDetector.Callback)} or
-     * {@link AlwaysOnHotwordDetector#setHotwordDetectionServiceConfig(PersistableBundle,
-     * SharedMemory)} requests an update of the hotword detection parameters.
+     * {@link AlwaysOnHotwordDetector#updateState(PersistableBundle, SharedMemory)} requests an
+     * update of the hotword detection parameters.
      *
-     * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
      * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob provided by the
-     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
      *
      * @hide
