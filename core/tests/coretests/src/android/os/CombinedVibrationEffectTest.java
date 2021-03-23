@@ -28,13 +28,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @Presubmit
 @RunWith(JUnit4.class)
 public class CombinedVibrationEffectTest {
     private static final VibrationEffect VALID_EFFECT = VibrationEffect.createOneShot(10, 255);
-    private static final VibrationEffect INVALID_EFFECT = new VibrationEffect.OneShot(-1, -1);
+    private static final VibrationEffect INVALID_EFFECT = new VibrationEffect.Composed(
+            new ArrayList<>(), 0);
 
     @Test
     public void testValidateMono() {
