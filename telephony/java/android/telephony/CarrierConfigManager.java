@@ -4849,6 +4849,30 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL =
             "carrier_provisions_wifi_merged_networks_bool";
 
+    /**
+     * Determines whether or not to use (IP) data connectivity as a supplemental condition to
+     * control the visibility of the no-calling indicator for this carrier in the System UI. Setting
+     * the configuration to true may make sense to a carrier which provides OTT calling.
+     *
+     * Config = true: do not show no-calling indication if (IP) data connectivity is available
+     *                or telephony has voice registration.
+     * Config = false: do not show no-calling indication if telephony has voice registration.
+     */
+    public static final String KEY_HIDE_NO_CALLING_INDICATOR_ON_DATA_NETWORK_BOOL =
+            "hide_no_calling_indicator_on_data_network_bool";
+
+    /**
+     * Determine whether or not to display a call strength indicator for this carrier in the System
+     * UI. Disabling the indication may be reasonable if the carrier's calling is not integrated
+     * into the Android telephony stack (e.g. it is OTT).
+     *
+     * true: Use telephony APIs to detect the current networking medium of calling and display a
+     *       UI indication based on the current strength (e.g. signal level) of that medium.
+     * false: Do not display the call strength indicator.
+     */
+    public static final String KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL =
+            "display_call_strength_indicator_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -5422,6 +5446,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
                 new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
         sDefaults.putBoolean(KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_NO_CALLING_INDICATOR_ON_DATA_NETWORK_BOOL, false);
+        sDefaults.putBoolean(KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL, true);
         sDefaults.putString(KEY_CARRIER_PROVISIONING_APP_STRING, "");
     }
 
