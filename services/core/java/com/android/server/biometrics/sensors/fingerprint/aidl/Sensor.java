@@ -403,6 +403,13 @@ class Sensor {
                 invalidationClient.onAuthenticatorIdInvalidated(newAuthenticatorId);
             });
         }
+
+        @Override
+        public void onSessionClosed() {
+            mHandler.post(() -> {
+              // TODO: implement this.
+            });
+        }
     }
 
     Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
