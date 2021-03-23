@@ -1225,6 +1225,70 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
+        public MediaSession.Token getMediaKeyEventSession() {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (!hasMediaControlPermission(pid, uid)) {
+                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission is required to"
+                            + " get the media key event session");
+                }
+                MediaSessionRecordImpl record;
+                synchronized (mLock) {
+                    FullUserRecord user = getFullUserRecordLocked(userId);
+                    if (user == null) {
+                        Log.w(TAG, "No matching user record to get the media key event session"
+                                + ", userId=" + userId);
+                        return null;
+                    }
+                    record = user.getMediaButtonSessionLocked();
+                }
+                if (record instanceof MediaSessionRecord) {
+                    return ((MediaSessionRecord) record).getSessionToken();
+                }
+                //TODO: Handle media session 2 case
+                return null;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public String getMediaKeyEventSessionPackageName() {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (!hasMediaControlPermission(pid, uid)) {
+                    throw new SecurityException("MEDIA_CONTENT_CONTROL permission is required to"
+                            + " get the media key event session package");
+                }
+                MediaSessionRecordImpl record;
+                synchronized (mLock) {
+                    FullUserRecord user = getFullUserRecordLocked(userId);
+                    if (user == null) {
+                        Log.w(TAG, "No matching user record to get the media key event session"
+                                + " package , userId=" + userId);
+                        return "";
+                    }
+                    record = user.getMediaButtonSessionLocked();
+                    if (record instanceof MediaSessionRecord) {
+                        return record.getPackageName();
+                    //TODO: Handle media session 2 case
+                    } else if (user.mLastMediaButtonReceiverHolder != null) {
+                        return user.mLastMediaButtonReceiverHolder.getPackageName();
+                    }
+                }
+                return "";
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void addSessionsListener(IActiveSessionsListener listener,
                 ComponentName componentName, int userId) throws RemoteException {
             final int pid = Binder.getCallingPid();
