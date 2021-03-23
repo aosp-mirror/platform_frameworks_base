@@ -25723,7 +25723,7 @@ package android.net.vcn {
   public abstract static class VcnManager.VcnStatusCallback {
     ctor public VcnManager.VcnStatusCallback();
     method public abstract void onGatewayConnectionError(@NonNull int[], int, @Nullable Throwable);
-    method public abstract void onVcnStatusChanged(int);
+    method public abstract void onStatusChanged(int);
   }
 
 }
