@@ -1203,7 +1203,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetworkRanker = new NetworkRanker();
         final NetworkRequest defaultInternetRequest = createDefaultRequest();
         mDefaultRequest = new NetworkRequestInfo(
-                defaultInternetRequest, null,
+                Process.myUid(), defaultInternetRequest, null,
                 new Binder(), NetworkCallback.FLAG_INCLUDE_LOCATION_INFO,
                 null /* attributionTags */);
         mNetworkRequests.put(defaultInternetRequest, mDefaultRequest);
@@ -1409,8 +1409,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (enable) {
             handleRegisterNetworkRequest(new NetworkRequestInfo(
-                    networkRequest, null,
-                    new Binder(),
+                    Process.myUid(), networkRequest, null, new Binder(),
                     NetworkCallback.FLAG_INCLUDE_LOCATION_INFO,
                     null /* attributionTags */));
         } else {
@@ -1563,7 +1562,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final int requestId = nri.getActiveRequest() != null
                 ? nri.getActiveRequest().requestId : nri.mRequests.get(0).requestId;
         mNetworkInfoBlockingLogs.log(String.format(
-                "%s %d(%d) on netId %d", action, nri.mUid, requestId, net.getNetId()));
+                "%s %d(%d) on netId %d", action, nri.mAsUid, requestId, net.getNetId()));
     }
 
     /**
@@ -2078,6 +2077,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void restrictRequestUidsForCallerAndSetRequestorInfo(NetworkCapabilities nc,
             int callerUid, String callerPackageName) {
         if (!checkSettingsPermission()) {
+            // There is no need to track the effective UID of the request here. If the caller lacks
+            // the settings permission, the effective UID is the same as the calling ID.
             nc.setSingleUid(callerUid);
         }
         nc.setRequestorUidAndPackageName(callerUid, callerPackageName);
@@ -5364,6 +5365,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         boolean mPendingIntentSent;
         @Nullable
         final Messenger mMessenger;
+
+        // Information about the caller that caused this object to be created.
         @Nullable
         private final IBinder mBinder;
         final int mPid;
@@ -5371,6 +5374,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final @NetworkCallback.Flag int mCallbackFlags;
         @Nullable
         final String mCallingAttributionTag;
+
+        // Effective UID of this request. This is different from mUid when a privileged process
+        // files a request on behalf of another UID. This UID is used to determine blocked status,
+        // UID matching, and so on. mUid above is used for permission checks and to enforce the
+        // maximum limit of registered callbacks per UID.
+        final int mAsUid;
+
         // In order to preserve the mapping of NetworkRequest-to-callback when apps register
         // callbacks using a returned NetworkRequest, the original NetworkRequest needs to be
         // maintained for keying off of. This is only a concern when the original nri
@@ -5398,12 +5408,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return (null == uids) ? new ArraySet<>() : uids;
         }
 
-        NetworkRequestInfo(@NonNull final NetworkRequest r, @Nullable final PendingIntent pi,
-                @Nullable String callingAttributionTag) {
-            this(Collections.singletonList(r), r, pi, callingAttributionTag);
+        NetworkRequestInfo(int asUid, @NonNull final NetworkRequest r,
+                @Nullable final PendingIntent pi, @Nullable String callingAttributionTag) {
+            this(asUid, Collections.singletonList(r), r, pi, callingAttributionTag);
         }
 
-        NetworkRequestInfo(@NonNull final List<NetworkRequest> r,
+        NetworkRequestInfo(int asUid, @NonNull final List<NetworkRequest> r,
                 @NonNull final NetworkRequest requestForCallback, @Nullable final PendingIntent pi,
                 @Nullable String callingAttributionTag) {
             ensureAllNetworkRequestsHaveType(r);
@@ -5414,6 +5424,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mBinder = null;
             mPid = getCallingPid();
             mUid = mDeps.getCallingUid();
+            mAsUid = asUid;
             mNetworkRequestCounter.incrementCountOrThrow(mUid);
             /**
              * Location sensitive data not included in pending intent. Only included in
@@ -5423,14 +5434,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mCallingAttributionTag = callingAttributionTag;
         }
 
-        NetworkRequestInfo(@NonNull final NetworkRequest r, @Nullable final Messenger m,
+        NetworkRequestInfo(int asUid, @NonNull final NetworkRequest r, @Nullable final Messenger m,
                 @Nullable final IBinder binder,
                 @NetworkCallback.Flag int callbackFlags,
                 @Nullable String callingAttributionTag) {
-            this(Collections.singletonList(r), r, m, binder, callbackFlags, callingAttributionTag);
+            this(asUid, Collections.singletonList(r), r, m, binder, callbackFlags,
+                    callingAttributionTag);
         }
 
-        NetworkRequestInfo(@NonNull final List<NetworkRequest> r,
+        NetworkRequestInfo(int asUid, @NonNull final List<NetworkRequest> r,
                 @NonNull final NetworkRequest requestForCallback, @Nullable final Messenger m,
                 @Nullable final IBinder binder,
                 @NetworkCallback.Flag int callbackFlags,
@@ -5443,6 +5455,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mBinder = binder;
             mPid = getCallingPid();
             mUid = mDeps.getCallingUid();
+            mAsUid = asUid;
             mPendingIntent = null;
             mNetworkRequestCounter.incrementCountOrThrow(mUid);
             mCallbackFlags = callbackFlags;
@@ -5485,18 +5498,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mBinder = nri.mBinder;
             mPid = nri.mPid;
             mUid = nri.mUid;
+            mAsUid = nri.mAsUid;
             mPendingIntent = nri.mPendingIntent;
             mNetworkRequestCounter.incrementCountOrThrow(mUid);
             mCallbackFlags = nri.mCallbackFlags;
             mCallingAttributionTag = nri.mCallingAttributionTag;
         }
 
-        NetworkRequestInfo(@NonNull final NetworkRequest r) {
-            this(Collections.singletonList(r));
+        NetworkRequestInfo(int asUid, @NonNull final NetworkRequest r) {
+            this(asUid, Collections.singletonList(r));
         }
 
-        NetworkRequestInfo(@NonNull final List<NetworkRequest> r) {
-            this(r, r.get(0), null /* pi */, null /* callingAttributionTag */);
+        NetworkRequestInfo(int asUid, @NonNull final List<NetworkRequest> r) {
+            this(asUid, r, r.get(0), null /* pi */, null /* callingAttributionTag */);
         }
 
         // True if this NRI is being satisfied. It also accounts for if the nri has its satisifer
@@ -5532,9 +5546,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         @Override
         public String toString() {
-            return "uid/pid:" + mUid + "/" + mPid + " active request Id: "
+            final String asUidString = (mAsUid == mUid) ? "" : " asUid: " + mAsUid;
+            return "uid/pid:" + mUid + "/" + mPid + asUidString + " activeRequest: "
                     + (mActiveRequest == null ? null : mActiveRequest.requestId)
-                    + " callback request Id: "
+                    + " callbackRequest: "
                     + mNetworkRequestForCallback.requestId
                     + " " + mRequests
                     + (mPendingIntent == null ? "" : " to trigger " + mPendingIntent)
@@ -5635,7 +5650,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
+    public NetworkRequest requestNetwork(int asUid, NetworkCapabilities networkCapabilities,
             int reqTypeInt, Messenger messenger, int timeoutMs, IBinder binder,
             int legacyType, int callbackFlags, @NonNull String callingPackageName,
             @Nullable String callingAttributionTag) {
@@ -5647,6 +5662,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         final NetworkCapabilities defaultNc = mDefaultRequest.mRequests.get(0).networkCapabilities;
         final int callingUid = mDeps.getCallingUid();
+        // Privileged callers can track the default network of another UID by passing in a UID.
+        if (asUid != Process.INVALID_UID) {
+            enforceSettingsPermission();
+        } else {
+            asUid = callingUid;
+        }
         final NetworkRequest.Type reqType;
         try {
             reqType = NetworkRequest.Type.values()[reqTypeInt];
@@ -5656,10 +5677,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         switch (reqType) {
             case TRACK_DEFAULT:
                 // If the request type is TRACK_DEFAULT, the passed {@code networkCapabilities}
-                // is unused and will be replaced by ones appropriate for the caller.
-                // This allows callers to keep track of the default network for their app.
+                // is unused and will be replaced by ones appropriate for the UID (usually, the
+                // calling app). This allows callers to keep track of the default network.
                 networkCapabilities = copyDefaultNetworkCapabilitiesForUid(
-                        defaultNc, callingUid, callingPackageName);
+                        defaultNc, asUid, callingUid, callingPackageName);
                 enforceAccessPermission();
                 break;
             case TRACK_SYSTEM_DEFAULT:
@@ -5711,7 +5732,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, legacyType,
                 nextNetworkRequestId(), reqType);
         final NetworkRequestInfo nri = getNriToRegister(
-                networkRequest, messenger, binder, callbackFlags, callingAttributionTag);
+                asUid, networkRequest, messenger, binder, callbackFlags,
+                callingAttributionTag);
         if (DBG) log("requestNetwork for " + nri);
 
         // For TRACK_SYSTEM_DEFAULT callbacks, the capabilities have been modified since they were
@@ -5738,25 +5760,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * requests registered to track the default request. If there is currently a per-app default
      * tracking the app requestor, then we need to create a version of this nri that mirrors that of
      * the tracking per-app default so that callbacks are sent to the app requestor appropriately.
+     * @param asUid the uid on behalf of which to file the request. Different from requestorUid
+     *              when a privileged caller is tracking the default network for another uid.
      * @param nr the network request for the nri.
      * @param msgr the messenger for the nri.
      * @param binder the binder for the nri.
      * @param callingAttributionTag the calling attribution tag for the nri.
      * @return the nri to register.
      */
-    private NetworkRequestInfo getNriToRegister(@NonNull final NetworkRequest nr,
+    private NetworkRequestInfo getNriToRegister(final int asUid, @NonNull final NetworkRequest nr,
             @Nullable final Messenger msgr, @Nullable final IBinder binder,
             @NetworkCallback.Flag int callbackFlags,
             @Nullable String callingAttributionTag) {
         final List<NetworkRequest> requests;
         if (NetworkRequest.Type.TRACK_DEFAULT == nr.type) {
             requests = copyDefaultNetworkRequestsForUid(
-                    nr.getRequestorUid(), nr.getRequestorPackageName());
+                    asUid, nr.getRequestorUid(), nr.getRequestorPackageName());
         } else {
             requests = Collections.singletonList(nr);
         }
         return new NetworkRequestInfo(
-                requests, nr, msgr, binder, callbackFlags, callingAttributionTag);
+                asUid, requests, nr, msgr, binder, callbackFlags, callingAttributionTag);
     }
 
     private void enforceNetworkRequestPermissions(NetworkCapabilities networkCapabilities,
@@ -5837,8 +5861,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId(), NetworkRequest.Type.REQUEST);
-        NetworkRequestInfo nri =
-                new NetworkRequestInfo(networkRequest, operation, callingAttributionTag);
+        NetworkRequestInfo nri = new NetworkRequestInfo(callingUid, networkRequest, operation,
+                callingAttributionTag);
         if (DBG) log("pendingRequest for " + nri);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT,
                 nri));
@@ -5905,7 +5929,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
         NetworkRequestInfo nri =
-                new NetworkRequestInfo(networkRequest, messenger, binder, callbackFlags,
+                new NetworkRequestInfo(callingUid, networkRequest, messenger, binder, callbackFlags,
                         callingAttributionTag);
         if (VDBG) log("listenForNetwork for " + nri);
 
@@ -5930,8 +5954,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
-        NetworkRequestInfo nri =
-                new NetworkRequestInfo(networkRequest, operation, callingAttributionTag);
+        NetworkRequestInfo nri = new NetworkRequestInfo(callingUid, networkRequest, operation,
+                callingAttributionTag);
         if (VDBG) log("pendingListenForNetwork for " + nri);
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_LISTENER, nri));
@@ -6081,33 +6105,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Get a copy of the network requests of the default request that is currently tracking the
      * given uid.
+     * @param asUid the uid on behalf of which to file the request. Different from requestorUid
+     *              when a privileged caller is tracking the default network for another uid.
      * @param requestorUid the uid to check the default for.
      * @param requestorPackageName the requestor's package name.
      * @return a copy of the default's NetworkRequest that is tracking the given uid.
      */
     @NonNull
     private List<NetworkRequest> copyDefaultNetworkRequestsForUid(
-            @NonNull final int requestorUid, @NonNull final String requestorPackageName) {
+            final int asUid, final int requestorUid, @NonNull final String requestorPackageName) {
         return copyNetworkRequestsForUid(
-                getDefaultRequestTrackingUid(requestorUid).mRequests,
-                requestorUid, requestorPackageName);
+                getDefaultRequestTrackingUid(asUid).mRequests,
+                asUid, requestorUid, requestorPackageName);
     }
 
     /**
      * Copy the given nri's NetworkRequest collection.
      * @param requestsToCopy the NetworkRequest collection to be copied.
+     * @param asUid the uid on behalf of which to file the request. Different from requestorUid
+     *              when a privileged caller is tracking the default network for another uid.
      * @param requestorUid the uid to set on the copied collection.
      * @param requestorPackageName the package name to set on the copied collection.
      * @return the copied NetworkRequest collection.
      */
     @NonNull
     private List<NetworkRequest> copyNetworkRequestsForUid(
-            @NonNull final List<NetworkRequest> requestsToCopy, @NonNull final int requestorUid,
-            @NonNull final String requestorPackageName) {
+            @NonNull final List<NetworkRequest> requestsToCopy, final int asUid,
+            final int requestorUid, @NonNull final String requestorPackageName) {
         final List<NetworkRequest> requests = new ArrayList<>();
         for (final NetworkRequest nr : requestsToCopy) {
             requests.add(new NetworkRequest(copyDefaultNetworkCapabilitiesForUid(
-                            nr.networkCapabilities, requestorUid, requestorPackageName),
+                            nr.networkCapabilities, asUid, requestorUid, requestorPackageName),
                     nr.legacyType, nextNetworkRequestId(), nr.type));
         }
         return requests;
@@ -6115,17 +6143,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @NonNull
     private NetworkCapabilities copyDefaultNetworkCapabilitiesForUid(
-            @NonNull final NetworkCapabilities netCapToCopy, @NonNull final int requestorUid,
-            @NonNull final String requestorPackageName) {
+            @NonNull final NetworkCapabilities netCapToCopy, final int asUid,
+            final int requestorUid, @NonNull final String requestorPackageName) {
         // These capabilities are for a TRACK_DEFAULT callback, so:
         // 1. Remove NET_CAPABILITY_VPN, because it's (currently!) the only difference between
         //    mDefaultRequest and a per-UID default request.
         //    TODO: stop depending on the fact that these two unrelated things happen to be the same
-        // 2. Always set the UIDs to mAsUid. restrictRequestUidsForCallerAndSetRequestorInfo will
+        // 2. Always set the UIDs to asUid. restrictRequestUidsForCallerAndSetRequestorInfo will
         //    not do this in the case of a privileged application.
         final NetworkCapabilities netCap = new NetworkCapabilities(netCapToCopy);
         netCap.removeCapability(NET_CAPABILITY_NOT_VPN);
-        netCap.setSingleUid(requestorUid);
+        netCap.setSingleUid(asUid);
         restrictRequestUidsForCallerAndSetRequestorInfo(
                 netCap, requestorUid, requestorPackageName);
         return netCap;
@@ -8031,9 +8059,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final boolean metered = nai.networkCapabilities.isMetered();
         boolean blocked;
-        blocked = isUidBlockedByVpn(nri.mUid, mVpnBlockedUidRanges);
+        blocked = isUidBlockedByVpn(nri.mAsUid, mVpnBlockedUidRanges);
         blocked |= NetworkPolicyManager.isUidBlocked(
-                mUidBlockedReasons.get(nri.mUid, BLOCKED_REASON_NONE), metered);
+                mUidBlockedReasons.get(nri.mAsUid, BLOCKED_REASON_NONE), metered);
         callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_AVAILABLE, blocked ? 1 : 0);
     }
 
@@ -8061,12 +8089,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             NetworkRequestInfo nri = mNetworkRequests.get(nr);
             final boolean oldBlocked, newBlocked, oldVpnBlocked, newVpnBlocked;
 
-            oldVpnBlocked = isUidBlockedByVpn(nri.mUid, oldBlockedUidRanges);
+            oldVpnBlocked = isUidBlockedByVpn(nri.mAsUid, oldBlockedUidRanges);
             newVpnBlocked = (oldBlockedUidRanges != newBlockedUidRanges)
-                    ? isUidBlockedByVpn(nri.mUid, newBlockedUidRanges)
+                    ? isUidBlockedByVpn(nri.mAsUid, newBlockedUidRanges)
                     : oldVpnBlocked;
 
-            final int blockedReasons = mUidBlockedReasons.get(nri.mUid, BLOCKED_REASON_NONE);
+            final int blockedReasons = mUidBlockedReasons.get(nri.mAsUid, BLOCKED_REASON_NONE);
             oldBlocked = oldVpnBlocked || NetworkPolicyManager.isUidBlocked(
                     blockedReasons, oldMetered);
             newBlocked = newVpnBlocked || NetworkPolicyManager.isUidBlocked(
@@ -8101,7 +8129,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             for (int i = 0; i < nai.numNetworkRequests(); i++) {
                 NetworkRequest nr = nai.requestAt(i);
                 NetworkRequestInfo nri = mNetworkRequests.get(nr);
-                if (nri != null && nri.mUid == uid) {
+                if (nri != null && nri.mAsUid == uid) {
                     callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_BLK_CHANGED, arg);
                 }
             }
@@ -8866,7 +8894,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // nri is not bound to the death of callback. Instead, callback.bindToDeath() is set in
         // handleRegisterConnectivityDiagnosticsCallback(). nri will be cleaned up as part of the
         // callback's binder death.
-        final NetworkRequestInfo nri = new NetworkRequestInfo(requestWithId);
+        final NetworkRequestInfo nri = new NetworkRequestInfo(callingUid, requestWithId);
         final ConnectivityDiagnosticsCallbackInfo cbInfo =
                 new ConnectivityDiagnosticsCallbackInfo(callback, nri, callingPackageName);
 
@@ -9350,7 +9378,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             nrs.add(createNetworkRequest(NetworkRequest.Type.REQUEST, pref.capabilities));
             nrs.add(createDefaultRequest());
             setNetworkRequestUids(nrs, UidRange.fromIntRanges(pref.capabilities.getUids()));
-            final NetworkRequestInfo nri = new NetworkRequestInfo(nrs);
+            final NetworkRequestInfo nri = new NetworkRequestInfo(Process.myUid(), nrs);
             result.add(nri);
         }
         return result;
@@ -9521,7 +9549,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             // Include this nri if it will be tracked by the new per-app default requests.
             final boolean isNriGoingToBeTracked =
-                    getDefaultRequestTrackingUid(nri.mUid) != mDefaultRequest;
+                    getDefaultRequestTrackingUid(nri.mAsUid) != mDefaultRequest;
             if (isNriGoingToBeTracked) {
                 defaultCallbackRequests.add(nri);
             }
@@ -9543,7 +9571,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final ArraySet<NetworkRequestInfo> callbackRequestsToRegister = new ArraySet<>();
         for (final NetworkRequestInfo callbackRequest : perAppCallbackRequestsForUpdate) {
             final NetworkRequestInfo trackingNri =
-                    getDefaultRequestTrackingUid(callbackRequest.mUid);
+                    getDefaultRequestTrackingUid(callbackRequest.mAsUid);
 
             // If this nri is not being tracked, the change it back to an untracked nri.
             if (trackingNri == mDefaultRequest) {
@@ -9553,12 +9581,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 continue;
             }
 
-            final String requestorPackageName =
-                    callbackRequest.mRequests.get(0).getRequestorPackageName();
+            final NetworkRequest request = callbackRequest.mRequests.get(0);
             callbackRequestsToRegister.add(new NetworkRequestInfo(
                     callbackRequest,
                     copyNetworkRequestsForUid(
-                            trackingNri.mRequests, callbackRequest.mUid, requestorPackageName)));
+                            trackingNri.mRequests, callbackRequest.mAsUid,
+                            callbackRequest.mUid, request.getRequestorPackageName())));
         }
         return callbackRequestsToRegister;
     }
@@ -9662,7 +9690,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ranges.add(new UidRange(uid, uid));
             }
             setNetworkRequestUids(requests, ranges);
-            return new NetworkRequestInfo(requests);
+            return new NetworkRequestInfo(Process.myUid(), requests);
         }
 
         private NetworkRequest createUnmeteredNetworkRequest() {
