@@ -17,6 +17,7 @@ package com.android.server.inputmethod;
 
 import static android.inputmethodservice.InputMethodService.FINISH_INPUT_NO_FALLBACK_CONNECTION;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.server.inputmethod.InputMethodManagerServiceProto.ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD;
@@ -178,7 +179,6 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
@@ -198,6 +198,7 @@ import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeS
 import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerService;
+import com.android.server.utils.PriorityDump;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -1565,7 +1566,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             LocalServices.addService(InputMethodManagerInternal.class,
                     new LocalServiceImpl(mService));
             publishBinderService(Context.INPUT_METHOD_SERVICE, mService, false /*allowIsolated*/,
-                    DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
+                    DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
         }
 
         @Override
@@ -5224,17 +5225,71 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
+        /**
+         * {@inheritDoc}
+         */
+        @BinderThread
+        @Override
+        public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
+                boolean asProto) {
+            if (asProto) {
+                dumpAsProtoNoCheck(fd);
+            } else {
+                dumpAsStringNoCheck(fd, pw, args, true /* isCritical */);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @BinderThread
+        @Override
+        public void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            dumpNormal(fd, pw, args, asProto);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @BinderThread
+        @Override
+        public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            if (asProto) {
+                dumpAsProtoNoCheck(fd);
+            } else {
+                dumpAsStringNoCheck(fd, pw, args, false /* isCritical */);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @BinderThread
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            dumpNormal(fd, pw, args, asProto);
+        }
+
+        @BinderThread
+        private void dumpAsProtoNoCheck(FileDescriptor fd) {
+            final ProtoOutputStream proto = new ProtoOutputStream(fd);
+            dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
+            proto.flush();
+        }
+    };
+
+    @BinderThread
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        if (ArrayUtils.contains(args, PROTO_ARG)) {
-            final ProtoOutputStream proto = new ProtoOutputStream(fd);
-            dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
-            proto.flush();
-            return;
-        }
+        PriorityDump.dump(mPriorityDumper, fd, pw, args);
+    }
 
+    @BinderThread
+    private void dumpAsStringNoCheck(FileDescriptor fd, PrintWriter pw, String[] args,
+            boolean isCritical) {
         IInputMethod method;
         ClientState client;
         ClientState focusedWindowClient;
@@ -5296,6 +5351,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             p.println("  mSoftInputShowHideHistory:");
             mSoftInputShowHideHistory.dump(pw, "   ");
+        }
+
+        // Exit here for critical dump, as remaining sections require IPCs to other processes.
+        if (isCritical) {
+            return;
         }
 
         p.println(" ");
