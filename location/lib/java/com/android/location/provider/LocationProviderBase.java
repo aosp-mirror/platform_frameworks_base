@@ -96,7 +96,6 @@ public abstract class LocationProviderBase {
     public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
 
     final String mTag;
-    @Nullable final String mPackageName;
     @Nullable final String mAttributionTag;
     final IBinder mBinder;
 
@@ -133,7 +132,6 @@ public abstract class LocationProviderBase {
     public LocationProviderBase(Context context, String tag,
             ProviderPropertiesUnbundled properties) {
         mTag = tag;
-        mPackageName = context != null ? context.getPackageName() : null;
         mAttributionTag = context != null ? context.getAttributionTag() : null;
         mBinder = new Service();
 
@@ -370,7 +368,7 @@ public abstract class LocationProviderBase {
         public void setLocationProviderManager(ILocationProviderManager manager) {
             synchronized (mBinder) {
                 try {
-                    manager.onInitialize(mAllowed, mProperties, mPackageName, mAttributionTag);
+                    manager.onInitialize(mAllowed, mProperties, mAttributionTag);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 } catch (RuntimeException e) {
