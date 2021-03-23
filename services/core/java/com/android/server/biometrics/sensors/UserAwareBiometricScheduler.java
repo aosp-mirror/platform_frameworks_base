@@ -108,14 +108,14 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
         if (nextUserId == currentUserId) {
             super.startNextOperationIfIdle();
         } else if (currentUserId == UserHandle.USER_NULL) {
-            Slog.d(getTag(), "User switch required, current user null, next: " + nextUserId);
             final BaseClientMonitor startClient =
                     mUserSwitchCallback.getStartUserClient(nextUserId);
+            Slog.d(getTag(), "[Starting User] " + startClient);
             startClient.start(mClientFinishedCallback);
         } else {
             final BaseClientMonitor stopClient = mUserSwitchCallback
                     .getStopUserClient(currentUserId);
-            Slog.d(getTag(), "User switch required, current: " + currentUserId
+            Slog.d(getTag(), "[Stopping User] current: " + currentUserId
                     + ", next: " + nextUserId + ". " + stopClient);
             stopClient.start(mClientFinishedCallback);
         }
