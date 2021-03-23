@@ -237,7 +237,6 @@
     <color name="resolver_text_color_secondary_dark">#ffC4C6C6</color>
     <color name="resolver_empty_state_text">#FF202124</color>
     <color name="resolver_empty_state_icon">#FF5F6368</color>
-    <color name="chooser_chip_icon">#FF1A73E8</color> <!-- Blue 600 -->
 
     <!-- Color for personal app suspension notification button text and icon tint. -->
     <color name="personal_apps_suspension_notification_color">#1A73E8</color>
