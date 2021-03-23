@@ -92,6 +92,7 @@ import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.hardware.usb.UsbManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -4017,23 +4018,27 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testUpdateNetworkPreferenceOnStartOnStopUser() throws Exception {
-        dpms.handleStartUser(CALLER_USER_HANDLE);
-        // TODO(b/178655595)
-        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
-        //         any(UserHandle.class),
-        //         anyInt(),
-        //         any(Executor.class),
-        //         any(Runnable.class)
-        //);
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        mServiceContext.permissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
-        dpms.handleStopUser(CALLER_USER_HANDLE);
-        // TODO(b/178655595)
-        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
-        //         any(UserHandle.class),
-        //         eq(ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT),
-        //         any(Executor.class),
-        //         any(Runnable.class)
-        //);
+        dpms.handleStartUser(managedProfileUserId);
+        verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
+                eq(UserHandle.of(managedProfileUserId)),
+                anyInt(),
+                any(),
+                any()
+        );
+
+        dpms.handleStopUser(managedProfileUserId);
+        verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
+                eq(UserHandle.of(managedProfileUserId)),
+                eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -4044,26 +4049,28 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertExpectException(SecurityException.class, null,
                 () -> dpm.isEnterpriseNetworkPreferenceEnabled());
 
-        setupProfileOwner();
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
         dpm.setEnterpriseNetworkPreferenceEnabled(false);
         assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isFalse();
-        // TODO(b/178655595)
-        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
-        //         any(UserHandle.class),
-        //         eq(ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT),
-        //         any(Executor.class),
-        //         any(Runnable.class)
-        //);
+        verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
+                eq(UserHandle.of(managedProfileUserId)),
+                eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT),
+                any(),
+                any()
+        );
 
         dpm.setEnterpriseNetworkPreferenceEnabled(true);
         assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isTrue();
-        // TODO(b/178655595)
-        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
-        //         any(UserHandle.class),
-        //         eq(ConnectivityManager.USER_PREFERENCE_ENTERPRISE),
-        //         any(Executor.class),
-        //         any(Runnable.class)
-        //);
+        verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
+                eq(UserHandle.of(managedProfileUserId)),
+                eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE),
+                any(),
+                any()
+        );
     }
 
     @Test

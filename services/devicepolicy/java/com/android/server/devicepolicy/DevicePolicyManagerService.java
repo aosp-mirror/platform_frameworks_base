@@ -102,8 +102,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-// TODO (b/178655595) import static android.net.ConnectivityManager.USER_PREFERENCE_ENTERPRISE;
-// TODO (b/178655595) import static android.net.ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT;
+import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
+import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
@@ -3089,13 +3089,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
 
-        boolean enableEnterpriseNetworkSlice = true;
+        boolean enableEnterpriseNetworkPreferenceEnabled = true;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
-            enableEnterpriseNetworkSlice = owner != null
+            enableEnterpriseNetworkPreferenceEnabled = owner != null
                     ? owner.mEnterpriseNetworkPreferenceEnabled : true;
         }
-        updateNetworkPreferenceForUser(userId, enableEnterpriseNetworkSlice);
+        updateNetworkPreferenceForUser(userId, enableEnterpriseNetworkPreferenceEnabled);
 
         startOwnerService(userId, "start-user");
     }
@@ -17009,18 +17009,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void updateNetworkPreferenceForUser(int userId, boolean enableEnterprise) {
+    private void updateNetworkPreferenceForUser(int userId,
+            boolean enableEnterpriseNetworkPreferenceEnabled) {
         if (!isManagedProfile(userId)) {
             return;
         }
-        // TODO(b/178655595)
-        // int networkPreference = enable ? ConnectivityManager.USER_PREFERENCE_ENTERPRISE :
-        //        ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT;
-        // mInjector.binderWithCleanCallingIdentity(() ->
-        //         mInjector.getConnectivityManager().setNetworkPreferenceForUser(
-        //                 UserHandle.of(userId),
-        //                 networkPreference,
-        //                 null /* executor */, null /* listener */));
+        int networkPreference = enableEnterpriseNetworkPreferenceEnabled
+                ? PROFILE_NETWORK_PREFERENCE_ENTERPRISE : PROFILE_NETWORK_PREFERENCE_DEFAULT;
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.getConnectivityManager().setProfileNetworkPreference(
+                        UserHandle.of(userId),
+                        networkPreference,
+                        null /* executor */, null /* listener */));
     }
 
     @Override
