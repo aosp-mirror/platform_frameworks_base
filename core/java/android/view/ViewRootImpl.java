@@ -1370,17 +1370,10 @@ public final class ViewRootImpl implements ViewParent,
             // can be used by code on the system process to escape that and enable
             // HW accelerated drawing.  (This is basically for the lock screen.)
 
-            final boolean fakeHwAccelerated = (attrs.privateFlags &
-                    WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED) != 0;
             final boolean forceHwAccelerated = (attrs.privateFlags &
                     WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED) != 0;
 
-            if (fakeHwAccelerated) {
-                // This is exclusively for the preview windows the window manager
-                // shows for launching applications, so they will look more like
-                // the app being launched.
-                mAttachInfo.mHardwareAccelerationRequested = true;
-            } else if (ThreadedRenderer.sRendererEnabled || forceHwAccelerated) {
+            if (ThreadedRenderer.sRendererEnabled || forceHwAccelerated) {
                 if (mAttachInfo.mThreadedRenderer != null) {
                     mAttachInfo.mThreadedRenderer.destroy();
                 }
