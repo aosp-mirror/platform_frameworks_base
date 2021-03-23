@@ -254,7 +254,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         mContext.getOpPackageName(), sensorId,
                         mSensors.get(sensorId).getAuthenticatorIds());
 
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling loadAuthenticatorId"
                         + ", sensorId: " + sensorId
@@ -268,7 +268,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final InvalidationRequesterClient<Face> client =
                     new InvalidationRequesterClient<>(mContext, userId, sensorId,
                             FaceUtils.getInstance(sensorId));
-            mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -318,7 +318,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                 final FaceInvalidationClient client = new FaceInvalidationClient(mContext,
                         mSensors.get(sensorId).getLazySession(), userId, sensorId,
                         mSensors.get(sensorId).getAuthenticatorIds(), callback);
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception", e);
             }
@@ -468,7 +468,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
                         mUsageStats, mSensors.get(sensorId).getLockoutCache(),
                         allowBackgroundAuthentication);
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling authenticate", e);
             }
@@ -523,7 +523,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         opPackageName, FaceUtils.getInstance(sensorId), sensorId,
                         mSensors.get(sensorId).getAuthenticatorIds());
 
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling remove", e);
             }
@@ -599,7 +599,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                                 FaceUtils.getInstance(sensorId),
                                 mSensors.get(sensorId).getAuthenticatorIds());
 
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client, callback);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling internal cleanup", e);
             }
