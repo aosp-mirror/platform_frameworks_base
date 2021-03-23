@@ -216,6 +216,14 @@ public class NetworkRequest implements Parcelable {
         }
 
         /**
+         * Creates a new Builder of NetworkRequest from an existing instance.
+         */
+        public Builder(@NonNull final NetworkRequest request) {
+            Objects.requireNonNull(request);
+            mNetworkCapabilities = request.networkCapabilities;
+        }
+
+        /**
          * Build {@link NetworkRequest} give the current set of capabilities.
          */
         public NetworkRequest build() {
