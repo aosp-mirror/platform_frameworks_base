@@ -169,8 +169,9 @@ public class RecoverySystem {
     public @interface ResumeOnRebootRebootErrorCode {}
 
     /**
-     * The preparation of resume on reboot succeeds. Don't expose it because a successful reboot
-     * should just reboot the device.
+     * The preparation of resume on reboot succeeds.
+     *
+     * <p> Don't expose it because a successful reboot should just reboot the device.
      *  @hide
      */
     public static final int RESUME_ON_REBOOT_REBOOT_ERROR_NONE = 0;
