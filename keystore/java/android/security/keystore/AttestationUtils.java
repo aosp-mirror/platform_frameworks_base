@@ -254,6 +254,8 @@ public abstract class AttestationUtils {
             keyStore.deleteEntry(keystoreAlias);
 
             return certificateChain;
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new DeviceIdAttestationException("Unable to perform attestation", e);
         }
