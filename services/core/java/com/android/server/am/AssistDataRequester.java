@@ -143,27 +143,45 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
      * Request that autofill data be loaded asynchronously. The resulting data will be provided
      * through the {@link AssistDataRequesterCallbacks}.
      *
-     * See {@link #requestData(List, boolean, boolean, boolean, boolean, boolean, int, String)}.
+     * See {@link #requestData(List, boolean, boolean, boolean, boolean, boolean, int, String,
+     * boolean)}.
      */
     public void requestAutofillData(List<IBinder> activityTokens, int callingUid,
             String callingPackage) {
         requestData(activityTokens, true /* requestAutofillData */,
                 true /* fetchData */, false /* fetchScreenshot */,
                 true /* allowFetchData */, false /* allowFetchScreenshot */,
-                callingUid, callingPackage);
+                false /* ignoreTopActivityCheck */, callingUid, callingPackage);
     }
 
     /**
      * Request that assist data be loaded asynchronously. The resulting data will be provided
      * through the {@link AssistDataRequesterCallbacks}.
      *
-     * See {@link #requestData(List, boolean, boolean, boolean, boolean, boolean, int, String)}.
+     * See {@link #requestData(List, boolean, boolean, boolean, boolean, boolean, int, String,
+     * boolean)}.
      */
     public void requestAssistData(List<IBinder> activityTokens, final boolean fetchData,
             final boolean fetchScreenshot, boolean allowFetchData, boolean allowFetchScreenshot,
             int callingUid, String callingPackage) {
+        requestAssistData(activityTokens, fetchData, fetchScreenshot, allowFetchData,
+                allowFetchScreenshot, false /* ignoreTopActivityCheck */, callingUid,
+                callingPackage);
+    }
+
+    /**
+     * Request that assist data be loaded asynchronously. The resulting data will be provided
+     * through the {@link AssistDataRequesterCallbacks}.
+     *
+     * See {@link #requestData(List, boolean, boolean, boolean, boolean, boolean, int, String,
+     * boolean)}.
+     */
+    public void requestAssistData(List<IBinder> activityTokens, final boolean fetchData,
+            final boolean fetchScreenshot, boolean allowFetchData, boolean allowFetchScreenshot,
+            boolean ignoreTopActivityCheck, int callingUid, String callingPackage) {
         requestData(activityTokens, false /* requestAutofillData */, fetchData, fetchScreenshot,
-                allowFetchData, allowFetchScreenshot, callingUid, callingPackage);
+                allowFetchData, allowFetchScreenshot, ignoreTopActivityCheck, callingUid,
+                callingPackage);
     }
 
     /**
@@ -183,10 +201,13 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
      *     is allowed to fetch the assist data
      * @param allowFetchScreenshot to be joined with other checks, determines whether or not the
      *     requester is allowed to fetch the assist screenshot
+     * @param ignoreTopActivityCheck overrides the check for whether the activity is in focus when
+     *     making the request. Used when passing an activity from Recents.
      */
     private void requestData(List<IBinder> activityTokens, final boolean requestAutofillData,
             final boolean fetchData, final boolean fetchScreenshot, boolean allowFetchData,
-            boolean allowFetchScreenshot, int callingUid, String callingPackage) {
+            boolean allowFetchScreenshot, boolean ignoreTopActivityCheck, int callingUid,
+            String callingPackage) {
         // TODO(b/34090158): Known issue, if the assist data is not allowed on the current activity,
         //                   then no assist data is requested for any of the other activities
 
@@ -230,7 +251,8 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                                         receiverExtras, topActivity, 0 /* flags */)
                                 : mActivityTaskManager.requestAssistContextExtras(
                                         ASSIST_CONTEXT_FULL, this, receiverExtras, topActivity,
-                                        /* focused= */ i == 0, /* newSessionId= */ i == 0);
+                                        /* checkActivityIsTop= */ (i == 0)
+                                        && !ignoreTopActivityCheck, /* newSessionId= */ i == 0);
                         if (result) {
                             mPendingDataCount++;
                         } else if (i == 0) {
