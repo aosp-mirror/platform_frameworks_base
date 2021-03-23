@@ -362,9 +362,8 @@ public abstract class NetworkAgent {
     public static final int CMD_UNREGISTER_QOS_CALLBACK = BASE + 21;
 
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
-        // The subtype can be changed with (TODO) setLegacySubtype, but it starts
-        // with 0 (TelephonyManager.NETWORK_TYPE_UNKNOWN) and an empty description.
-        final NetworkInfo ni = new NetworkInfo(config.legacyType, 0, config.legacyTypeName, "");
+        final NetworkInfo ni = new NetworkInfo(config.legacyType, config.legacySubType,
+                config.legacyTypeName, config.legacySubTypeName);
         ni.setIsAvailable(true);
         ni.setDetailedState(NetworkInfo.DetailedState.CONNECTING, null /* reason */,
                 config.getLegacyExtraInfo());
@@ -829,6 +828,7 @@ public abstract class NetworkAgent {
      * @hide
      */
     @Deprecated
+    @SystemApi
     public void setLegacySubtype(final int legacySubtype, @NonNull final String legacySubtypeName) {
         mNetworkInfo.setSubtype(legacySubtype, legacySubtypeName);
         queueOrSendNetworkInfo(mNetworkInfo);
@@ -962,6 +962,7 @@ public abstract class NetworkAgent {
      * shall try to overwrite this method and produce a bandwidth update if capable.
      * @hide
      */
+    @SystemApi
     public void onBandwidthUpdateRequested() {
         pollLceData();
     }
