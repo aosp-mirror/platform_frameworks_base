@@ -27,7 +27,8 @@ import static android.system.OsConstants.IPPROTO_IP;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IP_TOS;
 import static android.system.OsConstants.IP_TTL;
-import static android.system.OsConstants.TIOCOUTQ;
+
+import static com.android.server.connectivity.OsCompat.TIOCOUTQ;
 
 import android.annotation.NonNull;
 import android.net.InvalidPacketException;
@@ -175,10 +176,10 @@ public class TcpKeepaliveController {
             }
             // Query write sequence number from SEND_QUEUE.
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR_QUEUE, TCP_SEND_QUEUE);
-            tcpDetails.seq = Os.getsockoptInt(fd, IPPROTO_TCP, TCP_QUEUE_SEQ);
+            tcpDetails.seq = OsCompat.getsockoptInt(fd, IPPROTO_TCP, TCP_QUEUE_SEQ);
             // Query read sequence number from RECV_QUEUE.
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR_QUEUE, TCP_RECV_QUEUE);
-            tcpDetails.ack = Os.getsockoptInt(fd, IPPROTO_TCP, TCP_QUEUE_SEQ);
+            tcpDetails.ack = OsCompat.getsockoptInt(fd, IPPROTO_TCP, TCP_QUEUE_SEQ);
             // Switch to NO_QUEUE to prevent illegal socket read/write in repair mode.
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR_QUEUE, TCP_NO_QUEUE);
             // Finally, check if socket is still idle. TODO : this check needs to move to
@@ -198,9 +199,9 @@ public class TcpKeepaliveController {
             tcpDetails.rcvWndScale = trw.rcvWndScale;
             if (tcpDetails.srcAddress.length == 4 /* V4 address length */) {
                 // Query TOS.
-                tcpDetails.tos = Os.getsockoptInt(fd, IPPROTO_IP, IP_TOS);
+                tcpDetails.tos = OsCompat.getsockoptInt(fd, IPPROTO_IP, IP_TOS);
                 // Query TTL.
-                tcpDetails.ttl = Os.getsockoptInt(fd, IPPROTO_IP, IP_TTL);
+                tcpDetails.ttl = OsCompat.getsockoptInt(fd, IPPROTO_IP, IP_TTL);
             }
         } catch (ErrnoException e) {
             Log.e(TAG, "Exception reading TCP state from socket", e);
@@ -305,7 +306,7 @@ public class TcpKeepaliveController {
 
     private static boolean isReceiveQueueEmpty(FileDescriptor fd)
             throws ErrnoException {
-        final int result = Os.ioctlInt(fd, SIOCINQ);
+        final int result = OsCompat.ioctlInt(fd, SIOCINQ);
         if (result != 0) {
             Log.e(TAG, "Read queue has data");
             return false;
@@ -315,7 +316,7 @@ public class TcpKeepaliveController {
 
     private static boolean isSendQueueEmpty(FileDescriptor fd)
             throws ErrnoException {
-        final int result = Os.ioctlInt(fd, SIOCOUTQ);
+        final int result = OsCompat.ioctlInt(fd, SIOCOUTQ);
         if (result != 0) {
             Log.e(TAG, "Write queue has data");
             return false;
