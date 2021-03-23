@@ -1195,6 +1195,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public BatteryStatsImpl(Clocks clocks) {
         init(clocks);
+        mStartClockTimeMs = System.currentTimeMillis();
         mStatsFile = null;
         mCheckinFile = null;
         mDailyFile = null;
