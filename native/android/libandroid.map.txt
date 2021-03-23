@@ -287,6 +287,8 @@ LIBANDROID {
     android_getaddrinfofornetwork; # introduced=23
     android_getprocnetwork; # introduced=31
     android_setprocnetwork; # introduced=23
+    android_getprocdns; # introduced=31
+    android_setprocdns; # introduced=31
     android_setsocknetwork; # introduced=23
     android_res_cancel; # introduced=29
     android_res_nquery; # introduced=29
