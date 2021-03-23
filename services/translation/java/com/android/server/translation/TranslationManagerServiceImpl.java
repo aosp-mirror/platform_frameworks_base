@@ -62,6 +62,9 @@ final class TranslationManagerServiceImpl extends
     @Nullable
     private ServiceInfo mRemoteTranslationServiceInfo;
 
+    @GuardedBy("mLock")
+    private TranslationServiceInfo mTranslationServiceInfo;
+
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
     protected TranslationManagerServiceImpl(
@@ -76,10 +79,10 @@ final class TranslationManagerServiceImpl extends
     @Override // from PerUserSystemService
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws PackageManager.NameNotFoundException {
-        final TranslationServiceInfo info = new TranslationServiceInfo(getContext(),
+        mTranslationServiceInfo = new TranslationServiceInfo(getContext(),
                 serviceComponent, isTemporaryServiceSetLocked(), mUserId);
-        mRemoteTranslationServiceInfo = info.getServiceInfo();
-        return info.getServiceInfo();
+        mRemoteTranslationServiceInfo = mTranslationServiceInfo.getServiceInfo();
+        return mTranslationServiceInfo.getServiceInfo();
     }
 
     @GuardedBy("mLock")
@@ -227,4 +230,16 @@ final class TranslationManagerServiceImpl extends
     }
 
     private final RemoteCallbackList<IRemoteCallback> mCallbacks = new RemoteCallbackList<>();
+
+    public ComponentName getServiceSettingsActivityLocked() {
+        if (mTranslationServiceInfo == null) {
+            return null;
+        }
+        final String activityName = mTranslationServiceInfo.getSettingsActivity();
+        if (activityName == null) {
+            return null;
+        }
+        final String packageName = mTranslationServiceInfo.getServiceInfo().packageName;
+        return new ComponentName(packageName, activityName);
+    }
 }

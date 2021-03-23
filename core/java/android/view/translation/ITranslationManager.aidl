@@ -46,4 +46,5 @@ oneway interface ITranslationManager {
 
     void registerUiTranslationStateCallback(in IRemoteCallback callback, int userId);
     void unregisterUiTranslationStateCallback(in IRemoteCallback callback, int userId);
+    void getServiceSettingsActivity(in IResultReceiver result, int userId);
 }
