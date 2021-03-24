@@ -1874,7 +1874,7 @@ public class NotificationManagerService extends SystemService {
         private final Uri NOTIFICATION_BADGING_URI
                 = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BADGING);
         private final Uri NOTIFICATION_BUBBLES_URI
-                = Settings.Global.getUriFor(Settings.Global.NOTIFICATION_BUBBLES);
+                = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BUBBLES);
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
         private final Uri NOTIFICATION_RATE_LIMIT_URI
@@ -3467,8 +3467,7 @@ public class NotificationManagerService extends SystemService {
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
                         "areBubblesEnabled for user " + user.getIdentifier());
             }
-            // TODO: incorporate uid / per-user prefs once settings moves off global table.
-            return mPreferencesHelper.bubblesEnabled();
+            return mPreferencesHelper.bubblesEnabled(user);
         }
 
         @Override

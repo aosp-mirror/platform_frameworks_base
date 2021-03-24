@@ -684,10 +684,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private void setUpPrefsForBubbles(String pkg, int uid, boolean globalEnabled,
             int pkgPref, boolean channelEnabled) {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.NOTIFICATION_BUBBLES, globalEnabled ? 1 : 0);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_BUBBLES, globalEnabled ? 1 : 0);
         mService.mPreferencesHelper.updateBubblesEnabled();
-        assertEquals(globalEnabled, mService.mPreferencesHelper.bubblesEnabled());
+        assertEquals(globalEnabled, mService.mPreferencesHelper.bubblesEnabled(
+                mock(UserHandle.class)));
         try {
             mBinderService.setBubblesAllowed(pkg, uid, pkgPref);
         } catch (RemoteException e) {
@@ -4764,8 +4765,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testAreBubblesEnabled_false() throws Exception {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.NOTIFICATION_BUBBLES, 0);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_BUBBLES, 0);
         mService.mPreferencesHelper.updateBubblesEnabled();
         assertFalse(mBinderService.areBubblesEnabled(UserHandle.getUserHandleForUid(mUid)));
     }
