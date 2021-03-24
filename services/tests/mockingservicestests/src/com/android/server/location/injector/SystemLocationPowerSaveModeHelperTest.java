@@ -43,7 +43,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
-import com.android.server.location.eventlog.LocationEventLog;
 import com.android.server.location.injector.LocationPowerSaveModeHelper.LocationPowerSaveModeChangedListener;
 
 import org.junit.After;
@@ -85,7 +84,7 @@ public class SystemLocationPowerSaveModeHelperTest {
         Context context = mock(Context.class);
         doReturn(powerManager).when(context).getSystemService(PowerManager.class);
 
-        mHelper = new SystemLocationPowerSaveModeHelper(context, new LocationEventLog());
+        mHelper = new SystemLocationPowerSaveModeHelper(context);
         mHelper.onSystemReady();
     }
 

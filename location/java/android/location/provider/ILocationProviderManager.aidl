@@ -24,7 +24,7 @@ import android.location.provider.ProviderProperties;
  * @hide
  */
 interface ILocationProviderManager {
-    void onInitialize(boolean allowed, in ProviderProperties properties, @nullable String packageName, @nullable String attributionTag);
+    void onInitialize(boolean allowed, in ProviderProperties properties, @nullable String attributionTag);
     void onSetAllowed(boolean allowed);
     void onSetProperties(in ProviderProperties properties);
 

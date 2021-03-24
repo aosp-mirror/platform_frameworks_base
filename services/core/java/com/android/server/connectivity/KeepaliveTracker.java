@@ -26,6 +26,7 @@ import static android.net.SocketKeepalive.ERROR_INVALID_INTERVAL;
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 import static android.net.SocketKeepalive.ERROR_INVALID_NETWORK;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
+import static android.net.SocketKeepalive.ERROR_NO_SUCH_SLOT;
 import static android.net.SocketKeepalive.ERROR_STOP_REASON_UNINITIALIZED;
 import static android.net.SocketKeepalive.ERROR_UNSUPPORTED;
 import static android.net.SocketKeepalive.MAX_INTERVAL_SEC;
@@ -528,6 +529,8 @@ public class KeepaliveTracker {
             }
         } else if (reason == ERROR_STOP_REASON_UNINITIALIZED) {
             throw new IllegalStateException("Unexpected stop reason: " + reason);
+        } else if (reason == ERROR_NO_SUCH_SLOT) {
+            throw new IllegalStateException("No such slot: " + reason);
         } else {
             notifyErrorCallback(ki.mCallback, reason);
         }

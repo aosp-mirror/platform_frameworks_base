@@ -16,7 +16,6 @@
 
 package com.android.server.translation;
 
-import static android.view.translation.TranslationManager.STATUS_SYNC_CALL_SUCCESS;
 import static android.view.translation.UiTranslationManager.EXTRA_SOURCE_LOCALE;
 import static android.view.translation.UiTranslationManager.EXTRA_STATE;
 import static android.view.translation.UiTranslationManager.EXTRA_TARGET_LOCALE;
@@ -31,23 +30,23 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.service.translation.TranslationServiceInfo;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationManager.UiTranslationState;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
-import com.android.internal.util.SyncResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ActivityTokens;
 
-import java.util.ArrayList;
 import java.util.List;
 
 final class TranslationManagerServiceImpl extends
@@ -122,28 +121,28 @@ final class TranslationManagerServiceImpl extends
     }
 
     @GuardedBy("mLock")
-    void getSupportedLocalesLocked(@NonNull IResultReceiver resultReceiver) {
-        // TODO: implement this
-        try {
-            resultReceiver.send(STATUS_SYNC_CALL_SUCCESS,
-                    SyncResultReceiver.bundleFor(new ArrayList<>()));
-        } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException returning supported locales: " + e);
+    void onTranslationCapabilitiesRequestLocked(@TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int destFormat,
+            @NonNull ResultReceiver resultReceiver) {
+        final RemoteTranslationService remoteService = ensureRemoteServiceLocked();
+        if (remoteService != null) {
+            remoteService.onTranslationCapabilitiesRequest(sourceFormat, destFormat,
+                    resultReceiver);
         }
     }
 
     @GuardedBy("mLock")
-    void onSessionCreatedLocked(@NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec destSpec, int sessionId, IResultReceiver resultReceiver) {
+    void onSessionCreatedLocked(@NonNull TranslationContext translationContext, int sessionId,
+            IResultReceiver resultReceiver) {
         final RemoteTranslationService remoteService = ensureRemoteServiceLocked();
         if (remoteService != null) {
-            remoteService.onSessionCreated(sourceSpec, destSpec, sessionId, resultReceiver);
+            remoteService.onSessionCreated(translationContext, sessionId, resultReceiver);
         }
     }
 
     @GuardedBy("mLock")
     public void updateUiTranslationStateLocked(@UiTranslationState int state,
-            TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
+            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
             int taskId) {
         // deprecated
         final ActivityTokens taskTopActivityTokens =
@@ -152,13 +151,13 @@ final class TranslationManagerServiceImpl extends
             Slog.w(TAG, "Unknown activity to query for update translation state.");
             return;
         }
-        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec, destSpec,
-                viewIds);
+        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec,
+                targetSpec, viewIds);
     }
 
     @GuardedBy("mLock")
     public void updateUiTranslationStateLocked(@UiTranslationState int state,
-            TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
+            TranslationSpec sourceSpec, TranslationSpec targetSpec, List<AutofillId> viewIds,
             IBinder token, int taskId) {
         // Get top activity for a given task id
         final ActivityTokens taskTopActivityTokens =
@@ -169,20 +168,20 @@ final class TranslationManagerServiceImpl extends
                     + "translation state for token=" + token + " taskId=" + taskId);
             return;
         }
-        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec, destSpec,
-                viewIds);
+        updateUiTranslationStateByActivityTokens(taskTopActivityTokens, state, sourceSpec,
+                targetSpec, viewIds);
     }
 
     private void updateUiTranslationStateByActivityTokens(ActivityTokens tokens,
-            @UiTranslationState int state, TranslationSpec sourceSpec, TranslationSpec destSpec,
+            @UiTranslationState int state, TranslationSpec sourceSpec, TranslationSpec targetSpec,
             List<AutofillId> viewIds) {
         try {
             tokens.getApplicationThread().updateUiTranslationState(tokens.getActivityToken(), state,
-                    sourceSpec, destSpec, viewIds);
+                    sourceSpec, targetSpec, viewIds);
         } catch (RemoteException e) {
             Slog.w(TAG, "Update UiTranslationState fail: " + e);
         }
-        invokeCallbacks(state, sourceSpec, destSpec);
+        invokeCallbacks(state, sourceSpec, targetSpec);
     }
 
     private void invokeCallbacks(

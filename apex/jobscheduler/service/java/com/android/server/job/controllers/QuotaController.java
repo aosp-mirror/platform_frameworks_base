@@ -849,10 +849,9 @@ public final class QuotaController extends StateController {
             return true;
         }
         // A job is within quota if one of the following is true:
-        //   1. it's already running (already executing expedited jobs should be allowed to finish)
-        //   2. the app is currently in the foreground
-        //   3. the app overall is within its quota
-        //   4. It's on the temp allowlist (or within the grace period)
+        //   1. the app is currently in the foreground
+        //   2. the app overall is within its quota
+        //   3. It's on the temp allowlist (or within the grace period)
         if (isTopStartedJobLocked(jobStatus) || isUidInForeground(jobStatus.getSourceUid())) {
             return true;
         }
@@ -870,13 +869,6 @@ public final class QuotaController extends StateController {
         final boolean hasTopAppExemption = mTopAppCache.get(jobStatus.getSourceUid())
                 || nowElapsed < topAppGracePeriodEndElapsed;
         if (hasTopAppExemption) {
-            return true;
-        }
-
-        Timer ejTimer = mEJPkgTimers.get(jobStatus.getSourceUserId(),
-                jobStatus.getSourcePackageName());
-        // Any already executing expedited jobs should be allowed to finish.
-        if (ejTimer != null && ejTimer.isRunning(jobStatus)) {
             return true;
         }
 
@@ -4153,6 +4145,8 @@ public final class QuotaController extends StateController {
                 pw.print(", ");
                 if (js.shouldTreatAsExpeditedJob()) {
                     pw.print("within EJ quota");
+                } else if (js.startedAsExpeditedJob) {
+                    pw.print("out of EJ quota");
                 } else if (js.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)) {
                     pw.print("within regular quota");
                 } else {
@@ -4163,6 +4157,8 @@ public final class QuotaController extends StateController {
                     pw.print(getRemainingEJExecutionTimeLocked(
                             js.getSourceUserId(), js.getSourcePackageName()));
                     pw.print("ms remaining in EJ quota");
+                } else if (js.startedAsExpeditedJob) {
+                    pw.print("should be stopped after min execution time");
                 } else {
                     pw.print(getRemainingExecutionTimeLocked(js));
                     pw.print("ms remaining in quota");

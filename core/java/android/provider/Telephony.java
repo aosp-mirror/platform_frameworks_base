@@ -4574,6 +4574,13 @@ public final class Telephony {
          * This is the same as {@link ServiceState#getIsManualSelection()}.
          */
         public static final String IS_MANUAL_NETWORK_SELECTION = "is_manual_network_selection";
+
+        /**
+         * The current data network type.
+         * <p>
+         * This is the same as {@link TelephonyManager#getDataNetworkType()}.
+         */
+        public static final String DATA_NETWORK_TYPE = "data_network_type";
     }
 
     /**
@@ -5317,5 +5324,15 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_VOIMS_OPT_IN_STATUS = "voims_opt_in_status";
+
+        /**
+         * TelephonyProvider column name for information selected contacts that allow device to
+         * device sharing.
+         *
+         * @hide
+         */
+        public static final String COLUMN_D2D_STATUS_SHARING_SELECTED_CONTACTS =
+                "d2d_sharing_contacts";
+
     }
 }

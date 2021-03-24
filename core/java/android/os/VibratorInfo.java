@@ -153,7 +153,8 @@ public final class VibratorInfo implements Parcelable {
      * @param primitiveId Which primitives to query for.
      * @return Whether the primitive is supported.
      */
-    public boolean isPrimitiveSupported(@VibrationEffect.Composition.Primitive int primitiveId) {
+    public boolean isPrimitiveSupported(
+            @VibrationEffect.Composition.PrimitiveType int primitiveId) {
         return hasCapability(IVibrator.CAP_COMPOSE_EFFECTS) && mSupportedPrimitives != null
                 && mSupportedPrimitives.get(primitiveId, false);
     }

@@ -126,7 +126,7 @@ public final class OneHandedSettingsUtil {
      */
     public boolean getSettingsSwipeToNotificationEnabled(ContentResolver resolver) {
         return Settings.Secure.getInt(resolver,
-                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1) == 1;
+                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 0 /* Default OFF */) == 1;
     }
 
     void dump(PrintWriter pw, String prefix, ContentResolver resolver) {

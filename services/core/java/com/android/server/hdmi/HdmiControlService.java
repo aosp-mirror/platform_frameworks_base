@@ -372,8 +372,7 @@ public class HdmiControlService extends SystemService {
 
     private HdmiCecMessageValidator mMessageValidator;
 
-    private final HdmiCecPowerStatusController mPowerStatusController =
-            new HdmiCecPowerStatusController(this);
+    private HdmiCecPowerStatusController mPowerStatusController;
 
     @ServiceThreadOnly
     private String mMenuLanguage = localeToMenuLanguage(Locale.getDefault());
@@ -427,7 +426,7 @@ public class HdmiControlService extends SystemService {
     // Use getAtomWriter() instead of accessing directly, to allow dependency injection for testing.
     private HdmiCecAtomWriter mAtomWriter = new HdmiCecAtomWriter();
 
-    private CecMessageBuffer mCecMessageBuffer = new CecMessageBuffer(this);
+    private CecMessageBuffer mCecMessageBuffer;
 
     private final SelectRequestBuffer mSelectRequestBuffer = new SelectRequestBuffer();
 
@@ -493,6 +492,9 @@ public class HdmiControlService extends SystemService {
             mIoLooper = mIoThread.getLooper();
         }
 
+        if (mPowerStatusController == null) {
+            mPowerStatusController = new HdmiCecPowerStatusController(this);
+        }
         mPowerStatusController.setPowerStatus(getInitialPowerStatus());
         mProhibitMode = false;
         mHdmiControlEnabled = mHdmiCecConfig.getIntValue(
@@ -501,6 +503,9 @@ public class HdmiControlService extends SystemService {
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE));
         mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
 
+        if (mCecMessageBuffer == null) {
+            mCecMessageBuffer = new CecMessageBuffer(this);
+        }
         if (mCecController == null) {
             mCecController = HdmiCecController.create(this, getAtomWriter());
         }
@@ -948,11 +953,10 @@ public class HdmiControlService extends SystemService {
 
     /**
      * Returns {@link Looper} for IO operation.
-     *
-     * <p>Declared as package-private.
      */
     @Nullable
-    Looper getIoLooper() {
+    @VisibleForTesting
+    protected Looper getIoLooper() {
         return mIoLooper;
     }
 
@@ -974,10 +978,9 @@ public class HdmiControlService extends SystemService {
     /**
      * Returns {@link Looper} of main thread. Use this {@link Looper} instance
      * for tasks that are running on main service thread.
-     *
-     * <p>Declared as package-private.
      */
-    Looper getServiceLooper() {
+    @VisibleForTesting
+    protected Looper getServiceLooper() {
         return mHandler.getLooper();
     }
 
@@ -1015,8 +1018,9 @@ public class HdmiControlService extends SystemService {
     /**
      * Returns version of CEC.
      */
+    @VisibleForTesting
     @HdmiControlManager.HdmiCecVersion
-    int getCecVersion() {
+    protected int getCecVersion() {
         return mCecVersion;
     }
 
@@ -1087,23 +1091,30 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    boolean handleCecCommand(HdmiCecMessage message) {
+    @VisibleForTesting
+    @Constants.HandleMessageResult
+    protected int handleCecCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int errorCode = mMessageValidator.isValid(message);
         if (errorCode != HdmiCecMessageValidator.OK) {
             // We'll not response on the messages with the invalid source or destination
             // or with parameter length shorter than specified in the standard.
             if (errorCode == HdmiCecMessageValidator.ERROR_PARAMETER) {
-                maySendFeatureAbortCommand(message, Constants.ABORT_INVALID_OPERAND);
+                return Constants.ABORT_INVALID_OPERAND;
             }
-            return true;
+            return Constants.HANDLED;
         }
         getHdmiCecNetwork().handleCecMessage(message);
-        if (dispatchMessageToLocalDevice(message)) {
-            return true;
+
+        @Constants.HandleMessageResult int handleMessageResult =
+                dispatchMessageToLocalDevice(message);
+        if (handleMessageResult == Constants.NOT_HANDLED
+                && !mAddressAllocated
+                && mCecMessageBuffer.bufferMessage(message)) {
+            return Constants.HANDLED;
         }
 
-        return (!mAddressAllocated) ? mCecMessageBuffer.bufferMessage(message) : false;
+        return handleMessageResult;
     }
 
     void enableAudioReturnChannel(int portId, boolean enabled) {
@@ -1111,19 +1122,25 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private boolean dispatchMessageToLocalDevice(HdmiCecMessage message) {
+    @VisibleForTesting
+    @Constants.HandleMessageResult
+    protected int dispatchMessageToLocalDevice(HdmiCecMessage message) {
         assertRunOnServiceThread();
         for (HdmiCecLocalDevice device : mHdmiCecNetwork.getLocalDeviceList()) {
-            if (device.dispatchMessage(message)
+            @Constants.HandleMessageResult int messageResult = device.dispatchMessage(message);
+            if (messageResult != Constants.NOT_HANDLED
                     && message.getDestination() != Constants.ADDR_BROADCAST) {
-                return true;
+                return messageResult;
             }
         }
 
-        if (message.getDestination() != Constants.ADDR_BROADCAST) {
+        // We should never respond <Feature Abort> to a broadcast message
+        if (message.getDestination() == Constants.ADDR_BROADCAST) {
+            return Constants.HANDLED;
+        } else {
             HdmiLogger.warning("Unhandled cec command:" + message);
+            return Constants.NOT_HANDLED;
         }
-        return false;
     }
 
     /**
@@ -2972,7 +2989,7 @@ public class HdmiControlService extends SystemService {
     }
 
     @VisibleForTesting
-    boolean isStandbyMessageReceived() {
+    protected boolean isStandbyMessageReceived() {
         return mStandbyMessageReceived;
     }
 

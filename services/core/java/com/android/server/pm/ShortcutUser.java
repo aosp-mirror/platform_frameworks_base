@@ -19,7 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.appsearch.AppSearchManager;
-import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSession;
 import android.content.pm.ShortcutManager;
 import android.metrics.LogMaker;
@@ -35,6 +34,7 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.FgThread;
@@ -715,17 +715,26 @@ class ShortcutUser {
                 .setSubtype(totalSharingShortcutCount));
     }
 
-    void runInAppSearch(@NonNull final AppSearchManager.SearchContext searchContext,
-            @NonNull final Consumer<AppSearchResult<AppSearchSession>> callback) {
+    AndroidFuture<AppSearchSession> getAppSearch(
+            @NonNull final AppSearchManager.SearchContext searchContext) {
+        final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();
         if (mAppSearchManager == null) {
-            Slog.e(TAG, "app search manager is null");
-            return;
+            future.completeExceptionally(new RuntimeException("app search manager is null"));
+            return future;
         }
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
-            mAppSearchManager.createSearchSession(searchContext, mExecutor, callback);
+            mAppSearchManager.createSearchSession(searchContext, mExecutor, result -> {
+                if (!result.isSuccess()) {
+                    future.completeExceptionally(
+                            new RuntimeException(result.getErrorMessage()));
+                    return;
+                }
+                future.complete(result.getResultValue());
+            });
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
+        return future;
     }
 }

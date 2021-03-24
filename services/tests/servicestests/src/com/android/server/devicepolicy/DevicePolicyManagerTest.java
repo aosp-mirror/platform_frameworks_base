@@ -4037,16 +4037,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    public void testGetSetNetworkSlicing() throws Exception {
+    public void testGetSetEnterpriseNetworkPreference() throws Exception {
         assertExpectException(SecurityException.class, null,
-                () -> dpm.setNetworkSlicingEnabled(false));
+                () -> dpm.setEnterpriseNetworkPreferenceEnabled(false));
 
         assertExpectException(SecurityException.class, null,
-                () -> dpm.isNetworkSlicingEnabled());
+                () -> dpm.isEnterpriseNetworkPreferenceEnabled());
 
         setupProfileOwner();
-        dpm.setNetworkSlicingEnabled(false);
-        assertThat(dpm.isNetworkSlicingEnabled()).isFalse();
+        dpm.setEnterpriseNetworkPreferenceEnabled(false);
+        assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isFalse();
         // TODO(b/178655595)
         // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
         //         any(UserHandle.class),
@@ -4055,8 +4055,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         //         any(Runnable.class)
         //);
 
-        dpm.setNetworkSlicingEnabled(true);
-        assertThat(dpm.isNetworkSlicingEnabled()).isTrue();
+        dpm.setEnterpriseNetworkPreferenceEnabled(true);
+        assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isTrue();
         // TODO(b/178655595)
         // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
         //         any(UserHandle.class),

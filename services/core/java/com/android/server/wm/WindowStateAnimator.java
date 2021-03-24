@@ -656,8 +656,10 @@ class WindowStateAnimator {
 
         if (w.getOrientationChanging()) {
             if (!w.isDrawn()) {
-                w.mWmService.mRoot.mOrientationChangeComplete = false;
-                mAnimator.mLastWindowFreezeSource = w;
+                if (w.mDisplayContent.waitForUnfreeze(w)) {
+                    w.mWmService.mRoot.mOrientationChangeComplete = false;
+                    mAnimator.mLastWindowFreezeSource = w;
+                }
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Orientation continue waiting for draw in %s", w);
             } else {

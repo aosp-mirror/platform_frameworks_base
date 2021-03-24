@@ -143,7 +143,6 @@ import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
@@ -3376,7 +3375,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    /*
+    /**
      * Returns PendingIntent which can be used by Apps with MANAGE_EXTERNAL_STORAGE permission
      * to launch the manageSpaceActivity of the App specified by packageName.
      */
@@ -3437,6 +3436,13 @@ class StorageManagerService extends IStorageManager.Stub
 
         mStorageSessionController.notifyAppIoResumed(volumeUuid, uid, tid, reason);
     }
+
+    @Override
+    public boolean isAppIoBlocked(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        return isAppIoBlocked(uid);
+    }
+
 
     private boolean isAppIoBlocked(int uid) {
         return mStorageSessionController.isAppIoBlocked(uid);
@@ -4259,31 +4265,37 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @Override
+    public int getExternalStorageMountMode(int uid, String packageName) {
+        enforcePermission(android.Manifest.permission.WRITE_MEDIA_STORAGE);
+        return mStorageManagerInternal.getExternalStorageMountMode(uid, packageName);
+    }
+
     private int getMountModeInternal(int uid, String packageName) {
         try {
             // Get some easy cases out of the way first
             if (Process.isIsolated(uid)) {
-                return Zygote.MOUNT_EXTERNAL_NONE;
+                return StorageManager.MOUNT_MODE_EXTERNAL_NONE;
             }
 
             final String[] packagesForUid = mIPackageManager.getPackagesForUid(uid);
             if (ArrayUtils.isEmpty(packagesForUid)) {
                 // It's possible the package got uninstalled already, so just ignore.
-                return Zygote.MOUNT_EXTERNAL_NONE;
+                return StorageManager.MOUNT_MODE_EXTERNAL_NONE;
             }
             if (packageName == null) {
                 packageName = packagesForUid[0];
             }
 
             if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
-                return Zygote.MOUNT_EXTERNAL_NONE;
+                return StorageManager.MOUNT_MODE_EXTERNAL_NONE;
             }
 
             if (mStorageManagerInternal.isExternalStorageService(uid)) {
                 // Determine if caller requires pass_through mount; note that we do this for
                 // all processes that share a UID with MediaProvider; but this is fine, since
                 // those processes anyway share the same rights as MediaProvider.
-                return Zygote.MOUNT_EXTERNAL_PASS_THROUGH;
+                return StorageManager.MOUNT_MODE_EXTERNAL_PASS_THROUGH;
             }
 
             if ((mDownloadsAuthorityAppId == UserHandle.getAppId(uid)
@@ -4291,7 +4303,7 @@ class StorageManagerService extends IStorageManager.Stub
                 // DownloadManager can write in app-private directories on behalf of apps;
                 // give it write access to Android/
                 // ExternalStorageProvider can access Android/{data,obb} dirs in managed mode
-                return Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE;
+                return StorageManager.MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE;
             }
 
             final boolean hasMtp = mIPackageManager.checkUidPermission(ACCESS_MTP, uid) ==
@@ -4301,7 +4313,7 @@ class StorageManagerService extends IStorageManager.Stub
                         0, UserHandle.getUserId(uid));
                 if (ai != null && ai.isSignedWithPlatformKey()) {
                     // Platform processes hosting the MTP server should be able to write in Android/
-                    return Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE;
+                    return StorageManager.MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE;
                 }
             }
 
@@ -4326,13 +4338,13 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
             if ((hasInstall || hasInstallOp) && hasWrite) {
-                return Zygote.MOUNT_EXTERNAL_INSTALLER;
+                return StorageManager.MOUNT_MODE_EXTERNAL_INSTALLER;
             }
-            return Zygote.MOUNT_EXTERNAL_DEFAULT;
+            return StorageManager.MOUNT_MODE_EXTERNAL_DEFAULT;
         } catch (RemoteException e) {
             // Should not happen
         }
-        return Zygote.MOUNT_EXTERNAL_NONE;
+        return StorageManager.MOUNT_MODE_EXTERNAL_NONE;
     }
 
     private static class Callbacks extends Handler {
@@ -4702,7 +4714,8 @@ class StorageManagerService extends IStorageManager.Stub
                 return true;
             }
 
-            return getExternalStorageMountMode(uid, packageName) != Zygote.MOUNT_EXTERNAL_NONE;
+            return getExternalStorageMountMode(uid, packageName)
+                    != StorageManager.MOUNT_MODE_EXTERNAL_NONE;
         }
 
         private void killAppForOpChange(int code, int uid) {

@@ -48,6 +48,8 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -312,7 +314,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
             attrs = fixupVibrationAttributes(attrs);
             synchronized (mLock) {
-                SparseArray<VibrationEffect.Prebaked> effects = fixupAlwaysOnEffectsLocked(effect);
+                SparseArray<PrebakedSegment> effects = fixupAlwaysOnEffectsLocked(effect);
                 if (effects == null) {
                     // Invalid effects set in CombinedVibrationEffect, or always-on capability is
                     // missing on individual vibrators.
@@ -347,8 +349,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             attrs = fixupVibrationAttributes(attrs);
             Vibration vib = new Vibration(token, mNextVibrationId.getAndIncrement(), effect, attrs,
                     uid, opPkg, reason);
-            // Update with fixed up effect to keep the original effect in Vibration for debugging.
-            vib.updateEffect(fixupVibrationEffect(effect));
+            fillVibrationFallbacks(vib, effect);
 
             synchronized (mLock) {
                 Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(vib);
@@ -476,7 +477,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private void updateAlwaysOnLocked(AlwaysOnVibration vib) {
         for (int i = 0; i < vib.effects.size(); i++) {
             VibratorController vibrator = mVibrators.get(vib.effects.keyAt(i));
-            VibrationEffect.Prebaked effect = vib.effects.valueAt(i);
+            PrebakedSegment effect = vib.effects.valueAt(i);
             if (vibrator == null) {
                 continue;
             }
@@ -496,7 +497,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private Vibration.Status startVibrationLocked(Vibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationLocked");
         try {
-            vib.updateEffect(mVibrationScaler.scale(vib.getEffect(), vib.attrs.getUsage()));
+            vib.updateEffects(effect -> mVibrationScaler.scale(effect, vib.attrs.getUsage()));
             boolean inputDevicesAvailable = mInputDeviceDelegate.vibrateIfAvailable(
                     vib.uid, vib.opPkg, vib.getEffect(), vib.reason, vib.attrs);
             if (inputDevicesAvailable) {
@@ -757,43 +758,38 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      * Sets fallback effects to all prebaked ones in given combination of effects, based on {@link
      * VibrationSettings#getFallbackEffect}.
      */
-    private CombinedVibrationEffect fixupVibrationEffect(CombinedVibrationEffect effect) {
+    private void fillVibrationFallbacks(Vibration vib, CombinedVibrationEffect effect) {
         if (effect instanceof CombinedVibrationEffect.Mono) {
-            return CombinedVibrationEffect.createSynced(
-                    fixupVibrationEffect(((CombinedVibrationEffect.Mono) effect).getEffect()));
+            fillVibrationFallbacks(vib, ((CombinedVibrationEffect.Mono) effect).getEffect());
         } else if (effect instanceof CombinedVibrationEffect.Stereo) {
-            CombinedVibrationEffect.SyncedCombination combination =
-                    CombinedVibrationEffect.startSynced();
             SparseArray<VibrationEffect> effects =
                     ((CombinedVibrationEffect.Stereo) effect).getEffects();
             for (int i = 0; i < effects.size(); i++) {
-                combination.addVibrator(effects.keyAt(i), fixupVibrationEffect(effects.valueAt(i)));
+                fillVibrationFallbacks(vib, effects.valueAt(i));
             }
-            return combination.combine();
         } else if (effect instanceof CombinedVibrationEffect.Sequential) {
-            CombinedVibrationEffect.SequentialCombination combination =
-                    CombinedVibrationEffect.startSequential();
             List<CombinedVibrationEffect> effects =
                     ((CombinedVibrationEffect.Sequential) effect).getEffects();
-            for (CombinedVibrationEffect e : effects) {
-                combination.addNext(fixupVibrationEffect(e));
+            for (int i = 0; i < effects.size(); i++) {
+                fillVibrationFallbacks(vib, effects.get(i));
             }
-            return combination.combine();
         }
-        return effect;
     }
 
-    private VibrationEffect fixupVibrationEffect(VibrationEffect effect) {
-        if (effect instanceof VibrationEffect.Prebaked
-                && ((VibrationEffect.Prebaked) effect).shouldFallback()) {
-            VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) effect;
-            VibrationEffect fallback = mVibrationSettings.getFallbackEffect(prebaked.getId());
-            if (fallback != null) {
-                return new VibrationEffect.Prebaked(prebaked.getId(), prebaked.getEffectStrength(),
-                        fallback);
+    private void fillVibrationFallbacks(Vibration vib, VibrationEffect effect) {
+        VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+        int segmentCount = composed.getSegments().size();
+        for (int i = 0; i < segmentCount; i++) {
+            VibrationEffectSegment segment = composed.getSegments().get(i);
+            if (segment instanceof PrebakedSegment) {
+                PrebakedSegment prebaked = (PrebakedSegment) segment;
+                VibrationEffect fallback = mVibrationSettings.getFallbackEffect(
+                        prebaked.getEffectId());
+                if (prebaked.shouldFallback() && fallback != null) {
+                    vib.addFallback(prebaked.getEffectId(), fallback);
+                }
             }
         }
-        return effect;
     }
 
     /**
@@ -819,7 +815,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     @GuardedBy("mLock")
     @Nullable
-    private SparseArray<VibrationEffect.Prebaked> fixupAlwaysOnEffectsLocked(
+    private SparseArray<PrebakedSegment> fixupAlwaysOnEffectsLocked(
             CombinedVibrationEffect effect) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "fixupAlwaysOnEffectsLocked");
         try {
@@ -833,17 +829,17 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 // Only synced combinations can be used for always-on effects.
                 return null;
             }
-            SparseArray<VibrationEffect.Prebaked> result = new SparseArray<>();
+            SparseArray<PrebakedSegment> result = new SparseArray<>();
             for (int i = 0; i < effects.size(); i++) {
-                VibrationEffect prebaked = effects.valueAt(i);
-                if (!(prebaked instanceof VibrationEffect.Prebaked)) {
+                PrebakedSegment prebaked = extractPrebakedSegment(effects.valueAt(i));
+                if (prebaked == null) {
                     Slog.e(TAG, "Only prebaked effects supported for always-on.");
                     return null;
                 }
                 int vibratorId = effects.keyAt(i);
                 VibratorController vibrator = mVibrators.get(vibratorId);
                 if (vibrator != null && vibrator.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
-                    result.put(vibratorId, (VibrationEffect.Prebaked) prebaked);
+                    result.put(vibratorId, prebaked);
                 }
             }
             if (result.size() == 0) {
@@ -853,6 +849,20 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
+    }
+
+    @Nullable
+    private static PrebakedSegment extractPrebakedSegment(VibrationEffect effect) {
+        if (effect instanceof VibrationEffect.Composed) {
+            VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+            if (composed.getSegments().size() == 1) {
+                VibrationEffectSegment segment = composed.getSegments().get(0);
+                if (segment instanceof PrebakedSegment) {
+                    return (PrebakedSegment) segment;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -1008,10 +1018,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         public final int uid;
         public final String opPkg;
         public final VibrationAttributes attrs;
-        public final SparseArray<VibrationEffect.Prebaked> effects;
+        public final SparseArray<PrebakedSegment> effects;
 
         AlwaysOnVibration(int alwaysOnId, int uid, String opPkg, VibrationAttributes attrs,
-                SparseArray<VibrationEffect.Prebaked> effects) {
+                SparseArray<PrebakedSegment> effects) {
             this.alwaysOnId = alwaysOnId;
             this.uid = uid;
             this.opPkg = opPkg;

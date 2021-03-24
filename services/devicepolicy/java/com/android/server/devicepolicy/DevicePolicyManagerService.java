@@ -3092,7 +3092,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         boolean enableEnterpriseNetworkSlice = true;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
-            enableEnterpriseNetworkSlice = owner != null ? owner.mNetworkSlicingEnabled : true;
+            enableEnterpriseNetworkSlice = owner != null
+                    ? owner.mEnterpriseNetworkPreferenceEnabled : true;
         }
         updateNetworkPreferenceForUser(userId, enableEnterpriseNetworkSlice);
 
@@ -11423,30 +11424,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setNetworkSlicingEnabled(boolean enabled) {
+    public void setEnterpriseNetworkPreferenceEnabled(boolean enabled) {
         if (!mHasFeature) {
             return;
         }
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(isProfileOwner(caller),
-                "Caller is not profile owner; only profile owner may control the network slicing");
+                "Caller is not profile owner;"
+                        + " only profile owner may control the enterprise network preference");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
                     caller.getUserId());
-            if (requiredAdmin != null && requiredAdmin.mNetworkSlicingEnabled != enabled) {
-                requiredAdmin.mNetworkSlicingEnabled = enabled;
+            if (requiredAdmin != null
+                    && requiredAdmin.mEnterpriseNetworkPreferenceEnabled != enabled) {
+                requiredAdmin.mEnterpriseNetworkPreferenceEnabled = enabled;
                 saveSettingsLocked(caller.getUserId());
             }
         }
         updateNetworkPreferenceForUser(caller.getUserId(), enabled);
         DevicePolicyEventLogger
-                .createEvent(DevicePolicyEnums.SET_NETWORK_SLICING_ENABLED)
+                .createEvent(DevicePolicyEnums.SET_ENTERPRISE_NETWORK_PREFERENCE_ENABLED)
                 .setBoolean(enabled)
                 .write();
     }
 
     @Override
-    public boolean isNetworkSlicingEnabled(int userHandle) {
+    public boolean isEnterpriseNetworkPreferenceEnabled(int userHandle) {
         if (!mHasFeature) {
             return false;
         }
@@ -11457,7 +11460,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(userHandle);
             if (requiredAdmin != null) {
-                return requiredAdmin.mNetworkSlicingEnabled;
+                return requiredAdmin.mEnterpriseNetworkPreferenceEnabled;
             } else {
                 return false;
             }

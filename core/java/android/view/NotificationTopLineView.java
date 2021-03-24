@@ -26,6 +26,9 @@ import android.widget.RemoteViews;
 
 import com.android.internal.R;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * The top line of content in a notification view.
  * This includes the text views and badges but excludes the icon and the expander.
@@ -34,16 +37,22 @@ import com.android.internal.R;
  */
 @RemoteViews.RemoteView
 public class NotificationTopLineView extends ViewGroup {
+    private final OverflowAdjuster mOverflowAdjuster = new OverflowAdjuster();
     private final int mGravityY;
     private final int mChildMinWidth;
+    private final int mChildHideWidth;
     @Nullable private View mAppName;
     @Nullable private View mTitle;
     private View mHeaderText;
+    private View mHeaderTextDivider;
     private View mSecondaryHeaderText;
+    private View mSecondaryHeaderTextDivider;
     private OnClickListener mFeedbackListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private View mFeedbackIcon;
     private int mHeaderTextMarginEnd;
+
+    private Set<View> mViewsToDisappear = new HashSet<>();
 
     private int mMaxAscent;
     private int mMaxDescent;
@@ -66,6 +75,7 @@ public class NotificationTopLineView extends ViewGroup {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = getResources();
         mChildMinWidth = res.getDimensionPixelSize(R.dimen.notification_header_shrink_min_width);
+        mChildHideWidth = res.getDimensionPixelSize(R.dimen.notification_header_shrink_hide_width);
 
         // NOTE: Implementation only supports TOP, BOTTOM, and CENTER_VERTICAL gravities,
         // with CENTER_VERTICAL being the default.
@@ -88,7 +98,9 @@ public class NotificationTopLineView extends ViewGroup {
         mAppName = findViewById(R.id.app_name_text);
         mTitle = findViewById(R.id.title);
         mHeaderText = findViewById(R.id.header_text);
+        mHeaderTextDivider = findViewById(R.id.header_text_divider);
         mSecondaryHeaderText = findViewById(R.id.header_text_secondary);
+        mSecondaryHeaderTextDivider = findViewById(R.id.header_text_secondary_divider);
         mFeedbackIcon = findViewById(R.id.feedback);
     }
 
@@ -125,48 +137,37 @@ public class NotificationTopLineView extends ViewGroup {
             maxChildHeight = Math.max(maxChildHeight, childHeight);
         }
 
+        mViewsToDisappear.clear();
         // Ensure that there is at least enough space for the icons
         int endMargin = Math.max(mHeaderTextMarginEnd, getPaddingEnd());
         if (totalWidth > givenWidth - endMargin) {
             int overFlow = totalWidth - givenWidth + endMargin;
 
-            // First shrink the app name, down to a minimum size
-            overFlow = shrinkViewForOverflow(heightSpec, overFlow, mAppName, mChildMinWidth);
-
-            // Next, shrink the header text (this usually has subText)
-            //   This shrinks the subtext first, but not all the way (yet!)
-            overFlow = shrinkViewForOverflow(heightSpec, overFlow, mHeaderText, mChildMinWidth);
-
-            // Next, shrink the secondary header text  (this rarely has conversationTitle)
-            overFlow = shrinkViewForOverflow(heightSpec, overFlow, mSecondaryHeaderText, 0);
-
-            // Next, shrink the title text (this has contentTitle; only in headerless views)
-            overFlow = shrinkViewForOverflow(heightSpec, overFlow, mTitle, mChildMinWidth);
-
-            // Finally, if there is still overflow, shrink the header down to 0 if still necessary.
-            shrinkViewForOverflow(heightSpec, overFlow, mHeaderText, 0);
+            mOverflowAdjuster.resetForOverflow(overFlow, heightSpec)
+                    // First shrink the app name, down to a minimum size
+                    .adjust(mAppName, null, mChildMinWidth)
+                    // Next, shrink the header text (this usually has subText)
+                    //   This shrinks the subtext first, but not all the way (yet!)
+                    .adjust(mHeaderText, mHeaderTextDivider, mChildMinWidth)
+                    // Next, shrink the secondary header text  (this rarely has conversationTitle)
+                    .adjust(mSecondaryHeaderText, mSecondaryHeaderTextDivider, 0)
+                    // Next, shrink the title text (this has contentTitle; only in headerless views)
+                    .adjust(mTitle, null, mChildMinWidth)
+                    // Next, shrink the header down to 0 if still necessary.
+                    .adjust(mHeaderText, mHeaderTextDivider, 0)
+                    // Finally, shrink the title to 0 if necessary (media is super cramped)
+                    .adjust(mTitle, null, 0)
+                    // Clean up
+                    .finish();
         }
         setMeasuredDimension(givenWidth, wrapHeight ? maxChildHeight : givenHeight);
     }
 
-    private int shrinkViewForOverflow(int heightSpec, int overFlow, View targetView,
-            int minimumWidth) {
-        if (targetView != null) {
-            final int oldWidth = targetView.getMeasuredWidth();
-            if (overFlow > 0 && targetView.getVisibility() != GONE && oldWidth > minimumWidth) {
-                // we're still too big
-                int newSize = Math.max(minimumWidth, oldWidth - overFlow);
-                int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
-                targetView.measure(childWidthSpec, heightSpec);
-                overFlow -= oldWidth - newSize;
-            }
-        }
-        return overFlow;
-    }
-
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int left = getPaddingStart();
+        final boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        final int width = getWidth();
+        int start = getPaddingStart();
         int childCount = getChildCount();
         int ownHeight = b - t;
         int childSpace = ownHeight - mPaddingTop - mPaddingBottom;
@@ -182,8 +183,6 @@ public class NotificationTopLineView extends ViewGroup {
             }
             int childHeight = child.getMeasuredHeight();
             MarginLayoutParams params = (MarginLayoutParams) child.getLayoutParams();
-            int layoutLeft;
-            int layoutRight;
 
             // Calculate vertical alignment of the views, accounting for the view baselines
             int childTop;
@@ -219,19 +218,16 @@ public class NotificationTopLineView extends ViewGroup {
                 default:
                     childTop = mPaddingTop;
             }
-
-            left += params.getMarginStart();
-            int right = left + child.getMeasuredWidth();
-            layoutLeft = left;
-            layoutRight = right;
-            left = right + params.getMarginEnd();
-
-            if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
-                int ltrLeft = layoutLeft;
-                layoutLeft = getWidth() - layoutRight;
-                layoutRight = getWidth() - ltrLeft;
+            if (mViewsToDisappear.contains(child)) {
+                child.layout(start, childTop, start, childTop + childHeight);
+            } else {
+                start += params.getMarginStart();
+                int end = start + child.getMeasuredWidth();
+                int layoutLeft = isRtl ? width - end : start;
+                int layoutRight = isRtl ? width - start : end;
+                start = end + params.getMarginEnd();
+                child.layout(layoutLeft, childTop, layoutRight, childTop + childHeight);
             }
-            child.layout(layoutLeft, childTop, layoutRight, childTop + childHeight);
         }
         updateTouchListener();
     }
@@ -399,5 +395,84 @@ public class NotificationTopLineView extends ViewGroup {
             return false;
         }
         return mTouchListener.onTouchUp(upX, upY, downX, downY);
+    }
+
+    private final class OverflowAdjuster {
+        private int mOverflow;
+        private int mHeightSpec;
+        private View mRegrowView;
+
+        OverflowAdjuster resetForOverflow(int overflow, int heightSpec) {
+            mOverflow = overflow;
+            mHeightSpec = heightSpec;
+            mRegrowView = null;
+            return this;
+        }
+
+        /**
+         * Shrink the targetView's width by up to overFlow, down to minimumWidth.
+         * @param targetView the view to shrink the width of
+         * @param targetDivider a divider view which should be set to 0 width if the targetView is
+         * @param minimumWidth the minimum width allowed for the targetView
+         * @return this object
+         */
+        OverflowAdjuster adjust(View targetView, View targetDivider, int minimumWidth) {
+            if (mOverflow <= 0 || targetView == null || targetView.getVisibility() == View.GONE) {
+                return this;
+            }
+            final int oldWidth = targetView.getMeasuredWidth();
+            if (oldWidth <= minimumWidth) {
+                return this;
+            }
+            // we're too big
+            int newSize = Math.max(minimumWidth, oldWidth - mOverflow);
+            if (minimumWidth == 0 && newSize < mChildHideWidth
+                    && mRegrowView != null && mRegrowView != targetView) {
+                // View is so small it's better to hide it entirely (and its divider and margins)
+                // so we can give that space back to another previously shrunken view.
+                newSize = 0;
+            }
+
+            int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
+            targetView.measure(childWidthSpec, mHeightSpec);
+            mOverflow -= oldWidth - newSize;
+
+            if (newSize == 0) {
+                mViewsToDisappear.add(targetView);
+                mOverflow -= getHorizontalMargins(targetView);
+                if (targetDivider != null && targetDivider.getVisibility() != GONE) {
+                    mViewsToDisappear.add(targetDivider);
+                    int oldDividerWidth = targetDivider.getMeasuredWidth();
+                    int dividerWidthSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.AT_MOST);
+                    targetDivider.measure(dividerWidthSpec, mHeightSpec);
+                    mOverflow -= (oldDividerWidth + getHorizontalMargins(targetDivider));
+                }
+            }
+            if (mOverflow < 0 && mRegrowView != null) {
+                // We're now under-flowing, so regrow the last view.
+                final int regrowCurrentSize = mRegrowView.getMeasuredWidth();
+                final int maxSize = regrowCurrentSize - mOverflow;
+                int regrowWidthSpec = MeasureSpec.makeMeasureSpec(maxSize, MeasureSpec.AT_MOST);
+                mRegrowView.measure(regrowWidthSpec, mHeightSpec);
+                finish();
+                return this;
+            }
+
+            if (newSize != 0) {
+                // if we shrunk this view (but did not completely hide it) store it for potential
+                // re-growth if we proactively shorten a future view.
+                mRegrowView = targetView;
+            }
+            return this;
+        }
+
+        void finish() {
+            resetForOverflow(0, 0);
+        }
+
+        private int getHorizontalMargins(View view) {
+            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
+            return params.getMarginStart() + params.getMarginEnd();
+        }
     }
 }

@@ -36,7 +36,6 @@ import android.util.Log;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.location.eventlog.LocationEventLog;
 import com.android.server.location.injector.TestInjector;
 import com.android.server.location.test.FakeProvider;
 
@@ -77,7 +76,7 @@ public class StationaryThrottlingLocationProviderTest {
         mDelegateProvider = new FakeProvider(mDelegate);
 
         mProvider = new StationaryThrottlingLocationProvider("test_provider", mInjector,
-                mDelegateProvider, new LocationEventLog());
+                mDelegateProvider);
         mProvider.getController().setListener(mListener);
         mProvider.getController().start();
     }

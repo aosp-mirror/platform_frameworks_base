@@ -668,7 +668,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 && expandedView.findViewById(com.android.internal.R.id.media_actions) != null;
         boolean isMessagingLayout = contractedView instanceof MessagingLayout;
         boolean isCallLayout = contractedView instanceof CallLayout;
-        boolean showCompactMediaSeekbar = mMediaManager.getShowCompactMediaSeekbar();
 
         if (customView && beforeS && !mIsSummaryWithChildren) {
             if (beforeN) {
@@ -678,12 +677,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             } else {
                 smallHeight = mMaxSmallHeightBeforeS;
             }
-        } else if (isMediaLayout) {
-            // TODO(b/172652345): MediaStyle notifications currently look broken when we enforce
-            //  the standard notification height, so we have to afford them more vertical space to
-            //  make sure we don't crop them terribly.  We actually need to revisit this and give
-            //  them a headerless design, then remove this hack.
-            smallHeight = showCompactMediaSeekbar ? mMaxSmallHeightMedia : mMaxSmallHeightBeforeS;
         } else if (isMessagingLayout) {
             // TODO(b/173204301): MessagingStyle notifications currently look broken when we enforce
             //  the standard notification height, so we have to afford them more vertical space to

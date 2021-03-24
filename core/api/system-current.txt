@@ -699,6 +699,9 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SHOW_KEYGUARD_MESSAGE) public void requestDismissKeyguard(@NonNull android.app.Activity, @Nullable CharSequence, @Nullable android.app.KeyguardManager.KeyguardDismissCallback);
     method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public boolean setLock(int, @NonNull byte[], int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public void setPrivateNotificationsAllowed(boolean);
+    field public static final int PASSWORD = 0; // 0x0
+    field public static final int PATTERN = 2; // 0x2
+    field public static final int PIN = 1; // 0x1
   }
 
   public class Notification implements android.os.Parcelable {
@@ -1192,12 +1195,14 @@ package android.app.backup {
 
   public class RestoreSet implements android.os.Parcelable {
     ctor public RestoreSet();
-    ctor public RestoreSet(String, String, long);
+    ctor public RestoreSet(@Nullable String, @Nullable String, long);
+    ctor public RestoreSet(@Nullable String, @Nullable String, long, int);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.backup.RestoreSet> CREATOR;
-    field public String device;
-    field public String name;
+    field public final int backupTransportFlags;
+    field @Nullable public String device;
+    field @Nullable public String name;
     field public long token;
   }
 
@@ -5226,6 +5231,7 @@ package android.media {
     method @Nullable public String getClientPackageName();
     method @Nullable public android.media.MediaRouter2.RoutingController getController(@NonNull String);
     method @Nullable public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
+    method public void registerRouteCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaRouter2.RouteCallback);
     method public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
     method public void startScan();
     method public void stopScan();
@@ -8495,6 +8501,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean hasRestrictedProfiles();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean hasUserRestrictionForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isAdminUser();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isCloneProfile();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isGuestUser();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isManagedProfile(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isPrimaryUser();
@@ -8508,6 +8515,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean removeUser(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserIcon(@NonNull android.graphics.Bitmap) throws android.os.UserManager.UserOperationException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserName(@Nullable String);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean sharesMediaWithParent();
     field public static final String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field @Deprecated public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
     field public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
@@ -8521,6 +8529,7 @@ package android.os {
     field public static final int SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED = 2; // 0x2
     field public static final String USER_TYPE_FULL_SECONDARY = "android.os.usertype.full.SECONDARY";
     field public static final String USER_TYPE_FULL_SYSTEM = "android.os.usertype.full.SYSTEM";
+    field public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
     field public static final String USER_TYPE_PROFILE_MANAGED = "android.os.usertype.profile.MANAGED";
     field public static final String USER_TYPE_SYSTEM_HEADLESS = "android.os.usertype.system.HEADLESS";
   }
@@ -8668,9 +8677,15 @@ package android.os.storage {
     method @WorkerThread public void allocateBytes(@NonNull java.util.UUID, long, @RequiresPermission int) throws java.io.IOException;
     method @WorkerThread public void allocateBytes(java.io.FileDescriptor, long, @RequiresPermission int) throws java.io.IOException;
     method @WorkerThread public long getAllocatableBytes(@NonNull java.util.UUID, @RequiresPermission int) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public int getExternalStorageMountMode(int, @NonNull String);
     method public static boolean hasIsolatedStorage();
     method public void updateExternalStorageFileQuotaType(@NonNull java.io.File, int) throws java.io.IOException;
     field @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public static final int FLAG_ALLOCATE_AGGRESSIVE = 1; // 0x1
+    field public static final int MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE = 4; // 0x4
+    field public static final int MOUNT_MODE_EXTERNAL_DEFAULT = 1; // 0x1
+    field public static final int MOUNT_MODE_EXTERNAL_INSTALLER = 2; // 0x2
+    field public static final int MOUNT_MODE_EXTERNAL_NONE = 0; // 0x0
+    field public static final int MOUNT_MODE_EXTERNAL_PASS_THROUGH = 3; // 0x3
     field public static final int QUOTA_TYPE_MEDIA_AUDIO = 2; // 0x2
     field public static final int QUOTA_TYPE_MEDIA_IMAGE = 1; // 0x1
     field public static final int QUOTA_TYPE_MEDIA_NONE = 0; // 0x0
@@ -8995,6 +9010,8 @@ package android.provider {
     method @NonNull public static android.net.Uri setManageMode(@NonNull android.net.Uri);
     field public static final String ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
     field public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
+    field public static final String DOWNLOADS_PROVIDER_AUTHORITY = "downloads";
+    field public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY = "com.android.externalstorage.documents";
     field public static final String EXTRA_SHOW_ADVANCED = "android.provider.extra.SHOW_ADVANCED";
   }
 
@@ -10259,9 +10276,10 @@ package android.service.translation {
     ctor public TranslationService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onConnected();
-    method public abstract void onCreateTranslationSession(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, int);
+    method public abstract void onCreateTranslationSession(@NonNull android.view.translation.TranslationContext, int);
     method public void onDisconnected();
     method public abstract void onFinishTranslationSession(int);
+    method public abstract void onTranslationCapabilitiesRequest(int, int, @NonNull java.util.function.Consumer<java.util.Set<android.view.translation.TranslationCapability>>);
     method public abstract void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @NonNull android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
     field public static final String SERVICE_INTERFACE = "android.service.translation.TranslationService";
     field public static final String SERVICE_META_DATA = "android.translation_service";
@@ -14265,6 +14283,10 @@ package android.view.displayhash {
 }
 
 package android.view.translation {
+
+  public final class TranslationCapability implements android.os.Parcelable {
+    ctor public TranslationCapability(int, @NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, boolean, int);
+  }
 
   public final class UiTranslationManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(int);

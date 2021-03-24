@@ -30,6 +30,7 @@ import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.pm.ServiceInfo;
 import android.net.Network;
+import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -38,6 +39,7 @@ import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
+import android.util.Range;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -55,6 +57,7 @@ import com.android.server.job.JobStatusShortInfoProto;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Predicate;
 
 /**
@@ -325,6 +328,12 @@ public final class JobStatus {
     /** The evaluated priority of the job when it started running. */
     public int lastEvaluatedPriority;
 
+    /**
+     * Whether or not this particular JobStatus instance was treated as an EJ when it started
+     * running. This isn't copied over when a job is rescheduled.
+     */
+    public boolean startedAsExpeditedJob = false;
+
     // If non-null, this is work that has been enqueued for the job.
     public ArrayList<JobWorkItem> pendingWork;
 
@@ -527,8 +536,15 @@ public final class JobStatus {
             // Later, when we check if a given network satisfies the required
             // network, we need to know the UID that is requesting it, so push
             // our source UID into place.
-            job.getRequiredNetwork().networkCapabilities.setSingleUid(this.sourceUid);
+            final JobInfo.Builder builder = new JobInfo.Builder(job);
+            final NetworkRequest.Builder requestBuilder =
+                    new NetworkRequest.Builder(job.getRequiredNetwork());
+            requestBuilder.setUids(
+                    Collections.singleton(new Range<Integer>(this.sourceUid, this.sourceUid)));
+            builder.setRequiredNetwork(requestBuilder.build());
+            job = builder.build();
         }
+
         final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
         mHasMediaBackupExemption = !job.hasLateConstraint() && exemptedMediaUrisOnly
                 && requiresNetwork && this.sourcePackageName.equals(jsi.getMediaBackupPackage());
@@ -1112,18 +1128,19 @@ public final class JobStatus {
      */
     public boolean canRunInDoze() {
         return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
-                || (shouldTreatAsExpeditedJob()
+                || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                 && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
     }
 
     boolean canRunInBatterySaver() {
         return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0
-                || (shouldTreatAsExpeditedJob()
+                || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                 && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
     }
 
     boolean shouldIgnoreNetworkBlocking() {
-        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0 || shouldTreatAsExpeditedJob();
+        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
+                || (shouldTreatAsExpeditedJob() || startedAsExpeditedJob);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
@@ -2022,7 +2039,10 @@ public final class JobStatus {
         pw.println(serviceInfo != null);
         if ((getFlags() & JobInfo.FLAG_EXPEDITED) != 0) {
             pw.print("readyWithinExpeditedQuota: ");
-            pw.println(mReadyWithinExpeditedQuota);
+            pw.print(mReadyWithinExpeditedQuota);
+            pw.print(" (started as EJ: ");
+            pw.print(startedAsExpeditedJob);
+            pw.println(")");
         }
         pw.decreaseIndent();
 
@@ -2161,9 +2181,6 @@ public final class JobStatus {
             if (uriPerms != null) {
                 uriPerms.dump(proto, JobStatusDumpProto.JobInfo.GRANTED_URI_PERMISSIONS);
             }
-            if (job.getRequiredNetwork() != null) {
-                job.getRequiredNetwork().dumpDebug(proto, JobStatusDumpProto.JobInfo.REQUIRED_NETWORK);
-            }
             if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
                 proto.write(JobStatusDumpProto.JobInfo.TOTAL_NETWORK_DOWNLOAD_BYTES,
                         mTotalNetworkDownloadBytes);
@@ -2250,10 +2267,6 @@ public final class JobStatus {
                 Uri u = changedUris.valueAt(i);
                 proto.write(JobStatusDumpProto.CHANGED_URIS, u.toString());
             }
-        }
-
-        if (network != null) {
-            network.dumpDebug(proto, JobStatusDumpProto.NETWORK);
         }
 
         if (pendingWork != null) {
