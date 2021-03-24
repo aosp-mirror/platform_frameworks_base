@@ -36,6 +36,7 @@ cc_library_shared {
         "jni/com_android_server_TestNetworkService.cpp",
         "jni/onload.cpp",
     ],
+    stl: "libc++_static",
     shared_libs: [
         "libbase",
         "liblog",
