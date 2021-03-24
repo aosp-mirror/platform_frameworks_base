@@ -777,11 +777,11 @@ interface IWindowManager
     VerifiedDisplayHash verifyDisplayHash(in DisplayHash displayHash);
 
     /**
-     * Registers a listener for a {@link android.app.WindowContext} to handle configuration changes
-     * from the server side.
+     * Registers a listener for a {@link android.window.WindowContext} to handle configuration
+     * changes from the server side.
      * <p>
      * Note that this API should be invoked after calling
-     * {@link android.app.WindowTokenClient#attachContext(WindowContext)}
+     * {@link android.window.WindowTokenClient#attachContext(Context)}
      * </p>
      *
      * @param clientToken the window context's token
