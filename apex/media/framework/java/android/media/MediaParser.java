@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.media.MediaCodec.CryptoInfo;
+import android.media.metrics.LogSessionId;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
@@ -74,6 +75,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -1066,6 +1068,7 @@ public final class MediaParser {
     private boolean mReleased;
 
     // MediaMetrics fields.
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
     private final boolean mCreatedByName;
     private final SparseArray<Format> mTrackFormats;
     private String mLastObservedExceptionName;
@@ -1328,6 +1331,7 @@ public final class MediaParser {
                                 MEDIAMETRICS_PARAMETER_LIST_MAX_LENGTH));
 
         nativeSubmitMetrics(
+                // TODO: mLogSessionId,
                 mParserName,
                 mCreatedByName,
                 String.join(MEDIAMETRICS_ELEMENT_SEPARATOR, mParserNamesPool),
@@ -1339,6 +1343,15 @@ public final class MediaParser {
                 alteredParameters,
                 videoWidth,
                 videoHeight);
+    }
+
+    public void setLogSessionId(@NonNull LogSessionId sessionId) {
+        this.mLogSessionId = Objects.requireNonNull(sessionId);
+    }
+
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
     }
 
     // Private methods.
@@ -2184,6 +2197,7 @@ public final class MediaParser {
     // Native methods.
 
     private native void nativeSubmitMetrics(
+            // TODO: String logSessionId,
             String parserName,
             boolean createdByName,
             String parserPool,

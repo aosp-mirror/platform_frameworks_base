@@ -1483,7 +1483,7 @@ package android.media.audiopolicy {
 package android.media.metrics {
 
   public final class LogSessionId {
-    method @NonNull public String getStringId();
+    ctor public LogSessionId(@NonNull String);
   }
 
 }

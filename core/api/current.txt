@@ -20578,6 +20578,7 @@ package android.media {
     method public int getChannelConfiguration();
     method public int getChannelCount();
     method @NonNull public android.media.AudioFormat getFormat();
+    method @NonNull public android.media.metrics.LogSessionId getLogSessionId();
     method public android.os.PersistableBundle getMetrics();
     method public static int getMinBufferSize(int, int, int);
     method public int getNotificationMarkerPosition();
@@ -20600,6 +20601,7 @@ package android.media {
     method public void release();
     method public void removeOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener);
     method @Deprecated public void removeOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener);
+    method public void setLogSessionId(@NonNull android.media.metrics.LogSessionId);
     method public int setNotificationMarkerPosition(int);
     method public int setPositionNotificationPeriod(int);
     method public boolean setPreferredDevice(android.media.AudioDeviceInfo);
@@ -20715,6 +20717,7 @@ package android.media {
     method public int getChannelCount();
     method public int getDualMonoMode();
     method @NonNull public android.media.AudioFormat getFormat();
+    method @NonNull public android.media.metrics.LogSessionId getLogSessionId();
     method public static float getMaxVolume();
     method public android.os.PersistableBundle getMetrics();
     method public static int getMinBufferSize(int, int, int);
@@ -20752,6 +20755,7 @@ package android.media {
     method public int setAuxEffectSendLevel(@FloatRange(from=0.0) float);
     method public int setBufferSizeInFrames(@IntRange(from=0) int);
     method public boolean setDualMonoMode(int);
+    method public void setLogSessionId(@NonNull android.media.metrics.LogSessionId);
     method public int setLoopPoints(@IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0xffffffff) int);
     method public int setNotificationMarkerPosition(int);
     method public void setOffloadDelayPadding(@IntRange(from=0) int, @IntRange(from=0) int);
@@ -21961,7 +21965,7 @@ package android.media {
     method @NonNull public java.util.List<byte[]> getOfflineLicenseKeySetIds();
     method public int getOfflineLicenseState(@NonNull byte[]);
     method public int getOpenSessionCount();
-    method @Nullable public android.media.metrics.PlaybackComponent getPlaybackComponent(@NonNull byte[]);
+    method @Nullable public android.media.MediaDrm.PlaybackComponent getPlaybackComponent(@NonNull byte[]);
     method @NonNull public byte[] getPropertyByteArray(String);
     method @NonNull public String getPropertyString(@NonNull String);
     method @NonNull public android.media.MediaDrm.ProvisionRequest getProvisionRequest();
@@ -22166,6 +22170,11 @@ package android.media {
     method public void onSessionLostState(@NonNull android.media.MediaDrm, @NonNull byte[]);
   }
 
+  public final class MediaDrm.PlaybackComponent {
+    method @NonNull public android.media.metrics.LogSessionId getLogSessionId();
+    method public void setLogSessionId(@NonNull android.media.metrics.LogSessionId);
+  }
+
   public static final class MediaDrm.ProvisionRequest {
     method @NonNull public byte[] getData();
     method @NonNull public String getDefaultUrl();
@@ -22190,7 +22199,7 @@ package android.media {
     ctor public MediaDrmResetException(String);
   }
 
-  public final class MediaExtractor implements android.media.metrics.PlaybackComponent {
+  public final class MediaExtractor {
     ctor public MediaExtractor();
     method public boolean advance();
     method protected void finalize();
@@ -22198,8 +22207,8 @@ package android.media {
     method public long getCachedDuration();
     method public android.media.MediaExtractor.CasInfo getCasInfo(int);
     method public android.media.DrmInitData getDrmInitData();
+    method @NonNull public android.media.metrics.LogSessionId getLogSessionId();
     method public android.os.PersistableBundle getMetrics();
-    method @NonNull public String getPlaybackId();
     method @Nullable public java.util.Map<java.util.UUID,byte[]> getPsshInfo();
     method public boolean getSampleCryptoInfo(@NonNull android.media.MediaCodec.CryptoInfo);
     method public int getSampleFlags();
@@ -22220,8 +22229,8 @@ package android.media {
     method public void setDataSource(@NonNull android.content.res.AssetFileDescriptor) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setDataSource(@NonNull java.io.FileDescriptor) throws java.io.IOException;
     method public void setDataSource(@NonNull java.io.FileDescriptor, long, long) throws java.io.IOException;
+    method public void setLogSessionId(@NonNull android.media.metrics.LogSessionId);
     method public void setMediaCas(@NonNull android.media.MediaCas);
-    method public void setPlaybackId(@NonNull String);
     method public void unselectTrack(int);
     field public static final int SAMPLE_FLAG_ENCRYPTED = 2; // 0x2
     field public static final int SAMPLE_FLAG_PARTIAL_FRAME = 4; // 0x4
@@ -22823,6 +22832,7 @@ package android.media {
     method public java.util.List<android.media.MicrophoneInfo> getActiveMicrophones() throws java.io.IOException;
     method @Nullable public android.media.AudioRecordingConfiguration getActiveRecordingConfiguration();
     method public static final int getAudioSourceMax();
+    method @NonNull public android.media.metrics.LogSessionId getLogSessionId();
     method public int getMaxAmplitude() throws java.lang.IllegalStateException;
     method public android.os.PersistableBundle getMetrics();
     method public android.media.AudioDeviceInfo getPreferredDevice();
@@ -22845,6 +22855,7 @@ package android.media {
     method public void setCaptureRate(double);
     method public void setInputSurface(@NonNull android.view.Surface);
     method public void setLocation(float, float);
+    method public void setLogSessionId(@NonNull android.media.metrics.LogSessionId);
     method public void setMaxDuration(int) throws java.lang.IllegalArgumentException;
     method public void setMaxFileSize(long) throws java.lang.IllegalArgumentException;
     method public void setNextOutputFile(java.io.FileDescriptor) throws java.io.IOException;
@@ -24476,6 +24487,8 @@ package android.media.metrics {
   }
 
   public final class LogSessionId {
+    method @NonNull public String getStringId();
+    field @NonNull public static final android.media.metrics.LogSessionId LOG_SESSION_ID_NONE;
   }
 
   public class MediaMetricsManager {
@@ -24507,11 +24520,6 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.NetworkEvent.Builder setMetricsBundle(@NonNull android.os.Bundle);
     method @NonNull public android.media.metrics.NetworkEvent.Builder setNetworkType(int);
     method @NonNull public android.media.metrics.NetworkEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
-  }
-
-  public interface PlaybackComponent {
-    method @NonNull public String getPlaybackId();
-    method public void setPlaybackId(@NonNull String);
   }
 
   public final class PlaybackErrorEvent extends android.media.metrics.Event implements android.os.Parcelable {
