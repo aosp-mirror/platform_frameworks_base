@@ -34,6 +34,7 @@ import android.util.StateSet;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -112,6 +113,18 @@ import java.util.Arrays;
  *         android:color="?android:attr/colorAccent"
  *         android:alpha="0.5" /&gt;
  * </pre>
+ * <p>
+ * Starting with API 31, items may optionally define an {@link android.R.attr#lStar android:lStar}
+ * attribute to modify the base color's perceptual luminance. This attribute takes a either
+ * floating-point value between 0 and 100 or a theme attribute that resolves as such. The item's
+ * overall color is calculated by converting the base color to an accessibility friendly color space
+ * and setting its L* to the value specified on the {@code lStar} attribute. For
+ * example, the following item represents the theme's accent color at 50% perpectual luminosity:
+ * <pre>
+ * &lt;item android:state_enabled="false"
+ *         android:color="?android:attr/colorAccent"
+ *         android:lStar="50" /&gt;
+ * </pre>
  *
  * <a name="DeveloperGuide"></a>
  * <h3>Developer guide</h3>
@@ -122,6 +135,7 @@ import java.util.Arrays;
  *
  * @attr ref android.R.styleable#ColorStateListItem_alpha
  * @attr ref android.R.styleable#ColorStateListItem_color
+ * @attr ref android.R.styleable#ColorStateListItem_lStar
  */
 public class ColorStateList extends ComplexColor implements Parcelable {
     private static final String TAG = "ColorStateList";
@@ -301,6 +315,24 @@ public class ColorStateList extends ComplexColor implements Parcelable {
     }
 
     /**
+     * Creates a new ColorStateList that has the same states and colors as this
+     * one but where each color has the specified perceived luminosity value (0-100).
+     *
+     * @param lStar Target perceptual luminance (0-100).
+     * @return A new color state list.
+     */
+    @NonNull
+    public ColorStateList withLStar(float lStar) {
+        final int[] colors = new int[mColors.length];
+        final int len = colors.length;
+        for (int i = 0; i < len; i++) {
+            colors[i] = modulateColor(mColors[i], 1.0f /* alphaMod */, lStar);
+        }
+
+        return new ColorStateList(mStateSpecs, colors);
+    }
+
+    /**
      * Fill in this object based on the contents of an XML "selector" element.
      */
     private void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
@@ -332,6 +364,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
             final int[] themeAttrs = a.extractThemeAttrs();
             final int baseColor = a.getColor(R.styleable.ColorStateListItem_color, Color.MAGENTA);
             final float alphaMod = a.getFloat(R.styleable.ColorStateListItem_alpha, 1.0f);
+            final float lStar = a.getFloat(R.styleable.ColorStateListItem_lStar, -1.0f);
 
             changingConfigurations |= a.getChangingConfigurations();
 
@@ -346,6 +379,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
                 switch (stateResId) {
                     case R.attr.color:
                     case R.attr.alpha:
+                    case R.attr.lStar:
                         // Recognized attribute, ignore.
                         break;
                     default:
@@ -355,10 +389,11 @@ public class ColorStateList extends ComplexColor implements Parcelable {
             }
             stateSpec = StateSet.trimStateSet(stateSpec, j);
 
-            // Apply alpha modulation. If we couldn't resolve the color or
+            // Apply alpha and luma modulation. If we couldn't resolve the color or
             // alpha yet, the default values leave us enough information to
             // modulate again during applyTheme().
-            final int color = modulateColorAlpha(baseColor, alphaMod);
+            final int color = modulateColor(baseColor, alphaMod, lStar);
+
             if (listSize == 0 || stateSpec.length == 0) {
                 defaultColor = color;
             }
@@ -455,7 +490,9 @@ public class ColorStateList extends ComplexColor implements Parcelable {
                         R.styleable.ColorStateListItem_color, mColors[i]);
                 final float alphaMod = a.getFloat(
                         R.styleable.ColorStateListItem_alpha, defaultAlphaMod);
-                mColors[i] = modulateColorAlpha(baseColor, alphaMod);
+                final float lStar = a.getFloat(
+                        R.styleable.ColorStateListItem_lStar, -1.0f);
+                mColors[i] = modulateColor(baseColor, alphaMod, lStar);
 
                 // Account for any configuration changes.
                 mChangingConfigurations |= a.getChangingConfigurations();
@@ -505,13 +542,21 @@ public class ColorStateList extends ComplexColor implements Parcelable {
         return super.getChangingConfigurations() | mChangingConfigurations;
     }
 
-    private int modulateColorAlpha(int baseColor, float alphaMod) {
-        if (alphaMod == 1.0f) {
+    private int modulateColor(int baseColor, float alphaMod, float lStar) {
+        final boolean validLStar = lStar >= 0.0f && lStar <= 100.0f;
+        if (alphaMod == 1.0f && !validLStar) {
             return baseColor;
         }
 
         final int baseAlpha = Color.alpha(baseColor);
         final int alpha = MathUtils.constrain((int) (baseAlpha * alphaMod + 0.5f), 0, 255);
+
+        if (validLStar) {
+            final double[] labColor = new double[3];
+            ColorUtils.colorToLAB(baseColor, labColor);
+            baseColor = ColorUtils.LABToColor(lStar, labColor[1], labColor[2]);
+        }
+
         return (baseColor & 0xFFFFFF) | (alpha << 24);
     }
 
