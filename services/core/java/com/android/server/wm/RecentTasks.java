@@ -1573,6 +1573,10 @@ class RecentTasks {
                 } else if (document || trIsDocument) {
                     // Only one of these is a document. Not the droid we're looking for.
                     continue;
+                } else if (multiTasksAllowed) {
+                    // Neither is a document, but the new task supports multiple tasks so keep the
+                    // existing task
+                    continue;
                 }
             }
             return i;
