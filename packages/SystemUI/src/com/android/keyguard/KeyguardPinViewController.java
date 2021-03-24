@@ -34,10 +34,11 @@ public class KeyguardPinViewController
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
+            EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector, boolean isNewLayoutEnabled) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                falsingCollector);
+                emergencyButtonController, falsingCollector);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         view.setIsNewLayoutEnabled(isNewLayoutEnabled);
     }

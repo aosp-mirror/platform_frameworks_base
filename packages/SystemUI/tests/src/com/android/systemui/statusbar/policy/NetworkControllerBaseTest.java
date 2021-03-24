@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.telephony.TelephonyListenerManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -113,6 +114,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected NetworkScoreManager mMockNsm;
     protected SubscriptionManager mMockSm;
     protected TelephonyManager mMockTm;
+    protected TelephonyListenerManager mTelephonyListenerManager;
     protected BroadcastDispatcher mMockBd;
     protected Config mConfig;
     protected CallbackHandler mCallbackHandler;
@@ -164,6 +166,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mDemoModeController = mock(DemoModeController.class);
         mMockWm = mock(WifiManager.class);
         mMockTm = mock(TelephonyManager.class);
+        mTelephonyListenerManager = mock(TelephonyListenerManager.class);
         mMockSm = mock(SubscriptionManager.class);
         mMockCm = mock(ConnectivityManager.class);
         mMockBd = mock(BroadcastDispatcher.class);
@@ -213,6 +216,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mNetworkController = new NetworkControllerImpl(mContext,
                 mMockCm,
                 mMockTm,
+                mTelephonyListenerManager,
                 mMockWm,
                 mMockNsm,
                 mMockSm,
@@ -285,7 +289,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected NetworkControllerImpl setUpNoMobileData() {
         when(mMockTm.isDataCapable()).thenReturn(false);
         NetworkControllerImpl networkControllerNoMobile =
-                new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockNsm, mMockSm,
+                new NetworkControllerImpl(mContext, mMockCm, mMockTm, mTelephonyListenerManager,
+                        mMockWm, mMockNsm, mMockSm,
                         mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
