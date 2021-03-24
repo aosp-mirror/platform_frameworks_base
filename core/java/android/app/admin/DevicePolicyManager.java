@@ -3282,6 +3282,41 @@ public class DevicePolicyManager {
             "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
 
     /**
+     * A {@code boolean} metadata to be included in a mainline module's {@code <application>}
+     * manifest element, which declares that the module should be considered a required app for
+     * managed users.
+     * <p>Being declared as a required app prevents removal of this package during the
+     * provisioning process.
+     * @hide
+     */
+    @SystemApi
+    public static final String REQUIRED_APP_MANAGED_USER = "android.app.REQUIRED_APP_MANAGED_USER";
+
+    /**
+     * A {@code boolean} metadata to be included in a mainline module's {@code <application>}
+     * manifest element, which declares that the module should be considered a required app for
+     * managed devices.
+     * <p>Being declared as a required app prevents removal of this package during the
+     * provisioning process.
+     * @hide
+     */
+    @SystemApi
+    public static final String REQUIRED_APP_MANAGED_DEVICE =
+            "android.app.REQUIRED_APP_MANAGED_DEVICE";
+
+    /**
+     * A {@code boolean} metadata to be included in a mainline module's {@code <application>}
+     * manifest element, which declares that the module should be considered a required app for
+     * managed profiles.
+     * <p>Being declared as a required app prevents removal of this package during the
+     * provisioning process.
+     * @hide
+     */
+    @SystemApi
+    public static final String REQUIRED_APP_MANAGED_PROFILE =
+            "android.app.REQUIRED_APP_MANAGED_PROFILE";
+
+    /**
      * Called by an application that is administering the device to set the password restrictions it
      * is imposing. After setting this, the user will not be able to enter a new password that is
      * not at least as restrictive as what has been set. Note that the current password will remain
