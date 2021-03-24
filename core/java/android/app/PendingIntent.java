@@ -1010,7 +1010,7 @@ public final class PendingIntent implements Parcelable {
      * @deprecated Renamed to {@link #getCreatorPackage()}.
      */
     @Deprecated
-    @NonNull
+    @Nullable
     public String getTargetPackage() {
         return getCreatorPackage();
     }
@@ -1032,7 +1032,7 @@ public final class PendingIntent implements Parcelable {
      *
      * @return The package name of the PendingIntent.
      */
-    @NonNull
+    @Nullable
     public String getCreatorPackage() {
         return getCachedInfo().getCreatorPackage();
     }

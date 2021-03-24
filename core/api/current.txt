@@ -6320,13 +6320,13 @@ package android.app {
     method public static android.app.PendingIntent getActivity(android.content.Context, int, android.content.Intent, int);
     method public static android.app.PendingIntent getActivity(android.content.Context, int, @NonNull android.content.Intent, int, @Nullable android.os.Bundle);
     method public static android.app.PendingIntent getBroadcast(android.content.Context, int, @NonNull android.content.Intent, int);
-    method @NonNull public String getCreatorPackage();
+    method @Nullable public String getCreatorPackage();
     method public int getCreatorUid();
     method @NonNull public android.os.UserHandle getCreatorUserHandle();
     method public static android.app.PendingIntent getForegroundService(android.content.Context, int, @NonNull android.content.Intent, int);
     method @NonNull public android.content.IntentSender getIntentSender();
     method public static android.app.PendingIntent getService(android.content.Context, int, @NonNull android.content.Intent, int);
-    method @Deprecated @NonNull public String getTargetPackage();
+    method @Deprecated @Nullable public String getTargetPackage();
     method public boolean isActivity();
     method public boolean isBroadcast();
     method public boolean isForegroundService();
