@@ -75,7 +75,7 @@ class EnterPipToOtherOrientationTest(
                 // Enter PiP, and assert that the PiP is within bounds now that the device is back
                 // in portrait
                 broadcastActionTrigger.doAction(ACTION_ENTER_PIP)
-                wmHelper.waitPipWindowShown()
+                wmHelper.waitFor { it.wmState.hasPipWindow() }
                 wmHelper.waitForAppTransitionIdle()
             }
         }
