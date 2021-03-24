@@ -1227,10 +1227,12 @@ public class ConnectivityServiceTest {
             if (mAgentRegistered) throw new IllegalStateException("already registered");
             updateState(NetworkInfo.DetailedState.CONNECTING, "registerAgent");
             mConfig = new VpnConfig();
+            mConfig.session = "MySession12345";
             setUids(uids);
             if (!isAlwaysMetered) mNetworkCapabilities.addCapability(NET_CAPABILITY_NOT_METERED);
             mInterface = VPN_IFNAME;
-            mNetworkCapabilities.setTransportInfo(new VpnTransportInfo(getActiveVpnType()));
+            mNetworkCapabilities.setTransportInfo(new VpnTransportInfo(getActiveVpnType(),
+                    mConfig.session));
             mMockNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN, lp,
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
