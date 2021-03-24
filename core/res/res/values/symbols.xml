@@ -555,6 +555,9 @@
   <java-symbol type="string" name="paste_as_plain_text" />
   <java-symbol type="string" name="pasted_from_app" />
   <java-symbol type="string" name="pasted_from_clipboard" />
+  <java-symbol type="string" name="pasted_text" />
+  <java-symbol type="string" name="pasted_image" />
+  <java-symbol type="string" name="pasted_content" />
   <java-symbol type="string" name="replace" />
   <java-symbol type="string" name="undo" />
   <java-symbol type="string" name="redo" />
