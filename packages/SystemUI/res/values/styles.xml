@@ -321,6 +321,7 @@
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
+        <item name="wallpaperTextColorAccent">@*android:color/system_accent1_100</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:colorControlHighlight">@*android:color/primary_text_material_dark</item>
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
@@ -337,6 +338,7 @@
     <style name="Theme.SystemUI.Light">
         <item name="wallpaperTextColor">@*android:color/primary_text_material_light</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
+        <item name="wallpaperTextColorAccent">@*android:color/system_accent2_600</item>
         <item name="android:colorError">@*android:color/error_color_material_light</item>
         <item name="android:colorControlHighlight">#40000000</item>
         <item name="shadowRadius">0</item>
