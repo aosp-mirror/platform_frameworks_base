@@ -750,7 +750,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SUPPRESS_DOZE,
                  Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
                  Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
-                 Settings.Secure.TRANSFORM_ENABLED);
+                 Settings.Secure.UI_TRANSLATION_ENABLED);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {
