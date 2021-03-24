@@ -17,8 +17,8 @@ android_library {
 
     // TODO(b/149540986): revert this change.
     static_libs: [
-         // All other dependent components should be put in
-         // "SettingsLibDependenciesWithoutWifiTracker".
+        // All other dependent components should be put in
+        // "SettingsLibDependenciesWithoutWifiTracker".
         "WifiTrackerLib",
     ],
 
@@ -27,7 +27,10 @@ android_library {
 
     resource_dirs: ["res"],
 
-    srcs: ["src/**/*.java", "src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     min_sdk_version: "21",
 
@@ -68,6 +71,7 @@ java_defaults {
         "SettingsLibUsageProgressBarPreference",
         "SettingsLibCollapsingToolbarBaseActivity",
         "SettingsLibTwoTargetPreference",
+        "SettingsLibSettingsTransition",
     ],
 }
 
