@@ -5411,12 +5411,6 @@
     <permission android:name="android.permission.WATCH_APPOPS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to directly open the "Open by default" page inside a package's
-         Details screen.
-         @hide <p>Not for use by third-party applications. -->
-    <permission android:name="android.permission.OPEN_APP_OPEN_BY_DEFAULT_SETTINGS"
-                android:protectionLevel="signature" />
-
     <!-- Allows hidden API checks to be disabled when starting a process.
          @hide <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.DISABLE_HIDDEN_API_CHECKS"

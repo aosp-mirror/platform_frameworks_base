@@ -470,8 +470,8 @@ public final class Settings {
      * to be shown, with the "package" scheme. That is "package:com.my.app".
      * <p>
      * Output: Nothing.
-     * @hide
      */
+    @SuppressLint("ActionValue")
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS =
             "com.android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
