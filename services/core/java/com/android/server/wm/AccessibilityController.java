@@ -514,6 +514,18 @@ final class AccessibilityController {
         }
     }
 
+    void onImeSurfaceShownChanged(WindowState windowState, boolean shown) {
+        if (mAccessibilityTracing.isEnabled()) {
+            mAccessibilityTracing.logState(TAG + ".onImeSurfaceShownChanged",
+                    "windowState=" + windowState + "; shown=" + shown);
+        }
+        final int displayId = windowState.getDisplayId();
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onImeSurfaceShownChanged(shown);
+        }
+    }
+
     private static void populateTransformationMatrix(WindowState windowState,
             Matrix outMatrix) {
         windowState.getTransformationMatrix(sTempFloats, outMatrix);
@@ -764,6 +776,15 @@ final class AccessibilityController {
                     } break;
                 }
             }
+        }
+
+        void onImeSurfaceShownChanged(boolean shown) {
+            if (mAccessibilityTracing.isEnabled()) {
+                mAccessibilityTracing.logState(
+                        LOG_TAG + ".onImeSurfaceShownChanged", "shown=" + shown);
+            }
+            mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_IME_WINDOW_VISIBILITY_CHANGED,
+                    shown ? 1 : 0, 0).sendToTarget();
         }
 
         MagnificationSpec getMagnificationSpecForWindow(WindowState windowState) {
@@ -1337,6 +1358,7 @@ final class AccessibilityController {
             public static final int MESSAGE_NOTIFY_USER_CONTEXT_CHANGED = 3;
             public static final int MESSAGE_NOTIFY_ROTATION_CHANGED = 4;
             public static final int MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED = 5;
+            public static final int MESSAGE_NOTIFY_IME_WINDOW_VISIBILITY_CHANGED = 6;
 
             MyHandler(Looper looper) {
                 super(looper);
@@ -1379,6 +1401,11 @@ final class AccessibilityController {
                                 mService.scheduleAnimationLocked();
                             }
                         }
+                    } break;
+
+                    case MESSAGE_NOTIFY_IME_WINDOW_VISIBILITY_CHANGED: {
+                        final boolean shown = message.arg1 == 1;
+                        mCallbacks.onImeWindowVisibilityChanged(shown);
                     } break;
                 }
             }
@@ -2123,5 +2150,4 @@ final class AccessibilityController {
             }
         }
     }
-
 }

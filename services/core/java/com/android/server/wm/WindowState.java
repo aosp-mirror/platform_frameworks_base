@@ -3453,6 +3453,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mAttrs.type >= FIRST_SYSTEM_WINDOW && mAttrs.type != TYPE_TOAST) {
             mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
         }
+        if (mIsImWindow && mWmService.mAccessibilityController != null) {
+            mWmService.mAccessibilityController.onImeSurfaceShownChanged(this, shown);
+        }
     }
 
     private void logExclusionRestrictions(int side) {
