@@ -19803,7 +19803,8 @@ package android.location {
     method public boolean hasSpeed();
     method public boolean hasSpeedAccuracy();
     method public boolean hasVerticalAccuracy();
-    method public boolean isFromMockProvider();
+    method @Deprecated public boolean isFromMockProvider();
+    method public boolean isMock();
     method @Deprecated public void removeAccuracy();
     method @Deprecated public void removeAltitude();
     method @Deprecated public void removeBearing();
@@ -19819,6 +19820,7 @@ package android.location {
     method public void setExtras(@Nullable android.os.Bundle);
     method public void setLatitude(double);
     method public void setLongitude(double);
+    method public void setMock(boolean);
     method public void setProvider(String);
     method public void setSpeed(float);
     method public void setSpeedAccuracyMetersPerSecond(float);

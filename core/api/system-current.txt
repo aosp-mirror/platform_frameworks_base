@@ -4823,7 +4823,7 @@ package android.location {
   public class Location implements android.os.Parcelable {
     method public boolean isComplete();
     method public void makeComplete();
-    method public void setIsFromMockProvider(boolean);
+    method @Deprecated public void setIsFromMockProvider(boolean);
     field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
