@@ -20,11 +20,10 @@ import static android.os.PowerManager.locationPowerSaveModeToString;
 
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
+import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 
 import android.os.PowerManager.LocationPowerSaveMode;
 import android.util.Log;
-
-import com.android.server.location.eventlog.LocationEventLog;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -43,11 +42,9 @@ public abstract class LocationPowerSaveModeHelper {
         void onLocationPowerSaveModeChanged(@LocationPowerSaveMode int locationPowerSaveMode);
     }
 
-    private final LocationEventLog mLocationEventLog;
     private final CopyOnWriteArrayList<LocationPowerSaveModeChangedListener> mListeners;
 
-    public LocationPowerSaveModeHelper(LocationEventLog locationEventLog) {
-        mLocationEventLog = locationEventLog;
+    public LocationPowerSaveModeHelper() {
         mListeners = new CopyOnWriteArrayList<>();
     }
 
@@ -72,7 +69,7 @@ public abstract class LocationPowerSaveModeHelper {
             Log.d(TAG, "location power save mode is now " + locationPowerSaveModeToString(
                     locationPowerSaveMode));
         }
-        mLocationEventLog.logLocationPowerSaveMode(locationPowerSaveMode);
+        EVENT_LOG.logLocationPowerSaveMode(locationPowerSaveMode);
 
         for (LocationPowerSaveModeChangedListener listener : mListeners) {
             listener.onLocationPowerSaveModeChanged(locationPowerSaveMode);

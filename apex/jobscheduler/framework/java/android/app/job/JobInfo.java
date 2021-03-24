@@ -1021,6 +1021,41 @@ public class JobInfo implements Parcelable {
             mJobId = jobId;
         }
 
+        /**
+         * Creates a new Builder of JobInfo from an existing instance.
+         * @hide
+         */
+        public Builder(@NonNull JobInfo job) {
+            mJobId = job.getId();
+            mJobService = job.getService();
+            mExtras = job.getExtras();
+            mTransientExtras = job.getTransientExtras();
+            mClipData = job.getClipData();
+            mClipGrantFlags = job.getClipGrantFlags();
+            mPriority = job.getPriority();
+            mFlags = job.getFlags();
+            mConstraintFlags = job.getConstraintFlags();
+            mNetworkRequest = job.getRequiredNetwork();
+            mNetworkDownloadBytes = job.getEstimatedNetworkDownloadBytes();
+            mNetworkUploadBytes = job.getEstimatedNetworkUploadBytes();
+            mTriggerContentUris = job.getTriggerContentUris() != null
+                    ? new ArrayList<>(Arrays.asList(job.getTriggerContentUris())) : null;
+            mTriggerContentUpdateDelay = job.getTriggerContentUpdateDelay();
+            mTriggerContentMaxDelay = job.getTriggerContentMaxDelay();
+            mIsPersisted = job.isPersisted();
+            mMinLatencyMillis = job.getMinLatencyMillis();
+            mMaxExecutionDelayMillis = job.getMaxExecutionDelayMillis();
+            mIsPeriodic = job.isPeriodic();
+            mHasEarlyConstraint = job.hasEarlyConstraint();
+            mHasLateConstraint = job.hasLateConstraint();
+            mIntervalMillis = job.getIntervalMillis();
+            mFlexMillis = job.getFlexMillis();
+            mInitialBackoffMillis = job.getInitialBackoffMillis();
+            // mBackoffPolicySet isn't set but it's fine since this is copying from an already valid
+            // job.
+            mBackoffPolicy = job.getBackoffPolicy();
+        }
+
         /** @hide */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Builder setPriority(int priority) {
@@ -1462,7 +1497,7 @@ public class JobInfo implements Parcelable {
          * <ol>
          *     <li>Run as soon as possible</li>
          *     <li>Be less restricted during Doze and battery saver</li>
-         *     <li>Have the same network access as foreground services</li>
+         *     <li>Bypass Doze, app standby, and battery saver network restrictions</li>
          *     <li>Be less likely to be killed than regular jobs</li>
          *     <li>Be subject to background location throttling</li>
          * </ol>
@@ -1483,7 +1518,7 @@ public class JobInfo implements Parcelable {
          *
          * <p>
          * Assuming all constraints remain satisfied (including ideal system load conditions),
-         * expedited jobs are guaranteed to have a minimum allowed runtime of 1 minute. If your
+         * expedited jobs will have a maximum execution time of at least 1 minute. If your
          * app has remaining expedited job quota, then the expedited job <i>may</i> potentially run
          * longer until remaining quota is used up. Just like with regular jobs, quota is not
          * consumed while the app is on top and visible to the user.

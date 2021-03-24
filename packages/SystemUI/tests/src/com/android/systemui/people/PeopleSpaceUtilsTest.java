@@ -65,6 +65,7 @@ import android.util.DisplayMetrics;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.widget.PeopleTileKey;
@@ -119,6 +120,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                     .setNotificationKey(NOTIFICATION_KEY)
                     .setNotificationContent(NOTIFICATION_CONTENT)
                     .setNotificationDataUri(URI)
+                    .setMessagesCount(1)
                     .build();
 
     private final ShortcutInfo mShortcutInfo = new ShortcutInfo.Builder(mContext,
@@ -318,7 +320,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetLastMessagingStyleMessageNoMessage() {
+    public void testGetMessagingStyleMessagesNoMessage() {
         Notification notification = new Notification.Builder(mContext, "test")
                 .setContentTitle("TEST_TITLE")
                 .setContentText("TEST_TEXT")
@@ -328,22 +330,23 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 .setNotification(notification)
                 .build();
 
-        Notification.MessagingStyle.Message lastMessage =
-                PeopleSpaceUtils.getLastMessagingStyleMessage(sbn.getNotification());
+        List<Notification.MessagingStyle.Message> messages =
+                PeopleSpaceUtils.getMessagingStyleMessages(sbn.getNotification());
 
-        assertThat(lastMessage).isNull();
+        assertThat(ArrayUtils.isEmpty(messages)).isTrue();
     }
 
     @Test
-    public void testGetLastMessagingStyleMessage() {
+    public void testGetMessagingStyleMessages() {
         StatusBarNotification sbn = new SbnBuilder()
                 .setNotification(mNotification1)
                 .build();
 
-        Notification.MessagingStyle.Message lastMessage =
-                PeopleSpaceUtils.getLastMessagingStyleMessage(sbn.getNotification());
+        List<Notification.MessagingStyle.Message> messages =
+                PeopleSpaceUtils.getMessagingStyleMessages(sbn.getNotification());
 
-        assertThat(lastMessage.getText().toString()).isEqualTo(NOTIFICATION_TEXT_2);
+        assertThat(messages.size()).isEqualTo(3);
+        assertThat(messages.get(0).getText().toString()).isEqualTo(NOTIFICATION_TEXT_2);
     }
 
     @Test

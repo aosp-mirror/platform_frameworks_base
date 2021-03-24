@@ -311,6 +311,41 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     }
 
     @Test
+    public void testPlaceImeContainer_hidesImeWhenParentChanges() {
+        setupImeWindow();
+        final DisplayArea.Tokens imeContainer = mDisplay.getImeContainer();
+        final WindowToken imeToken = tokenOfType(TYPE_INPUT_METHOD);
+        final WindowState firstActivityWin =
+                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mFirstActivity,
+                        "firstActivityWin");
+        spyOn(firstActivityWin);
+        final WindowState secondActivityWin =
+                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mSecondActivity,
+                        "secondActivityWin");
+        spyOn(secondActivityWin);
+
+        // firstActivityWin should be the target
+        doReturn(true).when(firstActivityWin).canBeImeTarget();
+        doReturn(false).when(secondActivityWin).canBeImeTarget();
+
+        WindowState imeTarget = mDisplay.computeImeTarget(true /* updateImeTarget */);
+        assertThat(imeTarget).isEqualTo(firstActivityWin);
+        verify(mFirstRoot).placeImeContainer(imeContainer);
+
+        // secondActivityWin should be the target
+        doReturn(false).when(firstActivityWin).canBeImeTarget();
+        doReturn(true).when(secondActivityWin).canBeImeTarget();
+
+        spyOn(mDisplay.mInputMethodWindow);
+        imeTarget = mDisplay.computeImeTarget(true /* updateImeTarget */);
+
+        assertThat(imeTarget).isEqualTo(secondActivityWin);
+        verify(mSecondRoot).placeImeContainer(imeContainer);
+        // verify hide() was called on InputMethodWindow.
+        verify(mDisplay.mInputMethodWindow).hide(false /* doAnimation */, false /* requestAnim */);
+    }
+
+    @Test
     public void testResizableFixedOrientationApp_fixedOrientationLetterboxing() {
         mFirstRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);

@@ -110,7 +110,9 @@ public final class UsageStats implements Parcelable {
     public long mTotalTimeForegroundServiceUsed;
 
     /**
-     * Last time this package's component is used, measured in milliseconds since the epoch.
+     * Last time this package's component is used by a client package, measured in milliseconds
+     * since the epoch. Note that component usage is only reported in certain cases (e.g. broadcast
+     * receiver, service, content provider).
      * See {@link UsageEvents.Event#APP_COMPONENT_USED}
      * @hide
      */
@@ -274,8 +276,10 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
-     * Get the last time this package's component was used, measured in milliseconds since the
-     * epoch.
+     * Get the last time this package's component was used by a client package, measured in
+     * milliseconds since the epoch. Note that component usage is only reported in certain cases
+     * (e.g. broadcast receiver, service, content provider).
+     * See {@link UsageEvents.Event#APP_COMPONENT_USED}
      * @hide
      */
     @SystemApi

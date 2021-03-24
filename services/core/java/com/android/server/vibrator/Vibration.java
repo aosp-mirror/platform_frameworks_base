@@ -16,17 +16,24 @@
 
 package com.android.server.vibrator;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.CombinedVibrationEffect;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
+import android.os.vibrator.StepSegment;
+import android.os.vibrator.VibrationEffectSegment;
+import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.function.Function;
 
 /** Represents a vibration request to the vibrator service. */
 final class Vibration {
@@ -61,6 +68,7 @@ final class Vibration {
     public final String opPkg;
     public final String reason;
     public final IBinder token;
+    public final SparseArray<VibrationEffect> mFallbacks = new SparseArray<>();
 
     /** The actual effect to be played. */
     @Nullable
@@ -113,17 +121,70 @@ final class Vibration {
     }
 
     /**
-     * Replace this vibration effect if given {@code scaledEffect} is different, preserving the
-     * original one for debug purposes.
+     * Return the effect to be played when given prebaked effect id is not supported by the
+     * vibrator.
      */
-    public void updateEffect(@NonNull CombinedVibrationEffect newEffect) {
-        if (newEffect.equals(mEffect)) {
-            return;
+    @Nullable
+    public VibrationEffect getFallback(int effectId) {
+        return mFallbacks.get(effectId);
+    }
+
+    /**
+     * Add a fallback {@link VibrationEffect} to be played when given effect id is not supported,
+     * which might be necessary for replacement in realtime.
+     */
+    public void addFallback(int effectId, VibrationEffect effect) {
+        mFallbacks.put(effectId, effect);
+    }
+
+    /**
+     * Applied update function to the current effect held by this vibration, and to each fallback
+     * effect added.
+     */
+    public void updateEffects(Function<VibrationEffect, VibrationEffect> updateFn) {
+        CombinedVibrationEffect newEffect = transformCombinedEffect(mEffect, updateFn);
+        if (!newEffect.equals(mEffect)) {
+            if (mOriginalEffect == null) {
+                mOriginalEffect = mEffect;
+            }
+            mEffect = newEffect;
         }
-        if (mOriginalEffect == null) {
-            mOriginalEffect = mEffect;
+        for (int i = 0; i < mFallbacks.size(); i++) {
+            mFallbacks.setValueAt(i, updateFn.apply(mFallbacks.valueAt(i)));
         }
-        mEffect = newEffect;
+    }
+
+    /**
+     * Creates a new {@link CombinedVibrationEffect} by applying the given transformation function
+     * to each {@link VibrationEffect}.
+     */
+    private static CombinedVibrationEffect transformCombinedEffect(
+            CombinedVibrationEffect combinedEffect, Function<VibrationEffect, VibrationEffect> fn) {
+        if (combinedEffect instanceof CombinedVibrationEffect.Mono) {
+            VibrationEffect effect = ((CombinedVibrationEffect.Mono) combinedEffect).getEffect();
+            return CombinedVibrationEffect.createSynced(fn.apply(effect));
+        } else if (combinedEffect instanceof CombinedVibrationEffect.Stereo) {
+            SparseArray<VibrationEffect> effects =
+                    ((CombinedVibrationEffect.Stereo) combinedEffect).getEffects();
+            CombinedVibrationEffect.SyncedCombination combination =
+                    CombinedVibrationEffect.startSynced();
+            for (int i = 0; i < effects.size(); i++) {
+                combination.addVibrator(effects.keyAt(i), fn.apply(effects.valueAt(i)));
+            }
+            return combination.combine();
+        } else if (combinedEffect instanceof CombinedVibrationEffect.Sequential) {
+            List<CombinedVibrationEffect> effects =
+                    ((CombinedVibrationEffect.Sequential) combinedEffect).getEffects();
+            CombinedVibrationEffect.SequentialCombination combination =
+                    CombinedVibrationEffect.startSequential();
+            for (CombinedVibrationEffect effect : effects) {
+                combination.addNext(transformCombinedEffect(effect, fn));
+            }
+            return combination.combine();
+        } else {
+            // Unknown combination, return same effect.
+            return combinedEffect;
+        }
     }
 
     /** Return true is current status is different from {@link Status#RUNNING}. */
@@ -272,57 +333,62 @@ final class Vibration {
         private void dumpEffect(
                 ProtoOutputStream proto, long fieldId, VibrationEffect effect) {
             final long token = proto.start(fieldId);
-            if (effect instanceof VibrationEffect.OneShot) {
-                dumpEffect(proto, VibrationEffectProto.ONESHOT, (VibrationEffect.OneShot) effect);
-            } else if (effect instanceof VibrationEffect.Waveform) {
-                dumpEffect(proto, VibrationEffectProto.WAVEFORM, (VibrationEffect.Waveform) effect);
-            } else if (effect instanceof VibrationEffect.Prebaked) {
-                dumpEffect(proto, VibrationEffectProto.PREBAKED, (VibrationEffect.Prebaked) effect);
-            } else if (effect instanceof VibrationEffect.Composed) {
-                dumpEffect(proto, VibrationEffectProto.COMPOSED, (VibrationEffect.Composed) effect);
+            VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
+            for (VibrationEffectSegment segment : composed.getSegments()) {
+                dumpEffect(proto, VibrationEffectProto.SEGMENTS, segment);
             }
+            proto.write(VibrationEffectProto.REPEAT, composed.getRepeatIndex());
             proto.end(token);
         }
 
         private void dumpEffect(ProtoOutputStream proto, long fieldId,
-                VibrationEffect.OneShot effect) {
+                VibrationEffectSegment segment) {
             final long token = proto.start(fieldId);
-            proto.write(OneShotProto.DURATION, (int) effect.getDuration());
-            proto.write(OneShotProto.AMPLITUDE, effect.getAmplitude());
+            if (segment instanceof StepSegment) {
+                dumpEffect(proto, SegmentProto.STEP, (StepSegment) segment);
+            } else if (segment instanceof RampSegment) {
+                dumpEffect(proto, SegmentProto.RAMP, (RampSegment) segment);
+            } else if (segment instanceof PrebakedSegment) {
+                dumpEffect(proto, SegmentProto.PREBAKED, (PrebakedSegment) segment);
+            } else if (segment instanceof PrimitiveSegment) {
+                dumpEffect(proto, SegmentProto.PRIMITIVE, (PrimitiveSegment) segment);
+            }
+            proto.end(token);
+        }
+
+        private void dumpEffect(ProtoOutputStream proto, long fieldId, StepSegment segment) {
+            final long token = proto.start(fieldId);
+            proto.write(StepSegmentProto.DURATION, segment.getDuration());
+            proto.write(StepSegmentProto.AMPLITUDE, segment.getAmplitude());
+            proto.write(StepSegmentProto.FREQUENCY, segment.getFrequency());
+            proto.end(token);
+        }
+
+        private void dumpEffect(ProtoOutputStream proto, long fieldId, RampSegment segment) {
+            final long token = proto.start(fieldId);
+            proto.write(RampSegmentProto.DURATION, segment.getDuration());
+            proto.write(RampSegmentProto.START_AMPLITUDE, segment.getStartAmplitude());
+            proto.write(RampSegmentProto.END_AMPLITUDE, segment.getEndAmplitude());
+            proto.write(RampSegmentProto.START_FREQUENCY, segment.getStartFrequency());
+            proto.write(RampSegmentProto.END_FREQUENCY, segment.getEndFrequency());
             proto.end(token);
         }
 
         private void dumpEffect(ProtoOutputStream proto, long fieldId,
-                VibrationEffect.Waveform effect) {
+                PrebakedSegment segment) {
             final long token = proto.start(fieldId);
-            for (long timing : effect.getTimings()) {
-                proto.write(WaveformProto.TIMINGS, (int) timing);
-            }
-            for (int amplitude : effect.getAmplitudes()) {
-                proto.write(WaveformProto.AMPLITUDES, amplitude);
-            }
-            proto.write(WaveformProto.REPEAT, effect.getRepeatIndex() >= 0);
+            proto.write(PrebakedSegmentProto.EFFECT_ID, segment.getEffectId());
+            proto.write(PrebakedSegmentProto.EFFECT_STRENGTH, segment.getEffectStrength());
+            proto.write(PrebakedSegmentProto.FALLBACK, segment.shouldFallback());
             proto.end(token);
         }
 
         private void dumpEffect(ProtoOutputStream proto, long fieldId,
-                VibrationEffect.Prebaked effect) {
+                PrimitiveSegment segment) {
             final long token = proto.start(fieldId);
-            proto.write(PrebakedProto.EFFECT_ID, effect.getId());
-            proto.write(PrebakedProto.EFFECT_STRENGTH, effect.getEffectStrength());
-            proto.write(PrebakedProto.FALLBACK, effect.shouldFallback());
-            proto.end(token);
-        }
-
-        private void dumpEffect(ProtoOutputStream proto, long fieldId,
-                VibrationEffect.Composed effect) {
-            final long token = proto.start(fieldId);
-            for (VibrationEffect.Composition.PrimitiveEffect primitive :
-                    effect.getPrimitiveEffects()) {
-                proto.write(ComposedProto.EFFECT_IDS, primitive.id);
-                proto.write(ComposedProto.EFFECT_SCALES, primitive.scale);
-                proto.write(ComposedProto.DELAYS, primitive.delay);
-            }
+            proto.write(PrimitiveSegmentProto.PRIMITIVE_ID, segment.getPrimitiveId());
+            proto.write(PrimitiveSegmentProto.SCALE, segment.getScale());
+            proto.write(PrimitiveSegmentProto.DELAY, segment.getDelay());
             proto.end(token);
         }
     }

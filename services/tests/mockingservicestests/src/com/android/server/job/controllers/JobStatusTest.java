@@ -660,15 +660,19 @@ public class JobStatusTest {
                 new JobInfo.Builder(101, new ComponentName("foo", "bar")).build());
 
         markImplicitConstraintsSatisfied(job, false);
-        job.setBackgroundNotRestrictedConstraintSatisfied(sElapsedRealtimeClock.millis(), false);
+        job.setBackgroundNotRestrictedConstraintSatisfied(
+                sElapsedRealtimeClock.millis(), false, false);
         assertFalse(job.wouldBeReadyWithConstraint(CONSTRAINT_BACKGROUND_NOT_RESTRICTED));
-        job.setBackgroundNotRestrictedConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
+        job.setBackgroundNotRestrictedConstraintSatisfied(
+                sElapsedRealtimeClock.millis(), true, false);
         assertFalse(job.wouldBeReadyWithConstraint(CONSTRAINT_BACKGROUND_NOT_RESTRICTED));
 
         markImplicitConstraintsSatisfied(job, true);
-        job.setBackgroundNotRestrictedConstraintSatisfied(sElapsedRealtimeClock.millis(), false);
+        job.setBackgroundNotRestrictedConstraintSatisfied(
+                sElapsedRealtimeClock.millis(), false, false);
         assertTrue(job.wouldBeReadyWithConstraint(CONSTRAINT_BACKGROUND_NOT_RESTRICTED));
-        job.setBackgroundNotRestrictedConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
+        job.setBackgroundNotRestrictedConstraintSatisfied(
+                sElapsedRealtimeClock.millis(), true, false);
         assertTrue(job.wouldBeReadyWithConstraint(CONSTRAINT_BACKGROUND_NOT_RESTRICTED));
     }
 
@@ -677,7 +681,7 @@ public class JobStatusTest {
         job.setDeviceNotDozingConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), isSatisfied, false);
         job.setBackgroundNotRestrictedConstraintSatisfied(
-                sElapsedRealtimeClock.millis(), isSatisfied);
+                sElapsedRealtimeClock.millis(), isSatisfied, false);
     }
 
     private static JobStatus createJobStatus(long earliestRunTimeElapsedMillis,

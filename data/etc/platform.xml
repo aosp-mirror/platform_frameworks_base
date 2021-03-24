@@ -48,6 +48,10 @@
         <group gid="uhid" />
     </permission>
 
+    <permission name="android.permission.VIRTUAL_INPUT_DEVICE" >
+        <group gid="uhid" />
+    </permission>
+
     <permission name="android.permission.NET_TUNNELING" >
         <group gid="vpn" />
     </permission>
@@ -224,7 +228,22 @@
                       targetSdk="29">
         <new-permission name="android.permission.ACCESS_MEDIA_LOCATION" />
     </split-permission>
-
+    <split-permission name="android.permission.BLUETOOTH"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_SCAN" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH_ADMIN"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_SCAN" />
+    </split-permission>
+    <split-permission name="android.permission.BLUETOOTH_ADMIN"
+                      targetSdk="31">
+        <new-permission name="android.permission.BLUETOOTH_CONNECT" />
+    </split-permission>
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->

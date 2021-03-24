@@ -140,9 +140,7 @@ public:
                             const content::pm::FileSystemControlParcel& control,
                             const sp<content::pm::IDataLoaderStatusListener>& listener) {
         createOkNoStatus(id, params, control, listener);
-        if (mListener) {
-            mListener->onStatusChanged(id, IDataLoaderStatusListener::DATA_LOADER_CREATED);
-        }
+        reportStatus(id);
         return binder::Status::ok();
     }
     binder::Status createOkNoStatus(int32_t id, const content::pm::DataLoaderParamsParcel& params,
@@ -150,33 +148,26 @@ public:
                                     const sp<content::pm::IDataLoaderStatusListener>& listener) {
         mServiceConnector = control.service;
         mListener = listener;
+        mStatus = IDataLoaderStatusListener::DATA_LOADER_CREATED;
         return binder::Status::ok();
     }
     binder::Status startOk(int32_t id) {
-        if (mListener) {
-            mListener->onStatusChanged(id, IDataLoaderStatusListener::DATA_LOADER_STARTED);
-        }
+        setAndReportStatus(id, IDataLoaderStatusListener::DATA_LOADER_STARTED);
         return binder::Status::ok();
     }
     binder::Status stopOk(int32_t id) {
-        if (mListener) {
-            mListener->onStatusChanged(id, IDataLoaderStatusListener::DATA_LOADER_STOPPED);
-        }
+        setAndReportStatus(id, IDataLoaderStatusListener::DATA_LOADER_STOPPED);
         return binder::Status::ok();
     }
     binder::Status destroyOk(int32_t id) {
-        if (mListener) {
-            mListener->onStatusChanged(id, IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
-        }
+        setAndReportStatus(id, IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
         mListener = nullptr;
         return binder::Status::ok();
     }
     binder::Status prepareImageOk(int32_t id,
                                   const ::std::vector<content::pm::InstallationFileParcel>&,
                                   const ::std::vector<::std::string>&) {
-        if (mListener) {
-            mListener->onStatusChanged(id, IDataLoaderStatusListener::DATA_LOADER_IMAGE_READY);
-        }
+        setAndReportStatus(id, IDataLoaderStatusListener::DATA_LOADER_IMAGE_READY);
         return binder::Status::ok();
     }
     binder::Status storageError(int32_t id) {
@@ -197,10 +188,22 @@ public:
         EXPECT_TRUE(mServiceConnector->setStorageParams(enableReadLogs, &result).isOk());
         return result;
     }
+    int status() const { return mStatus; }
 
 private:
+    void setAndReportStatus(int id, int status) {
+        mStatus = status;
+        reportStatus(id);
+    }
+    void reportStatus(int id) {
+        if (mListener) {
+            mListener->onStatusChanged(id, mStatus);
+        }
+    }
+
     sp<IIncrementalServiceConnector> mServiceConnector;
     sp<IDataLoaderStatusListener> mListener;
+    int mStatus = IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
 };
 
 class MockDataLoaderManager : public DataLoaderManagerWrapper {
@@ -915,7 +918,7 @@ TEST_F(IncrementalServiceTest, testDataLoaderOnRestart) {
     EXPECT_CALL(*mDataLoader, start(_)).Times(6);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(3);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(4);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
@@ -1126,7 +1129,7 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     EXPECT_CALL(*mLooper, addFd(MockIncFs::kPendingReadsFd, _, _, _, _)).Times(2);
     EXPECT_CALL(*mLooper, removeFd(MockIncFs::kPendingReadsFd)).Times(2);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(5);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(6);
 
     sp<NiceMock<MockStorageHealthListener>> listener{new NiceMock<MockStorageHealthListener>};
     NiceMock<MockStorageHealthListener>* listenerMock = listener.get();
@@ -1314,7 +1317,7 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndTimedOut) {
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // Not expecting callback removal.
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(1);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(2);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
@@ -1355,7 +1358,7 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndNoTimedOutForSy
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // Not expecting callback removal.
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(0);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(2);
     // System data loader.
     mDataLoaderParcel.packageName = "android";
     TemporaryDir tempDir;
@@ -1366,9 +1369,9 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndNoTimedOutForSy
     ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
                                                   {}, {}));
 
-    // No readlogs callback.
-    ASSERT_EQ(mTimedQueue->mAfter, 0ms);
-    ASSERT_EQ(mTimedQueue->mWhat, nullptr);
+    // IfsState callback.
+    auto callback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(storageId);
 
     ASSERT_GE(mDataLoader->setStorageParams(true), 0);
     // Now advance clock for 1hr.
@@ -1376,6 +1379,8 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndNoTimedOutForSy
     ASSERT_GE(mDataLoader->setStorageParams(true), 0);
     // Now advance clock for 2hrs.
     mClock->advance(readLogsMaxInterval);
+    // IfsStorage callback should not affect anything.
+    callback();
     ASSERT_EQ(mDataLoader->setStorageParams(true), 0);
 }
 
@@ -1394,7 +1399,7 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndNewInstall) {
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
     // Not expecting callback removal.
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(2);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(4);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
@@ -1685,6 +1690,144 @@ TEST_F(IncrementalServiceTest, testRegisterLoadingProgressListenerFailsToGetProg
     mIncrementalService->registerLoadingProgressListener(storageId, listener);
 }
 
+TEST_F(IncrementalServiceTest, testStartDataLoaderUnbindOnAllDone) {
+    mFs->hasFiles();
+
+    const auto stateUpdateInterval = 1s;
+
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
+    // No unbinding just yet.
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(1);
+    EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // System data loader to get rid of readlog timeout callback.
+    mDataLoaderParcel.packageName = "android";
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+
+    // Started.
+    ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
+
+    // IfsState callback present.
+    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
+    auto callback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+
+    // Not loaded yet.
+    EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_))
+            .WillOnce(Return(incfs::LoadingState::MissingBlocks));
+
+    // Send the callback, should not do anything.
+    callback();
+
+    // Still started.
+    ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
+
+    // Still present.
+    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
+    callback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+
+    // Fully loaded.
+    EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_)).WillOnce(Return(incfs::LoadingState::Full));
+    // Expect the unbind.
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
+
+    callback();
+
+    // Destroyed.
+    ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
+}
+
+TEST_F(IncrementalServiceTest, testStartDataLoaderUnbindOnAllDoneWithReadlogs) {
+    mFs->hasFiles();
+
+    // Readlogs.
+    mVold->setIncFsMountOptionsSuccess();
+    mAppOpsManager->checkPermissionSuccess();
+
+    const auto stateUpdateInterval = 1s;
+
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
+    // No unbinding just yet.
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(1);
+    EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // System data loader to get rid of readlog timeout callback.
+    mDataLoaderParcel.packageName = "android";
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+
+    // Started.
+    ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
+
+    // IfsState callback present.
+    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
+    auto callback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+
+    // Not loaded yet.
+    EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_))
+            .WillOnce(Return(incfs::LoadingState::MissingBlocks));
+
+    // Send the callback, should not do anything.
+    callback();
+
+    // Still started.
+    ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
+
+    // Still present.
+    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
+    callback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+
+    // Fully loaded.
+    EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_))
+            .WillOnce(Return(incfs::LoadingState::Full))
+            .WillOnce(Return(incfs::LoadingState::Full));
+    // But with readlogs.
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+
+    // Send the callback, still nothing.
+    callback();
+
+    // Still started.
+    ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
+
+    // Still present.
+    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
+    callback = mTimedQueue->mWhat;
+    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+
+    // Disable readlogs and expect the unbind.
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
+    ASSERT_GE(mDataLoader->setStorageParams(false), 0);
+
+    callback();
+
+    // Destroyed.
+    ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
+}
+
 TEST_F(IncrementalServiceTest, testRegisterStorageHealthListenerSuccess) {
     mIncFs->openMountSuccess();
     sp<NiceMock<MockStorageHealthListener>> listener{new NiceMock<MockStorageHealthListener>};
@@ -1801,7 +1944,7 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsTooShort) {
     EXPECT_CALL(*mDataLoader, start(_)).Times(1);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mIncFs, setUidReadTimeouts(_, _)).Times(0);
-    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(1);
+    EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(2);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
@@ -1829,7 +1972,6 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
     EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_))
             .WillOnce(Return(incfs::LoadingState::MissingBlocks))
             .WillOnce(Return(incfs::LoadingState::MissingBlocks))
-            .WillOnce(Return(incfs::LoadingState::Full))
             .WillOnce(Return(incfs::LoadingState::Full));
 
     // Mark DataLoader as 'system' so that readlogs don't pollute the timed queue.
@@ -1846,10 +1988,10 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     {
         // Timed callback present -> 0 progress.
-        ASSERT_EQ(storageId, mTimedQueue->mId);
+        ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
         ASSERT_GE(mTimedQueue->mAfter, std::chrono::seconds(1));
         const auto timedCallback = mTimedQueue->mWhat;
-        mTimedQueue->clearJob(storageId);
+        mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
 
         // Call it again.
         timedCallback();
@@ -1857,10 +1999,10 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     {
         // Still present -> some progress.
-        ASSERT_EQ(storageId, mTimedQueue->mId);
+        ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
         ASSERT_GE(mTimedQueue->mAfter, std::chrono::seconds(1));
         const auto timedCallback = mTimedQueue->mWhat;
-        mTimedQueue->clearJob(storageId);
+        mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
 
         // Fully loaded but readlogs collection enabled.
         ASSERT_GE(mDataLoader->setStorageParams(true), 0);
@@ -1871,10 +2013,10 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     {
         // Still present -> fully loaded + readlogs.
-        ASSERT_EQ(storageId, mTimedQueue->mId);
+        ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
         ASSERT_GE(mTimedQueue->mAfter, std::chrono::seconds(1));
         const auto timedCallback = mTimedQueue->mWhat;
-        mTimedQueue->clearJob(storageId);
+        mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
 
         // Now disable readlogs.
         ASSERT_GE(mDataLoader->setStorageParams(false), 0);

@@ -56,6 +56,7 @@ public class PeopleSpaceTile implements Parcelable {
     private CharSequence mNotificationContent;
     private String mNotificationCategory;
     private Uri mNotificationDataUri;
+    private int mMessagesCount;
     private Intent mIntent;
     private long mNotificationTimestamp;
     private List<ConversationStatus> mStatuses;
@@ -74,6 +75,7 @@ public class PeopleSpaceTile implements Parcelable {
         mNotificationContent = b.mNotificationContent;
         mNotificationCategory = b.mNotificationCategory;
         mNotificationDataUri = b.mNotificationDataUri;
+        mMessagesCount = b.mMessagesCount;
         mIntent = b.mIntent;
         mNotificationTimestamp = b.mNotificationTimestamp;
         mStatuses = b.mStatuses;
@@ -140,6 +142,10 @@ public class PeopleSpaceTile implements Parcelable {
         return mNotificationDataUri;
     }
 
+    public int getMessagesCount() {
+        return mMessagesCount;
+    }
+
     /**
      * Provides an intent to launch. If present, we should manually launch the intent on tile
      * click, rather than calling {@link android.content.pm.LauncherApps} to launch the shortcut ID.
@@ -175,6 +181,7 @@ public class PeopleSpaceTile implements Parcelable {
         builder.setNotificationContent(mNotificationContent);
         builder.setNotificationCategory(mNotificationCategory);
         builder.setNotificationDataUri(mNotificationDataUri);
+        builder.setMessagesCount(mMessagesCount);
         builder.setIntent(mIntent);
         builder.setNotificationTimestamp(mNotificationTimestamp);
         builder.setStatuses(mStatuses);
@@ -196,6 +203,7 @@ public class PeopleSpaceTile implements Parcelable {
         private CharSequence mNotificationContent;
         private String mNotificationCategory;
         private Uri mNotificationDataUri;
+        private int mMessagesCount;
         private Intent mIntent;
         private long mNotificationTimestamp;
         private List<ConversationStatus> mStatuses;
@@ -320,6 +328,12 @@ public class PeopleSpaceTile implements Parcelable {
             return this;
         }
 
+        /** Sets the number of messages associated with the Tile. */
+        public Builder setMessagesCount(int messagesCount) {
+            mMessagesCount = messagesCount;
+            return this;
+        }
+
         /** Sets an intent to launch on click. */
         public Builder setIntent(Intent intent) {
             mIntent = intent;
@@ -359,6 +373,7 @@ public class PeopleSpaceTile implements Parcelable {
         mNotificationContent = in.readCharSequence();
         mNotificationCategory = in.readString();
         mNotificationDataUri = in.readParcelable(Uri.class.getClassLoader());
+        mMessagesCount = in.readInt();
         mIntent = in.readParcelable(Intent.class.getClassLoader());
         mNotificationTimestamp = in.readLong();
         mStatuses = new ArrayList<>();
@@ -385,6 +400,7 @@ public class PeopleSpaceTile implements Parcelable {
         dest.writeCharSequence(mNotificationContent);
         dest.writeString(mNotificationCategory);
         dest.writeParcelable(mNotificationDataUri, flags);
+        dest.writeInt(mMessagesCount);
         dest.writeParcelable(mIntent, flags);
         dest.writeLong(mNotificationTimestamp);
         dest.writeParcelableList(mStatuses, flags);

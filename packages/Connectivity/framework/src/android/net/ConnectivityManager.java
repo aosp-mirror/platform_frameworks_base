@@ -1083,8 +1083,7 @@ public class ConnectivityManager {
      *
      * @return a {@link Network} object for the current default network for the
      *         given UID or {@code null} if no default network is currently active
-     *
-     * @hide
+     * TODO: b/183465229 Cleanup getActiveNetworkForUid once b/165835257 is fixed
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     @Nullable
@@ -3705,8 +3704,9 @@ public class ConnectivityManager {
     private static final HashMap<NetworkRequest, NetworkCallback> sCallbacks = new HashMap<>();
     private static CallbackHandler sCallbackHandler;
 
-    private NetworkRequest sendRequestForNetwork(NetworkCapabilities need, NetworkCallback callback,
-            int timeoutMs, NetworkRequest.Type reqType, int legacyType, CallbackHandler handler) {
+    private NetworkRequest sendRequestForNetwork(int asUid, NetworkCapabilities need,
+            NetworkCallback callback, int timeoutMs, NetworkRequest.Type reqType, int legacyType,
+            CallbackHandler handler) {
         printStackTrace();
         checkCallbackNotNull(callback);
         if (reqType != TRACK_DEFAULT && reqType != TRACK_SYSTEM_DEFAULT && need == null) {
@@ -3731,8 +3731,8 @@ public class ConnectivityManager {
                             getAttributionTag());
                 } else {
                     request = mService.requestNetwork(
-                            need, reqType.ordinal(), messenger, timeoutMs, binder, legacyType,
-                            callbackFlags, callingPackageName, getAttributionTag());
+                            asUid, need, reqType.ordinal(), messenger, timeoutMs, binder,
+                            legacyType, callbackFlags, callingPackageName, getAttributionTag());
                 }
                 if (request != null) {
                     sCallbacks.put(request, callback);
@@ -3745,6 +3745,12 @@ public class ConnectivityManager {
             throw convertServiceException(e);
         }
         return request;
+    }
+
+    private NetworkRequest sendRequestForNetwork(NetworkCapabilities need, NetworkCallback callback,
+            int timeoutMs, NetworkRequest.Type reqType, int legacyType, CallbackHandler handler) {
+        return sendRequestForNetwork(Process.INVALID_UID, need, callback, timeoutMs, reqType,
+                legacyType, handler);
     }
 
     /**
@@ -4232,8 +4238,40 @@ public class ConnectivityManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
             @NonNull Handler handler) {
+        registerDefaultNetworkCallbackAsUid(Process.INVALID_UID, networkCallback, handler);
+    }
+
+    /**
+     * Registers to receive notifications about changes in the default network for the specified
+     * UID. This may be a physical network or a virtual network, such as a VPN that applies to the
+     * UID. The callbacks will continue to be called until either the application exits or
+     * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
+     *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * all variants of this method, of {@link #requestNetwork} as well as
+     * {@link ConnectivityDiagnosticsManager#registerConnectivityDiagnosticsCallback}.
+     * Requesting a network with this method will count toward this limit. If this limit is
+     * exceeded, an exception will be thrown. To avoid hitting this issue and to conserve resources,
+     * make sure to unregister the callbacks with
+     * {@link #unregisterNetworkCallback(NetworkCallback)}.
+     *
+     * @param uid the UID for which to track default network changes.
+     * @param networkCallback The {@link NetworkCallback} that the system will call as the
+     *                        UID's default network changes.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @throws RuntimeException if the app already has too many callbacks registered.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @SuppressLint({"ExecutorRegistration", "PairedRegistration"})
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    public void registerDefaultNetworkCallbackAsUid(int uid,
+            @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
-        sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
+        sendRequestForNetwork(uid, null /* need */, networkCallback, 0 /* timeoutMs */,
                 TRACK_DEFAULT, TYPE_NONE, cbHandler);
     }
 

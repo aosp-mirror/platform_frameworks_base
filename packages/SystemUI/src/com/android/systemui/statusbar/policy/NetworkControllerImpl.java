@@ -22,7 +22,6 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
-import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -44,11 +43,11 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CellSignalStrength;
-import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.FeatureFlagUtils;
@@ -74,6 +73,7 @@ import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.telephony.TelephonyListenerManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -108,6 +108,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     private final Context mContext;
     private final TelephonyManager mPhone;
+    private final TelephonyListenerManager mTelephonyListenerManager;
     private final WifiManager mWifiManager;
     private final ConnectivityManager mConnectivityManager;
     private final SubscriptionManager mSubscriptionManager;
@@ -121,7 +122,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final boolean mProviderModel;
     private Config mConfig;
 
-    private PhoneStateListener mPhoneStateListener;
+    private TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     // Subcontrollers.
@@ -201,12 +202,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
             BroadcastDispatcher broadcastDispatcher,
             ConnectivityManager connectivityManager,
             TelephonyManager telephonyManager,
+            TelephonyListenerManager telephonyListenerManager,
             @Nullable WifiManager wifiManager,
             NetworkScoreManager networkScoreManager,
             AccessPointControllerImpl accessPointController,
             DemoModeController demoModeController) {
         this(context, connectivityManager,
                 telephonyManager,
+                telephonyListenerManager,
                 wifiManager,
                 networkScoreManager,
                 SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
@@ -222,7 +225,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     NetworkControllerImpl(Context context, ConnectivityManager connectivityManager,
-            TelephonyManager telephonyManager, WifiManager wifiManager,
+            TelephonyManager telephonyManager,
+            TelephonyListenerManager telephonyListenerManager,
+            WifiManager wifiManager,
             NetworkScoreManager networkScoreManager,
             SubscriptionManager subManager, Config config, Looper bgLooper,
             CallbackHandler callbackHandler,
@@ -233,6 +238,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             BroadcastDispatcher broadcastDispatcher,
             DemoModeController demoModeController) {
         mContext = context;
+        mTelephonyListenerManager = telephonyListenerManager;
         mConfig = config;
         mReceiverHandler = new Handler(bgLooper);
         mCallbackHandler = callbackHandler;
@@ -372,23 +378,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // exclusively for status bar icons.
         mConnectivityManager.registerDefaultNetworkCallback(callback, mReceiverHandler);
         // Register the listener on our bg looper
-        mPhoneStateListener = new PhoneStateListener(mReceiverHandler::post) {
-            @Override
-            public void onActiveDataSubscriptionIdChanged(int subId) {
-                // For data switching from A to B, we assume B is validated for up to 2 seconds iff:
-                // 1) A and B are in the same subscription group e.g. CBRS data switch. And
-                // 2) A was validated before the switch.
-                // This is to provide smooth transition for UI without showing cross during data
-                // switch.
-                if (keepCellularValidationBitInSwitch(mActiveMobileDataSubscription, subId)) {
-                    if (DEBUG) Log.d(TAG, ": mForceCellularValidated to true.");
-                    mForceCellularValidated = true;
-                    mReceiverHandler.removeCallbacks(mClearForceValidated);
-                    mReceiverHandler.postDelayed(mClearForceValidated, 2000);
-                }
-                mActiveMobileDataSubscription = subId;
-                doUpdateMobileControllers();
+        mPhoneStateListener = subId -> {
+            // For data switching from A to B, we assume B is validated for up to 2 seconds iff:
+            // 1) A and B are in the same subscription group e.g. CBRS data switch. And
+            // 2) A was validated before the switch.
+            // This is to provide smooth transition for UI without showing cross during data
+            // switch.
+            if (keepCellularValidationBitInSwitch(mActiveMobileDataSubscription, subId)) {
+                if (DEBUG) Log.d(TAG, ": mForceCellularValidated to true.");
+                mForceCellularValidated = true;
+                mReceiverHandler.removeCallbacks(mClearForceValidated);
+                mReceiverHandler.postDelayed(mClearForceValidated, 2000);
             }
+            mActiveMobileDataSubscription = subId;
+            doUpdateMobileControllers();
         };
 
         mDemoModeController.addCallback(this);
@@ -428,7 +431,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mSubscriptionListener = new SubListener();
         }
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
-        mPhone.listen(mPhoneStateListener, LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
+        mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
 
         // broadcasts
         IntentFilter filter = new IntentFilter();

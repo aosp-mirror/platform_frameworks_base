@@ -96,7 +96,7 @@ public class BackgroundRestrictionsTest {
                     case ACTION_JOB_STOPPED:
                         mTestJobStatus.running = false;
                         mTestJobStatus.jobId = params.getJobId();
-                        mTestJobStatus.stopReason = params.getStopReason();
+                        mTestJobStatus.stopReason = params.getLegacyStopReason();
                         break;
                 }
             }

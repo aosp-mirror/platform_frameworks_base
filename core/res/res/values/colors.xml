@@ -237,7 +237,6 @@
     <color name="resolver_text_color_secondary_dark">#ffC4C6C6</color>
     <color name="resolver_empty_state_text">#FF202124</color>
     <color name="resolver_empty_state_icon">#FF5F6368</color>
-    <color name="chooser_chip_icon">#FF1A73E8</color> <!-- Blue 600 -->
 
     <!-- Color for personal app suspension notification button text and icon tint. -->
     <color name="personal_apps_suspension_notification_color">#1A73E8</color>
@@ -249,34 +248,34 @@
     <color name="system_accent1_0">#ffffff</color>
     <!-- Shade of the accent system color at 95% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_50">#91fff4</color>
+    <color name="system_accent1_50">#9CFFF2</color>
     <!-- Shade of the accent system color at 90% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_100">#83f6e5</color>
+    <color name="system_accent1_100">#8DF5E3</color>
     <!-- Shade of the accent system color at 80% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_200">#65d9c9</color>
+    <color name="system_accent1_200">#71D8C7</color>
     <!-- Shade of the accent system color at 70% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_300">#45bdae</color>
+    <color name="system_accent1_300">#53BCAC</color>
     <!-- Shade of the accent system color at 60% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_400">#1fa293</color>
+    <color name="system_accent1_400">#34A192</color>
     <!-- Shade of the accent system color at 49% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_500">#008377</color>
+    <color name="system_accent1_500">#008375</color>
     <!-- Shade of the accent system color at 40% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_600">#006d61</color>
+    <color name="system_accent1_600">#006C5F</color>
     <!-- Shade of the accent system color at 30% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_700">#005449</color>
+    <color name="system_accent1_700">#005747</color>
     <!-- Shade of the accent system color at 20% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_800">#003c33</color>
+    <color name="system_accent1_800">#003E31</color>
     <!-- Shade of the accent system color at 10% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent1_900">#00271e</color>
+    <color name="system_accent1_900">#002214</color>
     <!-- Darkest shade of the accent color used by the system. Black.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_accent1_1000">#000000</color>
@@ -286,34 +285,34 @@
     <color name="system_accent2_0">#ffffff</color>
     <!-- Shade of the secondary accent system color at 95% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_50">#91fff4</color>
+    <color name="system_accent2_50">#CDFAF1</color>
     <!-- Shade of the secondary accent system color at 90% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_100">#83f6e5</color>
+    <color name="system_accent2_100">#BFEBE3</color>
     <!-- Shade of the secondary accent system color at 80% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_200">#65d9c9</color>
+    <color name="system_accent2_200">#A4CFC7</color>
     <!-- Shade of the secondary accent system color at 70% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_300">#45bdae</color>
+    <color name="system_accent2_300">#89B4AC</color>
     <!-- Shade of the secondary accent system color at 60% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_400">#1fa293</color>
+    <color name="system_accent2_400">#6F9991</color>
     <!-- Shade of the secondary accent system color at 49% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_500">#008377</color>
+    <color name="system_accent2_500">#537C75</color>
     <!-- Shade of the secondary accent system color at 40% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_600">#006d61</color>
+    <color name="system_accent2_600">#3D665F</color>
     <!-- Shade of the secondary accent system color at 30% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_700">#005449</color>
+    <color name="system_accent2_700">#254E47</color>
     <!-- Shade of the secondary accent system color at 20% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_800">#003c33</color>
+    <color name="system_accent2_800">#0C3731</color>
     <!-- Shade of the secondary accent system color at 10% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent2_900">#00271e</color>
+    <color name="system_accent2_900">#00211C</color>
     <!-- Darkest shade of the secondary accent color used by the system. Black.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_accent2_1000">#000000</color>
@@ -323,34 +322,34 @@
     <color name="system_accent3_0">#ffffff</color>
     <!-- Shade of the tertiary accent system color at 95% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_50">#91fff4</color>
+    <color name="system_accent3_50">#F9EAFF</color>
     <!-- Shade of the tertiary accent system color at 90% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_100">#83f6e5</color>
+    <color name="system_accent3_100">#ECDBFF</color>
     <!-- Shade of the tertiary accent system color at 80% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_200">#65d9c9</color>
+    <color name="system_accent3_200">#CFBFEB</color>
     <!-- Shade of the tertiary accent system color at 70% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_300">#45bdae</color>
+    <color name="system_accent3_300">#B3A4CF</color>
     <!-- Shade of the tertiary accent system color at 60% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_400">#1fa293</color>
+    <color name="system_accent3_400">#988AB3</color>
     <!-- Shade of the tertiary accent system color at 49% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_500">#008377</color>
+    <color name="system_accent3_500">#7B6E96</color>
     <!-- Shade of the tertiary accent system color at 40% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_600">#006d61</color>
+    <color name="system_accent3_600">#64587F</color>
     <!-- Shade of the tertiary accent system color at 30% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_700">#005449</color>
+    <color name="system_accent3_700">#4C4165</color>
     <!-- Shade of the tertiary accent system color at 20% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_800">#003c33</color>
+    <color name="system_accent3_800">#352B4D</color>
     <!-- Shade of the tertiary accent system color at 10% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent3_900">#00271e</color>
+    <color name="system_accent3_900">#1E1636</color>
     <!-- Darkest shade of the tertiary accent color used by the system. Black.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_accent3_1000">#000000</color>

@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -325,6 +326,19 @@ public class AppSearchShortcutInfo extends GenericDocument {
             si.setRankChanged();
         }
         return si;
+    }
+
+    /**
+     * @hide
+     */
+    @NonNull
+    public static List<GenericDocument> toGenericDocuments(
+            @NonNull final Collection<ShortcutInfo> shortcuts) {
+        final List<GenericDocument> docs = new ArrayList<>(shortcuts.size());
+        for (ShortcutInfo si : shortcuts) {
+            docs.add(AppSearchShortcutInfo.instance(si));
+        }
+        return docs;
     }
 
     /** @hide */

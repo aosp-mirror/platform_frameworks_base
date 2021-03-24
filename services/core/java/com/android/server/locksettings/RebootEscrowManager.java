@@ -15,14 +15,17 @@
  */
 
 package com.android.server.locksettings;
+
 import static android.os.UserHandle.USER_SYSTEM;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -35,6 +38,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.widget.RebootEscrowListener;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,6 +70,22 @@ class RebootEscrowManager {
     public static final String REBOOT_ESCROW_ARMED_KEY = "reboot_escrow_armed_count";
 
     static final String REBOOT_ESCROW_KEY_ARMED_TIMESTAMP = "reboot_escrow_key_stored_timestamp";
+    static final String REBOOT_ESCROW_KEY_PROVIDER = "reboot_escrow_key_provider";
+
+    /**
+     * The verified boot 2.0 vbmeta digest of the current slot, the property value is always
+     * available after boot.
+     */
+    static final String VBMETA_DIGEST_PROP_NAME = "ro.boot.vbmeta.digest";
+    /**
+     * The system prop contains vbmeta digest of the inactive slot. The build property is set after
+     * an OTA update. RebootEscrowManager will store it in disk before the OTA reboot, so the value
+     * is available for vbmeta digest verification after the device reboots.
+     */
+    static final String OTHER_VBMETA_DIGEST_PROP_NAME = "ota.other.vbmeta_digest";
+    static final String REBOOT_ESCROW_KEY_VBMETA_DIGEST = "reboot_escrow_key_vbmeta_digest";
+    static final String REBOOT_ESCROW_KEY_OTHER_VBMETA_DIGEST =
+            "reboot_escrow_key_other_vbmeta_digest";
 
     /**
      * Number of boots until we consider the escrow data to be stale for the purposes of metrics.
@@ -85,6 +106,31 @@ class RebootEscrowManager {
      */
     private static final int DEFAULT_LOAD_ESCROW_DATA_RETRY_COUNT = 3;
     private static final int DEFAULT_LOAD_ESCROW_DATA_RETRY_INTERVAL_SECONDS = 30;
+
+    @IntDef(prefix = {"ERROR_"}, value = {
+            ERROR_NONE,
+            ERROR_UNKNOWN,
+            ERROR_NO_PROVIDER,
+            ERROR_LOAD_ESCROW_KEY,
+            ERROR_RETRY_COUNT_EXHAUSTED,
+            ERROR_UNLOCK_ALL_USERS,
+            ERROR_PROVIDER_MISMATCH,
+            ERROR_KEYSTORE_FAILURE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface RebootEscrowErrorCode {
+    }
+
+    static final int ERROR_NONE = 0;
+    static final int ERROR_UNKNOWN = 1;
+    static final int ERROR_NO_PROVIDER = 2;
+    static final int ERROR_LOAD_ESCROW_KEY = 3;
+    static final int ERROR_RETRY_COUNT_EXHAUSTED = 4;
+    static final int ERROR_UNLOCK_ALL_USERS = 5;
+    static final int ERROR_PROVIDER_MISMATCH = 6;
+    static final int ERROR_KEYSTORE_FAILURE = 7;
+
+    private @RebootEscrowErrorCode int mLoadEscrowDataErrorCode = ERROR_NONE;
 
     /**
      * Logs events for later debugging in bugreports.
@@ -199,6 +245,10 @@ class RebootEscrowManager {
                     0);
         }
 
+        public long getCurrentTimeMillis() {
+            return System.currentTimeMillis();
+        }
+
         public int getLoadEscrowDataRetryLimit() {
             return DeviceConfig.getInt(DeviceConfig.NAMESPACE_OTA,
                     "load_escrow_data_retry_count", DEFAULT_LOAD_ESCROW_DATA_RETRY_COUNT);
@@ -220,6 +270,11 @@ class RebootEscrowManager {
 
         public RebootEscrowEventLog getEventLog() {
             return new RebootEscrowEventLog();
+        }
+
+        public String getVbmetaDigest(boolean other) {
+            return other ? SystemProperties.get(OTHER_VBMETA_DIGEST_PROP_NAME)
+                    : SystemProperties.get(VBMETA_DIGEST_PROP_NAME);
         }
     }
 
@@ -261,6 +316,7 @@ class RebootEscrowManager {
         if (rebootEscrowUsers.isEmpty()) {
             Slog.i(TAG, "No reboot escrow data found for users,"
                     + " skipping loading escrow data");
+            clearMetricsStorage();
             return;
         }
 
@@ -284,6 +340,7 @@ class RebootEscrowManager {
         }
 
         Slog.w(TAG, "Failed to load reboot escrow data after " + attemptNumber + " attempts");
+        mLoadEscrowDataErrorCode = ERROR_RETRY_COUNT_EXHAUSTED;
         onGetRebootEscrowKeyFailed(users, attemptNumber);
     }
 
@@ -307,6 +364,17 @@ class RebootEscrowManager {
         }
 
         if (escrowKey == null) {
+            if (mLoadEscrowDataErrorCode == ERROR_NONE) {
+                // Specifically check if the RoR provider has changed after reboot.
+                int providerType = mInjector.serverBasedResumeOnReboot()
+                        ? RebootEscrowProviderInterface.TYPE_SERVER_BASED
+                        : RebootEscrowProviderInterface.TYPE_HAL;
+                if (providerType != mStorage.getInt(REBOOT_ESCROW_KEY_PROVIDER, -1, USER_SYSTEM)) {
+                    mLoadEscrowDataErrorCode = ERROR_PROVIDER_MISMATCH;
+                } else {
+                    mLoadEscrowDataErrorCode = ERROR_LOAD_ESCROW_KEY;
+                }
+            }
             onGetRebootEscrowKeyFailed(users, attemptNumber + 1);
             return;
         }
@@ -321,7 +389,47 @@ class RebootEscrowManager {
         // Clear the old key in keystore. A new key will be generated by new RoR requests.
         mKeyStoreManager.clearKeyStoreEncryptionKey();
 
+        if (!allUsersUnlocked && mLoadEscrowDataErrorCode == ERROR_NONE) {
+            mLoadEscrowDataErrorCode = ERROR_UNLOCK_ALL_USERS;
+        }
         onEscrowRestoreComplete(allUsersUnlocked, attemptNumber + 1);
+    }
+
+    private void clearMetricsStorage() {
+        mStorage.removeKey(REBOOT_ESCROW_ARMED_KEY, USER_SYSTEM);
+        mStorage.removeKey(REBOOT_ESCROW_KEY_ARMED_TIMESTAMP, USER_SYSTEM);
+        mStorage.removeKey(REBOOT_ESCROW_KEY_VBMETA_DIGEST, USER_SYSTEM);
+        mStorage.removeKey(REBOOT_ESCROW_KEY_OTHER_VBMETA_DIGEST, USER_SYSTEM);
+        mStorage.removeKey(REBOOT_ESCROW_KEY_PROVIDER, USER_SYSTEM);
+    }
+
+    private int getVbmetaDigestStatusOnRestoreComplete() {
+        String currentVbmetaDigest = mInjector.getVbmetaDigest(false);
+        String vbmetaDigestStored = mStorage.getString(REBOOT_ESCROW_KEY_VBMETA_DIGEST,
+                "", USER_SYSTEM);
+        String vbmetaDigestOtherStored = mStorage.getString(REBOOT_ESCROW_KEY_OTHER_VBMETA_DIGEST,
+                "", USER_SYSTEM);
+
+        // The other vbmeta digest is never set, assume no slot switch is attempted.
+        if (vbmetaDigestOtherStored.isEmpty()) {
+            if (currentVbmetaDigest.equals(vbmetaDigestStored)) {
+                return FrameworkStatsLog
+                        .REBOOT_ESCROW_RECOVERY_REPORTED__VBMETA_DIGEST_STATUS__MATCH_EXPECTED_SLOT;
+            }
+            return FrameworkStatsLog
+                    .REBOOT_ESCROW_RECOVERY_REPORTED__VBMETA_DIGEST_STATUS__MISMATCH;
+        }
+
+        // The other vbmeta digest is set, we expect to boot into the new slot.
+        if (currentVbmetaDigest.equals(vbmetaDigestOtherStored)) {
+            return FrameworkStatsLog
+                    .REBOOT_ESCROW_RECOVERY_REPORTED__VBMETA_DIGEST_STATUS__MATCH_EXPECTED_SLOT;
+        } else if (currentVbmetaDigest.equals(vbmetaDigestStored)) {
+            return FrameworkStatsLog
+                    .REBOOT_ESCROW_RECOVERY_REPORTED__VBMETA_DIGEST_STATUS__MATCH_FALLBACK_SLOT;
+        }
+        return FrameworkStatsLog
+                .REBOOT_ESCROW_RECOVERY_REPORTED__VBMETA_DIGEST_STATUS__MISMATCH;
     }
 
     private void reportMetricOnRestoreComplete(boolean success, int attemptCount) {
@@ -331,26 +439,32 @@ class RebootEscrowManager {
 
         long armedTimestamp = mStorage.getLong(REBOOT_ESCROW_KEY_ARMED_TIMESTAMP, -1,
                 USER_SYSTEM);
-        mStorage.removeKey(REBOOT_ESCROW_KEY_ARMED_TIMESTAMP, USER_SYSTEM);
-        int escrowDurationInSeconds = armedTimestamp != -1
-                ? (int) (System.currentTimeMillis() - armedTimestamp) / 1000 : -1;
+        int escrowDurationInSeconds = -1;
+        long currentTimeStamp = mInjector.getCurrentTimeMillis();
+        if (armedTimestamp != -1 && currentTimeStamp > armedTimestamp) {
+            escrowDurationInSeconds = (int) (currentTimeStamp - armedTimestamp) / 1000;
+        }
 
-        // TODO(b/179105110) design error code; and report the true value for other fields.
-        int vbmetaDigestStatus = FrameworkStatsLog
-                .REBOOT_ESCROW_RECOVERY_REPORTED__VBMETA_DIGEST_STATUS__MATCH_EXPECTED_SLOT;
+        int vbmetaDigestStatus = getVbmetaDigestStatusOnRestoreComplete();
+        if (!success && mLoadEscrowDataErrorCode == ERROR_NONE) {
+            mLoadEscrowDataErrorCode = ERROR_UNKNOWN;
+        }
 
-        mInjector.reportMetric(success, 0 /* error code */, serviceType, attemptCount,
+        // TODO(179105110) report the duration since boot complete.
+        mInjector.reportMetric(success, mLoadEscrowDataErrorCode, serviceType, attemptCount,
                 escrowDurationInSeconds, vbmetaDigestStatus, -1);
+
+        mLoadEscrowDataErrorCode = ERROR_NONE;
     }
 
     private void onEscrowRestoreComplete(boolean success, int attemptCount) {
         int previousBootCount = mStorage.getInt(REBOOT_ESCROW_ARMED_KEY, -1, USER_SYSTEM);
-        mStorage.removeKey(REBOOT_ESCROW_ARMED_KEY, USER_SYSTEM);
 
         int bootCountDelta = mInjector.getBootCount() - previousBootCount;
         if (success || (previousBootCount != -1 && bootCountDelta <= BOOT_COUNT_TOLERANCE)) {
             reportMetricOnRestoreComplete(success, attemptCount);
         }
+        clearMetricsStorage();
     }
 
     private RebootEscrowKey getAndClearRebootEscrowKey(SecretKey kk) throws IOException {
@@ -358,6 +472,14 @@ class RebootEscrowManager {
         if (rebootEscrowProvider == null) {
             Slog.w(TAG,
                     "Had reboot escrow data for users, but RebootEscrowProvider is unavailable");
+            mLoadEscrowDataErrorCode = ERROR_NO_PROVIDER;
+            return null;
+        }
+
+        // Server based RoR always need the decryption key from keystore.
+        if (rebootEscrowProvider.getType() == RebootEscrowProviderInterface.TYPE_SERVER_BASED
+                && kk == null) {
+            mLoadEscrowDataErrorCode = ERROR_KEYSTORE_FAILURE;
             return null;
         }
 
@@ -463,7 +585,7 @@ class RebootEscrowManager {
             return;
         }
 
-        mStorage.removeKey(REBOOT_ESCROW_ARMED_KEY, USER_SYSTEM);
+        clearMetricsStorage();
         rebootEscrowProvider.clearRebootEscrowKey();
 
         List<UserInfo> users = mUserManager.getUsers();
@@ -486,6 +608,9 @@ class RebootEscrowManager {
             return false;
         }
 
+        int actualProviderType = rebootEscrowProvider.getType();
+        // TODO(b/183140900) Fail the reboot if provider type mismatches.
+
         RebootEscrowKey escrowKey;
         synchronized (mKeyGenerationLock) {
             escrowKey = mPendingRebootEscrowKey;
@@ -505,8 +630,14 @@ class RebootEscrowManager {
         boolean armedRebootEscrow = rebootEscrowProvider.storeRebootEscrowKey(escrowKey, kk);
         if (armedRebootEscrow) {
             mStorage.setInt(REBOOT_ESCROW_ARMED_KEY, mInjector.getBootCount(), USER_SYSTEM);
-            mStorage.setLong(REBOOT_ESCROW_KEY_ARMED_TIMESTAMP, System.currentTimeMillis(),
+            mStorage.setLong(REBOOT_ESCROW_KEY_ARMED_TIMESTAMP, mInjector.getCurrentTimeMillis(),
                     USER_SYSTEM);
+            // Store the vbmeta digest of both slots.
+            mStorage.setString(REBOOT_ESCROW_KEY_VBMETA_DIGEST, mInjector.getVbmetaDigest(false),
+                    USER_SYSTEM);
+            mStorage.setString(REBOOT_ESCROW_KEY_OTHER_VBMETA_DIGEST,
+                    mInjector.getVbmetaDigest(true), USER_SYSTEM);
+            mStorage.setInt(REBOOT_ESCROW_KEY_PROVIDER, actualProviderType, USER_SYSTEM);
             mEventLog.addEntry(RebootEscrowEvent.SET_ARMED_STATUS);
         }
 

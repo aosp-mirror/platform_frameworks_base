@@ -68,7 +68,8 @@ public class BatteryUsageStatsTest {
 
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(1, 1)
                 .setDischargePercentage(20)
-                .setDischargedPowerRange(1000, 2000);
+                .setDischargedPowerRange(1000, 2000)
+                .setStatsStartTimestamp(1000);
 
         builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid)
                 .setPackageWithHighestDrain("foo")
@@ -105,6 +106,7 @@ public class BatteryUsageStatsTest {
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(20);
         assertThat(batteryUsageStats.getDischargedPowerRange().getLower()).isEqualTo(1000);
         assertThat(batteryUsageStats.getDischargedPowerRange().getUpper()).isEqualTo(2000);
+        assertThat(batteryUsageStats.getStatsStartTimestamp()).isEqualTo(1000);
 
         final List<UidBatteryConsumer> uidBatteryConsumers =
                 batteryUsageStats.getUidBatteryConsumers();

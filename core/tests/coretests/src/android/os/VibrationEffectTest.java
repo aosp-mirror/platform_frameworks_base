@@ -18,13 +18,9 @@ package android.os;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,11 +31,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.StepSegment;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.internal.R;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -53,9 +51,6 @@ public class VibrationEffectTest {
     private static final String RINGTONE_URI_3 = "content://test/system/ringtone_3";
     private static final String UNKNOWN_URI = "content://test/system/other_audio";
 
-    private static final float INTENSITY_SCALE_TOLERANCE = 1e-2f;
-    private static final int AMPLITUDE_SCALE_TOLERANCE = 1;
-
     private static final long TEST_TIMING = 100;
     private static final int TEST_AMPLITUDE = 100;
     private static final long[] TEST_TIMINGS = new long[] { 100, 100, 200 };
@@ -68,12 +63,6 @@ public class VibrationEffectTest {
             VibrationEffect.createOneShot(TEST_TIMING, VibrationEffect.DEFAULT_AMPLITUDE);
     private static final VibrationEffect TEST_WAVEFORM =
             VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, -1);
-    private static final VibrationEffect TEST_COMPOSED =
-            VibrationEffect.startComposition()
-                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 1)
-                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
-                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0f, 100)
-                    .compose();
 
     @Test
     public void getRingtones_noPrebakedRingtones() {
@@ -129,7 +118,16 @@ public class VibrationEffectTest {
     public void testValidateWaveform() {
         VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, -1).validate();
         VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, 0).validate();
+        VibrationEffect.startWaveform()
+                .addStep(/* amplitude= */ 1, /* duration= */ 10)
+                .addRamp(/* amplitude= */ 0, /* duration= */ 20)
+                .addStep(/* amplitude= */ 1, /* frequency*/ 1, /* duration= */ 100)
+                .addRamp(/* amplitude= */ 0.5f, /* frequency*/ -1, /* duration= */ 50)
+                .build()
+                .validate();
 
+        assertThrows(IllegalStateException.class,
+                () -> VibrationEffect.startWaveform().build().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.createWaveform(new long[0], new int[0], -1).validate());
         assertThrows(IllegalArgumentException.class,
@@ -143,22 +141,46 @@ public class VibrationEffectTest {
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.createWaveform(
                         TEST_TIMINGS, TEST_AMPLITUDES, TEST_TIMINGS.length).validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addStep(/* amplitude= */ -2, 10).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addStep(1, /* duration= */ -1).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startWaveform()
+                        .addStep(1, 0, /* duration= */ -1).build().validate());
     }
 
     @Test
     public void testValidateComposed() {
         VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addEffect(TEST_ONE_SHOT)
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
+                .addEffect(TEST_WAVEFORM, 100)
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .compose()
                 .validate();
 
+        assertThrows(IllegalStateException.class,
+                () -> VibrationEffect.startComposition().compose().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startComposition().addPrimitive(-1).compose().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startComposition()
                         .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, -1, 10)
+                        .compose()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, -10)
+                        .compose()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> VibrationEffect.startComposition()
+                        .addEffect(TEST_ONE_SHOT, /* delay= */ -10)
                         .compose()
                         .validate());
         assertThrows(IllegalArgumentException.class,
@@ -169,250 +191,122 @@ public class VibrationEffectTest {
     }
 
     @Test
-    public void testScalePrebaked_scalesFallbackEffect() {
-        VibrationEffect.Prebaked prebaked =
-                (VibrationEffect.Prebaked) VibrationEffect.get(VibrationEffect.RINGTONES[1]);
-        assertSame(prebaked, prebaked.scale(0.5f));
-
-        prebaked = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
-                VibrationEffect.EFFECT_STRENGTH_MEDIUM, TEST_ONE_SHOT);
-        VibrationEffect.OneShot scaledFallback =
-                (VibrationEffect.OneShot) prebaked.scale(0.5f).getFallbackEffect();
-        assertEquals(34, scaledFallback.getAmplitude(), AMPLITUDE_SCALE_TOLERANCE);
-    }
-
-    @Test
-    public void testResolvePrebaked_resolvesFallbackEffectIfSet() {
-        VibrationEffect.Prebaked prebaked =
-                (VibrationEffect.Prebaked) VibrationEffect.get(VibrationEffect.RINGTONES[1]);
-        assertSame(prebaked, prebaked.resolve(1000));
-
-        prebaked = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
-                VibrationEffect.EFFECT_STRENGTH_MEDIUM,
-                VibrationEffect.createOneShot(1, VibrationEffect.DEFAULT_AMPLITUDE));
-        VibrationEffect.OneShot resolvedFallback =
-                (VibrationEffect.OneShot) prebaked.resolve(10).getFallbackEffect();
-        assertEquals(10, resolvedFallback.getAmplitude());
-    }
-
-    @Test
-    public void testScaleOneShot() {
-        VibrationEffect.OneShot unset = new VibrationEffect.OneShot(
-                TEST_TIMING, VibrationEffect.DEFAULT_AMPLITUDE);
-        assertEquals(VibrationEffect.DEFAULT_AMPLITUDE, unset.scale(2).getAmplitude());
-
-        VibrationEffect.OneShot initial = (VibrationEffect.OneShot) TEST_ONE_SHOT;
-
-        VibrationEffect.OneShot halved = initial.scale(0.5f);
-        assertEquals(34, halved.getAmplitude(), AMPLITUDE_SCALE_TOLERANCE);
-
-        VibrationEffect.OneShot copied = initial.scale(1f);
-        assertEquals(TEST_AMPLITUDE, copied.getAmplitude());
-
-        VibrationEffect.OneShot scaledUp = initial.scale(1.5f);
-        assertTrue(scaledUp.getAmplitude() > initial.getAmplitude());
-        VibrationEffect.OneShot restored = scaledUp.scale(2 / 3f);
-        // Does not restore to the exact original value because scale up is a bit offset.
-        assertEquals(105, restored.getAmplitude(), AMPLITUDE_SCALE_TOLERANCE);
-
-        VibrationEffect.OneShot scaledDown = initial.scale(0.8f);
-        assertTrue(scaledDown.getAmplitude() < initial.getAmplitude());
-        restored = scaledDown.scale(1.25f);
-        // Does not restore to the exact original value because scale up is a bit offset.
-        assertEquals(101, restored.getAmplitude(), AMPLITUDE_SCALE_TOLERANCE);
-
-        // Does not go below min amplitude while scaling down.
-        VibrationEffect.OneShot minAmplitude = new VibrationEffect.OneShot(TEST_TIMING, 1);
-        assertEquals(1, minAmplitude.scale(0.5f).getAmplitude());
-    }
-
-    @Test
     public void testResolveOneShot() {
-        VibrationEffect.OneShot initial = (VibrationEffect.OneShot) DEFAULT_ONE_SHOT;
-        VibrationEffect.OneShot resolved = initial.resolve(239);
-        assertNotSame(initial, resolved);
-        assertEquals(239, resolved.getAmplitude());
+        VibrationEffect.Composed resolved = DEFAULT_ONE_SHOT.resolve(51);
+        assertEquals(0.2f, ((StepSegment) resolved.getSegments().get(0)).getAmplitude());
 
-        // Ignores input when amplitude already set.
-        VibrationEffect.OneShot resolved2 = resolved.resolve(10);
-        assertSame(resolved, resolved2);
-        assertEquals(239, resolved2.getAmplitude());
-    }
-
-    @Test
-    public void testResolveOneshotFailsWhenMaxAmplitudeAboveThreshold() {
-        try {
-            TEST_ONE_SHOT.resolve(1000);
-            fail("Max amplitude above threshold, should throw IllegalArgumentException");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
-    @Test
-    public void testResolveOneshotFailsWhenAmplitudeNonPositive() {
-        try {
-            TEST_ONE_SHOT.resolve(0);
-            fail("Amplitude is set to zero, should throw IllegalArgumentException");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
-    @Test
-    public void testScaleWaveform() {
-        VibrationEffect.Waveform initial = (VibrationEffect.Waveform) TEST_WAVEFORM;
-
-        VibrationEffect.Waveform copied = initial.scale(1f);
-        assertArrayEquals(TEST_AMPLITUDES, copied.getAmplitudes());
-
-        VibrationEffect.Waveform scaled = initial.scale(0.9f);
-        assertEquals(216, scaled.getAmplitudes()[0], AMPLITUDE_SCALE_TOLERANCE);
-        assertEquals(0, scaled.getAmplitudes()[1]);
-        assertEquals(-1, scaled.getAmplitudes()[2]);
-
-        VibrationEffect.Waveform minAmplitude = new VibrationEffect.Waveform(
-                new long[]{100}, new int[] {1}, -1);
-        assertArrayEquals(new int[]{1}, minAmplitude.scale(0.5f).getAmplitudes());
+        assertThrows(IllegalArgumentException.class, () -> DEFAULT_ONE_SHOT.resolve(1000));
     }
 
     @Test
     public void testResolveWaveform() {
-        VibrationEffect.Waveform initial = (VibrationEffect.Waveform) TEST_WAVEFORM;
-        VibrationEffect.Waveform resolved = initial.resolve(123);
-        assertNotSame(initial, resolved);
-        assertArrayEquals(new int[]{255, 0, 123}, resolved.getAmplitudes());
+        VibrationEffect.Composed resolved = TEST_WAVEFORM.resolve(102);
+        assertEquals(0.4f, ((StepSegment) resolved.getSegments().get(2)).getAmplitude());
 
-        // Ignores input when amplitude already set.
-        VibrationEffect.Waveform resolved2 = resolved.resolve(10);
-        assertSame(resolved, resolved2);
-        assertArrayEquals(new int[]{255, 0, 123}, resolved2.getAmplitudes());
+        assertThrows(IllegalArgumentException.class, () -> TEST_WAVEFORM.resolve(1000));
     }
 
     @Test
-    public void testResolveWaveformFailsWhenMaxAmplitudeAboveThreshold() {
-        try {
-            TEST_WAVEFORM.resolve(1000);
-            fail("Max amplitude above threshold, should throw IllegalArgumentException");
-        } catch (IllegalArgumentException expected) {
-        }
+    public void testResolvePrebaked() {
+        VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+        assertEquals(effect, effect.resolve(51));
+    }
+
+    @Test
+    public void testResolveComposed() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 1)
+                .compose();
+        assertEquals(effect, effect.resolve(51));
+
+        VibrationEffect.Composed resolved = VibrationEffect.startComposition()
+                .addEffect(DEFAULT_ONE_SHOT)
+                .compose()
+                .resolve(51);
+        assertEquals(0.2f, ((StepSegment) resolved.getSegments().get(0)).getAmplitude());
+    }
+
+    @Test
+    public void testApplyEffectStrengthOneShot() {
+        VibrationEffect.Composed applied = DEFAULT_ONE_SHOT.applyEffectStrength(
+                VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        assertEquals(DEFAULT_ONE_SHOT, applied);
+    }
+
+    @Test
+    public void testApplyEffectStrengthWaveform() {
+        VibrationEffect.Composed applied = TEST_WAVEFORM.applyEffectStrength(
+                VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        assertEquals(TEST_WAVEFORM, applied);
+    }
+
+    @Test
+    public void testApplyEffectStrengthPrebaked() {
+        VibrationEffect.Composed applied = VibrationEffect.get(VibrationEffect.EFFECT_CLICK)
+                .applyEffectStrength(VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        assertEquals(VibrationEffect.EFFECT_STRENGTH_LIGHT,
+                ((PrebakedSegment) applied.getSegments().get(0)).getEffectStrength());
+    }
+
+    @Test
+    public void testApplyEffectStrengthComposed() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 1)
+                .compose();
+        assertEquals(effect, effect.applyEffectStrength(VibrationEffect.EFFECT_STRENGTH_LIGHT));
+
+        VibrationEffect.Composed applied = VibrationEffect.startComposition()
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .compose()
+                .applyEffectStrength(VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        assertEquals(VibrationEffect.EFFECT_STRENGTH_LIGHT,
+                ((PrebakedSegment) applied.getSegments().get(0)).getEffectStrength());
+    }
+
+    @Test
+    public void testScaleOneShot() {
+        VibrationEffect.Composed scaledUp = TEST_ONE_SHOT.scale(1.5f);
+        assertTrue(100 / 255f < ((StepSegment) scaledUp.getSegments().get(0)).getAmplitude());
+
+        VibrationEffect.Composed scaledDown = TEST_ONE_SHOT.scale(0.5f);
+        assertTrue(100 / 255f > ((StepSegment) scaledDown.getSegments().get(0)).getAmplitude());
+    }
+
+    @Test
+    public void testScaleWaveform() {
+        VibrationEffect.Composed scaledUp = TEST_WAVEFORM.scale(1.5f);
+        assertEquals(1f, ((StepSegment) scaledUp.getSegments().get(0)).getAmplitude(), 1e-5f);
+
+        VibrationEffect.Composed scaledDown = TEST_WAVEFORM.scale(0.5f);
+        assertTrue(1f > ((StepSegment) scaledDown.getSegments().get(0)).getAmplitude());
+    }
+
+    @Test
+    public void testScalePrebaked() {
+        VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+
+        VibrationEffect.Composed scaledUp = effect.scale(1.5f);
+        assertEquals(effect, scaledUp);
+
+        VibrationEffect.Composed scaledDown = effect.scale(0.5f);
+        assertEquals(effect, scaledDown);
     }
 
     @Test
     public void testScaleComposed() {
-        VibrationEffect.Composed initial = (VibrationEffect.Composed) TEST_COMPOSED;
-
-        VibrationEffect.Composed copied = initial.scale(1);
-        assertEquals(1f, copied.getPrimitiveEffects().get(0).scale);
-        assertEquals(0.5f, copied.getPrimitiveEffects().get(1).scale);
-        assertEquals(0f, copied.getPrimitiveEffects().get(2).scale);
-
-        VibrationEffect.Composed halved = initial.scale(0.5f);
-        assertEquals(0.34f, halved.getPrimitiveEffects().get(0).scale, INTENSITY_SCALE_TOLERANCE);
-        assertEquals(0.17f, halved.getPrimitiveEffects().get(1).scale, INTENSITY_SCALE_TOLERANCE);
-        assertEquals(0f, halved.getPrimitiveEffects().get(2).scale);
-
-        VibrationEffect.Composed scaledUp = initial.scale(1.5f);
-        // Does not scale up from 1.
-        assertEquals(1f, scaledUp.getPrimitiveEffects().get(0).scale, INTENSITY_SCALE_TOLERANCE);
-        assertTrue(0.5f < scaledUp.getPrimitiveEffects().get(1).scale);
-        assertEquals(0f, scaledUp.getPrimitiveEffects().get(2).scale);
-
-        VibrationEffect.Composed restored = scaledUp.scale(2 / 3f);
-        // The original value was not scaled up, so this only scales it down.
-        assertEquals(0.53f, restored.getPrimitiveEffects().get(0).scale, INTENSITY_SCALE_TOLERANCE);
-        // Does not restore to the exact original value because scale up is a bit offset.
-        assertEquals(0.47f, restored.getPrimitiveEffects().get(1).scale, INTENSITY_SCALE_TOLERANCE);
-        assertEquals(0f, restored.getPrimitiveEffects().get(2).scale);
-
-        VibrationEffect.Composed scaledDown = initial.scale(0.8f);
-        assertTrue(1f > scaledDown.getPrimitiveEffects().get(0).scale);
-        assertTrue(0.5f > scaledDown.getPrimitiveEffects().get(1).scale);
-        assertEquals(0f, scaledDown.getPrimitiveEffects().get(2).scale);
-
-        restored = scaledDown.scale(1.25f);
-        // Does not restore to the exact original value because scale up is a bit offset.
-        assertEquals(0.84f, restored.getPrimitiveEffects().get(0).scale, INTENSITY_SCALE_TOLERANCE);
-        assertEquals(0.5f, restored.getPrimitiveEffects().get(1).scale, INTENSITY_SCALE_TOLERANCE);
-        assertEquals(0f, restored.getPrimitiveEffects().get(2).scale);
-    }
-
-    @Test
-    public void testResolveComposed_ignoresDefaultAmplitudeAndReturnsSameEffect() {
-        VibrationEffect initial = TEST_COMPOSED;
-        assertSame(initial, initial.resolve(1000));
-    }
-
-    @Test
-    public void testScaleAppliesSameAdjustmentsOnAllEffects() {
-        VibrationEffect.OneShot oneShot = new VibrationEffect.OneShot(TEST_TIMING, TEST_AMPLITUDE);
-        VibrationEffect.Waveform waveform = new VibrationEffect.Waveform(
-                new long[] { TEST_TIMING }, new int[]{ TEST_AMPLITUDE }, -1);
-        VibrationEffect.Composed composed =
+        VibrationEffect.Composed effect =
                 (VibrationEffect.Composed) VibrationEffect.startComposition()
-                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK,
-                                TEST_AMPLITUDE / 255f)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 1)
+                        .addEffect(TEST_ONE_SHOT)
                         .compose();
 
-        assertEquals(oneShot.scale(0.8f).getAmplitude(),
-                waveform.scale(0.8f).getAmplitudes()[0],
-                AMPLITUDE_SCALE_TOLERANCE);
-        assertEquals(oneShot.scale(1.2f).getAmplitude() / 255f,
-                composed.scale(1.2f).getPrimitiveEffects().get(0).scale,
-                INTENSITY_SCALE_TOLERANCE);
-    }
+        VibrationEffect.Composed scaledUp = effect.scale(1.5f);
+        assertTrue(0.5f < ((PrimitiveSegment) scaledUp.getSegments().get(0)).getScale());
+        assertTrue(100 / 255f < ((StepSegment) scaledUp.getSegments().get(1)).getAmplitude());
 
-    @Test
-    public void testScaleOnMaxAmplitude() {
-        VibrationEffect.OneShot oneShot = new VibrationEffect.OneShot(
-                TEST_TIMING, VibrationEffect.MAX_AMPLITUDE);
-        VibrationEffect.Waveform waveform = new VibrationEffect.Waveform(
-                new long[]{TEST_TIMING}, new int[]{VibrationEffect.MAX_AMPLITUDE}, -1);
-        VibrationEffect.Composed composed =
-                (VibrationEffect.Composed) VibrationEffect.startComposition()
-                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
-                        .compose();
-
-        // Scale up does NOT scale MAX_AMPLITUDE
-        assertEquals(VibrationEffect.MAX_AMPLITUDE, oneShot.scale(1.1f).getAmplitude());
-        assertEquals(VibrationEffect.MAX_AMPLITUDE, waveform.scale(1.2f).getAmplitudes()[0]);
-        assertEquals(1f,
-                composed.scale(1.4f).getPrimitiveEffects().get(0).scale,
-                INTENSITY_SCALE_TOLERANCE); // This needs tolerance for float point comparison.
-
-        // Scale down does scale MAX_AMPLITUDE
-        assertEquals(216, oneShot.scale(0.9f).getAmplitude(), AMPLITUDE_SCALE_TOLERANCE);
-        assertEquals(180, waveform.scale(0.8f).getAmplitudes()[0], AMPLITUDE_SCALE_TOLERANCE);
-        assertEquals(0.57f, composed.scale(0.7f).getPrimitiveEffects().get(0).scale,
-                INTENSITY_SCALE_TOLERANCE);
-    }
-
-    @Test
-    public void getEffectStrength_returnsValueFromConstructor() {
-        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
-                VibrationEffect.EFFECT_STRENGTH_LIGHT, null);
-        Assert.assertEquals(VibrationEffect.EFFECT_STRENGTH_LIGHT, effect.getEffectStrength());
-    }
-
-    @Test
-    public void getFallbackEffect_withFallbackDisabled_isNull() {
-        VibrationEffect fallback = VibrationEffect.createOneShot(100, 100);
-        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
-                false, VibrationEffect.EFFECT_STRENGTH_LIGHT);
-        Assert.assertNull(effect.getFallbackEffect());
-    }
-
-    @Test
-    public void getFallbackEffect_withoutEffectSet_isNull() {
-        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
-                true, VibrationEffect.EFFECT_STRENGTH_LIGHT);
-        Assert.assertNull(effect.getFallbackEffect());
-    }
-
-    @Test
-    public void getFallbackEffect_withFallback_returnsValueFromConstructor() {
-        VibrationEffect fallback = VibrationEffect.createOneShot(100, 100);
-        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
-                VibrationEffect.EFFECT_STRENGTH_LIGHT, fallback);
-        Assert.assertEquals(fallback, effect.getFallbackEffect());
+        VibrationEffect.Composed scaledDown = effect.scale(0.5f);
+        assertTrue(0.5f > ((PrimitiveSegment) scaledDown.getSegments().get(0)).getScale());
+        assertTrue(100 / 255f > ((StepSegment) scaledDown.getSegments().get(1)).getAmplitude());
     }
 
     private Resources mockRingtoneResources() {

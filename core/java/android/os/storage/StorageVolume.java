@@ -16,6 +16,8 @@
 
 package android.os.storage;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -289,9 +291,14 @@ public final class StorageVolume implements Parcelable {
         return mMaxFileSize;
     }
 
-    /** {@hide} */
+    /**
+     * Returns the user that owns this volume
+     *
+     * {@hide}
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public UserHandle getOwner() {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public @NonNull UserHandle getOwner() {
         return mOwner;
     }
 

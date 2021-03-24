@@ -170,13 +170,13 @@ static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong ptr) {
     wrapper->hal()->off();
 }
 
-static void vibratorSetAmplitude(JNIEnv* env, jclass /* clazz */, jlong ptr, jint amplitude) {
+static void vibratorSetAmplitude(JNIEnv* env, jclass /* clazz */, jlong ptr, jfloat amplitude) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
     if (wrapper == nullptr) {
         ALOGE("vibratorSetAmplitude failed because native wrapper was not initialized");
         return;
     }
-    wrapper->hal()->setAmplitude(static_cast<int32_t>(amplitude));
+    wrapper->hal()->setAmplitude(static_cast<float>(amplitude));
 }
 
 static void vibratorSetExternalControl(JNIEnv* env, jclass /* clazz */, jlong ptr,
@@ -313,9 +313,9 @@ static const JNINativeMethod method_table[] = {
         {"isAvailable", "(J)Z", (void*)vibratorIsAvailable},
         {"on", "(JJJ)V", (void*)vibratorOn},
         {"off", "(J)V", (void*)vibratorOff},
-        {"setAmplitude", "(JI)V", (void*)vibratorSetAmplitude},
+        {"setAmplitude", "(JF)V", (void*)vibratorSetAmplitude},
         {"performEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
-        {"performComposedEffect", "(J[Landroid/os/VibrationEffect$Composition$PrimitiveEffect;J)J",
+        {"performComposedEffect", "(J[Landroid/os/vibrator/PrimitiveSegment;J)J",
          (void*)vibratorPerformComposedEffect},
         {"getSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
         {"getSupportedPrimitives", "(J)[I", (void*)vibratorGetSupportedPrimitives},
@@ -334,11 +334,10 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     jclass listenerClass = FindClassOrDie(env, listenerClassName);
     sMethodIdOnComplete = GetMethodIDOrDie(env, listenerClass, "onComplete", "(IJ)V");
 
-    jclass primitiveClass =
-            FindClassOrDie(env, "android/os/VibrationEffect$Composition$PrimitiveEffect");
-    sPrimitiveClassInfo.id = GetFieldIDOrDie(env, primitiveClass, "id", "I");
-    sPrimitiveClassInfo.scale = GetFieldIDOrDie(env, primitiveClass, "scale", "F");
-    sPrimitiveClassInfo.delay = GetFieldIDOrDie(env, primitiveClass, "delay", "I");
+    jclass primitiveClass = FindClassOrDie(env, "android/os/vibrator/PrimitiveSegment");
+    sPrimitiveClassInfo.id = GetFieldIDOrDie(env, primitiveClass, "mPrimitiveId", "I");
+    sPrimitiveClassInfo.scale = GetFieldIDOrDie(env, primitiveClass, "mScale", "F");
+    sPrimitiveClassInfo.delay = GetFieldIDOrDie(env, primitiveClass, "mDelay", "I");
 
     return jniRegisterNativeMethods(env,
                                     "com/android/server/vibrator/VibratorController$NativeWrapper",

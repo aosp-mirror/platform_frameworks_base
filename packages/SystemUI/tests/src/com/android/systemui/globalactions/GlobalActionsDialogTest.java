@@ -43,7 +43,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.service.dreams.IDreamManager;
-import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.IWindowManager;
@@ -75,6 +74,7 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.settings.SecureSettings;
@@ -106,7 +106,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private ConnectivityManager mConnectivityManager;
-    @Mock private TelephonyManager mTelephonyManager;
+    @Mock private TelephonyListenerManager mTelephonyListenerManager;
     @Mock private ContentResolver mContentResolver;
     @Mock private Resources mResources;
     @Mock private ConfigurationController mConfigurationController;
@@ -167,7 +167,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mLockPatternUtils,
                 mBroadcastDispatcher,
                 mConnectivityManager,
-                mTelephonyManager,
+                mTelephonyListenerManager,
                 mContentResolver,
                 null,
                 mResources,

@@ -47,7 +47,6 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Range;
-import android.util.proto.ProtoOutputStream;
 
 import java.util.Arrays;
 import java.util.List;
@@ -313,8 +312,27 @@ public class NetworkRequest implements Parcelable {
          *
          * @hide
          */
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         public Builder addUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.addUnwantedCapability(capability);
+            return this;
+        }
+
+        /**
+         * Removes (if found) the given unwanted capability from this builder instance.
+         *
+         * @param capability The unwanted capability to remove.
+         * @return The builder to facilitate chaining.
+         *
+         * @hide
+         */
+        @NonNull
+        @SuppressLint("BuilderSetStyle")
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        public Builder removeUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
+            mNetworkCapabilities.removeUnwantedCapability(capability);
             return this;
         }
 
@@ -575,6 +593,7 @@ public class NetworkRequest implements Parcelable {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean hasUnwantedCapability(@NetCapability int capability) {
         return networkCapabilities.hasUnwantedCapability(capability);
     }
@@ -655,18 +674,6 @@ public class NetworkRequest implements Parcelable {
         }
     }
 
-    /** @hide */
-    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-
-        proto.write(NetworkRequestProto.TYPE, typeToProtoEnum(type));
-        proto.write(NetworkRequestProto.REQUEST_ID, requestId);
-        proto.write(NetworkRequestProto.LEGACY_TYPE, legacyType);
-        networkCapabilities.dumpDebug(proto, NetworkRequestProto.NETWORK_CAPABILITIES);
-
-        proto.end(token);
-    }
-
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof NetworkRequest == false) return false;
         NetworkRequest that = (NetworkRequest)obj;
@@ -678,5 +685,44 @@ public class NetworkRequest implements Parcelable {
 
     public int hashCode() {
         return Objects.hash(requestId, legacyType, networkCapabilities, type);
+    }
+
+    /**
+     * Gets all the capabilities set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of capability values for this instance.
+     */
+    @NonNull
+    public @NetCapability int[] getCapabilities() {
+        // No need to make a defensive copy here as NC#getCapabilities() already returns
+        // a new array.
+        return networkCapabilities.getCapabilities();
+    }
+
+    /**
+     * Gets all the unwanted capabilities set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of unwanted capability values for this instance.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @NetCapability int[] getUnwantedCapabilities() {
+        // No need to make a defensive copy here as NC#getUnwantedCapabilities() already returns
+        // a new array.
+        return networkCapabilities.getUnwantedCapabilities();
+    }
+
+    /**
+     * Gets all the transports set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of transport type values for this instance.
+     */
+    @NonNull
+    public @Transport int[] getTransportTypes() {
+        // No need to make a defensive copy here as NC#getTransportTypes() already returns
+        // a new array.
+        return networkCapabilities.getTransportTypes();
     }
 }

@@ -171,7 +171,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final int DEFAULT_MAX_UPDATES_PER_INTERVAL = 10;
 
     @VisibleForTesting
-    static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = 15;
+    static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = Integer.MAX_VALUE;
 
     @VisibleForTesting
     static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
@@ -2590,7 +2590,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
         ps.findAll(ret, query, cloneFlags);
-
         return new ParceledListSlice<>(setReturnedByServer(ret));
     }
 
@@ -5074,6 +5073,17 @@ public class ShortcutService extends IShortcutService.Stub {
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
+        }
+    }
+
+    @VisibleForTesting
+    void updatePackageShortcutForTest(String packageName, String shortcutId, int userId,
+            Consumer<ShortcutInfo> cb) {
+        synchronized (mLock) {
+            final ShortcutPackage pkg = getPackageShortcutForTest(packageName, userId);
+            if (pkg == null) return;
+
+            pkg.mutateShortcut(shortcutId, null, cb);
         }
     }
 

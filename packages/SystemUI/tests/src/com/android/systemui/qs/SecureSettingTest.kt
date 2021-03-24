@@ -41,6 +41,7 @@ class SecureSettingTest : SysuiTestCase() {
         private const val TEST_SETTING = "setting"
         private const val USER = 0
         private const val OTHER_USER = 1
+        private const val DEFAULT_VALUE = 1
         private val FAIL_CALLBACK: Callback = { _, _ -> fail("Callback should not be called") }
     }
 
@@ -59,7 +60,8 @@ class SecureSettingTest : SysuiTestCase() {
                 secureSettings,
                 Handler(testableLooper.looper),
                 TEST_SETTING,
-                USER
+                USER,
+                DEFAULT_VALUE
         ) {
             override fun handleValueChanged(value: Int, observedChange: Boolean) {
                 callback(value, observedChange)
@@ -149,5 +151,15 @@ class SecureSettingTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         assertThat(changed).isTrue()
+    }
+
+    @Test
+    fun testDefaultValue() {
+        // Check default value before listening
+        assertThat(setting.value).isEqualTo(DEFAULT_VALUE)
+
+        // Check default value if setting is not set
+        setting.isListening = true
+        assertThat(setting.value).isEqualTo(DEFAULT_VALUE)
     }
 }

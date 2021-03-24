@@ -182,6 +182,7 @@ import android.app.PropertyInvalidatedCache;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
+import android.app.job.JobParameters;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
@@ -3490,7 +3491,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     // Clear its scheduled jobs
                     JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
-                    js.cancelJobsForUid(appInfo.uid, "clear data");
+                    // Clearing data is akin to uninstalling. The app is force stopped before we
+                    // get to this point, so the reason won't be checked by the app.
+                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER, "clear data");
 
                     // Clear its pending alarms
                     AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
@@ -7703,9 +7706,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void handleApplicationCrashInner(String eventType, ProcessRecord r, String processName,
             ApplicationErrorReport.CrashInfo crashInfo) {
-        boolean isIncremental = false;
         float loadingProgress = 1;
-        long millisSinceOldestPendingRead = 0;
+        IncrementalMetrics incrementalMetrics = null;
         // Notify package manager service to possibly update package state
         if (r != null && r.info != null && r.info.packageName != null) {
             final String codePath = r.info.getCodePath();
@@ -7716,8 +7718,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (incrementalStatesInfo != null) {
                 loadingProgress = incrementalStatesInfo.getProgress();
             }
-            isIncremental = IncrementalManager.isIncrementalPath(codePath);
-            if (isIncremental) {
+            if (IncrementalManager.isIncrementalPath(codePath)) {
                 // Report in the main log about the incremental package
                 Slog.e(TAG, "App crashed on incremental package " + r.info.packageName
                         + " which is " + ((int) (loadingProgress * 100)) + "% loaded.");
@@ -7726,8 +7727,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (incrementalService != null) {
                     final IncrementalManager incrementalManager = new IncrementalManager(
                             IIncrementalService.Stub.asInterface(incrementalService));
-                    IncrementalMetrics metrics = incrementalManager.getMetrics(codePath);
-                    millisSinceOldestPendingRead = metrics.getMillisSinceOldestPendingRead();
+                    incrementalMetrics = incrementalManager.getMetrics(codePath);
                 }
             }
         }
@@ -7757,7 +7757,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
                         : (r != null) ? r.getProcessClassEnum()
                                       : ServerProtoEnums.ERROR_SOURCE_UNKNOWN,
-                isIncremental, loadingProgress, millisSinceOldestPendingRead
+                incrementalMetrics != null /* isIncremental */, loadingProgress,
+                incrementalMetrics != null ? incrementalMetrics.getMillisSinceOldestPendingRead()
+                        : -1
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
@@ -7770,7 +7772,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         addErrorToDropBox(
-                eventType, r, processName, null, null, null, null, null, null, crashInfo);
+                eventType, r, processName, null, null, null, null, null, null, crashInfo,
+                new Float(loadingProgress), incrementalMetrics);
 
         mAppErrors.crashApplication(r, crashInfo);
     }
@@ -7952,7 +7955,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         FrameworkStatsLog.write(FrameworkStatsLog.WTF_OCCURRED, callingUid, tag, processName,
                 callingPid, (r != null) ? r.getProcessClassEnum() : 0);
 
-        addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo);
+        addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo,
+                null, null);
 
         return r;
     }
@@ -7977,7 +7981,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (Pair<String, ApplicationErrorReport.CrashInfo> p = list.poll();
                 p != null; p = list.poll()) {
             addErrorToDropBox("wtf", proc, "system_server", null, null, null, p.first, null, null,
-                    p.second);
+                    p.second, null, null);
         }
     }
 
@@ -8066,12 +8070,15 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param report in long form describing the error, null if absent
      * @param dataFile text file to include in the report, null if none
      * @param crashInfo giving an application stack trace, null if absent
+     * @param loadingProgress the loading progress of an installed package, range in [0, 1].
+     * @param incrementalMetrics metrics for apps installed on Incremental.
      */
     public void addErrorToDropBox(String eventType,
             ProcessRecord process, String processName, String activityShortComponentName,
             String parentShortComponentName, ProcessRecord parentProcess,
             String subject, final String report, final File dataFile,
-            final ApplicationErrorReport.CrashInfo crashInfo) {
+            final ApplicationErrorReport.CrashInfo crashInfo,
+            @Nullable Float loadingProgress, @Nullable IncrementalMetrics incrementalMetrics) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
 
@@ -8131,6 +8138,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (crashInfo != null && crashInfo.crashTag != null && !crashInfo.crashTag.isEmpty()) {
             sb.append("Crash-Tag: ").append(crashInfo.crashTag).append("\n");
+        }
+        if (loadingProgress != null) {
+            sb.append("Loading-Progress: ").append(loadingProgress.floatValue()).append("\n");
+        }
+        if (incrementalMetrics != null) {
+            sb.append("Incremental: Yes").append("\n");
+            final long millisSinceOldestPendingRead =
+                    incrementalMetrics.getMillisSinceOldestPendingRead();
+            if (millisSinceOldestPendingRead > 0) {
+                sb.append("Millis-Since-Oldest-Pending-Read: ").append(
+                        millisSinceOldestPendingRead).append("\n");
+            }
         }
         sb.append("\n");
 
