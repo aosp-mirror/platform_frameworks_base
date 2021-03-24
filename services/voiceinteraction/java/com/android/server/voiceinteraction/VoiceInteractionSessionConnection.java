@@ -56,7 +56,6 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.IVoiceInteractionSessionService;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionSession;
-import android.util.Pair;
 import android.util.Slog;
 import android.view.IWindowManager;
 
@@ -68,6 +67,7 @@ import com.android.server.am.AssistDataRequester;
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityAssistInfo;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -102,6 +102,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     IVoiceInteractionSession mSession;
     IVoiceInteractor mInteractor;
     ArrayList<IVoiceInteractionSessionShowCallback> mPendingShowCallbacks = new ArrayList<>();
+    private List<ActivityAssistInfo> mPendingHandleAssistWithoutData = new ArrayList<>();
     AssistDataRequester mAssistDataRequester;
 
     IVoiceInteractionSessionShowCallback mShowCallback =
@@ -192,7 +193,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
 
     public boolean showLocked(Bundle args, int flags, int disabledContext,
             IVoiceInteractionSessionShowCallback showCallback,
-            List<Pair<IBinder, Integer>> topActivities) {
+            List<ActivityAssistInfo> topActivities) {
         if (mBound) {
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
@@ -216,7 +217,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 int topActivitiesCount = topActivities.size();
                 final ArrayList<IBinder> topActivitiesToken = new ArrayList<>(topActivitiesCount);
                 for (int i = 0; i < topActivitiesCount; i++) {
-                    topActivitiesToken.add(topActivities.get(i).first);
+                    topActivitiesToken.add(topActivities.get(i).getActivityToken());
                 }
                 mAssistDataRequester.requestAssistData(topActivitiesToken,
                         fetchData,
@@ -243,8 +244,16 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 } else {
                     doHandleAssistWithoutData(topActivities);
                 }
-            } else if (showCallback != null) {
-                mPendingShowCallbacks.add(showCallback);
+            } else {
+                if (showCallback != null) {
+                    mPendingShowCallbacks.add(showCallback);
+                }
+                if (!assistDataRequestNeeded) {
+                    // If no data are required we are not passing trough mAssistDataRequester. As
+                    // a consequence, when a new session is delivered it is needed to process those
+                    // requests manually.
+                    mPendingHandleAssistWithoutData = topActivities;
+                }
             }
             mCallback.onSessionShown(this);
             return true;
@@ -258,17 +267,17 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         return false;
     }
 
-    private void doHandleAssistWithoutData(List<Pair<IBinder, Integer>> topActivities) {
+    private void doHandleAssistWithoutData(List<ActivityAssistInfo> topActivities) {
         final int activityCount = topActivities.size();
         for (int i = 0; i < activityCount; i++) {
-            final Pair<IBinder, Integer> topActivity = topActivities.get(i);
-            final IBinder activityId = topActivity.first;
-            final int taskId = topActivity.second;
+            final ActivityAssistInfo topActivity = topActivities.get(i);
+            final IBinder assistToken = topActivity.getAssistToken();
+            final int taskId = topActivity.getTaskId();
             final int activityIndex = i;
             try {
                 mSession.handleAssist(
                         taskId,
-                        activityId,
+                        assistToken,
                         /* assistData = */ null,
                         /* assistStructure = */ null,
                         /* assistContent = */ null,
@@ -468,6 +477,10 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             } catch (RemoteException e) {
             }
             mAssistDataRequester.processPendingAssistData();
+            if (!mPendingHandleAssistWithoutData.isEmpty()) {
+                doHandleAssistWithoutData(mPendingHandleAssistWithoutData);
+                mPendingHandleAssistWithoutData.clear();
+            }
         }
         return true;
     }
