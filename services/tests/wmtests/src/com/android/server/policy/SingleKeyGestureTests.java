@@ -26,6 +26,7 @@ import static com.android.server.policy.SingleKeyGestureDetector.KEY_LONGPRESS;
 import static com.android.server.policy.SingleKeyGestureDetector.KEY_VERYLONGPRESS;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Instrumentation;
@@ -62,6 +63,10 @@ public class SingleKeyGestureTests {
     private long mLongPressTime;
     private long mVeryLongPressTime;
 
+    // Allow press from non interactive mode.
+    private boolean mAllowNonInteractiveForPress = true;
+    private boolean mAllowNonInteractiveForLongPress = true;
+
     @Before
     public void setUp() {
         mDetector = new SingleKeyGestureDetector(mContext);
@@ -81,11 +86,17 @@ public class SingleKeyGestureTests {
             }
             @Override
             public void onPress(long downTime) {
+                if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
+                    return;
+                }
                 mShortPressed.countDown();
             }
 
             @Override
             void onLongPress(long downTime) {
+                if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForLongPress) {
+                    return;
+                }
                 mLongPressed.countDown();
             }
 
@@ -96,6 +107,9 @@ public class SingleKeyGestureTests {
 
             @Override
             void onMultiPress(long downTime, int count) {
+                if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
+                    return;
+                }
                 mMultiPressed.countDown();
                 assertEquals(mMaxMultiPressPowerCount, count);
             }
@@ -103,9 +117,13 @@ public class SingleKeyGestureTests {
     }
 
     private void pressKey(long eventTime, int keyCode, long pressTime) {
+        pressKey(eventTime, keyCode, pressTime, true /* interactive */);
+    }
+
+    private void pressKey(long eventTime, int keyCode, long pressTime, boolean interactive) {
         final KeyEvent keyDown = new KeyEvent(eventTime, eventTime, ACTION_DOWN,
                 keyCode, 0 /* repeat */, 0 /* metaState */);
-        mDetector.interceptKey(keyDown);
+        mDetector.interceptKey(keyDown, interactive);
 
         // keep press down.
         try {
@@ -118,7 +136,7 @@ public class SingleKeyGestureTests {
         final KeyEvent keyUp = new KeyEvent(eventTime, eventTime, ACTION_UP,
                 keyCode, 0 /* repeat */, 0 /* metaState */);
 
-        mDetector.interceptKey(keyUp);
+        mDetector.interceptKey(keyUp, interactive);
     }
 
     @Test
@@ -148,5 +166,19 @@ public class SingleKeyGestureTests {
         pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
         pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */);
         assertTrue(mMultiPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testNonInteractive() throws InterruptedException {
+        long eventTime = SystemClock.uptimeMillis();
+        // Disallow short press behavior from non interactive.
+        mAllowNonInteractiveForPress = false;
+        pressKey(eventTime, KEYCODE_POWER, 0 /* pressTime */, false /* interactive */);
+        assertFalse(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+
+        // Allow long press behavior from non interactive.
+        eventTime = SystemClock.uptimeMillis();
+        pressKey(eventTime, KEYCODE_POWER, mLongPressTime, false /* interactive */);
+        assertTrue(mLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
 }
