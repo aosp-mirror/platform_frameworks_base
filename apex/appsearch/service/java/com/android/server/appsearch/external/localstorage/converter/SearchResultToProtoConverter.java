@@ -87,7 +87,9 @@ public class SearchResultToProtoConverter {
         GenericDocument document =
                 GenericDocumentToProtoConverter.toGenericDocument(proto.getDocument());
         SearchResult.Builder builder =
-                new SearchResult.Builder(packageName, databaseName).setGenericDocument(document);
+                new SearchResult.Builder(packageName, databaseName)
+                        .setGenericDocument(document)
+                        .setRankingSignal(proto.getScore());
         if (proto.hasSnippet()) {
             for (int i = 0; i < proto.getSnippet().getEntriesCount(); i++) {
                 SnippetProto.EntryProto entry = proto.getSnippet().getEntries(i);

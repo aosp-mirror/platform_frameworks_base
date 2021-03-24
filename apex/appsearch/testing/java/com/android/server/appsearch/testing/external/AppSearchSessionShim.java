@@ -52,12 +52,20 @@ public interface AppSearchSessionShim extends Closeable {
     /**
      * Retrieves the schema most recently successfully provided to {@link #setSchema}.
      *
-     * @return The pending result of performing this operation.
+     * @return The pending {@link GetSchemaResponse} of performing this operation.
      */
     // This call hits disk; async API prevents us from treating these calls as properties.
     @SuppressLint("KotlinPropertyAccess")
     @NonNull
-    ListenableFuture<Set<AppSearchSchema>> getSchema();
+    ListenableFuture<GetSchemaResponse> getSchema();
+
+    /**
+     * Retrieves the set of all namespaces in the current database with at least one document.
+     *
+     * @return The pending result of performing this operation.
+     */
+    @NonNull
+    ListenableFuture<Set<String>> getNamespaces();
 
     /**
      * Indexes documents into the {@link AppSearchSessionShim} database.
@@ -212,6 +220,17 @@ public interface AppSearchSessionShim extends Closeable {
      */
     @NonNull
     ListenableFuture<Void> remove(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
+
+    /**
+     * Gets the storage info for this {@link AppSearchSessionShim} database.
+     *
+     * <p>This may take time proportional to the number of documents and may be inefficient to call
+     * repeatedly.
+     *
+     * @return a {@link ListenableFuture} which resolves to a {@link StorageInfo} object.
+     */
+    @NonNull
+    ListenableFuture<StorageInfo> getStorageInfo();
 
     /**
      * Flush all schema and document updates, additions, and deletes to disk if possible.
