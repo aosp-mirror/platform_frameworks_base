@@ -12839,6 +12839,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ? AppOpsManager.MODE_ALLOWED
                     : AppOpsManager.opToDefaultMode(AppOpsManager.OP_INTERACT_ACROSS_PROFILES);
         }
+
+        public boolean isDeviceOrProfileOwnerInCallingUser(String packageName) {
+            return isDeviceOwnerInCallingUser(packageName)
+                    || isProfileOwnerInCallingUser(packageName);
+        }
+
+        private boolean isDeviceOwnerInCallingUser(String packageName) {
+            final ComponentName deviceOwnerInCallingUser =
+                    DevicePolicyManagerService.this.getDeviceOwnerComponent(
+                            /* callingUserOnly= */ true);
+            return deviceOwnerInCallingUser != null
+                    && packageName.equals(deviceOwnerInCallingUser.getPackageName());
+        }
+
+        private boolean isProfileOwnerInCallingUser(String packageName) {
+            final ComponentName profileOwnerInCallingUser =
+                    getProfileOwnerAsUser(UserHandle.getCallingUserId());
+            return profileOwnerInCallingUser != null
+                    && packageName.equals(profileOwnerInCallingUser.getPackageName());
+        }
     }
 
     private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {
@@ -14461,15 +14481,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         enforceProfileOrDeviceOwner(admin);
-        synchronized (getLockObject()) {
-            try {
-                IBackupManager ibm = mInjector.getIBackupManager();
-                return ibm != null && ibm.isBackupServiceActive(
-                    mInjector.userHandleGetCallingUserId());
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Failed requesting backup service state.", e);
+        final int userId = mInjector.userHandleGetCallingUserId();
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            synchronized (getLockObject()) {
+                try {
+                    IBackupManager ibm = mInjector.getIBackupManager();
+                    return ibm != null && ibm.isBackupServiceActive(userId);
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Failed requesting backup service state.", e);
+                }
             }
-        }
+        });
     }
 
     @Override

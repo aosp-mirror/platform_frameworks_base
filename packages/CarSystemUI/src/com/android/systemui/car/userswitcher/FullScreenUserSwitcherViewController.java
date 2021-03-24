@@ -22,6 +22,7 @@ import android.car.Car;
 import android.car.user.CarUserManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.view.KeyEvent;
 import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -67,6 +68,19 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
 
     @Override
     protected void onFinishInflate() {
+        // Intercept back button.
+        UserSwitcherContainer container = getLayout().findViewById(R.id.container);
+        container.setKeyEventHandler(event -> {
+            if (event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+                return false;
+            }
+
+            if (event.getAction() == KeyEvent.ACTION_UP && getLayout().isVisibleToUser()) {
+                stop();
+            }
+            return true;
+        });
+
         // Initialize user grid.
         mUserGridView = getLayout().findViewById(R.id.user_grid);
         GridLayoutManager layoutManager = new GridLayoutManager(mContext,
@@ -78,8 +92,13 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
     }
 
     @Override
+    protected int getFocusAreaViewId() {
+        return R.id.user_switcher_container;
+    }
+
+    @Override
     protected boolean shouldFocusWindow() {
-        return false;
+        return true;
     }
 
     @Override

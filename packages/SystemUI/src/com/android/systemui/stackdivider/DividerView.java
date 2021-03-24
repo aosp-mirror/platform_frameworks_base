@@ -618,7 +618,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mEntranceAnimationRunning = false;
             mExitAnimationRunning = false;
             if (!dismissed && !wasMinimizeInteraction) {
-                WindowManagerProxy.applyResizeSplits(snapTarget.position, mSplitLayout);
+                mWindowManagerProxy.applyResizeSplits(snapTarget.position, mSplitLayout);
             }
             if (mCallback != null) {
                 mCallback.onDraggingEnd();
@@ -889,7 +889,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         t.hide(sc).apply();
         mTiles.releaseTransaction(t);
         int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
-        WindowManagerProxy.applyResizeSplits(midPos, mSplitLayout);
+        mWindowManagerProxy.applyResizeSplits(midPos, mSplitLayout);
     }
 
     public void setMinimizedDockStack(boolean minimized, long animDuration,

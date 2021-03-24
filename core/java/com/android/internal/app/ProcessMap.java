@@ -22,7 +22,7 @@ import android.util.SparseArray;
 public class ProcessMap<E> {
     final ArrayMap<String, SparseArray<E>> mMap
             = new ArrayMap<String, SparseArray<E>>();
-    
+
     public E get(String name, int uid) {
         SparseArray<E> uids = mMap.get(name);
         if (uids == null) return null;
@@ -58,4 +58,6 @@ public class ProcessMap<E> {
     public int size() {
         return mMap.size();
     }
+
+    public void putAll(ProcessMap<E> other) { mMap.putAll(other.mMap); }
 }

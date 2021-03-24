@@ -183,6 +183,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
+import android.app.PropertyInvalidatedCache;
 import android.app.WaitResult;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
@@ -2123,7 +2124,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         0,
                         new HostingRecord("system"));
                 app.setPersistent(true);
-                app.pid = MY_PID;
+                app.pid = app.mPidForCompact = MY_PID;
                 app.getWindowProcessController().setPid(MY_PID);
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
@@ -5104,6 +5105,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, app.pid, app.processName);
 
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
+        synchronized (mOomAdjuster.mCachedAppOptimizer) {
+            app.mSetAdjForCompact = ProcessList.INVALID_ADJ;
+        }
         mOomAdjuster.setAttachingSchedGroupLocked(app);
         app.forcingToImportant = null;
         updateProcessForegroundLocked(app, false, 0, false);
@@ -5999,9 +6003,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private boolean isAppBad(ApplicationInfo info) {
-        synchronized (this) {
-            return mAppErrors.isBadProcessLocked(info);
-        }
+        return mAppErrors.isBadProcess(info.processName, info.uid);
     }
 
     // NOTE: this is an internal method used by the OnShellCommand implementation only and should
@@ -12835,6 +12837,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (r.thread != null) {
                 pw.println("\n\n** Cache info for pid " + r.pid + " [" + r.processName + "] **");
                 pw.flush();
+                if (r.pid == MY_PID) {
+                    PropertyInvalidatedCache.dumpCacheInfo(fd, args);
+                    continue;
+                }
                 try {
                     TransferPipe tp = new TransferPipe();
                     try {
@@ -20367,7 +20373,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callerUid = Binder.getCallingUid();
 
         // Only system can toggle the freezer state
-        if (callerUid == SYSTEM_UID) {
+        if (callerUid == SYSTEM_UID || Build.IS_DEBUGGABLE) {
             return mOomAdjuster.mCachedAppOptimizer.enableFreezer(enable);
         } else {
             throw new SecurityException("Caller uid " + callerUid + " cannot set freezer state ");

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"שני פסים של סוללה."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"שלושה פסים של סוללה."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"סוללה מלאה."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"אחוז טעינת הסוללה לא ידוע."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"אין טלפון."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"פס אחד של טלפון."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"שני פסים של טלפון."</string>
@@ -480,7 +481,7 @@
     <string name="user_new_user_name" msgid="2019166282704195789">"משתמש חדש"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"להסיר אורח?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בפעילות זו באתר יימחקו."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"הסר"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"הסרה"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"האם ברצונך להמשיך בפעילות באתר?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ברצוני להתחיל מחדש"</string>
@@ -502,7 +503,7 @@
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"האם להסיר את המשתמש?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"הסר"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"הסרה"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"תכונת החיסכון בסוללה פועלת"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"מפחית את הביצועים ונתונים ברקע"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"כיבוי תכונת החיסכון בסוללה"</string>
@@ -1109,4 +1110,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (מנותק)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"לא ניתן היה להתחבר. יש לנסות שוב."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"התאמה של מכשיר חדש"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"בעיה בקריאת מדדי הסוללה"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"יש להקיש כדי להציג מידע נוסף"</string>
 </resources>

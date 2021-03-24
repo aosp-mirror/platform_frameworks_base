@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Batterij: twee streepjes."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Batterij: drie streepjes."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batterij is vol."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batterijpercentage onbekend."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Geen telefoonsignaal."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefoon: één streepje."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefoon: twee streepjes."</string>
@@ -488,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Huidige gebruiker uitloggen"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"GEBRUIKER UITLOGGEN"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Nieuwe gebruiker toevoegen?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Wanneer u een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Als je een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Gebruikerslimiet bereikt"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Je kunt maximaal <xliff:g id="COUNT">%d</xliff:g> gebruikers toevoegen.</item>
@@ -620,16 +621,16 @@
     <string name="ring_toggle_title" msgid="5973120187287633224">"Gesprekken"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Bellen"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Trillen"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Dempen"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Geluid staat uit"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Telefoon op trillen"</string>
-    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Telefoon gedempt"</string>
+    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Telefoongeluid staat uit"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tik om dempen op te heffen."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tik om in te stellen op trillen. Toegankelijkheidsservices kunnen zijn gedempt."</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tik om te dempen. Toegankelijkheidsservices kunnen zijn gedempt."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tik om in te stellen op trillen. Het geluid van toegankelijkheidsservices kan hierdoor uitgaan."</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tik om te dempen. Het geluid van toegankelijkheidsservices kan hierdoor uitgaan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Tik om in te stellen op trillen."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tik om te dempen."</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"dempen"</string>
-    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"dempen opheffen"</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tik om geluid uit te zetten."</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"geluid uit"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"geluid aanzetten"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"trillen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s-volumeknoppen"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Gesprekken en meldingen gaan over (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
@@ -678,7 +679,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth inschakelen?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Als je je toetsenbord wilt verbinden met je tablet, moet je eerst Bluetooth inschakelen."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Inschakelen"</string>
-    <string name="show_silently" msgid="5629369640872236299">"Meldingen zonder geluid weergeven"</string>
+    <string name="show_silently" msgid="5629369640872236299">"Meldingen zonder geluid tonen"</string>
     <string name="block" msgid="188483833983476566">"Alle meldingen blokkeren"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"Niet zonder geluid weergeven"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Niet zonder geluid weergeven of blokkeren"</string>
@@ -714,14 +715,14 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan overgaan of trillen op basis van de telefooninstellingen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gespreksgedeelte weergegeven, verschijnt als zwevende bubbel, geeft profielfoto weer op vergrendelscherm"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Verschijnt als zwevende bubbel bovenaan het gespreksgedeelte en toont profielfoto op vergrendelscherm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen recente bubbels"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Recente bubbels en gesloten bubbels worden hier weergegeven"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Deze meldingen kunnen niet worden aangepast."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden geconfigureerd"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden ingesteld"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Melding via proxy"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle meldingen van <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Meer weergeven"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (verbinding verbroken)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Kan geen verbinding maken. Probeer het nog eens."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Nieuw apparaat koppelen"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Probleem bij het lezen van je batterijmeter"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tik hier voor meer informatie"</string>
 </resources>

@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -218,6 +219,11 @@ public class NotificationPanelViewController extends OverlayPanelViewController
     }
 
     @Override
+    protected int getFocusAreaViewId() {
+        return R.id.notification_container;
+    }
+
+    @Override
     protected boolean shouldShowNavigationBarInsets() {
         return true;
     }
@@ -239,12 +245,26 @@ public class NotificationPanelViewController extends OverlayPanelViewController
 
     /** Reinflates the view. */
     public void reinflate() {
+        // Do not reinflate the view if it has not been inflated at all.
+        if (!isInflated()) return;
+
         ViewGroup container = (ViewGroup) getLayout();
         container.removeView(mNotificationView);
 
         mNotificationView = (CarNotificationView) LayoutInflater.from(mContext).inflate(
                 R.layout.notification_center_activity, container,
                 /* attachToRoot= */ false);
+        mNotificationView.setKeyEventHandler(
+                event -> {
+                    if (event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+                        return false;
+                    }
+
+                    if (event.getAction() == KeyEvent.ACTION_UP && isPanelExpanded()) {
+                        toggle();
+                    }
+                    return true;
+                });
 
         container.addView(mNotificationView);
         onNotificationViewInflated();

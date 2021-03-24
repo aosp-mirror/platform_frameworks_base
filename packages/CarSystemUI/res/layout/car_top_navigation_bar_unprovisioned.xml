@@ -74,7 +74,8 @@
           android:id="@+id/qs"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:background="@null"/>
+          android:background="@null"
+          android:focusedByDefault="true"/>
       <com.android.systemui.statusbar.policy.Clock
           android:id="@+id/clock"
           android:layout_width="wrap_content"

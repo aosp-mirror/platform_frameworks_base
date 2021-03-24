@@ -14,10 +14,7 @@
   ~ limitations under the License.
   -->
 
-<!-- Car customizations
-     Car has solid black background instead of a transparent one
--->
-<LinearLayout
+<com.android.car.ui.FocusArea
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/keyguard_container"
     android:layout_width="match_parent"

@@ -361,7 +361,12 @@ public class MediaRouter {
         }
 
         public Display[] getAllPresentationDisplays() {
-            return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
+            try {
+                return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
+            } catch (RuntimeException ex) {
+                Log.e(TAG, "Unable to get displays.", ex);
+                return null;
+            }
         }
 
         private void updatePresentationDisplays(int changedDisplayId) {
@@ -2075,6 +2080,9 @@ public class MediaRouter {
         private Display choosePresentationDisplay() {
             if ((mSupportedTypes & ROUTE_TYPE_LIVE_VIDEO) != 0) {
                 Display[] displays = sStatic.getAllPresentationDisplays();
+                if (displays == null || displays.length == 0) {
+                    return null;
+                }
 
                 // Ensure that the specified display is valid for presentations.
                 // This check will normally disallow the default display unless it was

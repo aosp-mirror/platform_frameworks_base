@@ -138,9 +138,9 @@
     <item msgid="1333279807604675720">"Стерео"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="1241278021345116816">"Оптимизирано за квалитет на аудиото (990 кб/с - 909 кб/с)"</item>
+    <item msgid="1241278021345116816">"Оптимизирано за квалитет на аудиото (990 kbps - 909 kbps)"</item>
     <item msgid="3523665555859696539">"Балансиран квалитет на звукот и врската (660 kb/s/606 kb/s)"</item>
-    <item msgid="886408010459747589">"Оптимизирано за квалитет на врската (330 кб/с - 303 кб/с)"</item>
+    <item msgid="886408010459747589">"Оптимизирано за квалитет на врската (330 kbps - 303 kbps)"</item>
     <item msgid="3808414041654351577">"Најдобар напор (приспособлива стапка на битови)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">

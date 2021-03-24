@@ -76,18 +76,18 @@
     <string name="learn_more" msgid="4690632085667273811">"Läs mer"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Zooma för att fylla skärm"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Dra för att fylla skärmen"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"Skärmdump"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Skärmbild"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har skickat en bild"</string>
-    <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skärmdumpen sparas ..."</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"Skärmdumpen sparas ..."</string>
-    <string name="screenshot_saved_title" msgid="8893267638659083153">"Skärmdumpen har sparats"</string>
-    <string name="screenshot_saved_text" msgid="7778833104901642442">"Visa skärmdumpen genom att trycka här"</string>
-    <string name="screenshot_failed_title" msgid="3259148215671936891">"Det gick inte att spara skärmdumpen"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmdump igen"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Det går inte att spara skärmdumpen eftersom lagringsutrymmet inte räcker"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmdumpar"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Stäng skärmdump"</string>
-    <string name="screenshot_preview_description" msgid="7606510140714080474">"Förhandsgranskning av skärmdump"</string>
+    <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skärmbilden sparas ..."</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"Skärmbilden sparas ..."</string>
+    <string name="screenshot_saved_title" msgid="8893267638659083153">"Skärmbilden har sparats"</string>
+    <string name="screenshot_saved_text" msgid="7778833104901642442">"Visa skärmbilden genom att trycka här"</string>
+    <string name="screenshot_failed_title" msgid="3259148215671936891">"Det gick inte att spara skärmbilden"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmbild igen"</string>
+    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Det går inte att spara skärmbilden eftersom lagringsutrymmet inte räcker"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmbilder"</string>
+    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Stäng skärmbild"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Förhandsgranskning av skärmbild"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skärminspelare"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandlar skärminspelning"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Avisering om att skärminspelning pågår"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Batteri: två staplar."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Batteri: tre staplar."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batteriet är fulladdat."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Okänd batterinivå."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Ingen telefon."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefon: en stapel."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefon: två staplar."</string>
@@ -477,7 +478,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vill du ta bort gästen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ta bort"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka gäst!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka som gäst!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vill du fortsätta sessionen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Börja om"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ja, fortsätt"</string>
@@ -714,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan ringa eller vibrera beroende på inställningarna på telefonen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan ringa eller vibrera beroende på inställningarna på telefonen. Konversationer från <xliff:g id="APP_NAME">%1$s</xliff:g> visas i bubblor som standard."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Behåller din uppmärksamhet med en flytande genväg till innehållet."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla, visar profilbilden på låsskärmen"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla och visar profilbilden på låsskärmen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för konversationsfunktioner"</string>
@@ -947,7 +948,7 @@
     <string name="tuner_app" msgid="6949280415826686972">"Appen <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Aviseringar"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batteri"</string>
-    <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skärmdumpar"</string>
+    <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skärmbilder"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Allmänna meddelanden"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Lagring"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Tips"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (frånkopplad)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Det gick inte att ansluta. Försök igen."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parkoppla en ny enhet"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batteriindikatorn visas inte"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tryck för mer information"</string>
 </resources>

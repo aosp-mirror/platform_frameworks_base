@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"అవతలి వారు OFF TTY మోడ్‌ని అభ్యర్థించారు"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"వాయిస్"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"డేటా"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"ఫ్యాక్స్"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -229,9 +229,9 @@
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"మీ ఫోన్ షట్‌డౌన్ చేయబడుతుంది."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"మీరు షట్ డౌన్ చేయాలనుకుంటున్నారా?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"సురక్షిత మోడ్‌కు రీబూట్ చేయండి"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"మీరు సురక్షిత మోడ్‌లోకి రీబూట్ చేయాలనుకుంటున్నారా? దీని వలన మీరు ఇన్‌స్టాల్ చేసిన అన్ని మూడవ పక్షం అనువర్తనాలు నిలిపివేయబడతాయి. ఇవి మీరు మళ్లీ రీబూట్ చేసినప్పుడు పునరుద్ధరించబడతాయి."</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"మీరు సురక్షిత మోడ్‌లోకి రీబూట్ చేయాలనుకుంటున్నారా? దీని వలన మీరు ఇన్‌స్టాల్ చేసిన అన్ని మూడవ పక్షం యాప్‌లు నిలిపివేయబడతాయి. ఇవి మీరు మళ్లీ రీబూట్ చేసినప్పుడు పునరుద్ధరించబడతాయి."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"ఇటీవలివి"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"ఇటీవలి అనువర్తనాలు ఏవీ లేవు."</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"ఇటీవలి యాప్‌లు ఏవీ లేవు."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"టాబ్లెట్ ఎంపికలు"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ఎంపికలు"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ఫోన్ ఎంపికలు"</string>
@@ -336,13 +336,13 @@
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"స్థితి పట్టీని విస్తరింపజేయడం/కుదించడం"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"స్థితి బార్‌ను విస్తరింపజేయడానికి లేదా కుదించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"షార్ట్‌కట్‌లను ఇన్‌స్టాల్ చేయడం"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ సత్వరమార్గాలను జోడించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ సత్వరమార్గాలను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"సత్వరమార్గాలను అన్ఇన్‌స్టాల్ చేయడం"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ సత్వరమార్గాలను తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"వినియోగదారు ప్రమేయం లేకుండానే హోమ్‌స్క్రీన్ సత్వరమార్గాలను తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"అవుట్‌గోయింగ్ కాల్‌లను దారి మళ్లించడం"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"కాల్‌ను వేరే నంబర్‌కు దారి మళ్లించే లేదా మొత్తంగా కాల్‌ను ఆపివేసే ఎంపిక సహాయంతో అవుట్‌గోయింగ్ కాల్ సమయంలో డయల్ చేయబడుతున్న నంబర్‌ను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"కాల్‌ను వేరే నంబర్‌కు దారి మళ్లించే లేదా మొత్తంగా కాల్‌ను ఆపివేసే ఎంపిక సహాయంతో అవుట్‌గోయింగ్ కాల్ సమయంలో డయల్ చేయబడుతున్న నంబర్‌ను చూడటానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"ఫోన్ కాల్‌లకు సమాధానమివ్వు"</string>
-    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"ఇన్‌కమింగ్ ఫోన్ కాల్‌లకు సమాధానమివ్వడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"ఇన్‌కమింగ్ ఫోన్ కాల్‌లకు సమాధానమివ్వడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_receiveSms" msgid="505961632050451881">"వచన సందేశాలను (SMS) స్వీకరించడం"</string>
     <string name="permdesc_receiveSms" msgid="1797345626687832285">"SMS సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. యాప్ మీ డివైజ్‌కు పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
     <string name="permlab_receiveMms" msgid="4000650116674380275">"వచన సందేశాలను (MMS) స్వీకరించడం"</string>
@@ -386,7 +386,7 @@
     <string name="permlab_getPackageSize" msgid="375391550792886641">"యాప్ నిల్వ స్థలాన్ని అంచనా వేయడం"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"యాప్‌ కోడ్, డేటా మరియు కాష్ పరిమాణాలను తిరిగి పొందడానికి దాన్ని అనుమతిస్తుంది"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"సిస్టమ్ సెట్టింగ్‌లను మార్చడం"</string>
-    <string name="permdesc_writeSettings" msgid="8293047411196067188">"సిస్టమ్ యొక్క సెట్టింగ్‌ల డేటాను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన యాప్‌లు మీ సిస్టమ్ యొక్క కాన్ఫిగరేషన్‌ను నాశనం చేయవచ్చు."</string>
+    <string name="permdesc_writeSettings" msgid="8293047411196067188">"సిస్టమ్ యొక్క సెట్టింగ్‌ల డేటాను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. హానికరమైన యాప్‌లు మీ సిస్టమ్ యొక్క కాన్ఫిగరేషన్‌ను నాశనం చేయవచ్చు."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"ప్రారంభంలో అమలు చేయడం"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"సిస్టమ్ బూటింగ్‌ను పూర్తి చేసిన వెంటనే దానికదే ప్రారంభించబడటానికి యాప్‌ను అనుమతిస్తుంది. ఇది టాబ్లెట్‌ను ప్రారంభించడానికి ఎక్కువ సమయం పట్టేలా చేయవచ్చు మరియు ఎల్లప్పుడూ అమలు చేయడం ద్వారా మొత్తం టాబ్లెట్‌ను నెమ్మదిగా పని చేయడానికి యాప్‌ను అనుమతించేలా చేయవచ్చు."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"సిస్టమ్ బూటింగ్‌ను పూర్తి చేసిన వెంటనే యాప్ దానికదే ప్రారంభం కావడానికి అనుమతిస్తుంది. ఇది మీ Android TV పరికరం ప్రారంభం కావడానికి ఎక్కువ సమయం పట్టేలా చేయవచ్చు మరియు ఎల్లప్పుడూ అమలు కావడం ద్వారా మొత్తం పరికరం పనితీరును నెమ్మది చేయడానికి యాప్‌ను అనుమతించవచ్చు."</string>
@@ -432,7 +432,7 @@
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ఆడియోను రికార్డ్ చేయడం"</string>
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"ఈ యాప్ మైక్రోఫోన్‌ని ఉపయోగించి ఎప్పుడైనా ఆడియోను రికార్డ్ చేయగలదు."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIMకి ఆదేశాలను పంపడం"</string>
-    <string name="permdesc_sim_communication" msgid="4179799296415957960">"సిమ్‌కు ఆదేశాలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
+    <string name="permdesc_sim_communication" msgid="4179799296415957960">"సిమ్‌కు ఆదేశాలను పంపడానికి యాప్‌ను అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"భౌతిక కార్యాకలాపాన్ని గుర్తించండి"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ఈ యాప్ మీ భౌతిక కార్యాకలాపాన్ని గుర్తించగలదు."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"చిత్రాలు మరియు వీడియోలు తీయడం"</string>
@@ -447,11 +447,11 @@
     <string name="permlab_callPhone" msgid="1798582257194643320">"నేరుగా కాల్ చేసే ఫోన్ నంబర్‌లు"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"మీ ప్రమేయం లేకుండా ఫోన్ నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. దీని వలన అనుకోని ఛార్జీలు విధించబడవచ్చు లేదా కాల్‌లు రావచ్చు. ఇది అత్యవసర నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతించదని గుర్తుంచుకోండి. హానికరమైన యాప్‌లు మీ నిర్ధారణ లేకుండానే కాల్‌లు చేయడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS కాల్ సేవ యాక్సెస్ అనుమతి"</string>
-    <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"మీ ప్రమేయం లేకుండా కాల్‌లు చేయడం కోసం IMS సేవను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"మీ ప్రమేయం లేకుండా కాల్‌లు చేయడం కోసం IMS సేవను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ఫోన్ స్థితి మరియు గుర్తింపుని చదవడం"</string>
     <string name="permdesc_readPhoneState" msgid="7229063553502788058">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
-    <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"సిస్టమ్ ద్వారా కాల్‌లను చూసి, నియంత్రించండి."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"పరికరంలో కొనసాగుతున్న కాల్‌లను చూడడానికి మరియు నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది. ఇందులో కాల్ కోసం కాల్‌ల నంబర్‌లు మరియు రాష్ట్ర కాల్ వంటి సమాచారం ఉంటుంది."</string>
     <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ఆడియో రికార్డ్ పరిమితుల నుండి మినహాయింపు"</string>
@@ -469,9 +469,9 @@
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"మీ Android TV పరికరం స్లీప్ మోడ్‌లోకి వెళ్లకుండా నివారించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"నిద్రావస్థకి వెళ్లకుండా ఫోన్‌ను నిరోధించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_transmitIr" msgid="8077196086358004010">"ఇన్‌ఫ్రారెడ్ ప్రసరణ"</string>
-    <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"టాబ్లెట్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"టాబ్లెట్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"మీ Android TV పరికరం యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ని ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ఫోన్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ఫోన్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"వాల్‌పేపర్‌ను సెట్ చేయడం"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"సిస్టమ్ వాల్‌పేపర్‌ను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"మీ వాల్‌పేపర్ పరిమాణాన్ని సర్దుబాటు చేయడం"</string>
@@ -493,13 +493,13 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"టీథర్ చేయబడిన కనెక్టివిటీని మార్చడం"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"టీథర్ చేసిన నెట్‌వర్క్ కనెక్టివిటీ యొక్క స్థితిని మార్చడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"Wi-Fi కనెక్షన్‌లను వీక్షించడం"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi ప్రారంభించబడిందా, లేదా మరియు కనెక్ట్ చేయబడిన Wi-Fi పరికరాల పేరు వంటి Wi-Fi నెట్‌వర్కింగ్ గురించి సమాచారాన్ని వీక్షించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi ప్రారంభించబడిందా, లేదా మరియు కనెక్ట్ చేయబడిన Wi-Fi పరికరాల పేరు వంటి Wi-Fi నెట్‌వర్కింగ్ గురించి సమాచారాన్ని వీక్షించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"Wi-Fiకి కనెక్ట్ చేయడం మరియు దాని నుండి డిస్‌కనెక్ట్ చేయడం"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi యాక్సెస్ స్థానాలకు కనెక్ట్ చేయడానికి మరియు వాటి నుండి డిస్‌కనెక్ట్ చేయడానికి మరియు Wi-Fi నెట్‌వర్క్‌ల కోసం పరికర కాన్ఫిగరేషన్‌కు మార్పులు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"Wi-Fi Multicast స్వీకరణను అనుమతించడం"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ టాబ్లెట్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ Android TV పరికరానికి మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ని అనుమతిస్తుంది. ఇది మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఎక్కువ పవర్‌ను ఉపయోగిస్తుంది."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ ఫోన్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ ఫోన్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"బ్లూటూత్ సెట్టింగ్‌లను యాక్సెస్ చేయడం"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"స్థానిక బ్లూటూత్ టాబ్లెట్‌ను కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలతో దాన్ని కనుగొనడానికి మరియు జత చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"మీ Android TV పరికరంలో బ్లూటూత్‌ను కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలతో దాన్ని కనుగొని, జత చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -507,7 +507,7 @@
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAXకు కనెక్ట్ చేయడం మరియు దాని నుండి డిస్‌కనెక్ట్ చేయడం"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Wi-Fi ప్రారంభించబడిందా, లేదా మరియు కనెక్ట్ చేయబడిన WiMAX నెట్‌వర్క్‌ల గురించి సమాచారాన్ని కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"WiMAX స్థితిని మార్చడం"</string>
-    <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"WiMAX నెట్‌వర్క్‌లకు టాబ్లెట్‌ను కనెక్ట్ చేయడానికి మరియు వాటి నుండి టాబ్లెట్‌ను డిస్‌కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"WiMAX నెట్‌వర్క్‌లకు టాబ్లెట్‌ను కనెక్ట్ చేయడానికి మరియు వాటి నుండి టాబ్లెట్‌ను డిస్‌కనెక్ట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"మీ Android TV పరికరాన్ని WiMAX నెట్‌వర్క్‌లకు కనెక్ట్ చేయడానికి లేదా డిస్‌కనెక్ట్ చేయడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"WiMAX నెట్‌వర్క్‌లకు ఫోన్‌ను కనెక్ట్ చేయడానికి మరియు వాటి నుండి ఫోన్‌ను డిస్‌కనెక్ట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"బ్లూటూత్ పరికరాలతో జత చేయడం"</string>
@@ -622,19 +622,19 @@
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను సవరించండి లేదా తొలగించండి"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP కాల్‌లను చేయడానికి/స్వీకరించడానికి"</string>
-    <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP కాల్‌లను చేయడానికి మరియు స్వీకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP కాల్‌లను చేయడానికి మరియు స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"కొత్త టెలికామ్ SIM కనెక్షన్‌లను నమోదు చేయడం"</string>
-    <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"కొత్త టెలికామ్ SIM కనెక్షన్‌లను నమోదు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"కొత్త టెలికామ్ SIM కనెక్షన్‌లను నమోదు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడం"</string>
-    <string name="permdesc_register_call_provider" msgid="4201429251459068613">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_register_call_provider" msgid="4201429251459068613">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడం"</string>
-    <string name="permdesc_connection_manager" msgid="1426093604238937733">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_connection_manager" msgid="1426093604238937733">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ఇన్-కాల్ స్క్రీన్‌తో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"వినియోగదారునికి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"వినియోగదారునికి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"కాల్‌లు చేయడం/స్వీకరించడం కోసం టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"కాల్‌లు చేయడం/స్వీకరించడం కోసం టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"ఇన్-కాల్ వినియోగదారు అనుభవాన్ని అందించడం"</string>
-    <string name="permdesc_control_incall_experience" msgid="5896723643771737534">"ఇన్-కాల్ వినియోగదారుని అనుభవాన్ని అందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_control_incall_experience" msgid="5896723643771737534">"ఇన్-కాల్ వినియోగదారుని అనుభవాన్ని అందించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="8470402862501573795">"చారిత్రక నెట్‌వర్క్ వినియోగాన్ని చదవడం"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"నిర్దిష్ట నెట్‌వర్క్‌లు మరియు యాప్‌ల కోసం చారిత్రాత్మక నెట్‌వర్క్ వినియోగాన్ని చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"నెట్‌వర్క్ విధానాన్ని నిర్వహించడం"</string>
@@ -642,31 +642,31 @@
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"నెట్‌వర్క్ వినియోగ అకౌంటింగ్‌ను సవరించడం"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"యాప్‌లలో నెట్‌వర్క్ వినియోగం ఎలా గణించాలనే దాన్ని సవరించడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌ల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"నోటిఫికేషన్‌లను యాక్సెస్ చేయడం"</string>
-    <string name="permdesc_accessNotifications" msgid="761730149268789668">"నోటిఫికేషన్‌లను, ఇతర అనువర్తనాల ద్వారా పోస్ట్ చేయబడిన వాటిని తిరిగి పొందడానికి, పరిశీలించడానికి మరియు క్లియర్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_accessNotifications" msgid="761730149268789668">"నోటిఫికేషన్‌లను, ఇతర అనువర్తనాల ద్వారా పోస్ట్ చేయబడిన వాటిని తిరిగి పొందడానికి, పరిశీలించడానికి మరియు క్లియర్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"నోటిఫికేషన్ పరిశీలన సేవకు అనుబంధించడం"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"నోటిఫికేషన్ పరిశీలన సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
     <string name="permlab_bindConditionProviderService" msgid="5245421224814878483">"షరతు ప్రదాత సేవకు అనుబంధించడం"</string>
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"షరతు ప్రదాత సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"డ్రీమ్ సేవ‌కి అనుబంధించడం"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"డ్రీమ్ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ అనువర్తనాన్ని అభ్యర్థించడం"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ అనువర్తనాన్ని అభ్యర్థించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ యాప్‌ను అభ్యర్థించడం"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ యాప్‌ను అభ్యర్థించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"నెట్‌వర్క్ పరిస్థితులపై పరిశీలనల గురించి తెలుసుకోవడం"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"నెట్‌వర్క్ పరిస్థితులపై పరిశీలనల గురించి తెలుసుకోవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండకూడదు."</string>
+    <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"నెట్‌వర్క్ పరిస్థితులపై పరిశీలనల గురించి తెలుసుకోవడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండకూడదు."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"ఇన్‌పుట్ పరికరం క్రమాంకనాన్ని మార్చండి"</string>
-    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"టచ్ స్క్రీన్ యొక్క క్రమాంకన పరామితులను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
+    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"టచ్ స్క్రీన్ యొక్క క్రమాంకన పరామితులను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM ప్రమాణపత్రాలను యాక్సెస్ చేయడం"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"DRM ప్రమాణపత్రాలను కేటాయించడానికి మరియు ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"DRM ప్రమాణపత్రాలను కేటాయించడానికి మరియు ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android Beam బదిలీ స్థితిని స్వీకరించడం"</string>
-    <string name="permdesc_handoverStatus" msgid="3842269451732571070">"ప్రస్తుత Android Beam బదిలీలకు సంబంధించిన సమాచారాన్ని స్వీకరించడానికి ఈ అనువర్తనాన్ని అనుమతిస్తుంది"</string>
+    <string name="permdesc_handoverStatus" msgid="3842269451732571070">"ప్రస్తుత Android Beam బదిలీలకు సంబంధించిన సమాచారాన్ని స్వీకరించడానికి ఈ యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"DRM ప్రమాణపత్రాలను తీసివేయడం"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"DRM ప్రమాణపత్రాలను తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
+    <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"DRM ప్రమాణపత్రాలను తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"క్యారియర్ సందేశ సేవకు అనుబంధించడం"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"క్యారియర్ సందేశ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"క్యారియర్ సేవలకు అనుబంధించడం"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"క్యారియర్ సేవలకు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"అంతరాయం కలిగించవద్దును యాక్సెస్ చేయడం"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు వ్రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"వీక్షణ అనుమతి వినియోగాన్ని ప్రారంభించండి"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"యాప్‌నకు అనుమతి వినియోగాన్ని ప్రారంభించడానికి హోల్డర్‌‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ ఇటువంటి అనుమతి అవసరం ఉండదు."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
@@ -1111,7 +1111,7 @@
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"సిస్టమ్ కోసం తగినంత నిల్వ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> అమలులో ఉంది"</string>
-    <string name="app_running_notification_text" msgid="5120815883400228566">"మరింత సమాచారం కోసం లేదా అనువర్తనాన్ని ఆపివేయడం కోసం నొక్కండి."</string>
+    <string name="app_running_notification_text" msgid="5120815883400228566">"మరింత సమాచారం కోసం లేదా యాప్‌ను ఆపివేయడం కోసం నొక్కండి."</string>
     <string name="ok" msgid="2646370155170753815">"సరే"</string>
     <string name="cancel" msgid="6908697720451760115">"రద్దు చేయి"</string>
     <string name="yes" msgid="9069828999585032361">"సరే"</string>
@@ -1142,28 +1142,28 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"దీన్ని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$sని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపు"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"హోమ్ అనువర్తనాన్ని ఎంచుకోండి"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"హోమ్ యాప్‌ను ఎంచుకోండి"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"%1$sని హోమ్‌గా ఉపయోగించండి"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"చిత్రాన్ని క్యాప్చర్ చేయి"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"దీనితో చిత్రాన్ని క్యాప్చర్ చేయి"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$sతో చిత్రాన్ని క్యాప్చర్ చేయండి"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"చిత్రాన్ని క్యాప్చర్ చేయి"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"ఈ చర్యకు డిఫాల్ట్‌గా ఉపయోగించండి."</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"వేరొక అనువర్తనాన్ని ఉపయోగించండి"</string>
-    <string name="clearDefaultHintMsg" msgid="1325866337702524936">"సిస్టమ్ సెట్టింగ్‌లు &gt; అనువర్తనాలు &gt; డౌన్‌లోడ్ చేయబడినవిలో డిఫాల్ట్‌ను క్లియర్ చేయి."</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"వేరొక యాప్‌ను ఉపయోగించండి"</string>
+    <string name="clearDefaultHintMsg" msgid="1325866337702524936">"సిస్టమ్ సెట్టింగ్‌లు &gt; యాప్‌లు &gt; డౌన్‌లోడ్ చేయబడినవిలో డిఫాల్ట్‌ను క్లియర్ చేయి."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"చర్యను ఎంచుకోండి"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USB పరికరం కోసం యాప్‌ను ఎంచుకోండి"</string>
-    <string name="noApplications" msgid="1186909265235544019">"ఈ చర్యను అమలు చేయగల అనువర్తనాలు ఏవీ లేవు."</string>
+    <string name="noApplications" msgid="1186909265235544019">"ఈ చర్యను అమలు చేయగల యాప్‌లు ఏవీ లేవు."</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> ఆపివేయబడింది"</string>
     <string name="aerr_process" msgid="4268018696970966407">"<xliff:g id="PROCESS">%1$s</xliff:g> ఆపివేయబడింది"</string>
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
-    <string name="aerr_restart" msgid="2789618625210505419">"అనువర్తనాన్ని మళ్లీ తెరువు"</string>
+    <string name="aerr_restart" msgid="2789618625210505419">"యాప్‌ను మళ్లీ తెరువు"</string>
     <string name="aerr_report" msgid="3095644466849299308">"ఫీడ్‌బ్యాక్‌ను పంపు"</string>
     <string name="aerr_close" msgid="3398336821267021852">"మూసివేయి"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"పరికరం పునఃప్రారంభమయ్యే వరకు మ్యూట్ చేయి"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"వేచి ఉండండి"</string>
-    <string name="aerr_close_app" msgid="8318883106083050970">"అనువర్తనాన్ని మూసివేయి"</string>
+    <string name="aerr_close_app" msgid="8318883106083050970">"యాప్‌ను మూసివేయి"</string>
     <string name="anr_title" msgid="7290329487067300120"></string>
     <string name="anr_activity_application" msgid="8121716632960340680">"<xliff:g id="APPLICATION">%2$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
     <string name="anr_activity_process" msgid="3477362583767128667">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
@@ -1178,7 +1178,7 @@
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> వాస్తవంగా ప్రారంభించబడింది."</string>
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"ప్రమాణం"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"ఎల్లప్పుడూ చూపు"</string>
-    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"సిస్టమ్ సెట్టింగ్‌లు &gt; అనువర్తనాలు &gt; డౌన్‌లోడ్ చేసినవిలో దీన్ని పునఃప్రారంభించండి."</string>
+    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"సిస్టమ్ సెట్టింగ్‌లు &gt; యాప్‌లు &gt; డౌన్‌లోడ్ చేసినవిలో దీన్ని పునఃప్రారంభించండి."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుత ప్రదర్శన పరిమాణ సెట్టింగ్‌కు మద్దతు ఇవ్వదు, దీని వలన ఊహించని సమస్యలు తలెత్తవచ్చు."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"ఎల్లప్పుడూ చూపు"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Android OS యొక్క అననుకూల వెర్షన్ కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రూపొందించబడింది మరియు ఊహించని సమస్యలు తలెత్తవచ్చు. యాప్ యొక్క అప్‌డేట్ చేసిన వెర్షన్ అందుబాటులో ఉండవచ్చు."</string>
@@ -1323,7 +1323,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"బగ్ నివేదికను తీస్తోంది…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"బగ్ నివేదికను భాగస్వామ్యం చేయాలా?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"బగ్ నివేదికను భాగస్వామ్యం చేస్తోంది..."</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"మీ నిర్వాహకులు ఈ పరికరం సమస్యకు పరిష్కారాన్ని కనుగొనడంలో సహాయం కోసం బగ్ నివేదికను అభ్యర్థించారు. అనువర్తనాలు మరియు డేటా భాగస్వామ్యం చేయబడవచ్చు."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"మీ నిర్వాహకులు ఈ పరికరం సమస్యకు పరిష్కారాన్ని కనుగొనడంలో సహాయం కోసం బగ్ నివేదికను అభ్యర్థించారు. యాప్‌లు మరియు డేటా భాగస్వామ్యం చేయబడవచ్చు."</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"షేర్ చేయి"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
@@ -1386,13 +1386,13 @@
     <string name="ext_media_status_missing" msgid="6520746443048867314">"చొప్పించబడలేదు"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"సరిపోలే కార్యాచరణలు కనుగొనబడలేదు."</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"మీడియా అవుట్‌పుట్‌ను మళ్లించడం"</string>
-    <string name="permdesc_route_media_output" msgid="1759683269387729675">"మీడియా అవుట్‌పుట్‌ను ఇతర బాహ్య పరికరాలకు మళ్లించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_route_media_output" msgid="1759683269387729675">"మీడియా అవుట్‌పుట్‌ను ఇతర బాహ్య పరికరాలకు మళ్లించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"ఇన్‌స్టాల్ సెషన్‌లను చదవడం"</string>
-    <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"ఇన్‌స్టాల్ ప్యాకేజీలను అభ్యర్థించడం"</string>
-    <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"ప్యాకేజీల ఇన్‌స్టాలేషన్ అభ్యర్థించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"ప్యాకేజీల ఇన్‌స్టాలేషన్ అభ్యర్థించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"ప్యాకేజీలను తొలగించడానికి అభ్యర్థించు"</string>
-    <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ప్యాకేజీల తొలగింపును అభ్యర్థించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"ప్యాకేజీల తొలగింపును అభ్యర్థించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"బ్యాటరీ అనుకూలీకరణలను విస్మరించడానికి అడగాలి"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ఆ యాప్ కోసం బ్యాటరీ అనుకూలీకరణలు విస్మరించేలా అనుమతి కోరడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"జూమ్ నియంత్రణ కోసం రెండుసార్లు నొక్కండి"</string>
@@ -1413,8 +1413,8 @@
     <string name="deny" msgid="6632259981847676572">"తిరస్కరించండి"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"అనుమతి అభ్యర్థించబడింది"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"ఖాతా <xliff:g id="ACCOUNT">%s</xliff:g> కోసం\nఅనుమతి అభ్యర్థించబడింది."</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"మీరు మీ కార్యాలయ ప్రొఫైల్‌కు వెలుపల ఈ అనువర్తనాన్ని ఉపయోగిస్తున్నారు"</string>
-    <string name="forward_intent_to_work" msgid="3620262405636021151">"మీరు మీ కార్యాలయ ప్రొఫైల్‌లో ఈ అనువర్తనాన్ని ఉపయోగిస్తున్నారు"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"మీరు మీ కార్యాలయ ప్రొఫైల్‌కు వెలుపల ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
+    <string name="forward_intent_to_work" msgid="3620262405636021151">"మీరు మీ కార్యాలయ ప్రొఫైల్‌లో ఈ యాప్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"సమకాలీకరణ"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"యాక్సెస్ సామర్థ్యం"</string>
@@ -1661,9 +1661,9 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ఫీచర్ల మధ్య మారడానికి, మూడు చేతి వేళ్ళతో పైకి స్వైప్ చేసి పట్టుకోండి."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"మాగ్నిఫికేషన్"</string>
     <string name="user_switched" msgid="7249833311585228097">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>కి మారుస్తోంది…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> యూజర్‌కు స్విచ్ అవుతోంది…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ని లాగ్ అవుట్ చేస్తోంది…"</string>
-    <string name="owner_name" msgid="8713560351570795743">"యజమాని"</string>
+    <string name="owner_name" msgid="8713560351570795743">"ఓనర్"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ఎర్రర్"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ఈ మార్పును మీ నిర్వాహకులు అనుమతించలేదు"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ఈ చర్యను నిర్వహించడానికి యాప్ ఏదీ కనుగొనబడలేదు"</string>
@@ -1894,7 +1894,7 @@
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ఈ యాప్ పాత వెర్షన్ Android కోసం రూపొందించబడింది మరియు అది సరిగ్గా పని చేయకపోవచ్చు. అప్‌డేట్‌ల కోసం తనిఖీ చేయడానికి ప్రయత్నించండి లేదా డెవలపర్‌ని సంప్రదించండి."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"అప్‌డేట్ కోసం తనిఖీ చేయండి"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"మీకు కొత్త సందేశాలు ఉన్నాయి"</string>
-    <string name="new_sms_notification_content" msgid="3197949934153460639">"వీక్షించడానికి SMS అనువర్తనాన్ని తెరవండి"</string>
+    <string name="new_sms_notification_content" msgid="3197949934153460639">"వీక్షించడానికి SMS యాప్‌ను తెరవండి"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"కొంత ఫంక్షనాలిటీ పరిమితం కావచ్చు"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"కార్యాలయ ప్రొఫైల్ లాక్ అయింది"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"కార్యాలయ ప్రొఫైల్ అన్‌లాక్ చేయుటకు నొక్కండి"</string>

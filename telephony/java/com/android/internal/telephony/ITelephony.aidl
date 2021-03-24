@@ -2139,6 +2139,11 @@ interface ITelephony {
     int setImsProvisioningString(int subId, int key, String value);
 
     /**
+     * Start emergency callback mode for testing.
+     */
+    void startEmergencyCallbackMode();
+
+    /**
      * Update Emergency Number List for Test Mode.
      */
     void updateEmergencyNumberListTestMode(int action, in EmergencyNumber num);

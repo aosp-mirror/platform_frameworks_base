@@ -343,16 +343,18 @@ public class PackageInstallerActivity extends AlertActivity {
         if (!wasSetUp) {
             return;
         }
-
-        // load dummy layout with OK button disabled until we override this layout in
-        // startInstallConfirm
-        bindUi();
-        checkIfAllowedAndInitiateInstall();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (mAppSnippet != null) {
+            // load dummy layout with OK button disabled until we override this layout in
+            // startInstallConfirm
+            bindUi();
+            checkIfAllowedAndInitiateInstall();
+        }
 
         if (mOk != null) {
             mOk.setEnabled(mEnableOk);

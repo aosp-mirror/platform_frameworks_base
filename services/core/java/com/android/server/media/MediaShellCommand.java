@@ -64,7 +64,7 @@ public class MediaShellCommand extends ShellCommand {
         }
         if (sThread == null) {
             Looper.prepare();
-            sThread = ActivityThread.systemMain();
+            sThread = ActivityThread.currentActivityThread();
             Context context = sThread.getSystemContext();
             sMediaSessionManager =
                     (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);

@@ -2623,6 +2623,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         LocationAccessPolicy.LocationPermissionQuery.Builder locationQueryBuilder =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setMethod(message + " events: " + events)
                 .setCallingPid(Binder.getCallingPid())
                 .setCallingUid(Binder.getCallingUid());
@@ -2761,6 +2762,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         LocationAccessPolicy.LocationPermissionQuery query =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
                         .setCallingPackage(r.callingPackage)
+                        .setCallingFeatureId(r.callingFeatureId)
                         .setCallingPid(r.callerPid)
                         .setCallingUid(r.callerUid)
                         .setMethod("TelephonyRegistry push")
@@ -2779,6 +2781,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         LocationAccessPolicy.LocationPermissionQuery query =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
                         .setCallingPackage(r.callingPackage)
+                        .setCallingFeatureId(r.callingFeatureId)
                         .setCallingPid(r.callerPid)
                         .setCallingUid(r.callerUid)
                         .setMethod("TelephonyRegistry push")

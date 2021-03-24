@@ -854,7 +854,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Appels d\'urgence uniquement"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La carte SIM est verrouillée par clé PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Veuillez consulter le guide utilisateur ou contacter le service à la clientèle."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Veuillez consulter le guide d\'utilisation ou contacter le service à la clientèle."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"La carte SIM est verrouillée."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Déverrouillage de la carte SIM en cours…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises.\n\nVeuillez réessayer dans <xliff:g id="NUMBER_1">%2$d</xliff:g> secondes."</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec trois doigts et maintenez-les-y."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zoom"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Changement d\'utilisateur (<xliff:g id="NAME">%1$s</xliff:g>) en cours…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g> en cours..."</string>
     <string name="owner_name" msgid="8713560351570795743">"Propriétaire"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Erreur"</string>

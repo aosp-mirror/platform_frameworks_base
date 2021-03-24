@@ -548,7 +548,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"កំណត់​ការ​ចាក់​សោ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"ប្ដូរទៅ <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"បញ្ចូល​ភ្ញៀវ"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"លុប​​​ភ្ញៀវ"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"ដកភ្ញៀវចេញ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ភ្ញៀវ"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"លំនាំដើម​របស់ឧបករណ៍"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"បានបិទ"</string>

@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"बैटरी दो बार."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"बैटरी तीन बार."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"बैटरी पूरी है."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"इस बारे में जानकारी नहीं है कि अभी बैटरी कितने प्रतिशत चार्ज है."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"कोई फ़ोन नहीं."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"फ़ोन एक बार."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"फ़ोन दो बार."</string>
@@ -476,10 +477,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"प्रोफ़ाइल दिखाएं"</string>
     <string name="user_add_user" msgid="4336657383006913022">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नया उपयोगकर्ता"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि को निकालें?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"क्या आप मेहमान को हटाना चाहते हैं?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्लिकेशन और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"निकालें"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"अतिथि, आपका फिर से स्वागत है!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"मेहमान, आपका फिर से स्वागत है!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"फिर से शुरू करें"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"हां, जारी रखें"</string>
@@ -498,7 +499,7 @@
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"उपयोगकर्ता निकालें?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"निकालें"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाएं"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"बैटरी सेवर चालू है"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"बैटरी सेवर बंद करें"</string>
@@ -716,7 +717,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे चैट, बातचीत सेक्शन में सबसे ऊपर फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
@@ -981,8 +982,8 @@
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- यह <xliff:g id="APP">%1$s</xliff:g> से सूचना पढ़ सकता है"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- यह <xliff:g id="APP">%1$s</xliff:g> में कार्रवाई कर सकता है"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g> को किसी भी ऐप्लिकेशन के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें"</string>
-    <string name="slice_permission_allow" msgid="6340449521277951123">"मंज़ूरी दें"</string>
-    <string name="slice_permission_deny" msgid="6870256451658176895">"नामंज़ूर करें"</string>
+    <string name="slice_permission_allow" msgid="6340449521277951123">"अनुमति दें"</string>
+    <string name="slice_permission_deny" msgid="6870256451658176895">"अनुमति न दें"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"बैटरी सेवर शेड्यूल करने के लिए टैप करें"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"जब बैटरी खत्म होने वाली हो तब \'बैटरी सेवर\' चालू करें"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"जी नहीं, शुक्रिया"</string>
@@ -1099,4 +1100,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (डिसकनेक्ट किया गया)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"कनेक्ट नहीं किया जा सका. फिर से कोशिश करें."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नया डिवाइस जोड़ें"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"आपके डिवाइस के बैटरी मीटर की रीडिंग लेने में समस्या आ रही है"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ज़्यादा जानकारी के लिए टैप करें"</string>
 </resources>

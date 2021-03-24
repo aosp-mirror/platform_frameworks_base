@@ -134,11 +134,11 @@ public final class CachedAppOptimizerTest {
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
         ProcessRecord app = new ProcessRecord(mAms, ai, processName, uid);
-        app.pid = pid;
+        app.pid = app.mPidForCompact = pid;
         app.info.uid = packageUid;
         // Exact value does not mater, it can be any state for which compaction is allowed.
         app.setProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-        app.setAdj = 905;
+        app.setAdj = app.mSetAdjForCompact = 905;
         return app;
     }
 

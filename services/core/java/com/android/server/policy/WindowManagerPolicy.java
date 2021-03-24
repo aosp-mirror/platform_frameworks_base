@@ -933,9 +933,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return The starting surface.
      *
      */
-    public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
-            CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
-            int logo, int windowFlags, Configuration overrideConfig, int displayId);
+    public StartingSurface addSplashScreen(IBinder appToken, int userId, String packageName,
+            int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
+            int icon, int logo, int windowFlags, Configuration overrideConfig, int displayId);
 
     /**
      * Set or clear a window which can behave as the keyguard.

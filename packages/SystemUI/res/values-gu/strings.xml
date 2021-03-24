@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"બૅટરી બે બાર."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"બૅટરી ત્રણ બાર."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"બૅટરી પૂર્ણ."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"બૅટરીની ટકાવારી અજાણ છે."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"કોઈ ફોન નથી."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"ફોન એક બાર."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"ફોન બે બાર."</string>
@@ -389,7 +390,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"સ્વતઃ"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"રંગોને ઉલટાવો"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"રંગ સુધારણા મોડ"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"વધુ સેટિંગ્સ"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"વધુ સેટિંગ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"થઈ ગયું"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"કનેક્ટ થયેલ"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"કનેક્ટ કરેલ, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
@@ -475,10 +476,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"વપરાશકર્તા ઉમેરો"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"નવો વપરાશકર્તા"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"અતિથિ દૂર કરીએ?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ્લિકેશનો અને ડેટા કાઢી નાખવામાં આવશે."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"દૂર કરો"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ફરી સ્વાગત છે, અતિથિ!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"શું તમે તમારું સત્ર ચાલુ કરવા માંગો છો?"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"શું તમે તમારું સત્ર ચાલુ રાખવા માંગો છો?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"શરૂ કરો"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"હા, ચાલુ રાખો"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"અતિથિ વપરાશકર્તા"</string>
@@ -488,7 +489,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"વર્તમાન વપરાશકર્તાને લૉગઆઉટ કરો"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"વપરાશકર્તાને લૉગઆઉટ કરો"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"વપરાશકર્તા સંખ્યાની મર્યાદા"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">તમે <xliff:g id="COUNT">%d</xliff:g> વપરાશકર્તા સુધી ઉમેરી શકો છો.</item>
@@ -737,7 +738,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સૂચના નિયંત્રણો ચાલુ છે"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સૂચના નિયંત્રણો બંધ છે"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"આ ચૅનલની સૂચનાઓને મંજૂરી આપો"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"વધુ સેટિંગ્સ"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"વધુ સેટિંગ"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"કસ્ટમાઇઝ કરો"</string>
     <string name="notification_done" msgid="6215117625922713976">"થઈ ગયું"</string>
     <string name="inline_undo" msgid="9026953267645116526">"રદ કરો"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ડિસ્કનેક્ટ થયેલું)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"કનેક્ટ કરી શકાયું નહીં. ફરી પ્રયાસ કરો."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"નવા ડિવાઇસ સાથે જોડાણ કરો"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"તમારું બૅટરી મીટર વાંચવામાં સમસ્યા આવી"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"વધુ માહિતી માટે ટૅપ કરો"</string>
 </resources>

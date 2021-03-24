@@ -63,9 +63,9 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"允许"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"不允许使用 USB 调试功能"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"要允许在此网络上进行无线调试吗？"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"要允许通过此网络上进行无线调试吗？"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"网络名称 (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWLAN 地址 (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"在此网络上始终允许"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"始终允许通过此网络进行调试"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"允许"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"不允许使用无线调试功能"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"目前已登录此设备的用户无法开启无线调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"电池电量为两格。"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"电池电量为三格。"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"电池电量满格。"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"电池电量百分比未知。"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"没有手机信号。"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"手机信号强度为一格。"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"手机信号强度为两格。"</string>
@@ -508,7 +509,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"历史记录"</string>
-    <string name="notification_section_header_incoming" msgid="850925217908095197">"新"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"最新"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"静音"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"对话"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>（已断开连接）"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"无法连接。请重试。"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"与新设备配对"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"读取电池计量器时出现问题"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"点按即可了解详情"</string>
 </resources>

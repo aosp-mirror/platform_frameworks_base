@@ -49,10 +49,10 @@
     <string name="invalidPuk" msgid="8831151490931907083">"8-с цөөнгүй тооноос бүтэх PUK-г бичнэ үү."</string>
     <string name="needPuk" msgid="7321876090152422918">"SIM картны PUK-түгжигдсэн. Тайлах бол PUK кодыг бичнэ үү."</string>
     <string name="needPuk2" msgid="7032612093451537186">"SIM картыг блокоос гаргах бол PUK2-г бичнэ үү."</string>
-    <string name="enablePin" msgid="2543771964137091212">"Амжилтгүй боллоо, СИМ/РҮИМ түгжээг идэвхжүүлнэ үү."</string>
+    <string name="enablePin" msgid="2543771964137091212">"Амжилтгүй боллоо, SIM/РҮИМ түгжээг идэвхжүүлнэ үү."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="other">Таны СИМ түгжигдэхээс өмнө танд <xliff:g id="NUMBER_1">%d</xliff:g> оролдлого хийх боломж үлдлээ. </item>
-      <item quantity="one">Таны СИМ түгжигдэхээс өмнө танд <xliff:g id="NUMBER_0">%d</xliff:g> оролдлого хийх боломж үлдлээ. </item>
+      <item quantity="other">Таны SIM түгжигдэхээс өмнө танд <xliff:g id="NUMBER_1">%d</xliff:g> оролдлого хийх боломж үлдлээ. </item>
+      <item quantity="one">Таны SIM түгжигдэхээс өмнө танд <xliff:g id="NUMBER_0">%d</xliff:g> оролдлого хийх боломж үлдлээ. </item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
@@ -317,7 +317,7 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"таны биеийн байдлын талаарх мэдрэгч бүхий өгөгдөлд нэвтрэх"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Цонхны агуулгыг авах"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Хүрч танихыг асаах"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Хүрэлтээр сонсохыг асаах"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Товшсон зүйлсийг чангаар хэлэх ба дэлгэцийг дохио ашиглан таних боломжтой."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Бичсэн текстээ ажиглах"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Кредит картын дугаар болон нууц үг зэрэг хувийн датаг агуулж байна."</string>
@@ -798,7 +798,7 @@
     <string name="relationTypeAssistant" msgid="4057605157116589315">"Туслагч"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"Ах"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"Хүүхэд"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Дотоод Түнш"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Хамтран амьдрагч"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Эцэг"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"Найз"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Менежер"</string>
@@ -987,9 +987,9 @@
     <string name="searchview_description_clear" msgid="1989371719192982900">"Асуулгыг цэвэрлэх"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"Асуулгыг илгээх"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Дуут хайлт"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Хүрч хайх функцийг идэвхтэй болгох уу?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> нь Хүрч танихыг идэвхжүүлэхийг шаардаж байна. Хүрч таних идэвхжсэн үед та хуруун доороо юу байгааг сонсох, тайлбарыг харах боломжтой ба таблеттайгаа дохиогоор харилцах боломжтой."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> нь Хүрч танихыг идэвхжүүлэхийг шаардаж байна. Хүрч таних идэвхжсэн тохиолдолд та хуруун доороо юу байгааг сонсох, тайлбарыг харах боломжтой ба утастайгаа дохиогоор харилцах боломжтой."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Хүрэлтээр сонсохыг идэвхжүүлэх үү?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> нь Хүрэлтээр сонсохыг идэвхжүүлэхийг шаардаж байна. Хүрэлтээр сонсох идэвхжсэн үед та хуруун доороо юу байгааг сонсох, тайлбарыг харах боломжтой ба таблеттайгаа дохиогоор харилцах боломжтой."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> нь Хүрэлтээр сонсохыг идэвхжүүлэхийг шаардаж байна. Хүрэлтээр сонсох идэвхжсэн тохиолдолд та хуруун доороо юу байгааг сонсох, тайлбарыг харах боломжтой ба утастайгаа дохиогоор харилцах боломжтой."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 сарын өмнө"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"1 сарын өмнө"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1856,7 +1856,7 @@
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Мэдэгдсэн"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Дэлгэх"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Буулгах"</string>
-    <string name="expand_action_accessibility" msgid="1947657036871746627">"унтраах/асаах өргөтгөл"</string>
+    <string name="expand_action_accessibility" msgid="1947657036871746627">"асаах/унтраах өргөтгөл"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Андройд USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"USB Peripheral Port"</string>

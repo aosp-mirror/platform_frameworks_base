@@ -24,7 +24,7 @@
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Hakuna arifa"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Arifa"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Huenda chaji itaisha hivi karibuni"</string>
+    <string name="battery_low_title" msgid="6891106956328275225">"Chaji inaweza kuisha hivi karibuni"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Imebakisha <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Imesalia <xliff:g id="PERCENTAGE">%1$s</xliff:g>, itadumu takribani <xliff:g id="TIME">%2$s</xliff:g> kulingana na jinsi unavyotumia"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Imesalia <xliff:g id="PERCENTAGE">%1$s</xliff:g>, itadumu takribani <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Pau mbili za betri"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Pau tatu za betri."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Betri imejaa."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Asilimia ya betri haijulikani."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Hakuna simu"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Mwambaa mmoja wa simu."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Miambaa miwili ya simu"</string>
@@ -477,9 +478,9 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ungependa kumwondoa mgeni?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Data na programu zote katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ondoa"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Karibu tena, mwalikwa!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Karibu tena mgeni!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Je, unataka kuendelea na kipindi chako?"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza tena"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza upya"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ndiyo, endelea"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Mtumiaji mgeni"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Ili kufuta programu na data, mwondoe mtumiaji mgeni"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (hakijaunganishwa)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Imeshindwa kuunganisha. Jaribu tena."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Oanisha kifaa kipya"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Tatizo la kusoma mita ya betri yako"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Gusa ili upate maelezo zaidi"</string>
 </resources>

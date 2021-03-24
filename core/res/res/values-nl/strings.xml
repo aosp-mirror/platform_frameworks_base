@@ -501,9 +501,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je Android TV-apparaat. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je telefoon. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"Bluetooth-instellingen openen"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Hiermee kan de app de lokale bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Hiermee kan de app Bluetooth op je Android TV-apparaat configureren en externe apparaten zoeken en koppelen."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Hiermee kan de app de lokale bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Hiermee kan de app de lokale bluetooth-tablet instellen en externe apparaten zoeken en koppelen."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Hiermee kan de app Bluetooth op je Android TV-apparaat isntellen en externe apparaten zoeken en koppelen."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Hiermee kan de app de lokale bluetooth-telefoon instellen en externe apparaten zoeken en koppelen."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAX-verbinding maken en verbreken"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Hiermee kan de app bepalen of WiMAX is ingeschakeld en informatie bekijken over alle WiMAX-netwerken waarmee verbinding is gemaakt."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"WiMAX-status wijzigen"</string>
@@ -1329,7 +1329,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"Invoermethode selecteren"</string>
     <string name="show_ime" msgid="6406112007347443383">"Dit op het scherm weergeven terwijl het fysieke toetsenbord actief is"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtueel toetsenbord tonen"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Fysiek toetsenbord configureren"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Fysiek toetsenbord instellen"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tik om een taal en indeling te selecteren"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1352,7 +1352,7 @@
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Je moet het apparaat misschien opnieuw formatteren. Tik om het uit te werpen."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> niet ondersteund"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> werkt niet"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Dit apparaat biedt geen ondersteuning voor deze <xliff:g id="NAME">%s</xliff:g>. Tik om te configureren in een ondersteunde indeling."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Dit apparaat biedt geen ondersteuning voor deze <xliff:g id="NAME">%s</xliff:g>. Tik om in te stellen in een ondersteunde indeling."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Dit apparaat biedt geen ondersteuning voor deze <xliff:g id="NAME">%s</xliff:g>. Selecteer om in te stellen in een ondersteunde indeling."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Je moet het apparaat misschien opnieuw formatteren"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> is onverwacht verwijderd"</string>
@@ -1841,7 +1841,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Afspraken"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Slapen"</string>
-    <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dempt sommige geluiden"</string>
+    <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> zet sommige geluiden uit"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Er is een intern probleem met je apparaat. Het apparaat kan instabiel zijn totdat u het apparaat terugzet naar de fabrieksinstellingen."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Er is een intern probleem met je apparaat. Neem contact op met de fabrikant voor meer informatie."</string>
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD-verzoek gewijzigd in normaal gesprek"</string>
@@ -1909,7 +1909,7 @@
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo starten…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Apparaat resetten…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> uitgeschakeld"</string>
-    <string name="conference_call" msgid="5731633152336490471">"Conferencecall"</string>
+    <string name="conference_call" msgid="5731633152336490471">"Telefonische vergadering"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Knopinfo"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Games"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Muziek en audio"</string>
@@ -1985,7 +1985,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wil segmenten van <xliff:g id="APP_2">%2$s</xliff:g> weergeven"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bewerken"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Trillen bij gesprekken en meldingen"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Gesprekken en meldingen zijn gedempt"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Telefoon- en meldingsgeluid wordt uitgezet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systeemwijzigingen"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Niet storen"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nieuw: \'Niet storen\' verbergt meldingen"</string>

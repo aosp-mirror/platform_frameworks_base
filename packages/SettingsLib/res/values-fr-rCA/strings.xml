@@ -225,8 +225,8 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Associer avec l\'appareil"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Code d\'association Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Échec de l\'association"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Vérifier que l\'appareil est connecté au même réseau."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Associer un appareil par Wi-Fi en numérisant un code QR"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Vérifiez que l\'appareil est connecté au même réseau."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Associez l\'appareil par Wi-Fi en numérisant un code QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Association de l\'appareil en cours…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Échec de l\'association de l\'appareil Soit le code QR est incorrect, soit l\'appareil n\'est pas connecté au même réseau."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresse IP et port"</string>

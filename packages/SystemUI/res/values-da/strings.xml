@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Batteri to bjælker."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Batteri tre bjælker."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batteri fuldt."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriniveauet er ukendt."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Ingen telefon."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Telefon en bjælke."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Telefon to bjælker."</string>
@@ -487,8 +488,8 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Log brugeren ud"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Log den aktuelle bruger ud"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"LOG BRUGEREN UD"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Vil du tilføje den nye bruger?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nEnhver bruger kan opdatere apps for alle andre brugere."</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Vil du tilføje en ny bruger?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Grænsen for antal brugere er nået"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Du kan tilføje op til <xliff:g id="COUNT">%d</xliff:g> bruger.</item>
@@ -779,7 +780,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Mellemrumstast"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tilbagetast"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Afspil/pause"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stop"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Næste"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ingen forbindelse)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Der kunne ikke oprettes forbindelse. Prøv igen."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Par ny enhed"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Der er problemer med at aflæse dit batteriniveau"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tryk for at få flere oplysninger"</string>
 </resources>
