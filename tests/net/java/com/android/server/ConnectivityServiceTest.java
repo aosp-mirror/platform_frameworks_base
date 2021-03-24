@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
+import static android.Manifest.permission.NETWORK_FACTORY;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.content.Intent.ACTION_USER_ADDED;
@@ -12185,5 +12186,69 @@ public class ConnectivityServiceTest {
                 IllegalArgumentException.class , () ->
                         mCm.setProfileNetworkPreference(testHandle,
                                 PROFILE_NETWORK_PREFERENCE_ENTERPRISE, null, null));
+    }
+
+    @Test
+    public void testSubIdsClearedWithoutNetworkFactoryPermission() throws Exception {
+        mServiceContext.setPermission(NETWORK_FACTORY, PERMISSION_DENIED);
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        nc.setSubIds(Collections.singleton(Process.myUid()));
+
+        final NetworkCapabilities result =
+                mService.networkCapabilitiesRestrictedForCallerPermissions(
+                        nc, Process.myPid(), Process.myUid());
+        assertTrue(result.getSubIds().isEmpty());
+    }
+
+    @Test
+    public void testSubIdsExistWithNetworkFactoryPermission() throws Exception {
+        mServiceContext.setPermission(NETWORK_FACTORY, PERMISSION_GRANTED);
+
+        final Set<Integer> subIds = Collections.singleton(Process.myUid());
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        nc.setSubIds(subIds);
+
+        final NetworkCapabilities result =
+                mService.networkCapabilitiesRestrictedForCallerPermissions(
+                        nc, Process.myPid(), Process.myUid());
+        assertEquals(subIds, result.getSubIds());
+    }
+
+    private NetworkRequest getRequestWithSubIds() {
+        return new NetworkRequest.Builder()
+                .setSubIds(Collections.singleton(Process.myUid()))
+                .build();
+    }
+
+    @Test
+    public void testNetworkRequestWithSubIdsWithNetworkFactoryPermission() throws Exception {
+        mServiceContext.setPermission(NETWORK_FACTORY, PERMISSION_GRANTED);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                mContext, 0 /* requestCode */, new Intent("a"), FLAG_IMMUTABLE);
+        final NetworkCallback networkCallback1 = new NetworkCallback();
+        final NetworkCallback networkCallback2 = new NetworkCallback();
+
+        mCm.requestNetwork(getRequestWithSubIds(), networkCallback1);
+        mCm.requestNetwork(getRequestWithSubIds(), pendingIntent);
+        mCm.registerNetworkCallback(getRequestWithSubIds(), networkCallback2);
+
+        mCm.unregisterNetworkCallback(networkCallback1);
+        mCm.releaseNetworkRequest(pendingIntent);
+        mCm.unregisterNetworkCallback(networkCallback2);
+    }
+
+    @Test
+    public void testNetworkRequestWithSubIdsWithoutNetworkFactoryPermission() throws Exception {
+        mServiceContext.setPermission(NETWORK_FACTORY, PERMISSION_DENIED);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                mContext, 0 /* requestCode */, new Intent("a"), FLAG_IMMUTABLE);
+
+        final Class<SecurityException> expected = SecurityException.class;
+        assertThrows(
+                expected, () -> mCm.requestNetwork(getRequestWithSubIds(), new NetworkCallback()));
+        assertThrows(expected, () -> mCm.requestNetwork(getRequestWithSubIds(), pendingIntent));
+        assertThrows(
+                expected,
+                () -> mCm.registerNetworkCallback(getRequestWithSubIds(), new NetworkCallback()));
     }
 }

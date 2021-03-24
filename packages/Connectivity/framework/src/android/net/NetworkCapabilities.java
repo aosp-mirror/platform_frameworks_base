@@ -2346,9 +2346,15 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Gets the subscription ID set that associated to this network or request.
+     *
+     * <p>Instances of NetworkCapabilities will only have this field populated by the system if the
+     * receiver holds the NETWORK_FACTORY permission. In all other cases, it will be the empty set.
+     *
      * @return
+     * @hide
      */
     @NonNull
+    @SystemApi
     public Set<Integer> getSubIds() {
         return new ArraySet<>(mSubIds);
     }
@@ -2713,10 +2719,17 @@ public final class NetworkCapabilities implements Parcelable {
         /**
          * Set the subscription ID set.
          *
+         * <p>SubIds are populated in NetworkCapability instances from the system only for callers
+         * that hold the NETWORK_FACTORY permission. Similarly, the system will reject any
+         * NetworkRequests filed with a non-empty set of subIds unless the caller holds the
+         * NETWORK_FACTORY permission.
+         *
          * @param subIds a set that represent the subscription IDs. Empty if clean up.
          * @return this builder.
+         * @hide
          */
         @NonNull
+        @SystemApi
         public Builder setSubIds(@NonNull final Set<Integer> subIds) {
             mCaps.setSubIds(subIds);
             return this;
