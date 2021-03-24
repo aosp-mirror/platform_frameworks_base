@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.START_CANCELED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -55,6 +56,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 
@@ -68,6 +70,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -1307,6 +1310,26 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(rootTask.mTaskId, info.taskId);
         assertEquals(activity.appToken, info.topActivityToken);
         assertFalse(info.topActivityInSizeCompat);
+    }
+
+    @Test
+    public void testStartTasksInTransaction() {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        Bundle testOptions = new Bundle();
+        testOptions.putInt("test", 20);
+        wct.startTask(1, null /* options */);
+        wct.startTask(2, testOptions);
+        spyOn(mWm.mAtmService);
+        doReturn(START_CANCELED).when(mWm.mAtmService).startActivityFromRecents(anyInt(), any());
+        clearInvocations(mWm.mAtmService);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+
+        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mWm.mAtmService, times(1)).startActivityFromRecents(eq(1), bundleCaptor.capture());
+        assertTrue(bundleCaptor.getValue().isEmpty());
+
+        verify(mWm.mAtmService, times(1)).startActivityFromRecents(eq(2), bundleCaptor.capture());
+        assertEquals(20, bundleCaptor.getValue().getInt("test"));
     }
 
     /**
