@@ -2862,6 +2862,13 @@
             {@link android.content.Context#sendBroadcast(Intent, String)} being used.
             Multiple tags can be specified separated by '|'. -->
         <attr name="attributionTags"/>
+        <!-- Specifies whether a home sound effect should be played if the home app moves to
+             front after an activity with this flag set to <code>true</code>.
+             <p>The default value of this attribute is <code>true</code>.
+             <p>Also note that home sounds are only played if the device supports home sounds,
+             usually TVs.
+             <p>Requires permission {@code android.permission.DISABLE_SYSTEM_SOUND_EFFECTS}. -->
+        <attr name="playHomeTransitionSound" format="boolean"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
