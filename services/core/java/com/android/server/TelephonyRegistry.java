@@ -366,11 +366,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 || events.contains(TelephonyCallback.EVENT_BARRING_INFO_CHANGED);
     }
 
-    private boolean isPhoneStatePermissionRequired(Set<Integer> events) {
+    private boolean isPhoneStatePermissionRequired(Set<Integer> events, int targetSdk) {
         return events.contains(TelephonyCallback.EVENT_CALL_FORWARDING_INDICATOR_CHANGED)
                 || events.contains(TelephonyCallback.EVENT_MESSAGE_WAITING_INDICATOR_CHANGED)
                 || events.contains(TelephonyCallback.EVENT_EMERGENCY_NUMBER_LIST_CHANGED)
-                || events.contains(TelephonyCallback.EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED);
+                || events.contains(TelephonyCallback.EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED)
+                || (targetSdk <= android.os.Build.VERSION_CODES.R ? events.contains(
+                TelephonyCallback.EVENT_DISPLAY_INFO_CHANGED) : false);
     }
 
     private boolean isPrecisePhoneStatePermissionRequired(Set<Integer> events) {
@@ -882,12 +884,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             remove(callback.asBinder());
             return;
         }
-
+        int callerTargetSdk = TelephonyPermissions.getTargetSdk(mContext, callingPackage);
         // Checks permission and throws SecurityException for disallowed operations. For pre-M
         // apps whose runtime permission has been revoked, we return immediately to skip sending
         // events to the app without crashing it.
         if (!checkListenerPermission(events, subId, callingPackage, callingFeatureId,
-                "listen")) {
+                "listen", callerTargetSdk)) {
             return;
         }
 
@@ -920,7 +922,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             r.phoneId = phoneId;
             r.eventList = events;
-            r.targetSdk = TelephonyPermissions.getTargetSdk(mContext, callingPackage);
+            r.targetSdk = callerTargetSdk;
 
             if (DBG) {
                 log("listen:  Register r=" + r + " r.subId=" + r.subId + " phoneId=" + phoneId);
@@ -2876,7 +2878,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private boolean checkListenerPermission(Set<Integer> events, int subId, String callingPackage,
-                                            @Nullable String callingFeatureId, String message) {
+            @Nullable String callingFeatureId, String message, int targetSdk) {
         LocationAccessPolicy.LocationPermissionQuery.Builder locationQueryBuilder =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
                         .setCallingPackage(callingPackage)
@@ -2912,7 +2914,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
 
-        if (isPhoneStatePermissionRequired(events)) {
+        if (isPhoneStatePermissionRequired(events, targetSdk)) {
             if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
                     mContext, subId, callingPackage, callingFeatureId, message)) {
                 isPermissionCheckSuccessful = false;

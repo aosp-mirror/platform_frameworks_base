@@ -42359,7 +42359,7 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.DisplayInfoListener {
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onDisplayInfoChanged(@NonNull android.telephony.TelephonyDisplayInfo);
+    method public void onDisplayInfoChanged(@NonNull android.telephony.TelephonyDisplayInfo);
   }
 
   public static interface TelephonyCallback.EmergencyNumberListListener {
