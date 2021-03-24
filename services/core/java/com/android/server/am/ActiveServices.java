@@ -1790,6 +1790,44 @@ public final class ActiveServices {
                 }
 
                 if (!ignoreForeground) {
+                    if (r.mStartForegroundCount == 0) {
+                        /*
+                        If the service was started with startService(), not
+                        startForegroundService(), and if startForeground() isn't called within
+                        mFgsStartForegroundTimeoutMs, then we check the state of the app
+                        (who owns the service, which is the app that called startForeground())
+                        again. If the app is in the foreground, or in any other cases where
+                        FGS-starts are allowed, then we still allow the FGS to be started.
+                        Otherwise, startForeground() would fail.
+
+                        If the service was started with startForegroundService(), then the service
+                        must call startForeground() within a timeout anyway, so we don't need this
+                        check.
+                        */
+                        if (!r.fgRequired) {
+                            final long delayMs = SystemClock.elapsedRealtime() - r.createRealTime;
+                            if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
+                                setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
+                                        r.appInfo.uid, r.intent.getIntent(), r, false);
+                                final String temp = "startForegroundDelayMs:" + delayMs;
+                                if (r.mInfoAllowStartForeground != null) {
+                                    r.mInfoAllowStartForeground += "; " + temp;
+                                } else {
+                                    r.mInfoAllowStartForeground = temp;
+                                }
+                                r.mLoggedInfoAllowStartForeground = false;
+                            }
+                        }
+                    } else if (r.mStartForegroundCount >= 1) {
+                        // The second or later time startForeground() is called after service is
+                        // started. Check for app state again.
+                        final long delayMs = SystemClock.elapsedRealtime() -
+                                r.mLastSetFgsRestrictionTime;
+                        if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
+                            setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
+                                    r.appInfo.uid, r.intent.getIntent(), r, false);
+                        }
+                    }
                     logFgsBackgroundStart(r);
                     if (r.mAllowStartForeground == REASON_DENIED && isBgFgsRestrictionEnabled(r)) {
                         final String msg = "Service.startForeground() not allowed due to "
@@ -1843,6 +1881,7 @@ public final class ActiveServices {
                             active.mNumActive++;
                         }
                         r.isForeground = true;
+                        r.mStartForegroundCount++;
                         if (!stopProcStatsOp) {
                             ServiceState stracker = r.getTracker();
                             if (stracker != null) {
@@ -1901,6 +1940,7 @@ public final class ActiveServices {
                     decActiveForegroundAppLocked(smap, r);
                 }
                 r.isForeground = false;
+                resetFgsRestrictionLocked(r);
                 ServiceState stracker = r.getTracker();
                 if (stracker != null) {
                     stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -3892,6 +3932,7 @@ public final class ActiveServices {
         r.foregroundId = 0;
         r.foregroundNoti = null;
         r.mAllowWhileInUsePermissionInFgs = false;
+        r.mAllowStartForeground = REASON_DENIED;
 
         // Clear start entries.
         r.clearDeliveredStartsLocked();
@@ -5430,6 +5471,7 @@ public final class ActiveServices {
     private void setFgsRestrictionLocked(String callingPackage,
             int callingPid, int callingUid, Intent intent, ServiceRecord r,
             boolean allowBackgroundActivityStarts) {
+        r.mLastSetFgsRestrictionTime = SystemClock.elapsedRealtime();
         // Check DeviceConfig flag.
         if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
             r.mAllowWhileInUsePermissionInFgs = true;
@@ -5448,6 +5490,15 @@ public final class ActiveServices {
                         allowBackgroundActivityStarts);
             }
         }
+    }
+
+    void resetFgsRestrictionLocked(ServiceRecord r) {
+        r.mAllowWhileInUsePermissionInFgs = false;
+        r.mAllowStartForeground = REASON_DENIED;
+        r.mInfoAllowStartForeground = null;
+        r.mInfoTempFgsAllowListReason = null;
+        r.mLoggedInfoAllowStartForeground = false;
+        r.mLastSetFgsRestrictionTime = 0;
     }
 
     boolean canStartForegroundServiceLocked(int callingPid, int callingUid, String callingPackage) {
@@ -5601,6 +5652,7 @@ public final class ActiveServices {
                                         + ",callingUid:" + tempAllowListReason.mCallingUid))
                         + ">"
                         + "; targetSdkVersion:" + r.appInfo.targetSdkVersion
+                        + "; startForegroundCount:" + r.mStartForegroundCount
                         + "]";
         if (!debugInfo.equals(r.mInfoAllowStartForeground)) {
             r.mLoggedInfoAllowStartForeground = false;
