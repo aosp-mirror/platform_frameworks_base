@@ -139,4 +139,18 @@ public class AndroidKeyStoreMaintenance {
             return SYSTEM_ERROR;
         }
     }
+
+    /**
+     * Informs Keystore 2.0 that an off body event was detected.
+     */
+    public static void onDeviceOffBody() {
+        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return;
+        try {
+            getService().onDeviceOffBody();
+        } catch (Exception e) {
+            // TODO This fails open. This is not a regression with respect to keystore1 but it
+            //      should get fixed.
+            Log.e(TAG, "Error while reporting device off body event.", e);
+        }
+    }
 }
