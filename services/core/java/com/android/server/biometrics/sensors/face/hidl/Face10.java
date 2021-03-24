@@ -528,6 +528,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                 }
             }
 
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
             final FaceGenerateChallengeClient client = new FaceGenerateChallengeClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), opPackageName,
                     mSensorId, mCurrentChallengeOwner);
