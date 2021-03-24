@@ -16,6 +16,7 @@
 
 package android.telephony.data;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.net.QosSessionAttributes;
@@ -26,6 +27,7 @@ import android.util.Log;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +42,7 @@ import java.util.Objects;
 public final class NrQosSessionAttributes implements Parcelable, QosSessionAttributes {
     private static final String TAG = NrQosSessionAttributes.class.getSimpleName();
     private final int m5Qi;
-    private final int mQfi;
+    private final @IntRange(from=1, to=63) int mQfi;
     private final long mMaxUplinkBitRate;
     private final long mMaxDownlinkBitRate;
     private final long mGuaranteedUplinkBitRate;
@@ -55,7 +57,7 @@ public final class NrQosSessionAttributes implements Parcelable, QosSessionAttri
      *
      * @return the 5QI of the QOS flow
      */
-    public int get5Qi() {
+    public int getQosIdentifier() {
         return m5Qi;
     }
 
@@ -65,7 +67,7 @@ public final class NrQosSessionAttributes implements Parcelable, QosSessionAttri
      *
      * @return the QOS flow identifier of the session
      */
-    public int getQfi() {
+    public @IntRange(from=1, to=63) int getQosFlowIdentifier() {
         return mQfi;
     }
 
@@ -78,7 +80,7 @@ public final class NrQosSessionAttributes implements Parcelable, QosSessionAttri
      *
      * @return the guaranteed bit rate in kbps
      */
-    public long getGuaranteedUplinkBitRate() {
+    public long getGuaranteedUplinkBitRateKbps() {
         return mGuaranteedUplinkBitRate;
     }
 
@@ -91,7 +93,7 @@ public final class NrQosSessionAttributes implements Parcelable, QosSessionAttri
      *
      * @return the guaranteed bit rate in kbps
      */
-    public long getGuaranteedDownlinkBitRate() {
+    public long getGuaranteedDownlinkBitRateKbps() {
         return mGuaranteedDownlinkBitRate;
     }
 
@@ -104,7 +106,7 @@ public final class NrQosSessionAttributes implements Parcelable, QosSessionAttri
      *
      * @return the max uplink bit rate in kbps
      */
-    public long getMaxUplinkBitRate() {
+    public long getMaxUplinkBitRateKbps() {
         return mMaxUplinkBitRate;
     }
 
@@ -117,7 +119,7 @@ public final class NrQosSessionAttributes implements Parcelable, QosSessionAttri
      *
      * @return the max downlink bit rate in kbps
      */
-    public long getMaxDownlinkBitRate() {
+    public long getMaxDownlinkBitRateKbps() {
         return mMaxDownlinkBitRate;
     }
 
@@ -129,8 +131,9 @@ public final class NrQosSessionAttributes implements Parcelable, QosSessionAttri
      *
      * @return the averaging window duration in milliseconds
      */
-    public long getAveragingWindow() {
-        return mAveragingWindow;
+    @NonNull
+    public Duration getBitRateWindowDuration() {
+        return Duration.ofMillis(mAveragingWindow);
     }
 
     /**
