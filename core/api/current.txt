@@ -20445,7 +20445,9 @@ package android.media {
     method @NonNull public android.media.MediaFormat getOutputFormat(int);
     method @NonNull public android.media.MediaCodec.OutputFrame getOutputFrame(int);
     method @Nullable public android.media.Image getOutputImage(int);
+    method @Nullable public android.media.MediaCodec.ParameterDescriptor getParameterDescriptor(@NonNull String);
     method @NonNull public android.media.MediaCodec.QueueRequest getQueueRequest(int);
+    method @NonNull public java.util.List<java.lang.String> getSupportedVendorParameters();
     method @Nullable public static android.media.Image mapHardwareBuffer(@NonNull android.hardware.HardwareBuffer);
     method public void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
     method public void queueSecureInputBuffer(int, int, @NonNull android.media.MediaCodec.CryptoInfo, long, int) throws android.media.MediaCodec.CryptoException;
@@ -20464,6 +20466,8 @@ package android.media {
     method public void signalEndOfInputStream();
     method public void start();
     method public void stop();
+    method public void subscribeToVendorParameters(@NonNull java.util.List<java.lang.String>);
+    method public void unsubscribeFromVendorParameters(@NonNull java.util.List<java.lang.String>);
     field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
     field public static final int BUFFER_FLAG_END_OF_STREAM = 4; // 0x4
     field public static final int BUFFER_FLAG_KEY_FRAME = 1; // 0x1
@@ -20583,6 +20587,11 @@ package android.media {
     method @Nullable public android.hardware.HardwareBuffer getHardwareBuffer();
     method @Nullable public android.media.MediaCodec.LinearBlock getLinearBlock();
     method public long getPresentationTimeUs();
+  }
+
+  public class MediaCodec.ParameterDescriptor {
+    method @NonNull public String getName();
+    method public int getType();
   }
 
   public final class MediaCodec.QueueRequest {
