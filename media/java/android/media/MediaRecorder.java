@@ -29,6 +29,7 @@ import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.Camera;
+import android.media.metrics.LogSessionId;
 import android.media.permission.Identity;
 import android.os.Build;
 import android.os.Handler;
@@ -130,6 +131,8 @@ public class MediaRecorder implements AudioRouting,
 
     private int mChannelCount;
 
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
+
     /**
      * Default constructor.
      *
@@ -162,6 +165,27 @@ public class MediaRecorder implements AudioRouting,
          */
         native_setup(new WeakReference<MediaRecorder>(this),
                 ActivityThread.currentPackageName(), myIdentity(context));
+    }
+
+    /**
+     * Sets the {@link LogSessionId} for MediaRecorder.
+     *
+     * @param id the global ID for monitoring the MediaRecorder performance
+     */
+    public void setLogSessionId(@NonNull LogSessionId id) {
+        Objects.requireNonNull(id);
+        mLogSessionId = id;
+        setParameter("log-session-id=" + id.getStringId());
+    }
+
+    /**
+     * Returns the {@link LogSessionId} for MediaRecorder.
+     *
+     * @return the global ID for monitoring the MediaRecorder performance
+     */
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
     }
 
     /**
