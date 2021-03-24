@@ -97,6 +97,16 @@ public final class FadeOutManager {
         return true;
     }
 
+    static long getFadeOutDurationOnFocusLossMillis(AudioAttributes aa) {
+        if (ArrayUtils.contains(UNFADEABLE_CONTENT_TYPES, aa.getContentType())) {
+            return 0;
+        }
+        if (!ArrayUtils.contains(FADEABLE_USAGES, aa.getUsage())) {
+            return 0;
+        }
+        return FADE_OUT_DURATION_MS;
+    }
+
     /**
      * Map of uid (key) to faded out apps (value)
      */
