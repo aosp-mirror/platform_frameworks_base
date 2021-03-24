@@ -45,7 +45,8 @@ sk_sp<SkColorSpace> ImageDecoder::getDefaultColorSpace() const {
     return SkColorSpace::MakeSRGB();
 }
 
-ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChunkReader> peeker)
+ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChunkReader> peeker,
+                           SkCodec::ZeroInitialized zeroInit)
     : mCodec(std::move(codec))
     , mPeeker(std::move(peeker))
     , mDecodeSize(mCodec->codec()->dimensions())
@@ -57,6 +58,7 @@ ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChu
     mTargetSize = swapWidthHeight() ? SkISize { mDecodeSize.height(), mDecodeSize.width() }
                                     : mDecodeSize;
     this->rewind();
+    mOptions.fZeroInitialized = zeroInit;
 }
 
 ImageDecoder::~ImageDecoder() = default;
@@ -446,9 +448,16 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
                 ALOGE("Failed to invert matrix!");
             }
         }
+
+        // Even if the client did not provide zero initialized memory, the
+        // memory we decode into is.
+        mOptions.fZeroInitialized = SkCodec::kYes_ZeroInitialized;
     }
 
     auto result = mCodec->getAndroidPixels(decodeInfo, decodePixels, decodeRowBytes, &mOptions);
+
+    // The next call to decode() may not provide zero initialized memory.
+    mOptions.fZeroInitialized = SkCodec::kNo_ZeroInitialized;
 
     if (scale || handleOrigin || mCropRect) {
         SkBitmap scaledBm;
