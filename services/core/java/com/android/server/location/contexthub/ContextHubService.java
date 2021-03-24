@@ -691,6 +691,7 @@ public class ContextHubService extends IContextHubService.Stub {
             sendLocationSettingUpdate();
             sendWifiSettingUpdate(true /* forceUpdate */);
             sendAirplaneModeSettingUpdate();
+            sendMicrophoneDisableSettingUpdateForCurrentUser();
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
@@ -1123,6 +1124,7 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     public void onUserChanged() {
         Log.d(TAG, "User changed to id: " + getCurrentUserId());
+        sendLocationSettingUpdate();
         sendMicrophoneDisableSettingUpdateForCurrentUser();
     }
 }
