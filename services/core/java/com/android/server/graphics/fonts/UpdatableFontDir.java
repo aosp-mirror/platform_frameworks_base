@@ -41,11 +41,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Manages set of updatable font files.
@@ -109,6 +109,7 @@ final class UpdatableFontDir {
     private final FsverityUtil mFsverityUtil;
     private final File mConfigFile;
     private final File mTmpConfigFile;
+    private final Supplier<Long> mCurrentTimeSupplier;
 
     private long mLastModifiedMillis;
     private int mConfigVersion = 1;
@@ -128,18 +129,20 @@ final class UpdatableFontDir {
 
     UpdatableFontDir(File filesDir, List<File> preinstalledFontDirs, FontFileParser parser,
             FsverityUtil fsverityUtil) {
-        this(filesDir, preinstalledFontDirs, parser, fsverityUtil, new File(CONFIG_XML_FILE));
+        this(filesDir, preinstalledFontDirs, parser, fsverityUtil, new File(CONFIG_XML_FILE),
+                () -> System.currentTimeMillis());
     }
 
     // For unit testing
     UpdatableFontDir(File filesDir, List<File> preinstalledFontDirs, FontFileParser parser,
-            FsverityUtil fsverityUtil, File configFile) {
+            FsverityUtil fsverityUtil, File configFile, Supplier<Long> currentTimeSupplier) {
         mFilesDir = filesDir;
         mPreinstalledFontDirs = preinstalledFontDirs;
         mParser = parser;
         mFsverityUtil = fsverityUtil;
         mConfigFile = configFile;
         mTmpConfigFile = new File(configFile.getAbsoluteFile() + ".tmp");
+        mCurrentTimeSupplier = currentTimeSupplier;
     }
 
     /* package */ void loadFontFileMap() {
@@ -209,7 +212,7 @@ final class UpdatableFontDir {
         FileUtils.deleteContents(mFilesDir);
         mFontFamilyMap.clear();
 
-        mLastModifiedMillis = System.currentTimeMillis();
+        mLastModifiedMillis = mCurrentTimeSupplier.get();
         try (FileOutputStream fos = new FileOutputStream(mConfigFile)) {
             PersistentSystemFontConfig.writeToXml(fos, createPersistentConfig());
         } catch (Exception e) {
@@ -245,7 +248,7 @@ final class UpdatableFontDir {
             }
 
             // Write config file.
-            mLastModifiedMillis = Instant.now().getEpochSecond();
+            mLastModifiedMillis = mCurrentTimeSupplier.get();
             try (FileOutputStream fos = new FileOutputStream(mTmpConfigFile)) {
                 PersistentSystemFontConfig.writeToXml(fos, createPersistentConfig());
             } catch (Exception e) {
