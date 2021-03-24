@@ -22,7 +22,9 @@ import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -56,6 +58,7 @@ import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -80,6 +83,12 @@ public class IpConnectivityMetricsTest {
 
     IpConnectivityMetrics mService;
     NetdEventListenerService mNetdListener;
+    final NetworkCapabilities mNcWifi = new NetworkCapabilities.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .build();
+    final NetworkCapabilities mNcCell = new NetworkCapabilities.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build();
 
     @Before
     public void setUp() {
@@ -262,14 +271,6 @@ public class IpConnectivityMetricsTest {
     public void testEndToEndLogging() throws Exception {
         // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
         IpConnectivityLog logger = new IpConnectivityLog(mService.impl);
-
-        NetworkCapabilities ncWifi = new NetworkCapabilities();
-        NetworkCapabilities ncCell = new NetworkCapabilities();
-        ncWifi.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-        ncCell.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-
-        when(mCm.getNetworkCapabilities(new Network(100))).thenReturn(ncWifi);
-        when(mCm.getNetworkCapabilities(new Network(101))).thenReturn(ncCell);
 
         ApfStats apfStats = new ApfStats.Builder()
                 .setDurationMs(45000)
@@ -584,11 +585,21 @@ public class IpConnectivityMetricsTest {
         return buffer.toString();
     }
 
-    void connectEvent(int netid, int error, int latencyMs, String ipAddr) throws Exception {
-        mNetdListener.onConnectEvent(netid, error, latencyMs, ipAddr, 80, 1);
+    private void setCapabilities(int netId) {
+        final ArgumentCaptor<ConnectivityManager.NetworkCallback> networkCallback =
+                ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
+        verify(mCm).registerNetworkCallback(any(), networkCallback.capture());
+        networkCallback.getValue().onCapabilitiesChanged(new Network(netId),
+                netId == 100 ? mNcWifi : mNcCell);
+    }
+
+    void connectEvent(int netId, int error, int latencyMs, String ipAddr) throws Exception {
+        setCapabilities(netId);
+        mNetdListener.onConnectEvent(netId, error, latencyMs, ipAddr, 80, 1);
     }
 
     void dnsEvent(int netId, int type, int result, int latency) throws Exception {
+        setCapabilities(netId);
         mNetdListener.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
     }
 
