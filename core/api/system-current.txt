@@ -11272,12 +11272,11 @@ package android.telephony {
 
   public final class PhoneCapability implements android.os.Parcelable {
     method public int describeContents();
-    method public int getDeviceNrCapabilityBitmask();
-    method @IntRange(from=1) public int getMaxActiveInternetData();
-    method @IntRange(from=1) public int getMaxActivePacketSwitchedVoiceCalls();
+    method @NonNull public int[] getDeviceNrCapabilities();
+    method @IntRange(from=1) public int getMaxActiveDataSubscriptions();
+    method @IntRange(from=1) public int getMaxActiveVoiceSubscriptions();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneCapability> CREATOR;
-    field public static final int DEVICE_NR_CAPABILITY_NONE = 0; // 0x0
     field public static final int DEVICE_NR_CAPABILITY_NSA = 1; // 0x1
     field public static final int DEVICE_NR_CAPABILITY_SA = 2; // 0x2
   }
