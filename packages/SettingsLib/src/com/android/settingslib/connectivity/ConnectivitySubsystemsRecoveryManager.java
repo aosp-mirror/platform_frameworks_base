@@ -250,6 +250,7 @@ public class ConnectivitySubsystemsRecoveryManager {
      * @param callback Callbacks triggered when recovery status changes.
      */
     public void triggerSubsystemRestart(String reason, @NonNull RecoveryStatusCallback callback) {
+        // TODO: b/183530649 : clean-up or make use of the `reason` argument
         mHandler.post(() -> {
             boolean someSubsystemRestarted = false;
 
@@ -264,7 +265,7 @@ public class ConnectivitySubsystemsRecoveryManager {
             }
 
             if (isWifiEnabled()) {
-                mWifiManager.restartWifiSubsystem(reason);
+                mWifiManager.restartWifiSubsystem();
                 mWifiRestartInProgress = true;
                 someSubsystemRestarted = true;
                 startTrackingWifiRestart();
