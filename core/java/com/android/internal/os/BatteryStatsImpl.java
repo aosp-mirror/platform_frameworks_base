@@ -16525,6 +16525,8 @@ public class BatteryStatsImpl extends BatteryStats {
         // Pull the clock time.  This may update the time and make a new history entry
         // if we had originally pulled a time before the RTC was set.
         getStartClockTime();
+
+        updateSystemServiceCallStats();
     }
 
     public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
