@@ -69,7 +69,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Trace;
 import android.util.ArrayMap;
@@ -429,43 +428,37 @@ public class AppTransitionController {
         return mainWindow != null ? mainWindow.mAttrs : null;
     }
 
-    RemoteAnimationAdapter getRemoteAnimationOverride(@NonNull WindowContainer container,
+    RemoteAnimationAdapter getRemoteAnimationOverride(@Nullable WindowContainer container,
             @TransitionOldType int transit, ArraySet<Integer> activityTypes) {
-        final RemoteAnimationDefinition definition = container.getRemoteAnimationDefinition();
-        if (definition != null) {
-            final RemoteAnimationAdapter adapter = definition.getAdapter(transit, activityTypes);
-            if (adapter != null) {
-                return adapter;
+        if (container != null) {
+            final RemoteAnimationDefinition definition = container.getRemoteAnimationDefinition();
+            if (definition != null) {
+                final RemoteAnimationAdapter adapter = definition.getAdapter(transit,
+                        activityTypes);
+                if (adapter != null) {
+                    return adapter;
+                }
             }
         }
-        if (mRemoteAnimationDefinition != null) {
-            final RemoteAnimationAdapter adapter = mRemoteAnimationDefinition.getAdapter(
-                    transit, activityTypes);
-            if (adapter != null) {
-                return adapter;
-            }
-        }
-        return null;
+        return mRemoteAnimationDefinition != null
+                ? mRemoteAnimationDefinition.getAdapter(transit, activityTypes)
+                : null;
     }
 
     /**
      * Overrides the pending transition with the remote animation defined for the transition in the
      * set of defined remote animations in the app window token.
      */
-    private void overrideWithRemoteAnimationIfSet(ActivityRecord animLpActivity,
+    private void overrideWithRemoteAnimationIfSet(@Nullable ActivityRecord animLpActivity,
             @TransitionOldType int transit, ArraySet<Integer> activityTypes) {
         if (transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
             // The crash transition has higher priority than any involved remote animations.
             return;
         }
-        if (animLpActivity == null) {
-            return;
-        }
         final RemoteAnimationAdapter adapter =
                 getRemoteAnimationOverride(animLpActivity, transit, activityTypes);
         if (adapter != null) {
-            animLpActivity.getDisplayContent().mAppTransition.overridePendingAppTransitionRemote(
-                    adapter);
+            mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(adapter);
         }
     }
 
