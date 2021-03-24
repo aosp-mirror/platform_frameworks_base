@@ -195,6 +195,44 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Gets the media key event session, which would receive a media key event unless specified.
+     * @return The media key event session, which would receive key events by default, unless
+     *          the caller has specified the target. Can be {@code null}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MEDIA_CONTENT_CONTROL)
+    @Nullable
+    public MediaSession.Token getMediaKeyEventSession() {
+        try {
+            return mService.getMediaKeyEventSession();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to get media key event session", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the package name of the media key event session.
+     * @return The package name of the media key event session or the last session's media button
+     *          receiver if the media key event session is {@code null}.
+     * @see #getMediaKeyEventSession()
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MEDIA_CONTENT_CONTROL)
+    @NonNull
+    public String getMediaKeyEventSessionPackageName() {
+        try {
+            String packageName = mService.getMediaKeyEventSessionPackageName();
+            return (packageName != null) ? packageName : "";
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to get media key event session", ex);
+        }
+        return "";
+    }
+
+    /**
      * Get active sessions for the given user.
      * <p>
      * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be
@@ -856,7 +894,7 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Add a {@link OnMediaKeyEventDispatchedListener}.
+     * Add a {@link OnMediaKeyEventSessionChangedListener}.
      *
      * @param executor The executor on which the listener should be invoked
      * @param listener A {@link OnMediaKeyEventSessionChangedListener}.
