@@ -34,8 +34,8 @@ public:
     std::unique_ptr<SkAndroidCodec> mCodec;
     sk_sp<SkPngChunkReader> mPeeker;
 
-    ImageDecoder(std::unique_ptr<SkAndroidCodec> codec,
-                 sk_sp<SkPngChunkReader> peeker = nullptr);
+    ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChunkReader> peeker = nullptr,
+                 SkCodec::ZeroInitialized zeroInit = SkCodec::kNo_ZeroInitialized);
     ~ImageDecoder();
 
     SkISize getSampledDimensions(int sampleSize) const;

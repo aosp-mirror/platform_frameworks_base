@@ -141,7 +141,8 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream,
     }
 
     const bool isNinePatch = peeker->mPatch != nullptr;
-    ImageDecoder* decoder = new ImageDecoder(std::move(androidCodec), std::move(peeker));
+    ImageDecoder* decoder = new ImageDecoder(std::move(androidCodec), std::move(peeker),
+                                             SkCodec::kYes_ZeroInitialized);
     return env->NewObject(gImageDecoder_class, gImageDecoder_constructorMethodID,
                           reinterpret_cast<jlong>(decoder), decoder->width(), decoder->height(),
                           animated, isNinePatch);
