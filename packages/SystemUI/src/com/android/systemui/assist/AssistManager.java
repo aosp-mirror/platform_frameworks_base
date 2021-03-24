@@ -88,7 +88,6 @@ public class AssistManager {
     private static final String INVOCATION_PHONE_STATE_KEY = "invocation_phone_state";
     public static final String INVOCATION_TYPE_KEY = "invocation_type";
     protected static final String ACTION_KEY = "action";
-    protected static final String SHOW_ASSIST_HANDLES_ACTION = "show_assist_handles";
     protected static final String SET_ASSIST_GESTURE_CONSTRAINED_ACTION =
             "set_assist_gesture_constrained";
     protected static final String CONSTRAINED_KEY = "should_constrain";
@@ -110,7 +109,6 @@ public class AssistManager {
     protected final Context mContext;
     private final AssistDisclosure mAssistDisclosure;
     private final PhoneStateMonitor mPhoneStateMonitor;
-    private final AssistHandleBehaviorController mHandleController;
     private final UiController mUiController;
     protected final Lazy<SysUiState> mSysUiState;
     protected final AssistLogger mAssistLogger;
@@ -139,7 +137,6 @@ public class AssistManager {
             DeviceProvisionedController controller,
             Context context,
             AssistUtils assistUtils,
-            AssistHandleBehaviorController handleController,
             CommandQueue commandQueue,
             PhoneStateMonitor phoneStateMonitor,
             OverviewProxyService overviewProxyService,
@@ -153,7 +150,6 @@ public class AssistManager {
         mAssistUtils = assistUtils;
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = phoneStateMonitor;
-        mHandleController = handleController;
         mAssistLogger = assistLogger;
 
         mOrbController = new AssistOrbController(configurationController, context);
@@ -207,9 +203,7 @@ public class AssistManager {
                         }
 
                         String action = hints.getString(ACTION_KEY);
-                        if (SHOW_ASSIST_HANDLES_ACTION.equals(action)) {
-                            requestAssistHandles();
-                        } else if (SET_ASSIST_GESTURE_CONSTRAINED_ACTION.equals(action)) {
+                        if (SET_ASSIST_GESTURE_CONSTRAINED_ACTION.equals(action)) {
                             mSysUiState.get()
                                     .setFlag(
                                             SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
@@ -240,9 +234,6 @@ public class AssistManager {
             args = new Bundle();
         }
         int legacyInvocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
-        if (legacyInvocationType == INVOCATION_TYPE_GESTURE) {
-            mHandleController.onAssistantGesturePerformed();
-        }
         int legacyDeviceState = mPhoneStateMonitor.getPhoneState();
         args.putInt(INVOCATION_PHONE_STATE_KEY, legacyDeviceState);
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
@@ -267,10 +258,6 @@ public class AssistManager {
      */
     public void onGestureCompletion(float velocity) {
         mUiController.onGestureCompletion(velocity);
-    }
-
-    protected void requestAssistHandles() {
-        mHandleController.onAssistHandlesRequested();
     }
 
     public void hideAssist() {
@@ -353,10 +340,6 @@ public class AssistManager {
         return mAssistUtils.isSessionRunning();
     }
 
-    protected AssistHandleBehaviorController getHandleBehaviorController() {
-        return mHandleController;
-    }
-
     @Nullable
     public ComponentName getAssistInfoForUser(int userId) {
         return mAssistUtils.getAssistComponentForUser(userId);
@@ -380,10 +363,6 @@ public class AssistManager {
         });
     }
 
-    public long getAssistHandleShowAndGoRemainingDurationMs() {
-        return mHandleController.getShowAndGoRemainingTimeMs();
-    }
-
     /** Returns the logging flags for the given Assistant invocation type. */
     public int toLoggingSubType(int invocationType) {
         return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
@@ -400,7 +379,7 @@ public class AssistManager {
         // Note that this logic will break if the number of Assistant invocation types exceeds 7.
         // There are currently 5 invocation types, but we will be migrating to the new logging
         // framework in the next update.
-        int subType = mHandleController.areHandlesShowing() ? 0 : 1;
+        int subType = 0;
         subType |= invocationType << 1;
         subType |= phoneState << 4;
         return subType;
