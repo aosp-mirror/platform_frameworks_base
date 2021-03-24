@@ -270,6 +270,7 @@ package android.net {
 
   public final class NetworkCapabilities implements android.os.Parcelable {
     method @NonNull public int[] getAdministratorUids();
+    method @Nullable public static String getCapabilityCarrierName(int);
     method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
     method public boolean isPrivateDnsBroken();
