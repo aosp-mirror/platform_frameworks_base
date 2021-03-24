@@ -87,6 +87,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @NonNull private final StatusBarStateController mStatusBarStateController;
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final DumpManager mDumpManager;
+    @NonNull private final AuthRippleController mAuthRippleController;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -305,7 +306,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @Main DelayableExecutor fgExecutor,
             @NonNull StatusBar statusBar,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            @NonNull DumpManager dumpManager) {
+            @NonNull DumpManager dumpManager,
+            @NonNull AuthRippleController authRippleController) {
         mContext = context;
         mInflater = inflater;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
@@ -317,6 +319,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mStatusBarStateController = statusBarStateController;
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mDumpManager = dumpManager;
+        mAuthRippleController = authRippleController;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -343,6 +346,10 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        mAuthRippleController.setViewHost(mStatusBar.getNotificationShadeWindowView());
+        mAuthRippleController.setSensorLocation(getSensorLocation().centerX(),
+                getSensorLocation().centerY());
     }
 
     @Nullable
