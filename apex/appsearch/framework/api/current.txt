@@ -149,7 +149,8 @@ package android.app.appsearch {
     method public void remove(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
     method public void reportUsage(@NonNull android.app.appsearch.ReportUsageRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
     method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec);
-    method public void setSchema(@NonNull android.app.appsearch.SetSchemaRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.SetSchemaResponse>>);
+    method @Deprecated public void setSchema(@NonNull android.app.appsearch.SetSchemaRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.SetSchemaResponse>>);
+    method public void setSchema(@NonNull android.app.appsearch.SetSchemaRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.SetSchemaResponse>>);
   }
 
   public interface BatchResultCallback<KeyType, ValueType> {
