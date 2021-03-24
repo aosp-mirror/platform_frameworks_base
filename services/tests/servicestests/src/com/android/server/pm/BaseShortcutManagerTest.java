@@ -848,6 +848,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        public void getStorageInfo(String packageName, String databaseName, int userId,
+                IAppSearchResultCallback callback) throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
         public void persistToDisk(int userId) throws RemoteException {
 
         }

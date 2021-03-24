@@ -641,8 +641,28 @@ public final class AppSearchSession implements Closeable {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
-        // TODO(b/182909475): Implement getStorageInfo
-        throw new UnsupportedOperationException();
+        try {
+            mService.getStorageInfo(
+                    mPackageName,
+                    mDatabaseName,
+                    mUserId,
+                    new IAppSearchResultCallback.Stub() {
+                        public void onResult(AppSearchResult result) {
+                            executor.execute(() -> {
+                                if (result.isSuccess()) {
+                                    Bundle responseBundle = (Bundle) result.getResultValue();
+                                    StorageInfo response =
+                                            new StorageInfo(responseBundle);
+                                    callback.accept(AppSearchResult.newSuccessfulResult(response));
+                                } else {
+                                    callback.accept(result);
+                                }
+                            });
+                        }
+                    });
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
