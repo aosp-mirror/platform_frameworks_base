@@ -86,6 +86,15 @@ public abstract class AbstractEnableAdbPreferenceController extends
         }
     }
 
+    @Override
+    protected void onDeveloperOptionsSwitchEnabled() {
+        super.onDeveloperOptionsSwitchEnabled();
+        if (isAvailable()) {
+            mPreference.setDisabledByAdmin(
+                    checkIfUsbDataSignalingIsDisabled(mContext, UserHandle.myUserId()));
+        }
+    }
+
     public void enablePreference(boolean enabled) {
         if (isAvailable()) {
             mPreference.setEnabled(enabled);
