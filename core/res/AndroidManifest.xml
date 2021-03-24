@@ -1230,7 +1230,7 @@
         android:description="@string/permdesc_answerPhoneCalls"
         android:protectionLevel="dangerous|runtime" />
 
-    <!-- Allows a calling application which manages it own calls through the self-managed
+    <!-- Allows a calling application which manages its own calls through the self-managed
          {@link android.telecom.ConnectionService} APIs.  See
          {@link android.telecom.PhoneAccount#CAPABILITY_SELF_MANAGED} for more information on the
          self-managed ConnectionService APIs.
