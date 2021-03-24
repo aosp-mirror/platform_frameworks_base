@@ -1660,7 +1660,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_work_apps_available_share))
+        onView(withText(R.string.resolver_no_work_apps_available))
                 .check(matches(isDisplayed()));
     }
 
@@ -1711,7 +1711,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_work_apps_available_share))
+        onView(withText(R.string.resolver_no_work_apps_available))
                 .check(matches(isDisplayed()));
     }
 
@@ -2146,7 +2146,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_work_apps_available_resolve))
+        onView(withText(R.string.resolver_no_work_apps_available))
                 .check(matches(isDisplayed()));
     }
 
