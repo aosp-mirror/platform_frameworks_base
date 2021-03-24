@@ -116,6 +116,7 @@ public:
     enum StorageFlags {
         ReadLogsAllowed = 1 << 0,
         ReadLogsEnabled = 1 << 1,
+        ReadLogsRequested = 1 << 2,
     };
 
     struct LoadingProgress {
@@ -364,6 +365,9 @@ private:
 
         void setReadLogsEnabled(bool value);
         int32_t readLogsEnabled() const { return (flags & StorageFlags::ReadLogsEnabled); }
+
+        void setReadLogsRequested(bool value);
+        int32_t readLogsRequested() const { return (flags & StorageFlags::ReadLogsRequested); }
 
         static void cleanupFilesystem(std::string_view root);
     };
