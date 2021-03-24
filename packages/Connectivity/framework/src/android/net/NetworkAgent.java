@@ -32,6 +32,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1160,29 +1161,37 @@ public abstract class NetworkAgent {
 
 
     /**
-     * Sends the attributes of Eps Bearer Qos Session back to the Application
+     * Sends the attributes of Qos Session back to the Application
      *
      * @param qosCallbackId the callback id that the session belongs to
-     * @param sessionId the unique session id across all Eps Bearer Qos Sessions
-     * @param attributes the attributes of the Eps Qos Session
+     * @param sessionId the unique session id across all Qos Sessions
+     * @param attributes the attributes of the Qos Session
      */
     public final void sendQosSessionAvailable(final int qosCallbackId, final int sessionId,
-            @NonNull final EpsBearerQosSessionAttributes attributes) {
+            @NonNull final QosSessionAttributes attributes) {
         Objects.requireNonNull(attributes, "The attributes must be non-null");
-        queueOrSendMessage(ra -> ra.sendEpsQosSessionAvailable(qosCallbackId,
-                new QosSession(sessionId, QosSession.TYPE_EPS_BEARER),
-                attributes));
+        if (attributes instanceof EpsBearerQosSessionAttributes) {
+            queueOrSendMessage(ra -> ra.sendEpsQosSessionAvailable(qosCallbackId,
+                    new QosSession(sessionId, QosSession.TYPE_EPS_BEARER),
+                    (EpsBearerQosSessionAttributes)attributes));
+        } else if (attributes instanceof NrQosSessionAttributes) {
+            queueOrSendMessage(ra -> ra.sendNrQosSessionAvailable(qosCallbackId,
+                    new QosSession(sessionId, QosSession.TYPE_NR_BEARER),
+                    (NrQosSessionAttributes)attributes));
+        }
     }
 
     /**
-     * Sends event that the Eps Qos Session was lost.
+     * Sends event that the Qos Session was lost.
      *
      * @param qosCallbackId the callback id that the session belongs to
-     * @param sessionId the unique session id across all Eps Bearer Qos Sessions
+     * @param sessionId the unique session id across all Qos Sessions
+     * @param qosSessionType the session type {@code QosSesson#QosSessionType}
      */
-    public final void sendQosSessionLost(final int qosCallbackId, final int sessionId) {
+    public final void sendQosSessionLost(final int qosCallbackId,
+            final int sessionId, final int qosSessionType) {
         queueOrSendMessage(ra -> ra.sendQosSessionLost(qosCallbackId,
-                new QosSession(sessionId, QosSession.TYPE_EPS_BEARER)));
+                new QosSession(sessionId, qosSessionType)));
     }
 
     /**
