@@ -15442,16 +15442,55 @@ public class PackageManagerService extends IPackageManager.Stub
                 null);
     }
 
-    private void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
             boolean suspended) {
-        final Bundle extras = new Bundle(3);
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        sendPackageBroadcast(
-                suspended ? Intent.ACTION_PACKAGES_SUSPENDED
-                        : Intent.ACTION_PACKAGES_UNSUSPENDED,
-                null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
-                new int[] {userId}, null, null, null);
+        final List<List<String>> pkgsToSend = new ArrayList(pkgList.length);
+        final List<IntArray> uidsToSend = new ArrayList(pkgList.length);
+        final List<SparseArray<int[]>> allowListsToSend = new ArrayList(pkgList.length);
+        final int[] userIds = new int[] {userId};
+        // Get allow lists for the pkg in the pkgList. Merge into the existed pkgs and uids if
+        // allow lists are the same.
+        synchronized (mLock) {
+            for (int i = 0; i < pkgList.length; i++) {
+                final String pkgName = pkgList[i];
+                final int uid = uidList[i];
+                SparseArray<int[]> allowList = mAppsFilter.getVisibilityAllowList(
+                        getPackageSettingInternal(pkgName, Process.SYSTEM_UID),
+                        userIds, mSettings.getPackagesLocked());
+                if (allowList == null) {
+                    allowList = new SparseArray<>(0);
+                }
+                boolean merged = false;
+                for (int j = 0; j < allowListsToSend.size(); j++) {
+                    if (Arrays.equals(allowListsToSend.get(j).get(userId), allowList.get(userId))) {
+                        pkgsToSend.get(j).add(pkgName);
+                        uidsToSend.get(j).add(uid);
+                        merged = true;
+                        break;
+                    }
+                }
+                if (!merged) {
+                    pkgsToSend.add(new ArrayList<>(Arrays.asList(pkgName)));
+                    uidsToSend.add(IntArray.wrap(new int[] {uid}));
+                    allowListsToSend.add(allowList);
+                }
+            }
+        }
+
+        for (int i = 0; i < pkgsToSend.size(); i++) {
+            final Bundle extras = new Bundle(3);
+            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
+                    pkgsToSend.get(i).toArray(new String[pkgsToSend.get(i).size()]));
+            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidsToSend.get(i).toArray());
+            final SparseArray<int[]> allowList = allowListsToSend.get(i).size() == 0
+                    ? null : allowListsToSend.get(i);
+            sendPackageBroadcast(
+                    suspended ? Intent.ACTION_PACKAGES_SUSPENDED
+                            : Intent.ACTION_PACKAGES_UNSUSPENDED,
+                    null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
+                    userIds, null, allowList, null);
+        }
     }
 
     /**
