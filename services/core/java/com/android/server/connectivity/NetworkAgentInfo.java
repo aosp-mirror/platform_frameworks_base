@@ -577,6 +577,17 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
     }
 
+    /**
+     * Notify the NetworkAgent that the network is successfully connected.
+     */
+    public void onNetworkCreated() {
+        try {
+            networkAgent.onNetworkCreated();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending network created event", e);
+        }
+    }
+
     // TODO: consider moving out of NetworkAgentInfo into its own class
     private class NetworkAgentMessageHandler extends INetworkAgentRegistry.Stub {
         private final Handler mHandler;

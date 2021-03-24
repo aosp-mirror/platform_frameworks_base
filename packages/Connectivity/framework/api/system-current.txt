@@ -216,6 +216,7 @@ package android.net {
     method public void markConnected();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
+    method public void onNetworkCreated();
     method public void onNetworkUnwanted();
     method public void onQosCallbackRegistered(int, @NonNull android.net.QosFilter);
     method public void onQosCallbackUnregistered(int);
