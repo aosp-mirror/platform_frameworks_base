@@ -189,7 +189,7 @@ class NotificationShadeDepthController @Inject constructor(
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
         val zoomOut = blurUtils.ratioOfBlurRadius(blur)
         try {
-            if (root.isAttachedToWindow) {
+            if (root.isAttachedToWindow && root.windowToken != null) {
                 wallpaperManager.setWallpaperZoomOut(root.windowToken, zoomOut)
             } else {
                 Log.i(TAG, "Won't set zoom. Window not attached $root")
