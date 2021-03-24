@@ -4559,6 +4559,15 @@ public final class Telephony {
         public static final String VOICE_REG_STATE = "voice_reg_state";
 
         /**
+         * An integer value indicating the current data service state.
+         * <p>
+         * Valid values: {@link ServiceState#STATE_IN_SERVICE},
+         * {@link ServiceState#STATE_OUT_OF_SERVICE}, {@link ServiceState#STATE_EMERGENCY_ONLY},
+         * {@link ServiceState#STATE_POWER_OFF}.
+         */
+        public static final String DATA_REG_STATE = "data_reg_state";
+
+        /**
          * The current registered operator numeric id.
          * <p>
          * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
