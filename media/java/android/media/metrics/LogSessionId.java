@@ -17,20 +17,29 @@
 package android.media.metrics;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
+
+import java.util.Objects;
 
 /**
  * An instances of this class represents the ID of a log session.
  */
 public final class LogSessionId {
-    private final String mSessionId;
+    @NonNull private final String mSessionId;
 
-    /* package */ LogSessionId(@NonNull String id) {
-        mSessionId = id;
-    }
+    /**
+     * A {@link LogSessionId} object which is used to clear any existing session ID.
+     */
+    @NonNull public static final LogSessionId LOG_SESSION_ID_NONE = new LogSessionId("");
 
     /** @hide */
     @TestApi
+    public LogSessionId(@NonNull String id) {
+        mSessionId = Objects.requireNonNull(id);
+    }
+
+    /** Returns the ID represented by a string. */
     @NonNull
     public String getStringId() {
         return mSessionId;
@@ -39,5 +48,18 @@ public final class LogSessionId {
     @Override
     public String toString() {
         return mSessionId;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LogSessionId that = (LogSessionId) o;
+        return Objects.equals(mSessionId, that.mSessionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSessionId);
     }
 }
