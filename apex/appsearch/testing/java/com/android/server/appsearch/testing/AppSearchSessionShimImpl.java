@@ -20,12 +20,12 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
-import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.AppSearchSession;
 import android.app.appsearch.AppSearchSessionShim;
 import android.app.appsearch.BatchResultCallback;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByUriRequest;
+import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.RemoveByUriRequest;
 import android.app.appsearch.ReportUsageRequest;
@@ -34,6 +34,7 @@ import android.app.appsearch.SearchResultsShim;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
 import android.app.appsearch.SetSchemaResponse;
+import android.app.appsearch.StorageInfo;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 
@@ -94,9 +95,17 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
 
     @Override
     @NonNull
-    public ListenableFuture<Set<AppSearchSchema>> getSchema() {
-        SettableFuture<AppSearchResult<Set<AppSearchSchema>>> future = SettableFuture.create();
+    public ListenableFuture<GetSchemaResponse> getSchema() {
+        SettableFuture<AppSearchResult<GetSchemaResponse>> future = SettableFuture.create();
         mAppSearchSession.getSchema(mExecutor, future::set);
+        return Futures.transformAsync(future, this::transformResult, mExecutor);
+    }
+
+    @NonNull
+    @Override
+    public ListenableFuture<Set<String>> getNamespaces() {
+        SettableFuture<AppSearchResult<Set<String>>> future = SettableFuture.create();
+        mAppSearchSession.getNamespaces(mExecutor, future::set);
         return Futures.transformAsync(future, this::transformResult, mExecutor);
     }
 
@@ -151,6 +160,14 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
         mAppSearchSession.remove(queryExpression, searchSpec, mExecutor, future::set);
+        return Futures.transformAsync(future, this::transformResult, mExecutor);
+    }
+
+    @NonNull
+    @Override
+    public ListenableFuture<StorageInfo> getStorageInfo() {
+        SettableFuture<AppSearchResult<StorageInfo>> future = SettableFuture.create();
+        mAppSearchSession.getStorageInfo(mExecutor, future::set);
         return Futures.transformAsync(future, this::transformResult, mExecutor);
     }
 
