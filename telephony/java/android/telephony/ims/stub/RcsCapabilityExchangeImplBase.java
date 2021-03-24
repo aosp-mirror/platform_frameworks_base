@@ -356,18 +356,25 @@ public class RcsCapabilityExchangeImplBase {
         void onTerminated(@NonNull String reason, long retryAfterMilliseconds) throws ImsException;
     }
 
-    private final Executor mBinderExecutor;
+    private Executor mBinderExecutor;
 
     /**
      * Create a new RcsCapabilityExchangeImplBase instance.
      *
      * @param executor The executor that remote calls from the framework will be called on.
+     * @hide
      */
     public RcsCapabilityExchangeImplBase(@NonNull Executor executor) {
         if (executor == null) {
             throw new IllegalArgumentException("executor must not be null");
         }
         mBinderExecutor = executor;
+    }
+
+    /**
+     * Create a new RcsCapabilityExchangeImplBase instance.
+     */
+    public RcsCapabilityExchangeImplBase() {
     }
 
     /**
