@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -706,6 +707,44 @@ public final class DisplayManager {
         }
         final ColorDisplayManager cdm = mContext.getSystemService(ColorDisplayManager.class);
         cdm.setSaturationLevel(Math.round(level * 100f));
+    }
+
+    /**
+     * Sets the HDR types that have been disabled by user.
+     * @param userDisabledTypes the HDR types to disable.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setUserDisabledHdrTypes(@NonNull @HdrType int[] userDisabledTypes) {
+        mGlobal.setUserDisabledHdrTypes(userDisabledTypes);
+    }
+
+    /**
+     * Sets whether or not the user disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     *
+     * @param areUserDisabledHdrTypesAllowed If true, the user-disabled types
+     * are ignored and returned, if the display supports them. If false, the
+     * user-disabled types are taken into consideration and are never returned,
+     * even if the display supports them.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed) {
+        mGlobal.setAreUserDisabledHdrTypesAllowed(areUserDisabledHdrTypesAllowed);
+    }
+
+    /**
+     * Returns whether or not the user-disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean areUserDisabledHdrTypesAllowed() {
+        return mGlobal.areUserDisabledHdrTypesAllowed();
     }
 
     /**
