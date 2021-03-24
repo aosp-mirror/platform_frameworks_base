@@ -41,6 +41,7 @@ import android.os.VibrationEffect;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -224,6 +225,18 @@ public class VibratorControllerTest {
 
         assertTrue(controller.isVibrating());
         verify(mNativeWrapperMock).compose(eq(primitives), eq(12L));
+    }
+
+    @Test
+    public void on_withComposedPwle_ignoresEffect() {
+        VibratorController controller = createController();
+
+        RampSegment[] primitives = new RampSegment[]{
+                new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
+                        /* startFrequency= */ -1, /* endFrequency= */ 1, /* duration= */ 10)
+        };
+        assertEquals(0L, controller.on(primitives, 12));
+        assertFalse(controller.isVibrating());
     }
 
     @Test
