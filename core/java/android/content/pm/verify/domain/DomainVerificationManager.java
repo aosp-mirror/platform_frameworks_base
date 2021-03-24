@@ -179,10 +179,7 @@ public final class DomainVerificationManager {
      */
     @SystemApi
     @Nullable
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.DOMAIN_VERIFICATION_AGENT,
-            android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
-    })
+    @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
     public DomainVerificationInfo getDomainVerificationInfo(@NonNull String packageName)
             throws NameNotFoundException {
         try {
