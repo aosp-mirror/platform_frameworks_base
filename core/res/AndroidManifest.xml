@@ -5681,6 +5681,12 @@
     <permission android:name="android.permission.RENOUNCE_PERMISSIONS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to read nearby streaming policy. The policy allows the device
+         to stream its notifications and apps to nearby devices.
+         @hide -->
+    <permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows the holder to set the source of the data when setting a clip on the
          clipboard.
          @hide -->
