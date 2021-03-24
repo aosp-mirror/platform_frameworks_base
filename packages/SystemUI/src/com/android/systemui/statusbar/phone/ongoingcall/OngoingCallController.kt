@@ -19,11 +19,16 @@ package com.android.systemui.statusbar.phone.ongoingcall
 import android.app.Notification
 import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.util.Log
+import android.view.ViewGroup
+import android.widget.Chronometer
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.policy.CallbackController
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 
 /**
@@ -32,19 +37,39 @@ import javax.inject.Inject
 @SysUISingleton
 class OngoingCallController @Inject constructor(
     private val notifCollection: CommonNotifCollection,
-    private val featureFlags: FeatureFlags
-) {
+    private val featureFlags: FeatureFlags,
+    private val systemClock: SystemClock
+) : CallbackController<OngoingCallListener> {
+
+    var hasOngoingCall = false
+        private set
+    private var chipView: ViewGroup? = null
+
+    private val mListeners: MutableList<OngoingCallListener> = mutableListOf()
 
     private val notifListener = object : NotifCollectionListener {
         override fun onEntryUpdated(entry: NotificationEntry) {
-            if (isOngoingCallNotification(entry) && DEBUG) {
-                Log.d(TAG, "Ongoing call notification updated")
+            if (isOngoingCallNotification(entry)) {
+                val timeView = chipView?.findViewById<Chronometer>(R.id.ongoing_call_chip_time)
+                if (timeView != null) {
+                    hasOngoingCall = true
+                    val callStartTime = entry.sbn.notification.`when`
+                    timeView.base = callStartTime -
+                            System.currentTimeMillis() +
+                            systemClock.elapsedRealtime()
+                    timeView.start()
+                    mListeners.forEach { l -> l.onOngoingCallStarted(animate = true) }
+                } else if (DEBUG) {
+                    Log.w(TAG, "Ongoing call chip view could not be found; " +
+                            "Not displaying chip in status bar")
+                }
             }
         }
 
         override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
-            if (isOngoingCallNotification(entry) && DEBUG) {
-                Log.d(TAG, "Ongoing call notification removed")
+            if (isOngoingCallNotification(entry)) {
+                hasOngoingCall = false
+                mListeners.forEach { l -> l.onOngoingCallEnded(animate = true) }
             }
         }
     }
@@ -52,6 +77,24 @@ class OngoingCallController @Inject constructor(
     fun init() {
         if (featureFlags.isOngoingCallStatusBarChipEnabled) {
             notifCollection.addCollectionListener(notifListener)
+        }
+    }
+
+    fun setChipView(chipView: ViewGroup?) {
+        this.chipView = chipView
+    }
+
+    override fun addCallback(listener: OngoingCallListener) {
+        synchronized(mListeners) {
+            if (!mListeners.contains(listener)) {
+                mListeners.add(listener)
+            }
+        }
+    }
+
+    override fun removeCallback(listener: OngoingCallListener) {
+        synchronized(mListeners) {
+            mListeners.remove(listener)
         }
     }
 }

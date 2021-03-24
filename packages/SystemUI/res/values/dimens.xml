@@ -1441,4 +1441,11 @@
     <dimen name="wallet_empty_state_corner_radius">24dp</dimen>
     <dimen name="wallet_tile_card_view_height">32dp</dimen>
     <dimen name="wallet_tile_card_view_width">50dp</dimen>
+
+    <!-- Ongoing call chip -->
+    <dimen name="ongoing_call_chip_side_padding">12dp</dimen>
+    <dimen name="ongoing_call_chip_icon_size">16dp</dimen>
+    <!-- The padding between the icon and the text. -->
+    <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
+    <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
 </resources>

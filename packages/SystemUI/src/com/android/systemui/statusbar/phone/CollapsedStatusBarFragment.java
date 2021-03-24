@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -67,6 +68,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private NetworkController mNetworkController;
     private LinearLayout mSystemIconArea;
     private View mClockView;
+    private ViewGroup mOngoingCallChip;
     private View mNotificationIconAreaInner;
     private View mCenteredIconArea;
     private int mDisabled1;
@@ -83,6 +85,20 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         @Override
         public void setIsAirplaneMode(NetworkController.IconState icon) {
             mCommandQueue.recomputeDisableFlags(getContext().getDisplayId(), true /* animate */);
+        }
+    };
+
+    private final OngoingCallListener mOngoingCallListener = new OngoingCallListener() {
+        @Override
+        public void onOngoingCallStarted(boolean animate) {
+            disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
+            animateShow(mOngoingCallChip, animate);
+        }
+
+        @Override
+        public void onOngoingCallEnded(boolean animate) {
+            disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
+            animateHiddenState(mOngoingCallChip, View.GONE, animate);
         }
     };
 
@@ -142,6 +158,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         super.onResume();
         mCommandQueue.addCallback(this);
         mStatusBarStateController.addCallback(this);
+        mOngoingCallController.addCallback(mOngoingCallListener);
     }
 
     @Override
@@ -149,6 +166,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         super.onPause();
         mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
+        mOngoingCallController.removeCallback(mOngoingCallListener);
     }
 
     @Override
@@ -178,6 +196,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     .removeView(mCenteredIconArea);
         }
         statusBarCenteredIconArea.addView(mCenteredIconArea);
+
+        initOngoingCallChip();
 
         // Default to showing until we know otherwise.
         showNotificationIconArea(false);
@@ -226,6 +246,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         boolean headsUpVisible = mStatusBarComponent.headsUpShouldBeVisible();
         if (headsUpVisible) {
             state |= DISABLE_CLOCK;
+        }
+
+        if (mOngoingCallController.getHasOngoingCall()) {
+            state |= DISABLE_NOTIFICATION_ICONS;
         }
 
         if (!mKeyguardStateController.isLaunchTransitionFadingAway()
@@ -393,6 +417,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             ViewStub stub = mStatusBar.findViewById(R.id.operator_name);
             mOperatorNameFrame = stub.inflate();
         }
+    }
+
+    private void initOngoingCallChip() {
+        mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
+        mOngoingCallController.setChipView(mOngoingCallChip);
     }
 
     @Override

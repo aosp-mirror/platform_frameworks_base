@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
@@ -234,9 +235,11 @@ public interface StatusBarDependenciesModule {
     @Provides
     @SysUISingleton
     static OngoingCallController provideOngoingCallController(
-            CommonNotifCollection notifCollection, FeatureFlags featureFlags) {
+            CommonNotifCollection notifCollection,
+            FeatureFlags featureFlags,
+            SystemClock systemClock) {
         OngoingCallController ongoingCallController =
-                new OngoingCallController(notifCollection, featureFlags);
+                new OngoingCallController(notifCollection, featureFlags, systemClock);
         ongoingCallController.init();
         return ongoingCallController;
     }
