@@ -44,6 +44,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
@@ -342,14 +343,35 @@ public class AlwaysOnHotwordDetector {
         // Raw data associated with the event.
         // This is the audio that triggered the keyphrase if {@code isTriggerAudio} is true.
         private final byte[] mData;
+        private final HotwordDetectedResult mHotwordDetectedResult;
+        private final ParcelFileDescriptor mAudioStream;
 
         private EventPayload(boolean triggerAvailable, boolean captureAvailable,
                 AudioFormat audioFormat, int captureSession, byte[] data) {
+            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data, null,
+                    null);
+        }
+
+        EventPayload(AudioFormat audioFormat, HotwordDetectedResult hotwordDetectedResult) {
+            this(false, false, audioFormat, -1, null, hotwordDetectedResult, null);
+        }
+
+        EventPayload(AudioFormat audioFormat,
+                HotwordDetectedResult hotwordDetectedResult,
+                ParcelFileDescriptor audioStream) {
+            this(false, false, audioFormat, -1, null, hotwordDetectedResult, audioStream);
+        }
+
+        private EventPayload(boolean triggerAvailable, boolean captureAvailable,
+                AudioFormat audioFormat, int captureSession, byte[] data,
+                HotwordDetectedResult hotwordDetectedResult, ParcelFileDescriptor audioStream) {
             mTriggerAvailable = triggerAvailable;
             mCaptureAvailable = captureAvailable;
             mCaptureSession = captureSession;
             mAudioFormat = audioFormat;
             mData = data;
+            mHotwordDetectedResult = hotwordDetectedResult;
+            mAudioStream = audioStream;
         }
 
         /**
@@ -404,6 +426,33 @@ public class AlwaysOnHotwordDetector {
             } else {
                 return null;
             }
+        }
+
+        /**
+         * Returns {@link HotwordDetectedResult} associated with the hotword event, passed from
+         * {@link HotwordDetectionService}.
+         */
+        @Nullable
+        public HotwordDetectedResult getHotwordDetectedResult() {
+            return mHotwordDetectedResult;
+        }
+
+        /**
+         * Returns a stream with bytes corresponding to the open audio stream with hotword data.
+         *
+         * <p>This data represents an audio stream in the format returned by
+         * {@link #getCaptureAudioFormat}.
+         *
+         * <p>Clients are expected to start consuming the stream within 1 second of receiving the
+         * event.
+         *
+         * <p>When this method returns a non-null, clients must close this stream when it's no
+         * longer needed. Failing to do so will result in microphone being open for longer periods
+         * of time, and app being attributed for microphone usage.
+         */
+        @Nullable
+        public ParcelFileDescriptor getAudioStream() {
+            return mAudioStream;
         }
     }
 
