@@ -16,6 +16,7 @@
 
 package com.android.server.pm.test.verify.domain
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
@@ -23,6 +24,7 @@ import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationUserState
+import android.content.pm.verify.domain.IDomainVerificationManager
 import android.os.Build
 import android.os.PatternMatcher
 import android.os.Process
@@ -127,15 +129,17 @@ class DomainVerificationManagerApiTest {
         assertThat(service.setStatus(UUID_INVALID, setOf(DOMAIN_1), 1100))
                 .isEqualTo(DomainVerificationManager.ERROR_DOMAIN_SET_ID_INVALID)
 
-        assertThat(DomainVerificationJavaUtil.setStatusForceNullable(service, null,
-                setOf(DOMAIN_1), 1100))
-                .isEqualTo(DomainVerificationManager.ERROR_DOMAIN_SET_ID_NULL)
+        assertFailsWith(IllegalArgumentException::class) {
+            DomainVerificationJavaUtil.setStatusForceNullable(service, null, setOf(DOMAIN_1), 1100)
+        }
 
-        assertThat(DomainVerificationJavaUtil.setStatusForceNullable(service, UUID_ONE, null,
-                1100)).isEqualTo(DomainVerificationManager.ERROR_DOMAIN_SET_NULL_OR_EMPTY)
+        assertFailsWith(IllegalArgumentException::class) {
+            DomainVerificationJavaUtil.setStatusForceNullable(service, UUID_ONE, null, 1100)
+        }
 
-        assertThat(service.setStatus(UUID_ONE, emptySet(), 1100))
-                .isEqualTo(DomainVerificationManager.ERROR_DOMAIN_SET_NULL_OR_EMPTY)
+        assertFailsWith(IllegalArgumentException::class) {
+            service.setStatus(UUID_ONE, emptySet(), 1100)
+        }
 
         assertThat(service.setStatus(UUID_ONE, setOf(DOMAIN_3), 1100))
                 .isEqualTo(DomainVerificationManager.ERROR_UNKNOWN_DOMAIN)
@@ -143,8 +147,9 @@ class DomainVerificationManagerApiTest {
         assertThat(service.setStatus(UUID_ONE, setOf(DOMAIN_1, DOMAIN_2, DOMAIN_3), 1100))
                 .isEqualTo(DomainVerificationManager.ERROR_UNKNOWN_DOMAIN)
 
-        assertThat(service.setStatus(UUID_ONE, setOf(DOMAIN_1), 15))
-                .isEqualTo(DomainVerificationManager.ERROR_INVALID_STATE_CODE)
+        assertFailsWith(IllegalArgumentException::class) {
+            service.setStatus(UUID_ONE, setOf(DOMAIN_1), 15)
+        }
 
         map.clear()
         assertFailsWith(PackageManager.NameNotFoundException::class){
@@ -198,15 +203,19 @@ class DomainVerificationManagerApiTest {
         assertThat(service.setUserSelection(UUID_INVALID, setOf(DOMAIN_1), true, 0))
                 .isEqualTo(DomainVerificationManager.ERROR_DOMAIN_SET_ID_INVALID)
 
-        assertThat(DomainVerificationJavaUtil.setUserSelectionForceNullable(service, null,
-                setOf(DOMAIN_1), true, 0))
-                .isEqualTo(DomainVerificationManager.ERROR_DOMAIN_SET_ID_NULL)
+        assertFailsWith(IllegalArgumentException::class) {
+            DomainVerificationJavaUtil.setUserSelectionForceNullable(service, null,
+                setOf(DOMAIN_1), true, 0)
+        }
 
-        assertThat(DomainVerificationJavaUtil.setUserSelectionForceNullable(service, UUID_ONE, null,
-                true, 0)).isEqualTo(DomainVerificationManager.ERROR_DOMAIN_SET_NULL_OR_EMPTY)
+        assertFailsWith(IllegalArgumentException::class) {
+            DomainVerificationJavaUtil.setUserSelectionForceNullable(service, UUID_ONE, null,
+                true, 0)
+        }
 
-        assertThat(service.setUserSelection(UUID_ONE, emptySet(), true, 0))
-                .isEqualTo(DomainVerificationManager.ERROR_DOMAIN_SET_NULL_OR_EMPTY)
+        assertFailsWith(IllegalArgumentException::class) {
+            service.setUserSelection(UUID_ONE, emptySet(), true, 0)
+        }
 
         assertThat(service.setUserSelection(UUID_ONE, setOf(DOMAIN_3), true, 0))
                 .isEqualTo(DomainVerificationManager.ERROR_UNKNOWN_DOMAIN)
@@ -295,6 +304,48 @@ class DomainVerificationManagerApiTest {
             assertThat(it.single().isOverrideable).isEqualTo(true)
         }
         assertThat(service.getOwnersForDomain(DOMAIN_2, 1)).isEmpty()
+    }
+
+    @Test
+    fun appProcessManager() {
+        // The app side DomainVerificationManager also has to do some argument enforcement since
+        // the input values are transformed before they are sent across Binder. Verify that here.
+
+        // Mock nothing to ensure no calls are made before failing
+        val context = mockThrowOnUnmocked<Context>()
+        val binderInterface = mockThrowOnUnmocked<IDomainVerificationManager>()
+
+        val manager = DomainVerificationManager(context, binderInterface)
+
+        assertFailsWith(IllegalArgumentException::class) {
+            DomainVerificationJavaUtil.setStatusForceNullable(manager, null, setOf(DOMAIN_1), 1100)
+        }
+
+        assertFailsWith(IllegalArgumentException::class) {
+            DomainVerificationJavaUtil.setStatusForceNullable(manager, UUID_ONE, null, 1100)
+        }
+
+        assertFailsWith(IllegalArgumentException::class) {
+            manager.setDomainVerificationStatus(UUID_ONE, emptySet(), 1100)
+        }
+
+        assertFailsWith(IllegalArgumentException::class) {
+            DomainVerificationJavaUtil.setUserSelectionForceNullable(
+                manager, null,
+                setOf(DOMAIN_1), true
+            )
+        }
+
+        assertFailsWith(IllegalArgumentException::class) {
+            DomainVerificationJavaUtil.setUserSelectionForceNullable(
+                manager, UUID_ONE,
+                null, true
+            )
+        }
+
+        assertFailsWith(IllegalArgumentException::class) {
+            manager.setDomainVerificationUserSelection(UUID_ONE, emptySet(), true)
+        }
     }
 
     private fun makeService(vararg pkgSettings: PackageSetting) =
