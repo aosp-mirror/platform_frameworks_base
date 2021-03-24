@@ -12426,7 +12426,7 @@ package android.util {
 package android.uwb {
 
   public final class AngleMeasurement implements android.os.Parcelable {
-    ctor public AngleMeasurement(double, double, double);
+    ctor public AngleMeasurement(@FloatRange(from=-3.141592653589793, to=3.141592653589793) double, @FloatRange(from=0.0, to=3.141592653589793) double, @FloatRange(from=0.0, to=1.0) double);
     method public int describeContents();
     method @FloatRange(from=0.0, to=1.0) public double getConfidenceLevel();
     method @FloatRange(from=0.0, to=3.141592653589793) public double getErrorRadians();
