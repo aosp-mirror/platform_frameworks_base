@@ -212,6 +212,9 @@ public:
                                           std::string_view path) const final {
         return incfs::isFullyLoaded(control, path);
     }
+    incfs::LoadingState isFileFullyLoaded(const Control& control, FileId id) const final {
+        return incfs::isFullyLoaded(control, id);
+    }
     incfs::LoadingState isEverythingFullyLoaded(const Control& control) const final {
         return incfs::isEverythingFullyLoaded(control);
     }
@@ -227,9 +230,8 @@ public:
     ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const final {
         return incfs::writeBlocks({blocks.data(), size_t(blocks.size())});
     }
-    ErrorCode reserveSpace(const Control& control, std::string_view path,
-                           IncFsSize size) const final {
-        return incfs::reserveSpace(control, path, size);
+    ErrorCode reserveSpace(const Control& control, FileId id, IncFsSize size) const final {
+        return incfs::reserveSpace(control, id, size);
     }
     WaitResult waitForPendingReads(const Control& control, std::chrono::milliseconds timeout,
                                    std::vector<incfs::ReadInfo>* pendingReadsBuffer) const final {
@@ -238,18 +240,25 @@ public:
     ErrorCode setUidReadTimeouts(const Control& control,
                                  const std::vector<android::os::incremental::PerUidReadTimeouts>&
                                          perUidReadTimeouts) const final {
-        std::vector<incfs::UidReadTimeouts> timeouts;
-        timeouts.resize(perUidReadTimeouts.size());
+        std::vector<incfs::UidReadTimeouts> timeouts(perUidReadTimeouts.size());
         for (int i = 0, size = perUidReadTimeouts.size(); i < size; ++i) {
-            auto&& timeout = timeouts[i];
+            auto& timeout = timeouts[i];
             const auto& perUidTimeout = perUidReadTimeouts[i];
             timeout.uid = perUidTimeout.uid;
             timeout.minTimeUs = perUidTimeout.minTimeUs;
             timeout.minPendingTimeUs = perUidTimeout.minPendingTimeUs;
             timeout.maxPendingTimeUs = perUidTimeout.maxPendingTimeUs;
         }
-
         return incfs::setUidReadTimeouts(control, timeouts);
+    }
+    ErrorCode forEachFile(const Control& control, FileCallback cb) const final {
+        return incfs::forEachFile(control,
+                                  [&](auto& control, FileId id) { return cb(control, id); });
+    }
+    ErrorCode forEachIncompleteFile(const Control& control, FileCallback cb) const final {
+        return incfs::forEachIncompleteFile(control, [&](auto& control, FileId id) {
+            return cb(control, id);
+        });
     }
 };
 
