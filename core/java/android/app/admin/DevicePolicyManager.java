@@ -7221,6 +7221,42 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device/profile owner to set nearby app streaming policy. App streaming is when
+     * the device starts an app on a virtual display and sends a video stream of the app to nearby
+     * devices.
+     *
+     * @param policy One of the {@code NearbyStreamingPolicy} constants.
+     * @throws SecurityException if caller is not a device or profile owner.
+     */
+    public void setNearbyAppStreamingPolicy(@NearbyStreamingPolicy int policy) {
+        throwIfParentInstance("setNearbyAppStreamingPolicy");
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.setNearbyAppStreamingPolicy(policy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current runtime nearby app streaming policy set by the device or profile owner.
+     * The default is {@link #NEARBY_STREAMING_DISABLED}.
+     */
+    public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy() {
+        throwIfParentInstance("getNearbyAppStreamingPolicy");
+        if (mService == null) {
+            return NEARBY_STREAMING_DISABLED;
+        }
+        try {
+            return mService.getNearbyAppStreamingPolicy();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called by a device owner, or alternatively a profile owner from Android 8.0 (API level 26) or
      * higher, to set whether auto time is required. If auto time is required, no user will be able
      * set the date and time and network date and time will be used.

@@ -135,6 +135,9 @@ interface IDevicePolicyManager {
     void setNearbyNotificationStreamingPolicy(int policy);
     int getNearbyNotificationStreamingPolicy();
 
+    void setNearbyAppStreamingPolicy(int policy);
+    int getNearbyAppStreamingPolicy();
+
     void setKeyguardDisabledFeatures(in ComponentName who, int which, boolean parent);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
 
