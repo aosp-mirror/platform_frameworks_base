@@ -298,7 +298,7 @@ public class ContextHubService extends IContextHubService.Stub {
             mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
                     SensorPrivacyManager.Sensors.MICROPHONE, (userId, enabled) -> {
                         if (userId == getCurrentUserId()) {
-                            Log.d(TAG, "User: " + userId + " enabled: " + enabled);
+                            Log.d(TAG, "User: " + userId + "mic privacy: " + enabled);
                             sendMicrophoneDisableSettingUpdate(enabled);
                         }
                 });
