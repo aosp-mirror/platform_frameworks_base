@@ -42053,7 +42053,6 @@ package android.telephony {
     method public static int[] calculateLength(String, boolean);
     method @Deprecated public static android.telephony.SmsMessage createFromPdu(byte[]);
     method public static android.telephony.SmsMessage createFromPdu(byte[], String);
-    method @Nullable public static android.telephony.SmsMessage createSmsSubmitPdu(@NonNull byte[], boolean);
     method public String getDisplayMessageBody();
     method public String getDisplayOriginatingAddress();
     method public String getEmailBody();
