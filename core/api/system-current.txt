@@ -2804,7 +2804,9 @@ package android.content.pm {
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setMessage(@StringRes int);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonAction(int);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonText(@StringRes int);
+    method @NonNull public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonText(@NonNull String);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setTitle(@StringRes int);
+    method @NonNull public android.content.pm.SuspendDialogInfo.Builder setTitle(@NonNull String);
   }
 
 }
