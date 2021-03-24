@@ -27,10 +27,7 @@ import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.view.IWindowManager;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -48,13 +45,11 @@ import java.lang.ref.Reference;
 @UiContext
 public class WindowContext extends ContextWrapper {
     private final WindowManager mWindowManager;
-    private final IWindowManager mWms;
-    private final @NonNull IBinder mToken;
     private final @WindowManager.LayoutParams.WindowType int mType;
     private final @Nullable Bundle mOptions;
-    private boolean mListenerRegistered;
     private final ComponentCallbacksController mCallbacksController =
             new ComponentCallbacksController();
+    private final WindowContextController mController;
 
     /**
      * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
@@ -69,9 +64,9 @@ public class WindowContext extends ContextWrapper {
 
         mType = type;
         mOptions = options;
-        mWms = WindowManagerGlobal.getWindowManagerService();
-        mToken = getWindowContextToken();
         mWindowManager = createWindowContextWindowManager(this);
+        IBinder token = getWindowContextToken();
+        mController = new WindowContextController(token);
 
         Reference.reachabilityFence(this);
     }
@@ -81,12 +76,7 @@ public class WindowContext extends ContextWrapper {
      * to receive configuration changes of the associated {@link WindowManager} node.
      */
     public void registerWithServer() {
-        try {
-            mListenerRegistered = mWms.registerWindowContextListener(mToken, mType, getDisplayId(),
-                    mOptions);
-        }  catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mController.registerListener(mType, getDisplayId(), mOptions);
     }
 
     @Override
@@ -106,14 +96,7 @@ public class WindowContext extends ContextWrapper {
     /** Used for test to invoke because we can't invoke finalize directly. */
     @VisibleForTesting
     public void release() {
-        if (mListenerRegistered) {
-            mListenerRegistered = false;
-            try {
-                mWms.unregisterWindowContextListener(mToken);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
+        mController.unregisterListenerIfNeeded();
         destroy();
     }
 
