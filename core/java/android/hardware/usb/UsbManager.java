@@ -384,8 +384,9 @@ public class UsbManager {
             "android.hardware.usb.extra.ACCESSORY_START";
 
     /**
-     * A long extra indicating ms from boot to sent {@link #ACTION_USB_ACCESSORY_HANDSHAKE}
-     * This is obtained with SystemClock.elapsedRealtime()
+
+     * A long extra indicating the timestamp just before
+     * sending {@link  ACTION_USB_ACCESSORY_HANDSHAKE}.
      * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
      *
      * {@hide}
