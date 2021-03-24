@@ -2272,7 +2272,7 @@ void IncrementalService::addIfsStateCallback(StorageId storageId, IfsStateCallba
         mIfsStateCallbacks[storageId].emplace_back(std::move(callback));
     }
     if (wasEmpty) {
-        addTimedJob(*mTimedQueue, kMaxStorageId, Constants::progressUpdateInterval,
+        addTimedJob(*mTimedQueue, kAllStoragesId, Constants::progressUpdateInterval,
                     [this]() { processIfsStateCallbacks(); });
     }
 }
@@ -2288,29 +2288,36 @@ void IncrementalService::processIfsStateCallbacks() {
             }
             IfsStateCallbacks::iterator it;
             if (storageId == kInvalidStorageId) {
-                // First entry, initialize the it.
+                // First entry, initialize the |it|.
                 it = mIfsStateCallbacks.begin();
             } else {
-                // Subsequent entries, update the storageId, and shift to the new one.
-                it = mIfsStateCallbacks.find(storageId);
+                // Subsequent entries, update the |storageId|, and shift to the new one (not that
+                // it guarantees much about updated items, but at least the loop will finish).
+                it = mIfsStateCallbacks.lower_bound(storageId);
                 if (it == mIfsStateCallbacks.end()) {
-                    // Was removed while processing, too bad.
+                    // Nothing else left, too bad.
                     break;
                 }
-
-                auto& callbacks = it->second;
-                if (callbacks.empty()) {
-                    std::swap(callbacks, local);
+                if (it->first != storageId) {
+                    local.clear(); // Was removed during processing, forget the old callbacks.
                 } else {
-                    callbacks.insert(callbacks.end(), local.begin(), local.end());
-                }
-                if (callbacks.empty()) {
-                    it = mIfsStateCallbacks.erase(it);
-                    if (mIfsStateCallbacks.empty()) {
-                        return;
+                    // Put the 'surviving' callbacks back into the map and advance the position.
+                    auto& callbacks = it->second;
+                    if (callbacks.empty()) {
+                        std::swap(callbacks, local);
+                    } else {
+                        callbacks.insert(callbacks.end(), std::move_iterator(local.begin()),
+                                         std::move_iterator(local.end()));
+                        local.clear();
                     }
-                } else {
-                    ++it;
+                    if (callbacks.empty()) {
+                        it = mIfsStateCallbacks.erase(it);
+                        if (mIfsStateCallbacks.empty()) {
+                            return;
+                        }
+                    } else {
+                        ++it;
+                    }
                 }
             }
 
@@ -2330,7 +2337,7 @@ void IncrementalService::processIfsStateCallbacks() {
         processIfsStateCallbacks(storageId, local);
     }
 
-    addTimedJob(*mTimedQueue, kMaxStorageId, Constants::progressUpdateInterval,
+    addTimedJob(*mTimedQueue, kAllStoragesId, Constants::progressUpdateInterval,
                 [this]() { processIfsStateCallbacks(); });
 }
 
