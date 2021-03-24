@@ -50,6 +50,18 @@ public final class NrQos extends Qos implements Parcelable {
         return new NrQos(in);
     }
 
+    public int get5Qi() {
+        return fiveQi;
+    }
+
+    public int getQfi() {
+        return qosFlowId;
+    }
+
+    public int getAveragingWindow() {
+        return averagingWindowMs;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(Qos.QOS_TYPE_NR, dest, flags);

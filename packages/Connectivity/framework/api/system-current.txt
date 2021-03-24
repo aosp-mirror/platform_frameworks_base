@@ -232,8 +232,8 @@ package android.net {
     method public final void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
     method public final void sendNetworkScore(@IntRange(from=0, to=99) int);
     method public final void sendQosCallbackError(int, int);
-    method public final void sendQosSessionAvailable(int, int, @NonNull android.telephony.data.EpsBearerQosSessionAttributes);
-    method public final void sendQosSessionLost(int, int);
+    method public final void sendQosSessionAvailable(int, int, @NonNull android.net.QosSessionAttributes);
+    method public final void sendQosSessionLost(int, int, int);
     method public final void sendSocketKeepaliveEvent(int, int);
     method @Deprecated public void setLegacySubtype(int, @NonNull String);
     method public final void setUnderlyingNetworks(@Nullable java.util.List<android.net.Network>);
@@ -385,6 +385,7 @@ package android.net {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.QosSession> CREATOR;
     field public static final int TYPE_EPS_BEARER = 1; // 0x1
+    field public static final int TYPE_NR_BEARER = 2; // 0x2
   }
 
   public interface QosSessionAttributes {
