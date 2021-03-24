@@ -129,7 +129,7 @@ public class FrameTrackerTest {
 
         // end the trace session, the last janky frame is after the end() so is discarded.
         when(mChoreographer.getVsyncId()).thenReturn(102L);
-        mTracker.end();
+        mTracker.end(FrameTracker.REASON_END_NORMAL);
         sendFrame(5, JANK_NONE, 102L);
         sendFrame(500, JANK_APP_DEADLINE_MISSED, 103L);
 
@@ -151,7 +151,7 @@ public class FrameTrackerTest {
 
         // end the trace session
         when(mChoreographer.getVsyncId()).thenReturn(102L);
-        mTracker.end();
+        mTracker.end(FrameTracker.REASON_END_NORMAL);
         sendFrame(4, JANK_NONE, 102L);
 
         verify(mTracker).removeObservers();
@@ -174,7 +174,7 @@ public class FrameTrackerTest {
 
         // end the trace session
         when(mChoreographer.getVsyncId()).thenReturn(102L);
-        mTracker.end();
+        mTracker.end(FrameTracker.REASON_END_NORMAL);
         sendFrame(4, JANK_NONE, 102L);
 
         verify(mTracker).removeObservers();
@@ -197,7 +197,7 @@ public class FrameTrackerTest {
 
         // end the trace session
         when(mChoreographer.getVsyncId()).thenReturn(102L);
-        mTracker.end();
+        mTracker.end(FrameTracker.REASON_END_NORMAL);
         sendFrame(4, JANK_NONE, 102L);
 
         verify(mTracker).removeObservers();
@@ -220,7 +220,7 @@ public class FrameTrackerTest {
 
         // end the trace session, simulate one more valid callback came after the end call.
         when(mChoreographer.getVsyncId()).thenReturn(102L);
-        mTracker.end();
+        mTracker.end(FrameTracker.REASON_END_NORMAL);
         sendFrame(50, JANK_APP_DEADLINE_MISSED, 102L);
 
         // One more callback with VSYNC after the end() vsync id.
@@ -247,7 +247,7 @@ public class FrameTrackerTest {
         // a janky frame
         sendFrame(50, JANK_APP_DEADLINE_MISSED, 102L);
 
-        mTracker.cancel();
+        mTracker.cancel(FrameTracker.REASON_CANCEL_NORMAL);
         verify(mTracker).removeObservers();
         // Since the tracker has been cancelled, shouldn't trigger perfetto.
         verify(mTracker, never()).triggerPerfetto();
@@ -267,11 +267,11 @@ public class FrameTrackerTest {
 
         // end the trace session
         when(mChoreographer.getVsyncId()).thenReturn(101L);
-        mTracker.end();
+        mTracker.end(FrameTracker.REASON_END_NORMAL);
         sendFrame(4, JANK_NONE, 102L);
 
         // Since the begin vsync id (101) equals to the end vsync id (101), will be treat as cancel.
-        verify(mTracker).cancel();
+        verify(mTracker).cancel(FrameTracker.REASON_CANCEL_SAME_VSYNC);
 
         // Observers should be removed in this case, or FrameTracker object will be leaked.
         verify(mTracker).removeObservers();
@@ -282,13 +282,13 @@ public class FrameTrackerTest {
 
     @Test
     public void testCancelWhenSessionNeverBegun() {
-        mTracker.cancel();
+        mTracker.cancel(FrameTracker.REASON_CANCEL_NORMAL);
         verify(mTracker).removeObservers();
     }
 
     @Test
     public void testEndWhenSessionNeverBegun() {
-        mTracker.end();
+        mTracker.end(FrameTracker.REASON_END_NORMAL);
         verify(mTracker).removeObservers();
     }
 

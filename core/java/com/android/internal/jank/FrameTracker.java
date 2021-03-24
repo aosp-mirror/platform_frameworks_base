@@ -26,7 +26,9 @@ import static android.view.SurfaceControl.JankData.SURFACE_FLINGER_SCHEDULING;
 
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_METRICS_LOGGED;
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_BEGIN;
+import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_CANCEL;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.HardwareRendererObserver;
@@ -45,6 +47,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor.Session;
 import com.android.internal.util.FrameworkStatsLog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * A class that allows the app to get the frame metrics from HardwareRendererObserver.
  * @hide
@@ -56,6 +61,26 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
     private static final long INVALID_ID = -1;
     public static final int NANOS_IN_MILLISECOND = 1_000_000;
+
+    static final int REASON_END_UNKNOWN = -1;
+    static final int REASON_END_NORMAL = 0;
+    static final int REASON_END_SURFACE_DESTROYED = 1;
+    static final int REASON_CANCEL_NORMAL = 16;
+    static final int REASON_CANCEL_NOT_BEGUN = 17;
+    static final int REASON_CANCEL_SAME_VSYNC = 18;
+
+    /** @hide */
+    @IntDef({
+            REASON_END_UNKNOWN,
+            REASON_END_NORMAL,
+            REASON_END_SURFACE_DESTROYED,
+            REASON_CANCEL_NORMAL,
+            REASON_CANCEL_NOT_BEGUN,
+            REASON_CANCEL_SAME_VSYNC,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Reasons {
+    }
 
     private final HardwareRendererObserver mObserver;
     private SurfaceControl mSurfaceControl;
@@ -156,7 +181,14 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 // force finish the session.
                 mHandler.postDelayed(() -> {
                     synchronized (FrameTracker.this) {
+                        if (DEBUG) {
+                            Log.d(TAG, "surfaceDestroyed: " + mSession.getName()
+                                    + ", finalized=" + mMetricsFinalized
+                                    + ", info=" + mJankInfos.size()
+                                    + ", vsync=" + mBeginVsyncId + "-" + mEndVsyncId);
+                        }
                         if (!mMetricsFinalized) {
+                            end(REASON_END_SURFACE_DESTROYED);
                             finish(mJankInfos.size() - 1);
                         }
                     }
@@ -176,6 +208,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         mSession.setTimeStamp(System.nanoTime());
         Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
         mRendererWrapper.addObserver(mObserver);
+        if (DEBUG) {
+            Log.d(TAG, "begin: " + mSession.getName() + ", begin=" + mBeginVsyncId);
+        }
         if (mSurfaceControl != null) {
             mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
         }
@@ -187,15 +222,25 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     /**
      * End the trace session of the CUJ.
      */
-    public synchronized void end() {
+    public synchronized void end(@Reasons int reason) {
+        if (mEndVsyncId != INVALID_ID) return;
         mEndVsyncId = mChoreographer.getVsyncId();
+
         // Cancel the session if:
         // 1. The session begins and ends at the same vsync id.
         // 2. The session never begun.
-        if (mEndVsyncId == mBeginVsyncId || mBeginVsyncId == INVALID_ID) {
-            cancel();
+        if (mBeginVsyncId == INVALID_ID) {
+            cancel(REASON_CANCEL_NOT_BEGUN);
+        } else if (mEndVsyncId == mBeginVsyncId) {
+            cancel(REASON_CANCEL_SAME_VSYNC);
         } else {
+            if (DEBUG) {
+                Log.d(TAG, "end: " + mSession.getName()
+                        + ", end=" + mEndVsyncId + ", reason=" + reason);
+            }
             Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+            mSession.setReason(reason);
+            InteractionJankMonitor.getInstance().removeTimeout(mSession.getCuj());
         }
         // We don't remove observer here,
         // will remove it when all the frame metrics in this duration are called back.
@@ -205,7 +250,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     /**
      * Cancel the trace session of the CUJ.
      */
-    public synchronized void cancel() {
+    public synchronized void cancel(@Reasons int reason) {
         // We don't need to end the trace section if it never begun.
         if (mBeginVsyncId != INVALID_ID) {
             Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
@@ -215,10 +260,16 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         // Always remove the observers in cancel call to avoid leakage.
         removeObservers();
 
+        if (DEBUG) {
+            Log.d(TAG, "cancel: " + mSession.getName()
+                    + ", begin=" + mBeginVsyncId + ", end=" + mEndVsyncId + ", reason=" + reason);
+        }
+
+        mSession.setReason(reason);
         // Notify the listener the session has been cancelled.
         // We don't notify the listeners if the session never begun.
-        if (mListener != null && mBeginVsyncId != INVALID_ID) {
-            mListener.onNotifyCujEvents(mSession, InteractionJankMonitor.ACTION_SESSION_CANCEL);
+        if (mListener != null) {
+            mListener.onNotifyCujEvents(mSession, ACTION_SESSION_CANCEL);
         }
     }
 
@@ -399,6 +450,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         }
         if (DEBUG) {
             Log.i(TAG, "FrameTracker: CUJ=" + mSession.getName()
+                    + " (" + mBeginVsyncId + "," + mEndVsyncId + ")"
                     + " totalFrames=" + totalFramesCount
                     + " missedAppFrames=" + missedAppFramesCount
                     + " missedSfFrames=" + missedSfFramesCounts

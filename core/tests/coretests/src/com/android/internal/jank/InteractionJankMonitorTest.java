@@ -103,7 +103,7 @@ public class InteractionJankMonitorTest {
         assertThat(monitor.begin(mView, session.getCuj())).isTrue();
         verify(tracker).begin();
         assertThat(monitor.end(session.getCuj())).isTrue();
-        verify(tracker).end();
+        verify(tracker).end(FrameTracker.REASON_END_NORMAL);
     }
 
     @Test
@@ -154,7 +154,7 @@ public class InteractionJankMonitorTest {
         assertThat(runnable).isNotNull();
         mWorker.getThreadHandler().removeCallbacks(runnable);
         runnable.run();
-        verify(tracker).cancel();
+        verify(tracker).cancel(FrameTracker.REASON_CANCEL_NORMAL);
     }
 
     @Test
