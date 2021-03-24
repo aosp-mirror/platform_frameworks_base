@@ -1735,10 +1735,10 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnbindOnAllDone) {
     ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
 
     // IfsState callback present.
-    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(IncrementalService::kAllStoragesId, mTimedQueue->mId);
     ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
     auto callback = mTimedQueue->mWhat;
-    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+    mTimedQueue->clearJob(IncrementalService::kAllStoragesId);
 
     // Not loaded yet.
     EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_))
@@ -1751,10 +1751,10 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnbindOnAllDone) {
     ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
 
     // Still present.
-    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(IncrementalService::kAllStoragesId, mTimedQueue->mId);
     ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
     callback = mTimedQueue->mWhat;
-    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+    mTimedQueue->clearJob(IncrementalService::kAllStoragesId);
 
     // Fully loaded.
     EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_)).WillOnce(Return(incfs::LoadingState::Full));
@@ -1797,10 +1797,10 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnbindOnAllDoneWithReadlogs) {
     ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
 
     // IfsState callback present.
-    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(IncrementalService::kAllStoragesId, mTimedQueue->mId);
     ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
     auto callback = mTimedQueue->mWhat;
-    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+    mTimedQueue->clearJob(IncrementalService::kAllStoragesId);
 
     // Not loaded yet.
     EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_))
@@ -1813,10 +1813,10 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnbindOnAllDoneWithReadlogs) {
     ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
 
     // Still present.
-    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(IncrementalService::kAllStoragesId, mTimedQueue->mId);
     ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
     callback = mTimedQueue->mWhat;
-    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+    mTimedQueue->clearJob(IncrementalService::kAllStoragesId);
 
     // Fully loaded.
     EXPECT_CALL(*mIncFs, isEverythingFullyLoaded(_))
@@ -1832,10 +1832,10 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnbindOnAllDoneWithReadlogs) {
     ASSERT_EQ(mDataLoader->status(), IDataLoaderStatusListener::DATA_LOADER_STARTED);
 
     // Still present.
-    ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+    ASSERT_EQ(IncrementalService::kAllStoragesId, mTimedQueue->mId);
     ASSERT_EQ(mTimedQueue->mAfter, stateUpdateInterval);
     callback = mTimedQueue->mWhat;
-    mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+    mTimedQueue->clearJob(IncrementalService::kAllStoragesId);
 
     // Disable readlogs and expect the unbind.
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
@@ -2007,10 +2007,10 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     {
         // Timed callback present -> 0 progress.
-        ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+        ASSERT_EQ(IncrementalService::kAllStoragesId, mTimedQueue->mId);
         ASSERT_GE(mTimedQueue->mAfter, std::chrono::seconds(1));
         const auto timedCallback = mTimedQueue->mWhat;
-        mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+        mTimedQueue->clearJob(IncrementalService::kAllStoragesId);
 
         // Call it again.
         timedCallback();
@@ -2018,10 +2018,10 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     {
         // Still present -> some progress.
-        ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+        ASSERT_EQ(IncrementalService::kAllStoragesId, mTimedQueue->mId);
         ASSERT_GE(mTimedQueue->mAfter, std::chrono::seconds(1));
         const auto timedCallback = mTimedQueue->mWhat;
-        mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+        mTimedQueue->clearJob(IncrementalService::kAllStoragesId);
 
         // Fully loaded but readlogs collection enabled.
         ASSERT_GE(mDataLoader->setStorageParams(true), 0);
@@ -2032,10 +2032,10 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     {
         // Still present -> fully loaded + readlogs.
-        ASSERT_EQ(IncrementalService::kMaxStorageId, mTimedQueue->mId);
+        ASSERT_EQ(IncrementalService::kAllStoragesId, mTimedQueue->mId);
         ASSERT_GE(mTimedQueue->mAfter, std::chrono::seconds(1));
         const auto timedCallback = mTimedQueue->mWhat;
-        mTimedQueue->clearJob(IncrementalService::kMaxStorageId);
+        mTimedQueue->clearJob(IncrementalService::kAllStoragesId);
 
         // Now disable readlogs.
         ASSERT_GE(mDataLoader->setStorageParams(false), 0);

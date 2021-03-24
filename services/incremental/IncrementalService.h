@@ -95,7 +95,8 @@ public:
 #pragma GCC diagnostic pop
 
     static constexpr StorageId kInvalidStorageId = -1;
-    static constexpr StorageId kMaxStorageId = std::numeric_limits<int>::max();
+    static constexpr StorageId kMaxStorageId = std::numeric_limits<int>::max() - 1;
+    static constexpr StorageId kAllStoragesId = kMaxStorageId + 1;
 
     static constexpr BootClockTsUs kMaxBootClockTsUs = std::numeric_limits<BootClockTsUs>::max();
 
@@ -472,7 +473,7 @@ private:
     std::mutex mCallbacksLock;
     std::unordered_map<std::string, sp<AppOpsListener>> mCallbackRegistered;
 
-    using IfsStateCallbacks = std::unordered_map<StorageId, std::vector<IfsStateCallback>>;
+    using IfsStateCallbacks = std::map<StorageId, std::vector<IfsStateCallback>>;
     std::mutex mIfsStateCallbacksLock;
     IfsStateCallbacks mIfsStateCallbacks;
 
