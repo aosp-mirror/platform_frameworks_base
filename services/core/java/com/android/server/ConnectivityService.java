@@ -8113,6 +8113,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 updateCapabilitiesForNetwork(networkAgent);
             }
             networkAgent.created = true;
+            networkAgent.onNetworkCreated();
         }
 
         if (!networkAgent.everConnected && state == NetworkInfo.State.CONNECTED) {

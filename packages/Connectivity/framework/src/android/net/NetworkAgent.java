@@ -361,6 +361,14 @@ public abstract class NetworkAgent {
      */
     public static final int CMD_UNREGISTER_QOS_CALLBACK = BASE + 21;
 
+    /**
+     * Sent by ConnectivityService to {@link NetworkAgent} to inform the agent that its native
+     * network was created and the Network object is now valid.
+     *
+     * @hide
+     */
+    public static final int CMD_NETWORK_CREATED = BASE + 22;
+
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
         final NetworkInfo ni = new NetworkInfo(config.legacyType, config.legacySubType,
                 config.legacyTypeName, config.legacySubTypeName);
@@ -560,6 +568,10 @@ public abstract class NetworkAgent {
                             msg.arg1 /* QoS callback id */);
                     break;
                 }
+                case CMD_NETWORK_CREATED: {
+                    onNetworkCreated();
+                    break;
+                }
             }
         }
     }
@@ -699,6 +711,11 @@ public abstract class NetworkAgent {
         public void onQosCallbackUnregistered(final int qosCallbackId) {
             mHandler.sendMessage(mHandler.obtainMessage(
                     CMD_UNREGISTER_QOS_CALLBACK, qosCallbackId, 0, null));
+        }
+
+        @Override
+        public void onNetworkCreated() {
+            mHandler.sendMessage(mHandler.obtainMessage(CMD_NETWORK_CREATED));
         }
     }
 
@@ -1008,6 +1025,11 @@ public abstract class NetworkAgent {
     /** @hide TODO delete once subclasses have moved to onSaveAcceptUnvalidated */
     protected void saveAcceptUnvalidated(boolean accept) {
     }
+
+    /**
+     * Called when ConnectivityService has successfully created this NetworkAgent's native network.
+     */
+    public void onNetworkCreated() {}
 
     /**
      * Requests that the network hardware send the specified packet at the specified interval.
