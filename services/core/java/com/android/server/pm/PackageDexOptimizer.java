@@ -51,8 +51,8 @@ import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.storage.StorageManager;
 import android.util.Log;
@@ -260,7 +260,8 @@ public class PackageDexOptimizer {
 
                 // Only report metrics for base apk for now.
                 // TODO: add ISA and APK type to metrics.
-                if (pkg.getBaseCodePath().equals(path)) {
+                // OTAPreopt doesn't have stats so don't report in that case.
+                if (pkg.getBaseCodePath().equals(path) && packageStats != null) {
                     Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
                     try {
                         long sessionId = Math.randomLongInternal();
