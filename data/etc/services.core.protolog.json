@@ -1177,6 +1177,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/WallpaperAnimationAdapter.java"
     },
+    "-760764543": {
+      "message": "Focus not requested for window=%s because it has no surface or is not focusable.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/InputMonitor.java"
+    },
     "-754503024": {
       "message": "Relayout %s: oldVis=%d newVis=%d. %s",
       "level": "INFO",
@@ -1777,6 +1783,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "3593205": {
+      "message": "commitVisibility: %s: visible=%b mVisibleRequested=%b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WallpaperWindowToken.java"
+    },
     "9803449": {
       "message": "startFreezingDisplayLocked: exitAnim=%d enterAnim=%d called by %s",
       "level": "DEBUG",
@@ -1842,12 +1854,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
-    "63329306": {
-      "message": "commitVisibility: %s: visible=%b mVisibleRequested=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/WallpaperWindowToken.java"
     },
     "73987756": {
       "message": "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
