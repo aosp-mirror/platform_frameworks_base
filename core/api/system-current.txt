@@ -8687,9 +8687,15 @@ package android.os.storage {
     method @WorkerThread public void allocateBytes(@NonNull java.util.UUID, long, @RequiresPermission int) throws java.io.IOException;
     method @WorkerThread public void allocateBytes(java.io.FileDescriptor, long, @RequiresPermission int) throws java.io.IOException;
     method @WorkerThread public long getAllocatableBytes(@NonNull java.util.UUID, @RequiresPermission int) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE) public int getExternalStorageMountMode(int, @NonNull String);
     method public static boolean hasIsolatedStorage();
     method public void updateExternalStorageFileQuotaType(@NonNull java.io.File, int) throws java.io.IOException;
     field @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public static final int FLAG_ALLOCATE_AGGRESSIVE = 1; // 0x1
+    field public static final int MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE = 4; // 0x4
+    field public static final int MOUNT_MODE_EXTERNAL_DEFAULT = 1; // 0x1
+    field public static final int MOUNT_MODE_EXTERNAL_INSTALLER = 2; // 0x2
+    field public static final int MOUNT_MODE_EXTERNAL_NONE = 0; // 0x0
+    field public static final int MOUNT_MODE_EXTERNAL_PASS_THROUGH = 3; // 0x3
     field public static final int QUOTA_TYPE_MEDIA_AUDIO = 2; // 0x2
     field public static final int QUOTA_TYPE_MEDIA_IMAGE = 1; // 0x1
     field public static final int QUOTA_TYPE_MEDIA_NONE = 0; // 0x0
@@ -9014,6 +9020,8 @@ package android.provider {
     method @NonNull public static android.net.Uri setManageMode(@NonNull android.net.Uri);
     field public static final String ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
     field public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
+    field public static final String DOWNLOADS_PROVIDER_AUTHORITY = "downloads";
+    field public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY = "com.android.externalstorage.documents";
     field public static final String EXTRA_SHOW_ADVANCED = "android.provider.extra.SHOW_ADVANCED";
   }
 
