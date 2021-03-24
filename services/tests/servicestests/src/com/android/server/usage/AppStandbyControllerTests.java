@@ -940,7 +940,22 @@ public class AppStandbyControllerTests {
                 .setLong("elapsed_threshold_restricted", -1);
         mInjector.mPropertiesChangedListener
                 .onPropertiesChanged(mInjector.getDeviceConfigProperties());
-        testTimeout();
+
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mInjector.mElapsedRealtime = HOUR_MS;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_FREQUENT);
+
+        mInjector.mElapsedRealtime = 2 * HOUR_MS;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RARE);
+
+        mInjector.mElapsedRealtime = 4 * HOUR_MS;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
     }
 
     /**

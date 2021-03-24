@@ -55,7 +55,7 @@ public class BiometricScheduler {
 
     private static final String BASE_TAG = "BiometricScheduler";
     // Number of recent operations to keep in our logs for dumpsys
-    private static final int LOG_NUM_RECENT_OPERATIONS = 50;
+    protected static final int LOG_NUM_RECENT_OPERATIONS = 50;
 
     /**
      * Contains all the necessary information for a HAL operation.
@@ -196,10 +196,10 @@ public class BiometricScheduler {
         }
     }
 
-    @NonNull private final String mBiometricTag;
+    @NonNull protected final String mBiometricTag;
     @Nullable private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     @NonNull private final IBiometricService mBiometricService;
-    @NonNull private final Handler mHandler = new Handler(Looper.getMainLooper());
+    @NonNull protected final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull private final InternalCallback mInternalCallback;
     @VisibleForTesting @NonNull final Deque<Operation> mPendingOperations;
     @VisibleForTesting @Nullable Operation mCurrentOperation;
@@ -294,11 +294,11 @@ public class BiometricScheduler {
         return mInternalCallback;
     }
 
-    private String getTag() {
+    protected String getTag() {
         return BASE_TAG + "/" + mBiometricTag;
     }
 
-    private void startNextOperationIfIdle() {
+    protected void startNextOperationIfIdle() {
         if (mCurrentOperation != null) {
             Slog.v(getTag(), "Not idle, current operation: " + mCurrentOperation);
             return;
@@ -310,6 +310,7 @@ public class BiometricScheduler {
 
         mCurrentOperation = mPendingOperations.poll();
         final BaseClientMonitor currentClient = mCurrentOperation.mClientMonitor;
+        Slog.d(getTag(), "[Polled] " + mCurrentOperation);
 
         // If the operation at the front of the queue has been marked for cancellation, send
         // ERROR_CANCELED. No need to start this client.

@@ -374,7 +374,7 @@ public final class JobPackageTracker {
                             pw.print(pe.stopReasons.valueAt(k));
                             pw.print("x ");
                             pw.print(JobParameters
-                                    .getReasonCodeDescription(pe.stopReasons.keyAt(k)));
+                                    .getLegacyReasonCodeDescription(pe.stopReasons.keyAt(k)));
                         }
                         pw.println();
                     }
@@ -621,7 +621,7 @@ public final class JobPackageTracker {
                 if (reason != null) {
                     pw.print(mEventReasons[index]);
                 } else {
-                    pw.print(JobParameters.getReasonCodeDescription(
+                    pw.print(JobParameters.getLegacyReasonCodeDescription(
                             (mEventCmds[index] & EVENT_STOP_REASON_MASK)
                                     >> EVENT_STOP_REASON_SHIFT));
                 }

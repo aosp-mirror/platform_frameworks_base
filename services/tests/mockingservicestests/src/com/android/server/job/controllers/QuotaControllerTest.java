@@ -384,7 +384,8 @@ public class QuotaControllerTest {
         // Make sure Doze and background-not-restricted don't affect tests.
         js.setDeviceNotDozingConstraintSatisfied(/* nowElapsed */ sElapsedRealtimeClock.millis(),
                 /* state */ true, /* allowlisted */false);
-        js.setBackgroundNotRestrictedConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
+        js.setBackgroundNotRestrictedConstraintSatisfied(
+                sElapsedRealtimeClock.millis(), true, false);
         return js;
     }
 
@@ -5415,9 +5416,8 @@ public class QuotaControllerTest {
         inOrder.verify(mJobSchedulerService,
                 timeout(remainingTimeMs / 2 + 2 * SECOND_IN_MILLIS).times(1))
                 .onControllerStateChanged();
-        // Top and bg EJs should still be allowed to run since they started before the app ran
-        // out of quota.
-        assertTrue(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+        // Top should still be "in quota" since it started before the app ran on top out of quota.
+        assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
         assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
         assertFalse(
                 jobUnstarted.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
@@ -5466,7 +5466,7 @@ public class QuotaControllerTest {
         // wasn't started. Top should remain in quota since it started when the app was in TOP.
         assertTrue(jobTop2.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
         assertFalse(jobFg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
-        assertTrue(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
+        assertFalse(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
         trackJobs(jobBg2);
         assertFalse(jobBg2.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_EXPEDITED_QUOTA));
         assertFalse(

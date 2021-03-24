@@ -89,6 +89,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseDoubleArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
@@ -1194,6 +1195,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public BatteryStatsImpl(Clocks clocks) {
         init(clocks);
+        mStartClockTimeMs = System.currentTimeMillis();
         mStatsFile = null;
         mCheckinFile = null;
         mDailyFile = null;
@@ -12545,81 +12547,6 @@ public class BatteryStatsImpl extends BatteryStats {
                     = (long) (totalConsumedChargeUC * ratioNumerator / ratioDenominator + 0.5);
             uid.addChargeToStandardBucketLocked(uidActualUC, bucket);
         }
-    }
-
-    /**
-     * SparseDoubleArray map integers to doubles.
-     * Its implementation is the same as that of {@link SparseLongArray}; see there for details.
-     *
-     * @see SparseLongArray
-     */
-    private static class SparseDoubleArray {
-        /**
-         * The int->double map, but storing the doubles as longs using
-         * {@link Double.doubleToRawLongBits(double)}.
-         */
-        private final SparseLongArray mValues = new SparseLongArray();
-
-        /**
-         * Gets the double mapped from the specified key, or <code>0</code>
-         * if no such mapping has been made.
-         */
-        public double get(int key) {
-            if (mValues.indexOfKey(key) >= 0) {
-                return Double.longBitsToDouble(mValues.get(key));
-            }
-            return 0;
-        }
-
-        /**
-         * Adds a mapping from the specified key to the specified value,
-         * replacing the previous mapping from the specified key if there
-         * was one.
-         */
-        public void put(int key, double value) {
-            mValues.put(key, Double.doubleToRawLongBits(value));
-        }
-
-        /**
-         * Adds a mapping from the specified key to the specified value,
-         * <b>adding</b> to the previous mapping from the specified key if there
-         * was one.
-         */
-        public void add(int key, double summand) {
-            final double oldValue = get(key);
-            put(key, oldValue + summand);
-        }
-
-        /**
-         * Returns the number of key-value mappings that this SparseDoubleArray
-         * currently stores.
-         */
-        public int size() {
-            return mValues.size();
-        }
-
-        /**
-         * Given an index in the range <code>0...size()-1</code>, returns
-         * the key from the <code>index</code>th key-value mapping that this
-         * SparseDoubleArray stores.
-         *
-         * @see SparseLongArray#keyAt(int)
-         */
-        public int keyAt(int index) {
-            return mValues.keyAt(index);
-        }
-
-        /**
-         * Given an index in the range <code>0...size()-1</code>, returns
-         * the value from the <code>index</code>th key-value mapping that this
-         * SparseDoubleArray stores.
-         *
-         * @see SparseLongArray#valueAt(int)
-         */
-        public double valueAt(int index) {
-            return Double.longBitsToDouble(mValues.valueAt(index));
-        }
-
     }
 
     /**

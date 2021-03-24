@@ -15,6 +15,7 @@
  */
 package android.window;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
 import android.annotation.ColorInt;
@@ -32,6 +33,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -183,6 +185,7 @@ public final class SplashScreenView extends FrameLayout {
          * Create SplashScreenWindowView object from materials.
          */
         public SplashScreenView build() {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "SplashScreenView#build");
             final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
             final SplashScreenView view = (SplashScreenView)
                     layoutInflater.inflate(R.layout.splash_screen_view, null, false);
@@ -208,14 +211,14 @@ public final class SplashScreenView extends FrameLayout {
                 view.mParceledIconBitmap = mParceledIconBitmap;
             }
             // branding image
-            if (mBrandingImageHeight > 0 && mBrandingImageWidth > 0) {
+            if (mBrandingImageHeight > 0 && mBrandingImageWidth > 0 && mBrandingDrawable != null) {
                 final ViewGroup.LayoutParams params = view.mBrandingImageView.getLayoutParams();
                 params.width = mBrandingImageWidth;
                 params.height = mBrandingImageHeight;
                 view.mBrandingImageView.setLayoutParams(params);
-            }
-            if (mBrandingDrawable != null) {
                 view.mBrandingImageView.setBackground(mBrandingDrawable);
+            } else {
+                view.mBrandingImageView.setVisibility(GONE);
             }
             if (mParceledBrandingBitmap != null) {
                 view.mParceledBrandingBitmap = mParceledBrandingBitmap;
@@ -226,6 +229,7 @@ public final class SplashScreenView extends FrameLayout {
                         + view.mBrandingImageView + " drawable: " + mBrandingDrawable
                         + " size w: " + mBrandingImageWidth + " h: " + mBrandingImageHeight);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return view;
         }
     }

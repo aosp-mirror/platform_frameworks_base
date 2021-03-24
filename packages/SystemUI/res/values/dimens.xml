@@ -1353,6 +1353,7 @@
 
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>
+    <dimen name="people_space_messages_count_radius">12dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
     <dimen name="required_width_for_medium">146dp</dimen>
     <dimen name="required_width_for_large">138dp</dimen>

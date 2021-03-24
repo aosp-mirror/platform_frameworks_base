@@ -242,7 +242,7 @@
     <bool name="def_hdmiControlAutoDeviceOff">true</bool>
 
     <!-- Default for Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED -->
-    <bool name="def_swipe_bottom_to_notification_enabled">true</bool>
+    <bool name="def_swipe_bottom_to_notification_enabled">false</bool>
 
     <!-- Default for Settings.Secure.ONE_HANDED_MODE_ENABLED -->
     <bool name="def_one_handed_mode_enabled">false</bool>

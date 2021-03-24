@@ -48,10 +48,12 @@ import android.app.admin.DevicePolicyManager;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.GenericDocument;
 import android.app.appsearch.IAppSearchBatchResultCallback;
 import android.app.appsearch.IAppSearchManager;
 import android.app.appsearch.IAppSearchResultCallback;
 import android.app.appsearch.PackageIdentifier;
+import android.app.appsearch.SearchResultPage;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -159,7 +161,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 case Context.DEVICE_POLICY_SERVICE:
                     return mMockDevicePolicyManager;
                 case Context.APP_SEARCH_SERVICE:
-                    return new AppSearchManager(getTestContext(), mMockAppSearchManager);
+                    return new AppSearchManager(this, mMockAppSearchManager);
                 case Context.ROLE_SERVICE:
                     // RoleManager is final and cannot be mocked, so we only override the inject
                     // accessor methods in ShortcutService.
@@ -189,16 +191,16 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        public Context createContextAsUser(UserHandle user, int flags) {
+            when(mMockPackageManager.getUserId()).thenReturn(user.getIdentifier());
+            return this;
+        }
+
+        @Override
         public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
                 IntentFilter filter, String broadcastPermission, Handler scheduler) {
             // ignore.
             return null;
-        }
-
-        @Override
-        public Context createContextAsUser(UserHandle user, int flags) {
-            when(mMockPackageManager.getUserId()).thenReturn(user.getIdentifier());
-            return this;
         }
 
         @Override
@@ -235,6 +237,15 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         void injectRestoreCallingIdentity(long token) {
             mInjectedCallingUid = (int) token;
+        }
+
+        @Override
+        public Context createContextAsUser(UserHandle user, int flags) {
+            super.createContextAsUser(user, flags);
+            final ServiceContext ctx = spy(new ServiceContext());
+            when(ctx.getUser()).thenReturn(user);
+            when(ctx.getUserId()).thenReturn(user.getIdentifier());
+            return ctx;
         }
 
         @Override
@@ -620,6 +631,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         protected Map<String, List<PackageIdentifier>> mSchemasPackageAccessible =
                 new ArrayMap<>(1);
+        private Map<String, Map<String, GenericDocument>> mDocumentMap = new ArrayMap<>(1);
+
+        private String getKey(int userId, String databaseName) {
+            return new StringBuilder().append(userId).append("@").append(databaseName).toString();
+        }
 
         @Override
         public void setSchema(String packageName, String databaseName, List<Bundle> schemaBundles,
@@ -653,21 +669,77 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         public void putDocuments(String packageName, String databaseName,
                 List<Bundle> documentBundles, int userId, IAppSearchBatchResultCallback callback)
                 throws RemoteException {
-            ignore(callback);
+            final List<GenericDocument> docs = new ArrayList<>(documentBundles.size());
+            for (Bundle bundle : documentBundles) {
+                docs.add(new GenericDocument(bundle));
+            }
+            final AppSearchBatchResult.Builder<String, Void> builder =
+                    new AppSearchBatchResult.Builder<>();
+            final String key = getKey(userId, databaseName);
+            Map<String, GenericDocument> docMap = mDocumentMap.get(key);
+            for (GenericDocument doc : docs) {
+                builder.setSuccess(doc.getUri(), null);
+                if (docMap == null) {
+                    docMap = new ArrayMap<>(1);
+                    mDocumentMap.put(key, docMap);
+                }
+                docMap.put(doc.getUri(), doc);
+            }
+            callback.onResult(builder.build());
         }
 
         @Override
         public void getDocuments(String packageName, String databaseName, String namespace,
                 List<String> uris, Map<String, List<String>> typePropertyPaths, int userId,
                 IAppSearchBatchResultCallback callback) throws RemoteException {
-            ignore(callback);
+            final AppSearchBatchResult.Builder<String, Bundle> builder =
+                    new AppSearchBatchResult.Builder<>();
+            final String key = getKey(userId, databaseName);
+            if (!mDocumentMap.containsKey(key)) {
+                for (String uri : uris) {
+                    builder.setFailure(uri, AppSearchResult.RESULT_NOT_FOUND,
+                            key + " not found when getting: " + uri);
+                }
+            } else {
+                final Map<String, GenericDocument> docs = mDocumentMap.get(key);
+                for (String uri : uris) {
+                    if (docs.containsKey(uri)) {
+                        builder.setSuccess(uri, docs.get(uri).getBundle());
+                    } else {
+                        builder.setFailure(uri, AppSearchResult.RESULT_NOT_FOUND,
+                                "shortcut not found: " + uri);
+                    }
+                }
+            }
+            callback.onResult(builder.build());
         }
 
         @Override
         public void query(String packageName, String databaseName, String queryExpression,
                 Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
                 throws RemoteException {
-            ignore(callback);
+            final String key = getKey(userId, databaseName);
+            if (!mDocumentMap.containsKey(key)) {
+                final Bundle page = new Bundle();
+                page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
+                page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, new ArrayList<>());
+                callback.onResult(AppSearchResult.newSuccessfulResult(page));
+                return;
+            }
+            final List<GenericDocument> documents = new ArrayList<>(mDocumentMap.get(key).values());
+            final Bundle page = new Bundle();
+            page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 0);
+            final ArrayList<Bundle> resultBundles = new ArrayList<>();
+            for (GenericDocument document : documents) {
+                final Bundle resultBundle = new Bundle();
+                resultBundle.putBundle("document", document.getBundle());
+                resultBundle.putString("packageName", packageName);
+                resultBundle.putString("databaseName", databaseName);
+                resultBundle.putParcelableArrayList("matches", new ArrayList<>());
+                resultBundles.add(resultBundle);
+            }
+            page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, resultBundles);
+            callback.onResult(AppSearchResult.newSuccessfulResult(page));
         }
 
         @Override
@@ -679,7 +751,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         public void getNextPage(long nextPageToken, int userId, IAppSearchResultCallback callback)
                 throws RemoteException {
-            ignore(callback);
+            final Bundle page = new Bundle();
+            page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
+            page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, new ArrayList<>());
+            callback.onResult(AppSearchResult.newSuccessfulResult(page));
         }
 
         @Override
@@ -698,14 +773,40 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         public void removeByUri(String packageName, String databaseName, String namespace,
                 List<String> uris, int userId, IAppSearchBatchResultCallback callback)
                 throws RemoteException {
-            ignore(callback);
+            final AppSearchBatchResult.Builder<String, Void> builder =
+                    new AppSearchBatchResult.Builder<>();
+            final String key = getKey(userId, databaseName);
+            if (!mDocumentMap.containsKey(key)) {
+                for (String uri : uris) {
+                    builder.setFailure(uri, AppSearchResult.RESULT_NOT_FOUND,
+                            "package " + key + " not found when removing " + uri);
+                }
+            } else {
+                final Map<String, GenericDocument> docs = mDocumentMap.get(key);
+                for (String uri : uris) {
+                    if (docs.containsKey(uri)) {
+                        docs.remove(uri);
+                        builder.setSuccess(uri, null);
+                    } else {
+                        builder.setFailure(uri, AppSearchResult.RESULT_NOT_FOUND,
+                                "shortcut not found when removing " + uri);
+                    }
+                }
+            }
+            callback.onResult(builder.build());
         }
 
         @Override
         public void removeByQuery(String packageName, String databaseName, String queryExpression,
                 Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
                 throws RemoteException {
-            ignore(callback);
+            final String key = getKey(userId, databaseName);
+            if (!mDocumentMap.containsKey(key)) {
+                callback.onResult(AppSearchResult.newSuccessfulResult(null));
+                return;
+            }
+            mDocumentMap.get(key).clear();
+            callback.onResult(AppSearchResult.newSuccessfulResult(null));
         }
 
         @Override
@@ -724,12 +825,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             return null;
         }
 
-        private void ignore(IAppSearchResultCallback callback) throws RemoteException {
-            callback.onResult(AppSearchResult.newSuccessfulResult(null));
+        private void removeShortcuts() {
+            mDocumentMap.clear();
         }
 
-        private void ignore(IAppSearchBatchResultCallback callback) throws RemoteException {
-            callback.onResult(new AppSearchBatchResult.Builder().build());
+        private void ignore(IAppSearchResultCallback callback) throws RemoteException {
+            callback.onResult(AppSearchResult.newSuccessfulResult(null));
         }
     }
 
@@ -1145,6 +1246,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         if (DUMP_IN_TEARDOWN) dumpsysOnLogcat("Teardown");
 
         shutdownServices();
+
+        mMockAppSearchManager.removeShortcuts();
+        mMockAppSearchManager = null;
 
         super.tearDown();
     }
@@ -1891,6 +1995,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return mService.getPackageShortcutForTest(packageName, shortcutId, userId);
     }
 
+    protected void updatePackageShortcut(String packageName, String shortcutId, int userId,
+            Consumer<ShortcutInfo> cb) {
+        mService.updatePackageShortcutForTest(packageName, shortcutId, userId, cb);
+    }
+
     protected void assertShortcutExists(String packageName, String shortcutId, int userId) {
         assertTrue(getPackageShortcut(packageName, shortcutId, userId) != null);
     }
@@ -2086,6 +2195,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return getPackageShortcut(getCallingPackage(), shortcutId, getCallingUserId());
     }
 
+    protected void updateCallerShortcut(String shortcutId, Consumer<ShortcutInfo> cb) {
+        updatePackageShortcut(getCallingPackage(), shortcutId, getCallingUserId(), cb);
+    }
+
     protected List<ShortcutInfo> getLauncherShortcuts(String launcher, int userId, int queryFlags) {
         final List<ShortcutInfo>[] ret = new List[1];
         runWithCaller(launcher, userId, () -> {
@@ -2244,6 +2357,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         shutdownServices();
 
         deleteAllSavedFiles();
+
+        mMockAppSearchManager.removeShortcuts();
 
         initService();
         mService.applyRestore(payload, USER_0);

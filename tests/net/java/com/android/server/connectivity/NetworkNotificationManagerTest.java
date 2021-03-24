@@ -50,9 +50,7 @@ import com.android.connectivity.resources.R;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -103,17 +101,6 @@ public class NetworkNotificationManagerTest {
     ArgumentCaptor<Notification> mCaptor;
 
     NetworkNotificationManager mManager;
-
-
-    @BeforeClass
-    public static void setUpClass() {
-        Notification.DevFlags.sForceDefaults = true;
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        Notification.DevFlags.sForceDefaults = false;
-    }
 
     @Before
     public void setUp() {

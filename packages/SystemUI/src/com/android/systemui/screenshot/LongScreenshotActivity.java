@@ -267,8 +267,14 @@ public class LongScreenshotActivity extends Activity {
 
     @Override
     protected void onPause() {
-        Log.d(TAG, "onPause finishing=" + isFinishing());
+        Log.d(TAG, "onPause");
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d(TAG, "onStop finishing=" + isFinishing());
+        super.onStop();
         if (isFinishing()) {
             if (mScrollCaptureResponse != null) {
                 mScrollCaptureResponse.close();
@@ -294,12 +300,6 @@ public class LongScreenshotActivity extends Activity {
             mSavedImagePath.delete();
             mSavedImagePath = null;
         }
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d(TAG, "onStop");
-        super.onStop();
     }
 
     @Override

@@ -36,7 +36,6 @@
 
     <color name="resolver_empty_state_text">#FFFFFF</color>
     <color name="resolver_empty_state_icon">#FFFFFF</color>
-    <color name="chooser_chip_icon">#8AB4F8</color> <!-- Blue 300 -->
 
     <color name="personal_apps_suspension_notification_color">#8AB4F8</color>
 </resources>

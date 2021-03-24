@@ -669,7 +669,6 @@ java_defaults {
         // TODO: remove gps_debug and protolog.conf.json when the build system propagates "required" properly.
         "gps_debug.conf",
         "icu4j-platform-compat-config",
-        "libcore-platform-compat-config",
         "protolog.conf.json.gz",
         "services-platform-compat-config",
         "documents-ui-compat-config",

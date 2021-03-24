@@ -34,6 +34,7 @@ package android {
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
+    field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
     field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String TEST_BIOMETRIC = "android.permission.TEST_BIOMETRIC";
@@ -817,6 +818,7 @@ package android.content.pm {
     method public int describeContents();
     method public android.os.UserHandle getUserHandle();
     method public boolean isAdmin();
+    method public boolean isCloneProfile();
     method public boolean isDemo();
     method public boolean isEnabled();
     method public boolean isEphemeral();
@@ -1702,6 +1704,7 @@ package android.os {
     method public static android.os.VibrationEffect get(int, boolean);
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
     method public abstract long getDuration();
+    method @NonNull public static android.os.VibrationEffect.WaveformBuilder startWaveform();
     field public static final int EFFECT_POP = 4; // 0x4
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
@@ -1711,35 +1714,30 @@ package android.os {
     field public static final int[] RINGTONES;
   }
 
-  public static class VibrationEffect.OneShot extends android.os.VibrationEffect implements android.os.Parcelable {
-    ctor public VibrationEffect.OneShot(android.os.Parcel);
-    ctor public VibrationEffect.OneShot(long, int);
-    method public int getAmplitude();
-    method public long getDuration();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.OneShot> CREATOR;
-  }
-
-  public static class VibrationEffect.Prebaked extends android.os.VibrationEffect implements android.os.Parcelable {
-    ctor public VibrationEffect.Prebaked(android.os.Parcel);
-    ctor public VibrationEffect.Prebaked(int, boolean, int);
-    method public long getDuration();
-    method public int getEffectStrength();
-    method public int getId();
-    method public boolean shouldFallback();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Prebaked> CREATOR;
-  }
-
-  public static class VibrationEffect.Waveform extends android.os.VibrationEffect implements android.os.Parcelable {
-    ctor public VibrationEffect.Waveform(android.os.Parcel);
-    ctor public VibrationEffect.Waveform(long[], int[], int);
-    method public int[] getAmplitudes();
+  public static final class VibrationEffect.Composed extends android.os.VibrationEffect {
+    method @NonNull public android.os.VibrationEffect.Composed applyEffectStrength(int);
     method public long getDuration();
     method public int getRepeatIndex();
-    method public long[] getTimings();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Waveform> CREATOR;
+    method @NonNull public java.util.List<android.os.vibrator.VibrationEffectSegment> getSegments();
+    method @NonNull public android.os.VibrationEffect.Composed resolve(int);
+    method @NonNull public android.os.VibrationEffect.Composed scale(float);
+    method public void validate();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Composed> CREATOR;
+  }
+
+  public static final class VibrationEffect.Composition {
+    method @NonNull public android.os.VibrationEffect.Composition addEffect(@NonNull android.os.VibrationEffect);
+    method @NonNull public android.os.VibrationEffect.Composition addEffect(@NonNull android.os.VibrationEffect, @IntRange(from=0) int);
+  }
+
+  public static final class VibrationEffect.WaveformBuilder {
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addRamp(@FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addRamp(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=-1.0F, to=1.0f) float, @IntRange(from=0) int);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addStep(@FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
+    method @NonNull public android.os.VibrationEffect.WaveformBuilder addStep(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=-1.0F, to=1.0f) float, @IntRange(from=0) int);
+    method @NonNull public android.os.VibrationEffect build();
+    method @NonNull public android.os.VibrationEffect build(int);
   }
 
   public class VintfObject {
@@ -1840,6 +1838,7 @@ package android.os.storage {
   public class StorageManager {
     method @NonNull public static java.util.UUID convert(@NonNull String);
     method @NonNull public static String convert(@NonNull java.util.UUID);
+    method public boolean isAppIoBlocked(@NonNull java.util.UUID, int, int, int);
     method public static boolean isUserKeyUnlocked(int);
   }
 
@@ -1852,6 +1851,80 @@ package android.os.storage {
 package android.os.strictmode {
 
   public final class ExplicitGcViolation extends android.os.strictmode.Violation {
+  }
+
+}
+
+package android.os.vibrator {
+
+  public final class PrebakedSegment extends android.os.vibrator.VibrationEffectSegment {
+    method @NonNull public android.os.vibrator.PrebakedSegment applyEffectStrength(int);
+    method public int describeContents();
+    method public long getDuration();
+    method public int getEffectId();
+    method public int getEffectStrength();
+    method public boolean hasNonZeroAmplitude();
+    method @NonNull public android.os.vibrator.PrebakedSegment resolve(int);
+    method @NonNull public android.os.vibrator.PrebakedSegment scale(float);
+    method public boolean shouldFallback();
+    method public void validate();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PrebakedSegment> CREATOR;
+  }
+
+  public final class PrimitiveSegment extends android.os.vibrator.VibrationEffectSegment {
+    method @NonNull public android.os.vibrator.PrimitiveSegment applyEffectStrength(int);
+    method public int describeContents();
+    method public int getDelay();
+    method public long getDuration();
+    method public int getPrimitiveId();
+    method public float getScale();
+    method public boolean hasNonZeroAmplitude();
+    method @NonNull public android.os.vibrator.PrimitiveSegment resolve(int);
+    method @NonNull public android.os.vibrator.PrimitiveSegment scale(float);
+    method public void validate();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PrimitiveSegment> CREATOR;
+  }
+
+  public final class RampSegment extends android.os.vibrator.VibrationEffectSegment {
+    method @NonNull public android.os.vibrator.RampSegment applyEffectStrength(int);
+    method public int describeContents();
+    method public long getDuration();
+    method public float getEndAmplitude();
+    method public float getEndFrequency();
+    method public float getStartAmplitude();
+    method public float getStartFrequency();
+    method public boolean hasNonZeroAmplitude();
+    method @NonNull public android.os.vibrator.RampSegment resolve(int);
+    method @NonNull public android.os.vibrator.RampSegment scale(float);
+    method public void validate();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.RampSegment> CREATOR;
+  }
+
+  public final class StepSegment extends android.os.vibrator.VibrationEffectSegment {
+    method @NonNull public android.os.vibrator.StepSegment applyEffectStrength(int);
+    method public int describeContents();
+    method public float getAmplitude();
+    method public long getDuration();
+    method public float getFrequency();
+    method public boolean hasNonZeroAmplitude();
+    method @NonNull public android.os.vibrator.StepSegment resolve(int);
+    method @NonNull public android.os.vibrator.StepSegment scale(float);
+    method public void validate();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.StepSegment> CREATOR;
+  }
+
+  public abstract class VibrationEffectSegment implements android.os.Parcelable {
+    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T applyEffectStrength(int);
+    method public abstract long getDuration();
+    method public abstract boolean hasNonZeroAmplitude();
+    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T resolve(int);
+    method @NonNull public abstract <T extends android.os.vibrator.VibrationEffectSegment> T scale(float);
+    method public abstract void validate();
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.VibrationEffectSegment> CREATOR;
   }
 
 }

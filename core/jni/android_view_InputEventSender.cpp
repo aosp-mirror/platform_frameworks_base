@@ -18,28 +18,28 @@
 
 //#define LOG_NDEBUG 0
 
-#include <nativehelper/JNIHelp.h>
-
 #include <android_runtime/AndroidRuntime.h>
-#include <log/log.h>
-#include <utils/Looper.h>
 #include <input/InputTransport.h>
+#include <log/log.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <utils/Looper.h>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
+#include "core_jni_helpers.h"
 
-#include <nativehelper/ScopedLocalRef.h>
+#include <inttypes.h>
 #include <unordered_map>
 
-#include "core_jni_helpers.h"
 
 using android::base::Result;
 
 namespace android {
 
 // Log debug messages about the dispatch cycle.
-static const bool kDebugDispatchCycle = false;
+static constexpr bool kDebugDispatchCycle = false;
 
 static struct {
     jclass clazz;
@@ -74,8 +74,10 @@ private:
         return mInputPublisher.getChannel()->getName();
     }
 
-    virtual int handleEvent(int receiveFd, int events, void* data);
+    int handleEvent(int receiveFd, int events, void* data) override;
     status_t receiveFinishedSignals(JNIEnv* env);
+    bool notifyFinishedSignal(JNIEnv* env, jobject sender, const InputPublisher::Finished& finished,
+                              bool skipCallbacks);
 };
 
 NativeInputEventSender::NativeInputEventSender(JNIEnv* env, jobject senderWeak,
@@ -196,8 +198,13 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
         ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName().c_str());
     }
 
-    ScopedLocalRef<jobject> senderObj(env, NULL);
-    bool skipCallbacks = false;
+    ScopedLocalRef<jobject> senderObj(env, jniGetReferent(env, mSenderWeakGlobal));
+    if (!senderObj.get()) {
+        ALOGW("channel '%s' ~ Sender object was finalized without being disposed.",
+              getInputChannelName().c_str());
+        return DEAD_OBJECT;
+    }
+    bool skipCallbacks = false; // stop calling Java functions after an exception occurs
     for (;;) {
         Result<InputPublisher::Finished> result = mInputPublisher.receiveFinishedSignal();
         if (!result.ok()) {
@@ -206,45 +213,55 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
                 return OK;
             }
             ALOGE("channel '%s' ~ Failed to consume finished signals.  status=%d",
-                    getInputChannelName().c_str(), status);
+                  getInputChannelName().c_str(), status);
             return status;
         }
 
-        auto it = mPublishedSeqMap.find(result->seq);
-        if (it == mPublishedSeqMap.end()) {
-            continue;
-        }
-
-        uint32_t seq = it->second;
-        mPublishedSeqMap.erase(it);
-
-        if (kDebugDispatchCycle) {
-            ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, pendingEvents=%zu.",
-                  getInputChannelName().c_str(), seq, result->handled ? "true" : "false",
-                  mPublishedSeqMap.size());
-        }
-
-        if (!skipCallbacks) {
-            if (!senderObj.get()) {
-                senderObj.reset(jniGetReferent(env, mSenderWeakGlobal));
-                if (!senderObj.get()) {
-                    ALOGW("channel '%s' ~ Sender object was finalized without being disposed.",
-                          getInputChannelName().c_str());
-                    return DEAD_OBJECT;
-                }
-            }
-
-            env->CallVoidMethod(senderObj.get(),
-                                gInputEventSenderClassInfo.dispatchInputEventFinished,
-                                static_cast<jint>(seq), static_cast<jboolean>(result->handled));
-            if (env->ExceptionCheck()) {
-                ALOGE("Exception dispatching finished signal.");
-                skipCallbacks = true;
-            }
+        const bool notified = notifyFinishedSignal(env, senderObj.get(), *result, skipCallbacks);
+        if (!notified) {
+            skipCallbacks = true;
         }
     }
 }
 
+/**
+ * Invoke the Java function dispatchInputEventFinished for the received "Finished" signal.
+ * Set the variable 'skipCallbacks' to 'true' if a Java exception occurred.
+ * Java function will only be called if 'skipCallbacks' is originally 'false'.
+ *
+ * Return "false" if an exception occurred while calling the Java function
+ *        "true" otherwise
+ */
+bool NativeInputEventSender::notifyFinishedSignal(JNIEnv* env, jobject sender,
+                                                  const InputPublisher::Finished& finished,
+                                                  bool skipCallbacks) {
+    auto it = mPublishedSeqMap.find(finished.seq);
+    if (it == mPublishedSeqMap.end()) {
+        ALOGW("Received 'finished' signal for unknown seq number = %" PRIu32, finished.seq);
+        // Since this is coming from the receiver (typically app), it's possible that an app
+        // does something wrong and sends bad data. Just ignore and process other events.
+        return true;
+    }
+    const uint32_t seq = it->second;
+    mPublishedSeqMap.erase(it);
+
+    if (kDebugDispatchCycle) {
+        ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, pendingEvents=%zu.",
+              getInputChannelName().c_str(), seq, finished.handled ? "true" : "false",
+              mPublishedSeqMap.size());
+    }
+    if (skipCallbacks) {
+        return true;
+    }
+
+    env->CallVoidMethod(sender, gInputEventSenderClassInfo.dispatchInputEventFinished,
+                        static_cast<jint>(seq), static_cast<jboolean>(finished.handled));
+    if (env->ExceptionCheck()) {
+        ALOGE("Exception dispatching finished signal for seq=%" PRIu32, seq);
+        return false;
+    }
+    return true;
+}
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject senderWeak,
         jobject inputChannelObj, jobject messageQueueObj) {

@@ -210,7 +210,8 @@ public final class BackgroundJobsController extends StateController {
             jobStatus.maybeLogBucketMismatch();
         }
         boolean didChange =
-                jobStatus.setBackgroundNotRestrictedConstraintSatisfied(nowElapsed, canRun);
+                jobStatus.setBackgroundNotRestrictedConstraintSatisfied(nowElapsed, canRun,
+                        !mAppStateTracker.isRunAnyInBackgroundAppOpsAllowed(uid, packageName));
         didChange |= jobStatus.setUidActive(isActive);
         return didChange;
     }

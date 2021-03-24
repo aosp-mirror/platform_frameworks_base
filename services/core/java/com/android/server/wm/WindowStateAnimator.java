@@ -272,14 +272,15 @@ class WindowStateAnimator {
             }
             mDrawState = COMMIT_DRAW_PENDING;
             layoutNeeded = true;
+        }
 
-            if (postDrawTransaction != null) {
+        if (postDrawTransaction != null) {
+            if (mLastHidden) {
                 mPostDrawTransaction.merge(postDrawTransaction);
+                layoutNeeded = true;
+            } else {
+                postDrawTransaction.apply();
             }
-        } else if (postDrawTransaction != null) {
-            // If draw state is not pending we may delay applying this transaction from the client,
-            // so apply it now.
-            postDrawTransaction.apply();
         }
 
         return layoutNeeded;
@@ -656,8 +657,10 @@ class WindowStateAnimator {
 
         if (w.getOrientationChanging()) {
             if (!w.isDrawn()) {
-                w.mWmService.mRoot.mOrientationChangeComplete = false;
-                mAnimator.mLastWindowFreezeSource = w;
+                if (w.mDisplayContent.waitForUnfreeze(w)) {
+                    w.mWmService.mRoot.mOrientationChangeComplete = false;
+                    mAnimator.mLastWindowFreezeSource = w;
+                }
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Orientation continue waiting for draw in %s", w);
             } else {

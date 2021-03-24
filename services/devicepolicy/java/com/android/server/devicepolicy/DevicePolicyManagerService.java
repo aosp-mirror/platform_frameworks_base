@@ -102,8 +102,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-// TODO (b/178655595) import static android.net.ConnectivityManager.USER_PREFERENCE_ENTERPRISE;
-// TODO (b/178655595) import static android.net.ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT;
+import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
+import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
@@ -3089,12 +3089,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
 
-        boolean enableEnterpriseNetworkSlice = true;
+        boolean enableEnterpriseNetworkPreferenceEnabled = true;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
-            enableEnterpriseNetworkSlice = owner != null ? owner.mNetworkSlicingEnabled : true;
+            enableEnterpriseNetworkPreferenceEnabled = owner != null
+                    ? owner.mEnterpriseNetworkPreferenceEnabled : true;
         }
-        updateNetworkPreferenceForUser(userId, enableEnterpriseNetworkSlice);
+        updateNetworkPreferenceForUser(userId, enableEnterpriseNetworkPreferenceEnabled);
 
         startOwnerService(userId, "start-user");
     }
@@ -11423,30 +11424,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setNetworkSlicingEnabled(boolean enabled) {
+    public void setEnterpriseNetworkPreferenceEnabled(boolean enabled) {
         if (!mHasFeature) {
             return;
         }
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(isProfileOwner(caller),
-                "Caller is not profile owner; only profile owner may control the network slicing");
+                "Caller is not profile owner;"
+                        + " only profile owner may control the enterprise network preference");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
                     caller.getUserId());
-            if (requiredAdmin != null && requiredAdmin.mNetworkSlicingEnabled != enabled) {
-                requiredAdmin.mNetworkSlicingEnabled = enabled;
+            if (requiredAdmin != null
+                    && requiredAdmin.mEnterpriseNetworkPreferenceEnabled != enabled) {
+                requiredAdmin.mEnterpriseNetworkPreferenceEnabled = enabled;
                 saveSettingsLocked(caller.getUserId());
             }
         }
         updateNetworkPreferenceForUser(caller.getUserId(), enabled);
         DevicePolicyEventLogger
-                .createEvent(DevicePolicyEnums.SET_NETWORK_SLICING_ENABLED)
+                .createEvent(DevicePolicyEnums.SET_ENTERPRISE_NETWORK_PREFERENCE_ENABLED)
                 .setBoolean(enabled)
                 .write();
     }
 
     @Override
-    public boolean isNetworkSlicingEnabled(int userHandle) {
+    public boolean isEnterpriseNetworkPreferenceEnabled(int userHandle) {
         if (!mHasFeature) {
             return false;
         }
@@ -11457,7 +11460,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(userHandle);
             if (requiredAdmin != null) {
-                return requiredAdmin.mNetworkSlicingEnabled;
+                return requiredAdmin.mEnterpriseNetworkPreferenceEnabled;
             } else {
                 return false;
             }
@@ -17006,18 +17009,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void updateNetworkPreferenceForUser(int userId, boolean enableEnterprise) {
+    private void updateNetworkPreferenceForUser(int userId,
+            boolean enableEnterpriseNetworkPreferenceEnabled) {
         if (!isManagedProfile(userId)) {
             return;
         }
-        // TODO(b/178655595)
-        // int networkPreference = enable ? ConnectivityManager.USER_PREFERENCE_ENTERPRISE :
-        //        ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT;
-        // mInjector.binderWithCleanCallingIdentity(() ->
-        //         mInjector.getConnectivityManager().setNetworkPreferenceForUser(
-        //                 UserHandle.of(userId),
-        //                 networkPreference,
-        //                 null /* executor */, null /* listener */));
+        int networkPreference = enableEnterpriseNetworkPreferenceEnabled
+                ? PROFILE_NETWORK_PREFERENCE_ENTERPRISE : PROFILE_NETWORK_PREFERENCE_DEFAULT;
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.getConnectivityManager().setProfileNetworkPreference(
+                        UserHandle.of(userId),
+                        networkPreference,
+                        null /* executor */, null /* listener */));
     }
 
     @Override

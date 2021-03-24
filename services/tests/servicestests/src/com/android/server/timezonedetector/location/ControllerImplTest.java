@@ -72,7 +72,6 @@ public class ControllerImplTest {
     private TestCallback mTestCallback;
     private TestLocationTimeZoneProvider mTestPrimaryLocationTimeZoneProvider;
     private TestLocationTimeZoneProvider mTestSecondaryLocationTimeZoneProvider;
-    private FakeTimeZoneIdValidator mTimeZoneAvailabilityChecker;
 
     @Before
     public void setUp() {
@@ -84,13 +83,10 @@ public class ControllerImplTest {
         };
         mTestThreadingDomain = new TestThreadingDomain();
         mTestCallback = new TestCallback(mTestThreadingDomain);
-        mTimeZoneAvailabilityChecker = new FakeTimeZoneIdValidator();
         mTestPrimaryLocationTimeZoneProvider = new TestLocationTimeZoneProvider(
-                stubbedProviderMetricsLogger, mTestThreadingDomain, "primary",
-                mTimeZoneAvailabilityChecker);
+                stubbedProviderMetricsLogger, mTestThreadingDomain, "primary");
         mTestSecondaryLocationTimeZoneProvider = new TestLocationTimeZoneProvider(
-                stubbedProviderMetricsLogger, mTestThreadingDomain, "secondary",
-                mTimeZoneAvailabilityChecker);
+                stubbedProviderMetricsLogger, mTestThreadingDomain, "secondary");
     }
 
     @Test
@@ -1185,10 +1181,9 @@ public class ControllerImplTest {
          * Creates the instance.
          */
         TestLocationTimeZoneProvider(ProviderMetricsLogger providerMetricsLogger,
-                ThreadingDomain threadingDomain, String providerName,
-                TimeZoneIdValidator timeZoneIdValidator) {
+                ThreadingDomain threadingDomain, String providerName) {
             super(providerMetricsLogger, threadingDomain, providerName,
-                    timeZoneIdValidator);
+                    new FakeTimeZoneProviderEventPreProcessor());
         }
 
         public void setFailDuringInitialization(boolean failInitialization) {
@@ -1320,15 +1315,5 @@ public class ControllerImplTest {
             }
             mTestProviderState.commitLatest();
         }
-    }
-
-    private static final class FakeTimeZoneIdValidator
-            implements LocationTimeZoneProvider.TimeZoneIdValidator {
-
-        @Override
-        public boolean isValid(@NonNull String timeZoneId) {
-            return true;
-        }
-
     }
 }

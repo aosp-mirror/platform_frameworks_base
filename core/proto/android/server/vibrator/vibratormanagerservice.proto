@@ -21,40 +21,49 @@ option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/privacy.proto";
 
-message OneShotProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-    repeated int32 duration = 1;
-    repeated int32 amplitude = 2;
-}
-
-message WaveformProto {
+message StepSegmentProto {
    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-   repeated int32 timings = 1;
-   repeated int32 amplitudes = 2;
-   required bool repeat = 3;
+   optional int32 duration = 1;
+   optional float amplitude = 2;
+   optional float frequency = 3;
 }
 
-message PrebakedProto {
+message RampSegmentProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional int32 duration = 1;
+    optional float startAmplitude = 2;
+    optional float endAmplitude = 3;
+    optional float startFrequency = 4;
+    optional float endFrequency = 5;
+}
+
+message PrebakedSegmentProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     optional int32 effect_id = 1;
     optional int32 effect_strength = 2;
     optional int32 fallback = 3;
 }
 
-message ComposedProto {
+message PrimitiveSegmentProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-    repeated int32 effect_ids = 1;
-    repeated float effect_scales = 2;
-    repeated int32 delays = 3;
+    optional int32 primitive_id = 1;
+    optional float scale = 2;
+    optional int32 delay = 3;
+}
+
+message SegmentProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional PrebakedSegmentProto prebaked = 1;
+    optional PrimitiveSegmentProto primitive = 2;
+    optional StepSegmentProto step = 3;
+    optional RampSegmentProto ramp = 4;
 }
 
 // A com.android.os.VibrationEffect object.
 message VibrationEffectProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-    optional OneShotProto oneshot = 1;
-    optional WaveformProto waveform = 2;
-    optional PrebakedProto prebaked = 3;
-    optional ComposedProto composed = 4;
+    optional SegmentProto segments = 1;
+    required int32 repeat = 2;
 }
 
 message SyncVibrationEffectProto {

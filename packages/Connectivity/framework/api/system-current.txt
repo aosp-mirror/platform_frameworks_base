@@ -212,10 +212,12 @@ package android.net {
 
   public abstract class NetworkAgent {
     ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
+    ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, @NonNull android.net.NetworkScore, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
     method @Nullable public android.net.Network getNetwork();
     method public void markConnected();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
+    method public void onBandwidthUpdateRequested();
     method public void onNetworkUnwanted();
     method public void onQosCallbackRegistered(int, @NonNull android.net.QosFilter);
     method public void onQosCallbackUnregistered(int);
@@ -233,6 +235,7 @@ package android.net {
     method public final void sendQosSessionAvailable(int, int, @NonNull android.telephony.data.EpsBearerQosSessionAttributes);
     method public final void sendQosSessionLost(int, int);
     method public final void sendSocketKeepaliveEvent(int, int);
+    method @Deprecated public void setLegacySubtype(int, @NonNull String);
     method public final void setUnderlyingNetworks(@Nullable java.util.List<android.net.Network>);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
@@ -253,7 +256,12 @@ package android.net {
   public static final class NetworkAgentConfig.Builder {
     ctor public NetworkAgentConfig.Builder();
     method @NonNull public android.net.NetworkAgentConfig build();
+    method @NonNull public android.net.NetworkAgentConfig.Builder disableNat64Detection();
+    method @NonNull public android.net.NetworkAgentConfig.Builder disableProvisioningNotification();
     method @NonNull public android.net.NetworkAgentConfig.Builder setExplicitlySelected(boolean);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyExtraInfo(@NonNull String);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacySubType(int);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacySubTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyType(int);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setPartialConnectivityAcceptable(boolean);
@@ -314,6 +322,19 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
+  }
+
+  public final class NetworkScore implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getLegacyInt();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkScore> CREATOR;
+  }
+
+  public static final class NetworkScore.Builder {
+    ctor public NetworkScore.Builder();
+    method @NonNull public android.net.NetworkScore build();
+    method @NonNull public android.net.NetworkScore.Builder setLegacyInt(int);
   }
 
   public final class OemNetworkPreferences implements android.os.Parcelable {
@@ -388,6 +409,7 @@ package android.net {
   }
 
   public abstract class SocketKeepalive implements java.lang.AutoCloseable {
+    field public static final int ERROR_NO_SUCH_SLOT = -33; // 0xffffffdf
     field public static final int SUCCESS = 0; // 0x0
   }
 

@@ -206,6 +206,12 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
     }
 
+    private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
+    static {
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
+    }
+
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
 
     private static final String ACTION_TRACK = "com.android.fitness.TRACK";
@@ -733,14 +739,15 @@ final class DefaultPermissionGrantPolicy {
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
                         SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
-                        ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
+                        ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS,
+                        ACTIVITY_RECOGNITION_PERMISSIONS);
             }
         }
         if (locationExtraPackageNames != null) {
             // Also grant location and activity recognition permission to location extra packages.
             for (String packageName : locationExtraPackageNames) {
                 grantPermissionsToSystemPackage(pm, packageName, userId,
-                        ALWAYS_LOCATION_PERMISSIONS);
+                        ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
                         ACTIVITY_RECOGNITION_PERMISSIONS);
             }
@@ -809,7 +816,7 @@ final class DefaultPermissionGrantPolicy {
         // Companion devices
         grantSystemFixedPermissionsToSystemPackage(pm,
                 CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, userId,
-                ALWAYS_LOCATION_PERMISSIONS);
+                ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
 
         // Ringtone Picker
         grantSystemFixedPermissionsToSystemPackage(pm,

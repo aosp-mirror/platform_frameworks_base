@@ -235,6 +235,7 @@ public class PeopleSpaceTileTest {
                 .setStatuses(statusList).setNotificationKey("key")
                 .setNotificationContent("content")
                 .setNotificationDataUri(Uri.parse("data"))
+                .setMessagesCount(2)
                 .setIntent(new Intent())
                 .build();
 
@@ -256,6 +257,7 @@ public class PeopleSpaceTileTest {
         assertThat(readTile.getNotificationKey()).isEqualTo(tile.getNotificationKey());
         assertThat(readTile.getNotificationContent()).isEqualTo(tile.getNotificationContent());
         assertThat(readTile.getNotificationDataUri()).isEqualTo(tile.getNotificationDataUri());
+        assertThat(readTile.getMessagesCount()).isEqualTo(tile.getMessagesCount());
         assertThat(readTile.getIntent().toString()).isEqualTo(tile.getIntent().toString());
     }
 
@@ -288,6 +290,17 @@ public class PeopleSpaceTileTest {
                         .build();
 
         assertThat(tile.getNotificationDataUri()).isEqualTo(Uri.parse("test"));
+    }
+
+    @Test
+    public void testMessagesCount() {
+        PeopleSpaceTile tile =
+                new PeopleSpaceTile.Builder(new ShortcutInfo.Builder(mContext, "123").build(),
+                        mLauncherApps)
+                        .setMessagesCount(2)
+                        .build();
+
+        assertThat(tile.getMessagesCount()).isEqualTo(2);
     }
 
     @Test

@@ -266,6 +266,8 @@ class JobConcurrencyManager {
 
     String[] mRecycledPreemptReasonForContext = new String[MAX_JOB_CONTEXTS_COUNT];
 
+    int[] mRecycledPreemptReasonCodeForContext = new int[MAX_JOB_CONTEXTS_COUNT];
+
     String[] mRecycledShouldStopJobReason = new String[MAX_JOB_CONTEXTS_COUNT];
 
     private final ArraySet<JobStatus> mRunningJobs = new ArraySet<>();
@@ -505,6 +507,7 @@ class JobConcurrencyManager {
         int[] preferredUidForContext = mRecycledPreferredUidForContext;
         int[] workTypeForContext = mRecycledWorkTypeForContext;
         String[] preemptReasonForContext = mRecycledPreemptReasonForContext;
+        int[] preemptReasonCodeForContext = mRecycledPreemptReasonCodeForContext;
         String[] shouldStopJobReason = mRecycledShouldStopJobReason;
 
         updateCounterConfigLocked();
@@ -528,6 +531,7 @@ class JobConcurrencyManager {
             slotChanged[i] = false;
             preferredUidForContext[i] = js.getPreferredUid();
             preemptReasonForContext[i] = null;
+            preemptReasonCodeForContext[i] = JobParameters.STOP_REASON_UNDEFINED;
             shouldStopJobReason[i] = shouldStopRunningJobLocked(js);
         }
         if (DEBUG) {
@@ -551,6 +555,7 @@ class JobConcurrencyManager {
             int allWorkTypes = getJobWorkTypes(nextPending);
             int workType = mWorkCountTracker.canJobStart(allWorkTypes);
             boolean startingJob = false;
+            int preemptReasonCode = JobParameters.STOP_REASON_UNDEFINED;
             String preemptReason = null;
             // TODO(141645789): rewrite this to look at empty contexts first so we don't
             // unnecessarily preempt
@@ -582,6 +587,7 @@ class JobConcurrencyManager {
                         // assign the new job to this context since we'll reassign when the
                         // preempted job finally stops.
                         preemptReason = reason;
+                        preemptReasonCode = JobParameters.STOP_REASON_DEVICE_STATE;
                     }
                     continue;
                 }
@@ -597,6 +603,7 @@ class JobConcurrencyManager {
                     minPriorityForPreemption = jobPriority;
                     selectedContextId = j;
                     preemptReason = "higher priority job found";
+                    preemptReasonCode = JobParameters.STOP_REASON_PREEMPT;
                     // In this case, we're just going to preempt a low priority job, we're not
                     // actually starting a job, so don't set startingJob.
                 }
@@ -604,6 +611,7 @@ class JobConcurrencyManager {
             if (selectedContextId != -1) {
                 contextIdToJobMap[selectedContextId] = nextPending;
                 slotChanged[selectedContextId] = true;
+                preemptReasonCodeForContext[selectedContextId] = preemptReasonCode;
                 preemptReasonForContext[selectedContextId] = preemptReason;
             }
             if (startingJob) {
@@ -631,8 +639,13 @@ class JobConcurrencyManager {
                     }
                     // preferredUid will be set to uid of currently running job.
                     activeServices.get(i).cancelExecutingJobLocked(
+                            preemptReasonCodeForContext[i],
                             JobParameters.REASON_PREEMPT, preemptReasonForContext[i]);
-                    preservePreferredUid = true;
+                    // Only preserve the UID if we're preempting for the same UID. If we're stopping
+                    // the job because something is pending (eg. EJs), then we shouldn't preserve
+                    // the UID.
+                    preservePreferredUid =
+                            preemptReasonCodeForContext[i] == JobParameters.STOP_REASON_PREEMPT;
                 } else {
                     final JobStatus pendingJob = contextIdToJobMap[i];
                     if (DEBUG) {
@@ -657,7 +670,8 @@ class JobConcurrencyManager {
             final JobStatus jobStatus = jsc.getRunningJobLocked();
 
             if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()) {
-                jsc.cancelExecutingJobLocked(JobParameters.REASON_TIMEOUT, debugReason);
+                jsc.cancelExecutingJobLocked(JobParameters.STOP_REASON_DEVICE_STATE,
+                        JobParameters.REASON_TIMEOUT, debugReason);
             }
         }
     }
@@ -877,7 +891,7 @@ class JobConcurrencyManager {
         }
 
         // Only expedited jobs can replace expedited jobs.
-        if (js.shouldTreatAsExpeditedJob()) {
+        if (js.shouldTreatAsExpeditedJob() || js.startedAsExpeditedJob) {
             // Keep fg/bg user distinction.
             if (workType == WORK_TYPE_BGUSER_IMPORTANT || workType == WORK_TYPE_BGUSER) {
                 // Let any important bg user job replace a bg user expedited job.

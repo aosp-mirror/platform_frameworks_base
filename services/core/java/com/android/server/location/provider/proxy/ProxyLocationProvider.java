@@ -19,7 +19,6 @@ package com.android.server.location.provider.proxy;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationResult;
@@ -28,42 +27,46 @@ import android.location.provider.ILocationProviderManager;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.ArrayUtils;
+import com.android.server.FgThread;
 import com.android.server.location.provider.AbstractLocationProvider;
+import com.android.server.servicewatcher.CurrentUserServiceSupplier;
+import com.android.server.servicewatcher.CurrentUserServiceSupplier.BoundServiceInfo;
 import com.android.server.servicewatcher.ServiceWatcher;
-import com.android.server.servicewatcher.ServiceWatcher.BoundService;
+import com.android.server.servicewatcher.ServiceWatcher.ServiceListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Proxy for ILocationProvider implementations.
  */
-public class ProxyLocationProvider extends AbstractLocationProvider {
+public class ProxyLocationProvider extends AbstractLocationProvider implements
+        ServiceListener<BoundServiceInfo> {
 
-    private static final String KEY_EXTRA_ATTRIBUTION_TAGS = "android:location_allow_listed_tags";
-    private static final String EXTRA_ATTRIBUTION_TAGS_SEPARATOR = ";";
+    private static final String EXTRA_LOCATION_TAGS = "android:location_allow_listed_tags";
+    private static final String LOCATION_TAGS_SEPARATOR = ";";
+
+    private static final long RESET_DELAY_MS = 1000;
 
     /**
      * Creates and registers this proxy. If no suitable service is available for the proxy, returns
      * null.
      */
     @Nullable
-    public static ProxyLocationProvider create(Context context, String action,
+    public static ProxyLocationProvider create(Context context, String provider, String action,
             int enableOverlayResId, int nonOverlayPackageResId) {
-        ProxyLocationProvider proxy = new ProxyLocationProvider(context, action, enableOverlayResId,
-                nonOverlayPackageResId);
+        ProxyLocationProvider proxy = new ProxyLocationProvider(context, provider, action,
+                enableOverlayResId, nonOverlayPackageResId);
         if (proxy.checkServiceResolves()) {
             return proxy;
         } else {
@@ -80,21 +83,24 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
     final ArrayList<Runnable> mFlushListeners = new ArrayList<>(0);
 
     @GuardedBy("mLock")
-    Proxy mProxy;
+    @Nullable Runnable mResetter;
     @GuardedBy("mLock")
-    @Nullable ComponentName mService;
+    @Nullable Proxy mProxy;
+    @GuardedBy("mLock")
+    @Nullable BoundServiceInfo mBoundServiceInfo;
 
     private volatile ProviderRequest mRequest;
 
-    private ProxyLocationProvider(Context context, String action, int enableOverlayResId,
-            int nonOverlayPackageResId) {
+    private ProxyLocationProvider(Context context, String provider, String action,
+            int enableOverlayResId, int nonOverlayPackageResId) {
         // safe to use direct executor since our locks are not acquired in a code path invoked by
         // our owning provider
         super(DIRECT_EXECUTOR, null, null, Collections.emptySet());
 
         mContext = context;
-        mServiceWatcher = new ServiceWatcher(context, action, this::onBind,
-                this::onUnbind, enableOverlayResId, nonOverlayPackageResId);
+        mServiceWatcher = ServiceWatcher.create(context, provider,
+                new CurrentUserServiceSupplier(context, action, enableOverlayResId,
+                        nonOverlayPackageResId), this);
 
         mProxy = null;
         mRequest = ProviderRequest.EMPTY_REQUEST;
@@ -104,21 +110,13 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
         return mServiceWatcher.checkServiceResolves();
     }
 
-    private void onBind(IBinder binder, BoundService boundService) throws RemoteException {
+    @Override
+    public void onBind(IBinder binder, BoundServiceInfo boundServiceInfo) throws RemoteException {
         ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
 
         synchronized (mLock) {
             mProxy = new Proxy();
-            mService = boundService.component;
-
-            // update extra attribution tag info from manifest
-            if (boundService.metadata != null) {
-                String tagsList = boundService.metadata.getString(KEY_EXTRA_ATTRIBUTION_TAGS);
-                if (tagsList != null) {
-                    setExtraAttributionTags(
-                            new ArraySet<>(tagsList.split(EXTRA_ATTRIBUTION_TAGS_SEPARATOR)));
-                }
-            }
+            mBoundServiceInfo = boundServiceInfo;
 
             provider.setLocationProviderManager(mProxy);
 
@@ -129,12 +127,30 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
         }
     }
 
-    private void onUnbind() {
+    @Override
+    public void onUnbind() {
         Runnable[] flushListeners;
         synchronized (mLock) {
             mProxy = null;
-            mService = null;
-            setState(prevState -> State.EMPTY_STATE);
+            mBoundServiceInfo = null;
+
+            // we need to clear the state - but most disconnections are very temporary. we give a
+            // grace period where we don't clear the state immediately so that transient
+            // interruptions are not necessarily visible to downstream clients
+            if (mResetter == null) {
+                mResetter = new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (mLock) {
+                            if (mResetter == this) {
+                                setState(prevState -> State.EMPTY_STATE);
+                            }
+                        }
+                    }
+                };
+                FgThread.getHandler().postDelayed(mResetter, RESET_DELAY_MS);
+            }
+
             flushListeners = mFlushListeners.toArray(new Runnable[0]);
             mFlushListeners.clear();
         }
@@ -166,7 +182,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
     @Override
     protected void onFlush(Runnable callback) {
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
+        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderOperation() {
             @Override
             public void run(IBinder binder) throws RemoteException {
                 ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
@@ -206,20 +222,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mServiceWatcher.dump(fd, pw, args);
-    }
-
-    private static String guessPackageName(Context context, int uid, String packageName) {
-        String[] packageNames = context.getPackageManager().getPackagesForUid(uid);
-        if (packageNames == null || packageNames.length == 0) {
-            // illegal state exception will propagate back through binders
-            throw new IllegalStateException(
-                    "location provider from uid " + uid + " has no package information");
-        } else if (ArrayUtils.contains(packageNames, packageName)) {
-            return packageName;
-        } else {
-            return packageNames[0];
-        }
+        mServiceWatcher.dump(pw);
     }
 
     private class Proxy extends ILocationProviderManager.Stub {
@@ -229,26 +232,37 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
         // executed on binder thread
         @Override
         public void onInitialize(boolean allowed, ProviderProperties properties,
-                @Nullable String packageName, @Nullable String attributionTag) {
+                @Nullable String attributionTag) {
             synchronized (mLock) {
                 if (mProxy != this) {
                     return;
                 }
 
-                CallerIdentity identity;
-                if (packageName == null) {
-                    packageName = guessPackageName(mContext, Binder.getCallingUid(),
-                            Objects.requireNonNull(mService).getPackageName());
-                    // unsafe is ok since the package is coming direct from the package manager here
-                    identity = CallerIdentity.fromBinderUnsafe(packageName, attributionTag);
-                } else {
-                    identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
+                if (mResetter != null) {
+                    FgThread.getHandler().removeCallbacks(mResetter);
+                    mResetter = null;
                 }
 
-                setState(prevState -> prevState
+                // set extra attribution tags from manifest if necessary
+                String[] attributionTags = new String[0];
+                if (mBoundServiceInfo.getMetadata() != null) {
+                    String tagsStr = mBoundServiceInfo.getMetadata().getString(EXTRA_LOCATION_TAGS);
+                    if (!TextUtils.isEmpty(tagsStr)) {
+                        attributionTags = tagsStr.split(LOCATION_TAGS_SEPARATOR);
+                    }
+                }
+                ArraySet<String> extraAttributionTags = new ArraySet<>(attributionTags);
+
+                // unsafe is ok since we trust the package name already
+                CallerIdentity identity = CallerIdentity.fromBinderUnsafe(
+                        mBoundServiceInfo.getComponentName().getPackageName(),
+                        attributionTag);
+
+                setState(prevState -> State.EMPTY_STATE
                         .withAllowed(allowed)
                         .withProperties(properties)
-                        .withIdentity(identity));
+                        .withIdentity(identity)
+                        .withExtraAttributionTags(extraAttributionTags));
             }
         }
 

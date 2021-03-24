@@ -1674,9 +1674,11 @@ final public class MediaCodec implements PlaybackComponent {
     public @interface BufferFlag {}
 
     private EventHandler mEventHandler;
+    private EventHandler mOnFirstTunnelFrameReadyHandler;
     private EventHandler mOnFrameRenderedHandler;
     private EventHandler mCallbackHandler;
     private Callback mCallback;
+    private OnFirstTunnelFrameReadyListener mOnFirstTunnelFrameReadyListener;
     private OnFrameRenderedListener mOnFrameRenderedListener;
     private final Object mListenerLock = new Object();
     private MediaCodecInfo mCodecInfo;
@@ -1687,6 +1689,7 @@ final public class MediaCodec implements PlaybackComponent {
     private static final int EVENT_CALLBACK = 1;
     private static final int EVENT_SET_CALLBACK = 2;
     private static final int EVENT_FRAME_RENDERED = 3;
+    private static final int EVENT_FIRST_TUNNEL_FRAME_READY = 4;
 
     private static final int CB_INPUT_AVAILABLE = 1;
     private static final int CB_OUTPUT_AVAILABLE = 2;
@@ -1747,6 +1750,16 @@ final public class MediaCodec implements PlaybackComponent {
                         onFrameRenderedListener.onFrameRendered(
                                 mCodec, (long)mediaTimeUs, (long)systemNano);
                     }
+                    break;
+                case EVENT_FIRST_TUNNEL_FRAME_READY:
+                    OnFirstTunnelFrameReadyListener onFirstTunnelFrameReadyListener;
+                    synchronized (mListenerLock) {
+                        onFirstTunnelFrameReadyListener = mOnFirstTunnelFrameReadyListener;
+                    }
+                    if (onFirstTunnelFrameReadyListener == null) {
+                        break;
+                    }
+                    onFirstTunnelFrameReadyListener.onFirstTunnelFrameReady(mCodec);
                     break;
                 default:
                 {
@@ -1923,6 +1936,7 @@ final public class MediaCodec implements PlaybackComponent {
             mEventHandler = null;
         }
         mCallbackHandler = mEventHandler;
+        mOnFirstTunnelFrameReadyHandler = mEventHandler;
         mOnFrameRenderedHandler = mEventHandler;
 
         mBufferLock = new Object();
@@ -2276,6 +2290,9 @@ final public class MediaCodec implements PlaybackComponent {
             if (mCallbackHandler != null) {
                 mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
                 mCallbackHandler.removeMessages(EVENT_CALLBACK);
+            }
+            if (mOnFirstTunnelFrameReadyHandler != null) {
+                mOnFirstTunnelFrameReadyHandler.removeMessages(EVENT_FIRST_TUNNEL_FRAME_READY);
             }
             if (mOnFrameRenderedHandler != null) {
                 mOnFrameRenderedHandler.removeMessages(EVENT_FRAME_RENDERED);
@@ -4447,6 +4464,41 @@ final public class MediaCodec implements PlaybackComponent {
             MediaFormat.KEY_LOW_LATENCY;
 
     /**
+     * Control video peek of the first frame when a codec is configured for tunnel mode with
+     * {@link MediaFormat#KEY_AUDIO_SESSION_ID} while the {@link AudioTrack} is paused.
+     *<p>
+     * When disabled (1) after a {@link #flush} or {@link #start}, (2) while the corresponding
+     * {@link AudioTrack} is paused and (3) before any buffers are queued, the first frame is not to
+     * be rendered until either this parameter is enabled or the corresponding {@link AudioTrack}
+     * has begun playback. Once the frame is decoded and ready to be rendered,
+     * {@link OnFirstTunnelFrameReadyListener#onFirstTunnelFrameReady} is called but the frame is
+     * not rendered. The surface continues to show the previously-rendered content, or black if the
+     * surface is new. A subsequent call to {@link AudioTrack#play} renders this frame and triggers
+     * a callback to {@link OnFrameRenderedListener#onFrameRendered}, and video playback begins.
+     *<p>
+     * <b>Note</b>: To clear any previously rendered content and show black, configure the
+     * MediaCodec with {@code KEY_PUSH_BLANK_BUFFERS_ON_STOP(1)}, and call {@link #stop} before
+     * pushing new video frames to the codec.
+     *<p>
+     * When enabled (1) after a {@link #flush} or {@link #start} and (2) while the corresponding
+     * {@link AudioTrack} is paused, the first frame is rendered as soon as it is decoded, or
+     * immediately, if it has already been decoded. If not already decoded, when the frame is
+     * decoded and ready to be rendered,
+     * {@link OnFirstTunnelFrameReadyListener#onFirstTunnelFrameReady} is called. The frame is then
+     * immediately rendered and {@link OnFrameRenderedListener#onFrameRendered} is subsequently
+     * called.
+     *<p>
+     * The value is an Integer object containing the value 1 to enable or the value 0 to disable.
+     *<p>
+     * The default for this parameter is <b>enabled</b>. Once a frame has been rendered, changing
+     * this parameter has no effect until a subsequent {@link #flush} or
+     * {@link #stop}/{@link #start}.
+     *
+     * @see #setParameters(Bundle)
+     */
+    public static final String PARAMETER_KEY_TUNNEL_PEEK = "tunnel-peek";
+
+    /**
      * Communicate additional parameter changes to the component instance.
      * <b>Note:</b> Some of these parameter changes may silently fail to apply.
      *
@@ -4543,6 +4595,55 @@ final public class MediaCodec implements PlaybackComponent {
     public void setCallback(@Nullable /* MediaCodec. */ Callback cb) {
         setCallback(cb, null /* handler */);
     }
+
+    /**
+     * Listener to be called when the first output frame has been decoded
+     * and is ready to be rendered for a codec configured for tunnel mode with
+     * {@code KEY_AUDIO_SESSION_ID}.
+     *
+     * @see MediaCodec#setOnFirstTunnelFrameReadyListener
+     */
+    public interface OnFirstTunnelFrameReadyListener {
+
+        /**
+         * Called when the first output frame has been decoded and is ready to be
+         * rendered.
+         */
+        void onFirstTunnelFrameReady(@NonNull MediaCodec codec);
+    }
+
+    /**
+     * Registers a callback to be invoked when the first output frame has been decoded
+     * and is ready to be rendered on a codec configured for tunnel mode with {@code
+     * KEY_AUDIO_SESSION_ID}.
+     *
+     * @param handler the callback will be run on the handler's thread. If {@code
+     * null}, the callback will be run on the default thread, which is the looper from
+     * which the codec was created, or a new thread if there was none.
+     *
+     * @param listener the callback that will be run. If {@code null}, clears any registered
+     * listener.
+     */
+    public void setOnFirstTunnelFrameReadyListener(
+            @Nullable Handler handler, @Nullable OnFirstTunnelFrameReadyListener listener) {
+        synchronized (mListenerLock) {
+            mOnFirstTunnelFrameReadyListener = listener;
+            if (listener != null) {
+                EventHandler newHandler = getEventHandlerOn(
+                        handler,
+                        mOnFirstTunnelFrameReadyHandler);
+                if (newHandler != mOnFirstTunnelFrameReadyHandler) {
+                    mOnFirstTunnelFrameReadyHandler.removeMessages(EVENT_FIRST_TUNNEL_FRAME_READY);
+                }
+                mOnFirstTunnelFrameReadyHandler = newHandler;
+            } else if (mOnFirstTunnelFrameReadyHandler != null) {
+                mOnFirstTunnelFrameReadyHandler.removeMessages(EVENT_FIRST_TUNNEL_FRAME_READY);
+            }
+            native_enableOnFirstTunnelFrameReadyListener(listener != null);
+        }
+    }
+
+    private native void native_enableOnFirstTunnelFrameReadyListener(boolean enable);
 
     /**
      * Listener to be called when an output frame has rendered on the output surface
@@ -4667,6 +4768,8 @@ final public class MediaCodec implements PlaybackComponent {
             EventHandler handler = mEventHandler;
             if (what == EVENT_CALLBACK) {
                 handler = mCallbackHandler;
+            } else if (what == EVENT_FIRST_TUNNEL_FRAME_READY) {
+                handler = mOnFirstTunnelFrameReadyHandler;
             } else if (what == EVENT_FRAME_RENDERED) {
                 handler = mOnFrameRenderedHandler;
             }

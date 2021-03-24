@@ -21,6 +21,9 @@
        android:sharedUserId="com.android.framework.externalsharedpermstestapp">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
     <application>
         <uses-library android:name="android.test.runner" />

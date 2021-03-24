@@ -109,6 +109,7 @@ class HibernationStateDiskStore<T> {
      * @return the parsed list of hibernation states, null if file does not exist
      */
     @Nullable
+    @WorkerThread
     List<T> readHibernationStates() {
         synchronized (this) {
             if (!mHibernationFile.exists()) {

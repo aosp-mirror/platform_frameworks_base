@@ -608,7 +608,12 @@ public class BaseInputConnection implements InputConnection {
         Preconditions.checkArgumentNonnegative(afterLength);
 
         final Editable content = getEditable();
-        if (content == null) return null;
+        // If {@link #getEditable()} is null or {@code mEditable} is equal to {@link #getEditable()}
+        // (a.k.a, a fake editable), it means we cannot get valid content from the editable, so
+        // fallback to retrieve surrounding text from other APIs.
+        if (content == null || mEditable == content) {
+            return InputConnection.super.getSurroundingText(beforeLength, afterLength, flags);
+        }
 
         int selStart = Selection.getSelectionStart(content);
         int selEnd = Selection.getSelectionEnd(content);
