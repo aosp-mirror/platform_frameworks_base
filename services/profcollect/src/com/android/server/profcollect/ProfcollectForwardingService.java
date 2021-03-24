@@ -295,10 +295,30 @@ public final class ProfcollectForwardingService extends SystemService {
             return;
         }
 
-        try {
-            mIProfcollect.report();
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, e.getMessage());
-        }
+        final boolean uploadReport =
+                DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                                        "upload_report", false);
+
+        new Thread(() -> {
+            try {
+                String reportPath = mIProfcollect.report();
+                if (!uploadReport) {
+                    return;
+                }
+                Intent uploadIntent =
+                        new Intent("com.google.android.apps.betterbug.intent.action.UPLOAD_PROFILE")
+                        .setPackage("com.google.android.apps.internal.betterbug")
+                        .putExtra("EXTRA_DESTINATION", "PROFCOLLECT")
+                        .putExtra("EXTRA_PACKAGE_NAME", getContext().getPackageName())
+                        .putExtra("EXTRA_PROFILE_PATH", reportPath)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                Context context = getContext();
+                if (context.getPackageManager().queryBroadcastReceivers(uploadIntent, 0) != null) {
+                    context.sendBroadcast(uploadIntent);
+                }
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, e.getMessage());
+            }
+        }).start();
     }
 }
