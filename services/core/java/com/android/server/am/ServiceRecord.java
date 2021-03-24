@@ -165,9 +165,16 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
     @PowerWhitelistManager.ReasonCode int mAllowStartForeground = REASON_DENIED;
+    // Debug info why mAllowStartForeground is allowed or denied.
     String mInfoAllowStartForeground;
+    // Debug info if mAllowStartForeground is allowed because of a temp-allowlist.
     FgsStartTempAllowList.TempFgsAllowListEntry mInfoTempFgsAllowListReason;
+    // Is the same mInfoAllowStartForeground string has been logged before? Used for dedup.
     boolean mLoggedInfoAllowStartForeground;
+    // The number of times Service.startForeground() is called;
+    int mStartForegroundCount;
+    // Last time mAllowWhileInUsePermissionInFgs or mAllowStartForeground is set.
+    long mLastSetFgsRestrictionTime;
 
     String stringName;      // caching of toString
 
@@ -439,6 +446,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         pw.println(mRecentCallingUid);
         pw.print(prefix); pw.print("allowStartForeground=");
         pw.println(mAllowStartForeground);
+        pw.print(prefix); pw.print("startForegroundCount=");
+        pw.println(mStartForegroundCount);
         pw.print(prefix); pw.print("infoAllowStartForeground=");
         pw.println(mInfoAllowStartForeground);
         if (delayed) {
