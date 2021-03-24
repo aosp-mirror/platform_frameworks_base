@@ -34,6 +34,8 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleableRes;
+import android.app.ActivityThread;
+import android.app.ResourcesManager;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -85,7 +87,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.os.ext.SdkExtensions;
 import android.permission.PermissionManager;
 import android.text.TextUtils;
@@ -3039,6 +3043,42 @@ public class ParsingPackageUtils {
 
             return input.success(existingSigningDetails);
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static void readConfigUseRoundIcon(Resources r) {
+        if (r != null) {
+            sUseRoundIcon = r.getBoolean(com.android.internal.R.bool.config_useRoundIcon);
+            return;
+        }
+
+        final ApplicationInfo androidAppInfo;
+        try {
+            androidAppInfo = ActivityThread.getPackageManager().getApplicationInfo(
+                    "android", 0 /* flags */,
+                    UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        final Resources systemResources = Resources.getSystem();
+
+        // Create in-flight as this overlayable resource is only used when config changes
+        final Resources overlayableRes = ResourcesManager.getInstance().getResources(
+                null /* activityToken */,
+                null /* resDir */,
+                null /* splitResDirs */,
+                androidAppInfo.resourceDirs,
+                androidAppInfo.overlayPaths,
+                androidAppInfo.sharedLibraryFiles,
+                null /* overrideDisplayId */,
+                null /* overrideConfig */,
+                systemResources.getCompatibilityInfo(),
+                systemResources.getClassLoader(),
+                null /* loaders */);
+
+        sUseRoundIcon = overlayableRes.getBoolean(com.android.internal.R.bool.config_useRoundIcon);
     }
 
     /*
