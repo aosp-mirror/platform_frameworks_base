@@ -1086,17 +1086,14 @@ int IncrementalService::makeFile(StorageId storage, std::string_view path, int m
         return err;
     }
     if (params.size > 0) {
-        // Only v2+ incfs supports automatically trimming file over-reserved sizes
-        if (mIncFs->features() & incfs::Features::v2) {
-            if (auto err = mIncFs->reserveSpace(ifs->control, normPath, params.size)) {
-                if (err != -EOPNOTSUPP) {
-                    LOG(ERROR) << "Failed to reserve space for a new file: " << err;
-                    (void)mIncFs->unlink(ifs->control, normPath);
-                    return err;
-                } else {
-                    LOG(WARNING) << "Reserving space for backing file isn't supported, "
-                                    "may run out of disk later";
-                }
+        if (auto err = mIncFs->reserveSpace(ifs->control, id, params.size)) {
+            if (err != -EOPNOTSUPP) {
+                LOG(ERROR) << "Failed to reserve space for a new file: " << err;
+                (void)mIncFs->unlink(ifs->control, normPath);
+                return err;
+            } else {
+                LOG(WARNING) << "Reserving space for backing file isn't supported, "
+                                "may run out of disk later";
             }
         }
         if (!data.empty()) {
@@ -1680,6 +1677,15 @@ void IncrementalService::runCmdLooper() {
     }
 }
 
+void IncrementalService::trimReservedSpaceV1(const IncFsMount& ifs) {
+    mIncFs->forEachFile(ifs.control, [this](auto&& control, auto&& fileId) {
+        if (mIncFs->isFileFullyLoaded(control, fileId) == incfs::LoadingState::Full) {
+            mIncFs->reserveSpace(control, fileId, -1);
+        }
+        return true;
+    });
+}
+
 void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderParamsParcel&& params,
                                                  DataLoaderStatusListener&& statusListener,
                                                  const StorageHealthCheckParams& healthCheckParams,
@@ -1698,6 +1704,22 @@ void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderPara
             new DataLoaderStub(*this, ifs.mountId, std::move(params), std::move(fsControlParcel),
                                std::move(statusListener), healthCheckParams,
                                std::move(healthListener), path::join(ifs.root, constants().mount));
+
+    // pre-v2 IncFS doesn't do automatic reserved space trimming - need to run it manually
+    if (!(mIncFs->features() & incfs::Features::v2)) {
+        addIfsStateCallback(ifs.mountId, [this](StorageId storageId, IfsState state) -> bool {
+            if (!state.fullyLoaded) {
+                return true;
+            }
+
+            const auto ifs = getIfs(storageId);
+            if (!ifs) {
+                return false;
+            }
+            trimReservedSpaceV1(*ifs);
+            return false;
+        });
+    }
 
     addIfsStateCallback(ifs.mountId, [this](StorageId storageId, IfsState state) -> bool {
         if (!state.fullyLoaded || state.readLogsEnabled) {
