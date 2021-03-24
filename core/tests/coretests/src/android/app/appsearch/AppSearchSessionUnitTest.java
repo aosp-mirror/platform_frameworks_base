@@ -51,7 +51,7 @@ public class AppSearchSessionUnitTest {
         CompletableFuture<AppSearchResult<SetSchemaResponse>> schemaFuture =
                 new CompletableFuture<>();
         mSearchSession.setSchema(
-                new SetSchemaRequest.Builder().setForceOverride(true).build(), mExecutor,
+                new SetSchemaRequest.Builder().setForceOverride(true).build(), mExecutor, mExecutor,
                 schemaFuture::complete);
 
         schemaFuture.get().getResultValue();
