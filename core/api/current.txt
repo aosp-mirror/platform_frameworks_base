@@ -13328,7 +13328,8 @@ package android.content.res {
     method public void setTo(android.content.res.Resources.Theme);
   }
 
-  public class TypedArray {
+  public class TypedArray implements java.lang.AutoCloseable {
+    method public void close();
     method public boolean getBoolean(@StyleableRes int, boolean);
     method public int getChangingConfigurations();
     method @ColorInt public int getColor(@StyleableRes int, @ColorInt int);
