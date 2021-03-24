@@ -34,7 +34,7 @@ import java.util.List;
 public final class BatteryUsageStats implements Parcelable {
     private final double mConsumedPower;
     private final int mDischargePercentage;
-    private final long mStatsStartRealtimeMs;
+    private final long mStatsStartTimestampMs;
     private final double mDischargedPowerLowerBound;
     private final double mDischargedPowerUpperBound;
     private final long mBatteryTimeRemainingMs;
@@ -46,7 +46,7 @@ public final class BatteryUsageStats implements Parcelable {
     private final List<BatteryStats.HistoryTag> mHistoryTagPool;
 
     private BatteryUsageStats(@NonNull Builder builder) {
-        mStatsStartRealtimeMs = builder.mStatsStartRealtimeMs;
+        mStatsStartTimestampMs = builder.mStatsStartTimestampMs;
         mDischargePercentage = builder.mDischargePercentage;
         mDischargedPowerLowerBound = builder.mDischargedPowerLowerBoundMah;
         mDischargedPowerUpperBound = builder.mDischargedPowerUpperBoundMah;
@@ -91,10 +91,11 @@ public final class BatteryUsageStats implements Parcelable {
     }
 
     /**
-     * Timestamp of the latest battery stats reset, in milliseconds.
+     * Timestamp (as returned by System.currentTimeMillis()) of the latest battery stats reset, in
+     * milliseconds.
      */
-    public long getStatsStartRealtime() {
-        return mStatsStartRealtimeMs;
+    public long getStatsStartTimestamp() {
+        return mStatsStartTimestampMs;
     }
 
     /**
@@ -174,7 +175,7 @@ public final class BatteryUsageStats implements Parcelable {
     }
 
     private BatteryUsageStats(@NonNull Parcel source) {
-        mStatsStartRealtimeMs = source.readLong();
+        mStatsStartTimestampMs = source.readLong();
         mConsumedPower = source.readDouble();
         mDischargePercentage = source.readInt();
         mDischargedPowerLowerBound = source.readDouble();
@@ -214,7 +215,7 @@ public final class BatteryUsageStats implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeLong(mStatsStartRealtimeMs);
+        dest.writeLong(mStatsStartTimestampMs);
         dest.writeDouble(mConsumedPower);
         dest.writeInt(mDischargePercentage);
         dest.writeDouble(mDischargedPowerLowerBound);
@@ -260,7 +261,7 @@ public final class BatteryUsageStats implements Parcelable {
     public static final class Builder {
         private final int mCustomPowerComponentCount;
         private final int mCustomTimeComponentCount;
-        private long mStatsStartRealtimeMs;
+        private long mStatsStartTimestampMs;
         private int mDischargePercentage;
         private double mDischargedPowerLowerBoundMah;
         private double mDischargedPowerUpperBoundMah;
@@ -291,8 +292,8 @@ public final class BatteryUsageStats implements Parcelable {
         /**
          * Sets the timestamp of the latest battery stats reset, in milliseconds.
          */
-        public Builder setStatsStartRealtime(long statsStartRealtimeMs) {
-            mStatsStartRealtimeMs = statsStartRealtimeMs;
+        public Builder setStatsStartTimestamp(long statsStartTimestampMs) {
+            mStatsStartTimestampMs = statsStartTimestampMs;
             return this;
         }
 

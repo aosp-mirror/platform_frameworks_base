@@ -467,6 +467,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(View.VISIBLE,
                 smallResult.findViewById(R.id.person_icon).getVisibility());
 
+        // Has a single message, no count shown.
+        assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
+
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
@@ -490,6 +493,36 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
         assertThat(statusContent.getMaxLines()).isEqualTo(3);
     }
+
+    @Test
+    public void testCreateRemoteViewsWithNotificationTemplateTwoMessages() {
+        PeopleSpaceTile tileWithStatusAndNotification = PERSON_TILE.toBuilder()
+                .setNotificationDataUri(null)
+                .setStatuses(Arrays.asList(GAME_STATUS,
+                        NEW_STORY_WITH_AVAILABILITY))
+                .setMessagesCount(2).build();
+        RemoteViews views = new PeopleTileViewHelper(mContext,
+                tileWithStatusAndNotification, 0, mOptions).getViews();
+        View result = views.apply(mContext, null);
+
+        TextView name = (TextView) result.findViewById(R.id.name);
+        assertEquals(name.getText(), NAME);
+        TextView subtext = (TextView) result.findViewById(R.id.subtext);
+        assertEquals(View.GONE, subtext.getVisibility());
+        // Has availability.
+        View availability = result.findViewById(R.id.availability);
+        assertEquals(View.VISIBLE, availability.getVisibility());
+        // Has person icon.
+        View personIcon = result.findViewById(R.id.person_icon);
+        assertEquals(View.VISIBLE, personIcon.getVisibility());
+        // Has notification content.
+        TextView statusContent = (TextView) result.findViewById(R.id.text_content);
+        assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
+
+        // Has 2 messages, show count.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.messages_count).getVisibility());
+    }
+
 
     @Test
     public void testGetBackgroundTextFromMessageNoPunctuation() {

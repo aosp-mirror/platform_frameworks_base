@@ -201,4 +201,5 @@ interface IStorageManager {
     void notifyAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 91;
     void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 92;
     PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 93;
+    boolean isAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 94;
     }

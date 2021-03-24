@@ -107,7 +107,7 @@ public class ArcInitiationActionFromAvrTest {
                     }
 
                     @Override
-                    Looper getServiceLooper() {
+                    protected Looper getServiceLooper() {
                         return mTestLooper.getLooper();
                     }
                 };

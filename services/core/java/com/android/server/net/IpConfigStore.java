@@ -22,7 +22,6 @@ import android.net.IpConfiguration.IpAssignment;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.LinkAddress;
 import android.net.ProxyInfo;
-import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
 import android.util.ArrayMap;
@@ -42,6 +41,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 public class IpConfigStore {
     private static final String TAG = "IpConfigStore";
@@ -83,25 +84,25 @@ public class IpConfigStore {
         boolean written = false;
 
         try {
-            switch (config.ipAssignment) {
+            switch (config.getIpAssignment()) {
                 case STATIC:
                     out.writeUTF(IP_ASSIGNMENT_KEY);
-                    out.writeUTF(config.ipAssignment.toString());
-                    StaticIpConfiguration staticIpConfiguration = config.staticIpConfiguration;
+                    out.writeUTF(config.getIpAssignment().toString());
+                    StaticIpConfiguration staticIpConfiguration = config.getStaticIpConfiguration();
                     if (staticIpConfiguration != null) {
-                        if (staticIpConfiguration.ipAddress != null) {
-                            LinkAddress ipAddress = staticIpConfiguration.ipAddress;
+                        if (staticIpConfiguration.getIpAddress() != null) {
+                            LinkAddress ipAddress = staticIpConfiguration.getIpAddress();
                             out.writeUTF(LINK_ADDRESS_KEY);
                             out.writeUTF(ipAddress.getAddress().getHostAddress());
                             out.writeInt(ipAddress.getPrefixLength());
                         }
-                        if (staticIpConfiguration.gateway != null) {
+                        if (staticIpConfiguration.getGateway() != null) {
                             out.writeUTF(GATEWAY_KEY);
                             out.writeInt(0);  // Default route.
                             out.writeInt(1);  // Have a gateway.
-                            out.writeUTF(staticIpConfiguration.gateway.getHostAddress());
+                            out.writeUTF(staticIpConfiguration.getGateway().getHostAddress());
                         }
-                        for (InetAddress inetAddr : staticIpConfiguration.dnsServers) {
+                        for (InetAddress inetAddr : staticIpConfiguration.getDnsServers()) {
                             out.writeUTF(DNS_KEY);
                             out.writeUTF(inetAddr.getHostAddress());
                         }
@@ -110,7 +111,7 @@ public class IpConfigStore {
                     break;
                 case DHCP:
                     out.writeUTF(IP_ASSIGNMENT_KEY);
-                    out.writeUTF(config.ipAssignment.toString());
+                    out.writeUTF(config.getIpAssignment().toString());
                     written = true;
                     break;
                 case UNASSIGNED:
@@ -121,13 +122,13 @@ public class IpConfigStore {
                     break;
             }
 
-            switch (config.proxySettings) {
+            switch (config.getProxySettings()) {
                 case STATIC:
-                    ProxyInfo proxyProperties = config.httpProxy;
+                    ProxyInfo proxyProperties = config.getHttpProxy();
                     String exclusionList = ProxyUtils.exclusionListAsString(
                             proxyProperties.getExclusionList());
                     out.writeUTF(PROXY_SETTINGS_KEY);
-                    out.writeUTF(config.proxySettings.toString());
+                    out.writeUTF(config.getProxySettings().toString());
                     out.writeUTF(PROXY_HOST_KEY);
                     out.writeUTF(proxyProperties.getHost());
                     out.writeUTF(PROXY_PORT_KEY);
@@ -139,16 +140,16 @@ public class IpConfigStore {
                     written = true;
                     break;
                 case PAC:
-                    ProxyInfo proxyPacProperties = config.httpProxy;
+                    ProxyInfo proxyPacProperties = config.getHttpProxy();
                     out.writeUTF(PROXY_SETTINGS_KEY);
-                    out.writeUTF(config.proxySettings.toString());
+                    out.writeUTF(config.getProxySettings().toString());
                     out.writeUTF(PROXY_PAC_FILE);
                     out.writeUTF(proxyPacProperties.getPacFileUrl().toString());
                     written = true;
                     break;
                 case NONE:
                     out.writeUTF(PROXY_SETTINGS_KEY);
-                    out.writeUTF(config.proxySettings.toString());
+                    out.writeUTF(config.getProxySettings().toString());
                     written = true;
                     break;
                 case UNASSIGNED:
@@ -267,11 +268,14 @@ public class IpConfigStore {
                 IpAssignment ipAssignment = IpAssignment.DHCP;
                 ProxySettings proxySettings = ProxySettings.NONE;
                 StaticIpConfiguration staticIpConfiguration = new StaticIpConfiguration();
+                LinkAddress linkAddress = null;
+                InetAddress gatewayAddress = null;
                 String proxyHost = null;
                 String pacFileUrl = null;
                 int proxyPort = -1;
                 String exclusionList = null;
                 String key;
+                final List<InetAddress> dnsServers = new ArrayList<>();
 
                 do {
                     key = in.readUTF();
@@ -286,15 +290,15 @@ public class IpConfigStore {
                         } else if (key.equals(IP_ASSIGNMENT_KEY)) {
                             ipAssignment = IpAssignment.valueOf(in.readUTF());
                         } else if (key.equals(LINK_ADDRESS_KEY)) {
-                            LinkAddress linkAddr =
+                            LinkAddress parsedLinkAddress =
                                     new LinkAddress(
                                             InetAddresses.parseNumericAddress(in.readUTF()),
                                             in.readInt());
-                            if (linkAddr.getAddress() instanceof Inet4Address &&
-                                    staticIpConfiguration.ipAddress == null) {
-                                staticIpConfiguration.ipAddress = linkAddr;
+                            if (parsedLinkAddress.getAddress() instanceof Inet4Address
+                                    && linkAddress == null) {
+                                linkAddress = parsedLinkAddress;
                             } else {
-                                loge("Non-IPv4 or duplicate address: " + linkAddr);
+                                loge("Non-IPv4 or duplicate address: " + parsedLinkAddress);
                             }
                         } else if (key.equals(GATEWAY_KEY)) {
                             LinkAddress dest = null;
@@ -302,8 +306,8 @@ public class IpConfigStore {
                             if (version == 1) {
                                 // only supported default gateways - leave the dest/prefix empty
                                 gateway = InetAddresses.parseNumericAddress(in.readUTF());
-                                if (staticIpConfiguration.gateway == null) {
-                                    staticIpConfiguration.gateway = gateway;
+                                if (gatewayAddress == null) {
+                                    gatewayAddress = gateway;
                                 } else {
                                     loge("Duplicate gateway: " + gateway.getHostAddress());
                                 }
@@ -317,17 +321,18 @@ public class IpConfigStore {
                                 if (in.readInt() == 1) {
                                     gateway = InetAddresses.parseNumericAddress(in.readUTF());
                                 }
-                                RouteInfo route = new RouteInfo(dest, gateway);
-                                if (route.isIPv4Default() &&
-                                        staticIpConfiguration.gateway == null) {
-                                    staticIpConfiguration.gateway = gateway;
+                                // If the destination is a default IPv4 route, use the gateway
+                                // address unless already set.
+                                if (dest.getAddress() instanceof Inet4Address
+                                        && dest.getPrefixLength() == 0 && gatewayAddress == null) {
+                                    gatewayAddress = gateway;
                                 } else {
-                                    loge("Non-IPv4 default or duplicate route: " + route);
+                                    loge("Non-IPv4 default or duplicate route: "
+                                            + dest.getAddress());
                                 }
                             }
                         } else if (key.equals(DNS_KEY)) {
-                            staticIpConfiguration.dnsServers.add(
-                                    InetAddresses.parseNumericAddress(in.readUTF()));
+                            dnsServers.add(InetAddresses.parseNumericAddress(in.readUTF()));
                         } else if (key.equals(PROXY_SETTINGS_KEY)) {
                             proxySettings = ProxySettings.valueOf(in.readUTF());
                         } else if (key.equals(PROXY_HOST_KEY)) {
@@ -348,25 +353,31 @@ public class IpConfigStore {
                     }
                 } while (true);
 
+                staticIpConfiguration = new StaticIpConfiguration.Builder()
+                    .setIpAddress(linkAddress)
+                    .setGateway(gatewayAddress)
+                    .setDnsServers(dnsServers)
+                    .build();
+
                 if (uniqueToken != null) {
                     IpConfiguration config = new IpConfiguration();
                     networks.put(uniqueToken, config);
 
                     switch (ipAssignment) {
                         case STATIC:
-                            config.staticIpConfiguration = staticIpConfiguration;
-                            config.ipAssignment = ipAssignment;
+                            config.setStaticIpConfiguration(staticIpConfiguration);
+                            config.setIpAssignment(ipAssignment);
                             break;
                         case DHCP:
-                            config.ipAssignment = ipAssignment;
+                            config.setIpAssignment(ipAssignment);
                             break;
                         case UNASSIGNED:
                             loge("BUG: Found UNASSIGNED IP on file, use DHCP");
-                            config.ipAssignment = IpAssignment.DHCP;
+                            config.setIpAssignment(IpAssignment.DHCP);
                             break;
                         default:
                             loge("Ignore invalid ip assignment while reading.");
-                            config.ipAssignment = IpAssignment.UNASSIGNED;
+                            config.setIpAssignment(IpAssignment.UNASSIGNED);
                             break;
                     }
 
@@ -374,25 +385,25 @@ public class IpConfigStore {
                         case STATIC:
                             ProxyInfo proxyInfo = ProxyInfo.buildDirectProxy(proxyHost, proxyPort,
                                     ProxyUtils.exclusionStringAsList(exclusionList));
-                            config.proxySettings = proxySettings;
-                            config.httpProxy = proxyInfo;
+                            config.setProxySettings(proxySettings);
+                            config.setHttpProxy(proxyInfo);
                             break;
                         case PAC:
                             ProxyInfo proxyPacProperties =
                                     ProxyInfo.buildPacProxy(Uri.parse(pacFileUrl));
-                            config.proxySettings = proxySettings;
-                            config.httpProxy = proxyPacProperties;
+                            config.setProxySettings(proxySettings);
+                            config.setHttpProxy(proxyPacProperties);
                             break;
                         case NONE:
-                            config.proxySettings = proxySettings;
+                            config.setProxySettings(proxySettings);
                             break;
                         case UNASSIGNED:
                             loge("BUG: Found UNASSIGNED proxy on file, use NONE");
-                            config.proxySettings = ProxySettings.NONE;
+                            config.setProxySettings(ProxySettings.NONE);
                             break;
                         default:
                             loge("Ignore invalid proxy settings while reading");
-                            config.proxySettings = ProxySettings.UNASSIGNED;
+                            config.setProxySettings(ProxySettings.UNASSIGNED);
                             break;
                     }
                 } else {

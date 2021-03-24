@@ -218,7 +218,7 @@ public class SystemVibrator extends Vibrator {
 
     @Override
     public boolean[] arePrimitivesSupported(
-            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+            @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
         boolean[] supported = new boolean[primitiveIds.length];
         if (mVibratorManager == null) {
             Log.w(TAG, "Failed to check supported primitives; no vibrator manager.");

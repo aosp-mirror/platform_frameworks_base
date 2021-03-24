@@ -24,6 +24,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.TypedValue;
 
 import java.util.ArrayList;
@@ -38,6 +39,9 @@ public class UdfpsEnrollHelper {
     private static final String SCALE_OVERRIDE =
             "com.android.systemui.biometrics.UdfpsEnrollHelper.scale";
     private static final float SCALE = 0.5f;
+
+    private static final String NEW_COORDS_OVERRIDE =
+            "com.android.systemui.biometrics.UdfpsNewCoords";
 
     // Enroll with two center touches before going to guided enrollment
     private static final int NUM_CENTER_TOUCHES = 2;
@@ -68,21 +72,42 @@ public class UdfpsEnrollHelper {
         // Number of pixels per mm
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 1,
                 context.getResources().getDisplayMetrics());
-
-        mGuidedEnrollmentPoints.add(new PointF( 2.00f * px,  0.00f * px));
-        mGuidedEnrollmentPoints.add(new PointF( 0.87f * px, -2.70f * px));
-        mGuidedEnrollmentPoints.add(new PointF(-1.80f * px, -1.31f * px));
-        mGuidedEnrollmentPoints.add(new PointF(-1.80f * px,  1.31f * px));
-        mGuidedEnrollmentPoints.add(new PointF( 0.88f * px,  2.70f * px));
-        mGuidedEnrollmentPoints.add(new PointF( 3.94f * px, -1.06f * px));
-        mGuidedEnrollmentPoints.add(new PointF( 2.90f * px, -4.14f * px));
-        mGuidedEnrollmentPoints.add(new PointF(-0.52f * px, -5.95f * px));
-        mGuidedEnrollmentPoints.add(new PointF(-3.33f * px, -3.33f * px));
-        mGuidedEnrollmentPoints.add(new PointF(-3.99f * px, -0.35f * px));
-        mGuidedEnrollmentPoints.add(new PointF(-3.62f * px,  2.54f * px));
-        mGuidedEnrollmentPoints.add(new PointF(-1.49f * px,  5.57f * px));
-        mGuidedEnrollmentPoints.add(new PointF( 2.29f * px,  4.92f * px));
-        mGuidedEnrollmentPoints.add(new PointF( 3.82f * px,  1.78f * px));
+        boolean useNewCoords = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                NEW_COORDS_OVERRIDE, 0,
+                UserHandle.USER_CURRENT) != 0;
+        if (useNewCoords && (Build.IS_ENG || Build.IS_USERDEBUG)) {
+            Log.v(TAG, "Using new coordinates");
+            mGuidedEnrollmentPoints.add(new PointF(-0.15f * px, -1.02f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-0.15f * px,  1.02f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 0.29f * px,  0.00f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 2.17f * px, -2.35f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 1.07f * px, -3.96f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-0.37f * px, -4.31f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-1.69f * px, -3.29f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-2.48f * px, -1.23f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-2.48f * px,  1.23f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-1.69f * px,  3.29f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-0.37f * px,  4.31f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 1.07f * px,  3.96f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 2.17f * px,  2.35f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 2.58f * px,  0.00f * px));
+        } else {
+            Log.v(TAG, "Using old coordinates");
+            mGuidedEnrollmentPoints.add(new PointF( 2.00f * px,  0.00f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 0.87f * px, -2.70f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-1.80f * px, -1.31f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-1.80f * px,  1.31f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 0.88f * px,  2.70f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 3.94f * px, -1.06f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 2.90f * px, -4.14f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-0.52f * px, -5.95f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-3.33f * px, -3.33f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-3.99f * px, -0.35f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-3.62f * px,  2.54f * px));
+            mGuidedEnrollmentPoints.add(new PointF(-1.49f * px,  5.57f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 2.29f * px,  4.92f * px));
+            mGuidedEnrollmentPoints.add(new PointF( 3.82f * px,  1.78f * px));
+        }
     }
 
     boolean shouldShowProgressBar() {

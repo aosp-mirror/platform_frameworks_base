@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <android/file_descriptor_jni.h>
+#include <android/multinetwork.h>
 #include <arpa/inet.h>
 #include <linux/filter.h>
 #include <linux/if_arp.h>
@@ -94,14 +95,21 @@ static void android_net_utils_detachBPFFilter(JNIEnv *env, jobject clazz, jobjec
     }
 }
 
-static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)
+static jboolean android_net_utils_bindProcessToNetworkHandle(JNIEnv *env, jobject thiz,
+        jlong netHandle)
 {
-    return (jboolean) !setNetworkForProcess(netId);
+    return (jboolean) !android_setprocnetwork(netHandle);
 }
 
-static jint android_net_utils_getBoundNetworkForProcess(JNIEnv *env, jobject thiz)
+static jlong android_net_utils_getBoundNetworkHandleForProcess(JNIEnv *env, jobject thiz)
 {
-    return getNetworkForProcess();
+    net_handle_t network;
+    if (android_getprocnetwork(&network) != 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                "android_getprocnetwork(): %s", strerror(errno));
+        return NETWORK_UNSPECIFIED;
+    }
+    return (jlong) network;
 }
 
 static jboolean android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *env, jobject thiz,
@@ -255,8 +263,8 @@ static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, j
 // clang-format off
 static const JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
-    { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
-    { "getBoundNetworkForProcess", "()I", (void*) android_net_utils_getBoundNetworkForProcess },
+    { "bindProcessToNetworkHandle", "(J)Z", (void*) android_net_utils_bindProcessToNetworkHandle },
+    { "getBoundNetworkHandleForProcess", "()J", (void*) android_net_utils_getBoundNetworkHandleForProcess },
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
     { "bindSocketToNetwork", "(Ljava/io/FileDescriptor;I)I", (void*) android_net_utils_bindSocketToNetwork },
     { "queryUserAccess", "(II)Z", (void*)android_net_utils_queryUserAccess },

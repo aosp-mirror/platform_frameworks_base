@@ -325,15 +325,15 @@ public interface InputConnection {
 
         CharSequence textBeforeCursor = getTextBeforeCursor(beforeLength, flags);
         if (textBeforeCursor == null) {
-            textBeforeCursor = "";
+            return null;
+        }
+        CharSequence textAfterCursor = getTextAfterCursor(afterLength, flags);
+        if (textAfterCursor == null) {
+            return null;
         }
         CharSequence selectedText = getSelectedText(flags);
         if (selectedText == null) {
             selectedText = "";
-        }
-        CharSequence textAfterCursor = getTextAfterCursor(afterLength, flags);
-        if (textAfterCursor == null) {
-            textAfterCursor = "";
         }
         CharSequence surroundingText =
                 TextUtils.concat(textBeforeCursor, selectedText, textAfterCursor);

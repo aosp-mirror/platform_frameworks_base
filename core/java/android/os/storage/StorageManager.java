@@ -2803,6 +2803,30 @@ public class StorageManager {
         }
     }
 
+    /**
+     * Check if {@code uid} with {@code tid} is blocked on IO for {@code reason}.
+     *
+     * This requires {@link ExternalStorageService} the
+     * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE} permission.
+     *
+     * @param volumeUuid the UUID of the storage volume to check IO blocked status
+     * @param uid the UID of the app to check IO blocked status
+     * @param tid the tid of the app to check IO blocked status
+     * @param reason the reason to check IO blocked status for
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isAppIoBlocked(@NonNull UUID volumeUuid, int uid, int tid,
+            @AppIoBlockedReason int reason) {
+        Objects.requireNonNull(volumeUuid);
+        try {
+            return mStorageManager.isAppIoBlocked(convert(volumeUuid), uid, tid, reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private final Object mFuseAppLoopLock = new Object();
 
     @GuardedBy("mFuseAppLoopLock")

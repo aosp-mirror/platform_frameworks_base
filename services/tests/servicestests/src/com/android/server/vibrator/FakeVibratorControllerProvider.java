@@ -20,6 +20,10 @@ import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.StepSegment;
+import android.os.vibrator.VibrationEffectSegment;
 
 import com.android.server.vibrator.VibratorController.OnVibrationCompleteListener;
 
@@ -37,9 +41,9 @@ final class FakeVibratorControllerProvider {
 
     private static final int EFFECT_DURATION = 20;
 
-    private final Map<Long, VibrationEffect.Prebaked> mEnabledAlwaysOnEffects = new HashMap<>();
-    private final List<VibrationEffect> mEffects = new ArrayList<>();
-    private final List<Integer> mAmplitudes = new ArrayList<>();
+    private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();
+    private final List<VibrationEffectSegment> mEffectSegments = new ArrayList<>();
+    private final List<Float> mAmplitudes = new ArrayList<>();
     private final Handler mHandler;
     private final FakeNativeWrapper mNativeWrapper;
 
@@ -57,85 +61,96 @@ final class FakeVibratorControllerProvider {
         public OnVibrationCompleteListener listener;
         public boolean isInitialized;
 
+        @Override
         public void init(int vibratorId, OnVibrationCompleteListener listener) {
             isInitialized = true;
             this.vibratorId = vibratorId;
             this.listener = listener;
         }
 
+        @Override
         public boolean isAvailable() {
             return mIsAvailable;
         }
 
+        @Override
         public void on(long milliseconds, long vibrationId) {
-            VibrationEffect effect = VibrationEffect.createOneShot(
-                    milliseconds, VibrationEffect.DEFAULT_AMPLITUDE);
-            mEffects.add(effect);
+            mEffectSegments.add(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
+                    /* frequency= */ 0, (int) milliseconds));
             applyLatency();
             scheduleListener(milliseconds, vibrationId);
         }
 
+        @Override
         public void off() {
         }
 
-        public void setAmplitude(int amplitude) {
+        @Override
+        public void setAmplitude(float amplitude) {
             mAmplitudes.add(amplitude);
             applyLatency();
         }
 
+        @Override
         public int[] getSupportedEffects() {
             return mSupportedEffects;
         }
 
+        @Override
         public int[] getSupportedPrimitives() {
             return mSupportedPrimitives;
         }
 
+        @Override
         public float getResonantFrequency() {
             return mResonantFrequency;
         }
 
+        @Override
         public float getQFactor() {
             return mQFactor;
         }
 
+        @Override
         public long perform(long effect, long strength, long vibrationId) {
             if (mSupportedEffects == null
                     || Arrays.binarySearch(mSupportedEffects, (int) effect) < 0) {
                 return 0;
             }
-            mEffects.add(new VibrationEffect.Prebaked((int) effect, false, (int) strength));
+            mEffectSegments.add(new PrebakedSegment((int) effect, false, (int) strength));
             applyLatency();
             scheduleListener(EFFECT_DURATION, vibrationId);
             return EFFECT_DURATION;
         }
 
-        public long compose(VibrationEffect.Composition.PrimitiveEffect[] effect,
-                long vibrationId) {
-            VibrationEffect.Composed composed = new VibrationEffect.Composed(Arrays.asList(effect));
-            mEffects.add(composed);
-            applyLatency();
+        @Override
+        public long compose(PrimitiveSegment[] effects, long vibrationId) {
             long duration = 0;
-            for (VibrationEffect.Composition.PrimitiveEffect e : effect) {
-                duration += EFFECT_DURATION + e.delay;
+            for (PrimitiveSegment primitive : effects) {
+                duration += EFFECT_DURATION + primitive.getDelay();
+                mEffectSegments.add(primitive);
             }
+            applyLatency();
             scheduleListener(duration, vibrationId);
             return duration;
         }
 
+        @Override
         public void setExternalControl(boolean enabled) {
         }
 
+        @Override
         public long getCapabilities() {
             return mCapabilities;
         }
 
+        @Override
         public void alwaysOnEnable(long id, long effect, long strength) {
-            VibrationEffect.Prebaked prebaked = new VibrationEffect.Prebaked((int) effect, false,
-                    (int) strength);
+            PrebakedSegment prebaked = new PrebakedSegment((int) effect, false, (int) strength);
             mEnabledAlwaysOnEffects.put(id, prebaked);
         }
 
+        @Override
         public void alwaysOnDisable(long id) {
             mEnabledAlwaysOnEffects.remove(id);
         }
@@ -222,21 +237,21 @@ final class FakeVibratorControllerProvider {
      * Return the amplitudes set by this controller, including zeroes for each time the vibrator was
      * turned off.
      */
-    public List<Integer> getAmplitudes() {
+    public List<Float> getAmplitudes() {
         return new ArrayList<>(mAmplitudes);
     }
 
-    /** Return list of {@link VibrationEffect} played by this controller, in order. */
-    public List<VibrationEffect> getEffects() {
-        return new ArrayList<>(mEffects);
+    /** Return list of {@link VibrationEffectSegment} played by this controller, in order. */
+    public List<VibrationEffectSegment> getEffectSegments() {
+        return new ArrayList<>(mEffectSegments);
     }
 
     /**
-     * Return the {@link VibrationEffect.Prebaked} effect enabled with given id, or {@code null} if
+     * Return the {@link PrebakedSegment} effect enabled with given id, or {@code null} if
      * missing or disabled.
      */
     @Nullable
-    public VibrationEffect.Prebaked getAlwaysOnEffect(int id) {
+    public PrebakedSegment getAlwaysOnEffect(int id) {
         return mEnabledAlwaysOnEffects.get((long) id);
     }
 }

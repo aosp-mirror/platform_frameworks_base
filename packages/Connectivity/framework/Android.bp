@@ -128,6 +128,7 @@ cc_library_static {
     srcs: [
         "jni/android_net_NetworkUtils.cpp",
     ],
+    shared_libs: ["libandroid_net"],
     apex_available: [
         "//apex_available:platform",
         "com.android.tethering",
@@ -140,6 +141,7 @@ cc_library_shared {
     srcs: [
         "jni/onload.cpp",
     ],
+    shared_libs: ["libandroid"],
     static_libs: ["libconnectivityframeworkutils"],
     apex_available: [
         "//apex_available:platform",

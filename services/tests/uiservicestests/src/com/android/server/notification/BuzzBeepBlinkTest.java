@@ -1688,8 +1688,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
         @Override
         public boolean matches(VibrationEffect actual) {
-            if (actual instanceof VibrationEffect.Waveform &&
-                    ((VibrationEffect.Waveform) actual).getRepeatIndex() == mRepeatIndex) {
+            if (actual instanceof VibrationEffect.Composed
+                    && ((VibrationEffect.Composed) actual).getRepeatIndex() == mRepeatIndex) {
                 return true;
             }
             // All non-waveform effects are essentially one shots.

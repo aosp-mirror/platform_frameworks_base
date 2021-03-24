@@ -630,7 +630,7 @@ public class SubscriptionManager {
                     D2D_SHARING_STARRED_CONTACTS,
                     D2D_SHARING_ALL
             })
-    public @interface DeviceToDeviceStatusSharing {}
+    public @interface DeviceToDeviceStatusSharingPreference {}
 
     /**
      * TelephonyProvider column name for device to device sharing status.
@@ -3415,29 +3415,31 @@ public class SubscriptionManager {
      * app uses this method to indicate with whom they wish to share device to device status
      * information.
      * @param sharing the status sharing preference
-     * @param subId the unique Subscription ID in database
+     * @param subscriptionId the unique Subscription ID in database
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDeviceToDeviceStatusSharing(@DeviceToDeviceStatusSharing int sharing,
-            int subId) {
+    public void setDeviceToDeviceStatusSharingPreference(
+            @DeviceToDeviceStatusSharingPreference int sharing, int subscriptionId) {
         if (VDBG) {
-            logd("[setDeviceToDeviceStatusSharing] + sharing: " + sharing + " subId: " + subId);
+            logd("[setDeviceToDeviceStatusSharing] + sharing: " + sharing + " subId: "
+                    + subscriptionId);
         }
-        setSubscriptionPropertyHelper(subId, "setDeviceToDeviceSharingStatus",
-                (iSub)->iSub.setDeviceToDeviceStatusSharing(sharing, subId));
+        setSubscriptionPropertyHelper(subscriptionId, "setDeviceToDeviceSharingStatus",
+                (iSub)->iSub.setDeviceToDeviceStatusSharing(sharing, subscriptionId));
     }
 
     /**
      * Returns the user-chosen device to device status sharing preference
-     * @param subId Subscription id of subscription
+     * @param subscriptionId Subscription id of subscription
      * @return The device to device status sharing preference
      */
-    public @DeviceToDeviceStatusSharing int getDeviceToDeviceStatusSharing(int subId) {
+    public @DeviceToDeviceStatusSharingPreference int getDeviceToDeviceStatusSharingPreference(
+            int subscriptionId) {
         if (VDBG) {
-            logd("[getDeviceToDeviceStatusSharing] + subId: " + subId);
+            logd("[getDeviceToDeviceStatusSharing] + subId: " + subscriptionId);
         }
-        return getIntegerSubscriptionProperty(subId, D2D_STATUS_SHARING, D2D_SHARING_DISABLED,
-                mContext);
+        return getIntegerSubscriptionProperty(subscriptionId, D2D_STATUS_SHARING,
+                D2D_SHARING_DISABLED, mContext);
     }
 
     /**

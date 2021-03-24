@@ -1481,17 +1481,6 @@ please see styles_device_defaults.xml.
         <item name="android:windowExitAnimation">@anim/slide_out_down</item>
     </style>
 
-    <!-- The style for the container of media actions in a notification. -->
-    <!-- @hide -->
-    <style name="NotificationMediaActionContainer">
-        <item name="layout_width">wrap_content</item>
-        <item name="layout_height">wrap_content</item>
-        <item name="layout_marginTop">-21dp</item>
-        <item name="paddingStart">8dp</item>
-        <item name="paddingBottom">@dimen/media_notification_actions_padding_bottom</item>
-        <item name="gravity">top</item>
-    </style>
-
     <!-- The style for normal action button on notification -->
     <style name="NotificationAction" parent="Widget.Material.Light.Button.Borderless.Small">
       <item name="textColor">@color/notification_action_button_text_color</item>

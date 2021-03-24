@@ -22,7 +22,6 @@ import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.ACTION_USER_STOPPED;
 import static android.content.Intent.ACTION_USER_UNLOCKED;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
-import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -76,11 +75,11 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.telephony.CarrierConfigManager;
-import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseArray;
@@ -107,6 +106,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.RingerModeTracker;
 
@@ -290,6 +290,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mDeviceInteractive;
     private boolean mScreenOn;
     private SubscriptionManager mSubscriptionManager;
+    private final TelephonyListenerManager mTelephonyListenerManager;
     private List<SubscriptionInfo> mSubscriptionInfo;
     private TrustManager mTrustManager;
     private UserManager mUserManager;
@@ -358,7 +359,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             };
 
     @VisibleForTesting
-    public PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+    public TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener =
+            new TelephonyCallback.ActiveDataSubscriptionIdListener() {
         @Override
         public void onActiveDataSubscriptionIdChanged(int subId) {
             mActiveMobileDataSubscription = subId;
@@ -1614,9 +1616,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             StatusBarStateController statusBarStateController,
             LockPatternUtils lockPatternUtils,
             AuthController authController,
+            TelephonyListenerManager telephonyListenerManager,
             FeatureFlags featureFlags) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
+        mTelephonyListenerManager = telephonyListenerManager;
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged);
         mBackgroundExecutor = backgroundExecutor;
@@ -1865,8 +1869,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mTelephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (mTelephonyManager != null) {
-            mTelephonyManager.listen(mPhoneStateListener,
-                    LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
+            mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
             // Set initial sim states values.
             for (int slot = 0; slot < mTelephonyManager.getActiveModemCount(); slot++) {
                 int state = mTelephonyManager.getSimState(slot);
@@ -3123,7 +3126,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         TelephonyManager telephony =
                 (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephony != null) {
-            telephony.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+            mTelephonyListenerManager.removeActiveDataSubscriptionIdListener(mPhoneStateListener);
         }
 
         mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionListener);

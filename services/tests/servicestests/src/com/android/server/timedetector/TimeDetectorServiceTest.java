@@ -217,20 +217,20 @@ public class TimeDetectorServiceTest {
             fail();
         } finally {
             verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.SET_TIME), anyString());
+                    eq(android.Manifest.permission.SUGGEST_EXTERNAL_TIME), anyString());
         }
     }
 
     @Test
     public void testSuggestExternalTime() throws Exception {
-        doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
+        doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
 
         ExternalTimeSuggestion externalTimeSuggestion = createExternalTimeSuggestion();
         mTimeDetectorService.suggestExternalTime(externalTimeSuggestion);
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.SET_TIME), anyString());
+                eq(android.Manifest.permission.SUGGEST_EXTERNAL_TIME), anyString());
 
         mTestHandler.waitForMessagesToBeProcessed();
         mStubbedTimeDetectorStrategy.verifySuggestExternalTimeCalled(externalTimeSuggestion);

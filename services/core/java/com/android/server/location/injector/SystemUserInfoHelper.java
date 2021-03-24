@@ -155,6 +155,11 @@ public class SystemUserInfoHelper extends UserInfoHelper {
      */
     @Override
     public void dump(FileDescriptor fd, IndentingPrintWriter pw, String[] args) {
+        int[] runningUserIds = getRunningUserIds();
+        if (runningUserIds.length > 1) {
+            pw.println("running users: u" + Arrays.toString(runningUserIds));
+        }
+
         ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
         if (activityManagerInternal == null) {
             return;

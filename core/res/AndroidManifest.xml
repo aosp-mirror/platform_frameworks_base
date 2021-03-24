@@ -1388,6 +1388,14 @@
         android:backgroundPermission="android.permission.BACKGROUND_CAMERA"
         android:protectionLevel="dangerous|instant" />
 
+    <!-- Required to be able to discover and connect to nearby Bluetooth devices.
+         <p>Protection level: dangerous -->
+    <permission-group android:name="android.permission-group.NEARBY_DEVICES"
+        android:icon="@drawable/ic_qs_bluetooth"
+        android:label="@string/permgrouplab_nearby_devices"
+        android:description="@string/permgroupdesc_nearby_devices"
+        android:priority="750" />
+
     <!-- @SystemApi @TestApi Required to be able to access the camera device in the background.
          This permission is not intended to be held by apps.
          <p>Protection level: internal
@@ -1930,6 +1938,22 @@
         android:label="@string/permlab_bluetooth"
         android:protectionLevel="normal" />
 
+    <!-- Required to be able to discover and pair nearby Bluetooth devices.
+         <p>Protection level: dangerous -->
+    <permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:description="@string/permdesc_bluetooth_scan"
+        android:label="@string/permlab_bluetooth_scan"
+        android:protectionLevel="dangerous" />
+
+    <!-- Required to be able to connect to paired Bluetooth devices.
+         <p>Protection level: dangerous -->
+    <permission android:name="android.permission.BLUETOOTH_CONNECT"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:description="@string/permdesc_bluetooth_connect"
+        android:label="@string/permlab_bluetooth_connect"
+        android:protectionLevel="dangerous" />
+
     <!-- @SystemApi @TestApi Allows an application to suspend other apps, which will prevent the
          user from using them until they are unsuspended.
          @hide
@@ -1961,6 +1985,12 @@
          @hide This should only be used by Bluetooth apk.
     -->
     <permission android:name="android.permission.BLUETOOTH_STACK"
+        android:protectionLevel="signature" />
+
+    <!-- Allows uhid write access for creating virtual input devices
+         @hide
+    -->
+    <permission android:name="android.permission.VIRTUAL_INPUT_DEVICE"
         android:protectionLevel="signature" />
 
     <!-- Allows applications to perform I/O operations over NFC.
@@ -2939,6 +2969,15 @@
     <permission android:name="android.permission.SUGGEST_MANUAL_TIME_AND_ZONE"
         android:protectionLevel="signature" />
 
+    <!-- Allows system clock time suggestions from an external clock / time source to be made.
+         The nature of "external" could be highly form-factor specific. Example, times
+         obtained via the VHAL for Android Auto OS.
+         <p>Not for use by third-party applications.
+         @SystemApi @hide
+    -->
+    <permission android:name="android.permission.SUGGEST_EXTERNAL_TIME"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows applications like settings to manage configuration associated with automatic time
          and time zone detection.
          <p>Not for use by third-party applications.
@@ -3554,7 +3593,7 @@
          @hide
     -->
     <permission android:name="android.permission.GET_TOP_ACTIVITY_INFO"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|recents" />
 
     <!-- Allows an application to retrieve the current state of keys and
          switches.
@@ -4910,6 +4949,11 @@
          <p>Not for use by third-party applications. @hide -->
     <permission android:name="android.permission.SET_INITIAL_LOCK"
         android:protectionLevel="signature|setup"/>
+
+    <!-- @TestApi Allows applications to set and verify lockscreen credentials.
+        @hide -->
+    <permission android:name="android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS"
+                android:protectionLevel="signature"/>
 
     <!-- Allows managing (adding, removing) fingerprint templates. Reserved for the system. @hide -->
     <permission android:name="android.permission.MANAGE_FINGERPRINT"

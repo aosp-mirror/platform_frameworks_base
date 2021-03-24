@@ -81,6 +81,7 @@ enum {
     EVENT_CALLBACK = 1,
     EVENT_SET_CALLBACK = 2,
     EVENT_FRAME_RENDERED = 3,
+    EVENT_FIRST_TUNNEL_FRAME_READY = 4,
 };
 
 static struct CryptoErrorCodes {
@@ -267,6 +268,18 @@ JMediaCodec::~JMediaCodec() {
     mObject = NULL;
     env->DeleteGlobalRef(mClass);
     mClass = NULL;
+}
+
+status_t JMediaCodec::enableOnFirstTunnelFrameReadyListener(jboolean enable) {
+    if (enable) {
+        if (mOnFirstTunnelFrameReadyNotification == NULL) {
+            mOnFirstTunnelFrameReadyNotification = new AMessage(kWhatFirstTunnelFrameReady, this);
+        }
+    } else {
+        mOnFirstTunnelFrameReadyNotification.clear();
+    }
+
+    return mCodec->setOnFirstTunnelFrameReadyNotification(mOnFirstTunnelFrameReadyNotification);
 }
 
 status_t JMediaCodec::enableOnFrameRenderedListener(jboolean enable) {
@@ -1058,6 +1071,27 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
     env->DeleteLocalRef(obj);
 }
 
+void JMediaCodec::handleFirstTunnelFrameReadyNotification(const sp<AMessage> &msg) {
+    int32_t arg1 = 0, arg2 = 0;
+    jobject obj = NULL;
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+    sp<AMessage> data;
+    CHECK(msg->findMessage("data", &data));
+
+    status_t err = ConvertMessageToMap(env, data, &obj);
+    if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    env->CallVoidMethod(
+            mObject, gFields.postEventFromNativeID,
+            EVENT_FIRST_TUNNEL_FRAME_READY, arg1, arg2, obj);
+
+    env->DeleteLocalRef(obj);
+}
+
 void JMediaCodec::handleFrameRenderedNotification(const sp<AMessage> &msg) {
     int32_t arg1 = 0, arg2 = 0;
     jobject obj = NULL;
@@ -1098,6 +1132,11 @@ void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                 mLooper->stop();
                 mLooper.clear();
             }
+            break;
+        }
+        case kWhatFirstTunnelFrameReady:
+        {
+            handleFirstTunnelFrameReadyNotification(msg);
             break;
         }
         default:
@@ -1254,6 +1293,22 @@ static jint throwExceptionAsNecessary(
             throwCodecException(env, err, actionCode, msg);
             return 0;
     }
+}
+
+static void android_media_MediaCodec_native_enableOnFirstTunnelFrameReadyListener(
+        JNIEnv *env,
+        jobject thiz,
+        jboolean enabled) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    status_t err = codec->enableOnFirstTunnelFrameReadyListener(enabled);
+
+    throwExceptionAsNecessary(env, err);
 }
 
 static void android_media_MediaCodec_native_enableOnFrameRenderedListener(
@@ -3137,6 +3192,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_setInputSurface", "(Landroid/view/Surface;)V",
       (void *)android_media_MediaCodec_setInputSurface },
+
+    { "native_enableOnFirstTunnelFrameReadyListener", "(Z)V",
+      (void *)android_media_MediaCodec_native_enableOnFirstTunnelFrameReadyListener },
 
     { "native_enableOnFrameRenderedListener", "(Z)V",
       (void *)android_media_MediaCodec_native_enableOnFrameRenderedListener },

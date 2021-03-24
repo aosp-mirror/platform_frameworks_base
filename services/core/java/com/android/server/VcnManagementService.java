@@ -820,8 +820,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
             final IBinder cbBinder = callback.asBinder();
             final VcnStatusCallbackInfo cbInfo =
-                    new VcnStatusCallbackInfo(
-                            subGroup, callback, opPkgName, mDeps.getBinderCallingUid());
+                    new VcnStatusCallbackInfo(subGroup, callback, opPkgName, callingUid);
 
             try {
                 cbBinder.linkToDeath(cbInfo, 0 /* flags */);
