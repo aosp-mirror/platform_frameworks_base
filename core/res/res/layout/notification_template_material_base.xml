@@ -46,20 +46,6 @@
         android:padding="@dimen/notification_icon_circle_padding"
         />
 
-    <ImageView
-        android:id="@+id/right_icon"
-        android:layout_width="@dimen/notification_right_icon_size"
-        android:layout_height="@dimen/notification_right_icon_size"
-        android:layout_gravity="center_vertical|end"
-        android:layout_marginTop="@dimen/notification_right_icon_headerless_margin"
-        android:layout_marginBottom="@dimen/notification_right_icon_headerless_margin"
-        android:layout_marginEnd="@dimen/notification_header_expand_icon_size"
-        android:background="@drawable/notification_large_icon_outline"
-        android:clipToOutline="true"
-        android:importantForAccessibility="no"
-        android:scaleType="centerCrop"
-        />
-
     <FrameLayout
         android:id="@+id/alternate_expand_target"
         android:layout_width="@dimen/notification_content_margin_start"
@@ -68,94 +54,115 @@
         android:importantForAccessibility="no"
         />
 
-    <FrameLayout
-        android:id="@+id/expand_button_touch_container"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="end">
-
-        <include layout="@layout/notification_expand_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            />
-
-    </FrameLayout>
-
     <LinearLayout
-        android:id="@+id/notification_headerless_view_column"
+        android:id="@+id/notification_headerless_view_row"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="@dimen/notification_headerless_margin_twoline"
-        android:layout_marginTop="@dimen/notification_headerless_margin_twoline"
-        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/notification_content_margin_start"
+        android:orientation="horizontal"
         >
 
-        <!-- extends ViewGroup -->
-        <NotificationTopLineView
-            android:id="@+id/notification_top_line"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/notification_headerless_line_height"
-            android:layout_marginEnd="@dimen/notification_heading_margin_end"
-            android:layout_marginStart="@dimen/notification_content_margin_start"
-            android:clipChildren="false"
-            android:theme="@style/Theme.DeviceDefault.Notification"
-            >
-
-            <!--
-            NOTE: The notification_top_line_views layout contains the app_name_text.
-            In order to include the title view at the beginning, the Notification.Builder
-            has logic to hide that view whenever this title view is to be visible.
-            -->
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/notification_header_separating_margin"
-                android:ellipsize="marquee"
-                android:fadingEdge="horizontal"
-                android:singleLine="true"
-                android:textAlignment="viewStart"
-                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
-                />
-
-            <include layout="@layout/notification_top_line_views" />
-
-        </NotificationTopLineView>
-
         <LinearLayout
-            android:id="@+id/notification_main_column"
-            android:layout_width="match_parent"
+            android:id="@+id/notification_headerless_view_column"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/notification_heading_margin_end"
-            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:layout_marginBottom="@dimen/notification_headerless_margin_twoline"
+            android:layout_marginTop="@dimen/notification_headerless_margin_twoline"
             android:orientation="vertical"
             >
 
-            <com.android.internal.widget.NotificationVanishingFrameLayout
-                android:layout_width="match_parent"
+            <NotificationTopLineView
+                android:id="@+id/notification_top_line"
+                android:layout_width="wrap_content"
                 android:layout_height="@dimen/notification_headerless_line_height"
+                android:clipChildren="false"
+                android:theme="@style/Theme.DeviceDefault.Notification"
                 >
-                <!-- This is the simplest way to keep this text vertically centered without using
-                 gravity="center_vertical" which causes jumpiness in expansion animations. -->
-                <include
-                    layout="@layout/notification_template_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/notification_text_height"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="0dp"
-                    />
-            </com.android.internal.widget.NotificationVanishingFrameLayout>
 
-            <include
-                layout="@layout/notification_template_progress"
+                <!--
+                NOTE: The notification_top_line_views layout contains the app_name_text.
+                In order to include the title view at the beginning, the Notification.Builder
+                has logic to hide that view whenever this title view is to be visible.
+                -->
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/notification_header_separating_margin"
+                    android:ellipsize="marquee"
+                    android:fadingEdge="horizontal"
+                    android:singleLine="true"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
+                    />
+
+                <include layout="@layout/notification_top_line_views" />
+
+            </NotificationTopLineView>
+
+            <LinearLayout
+                android:id="@+id/notification_main_column"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/notification_headerless_line_height"
-                />
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+
+                <com.android.internal.widget.NotificationVanishingFrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/notification_headerless_line_height"
+                    >
+                    <!-- This is the simplest way to keep this text vertically centered without
+                     gravity="center_vertical" which causes jumpiness in expansion animations. -->
+                    <include
+                        layout="@layout/notification_template_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/notification_text_height"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop="0dp"
+                        />
+                </com.android.internal.widget.NotificationVanishingFrameLayout>
+
+                <include
+                    layout="@layout/notification_template_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/notification_headerless_line_height"
+                    />
+
+            </LinearLayout>
 
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/right_icon"
+            android:layout_width="@dimen/notification_right_icon_size"
+            android:layout_height="@dimen/notification_right_icon_size"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginTop="@dimen/notification_right_icon_headerless_margin"
+            android:layout_marginBottom="@dimen/notification_right_icon_headerless_margin"
+            android:layout_marginStart="@dimen/notification_right_icon_content_margin"
+            android:background="@drawable/notification_large_icon_outline"
+            android:clipToOutline="true"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            />
+
+        <FrameLayout
+            android:id="@+id/expand_button_touch_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:minWidth="@dimen/notification_content_margin_end"
+            >
+
+            <include layout="@layout/notification_expand_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                />
+
+        </FrameLayout>
 
     </LinearLayout>
 

@@ -285,6 +285,7 @@ LIBANDROID {
     ATrace_endAsyncSection; # introduced=29
     ATrace_setCounter; # introduced=29
     android_getaddrinfofornetwork; # introduced=23
+    android_getprocnetwork; # introduced=31
     android_setprocnetwork; # introduced=23
     android_setsocknetwork; # introduced=23
     android_res_cancel; # introduced=29

@@ -54,11 +54,11 @@ import java.util.concurrent.Executor;
 public class KeyguardDisplayManagerTest extends SysuiTestCase {
 
     @Mock
+    private NavigationBarController mNavigationBarController;
+    @Mock
     private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
-
     @Mock
     private DisplayManager mDisplayManager;
-
     @Mock
     private KeyguardDisplayManager.KeyguardPresentation mKeyguardPresentation;
 
@@ -76,9 +76,8 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
-        mDependency.injectMockDependency(NavigationBarController.class);
-        mManager = spy(new KeyguardDisplayManager(mContext, mKeyguardStatusViewComponentFactory,
-                mBackgroundExecutor));
+        mManager = spy(new KeyguardDisplayManager(mContext, () -> mNavigationBarController,
+                mKeyguardStatusViewComponentFactory, mBackgroundExecutor));
         doReturn(mKeyguardPresentation).when(mManager).createPresentation(any());
 
         mDefaultDisplay = new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,

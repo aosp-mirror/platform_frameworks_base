@@ -328,6 +328,7 @@ public class PeopleSpaceWidgetManager {
                     .setNotificationKey(null)
                     .setNotificationContent(null)
                     .setNotificationDataUri(null)
+                    .setMessagesCount(0)
                     // Reset missed calls category.
                     .setNotificationCategory(null)
                     .build();

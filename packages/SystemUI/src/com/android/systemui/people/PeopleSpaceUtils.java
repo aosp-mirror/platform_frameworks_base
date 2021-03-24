@@ -274,13 +274,17 @@ public class PeopleSpaceUtils {
             return tile;
         }
         boolean isMissedCall = Objects.equals(notification.category, CATEGORY_MISSED_CALL);
-        Notification.MessagingStyle.Message message = getLastMessagingStyleMessage(notification);
+        List<Notification.MessagingStyle.Message> messages =
+                getMessagingStyleMessages(notification);
 
-        if (!isMissedCall && message == null) {
+        if (!isMissedCall && ArrayUtils.isEmpty(messages)) {
             if (DEBUG) Log.d(TAG, "Notification has no content");
             return tile;
         }
 
+        // messages are in chronological order from most recent to least.
+        Notification.MessagingStyle.Message message = messages != null ? messages.get(0) : null;
+        int messagesCount = messages != null ? messages.size() : 0;
         // If it's a missed call notification and it doesn't include content, use fallback value,
         // otherwise, use notification content.
         boolean hasMessageText = message != null && !TextUtils.isEmpty(message.getText());
@@ -294,12 +298,16 @@ public class PeopleSpaceUtils {
                 .setNotificationCategory(notification.category)
                 .setNotificationContent(content)
                 .setNotificationDataUri(dataUri)
+                .setMessagesCount(messagesCount)
                 .build();
     }
 
-    /** Gets the most recent {@link Notification.MessagingStyle.Message} from the notification. */
+    /**
+     * Returns {@link Notification.MessagingStyle.Message}s from the Notification in chronological
+     * order from most recent to least.
+     */
     @VisibleForTesting
-    public static Notification.MessagingStyle.Message getLastMessagingStyleMessage(
+    public static List<Notification.MessagingStyle.Message> getMessagingStyleMessages(
             Notification notification) {
         if (notification == null) {
             return null;
@@ -312,7 +320,7 @@ public class PeopleSpaceUtils {
                         Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
                 sortedMessages.sort(Collections.reverseOrder(
                         Comparator.comparing(Notification.MessagingStyle.Message::getTimestamp)));
-                return sortedMessages.get(0);
+                return sortedMessages;
             }
         }
         return null;

@@ -18,6 +18,7 @@ package com.android.server.job;
 
 import android.annotation.NonNull;
 import android.app.job.JobInfo;
+import android.app.job.JobParameters;
 import android.util.proto.ProtoOutputStream;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public interface JobSchedulerInternal {
     /**
      * Cancel the jobs for a given uid (e.g. when app data is cleared)
      */
-    void cancelJobsForUid(int uid, String reason);
+    void cancelJobsForUid(int uid, @JobParameters.StopReason int reason, String debugReason);
 
     /**
      * These are for activity manager to communicate to use what is currently performing backups.

@@ -300,9 +300,8 @@ class ProcessErrorStateRecord {
         }
 
         // Check if package is still being loaded
-        boolean isIncremental = false;
         float loadingProgress = 1;
-        long millisSinceOldestPendingRead = 0;
+        IncrementalMetrics incrementalMetrics = null;
         final PackageManagerInternal packageManagerInternal = mService.getPackageManagerInternal();
         if (aInfo != null && aInfo.packageName != null) {
             IncrementalStatesInfo incrementalStatesInfo =
@@ -312,8 +311,7 @@ class ProcessErrorStateRecord {
                 loadingProgress = incrementalStatesInfo.getProgress();
             }
             final String codePath = aInfo.getCodePath();
-            isIncremental = IncrementalManager.isIncrementalPath(codePath);
-            if (isIncremental) {
+            if (IncrementalManager.isIncrementalPath(codePath)) {
                 // Report in the main log that the incremental package is still loading
                 Slog.e(TAG, "App crashed on incremental package " + aInfo.packageName
                         + " which is " + ((int) (loadingProgress * 100)) + "% loaded.");
@@ -322,8 +320,7 @@ class ProcessErrorStateRecord {
                 if (incrementalService != null) {
                     final IncrementalManager incrementalManager = new IncrementalManager(
                             IIncrementalService.Stub.asInterface(incrementalService));
-                    IncrementalMetrics metrics = incrementalManager.getMetrics(codePath);
-                    millisSinceOldestPendingRead = metrics.getMillisSinceOldestPendingRead();
+                    incrementalMetrics = incrementalManager.getMetrics(codePath);
                 }
             }
         }
@@ -345,7 +342,7 @@ class ProcessErrorStateRecord {
             info.append("Parent: ").append(parentShortComponentName).append("\n");
         }
 
-        if (isIncremental) {
+        if (incrementalMetrics != null) {
             // Report in the main log about the incremental package
             info.append("Package is ").append((int) (loadingProgress * 100)).append("% loaded.\n");
         }
@@ -434,12 +431,14 @@ class ProcessErrorStateRecord {
                         : FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND,
                 mApp.getProcessClassEnum(),
                 (mApp.info != null) ? mApp.info.packageName : "",
-                isIncremental, loadingProgress, millisSinceOldestPendingRead);
+                incrementalMetrics != null /* isIncremental */, loadingProgress,
+                incrementalMetrics != null ? incrementalMetrics.getMillisSinceOldestPendingRead()
+                        : -1);
         final ProcessRecord parentPr = parentProcess != null
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", mApp, mApp.processName, activityShortComponentName,
                 parentShortComponentName, parentPr, annotation, report.toString(), tracesFile,
-                null);
+                null, new Float(loadingProgress), incrementalMetrics);
 
         if (mApp.getWindowProcessController().appNotResponding(info.toString(),
                 () -> {

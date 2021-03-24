@@ -130,11 +130,11 @@ public class EdgeEffect {
     public @interface EdgeEffectType {
     }
 
-    private static final float LINEAR_STRETCH_INTENSITY = 0.03f;
+    private static final float LINEAR_STRETCH_INTENSITY = 0.06f;
 
-    private static final float EXP_STRETCH_INTENSITY = 0.02f;
+    private static final float EXP_STRETCH_INTENSITY = 0.06f;
 
-    private static final float SCROLL_DIST_AFFECTED_BY_EXP_STRETCH = 0.4f;
+    private static final float SCROLL_DIST_AFFECTED_BY_EXP_STRETCH = 0.33f;
 
     @SuppressWarnings("UnusedDeclaration")
     private static final String TAG = "EdgeEffect";

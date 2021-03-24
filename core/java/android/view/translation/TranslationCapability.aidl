@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.server.timezonedetector.location;
+package android.view.translation;
 
-import android.annotation.NonNull;
-
-import com.android.i18n.timezone.ZoneInfoDb;
-
-class ZoneInfoDbTimeZoneIdValidator implements
-        LocationTimeZoneProvider.TimeZoneIdValidator {
-
-    @Override
-    public boolean isValid(@NonNull String timeZoneId) {
-        return ZoneInfoDb.getInstance().hasTimeZone(timeZoneId);
-    }
-}
+parcelable TranslationCapability;

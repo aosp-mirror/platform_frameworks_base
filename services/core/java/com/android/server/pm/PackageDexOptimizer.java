@@ -260,7 +260,8 @@ public class PackageDexOptimizer {
 
                 // Only report metrics for base apk for now.
                 // TODO: add ISA and APK type to metrics.
-                if (pkg.getBaseApkPath().equals(path)) {
+                // OTAPreopt doesn't have stats so don't report in that case.
+                if (pkg.getBaseApkPath().equals(path) && packageStats != null) {
                     Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
                     try {
                         long sessionId = Math.randomLongInternal();

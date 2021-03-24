@@ -291,7 +291,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                                 mSensors.get(sensorId).getLazySession(), userId,
                                 mContext.getOpPackageName(), sensorId,
                                 mSensors.get(sensorId).getAuthenticatorIds());
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling loadAuthenticatorId"
                         + ", sensorId: " + sensorId
@@ -305,7 +305,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final InvalidationRequesterClient<Fingerprint> client =
                     new InvalidationRequesterClient<>(mContext, userId, sensorId,
                             FingerprintUtils.getInstance(sensorId));
-            mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -458,7 +458,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         mSensors.get(sensorId).getLazySession(), token, callback, userId,
                         opPackageName, sensorId, mUdfpsOverlayController, isStrongBiometric,
                         statsClient);
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling finger detect", e);
             }
@@ -492,7 +492,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
                         mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
                         mUdfpsOverlayController, allowBackgroundAuthentication);
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling authenticate", e);
             }
@@ -554,7 +554,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         new ClientMonitorCallbackConverter(receiver), fingerprintIds, userId,
                         opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                         mSensors.get(sensorId).getAuthenticatorIds());
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling remove", e);
             }
@@ -583,7 +583,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                                 mContext.getOpPackageName(), sensorId, enrolledList,
                                 FingerprintUtils.getInstance(sensorId),
                                 mSensors.get(sensorId).getAuthenticatorIds());
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client, callback);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling internal cleanup", e);
             }
@@ -627,7 +627,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         new FingerprintInvalidationClient(mContext,
                                 mSensors.get(sensorId).getLazySession(), userId, sensorId,
                                 mSensors.get(sensorId).getAuthenticatorIds(), callback);
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                scheduleForSensor(sensorId, client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception", e);
             }

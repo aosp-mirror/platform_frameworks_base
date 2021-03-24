@@ -37,7 +37,6 @@ import android.widget.ImageView;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 
@@ -86,10 +85,10 @@ public class KeyguardSimPukViewController
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
             TelephonyManager telephonyManager, FalsingCollector falsingCollector,
-            boolean isNewLayoutEnabled) {
+            EmergencyButtonController emergencyButtonController, boolean isNewLayoutEnabled) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                falsingCollector);
+                emergencyButtonController, falsingCollector);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mTelephonyManager = telephonyManager;
         mSimImageView = mView.findViewById(R.id.keyguard_sim);
@@ -198,8 +197,7 @@ public class KeyguardSimPukViewController
         if (count < 2) {
             msg = rez.getString(R.string.kg_puk_enter_puk_hint);
         } else {
-            SubscriptionInfo info = Dependency.get(KeyguardUpdateMonitor.class)
-                    .getSubscriptionInfoForSubId(mSubId);
+            SubscriptionInfo info = mKeyguardUpdateMonitor.getSubscriptionInfoForSubId(mSubId);
             CharSequence displayName = info != null ? info.getDisplayName() : "";
             msg = rez.getString(R.string.kg_puk_enter_puk_hint_multi, displayName);
             if (info != null) {

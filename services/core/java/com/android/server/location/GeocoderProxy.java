@@ -24,6 +24,7 @@ import android.location.IGeocodeProvider;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.android.server.servicewatcher.CurrentUserServiceSupplier;
 import com.android.server.servicewatcher.ServiceWatcher;
 
 import java.util.Collections;
@@ -54,9 +55,11 @@ public class GeocoderProxy {
     private final ServiceWatcher mServiceWatcher;
 
     private GeocoderProxy(Context context) {
-        mServiceWatcher = new ServiceWatcher(context, SERVICE_ACTION, null, null,
-                com.android.internal.R.bool.config_enableGeocoderOverlay,
-                com.android.internal.R.string.config_geocoderProviderPackageName);
+        mServiceWatcher = ServiceWatcher.create(context, "GeocoderProxy",
+                new CurrentUserServiceSupplier(context, SERVICE_ACTION,
+                        com.android.internal.R.bool.config_enableGeocoderOverlay,
+                        com.android.internal.R.string.config_geocoderProviderPackageName),
+                null);
     }
 
     private boolean register() {
@@ -72,7 +75,7 @@ public class GeocoderProxy {
      */
     public void getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, IGeocodeListener listener) {
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
+        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderOperation() {
             @Override
             public void run(IBinder binder) throws RemoteException {
                 IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
@@ -97,7 +100,7 @@ public class GeocoderProxy {
             double lowerLeftLatitude, double lowerLeftLongitude,
             double upperRightLatitude, double upperRightLongitude, int maxResults,
             GeocoderParams params, IGeocodeListener listener) {
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
+        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderOperation() {
             @Override
             public void run(IBinder binder) throws RemoteException {
                 IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);

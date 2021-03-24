@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * The {@link Translator} for translation, defined by a source and a dest {@link TranslationSpec}.
+ * The {@link Translator} for translation, defined by a {@link TranslationContext}.
  */
 @SuppressLint("NotCloseable")
 public class Translator {
@@ -62,10 +62,7 @@ public class Translator {
     private final Context mContext;
 
     @NonNull
-    private final TranslationSpec mSourceSpec;
-
-    @NonNull
-    private final TranslationSpec mDestSpec;
+    private final TranslationContext mTranslationContext;
 
     @NonNull
     private final TranslationManager mManager;
@@ -164,13 +161,11 @@ public class Translator {
      * @hide
      */
     public Translator(@NonNull Context context,
-            @NonNull TranslationSpec sourceSpec,
-            @NonNull TranslationSpec destSpec, int sessionId,
+            @NonNull TranslationContext translationContext, int sessionId,
             @NonNull TranslationManager translationManager, @NonNull Handler handler,
             @Nullable ITranslationManager systemServerBinder) {
         mContext = context;
-        mSourceSpec = sourceSpec;
-        mDestSpec = destSpec;
+        mTranslationContext = translationContext;
         mId = sessionId;
         mManager = translationManager;
         mHandler = handler;
@@ -183,7 +178,7 @@ public class Translator {
      */
     void start() {
         try {
-            mSystemServerBinder.onSessionCreated(mSourceSpec, mDestSpec, mId,
+            mSystemServerBinder.onSessionCreated(mTranslationContext, mId,
                     mServiceBinderReceiver, mContext.getUserId());
         } catch (RemoteException e) {
             Log.w(TAG, "RemoteException calling startSession(): " + e);
@@ -223,8 +218,7 @@ public class Translator {
 
     /** @hide */
     public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
-        pw.print(prefix); pw.print("sourceSpec: "); pw.println(mSourceSpec);
-        pw.print(prefix); pw.print("destSpec: "); pw.println(mDestSpec);
+        pw.print(prefix); pw.print("translationContext: "); pw.println(mTranslationContext);
     }
 
     /**

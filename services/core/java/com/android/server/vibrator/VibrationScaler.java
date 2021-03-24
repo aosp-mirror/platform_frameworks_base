@@ -18,15 +18,12 @@ package com.android.server.vibrator;
 
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
-import android.os.CombinedVibrationEffect;
 import android.os.IExternalVibratorService;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.vibrator.PrebakedSegment;
 import android.util.Slog;
 import android.util.SparseArray;
-
-import java.util.List;
-import java.util.Objects;
 
 /** Controls vibration scaling. */
 final class VibrationScaler {
@@ -90,43 +87,6 @@ final class VibrationScaler {
     }
 
     /**
-     * Scale a {@link CombinedVibrationEffect} based on the given usage hint for this vibration.
-     *
-     * @param combinedEffect the effect to be scaled
-     * @param usageHint      one of VibrationAttributes.USAGE_*
-     * @return The same given effect, if no changes were made, or a new
-     * {@link CombinedVibrationEffect} with resolved and scaled amplitude
-     */
-    public <T extends CombinedVibrationEffect> T scale(CombinedVibrationEffect combinedEffect,
-            int usageHint) {
-        if (combinedEffect instanceof CombinedVibrationEffect.Mono) {
-            VibrationEffect effect = ((CombinedVibrationEffect.Mono) combinedEffect).getEffect();
-            return (T) CombinedVibrationEffect.createSynced(scale(effect, usageHint));
-        } else if (combinedEffect instanceof CombinedVibrationEffect.Stereo) {
-            SparseArray<VibrationEffect> effects =
-                    ((CombinedVibrationEffect.Stereo) combinedEffect).getEffects();
-            CombinedVibrationEffect.SyncedCombination combination =
-                    CombinedVibrationEffect.startSynced();
-            for (int i = 0; i < effects.size(); i++) {
-                combination.addVibrator(effects.keyAt(i), scale(effects.valueAt(i), usageHint));
-            }
-            return (T) combination.combine();
-        } else if (combinedEffect instanceof CombinedVibrationEffect.Sequential) {
-            List<CombinedVibrationEffect> effects =
-                    ((CombinedVibrationEffect.Sequential) combinedEffect).getEffects();
-            CombinedVibrationEffect.SequentialCombination combination =
-                    CombinedVibrationEffect.startSequential();
-            for (CombinedVibrationEffect effect : effects) {
-                combination.addNext(scale(effect, usageHint));
-            }
-            return (T) combination.combine();
-        } else {
-            // Unknown combination, return same effect.
-            return (T) combinedEffect;
-        }
-    }
-
-    /**
      * Scale a {@link VibrationEffect} based on the given usage hint for this vibration.
      *
      * @param effect    the effect to be scaled
@@ -135,33 +95,10 @@ final class VibrationScaler {
      * resolved and scaled amplitude
      */
     public <T extends VibrationEffect> T scale(VibrationEffect effect, int usageHint) {
-        if (effect instanceof VibrationEffect.Prebaked) {
-            // Prebaked effects are always just a direct translation to EffectStrength.
-            int intensity = mSettingsController.getCurrentIntensity(usageHint);
-            int newStrength = intensityToEffectStrength(intensity);
-            VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) effect;
-            int strength = prebaked.getEffectStrength();
-            VibrationEffect fallback = prebaked.getFallbackEffect();
-
-            if (fallback != null) {
-                VibrationEffect scaledFallback = scale(fallback, usageHint);
-                if (strength == newStrength && Objects.equals(fallback, scaledFallback)) {
-                    return (T) prebaked;
-                }
-
-                return (T) new VibrationEffect.Prebaked(prebaked.getId(), newStrength,
-                        scaledFallback);
-            } else if (strength == newStrength) {
-                return (T) prebaked;
-            } else {
-                return (T) new VibrationEffect.Prebaked(prebaked.getId(), prebaked.shouldFallback(),
-                        newStrength);
-            }
-        }
-
-        effect = effect.resolve(mDefaultVibrationAmplitude);
         int defaultIntensity = mSettingsController.getDefaultIntensity(usageHint);
         int currentIntensity = mSettingsController.getCurrentIntensity(usageHint);
+        int newEffectStrength = intensityToEffectStrength(currentIntensity);
+        effect = effect.applyEffectStrength(newEffectStrength).resolve(mDefaultVibrationAmplitude);
         ScaleLevel scale = mScaleLevels.get(currentIntensity - defaultIntensity);
 
         if (scale == null) {
@@ -171,7 +108,21 @@ final class VibrationScaler {
             return (T) effect;
         }
 
-        return effect.scale(scale.factor);
+        return (T) effect.scale(scale.factor);
+    }
+
+    /**
+     * Scale a {@link PrebakedSegment} based on the given usage hint for this vibration.
+     *
+     * @param prebaked  the prebaked segment to be scaled
+     * @param usageHint one of VibrationAttributes.USAGE_*
+     * @return The same segment if no changes were made, or a new {@link PrebakedSegment} with
+     * updated effect strength
+     */
+    public PrebakedSegment scale(PrebakedSegment prebaked, int usageHint) {
+        int currentIntensity = mSettingsController.getCurrentIntensity(usageHint);
+        int newEffectStrength = intensityToEffectStrength(currentIntensity);
+        return prebaked.applyEffectStrength(newEffectStrength);
     }
 
     /** Mapping of Vibrator.VIBRATION_INTENSITY_* values to {@link EffectStrength}. */

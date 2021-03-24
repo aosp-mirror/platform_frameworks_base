@@ -608,8 +608,8 @@ public class RecentsAnimationController implements DeathRecipient {
 
     private void attachNavigationBarToApp() {
         if (!mShouldAttachNavBarToAppDuringTransition
-                // Skip the case where the nav bar is controlled by fixed rotation.
-                || mDisplayContent.getFixedRotationAnimationController() != null) {
+                // Skip the case where the nav bar is controlled by fade rotation.
+                || mDisplayContent.getFadeRotationAnimationController() != null) {
             return;
         }
         ActivityRecord topActivity = null;

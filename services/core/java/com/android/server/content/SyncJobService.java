@@ -119,7 +119,7 @@ public class SyncJobService extends JobService {
     public boolean onStopJob(JobParameters params) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Slog.v(TAG, "onStopJob called " + params.getJobId() + ", reason: "
-                    + params.getStopReason());
+                    + params.getLegacyStopReason());
         }
         final SyncOperation op = SyncOperation.maybeCreateFromJobExtras(params.getExtras());
         if (op == null) {
@@ -161,9 +161,9 @@ public class SyncJobService extends JobService {
         m.obj = op;
 
         // Reschedule if this job was NOT explicitly canceled.
-        m.arg1 = params.getStopReason() != JobParameters.REASON_CANCELED ? 1 : 0;
+        m.arg1 = params.getLegacyStopReason() != JobParameters.REASON_CANCELED ? 1 : 0;
         // Apply backoff only if stop is called due to timeout.
-        m.arg2 = params.getStopReason() == JobParameters.REASON_TIMEOUT ? 1 : 0;
+        m.arg2 = params.getLegacyStopReason() == JobParameters.REASON_TIMEOUT ? 1 : 0;
 
         SyncManager.sendMessage(m);
         return false;
@@ -204,7 +204,8 @@ public class SyncJobService extends JobService {
             return "job:null";
         } else {
             return "job:#" + params.getJobId() + ":"
-                    + "sr=[" + params.getStopReason() + "/" + params.getDebugStopReason() + "]:"
+                    + "sr=[" + params.getLegacyStopReason()
+                    + "/" + params.getDebugStopReason() + "]:"
                     + SyncOperation.maybeCreateFromJobExtras(params.getExtras());
         }
     }

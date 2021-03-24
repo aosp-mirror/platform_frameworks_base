@@ -424,6 +424,12 @@ public class Sensor {
             });
         }
 
+        @Override
+        public void onSessionClosed() {
+            mHandler.post(() -> {
+              // TODO: implement this.
+            });
+        }
     }
 
     Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,

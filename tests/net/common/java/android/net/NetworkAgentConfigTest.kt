@@ -44,7 +44,7 @@ class NetworkAgentConfigTest {
             setPartialConnectivityAcceptable(false)
             setUnvalidatedConnectivityAcceptable(true)
         }.build()
-        assertParcelSane(config, 10)
+        assertParcelSane(config, 12)
     }
 
     @Test @IgnoreUpTo(Build.VERSION_CODES.Q)

@@ -228,7 +228,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     private void enforceSuggestExternalTimePermission() {
         // We don't expect a call from system server, so simply enforce calling permission.
         mContext.enforceCallingPermission(
-                android.Manifest.permission.SET_TIME,
+                android.Manifest.permission.SUGGEST_EXTERNAL_TIME,
                 "suggest time from external source");
     }
 

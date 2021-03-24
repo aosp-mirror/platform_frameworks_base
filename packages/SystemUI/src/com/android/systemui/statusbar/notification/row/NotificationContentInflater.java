@@ -40,13 +40,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.media.MediaDataManagerKt;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.InflationException;
-import com.android.systemui.statusbar.notification.MediaNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -798,13 +796,6 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 if (recoveredBuilder.usesTemplate()) {
                     // For all of our templates, we want it to be RTL
                     packageContext = new RtlEnabledContext(packageContext);
-                }
-                Notification notification = sbn.getNotification();
-                if (notification.isMediaNotification() && !(mIsMediaInQS
-                        && MediaDataManagerKt.isMediaNotification(sbn))) {
-                    MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
-                            packageContext);
-                    processor.processNotification(notification, recoveredBuilder);
                 }
                 if (mEntry.getRanking().isConversation()) {
                     mConversationProcessor.processNotification(mEntry, recoveredBuilder);

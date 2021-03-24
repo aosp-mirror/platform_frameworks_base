@@ -14951,6 +14951,13 @@ public class TelephonyManager {
     public static final String CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING =
             "CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING";
 
+    /**
+     * Indicates whether {@link #getNetworkSlicingConfiguration} is supported. See comments on
+     * respective methods for more information.
+     */
+    public static final String CAPABILITY_SLICING_CONFIG_SUPPORTED =
+            "CAPABILITY_SLICING_CONFIG_SUPPORTED";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
@@ -14958,6 +14965,7 @@ public class TelephonyManager {
             CAPABILITY_ALLOWED_NETWORK_TYPES_USED,
             CAPABILITY_NR_DUAL_CONNECTIVITY_CONFIGURATION_AVAILABLE,
             CAPABILITY_THERMAL_MITIGATION_DATA_THROTTLING,
+            CAPABILITY_SLICING_CONFIG_SUPPORTED,
     })
     public @interface RadioInterfaceCapability {}
 
@@ -15077,7 +15085,12 @@ public class TelephonyManager {
      * DataThrottlingRequest#DATA_THROTTLING_ACTION_NO_DATA_THROTTLING} can still be requested in
      * order to undo the mitigations above it (i.e {@link
      * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_VOICE_ONLY} and/or {@link
-     * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_RADIO_OFF}).
+     * ThermalMitigationRequest#THERMAL_MITIGATION_ACTION_RADIO_OFF}). </p>
+     *
+     * <p> In addition to the {@link Manifest.permission#MODIFY_PHONE_STATE} permission, callers of
+     * this API must also be listed in the device configuration as an authorized app in
+     * {@code packages/services/Telephony/res/values/config.xml} under the
+     * {@code thermal_mitigation_allowlisted_packages} key. </p>
      *
      * @param thermalMitigationRequest Thermal mitigation request. See {@link
      * ThermalMitigationRequest} for details.
@@ -15096,7 +15109,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.sendThermalMitigationRequest(getSubId(), thermalMitigationRequest);
+                return telephony.sendThermalMitigationRequest(getSubId(), thermalMitigationRequest,
+                        getOpPackageName());
             }
             throw new IllegalStateException("telephony service is null.");
         } catch (RemoteException ex) {
@@ -15603,9 +15617,15 @@ public class TelephonyManager {
      *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      * </ul>
      *
+     * This will be invalid if the device does not support
+     * android.telephony.TelephonyManager#CAPABILITY_SLICING_CONFIG_SUPPORTED.
+     *
      * @param executor the executor on which callback will be invoked.
      * @param callback a callback to receive the current slicing configuration.
      */
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_SLICING_CONFIG_SUPPORTED)
     @SuppressAutoDoc // No support for carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getNetworkSlicingConfiguration(

@@ -44,6 +44,8 @@ import com.android.internal.util.Preconditions;
 /** In memory event log for location events. */
 public class LocationEventLog extends LocalEventLog {
 
+    public static final LocationEventLog EVENT_LOG = new LocationEventLog();
+
     private static int getLogSize() {
         if (Build.IS_DEBUGGABLE || D) {
             return 500;
@@ -52,16 +54,17 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static final int EVENT_LOCATION_ENABLED = 1;
-    private static final int EVENT_PROVIDER_ENABLED = 2;
-    private static final int EVENT_PROVIDER_MOCKED = 3;
-    private static final int EVENT_PROVIDER_REGISTER_CLIENT = 4;
-    private static final int EVENT_PROVIDER_UNREGISTER_CLIENT = 5;
-    private static final int EVENT_PROVIDER_UPDATE_REQUEST = 6;
-    private static final int EVENT_PROVIDER_RECEIVE_LOCATION = 7;
-    private static final int EVENT_PROVIDER_DELIVER_LOCATION = 8;
-    private static final int EVENT_PROVIDER_STATIONARY_THROTTLED = 9;
-    private static final int EVENT_LOCATION_POWER_SAVE_MODE_CHANGE = 10;
+    private static final int EVENT_USER_SWITCHED = 1;
+    private static final int EVENT_LOCATION_ENABLED = 2;
+    private static final int EVENT_PROVIDER_ENABLED = 3;
+    private static final int EVENT_PROVIDER_MOCKED = 4;
+    private static final int EVENT_PROVIDER_REGISTER_CLIENT = 5;
+    private static final int EVENT_PROVIDER_UNREGISTER_CLIENT = 6;
+    private static final int EVENT_PROVIDER_UPDATE_REQUEST = 7;
+    private static final int EVENT_PROVIDER_RECEIVE_LOCATION = 8;
+    private static final int EVENT_PROVIDER_DELIVER_LOCATION = 9;
+    private static final int EVENT_PROVIDER_STATIONARY_THROTTLED = 10;
+    private static final int EVENT_LOCATION_POWER_SAVE_MODE_CHANGE = 11;
 
     @GuardedBy("mAggregateStats")
     private final ArrayMap<String, ArrayMap<CallerIdentity, AggregateStats>> mAggregateStats;
@@ -90,19 +93,24 @@ public class LocationEventLog extends LocalEventLog {
                 packageMap = new ArrayMap<>(2);
                 mAggregateStats.put(provider, packageMap);
             }
-            CallerIdentity stripped = identity.stripListenerId();
-            AggregateStats stats = packageMap.get(stripped);
+            CallerIdentity aggregate = CallerIdentity.forAggregation(identity);
+            AggregateStats stats = packageMap.get(aggregate);
             if (stats == null) {
                 stats = new AggregateStats();
-                packageMap.put(stripped, stats);
+                packageMap.put(aggregate, stats);
             }
             return stats;
         }
     }
 
+    /** Logs a user switched event. */
+    public void logUserSwitched(int userIdFrom, int userIdTo) {
+        addLogEvent(EVENT_USER_SWITCHED, userIdFrom, userIdTo);
+    }
+
     /** Logs a location enabled/disabled event. */
     public void logLocationEnabled(int userId, boolean enabled) {
-        addLogEvent(EVENT_LOCATION_POWER_SAVE_MODE_CHANGE, userId, enabled);
+        addLogEvent(EVENT_LOCATION_ENABLED, userId, enabled);
     }
 
     /** Logs a location provider enabled/disabled event. */
@@ -183,8 +191,10 @@ public class LocationEventLog extends LocalEventLog {
     @Override
     protected LogEvent createLogEvent(long timeDelta, int event, Object... args) {
         switch (event) {
+            case EVENT_USER_SWITCHED:
+                return new UserSwitchedEvent(timeDelta, (Integer) args[0], (Integer) args[1]);
             case EVENT_LOCATION_ENABLED:
-                return new LocationEnabledEvent(timeDelta, (Integer) args[1], (Boolean) args[2]);
+                return new LocationEnabledEvent(timeDelta, (Integer) args[0], (Boolean) args[1]);
             case EVENT_PROVIDER_ENABLED:
                 return new ProviderEnabledEvent(timeDelta, (String) args[0], (Integer) args[1],
                         (Boolean) args[2]);
@@ -397,6 +407,23 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
+    private static final class UserSwitchedEvent extends LogEvent {
+
+        private final int mUserIdFrom;
+        private final int mUserIdTo;
+
+        UserSwitchedEvent(long timeDelta, int userIdFrom, int userIdTo) {
+            super(timeDelta);
+            mUserIdFrom = userIdFrom;
+            mUserIdTo = userIdTo;
+        }
+
+        @Override
+        public String getLogString() {
+            return "current user switched from u" + mUserIdFrom + " to u" + mUserIdTo;
+        }
+    }
+
     private static final class LocationEnabledEvent extends LogEvent {
 
         private final int mUserId;
@@ -410,7 +437,7 @@ public class LocationEventLog extends LocalEventLog {
 
         @Override
         public String getLogString() {
-            return "[u" + mUserId + "] location setting " + (mEnabled ? "enabled" : "disabled");
+            return "location [u" + mUserId + "] " + (mEnabled ? "enabled" : "disabled");
         }
     }
 

@@ -35,7 +35,6 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Range;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.net.module.util.CollectionUtils;
@@ -538,43 +537,6 @@ public final class NetworkCapabilities implements Parcelable {
             | (1 << NET_CAPABILITY_NOT_VPN);
 
     /**
-     * Capabilities that suggest that a network is restricted.
-     * {@see #maybeMarkCapabilitiesRestricted}, {@see #FORCE_RESTRICTED_CAPABILITIES}
-     */
-    @VisibleForTesting
-    /* package */ static final long RESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_CBS)
-            | (1 << NET_CAPABILITY_DUN)
-            | (1 << NET_CAPABILITY_EIMS)
-            | (1 << NET_CAPABILITY_FOTA)
-            | (1 << NET_CAPABILITY_IA)
-            | (1 << NET_CAPABILITY_IMS)
-            | (1 << NET_CAPABILITY_MCX)
-            | (1 << NET_CAPABILITY_RCS)
-            | (1 << NET_CAPABILITY_VEHICLE_INTERNAL)
-            | (1 << NET_CAPABILITY_XCAP)
-            | (1 << NET_CAPABILITY_ENTERPRISE);
-
-    /**
-     * Capabilities that force network to be restricted.
-     * {@see #maybeMarkCapabilitiesRestricted}.
-     */
-    private static final long FORCE_RESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_OEM_PAID)
-            | (1 << NET_CAPABILITY_OEM_PRIVATE);
-
-    /**
-     * Capabilities that suggest that a network is unrestricted.
-     * {@see #maybeMarkCapabilitiesRestricted}.
-     */
-    @VisibleForTesting
-    /* package */ static final long UNRESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_INTERNET)
-            | (1 << NET_CAPABILITY_MMS)
-            | (1 << NET_CAPABILITY_SUPL)
-            | (1 << NET_CAPABILITY_WIFI_P2P);
-
-    /**
      * Capabilities that are managed by ConnectivityService.
      */
     private static final long CONNECTIVITY_MANAGED_CAPABILITIES =
@@ -639,19 +601,31 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Removes (if found) the given capability from this {@code NetworkCapability} instance.
+     * Removes (if found) the given capability from this {@code NetworkCapability}
+     * instance that were added via addCapability(int) or setCapabilities(int[], int[]).
      *
      * @param capability the capability to be removed.
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public @NonNull NetworkCapabilities removeCapability(@NetCapability int capability) {
-        // Note that this method removes capabilities that were added via addCapability(int),
-        // addUnwantedCapability(int) or setCapabilities(int[], int[]).
         checkValidCapability(capability);
         final long mask = ~(1 << capability);
         mNetworkCapabilities &= mask;
-        mUnwantedNetworkCapabilities &= mask;
+        return this;
+    }
+
+    /**
+     * Removes (if found) the given unwanted capability from this {@code NetworkCapability}
+     * instance that were added via addUnwantedCapability(int) or setCapabilities(int[], int[]).
+     *
+     * @param capability the capability to be removed.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
+     * @hide
+     */
+    public @NonNull NetworkCapabilities removeUnwantedCapability(@NetCapability int capability) {
+        checkValidCapability(capability);
+        mUnwantedNetworkCapabilities &= ~(1 << capability);
         return this;
     }
 
@@ -723,6 +697,7 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /** @hide */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean hasUnwantedCapability(@NetCapability int capability) {
         return isValidCapability(capability)
                 && ((mUnwantedNetworkCapabilities & (1 << capability)) != 0);
@@ -736,10 +711,16 @@ public final class NetworkCapabilities implements Parcelable {
         return ((mNetworkCapabilities & CONNECTIVITY_MANAGED_CAPABILITIES) != 0);
     }
 
-    /** Note this method may result in having the same capability in wanted and unwanted lists. */
     private void combineNetCapabilities(@NonNull NetworkCapabilities nc) {
-        this.mNetworkCapabilities |= nc.mNetworkCapabilities;
-        this.mUnwantedNetworkCapabilities |= nc.mUnwantedNetworkCapabilities;
+        final long wantedCaps = this.mNetworkCapabilities | nc.mNetworkCapabilities;
+        final long unwantedCaps =
+                this.mUnwantedNetworkCapabilities | nc.mUnwantedNetworkCapabilities;
+        if ((wantedCaps & unwantedCaps) != 0) {
+            throw new IllegalArgumentException(
+                    "Cannot have the same capability in wanted and unwanted lists.");
+        }
+        this.mNetworkCapabilities = wantedCaps;
+        this.mUnwantedNetworkCapabilities = unwantedCaps;
     }
 
     /**
@@ -792,37 +773,12 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Deduces that all the capabilities it provides are typically provided by restricted networks
-     * or not.
-     *
-     * @return {@code true} if the network should be restricted.
-     * @hide
-     */
-    public boolean deduceRestrictedCapability() {
-        // Check if we have any capability that forces the network to be restricted.
-        final boolean forceRestrictedCapability =
-                (mNetworkCapabilities & FORCE_RESTRICTED_CAPABILITIES) != 0;
-
-        // Verify there aren't any unrestricted capabilities.  If there are we say
-        // the whole thing is unrestricted unless it is forced to be restricted.
-        final boolean hasUnrestrictedCapabilities =
-                (mNetworkCapabilities & UNRESTRICTED_CAPABILITIES) != 0;
-
-        // Must have at least some restricted capabilities.
-        final boolean hasRestrictedCapabilities =
-                (mNetworkCapabilities & RESTRICTED_CAPABILITIES) != 0;
-
-        return forceRestrictedCapability
-                || (hasRestrictedCapabilities && !hasUnrestrictedCapabilities);
-    }
-
-    /**
-     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if deducing the network is restricted.
+     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if inferring the network is restricted.
      *
      * @hide
      */
     public void maybeMarkCapabilitiesRestricted() {
-        if (deduceRestrictedCapability()) {
+        if (NetworkCapabilitiesUtils.inferRestrictedCapability(this)) {
             removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
     }
@@ -2066,34 +2022,6 @@ public final class NetworkCapabilities implements Parcelable {
             bitMask >>= 1;
             ++bitPos;
         }
-    }
-
-    /** @hide */
-    public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-
-        for (int transport : getTransportTypes()) {
-            proto.write(NetworkCapabilitiesProto.TRANSPORTS, transport);
-        }
-
-        for (int capability : getCapabilities()) {
-            proto.write(NetworkCapabilitiesProto.CAPABILITIES, capability);
-        }
-
-        proto.write(NetworkCapabilitiesProto.LINK_UP_BANDWIDTH_KBPS, mLinkUpBandwidthKbps);
-        proto.write(NetworkCapabilitiesProto.LINK_DOWN_BANDWIDTH_KBPS, mLinkDownBandwidthKbps);
-
-        if (mNetworkSpecifier != null) {
-            proto.write(NetworkCapabilitiesProto.NETWORK_SPECIFIER, mNetworkSpecifier.toString());
-        }
-        if (mTransportInfo != null) {
-            // TODO b/120653863: write transport-specific info to proto?
-        }
-
-        proto.write(NetworkCapabilitiesProto.CAN_REPORT_SIGNAL_STRENGTH, hasSignalStrength());
-        proto.write(NetworkCapabilitiesProto.SIGNAL_STRENGTH, mSignalStrength);
-
-        proto.end(token);
     }
 
     /**

@@ -2235,11 +2235,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mPendingPositionChanged = null;
             }
 
-            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
-                win.prepareDrawHandlers();
-                result |= RELAYOUT_RES_BLAST_SYNC;
-            }
-
             int attrChanges = 0;
             int flagChanges = 0;
             int privateFlagChanges = 0;
@@ -2511,6 +2506,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG_WM, "Relayout complete " + win + ": outFrames=" + outFrames);
             }
             win.mInRelayout = false;
+
+            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
+                win.prepareDrawHandlers();
+                win.markRedrawForSyncReported();
+                result |= RELAYOUT_RES_BLAST_SYNC;
+            }
 
             if (configChanged) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
