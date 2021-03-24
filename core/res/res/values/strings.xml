@@ -2815,6 +2815,15 @@
     <!-- Displayed to the user to inform them that an app has accessed clipboard data (pasted as in "copy and paste") [CHAR LIMIT=50] -->
     <string name="pasted_from_clipboard"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted from clipboard</string>
 
+    <!-- Displayed to the user to inform them that an app has accessed text from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
+    <string name="pasted_text"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted text you copied</string>
+
+    <!-- Displayed to the user to inform them that an app has accessed an image from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
+    <string name="pasted_image"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted an image you copied</string>
+
+    <!-- Displayed to the user to inform them that an app has accessed content from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
+    <string name="pasted_content"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted content you copied</string>
+
     <!-- Menu item displayed at the end of a menu to allow users to see another page worth of menu items. This is shown on any app's menu as long as the app has too many items in the menu.-->
     <string name="more_item_label">More</string>
     <!-- Prepended to the shortcut for a menu item to indicate that the user should hold the MENU button together with the shortcut to invoke the item. For example, if the shortcut to open a new tab in browser is MENU and B together, then this would be prepended to the letter "B" -->
