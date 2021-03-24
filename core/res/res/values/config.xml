@@ -4138,6 +4138,35 @@
          If non-positive, then the refresh rate is unchanged even if thresholds are configured. -->
     <integer name="config_defaultRefreshRateInZone">0</integer>
 
+    <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
+         vendor to tune the curves to have exact same brightness for different refresh rate. So
+         flicker could be observed at switch time. The issue can be observed on the screen with
+         even full white content at the high brightness. To prevent flickering, we support fixed
+         refresh rates if the display and ambient brightness are equal to or above the provided
+         thresholds. You can define multiple threshold levels as higher brightness environments
+         may have lower display brightness requirements for the flickering is visible. And the
+         high brightness environment could have higher threshold.
+         For example, fixed refresh rate if
+             display brightness >= disp0 && ambient brightness >= amb0
+             || display brightness >= disp1 && ambient brightness >= amb1 -->
+    <integer-array translatable="false" name="config_highDisplayBrightnessThresholdsOfFixedRefreshRate">
+         <!--
+           <item>disp0</item>
+           <item>disp1</item>
+        -->
+    </integer-array>
+
+    <integer-array translatable="false" name="config_highAmbientBrightnessThresholdsOfFixedRefreshRate">
+         <!--
+           <item>amb0</item>
+           <item>amb1</item>
+        -->
+    </integer-array>
+
+    <!-- Default refresh rate in the high zone defined by brightness and ambient thresholds.
+         If non-positive, then the refresh rate is unchanged even if thresholds are configured. -->
+    <integer name="config_fixedRefreshRateInHighZone">0</integer>
+
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
     <string name="config_displayLightSensorType" translatable="false" />

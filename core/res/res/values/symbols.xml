@@ -3784,6 +3784,11 @@
   <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />
   <java-symbol type="array" name="config_ambientThresholdsOfPeakRefreshRate" />
 
+  <!-- For fixed refresh rate displays in high brightness-->
+  <java-symbol type="integer" name="config_fixedRefreshRateInHighZone" />
+  <java-symbol type="array" name="config_highDisplayBrightnessThresholdsOfFixedRefreshRate" />
+  <java-symbol type="array" name="config_highAmbientBrightnessThresholdsOfFixedRefreshRate" />
+
   <!-- For Auto-Brightness -->
   <java-symbol type="string" name="config_displayLightSensorType" />
 
