@@ -24,6 +24,7 @@ import android.app.GameManager;
 import android.app.GameManager.GameMode;
 import android.app.IGameManagerService;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Environment;
@@ -58,6 +59,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     static final int WRITE_SETTINGS_DELAY = 10 * 1000;  // 10 seconds
 
     private final Context mContext;
+    private final PackageManager mPackageManager;
     private final Object mLock = new Object();
     private final Handler mHandler;
     @GuardedBy("mLock")
@@ -70,6 +72,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     GameManagerService(Context context, Looper looper) {
         mContext = context;
         mHandler = new SettingsHandler(looper);
+        mPackageManager = context.getPackageManager();
     }
 
     class SettingsHandler extends Handler {
@@ -171,9 +174,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
     }
 
     private boolean isValidPackageName(String packageName) {
-        final PackageManager pm = mContext.getPackageManager();
         try {
-            return pm.getPackageUid(packageName, 0) == Binder.getCallingUid();
+            return mPackageManager.getPackageUid(packageName, 0) == Binder.getCallingUid();
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
             return false;
@@ -208,16 +210,36 @@ public final class GameManagerService extends IGameManagerService.Stub {
     @Override
     public @GameMode int getGameMode(String packageName, int userId)
             throws SecurityException {
-        // TODO(b/178860939): Restrict to games only.
-
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "getGameMode",
                 "com.android.server.app.GameManagerService");
 
+        // Restrict to games only.
+        try {
+            final ApplicationInfo applicationInfo = mPackageManager
+                    .getApplicationInfoAsUser(packageName, PackageManager.MATCH_ALL, userId);
+            if (applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
+                Log.e(TAG, "Ignoring attempt to get the Game Mode for '" + packageName
+                        + "' which is not categorized as a game: applicationInfo.flags = "
+                        + applicationInfo.flags + ", category = " + applicationInfo.category);
+                return GameManager.GAME_MODE_UNSUPPORTED;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return GameManager.GAME_MODE_UNSUPPORTED;
+        }
+
+        // This function handles two types of queries:
+        // 1.) A normal, non-privileged app querying its own Game Mode.
+        // 2.) A privileged system service querying the Game Mode of another package.
+        // The least privileged case is a normal app performing a query, so check that first and
+        // return a value if the package name is valid. Next, check if the caller has the necessary
+        // permission and return a value. Do this check last, since it can throw an exception.
         if (isValidPackageName(packageName)) {
             return getGameModeFromSettings(packageName, userId);
         }
 
+        // Since the package name doesn't match, check the caller has the necessary permission.
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
         return getGameModeFromSettings(packageName, userId);
     }
@@ -230,15 +252,28 @@ public final class GameManagerService extends IGameManagerService.Stub {
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public void setGameMode(String packageName, @GameMode int gameMode, int userId)
             throws SecurityException {
-        // TODO(b/178860939): Restrict to games only.
-
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
 
-        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, true, "setGameMode",
-                "com.android.server.app.GameManagerService");
+        // Restrict to games only.
+        try {
+            final ApplicationInfo applicationInfo = mPackageManager
+                    .getApplicationInfoAsUser(packageName, PackageManager.MATCH_ALL, userId);
+            if (applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
+                Log.e(TAG, "Ignoring attempt to set the Game Mode for '" + packageName
+                        + "' which is not categorized as a game: applicationInfo.flags = "
+                        + applicationInfo.flags + ", category = " + applicationInfo.category);
+                return;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
 
         synchronized (mLock) {
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, false, true, "setGameMode",
+                    "com.android.server.app.GameManagerService");
+
             if (!mSettings.containsKey(userId)) {
                 return;
             }
