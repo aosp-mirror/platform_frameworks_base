@@ -20,7 +20,7 @@ import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.net.ConnectivityManager;
+import android.content.pm.PackageManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
 
@@ -52,9 +52,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     }
 
     private boolean deviceHasTelephonyNetwork() {
-        // TODO b/150583524 Avoid the use of a deprecated API.
-        return mContext.getSystemService(ConnectivityManager.class)
-                .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }
 
     @Override
