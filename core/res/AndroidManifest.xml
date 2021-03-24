@@ -1987,6 +1987,12 @@
     <permission android:name="android.permission.BLUETOOTH_STACK"
         android:protectionLevel="signature" />
 
+    <!-- Allows uhid write access for creating virtual input devices
+         @hide
+    -->
+    <permission android:name="android.permission.VIRTUAL_INPUT_DEVICE"
+        android:protectionLevel="signature" />
+
     <!-- Allows applications to perform I/O operations over NFC.
          <p>Protection level: normal
     -->
