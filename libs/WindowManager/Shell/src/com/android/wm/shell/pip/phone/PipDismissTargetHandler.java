@@ -22,7 +22,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.TransitionDrawable;
-import android.os.Handler;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,8 +39,6 @@ import com.android.wm.shell.common.DismissCircleView;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.pip.PipUiEventLogger;
-
-import java.util.concurrent.TimeUnit;
 
 import kotlin.Unit;
 
@@ -89,7 +86,9 @@ public class PipDismissTargetHandler {
     // Allow dragging the PIP to a location to close it
     private boolean mEnableDismissDragToEdge;
 
+    private int mTargetSize;
     private int mDismissAreaHeight;
+    private float mMagneticFieldRadiusPercent = 1f;
 
     private final Context mContext;
     private final PipMotionHelper mMotionHelper;
@@ -183,18 +182,27 @@ public class PipDismissTargetHandler {
         }
 
         final Resources res = mContext.getResources();
-        final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
+        mTargetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
         mDismissAreaHeight = res.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height);
         final FrameLayout.LayoutParams newParams =
-                new FrameLayout.LayoutParams(targetSize, targetSize);
+                new FrameLayout.LayoutParams(mTargetSize, mTargetSize);
         newParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
         newParams.bottomMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.floating_dismiss_bottom_margin);
         mTargetView.setLayoutParams(newParams);
 
         // Set the magnetic field radius equal to the target size from the center of the target
-        mMagneticTarget.setMagneticFieldRadiusPx(
-                (int) (targetSize * MAGNETIC_FIELD_RADIUS_MULTIPLIER));
+        setMagneticFieldRadiusPercent(mMagneticFieldRadiusPercent);
+    }
+
+    /**
+     * Increase or decrease the field radius of the magnet object, e.g. with larger percent,
+     * PiP will magnetize to the field sooner.
+     */
+    public void setMagneticFieldRadiusPercent(float percent) {
+        mMagneticFieldRadiusPercent = percent;
+        mMagneticTarget.setMagneticFieldRadiusPx((int) (mMagneticFieldRadiusPercent * mTargetSize
+                        * MAGNETIC_FIELD_RADIUS_MULTIPLIER));
     }
 
     /** Adds the magnetic target view to the WindowManager so it's ready to be animated in. */
