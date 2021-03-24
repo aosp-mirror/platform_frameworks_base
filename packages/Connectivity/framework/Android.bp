@@ -141,6 +141,7 @@ cc_library_shared {
         "jni/onload.cpp",
     ],
     shared_libs: ["libandroid"],
+    stl: "libc++_static",
     apex_available: [
         "//apex_available:platform",
         "com.android.tethering",
