@@ -4095,13 +4095,10 @@
   <java-symbol type="id" name="resolver_empty_state_container" />
   <java-symbol type="id" name="button_bar_container" />
   <java-symbol type="id" name="title_container" />
-  <java-symbol type="string" name="resolver_cant_share_with_work_apps" />
+  <java-symbol type="string" name="resolver_cross_profile_blocked" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps_explanation" />
-  <java-symbol type="string" name="resolver_cant_share_with_personal_apps" />
   <java-symbol type="string" name="resolver_cant_share_with_personal_apps_explanation" />
-  <java-symbol type="string" name="resolver_cant_access_work_apps" />
   <java-symbol type="string" name="resolver_cant_access_work_apps_explanation" />
-  <java-symbol type="string" name="resolver_cant_access_personal_apps" />
   <java-symbol type="string" name="resolver_cant_access_personal_apps_explanation" />
   <java-symbol type="string" name="resolver_turn_on_work_apps" />
   <java-symbol type="string" name="resolver_no_work_apps_available_share" />
