@@ -687,7 +687,11 @@ public final class Call {
         public static final int PROPERTY_IS_ADHOC_CONFERENCE = 0x00002000;
 
         /**
-         * Connection is using Cross SIM Calling.
+         * Connection is using cross sim technology.
+         * <p>
+         * Indicates that the {@link Connection} is using a cross sim technology which would
+         * register IMS over internet APN of default data subscription.
+         * <p>
          */
         public static final int PROPERTY_CROSS_SIM = 0x00004000;
 
