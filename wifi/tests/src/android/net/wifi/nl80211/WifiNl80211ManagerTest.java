@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -97,14 +98,20 @@ public class WifiNl80211ManagerTest {
     @Mock
     private WifiNl80211Manager.PnoScanRequestCallback mPnoScanRequestCallback;
     @Mock
+    private WifiNl80211Manager.CountryCodeChangeListener mCountryCodeChangeListener;
+    @Mock
+    private WifiNl80211Manager.CountryCodeChangeListener mCountryCodeChangeListener2;
+    @Mock
     private Context mContext;
     private TestLooper mLooper;
     private TestAlarmManager mTestAlarmManager;
     private AlarmManager mAlarmManager;
     private WifiNl80211Manager mWificondControl;
+    private WifiNl80211Manager.WificondEventHandler mWificondEventHandler;
     private static final String TEST_INTERFACE_NAME = "test_wlan_if";
     private static final String TEST_INTERFACE_NAME1 = "test_wlan_if1";
     private static final String TEST_INVALID_INTERFACE_NAME = "asdf";
+    private static final String TEST_COUNTRY_CODE = "US";
     private static final byte[] TEST_SSID =
             new byte[]{'G', 'o', 'o', 'g', 'l', 'e', 'G', 'u', 'e', 's', 't'};
     private static final byte[] TEST_PSK =
@@ -182,6 +189,7 @@ public class WifiNl80211ManagerTest {
         when(mClientInterface.getWifiScannerImpl()).thenReturn(mWifiScannerImpl);
         when(mClientInterface.getInterfaceName()).thenReturn(TEST_INTERFACE_NAME);
         mWificondControl = new WifiNl80211Manager(mContext, mWificond);
+        mWificondEventHandler = mWificondControl.getWificondEventHandler();
         assertEquals(true,
                 mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME, Runnable::run,
                         mNormalScanCallback, mPnoScanCallback));
@@ -757,6 +765,28 @@ public class WifiNl80211ManagerTest {
                 channelBandwidth);
         verify(mSoftApListener).onSoftApChannelSwitched(eq(channelFrequency),
                 eq(SoftApInfo.CHANNEL_WIDTH_20MHZ));
+    }
+
+    /**
+     * Ensures callback works after register CountryCodeChangeListener.
+     */
+    @Test
+    public void testCountryCodeChangeListenerInvocation() throws Exception {
+        assertTrue(mWificondControl.registerCountryCodeChangeListener(
+                Runnable::run, mCountryCodeChangeListener));
+        assertTrue(mWificondControl.registerCountryCodeChangeListener(
+                Runnable::run, mCountryCodeChangeListener2));
+
+        mWificondEventHandler.OnRegDomainChanged(TEST_COUNTRY_CODE);
+        verify(mCountryCodeChangeListener).onChanged(TEST_COUNTRY_CODE);
+        verify(mCountryCodeChangeListener2).onChanged(TEST_COUNTRY_CODE);
+
+        reset(mCountryCodeChangeListener);
+        reset(mCountryCodeChangeListener2);
+        mWificondControl.unregisterCountryCodeChangeListener(mCountryCodeChangeListener2);
+        mWificondEventHandler.OnRegDomainChanged(TEST_COUNTRY_CODE);
+        verify(mCountryCodeChangeListener).onChanged(TEST_COUNTRY_CODE);
+        verify(mCountryCodeChangeListener2, never()).onChanged(TEST_COUNTRY_CODE);
     }
 
     /**

@@ -7783,6 +7783,7 @@ package android.net.wifi.nl80211 {
     method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
     method @Nullable public static android.net.wifi.nl80211.WifiNl80211Manager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
     method @Deprecated public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback);
+    method public boolean registerCountryCodeChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.CountryCodeChangeListener);
     method public void sendMgmtFrame(@NonNull String, @NonNull byte[], int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SendMgmtFrameCallback);
     method public void setOnServiceDeadCallback(@NonNull Runnable);
     method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback);
@@ -7795,6 +7796,7 @@ package android.net.wifi.nl80211 {
     method public boolean tearDownClientInterface(@NonNull String);
     method public boolean tearDownInterfaces();
     method public boolean tearDownSoftApInterface(@NonNull String);
+    method public void unregisterCountryCodeChangeListener(@NonNull android.net.wifi.nl80211.WifiNl80211Manager.CountryCodeChangeListener);
     field public static final String SCANNING_PARAM_ENABLE_6GHZ_RNR = "android.net.wifi.nl80211.SCANNING_PARAM_ENABLE_6GHZ_RNR";
     field public static final int SCAN_TYPE_PNO_SCAN = 1; // 0x1
     field public static final int SCAN_TYPE_SINGLE_SCAN = 0; // 0x0
@@ -7803,6 +7805,10 @@ package android.net.wifi.nl80211 {
     field public static final int SEND_MGMT_FRAME_ERROR_NO_ACK = 3; // 0x3
     field public static final int SEND_MGMT_FRAME_ERROR_TIMEOUT = 4; // 0x4
     field public static final int SEND_MGMT_FRAME_ERROR_UNKNOWN = 1; // 0x1
+  }
+
+  public static interface WifiNl80211Manager.CountryCodeChangeListener {
+    method public void onChanged(@NonNull String);
   }
 
   public static class WifiNl80211Manager.OemSecurityType {
