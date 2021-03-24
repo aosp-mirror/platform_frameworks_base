@@ -42503,6 +42503,7 @@ package android.telephony {
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
+    field public static final String CAPABILITY_SLICING_CONFIG_SUPPORTED = "CAPABILITY_SLICING_CONFIG_SUPPORTED";
     field public static final int CDMA_ROAMING_MODE_AFFILIATED = 1; // 0x1
     field public static final int CDMA_ROAMING_MODE_ANY = 2; // 0x2
     field public static final int CDMA_ROAMING_MODE_HOME = 0; // 0x0
