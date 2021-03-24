@@ -29,7 +29,10 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
@@ -158,6 +161,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private final TelephonySubscriptionTrackerCallback mTelephonySubscriptionTrackerCb;
     @NonNull private final TelephonySubscriptionTracker mTelephonySubscriptionTracker;
     @NonNull private final VcnContext mVcnContext;
+    @NonNull private final BroadcastReceiver mPkgChangeReceiver;
 
     /** Can only be assigned when {@link #systemReady()} is called, since it uses AppOpsManager. */
     @Nullable private LocationPermissionChecker mLocationPermissionChecker;
@@ -202,6 +206,29 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         mConfigDiskRwHelper = mDeps.newPersistableBundleLockingReadWriteHelper(VCN_CONFIG_FILE);
         mVcnContext = mDeps.newVcnContext(mContext, mLooper, mNetworkProvider);
+
+        mPkgChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+
+                if (Intent.ACTION_PACKAGE_ADDED.equals(action)
+                        || Intent.ACTION_PACKAGE_REPLACED.equals(action)
+                        || Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                    mTelephonySubscriptionTracker.handleSubscriptionsChanged();
+                } else {
+                    Log.wtf(TAG, "received unexpected intent: " + action);
+                }
+            }
+        };
+
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addDataScheme("package");
+        mContext.registerReceiver(
+                mPkgChangeReceiver, intentFilter, null /* broadcastPermission */, mHandler);
 
         // Run on handler to ensure I/O does not block system server startup
         mHandler.post(() -> {

@@ -49,7 +49,9 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
@@ -336,6 +338,13 @@ public class VcnManagementServiceTest {
         return captor.getValue();
     }
 
+    private BroadcastReceiver getPackageChangeReceiver() {
+        final ArgumentCaptor<BroadcastReceiver> captor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mMockContext).registerReceiver(captor.capture(), any(), any(), any());
+        return captor.getValue();
+    }
+
     private Vcn startAndGetVcnInstance(ParcelUuid uuid) {
         mVcnMgmtSvc.setVcnConfig(uuid, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
         return mVcnMgmtSvc.getAllVcns().get(uuid);
@@ -409,6 +418,42 @@ public class VcnManagementServiceTest {
         mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
         mTestLooper.dispatchAll();
         verify(newInstance, never()).teardownAsynchronously();
+    }
+
+    @Test
+    public void testPackageChangeListenerRegistered() throws Exception {
+        verify(mMockContext).registerReceiver(any(BroadcastReceiver.class), argThat(filter -> {
+            return filter.hasAction(Intent.ACTION_PACKAGE_ADDED)
+                    && filter.hasAction(Intent.ACTION_PACKAGE_REPLACED)
+                    && filter.hasAction(Intent.ACTION_PACKAGE_REMOVED);
+        }), any(), any());
+    }
+
+    @Test
+    public void testPackageChangeListener_packageAdded() throws Exception {
+        final BroadcastReceiver receiver = getPackageChangeReceiver();
+
+        verify(mMockContext).registerReceiver(any(), argThat(filter -> {
+            return filter.hasAction(Intent.ACTION_PACKAGE_ADDED)
+                    && filter.hasAction(Intent.ACTION_PACKAGE_REPLACED)
+                    && filter.hasAction(Intent.ACTION_PACKAGE_REMOVED);
+        }), any(), any());
+
+        receiver.onReceive(mMockContext, new Intent(Intent.ACTION_PACKAGE_ADDED));
+        verify(mSubscriptionTracker).handleSubscriptionsChanged();
+    }
+
+    @Test
+    public void testPackageChangeListener_packageRemoved() throws Exception {
+        final BroadcastReceiver receiver = getPackageChangeReceiver();
+
+        verify(mMockContext).registerReceiver(any(), argThat(filter -> {
+            return filter.hasAction(Intent.ACTION_PACKAGE_REMOVED)
+                    && filter.hasAction(Intent.ACTION_PACKAGE_REMOVED);
+        }), any(), any());
+
+        receiver.onReceive(mMockContext, new Intent(Intent.ACTION_PACKAGE_REMOVED));
+        verify(mSubscriptionTracker).handleSubscriptionsChanged();
     }
 
     @Test
