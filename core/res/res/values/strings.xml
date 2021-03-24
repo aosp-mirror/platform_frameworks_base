@@ -5635,30 +5635,24 @@
     <!-- Accessibility label for the work tab button. [CHAR LIMIT=NONE] -->
     <string name="resolver_work_tab_accessibility">Work view</string>
 
-    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this specific content with work apps. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_with_work_apps">Can\u2019t share this with work apps</string>
+    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this content across profiles. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cross_profile_blocked">Blocked by your IT admin</string>
     <!-- Error message. This text is explaining that the user's IT admin doesn't allow this specific content to be shared with apps in the work profile. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_with_work_apps_explanation">Your IT admin doesn\u2019t allow you to share this content with apps in your work profile</string>
+    <string name="resolver_cant_share_with_work_apps_explanation">This content can\u2019t be shared with work apps</string>
 
-    <!-- Title of an error screen. This error message lets the user know that their IT admin doesn't allow them to open this specific content with a work app. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_access_work_apps">Can\u2019t open this with work apps</string>
     <!-- Error message. This message lets the user know that their IT admin doesn't allow them to open this specific content with an app in their work profile. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_access_work_apps_explanation">Your IT admin doesn\u2019t allow you to open this content with apps in your work profile</string>
+    <string name="resolver_cant_access_work_apps_explanation">This content can\u2019t be opened with work apps</string>
 
-    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this specific content with personal apps. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_with_personal_apps">Can\u2019t share this with personal apps</string>
     <!-- Error message. This text is explaining that the user's IT admin doesn't allow them to share this specific content with apps in their personal profile. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_with_personal_apps_explanation">Your IT admin doesn\u2019t allow you to share this content with apps in your personal profile</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation">This content can\u2019t be shared with personal apps</string>
 
-    <!-- Title of an error screen. This error message lets the user know that their IT admin doesn't allow them to open this specific content with a personal app. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_access_personal_apps">Can\u2019t open this with personal apps</string>
     <!-- Error message. This message lets the user know that their IT admin doesn't allow them to open this specific content with an app in their personal profile. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_access_personal_apps_explanation">Your IT admin doesn\u2019t allow you to open this content with apps in your personal profile</string>
+    <string name="resolver_cant_access_personal_apps_explanation">This content can\u2019t be opened with personal apps</string>
 
     <!-- Error message. This text lets the user know that they need to turn on work apps in order to share or open content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
     <string name="resolver_turn_on_work_apps">Work profile is paused</string>
     <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
-    <string name="resolver_switch_on_work">Turn on</string>
+    <string name="resolver_switch_on_work">Tap to turn on</string>
 
     <!-- Error message. This text lets the user know that their current work apps don't support the specific content that they're trying to share. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_work_apps_available_share">No work apps can support this content</string>
