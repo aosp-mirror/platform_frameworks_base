@@ -44,7 +44,7 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<ISessio
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().generateChallenge(mSequentialId);
+            getFreshDaemon().generateChallenge();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
         }
