@@ -267,8 +267,8 @@ public final class MandatoryStreamCombination {
                 mStreamsInformation.hashCode());
     }
 
-    private static enum SizeThreshold { VGA, PREVIEW, RECORD, MAXIMUM, s720p, s1440p }
-    private static enum ReprocessType { NONE, PRIVATE, YUV }
+    private static enum SizeThreshold { VGA, PREVIEW, RECORD, MAXIMUM, s720p, s1440p, FULL_RES }
+    private static enum ReprocessType { NONE, PRIVATE, YUV, REMOSAIC }
     private static final class StreamTemplate {
         public int mFormat;
         public SizeThreshold mSizeThreshold;
@@ -691,6 +691,18 @@ public final class MandatoryStreamCombination {
                 "Depth capture for mesh based object rendering"),
     };
 
+    private static StreamCombinationTemplate sUltraHighResolutionStreamCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.FULL_RES) },
+                "Full res YUV image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.FULL_RES) },
+                "Full res RAW capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.FULL_RES) },
+                "Full res JPEG still image capture"),
+    };
+
     /**
      * Helper builder class to generate a list of available mandatory stream combinations.
      * @hide
@@ -700,6 +712,7 @@ public final class MandatoryStreamCombination {
         private List<Integer> mCapabilities;
         private int mHwLevel, mCameraId;
         private StreamConfigurationMap mStreamConfigMap;
+        private StreamConfigurationMap mStreamConfigMapMaximumResolution;
         private boolean mIsHiddenPhysicalCamera;
 
         private final Size kPreviewSizeBound = new Size(1920, 1088);
@@ -712,13 +725,17 @@ public final class MandatoryStreamCombination {
          * @param displaySize The device display size.
          * @param capabilities The camera device capabilities.
          * @param sm The camera device stream configuration map.
+         * @param smMaxResolution The camera device stream configuration map when it runs in max
+         *                        resolution mode.
          */
         public Builder(int cameraId, int hwLevel, @NonNull Size displaySize,
-                @NonNull List<Integer> capabilities, @NonNull StreamConfigurationMap sm) {
+                @NonNull List<Integer> capabilities, @NonNull StreamConfigurationMap sm,
+                StreamConfigurationMap smMaxResolution) {
             mCameraId = cameraId;
             mDisplaySize = displaySize;
             mCapabilities = capabilities;
             mStreamConfigMap = sm;
+            mStreamConfigMapMaximumResolution = smMaxResolution;
             mHwLevel = hwLevel;
             mIsHiddenPhysicalCamera =
                     CameraManager.isHiddenPhysicalCamera(Integer.toString(mCameraId));
@@ -794,6 +811,97 @@ public final class MandatoryStreamCombination {
                 availableConcurrentStreamCombinations.add(streamCombination);
             }
             return Collections.unmodifiableList(availableConcurrentStreamCombinations);
+        }
+
+        /**
+         * Retrieve a list of all available mandatory stream combinations supported when
+         * {@link CaptureRequest#ANDROID_SENSOR_PIXEL_MODE} is set to
+         * {@link CameraMetadata#ANDROID_SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION}.
+         *
+         * @return a non-modifiable list of supported mandatory stream combinations or
+         *         null in case device is not backward compatible or the method encounters
+         *         an error.
+         */
+        public @NonNull List<MandatoryStreamCombination>
+                getAvailableMandatoryMaximumResolutionStreamCombinations() {
+
+            ArrayList<StreamCombinationTemplate> chosenStreamCombinations =
+                    new ArrayList<StreamCombinationTemplate>();
+
+            chosenStreamCombinations.addAll(Arrays.asList(sUltraHighResolutionStreamCombinations));
+
+            ArrayList<MandatoryStreamCombination> availableStreamCombinations =
+                    new ArrayList<MandatoryStreamCombination>();
+            boolean addRemosaicReprocessing = isRemosaicReprocessingSupported();
+            int remosaicSize = 0;
+            if (addRemosaicReprocessing) {
+                remosaicSize = 1;
+            }
+            availableStreamCombinations.ensureCapacity(
+                    chosenStreamCombinations.size() + remosaicSize);
+            fillMandatoryOutputStreamCombinations(availableStreamCombinations,
+                    chosenStreamCombinations, mStreamConfigMapMaximumResolution);
+            if (isRemosaicReprocessingSupported()) {
+                // Add reprocess mandatory streams
+                ArrayList<MandatoryStreamInformation> streamsInfo =
+                        new ArrayList<MandatoryStreamInformation>();
+
+                ArrayList<Size> inputSize = new ArrayList<Size>();
+                Size maxRawInputSize = getMaxSize(mStreamConfigMapMaximumResolution.getInputSizes(
+                        ImageFormat.RAW_SENSOR));
+                inputSize.add(maxRawInputSize);
+
+                streamsInfo.add(new MandatoryStreamInformation(inputSize,
+                        ImageFormat.RAW_SENSOR, /*isInput*/true));
+                streamsInfo.add(new MandatoryStreamInformation(inputSize,
+                        ImageFormat.RAW_SENSOR));
+                MandatoryStreamCombination streamCombination;
+                streamCombination = new MandatoryStreamCombination(streamsInfo,
+                        "Remosaic reprocessing", true);
+                availableStreamCombinations.add(streamCombination);
+            }
+            return Collections.unmodifiableList(availableStreamCombinations);
+        }
+
+        private void fillMandatoryOutputStreamCombinations(
+                ArrayList<MandatoryStreamCombination> availableStreamCombinations,
+                ArrayList<StreamCombinationTemplate> chosenStreamCombinations,
+                StreamConfigurationMap streamConfigMap) {
+
+            for (StreamCombinationTemplate combTemplate : chosenStreamCombinations) {
+                ArrayList<MandatoryStreamInformation> streamsInfo =
+                        new ArrayList<MandatoryStreamInformation>();
+                streamsInfo.ensureCapacity(combTemplate.mStreamTemplates.length);
+
+                for (StreamTemplate template : combTemplate.mStreamTemplates) {
+                    MandatoryStreamInformation streamInfo;
+                    List<Size> sizes = new ArrayList<Size>();
+                    Size sizeChosen =
+                            getMaxSize(streamConfigMap.getOutputSizes(
+                                    template.mFormat));
+                    sizes.add(sizeChosen);
+                    try {
+                        streamInfo = new MandatoryStreamInformation(sizes, template.mFormat);
+                    } catch (IllegalArgumentException e) {
+                        String cause = "No available sizes found for format: " + template.mFormat
+                                + " size threshold: " + template.mSizeThreshold + " combination: "
+                                + combTemplate.mDescription;
+                        throw new RuntimeException(cause, e);
+                    }
+                    streamsInfo.add(streamInfo);
+                }
+
+                MandatoryStreamCombination streamCombination;
+                try {
+                    streamCombination = new MandatoryStreamCombination(streamsInfo,
+                            combTemplate.mDescription, /*isReprocess*/false);
+                } catch (IllegalArgumentException e) {
+                    String cause =  "No stream information for mandatory combination: "
+                            + combTemplate.mDescription;
+                    throw new RuntimeException(cause, e);
+                }
+                availableStreamCombinations.add(streamCombination);
+            }
         }
 
         /**
@@ -948,7 +1056,6 @@ public final class MandatoryStreamCombination {
                         inputSize.add(maxYUVInputSize);
                         format = ImageFormat.YUV_420_888;
                     }
-
                     streamsInfo.add(new MandatoryStreamInformation(inputSize, format,
                                 /*isInput*/true));
                     streamsInfo.add(new MandatoryStreamInformation(inputSize, format));
@@ -974,7 +1081,6 @@ public final class MandatoryStreamCombination {
                                 combTemplate.mDescription);
                         return null;
                     }
-
                     streamsInfo.add(streamInfo);
                 }
 
@@ -1217,6 +1323,14 @@ public final class MandatoryStreamCombination {
         private boolean isYUVReprocessingSupported() {
             return isCapabilitySupported(
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING);
+        }
+
+        /**
+         * Check whether the current device supports YUV reprocessing.
+         */
+        private boolean isRemosaicReprocessingSupported() {
+            return isCapabilitySupported(
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING);
         }
 
         /**
