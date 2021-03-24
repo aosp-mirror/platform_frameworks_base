@@ -1673,11 +1673,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void setStatsProviderLimitAsync(@NonNull String iface, long quota) {
-            if (LOGV) Slog.v(TAG, "setStatsProviderLimitAsync(" + iface + "," + quota + ")");
-            // TODO: Set warning accordingly.
+        public void setStatsProviderWarningAndLimitAsync(
+                @NonNull String iface, long warning, long limit) {
+            if (LOGV) {
+                Slog.v(TAG, "setStatsProviderWarningAndLimitAsync("
+                        + iface + "," + warning + "," + limit + ")");
+            }
             invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetWarningAndLimit(iface,
-                    NetworkStatsProvider.QUOTA_UNLIMITED, quota));
+                    warning, limit));
         }
     }
 
