@@ -323,6 +323,14 @@ void IncrementalService::IncFsMount::setReadLogsEnabled(bool value) {
     }
 }
 
+void IncrementalService::IncFsMount::setReadLogsRequested(bool value) {
+    if (value) {
+        flags |= StorageFlags::ReadLogsRequested;
+    } else {
+        flags &= ~StorageFlags::ReadLogsRequested;
+    }
+}
+
 IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_view rootDir)
       : mVold(sm.getVoldService()),
         mDataLoaderManager(sm.getDataLoaderManager()),
@@ -804,32 +812,38 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
         return -EINVAL;
     }
 
-    std::unique_lock l(ifs->lock);
-    if (!enableReadLogs) {
-        return disableReadLogsLocked(*ifs);
-    }
+    std::string packageName;
 
-    if (!ifs->readLogsAllowed()) {
-        LOG(ERROR) << "enableReadLogs failed, readlogs disallowed for storageId: " << storageId;
-        return -EPERM;
-    }
+    {
+        std::unique_lock l(ifs->lock);
+        if (!enableReadLogs) {
+            return disableReadLogsLocked(*ifs);
+        }
 
-    if (!ifs->dataLoaderStub) {
-        // This should never happen - only DL can call enableReadLogs.
-        LOG(ERROR) << "enableReadLogs failed: invalid state";
-        return -EPERM;
-    }
+        if (!ifs->readLogsAllowed()) {
+            LOG(ERROR) << "enableReadLogs failed, readlogs disallowed for storageId: " << storageId;
+            return -EPERM;
+        }
 
-    // Check installation time.
-    const auto now = mClock->now();
-    const auto startLoadingTs = ifs->startLoadingTs;
-    if (startLoadingTs <= now && now - startLoadingTs > getReadLogsMaxInterval()) {
-        LOG(ERROR) << "enableReadLogs failed, readlogs can't be enabled at this time, storageId: "
-                   << storageId;
-        return -EPERM;
-    }
+        if (!ifs->dataLoaderStub) {
+            // This should never happen - only DL can call enableReadLogs.
+            LOG(ERROR) << "enableReadLogs failed: invalid state";
+            return -EPERM;
+        }
 
-    const auto& packageName = ifs->dataLoaderStub->params().packageName;
+        // Check installation time.
+        const auto now = mClock->now();
+        const auto startLoadingTs = ifs->startLoadingTs;
+        if (startLoadingTs <= now && now - startLoadingTs > getReadLogsMaxInterval()) {
+            LOG(ERROR)
+                    << "enableReadLogs failed, readlogs can't be enabled at this time, storageId: "
+                    << storageId;
+            return -EPERM;
+        }
+
+        packageName = ifs->dataLoaderStub->params().packageName;
+        ifs->setReadLogsRequested(true);
+    }
 
     // Check loader usage stats permission and apop.
     if (auto status =
@@ -849,8 +863,14 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
         return fromBinderStatus(status);
     }
 
-    if (auto status = applyStorageParamsLocked(*ifs, /*enableReadLogs=*/true); status != 0) {
-        return status;
+    {
+        std::unique_lock l(ifs->lock);
+        if (!ifs->readLogsRequested()) {
+            return 0;
+        }
+        if (auto status = applyStorageParamsLocked(*ifs, /*enableReadLogs=*/true); status != 0) {
+            return status;
+        }
     }
 
     registerAppOpsCallback(packageName);
@@ -859,6 +879,7 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
 }
 
 int IncrementalService::disableReadLogsLocked(IncFsMount& ifs) {
+    ifs.setReadLogsRequested(false);
     return applyStorageParamsLocked(ifs, /*enableReadLogs=*/false);
 }
 
@@ -2214,7 +2235,6 @@ void IncrementalService::onAppOpChanged(const std::string& packageName) {
         affected.reserve(mMounts.size());
         for (auto&& [id, ifs] : mMounts) {
             std::unique_lock ll(ifs->lock);
-
             if (ifs->mountId == id && ifs->dataLoaderStub &&
                 ifs->dataLoaderStub->params().packageName == packageName) {
                 affected.push_back(ifs);
@@ -2222,7 +2242,8 @@ void IncrementalService::onAppOpChanged(const std::string& packageName) {
         }
     }
     for (auto&& ifs : affected) {
-        applyStorageParamsLocked(*ifs, /*enableReadLogs=*/false);
+        std::unique_lock ll(ifs->lock);
+        disableReadLogsLocked(*ifs);
     }
 }
 
