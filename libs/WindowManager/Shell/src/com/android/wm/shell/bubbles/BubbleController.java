@@ -120,6 +120,16 @@ public class BubbleController {
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
+    private final WindowManagerShellWrapper mWindowManagerShellWrapper;
+    private final LauncherApps mLauncherApps;
+    private final IStatusBarService mBarService;
+    private final WindowManager mWindowManager;
+    private final ShellTaskOrganizer mTaskOrganizer;
+
+    // Used to post to main UI thread
+    private final ShellExecutor mMainExecutor;
+    private final Handler mMainHandler;
+
     private BubbleLogger mLogger;
     private BubbleData mBubbleData;
     private View mBubbleScrim;
@@ -148,12 +158,6 @@ public class BubbleController {
      */
     @Nullable private BubbleEntry mNotifEntryToExpandOnShadeUnlock;
 
-    private IStatusBarService mBarService;
-    private WindowManager mWindowManager;
-
-    // Used to post to main UI thread
-    private final ShellExecutor mMainExecutor;
-
     /** LayoutParams used to add the BubbleStackView to the window manager. */
     private WindowManager.LayoutParams mWmLayoutParams;
     /** Whether or not the BubbleStackView has been added to the WindowManager. */
@@ -176,15 +180,6 @@ public class BubbleController {
     private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
 
     private boolean mInflateSynchronously;
-
-    private ShellTaskOrganizer mTaskOrganizer;
-
-    /**
-     * Whether the IME is visible, as reported by the BubbleStackView. If it is, we'll make the
-     * Bubbles window NOT_FOCUSABLE so that touches on the Bubbles UI doesn't steal focus from the
-     * ActivityView and hide the IME.
-     */
-    private boolean mImeVisible = false;
 
     /** true when user is in status bar unlock shade. */
     private boolean mIsStatusBarShade = true;
@@ -231,13 +226,28 @@ public class BubbleController {
             ShellExecutor mainExecutor,
             Handler mainHandler) {
         mContext = context;
+        mLauncherApps = launcherApps;
+        mBarService = statusBarService == null
+                ? IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE))
+                : statusBarService;
+        mWindowManager = windowManager;
+        mWindowManagerShellWrapper = windowManagerShellWrapper;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mDataRepository = dataRepository;
         mLogger = bubbleLogger;
         mMainExecutor = mainExecutor;
-
+        mMainHandler = mainHandler;
+        mTaskOrganizer = organizer;
+        mSurfaceSynchronizer = synchronizer;
+        mCurrentUserId = ActivityManager.getCurrentUser();
         mBubblePositioner = positioner;
         mBubbleData = data;
+        mSavedBubbleKeysPerUser = new SparseSetArray<>();
+        mBubbleIconFactory = new BubbleIconFactory(context);
+    }
+
+    public void initialize() {
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(bubble -> {
             // Make sure NoMan knows suppression state so that anyone querying it can tell.
@@ -261,28 +271,18 @@ public class BubbleController {
         });
 
         try {
-            windowManagerShellWrapper.addPinnedStackListener(new BubblesImeListener());
+            mWindowManagerShellWrapper.addPinnedStackListener(new BubblesImeListener());
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        mSurfaceSynchronizer = synchronizer;
 
-        mWindowManager = windowManager;
-        mBarService = statusBarService == null
-                ? IStatusBarService.Stub.asInterface(
-                        ServiceManager.getService(Context.STATUS_BAR_SERVICE))
-                : statusBarService;
 
-        mSavedBubbleKeysPerUser = new SparseSetArray<>();
-        mCurrentUserId = ActivityManager.getCurrentUser();
         mBubbleData.setCurrentUserId(mCurrentUserId);
 
-        mBubbleIconFactory = new BubbleIconFactory(context);
-        mTaskOrganizer = organizer;
         mTaskOrganizer.addLocusIdListener((taskId, locus, visible) ->
                 mBubbleData.onLocusVisibilityChanged(taskId, locus, visible));
 
-        launcherApps.registerCallback(new LauncherApps.Callback() {
+        mLauncherApps.registerCallback(new LauncherApps.Callback() {
             @Override
             public void onPackageAdded(String s, UserHandle userHandle) {}
 
@@ -318,7 +318,7 @@ public class BubbleController {
                 mBubbleData.removeBubblesWithInvalidShortcuts(
                         packageName, validShortcuts, DISMISS_SHORTCUT_REMOVED);
             }
-        }, mainHandler);
+        }, mMainHandler);
     }
 
     @VisibleForTesting
@@ -525,10 +525,6 @@ public class BubbleController {
             // This means the stack has already been added. This shouldn't happen...
             e.printStackTrace();
         }
-    }
-
-    void onImeVisibilityChanged(boolean imeVisible) {
-        mImeVisible = imeVisible;
     }
 
     /** Removes the BubbleStackView from the WindowManager if it's there. */
