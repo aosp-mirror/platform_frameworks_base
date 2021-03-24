@@ -104,6 +104,18 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
+     * TODO(b/181887768): This method exists only for dogfooder transition and must be removed.
+     * @deprecated This method exists only for dogfooder transition and must be removed.
+     */
+    @Deprecated
+    public void setSchema(
+            @NonNull SetSchemaRequest request,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull Consumer<AppSearchResult<SetSchemaResponse>> callback) {
+        setSchema(request, callbackExecutor, callbackExecutor, callback);
+    }
+
+    /**
      * Sets the schema that represents the organizational structure of data within the AppSearch
      * database.
      *
@@ -113,7 +125,9 @@ public final class AppSearchSession implements Closeable {
      * no-op call.
      *
      * @param request the schema to set or update the AppSearch database to.
-     * @param executor Executor on which to invoke the callback.
+     * @param workExecutor Executor on which to schedule heavy client-side background work such as
+     *                     transforming documents.
+     * @param callbackExecutor Executor on which to invoke the callback.
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
      */
@@ -121,10 +135,12 @@ public final class AppSearchSession implements Closeable {
     //  exposed.
     public void setSchema(
             @NonNull SetSchemaRequest request,
-            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Executor workExecutor,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull Consumer<AppSearchResult<SetSchemaResponse>> callback) {
         Objects.requireNonNull(request);
-        Objects.requireNonNull(executor);
+        Objects.requireNonNull(workExecutor);
+        Objects.requireNonNull(callbackExecutor);
         Objects.requireNonNull(callback);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         List<Bundle> schemaBundles = new ArrayList<>(request.getSchemas().size());
@@ -153,10 +169,12 @@ public final class AppSearchSession implements Closeable {
                     request.getVersion(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
-                            executor.execute(() -> {
+                            callbackExecutor.execute(() -> {
                                 if (result.isSuccess()) {
                                     callback.accept(
                                             // TODO(b/177266929) implement Migration in platform.
+                                            // TODO(b/183177268): once migration is implemented, run
+                                            //  it on workExecutor.
                                             AppSearchResult.newSuccessfulResult(
                                                     new SetSchemaResponse.Builder().build()));
                                 } else {
@@ -332,8 +350,7 @@ public final class AppSearchSession implements Closeable {
 
                                 // Translate successful results
                                 for (Map.Entry<String, Bundle> bundleEntry :
-                                        (Set<Map.Entry<String, Bundle>>)
-                                                result.getSuccesses().entrySet()) {
+                                        ((Map<String, Bundle>) result.getSuccesses()).entrySet()) {
                                     GenericDocument document;
                                     try {
                                         document = new GenericDocument(bundleEntry.getValue());
@@ -352,8 +369,8 @@ public final class AppSearchSession implements Closeable {
 
                                 // Translate failed results
                                 for (Map.Entry<String, AppSearchResult<Bundle>> bundleEntry :
-                                        (Set<Map.Entry<String, AppSearchResult<Bundle>>>)
-                                                result.getFailures().entrySet()) {
+                                        ((Map<String, AppSearchResult<Bundle>>)
+                                                result.getFailures()).entrySet()) {
                                     documentResultBuilder.setFailure(
                                             bundleEntry.getKey(),
                                             bundleEntry.getValue().getResultCode(),
