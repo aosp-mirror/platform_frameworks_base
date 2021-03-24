@@ -252,7 +252,6 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
@@ -371,6 +370,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
+import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -12304,9 +12304,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public ArraySet<String> getOptimizablePackages() {
         ArraySet<String> pkgs = new ArraySet<>();
+        final boolean hibernationEnabled = AppHibernationService.isAppHibernationEnabled();
+        AppHibernationManagerInternal appHibernationManager =
+                mInjector.getLocalService(AppHibernationManagerInternal.class);
         synchronized (mLock) {
             for (AndroidPackage p : mPackages.values()) {
-                if (PackageDexOptimizer.canOptimizePackage(p)) {
+                // Checking hibernation state is an inexpensive call.
+                boolean isHibernating = hibernationEnabled
+                        && appHibernationManager.isHibernatingGlobally(p.getPackageName());
+                if (PackageDexOptimizer.canOptimizePackage(p) && !isHibernating) {
                     pkgs.add(p.getPackageName());
                 }
             }
@@ -27363,6 +27369,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 int callingUid, int userId) {
             return PackageManagerService.this.getPackageStartability(
                     packageName, callingUid, userId) == PACKAGE_STARTABILITY_FROZEN;
+        }
+
+        @Override
+        public void deleteOatArtifactsOfPackage(String packageName) {
+            PackageManagerService.this.deleteOatArtifactsOfPackage(packageName);
         }
     }
 
