@@ -39,6 +39,7 @@ import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
+import android.content.pm.AppSearchShortcutInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.IPackageManager;
@@ -1936,7 +1937,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 }
 
                 ArrayList<ShortcutInfo> cachedOrPinned = new ArrayList<>();
-                ps.findAll(cachedOrPinned, (ShortcutInfo si) -> si.isVisibleToPublisher()
+                ps.findAll(cachedOrPinned, AppSearchShortcutInfo.QUERY_IS_VISIBLE_CACHED_OR_PINNED,
+                        (ShortcutInfo si) -> si.isVisibleToPublisher()
                                 && si.isDynamic() && (si.isCached() || si.isPinned()),
                         ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
 
@@ -2433,8 +2435,9 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             // Dynamic shortcuts that are either cached or pinned will not get deleted.
-            ps.findAll(changedShortcuts, (ShortcutInfo si) -> si.isVisibleToPublisher()
-                    && si.isDynamic() && (si.isCached() || si.isPinned()),
+            ps.findAll(changedShortcuts, AppSearchShortcutInfo.QUERY_IS_VISIBLE_CACHED_OR_PINNED,
+                    (ShortcutInfo si) -> si.isVisibleToPublisher()
+                            && si.isDynamic() && (si.isCached() || si.isPinned()),
                     ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
 
             removedShortcuts = ps.deleteAllDynamicShortcuts(/*ignoreInvisible=*/ true);
@@ -2513,8 +2516,11 @@ public class ShortcutService extends IShortcutService.Stub {
                         | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
                         | (matchCached ? ShortcutInfo.FLAG_CACHED_ALL : 0);
 
+                final String query = AppSearchShortcutInfo.QUERY_IS_VISIBLE_TO_PUBLISHER + " "
+                        + createQuery(matchDynamic, matchPinned, matchManifest, matchCached);
+
                 callback.complete(getShortcutsWithQueryLocked(
-                        packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
+                        packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR, query,
                         (ShortcutInfo si) ->
                                 si.isVisibleToPublisher() && (si.getFlags() & shortcutFlags) != 0));
             }
@@ -2590,12 +2596,13 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @GuardedBy("mLock")
     private ParceledListSlice<ShortcutInfo> getShortcutsWithQueryLocked(@NonNull String packageName,
-            @UserIdInt int userId, int cloneFlags, @NonNull Predicate<ShortcutInfo> query) {
+            @UserIdInt int userId, int cloneFlags, @NonNull final String query,
+            @NonNull Predicate<ShortcutInfo> filter) {
 
         final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
         final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
-        ps.findAll(ret, query, cloneFlags);
+        ps.findAll(ret, query, filter, cloneFlags);
         return new ParceledListSlice<>(setReturnedByServer(ret));
     }
 
@@ -2853,6 +2860,28 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    private String createQuery(final boolean matchDynamic, final boolean matchPinned,
+            final boolean matchManifest, final boolean matchCached) {
+
+        final List<String> queries = new ArrayList<>(1);
+        if (matchDynamic) {
+            queries.add(AppSearchShortcutInfo.QUERY_IS_DYNAMIC);
+        }
+        if (matchPinned) {
+            queries.add(AppSearchShortcutInfo.QUERY_IS_PINNED);
+        }
+        if (matchManifest) {
+            queries.add(AppSearchShortcutInfo.QUERY_IS_MANIFEST);
+        }
+        if (matchCached) {
+            queries.add(AppSearchShortcutInfo.QUERY_IS_CACHED);
+        }
+        if (queries.isEmpty()) {
+            return "";
+        }
+        return "(" + String.join(" OR ", queries) + ")";
+    }
+
     /**
      * Remove all the information associated with a package.  This will really remove all the
      * information, including the restore information (i.e. it'll remove packages even if they're
@@ -2965,18 +2994,12 @@ public class ShortcutService extends IShortcutService.Stub {
                 int callingPid, int callingUid) {
             final ArraySet<String> ids = shortcutIds == null ? null
                     : new ArraySet<>(shortcutIds);
-            final ArraySet<LocusId> locIds = locusIds == null ? null
-                    : new ArraySet<>(locusIds);
 
             final ShortcutUser user = getUserShortcutsLocked(userId);
             final ShortcutPackage p = user.getPackageShortcutsIfExists(packageName);
             if (p == null) {
                 return; // No need to instantiate ShortcutPackage.
             }
-            final boolean matchDynamic = (queryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) != 0;
-            final boolean matchPinned = (queryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0;
-            final boolean matchManifest = (queryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) != 0;
-            final boolean matchCached = (queryFlags & ShortcutQuery.FLAG_MATCH_CACHED) != 0;
 
             final boolean canAccessAllShortcuts =
                     canSeeAnyPinnedShortcut(callingPackage, launcherUserId, callingPid, callingUid);
@@ -2984,38 +3007,64 @@ public class ShortcutService extends IShortcutService.Stub {
             final boolean getPinnedByAnyLauncher =
                     canAccessAllShortcuts &&
                     ((queryFlags & ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER) != 0);
+            queryFlags |= (getPinnedByAnyLauncher ? ShortcutQuery.FLAG_MATCH_PINNED : 0);
 
-            p.findAll(ret,
-                    (ShortcutInfo si) -> {
-                        if (si.getLastChangedTimestamp() < changedSince) {
-                            return false;
-                        }
-                        if (ids != null && !ids.contains(si.getId())) {
-                            return false;
-                        }
-                        if (locIds != null && !locIds.contains(si.getLocusId())) {
-                            return false;
-                        }
-                        if (componentName != null) {
-                            if (si.getActivity() != null
-                                    && !si.getActivity().equals(componentName)) {
-                                return false;
-                            }
-                        }
-                        if (matchDynamic && si.isDynamic()) {
-                            return true;
-                        }
-                        if ((matchPinned || getPinnedByAnyLauncher) && si.isPinned()) {
-                            return true;
-                        }
-                        if (matchManifest && si.isDeclaredInManifest()) {
-                            return true;
-                        }
-                        if (matchCached && si.isCached()) {
-                            return true;
-                        }
+            final Predicate<ShortcutInfo> filter = getFilterFromQuery(ids, locusIds, changedSince,
+                    componentName, queryFlags, getPinnedByAnyLauncher);
+            if (ids != null && !ids.isEmpty()) {
+                p.findAllByIds(ret, ids, filter, cloneFlag, callingPackage, launcherUserId,
+                        getPinnedByAnyLauncher);
+            } else {
+                final boolean matchDynamic = (queryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) != 0;
+                final boolean matchPinned = (queryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0;
+                final boolean matchManifest = (queryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) != 0;
+                final boolean matchCached = (queryFlags & ShortcutQuery.FLAG_MATCH_CACHED) != 0;
+                p.findAll(ret, createQuery(matchDynamic, matchPinned, matchManifest, matchCached),
+                        filter, cloneFlag, callingPackage, launcherUserId, getPinnedByAnyLauncher);
+            }
+        }
+
+        private Predicate<ShortcutInfo> getFilterFromQuery(@Nullable ArraySet<String> ids,
+                @Nullable List<LocusId> locusIds, long changedSince,
+                @Nullable ComponentName componentName, int queryFlags,
+                boolean getPinnedByAnyLauncher) {
+            final ArraySet<LocusId> locIds = locusIds == null ? null
+                    : new ArraySet<>(locusIds);
+
+            final boolean matchDynamic = (queryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) != 0;
+            final boolean matchPinned = (queryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0;
+            final boolean matchManifest = (queryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) != 0;
+            final boolean matchCached = (queryFlags & ShortcutQuery.FLAG_MATCH_CACHED) != 0;
+            return si -> {
+                if (si.getLastChangedTimestamp() < changedSince) {
+                    return false;
+                }
+                if (ids != null && !ids.contains(si.getId())) {
+                    return false;
+                }
+                if (locIds != null && !locIds.contains(si.getLocusId())) {
+                    return false;
+                }
+                if (componentName != null) {
+                    if (si.getActivity() != null
+                            && !si.getActivity().equals(componentName)) {
                         return false;
-                    }, cloneFlag, callingPackage, launcherUserId, getPinnedByAnyLauncher);
+                    }
+                }
+                if (matchDynamic && si.isDynamic()) {
+                    return true;
+                }
+                if ((matchPinned || getPinnedByAnyLauncher) && si.isPinned()) {
+                    return true;
+                }
+                if (matchManifest && si.isDeclaredInManifest()) {
+                    return true;
+                }
+                if (matchCached && si.isCached()) {
+                    return true;
+                }
+                return false;
+            };
         }
 
         @Override
@@ -3056,7 +3105,7 @@ public class ShortcutService extends IShortcutService.Stub {
             }
 
             final ArrayList<ShortcutInfo> list = new ArrayList<>(1);
-            p.findAll(list,
+            p.findAllByIds(list, Collections.singletonList(shortcutId),
                     (ShortcutInfo si) -> shortcutId.equals(si.getId()),
                     /* clone flags=*/ 0, callingPackage, launcherUserId, getPinnedByAnyLauncher);
             return list.size() == 0 ? null : list.get(0);
@@ -3086,9 +3135,11 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (sp != null) {
                     // List the shortcuts that are pinned only, these will get removed.
                     removedShortcuts = new ArrayList<>();
-                    sp.findAll(removedShortcuts, (ShortcutInfo si) -> si.isVisibleToPublisher()
-                            && si.isPinned() && !si.isCached() && !si.isDynamic()
-                            && !si.isDeclaredInManifest(), ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO,
+                    sp.findAll(removedShortcuts, AppSearchShortcutInfo.QUERY_IS_VISIBLE_PINNED_ONLY,
+                            (ShortcutInfo si) -> si.isVisibleToPublisher()
+                                    && si.isPinned() && !si.isCached() && !si.isDynamic()
+                                    && !si.isDeclaredInManifest(),
+                            ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO,
                             callingPackage, launcherUserId, false);
                 }
                 // Get list of shortcuts that will get unpinned.
@@ -5175,7 +5226,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         List<ShortcutInfo> result = new ArrayList<>();
-        ps.findAll(result, (ShortcutInfo si) -> resultIds.contains(si.getId()),
+        ps.findAllByIds(result, resultIds, (ShortcutInfo si) -> resultIds.contains(si.getId()),
                 ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
         return result;
     }
