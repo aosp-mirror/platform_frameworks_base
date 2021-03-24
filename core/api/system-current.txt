@@ -10342,7 +10342,6 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean stopRecognition();
     field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
     field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
-    field public static final int HOTWORD_DETECTION_FALSE_ALERT = 0; // 0x0
     field public static final int MODEL_PARAM_THRESHOLD_FACTOR = 0; // 0x0
     field public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 2; // 0x2
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
@@ -10365,7 +10364,7 @@ package android.service.voice {
     method public abstract void onError();
     method public abstract void onRecognitionPaused();
     method public abstract void onRecognitionResumed();
-    method public void onRejected(int);
+    method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
   }
 
   public static class AlwaysOnHotwordDetector.EventPayload {
@@ -10414,7 +10413,7 @@ package android.service.voice {
 
   public static final class HotwordDetectionService.DspHotwordDetectionCallback {
     method public void onDetected();
-    method public void onRejected();
+    method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
   }
 
   public interface HotwordDetector {
