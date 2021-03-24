@@ -13121,7 +13121,7 @@ public final class Settings {
          * @see #ENABLE_RESTRICTED_BUCKET
          * @hide
          */
-        public static final int DEFAULT_ENABLE_RESTRICTED_BUCKET = 0;
+        public static final int DEFAULT_ENABLE_RESTRICTED_BUCKET = 1;
 
         /**
          * Whether or not app auto restriction is enabled. When it is enabled, settings app will
