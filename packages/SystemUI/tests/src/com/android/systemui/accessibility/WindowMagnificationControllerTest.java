@@ -303,6 +303,19 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void performA11yActions_visible_notifyAccessibilityActionPerformed() {
+        final int displayId = mContext.getDisplayId();
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(2.5f, Float.NaN,
+                    Float.NaN);
+        });
+
+        mMirrorView.performAccessibilityAction(R.id.accessibility_action_move_up, null);
+
+        verify(mWindowMagnifierCallback).onAccessibilityActionPerformed(eq(displayId));
+    }
+
+    @Test
     public void onNavigationModeChanged_updateMirrorViewLayout() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,

@@ -116,6 +116,11 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     }
 
     @Override
+    public void onAccessibilityActionPerformed(int displayId) {
+        updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+    }
+
+    @Override
     public void onTouchInteractionStart(int displayId, int mode) {
         handleUserInteractionChanged(displayId, mode);
     }
@@ -145,8 +150,13 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     }
 
     private void updateMagnificationButton(int displayId, int mode) {
-        if (isActivated(displayId, mode) && mMagnificationCapabilities
-                == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
+        final boolean isActivated = isActivated(displayId, mode);
+        final boolean showButton;
+        synchronized (mLock) {
+            showButton = isActivated && mMagnificationCapabilities
+                    == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
+        }
+        if (showButton) {
             getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
         } else {
             getWindowMagnificationMgr().removeMagnificationButton(displayId);
@@ -414,13 +424,22 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
     private boolean isActivated(int displayId, int mode) {
         boolean isActivated = false;
-        if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
-                && mFullScreenMagnificationController != null) {
-            isActivated = mFullScreenMagnificationController.isMagnifying(displayId)
-                    || mFullScreenMagnificationController.isForceShowMagnifiableBounds(displayId);
-        } else if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
-                && mWindowMagnificationMgr != null) {
-            isActivated = mWindowMagnificationMgr.isWindowMagnifierEnabled(displayId);
+        if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN) {
+            synchronized (mLock) {
+                if (mFullScreenMagnificationController == null) {
+                    return false;
+                }
+                isActivated = mFullScreenMagnificationController.isMagnifying(displayId)
+                        || mFullScreenMagnificationController.isForceShowMagnifiableBounds(
+                        displayId);
+            }
+        } else if (mode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
+            synchronized (mLock) {
+                if (mWindowMagnificationMgr == null) {
+                    return false;
+                }
+                isActivated = mWindowMagnificationMgr.isWindowMagnifierEnabled(displayId);
+            }
         }
         return isActivated;
     }

@@ -46,4 +46,11 @@ interface WindowMagnifierCallback {
      * @param scale the target scale, or {@link Float#NaN} to leave unchanged
      */
     void onPerformScaleAction(int displayId, float scale);
+
+    /**
+     * Called when the accessibility action is performed.
+     *
+     * @param displayId The logical display id.
+     */
+    void onAccessibilityActionPerformed(int displayId);
 }

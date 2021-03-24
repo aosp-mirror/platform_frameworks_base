@@ -95,6 +95,13 @@ public class WindowMagnificationManager implements
         void onPerformScaleAction(int displayId, float scale);
 
         /**
+         * Called when the accessibility action is performed.
+         *
+         * @param displayId The logical display id.
+         */
+        void onAccessibilityActionPerformed(int displayId);
+
+        /**
          * Called when the state of the magnification activation is changed.
          *
          * @param activated {@code true} if the magnification is activated, otherwise {@code false}.
@@ -535,9 +542,12 @@ public class WindowMagnificationManager implements
 
         @Override
         public void onPerformScaleAction(int displayId, float scale) {
-            synchronized (mLock) {
-                mCallback.onPerformScaleAction(displayId, scale);
-            }
+            mCallback.onPerformScaleAction(displayId, scale);
+        }
+
+        @Override
+        public void onAccessibilityActionPerformed(int displayId) {
+            mCallback.onAccessibilityActionPerformed(displayId);
         }
 
         @Override
