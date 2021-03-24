@@ -71,7 +71,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_silky_home", "true");
         DEFAULT_FLAGS.put("settings_contextual_home", "false");
         DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "false");
-        DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "false");
+        DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "false");
     }
 
