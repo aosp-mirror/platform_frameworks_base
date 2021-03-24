@@ -52844,7 +52844,7 @@ package android.view.translation {
     method @NonNull public android.view.translation.TranslationResponse.Builder setFinalResponse(boolean);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int, @NonNull android.view.translation.TranslationResponseValue);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValues(@NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue>);
-    method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
+    method @Deprecated @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
     method @NonNull public android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int, @NonNull android.view.translation.ViewTranslationResponse);
     method @NonNull public android.view.translation.TranslationResponse.Builder setViewTranslationResponses(@NonNull android.util.SparseArray<android.view.translation.ViewTranslationResponse>);
   }
