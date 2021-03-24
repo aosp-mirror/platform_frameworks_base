@@ -4227,6 +4227,11 @@
     <permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE"
                 android:protectionLevel="normal" />
 
+    <!-- Allows an application to create new companion device associations.
+         @hide -->
+    <permission android:name="android.permission.ASSOCIATE_COMPANION_DEVICES"
+        android:protectionLevel="internal|role" />
+
     <!-- @SystemApi Allows an application to use SurfaceFlinger's low level features.
          <p>Not for use by third-party applications.
          @hide

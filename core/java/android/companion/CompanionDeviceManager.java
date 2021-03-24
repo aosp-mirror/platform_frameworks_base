@@ -425,6 +425,32 @@ public final class CompanionDeviceManager {
                     mContext.getPackageName(), deviceAddress);
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+        }
+    }
+
+    /**
+     * Associates given device with given app for the given user directly, without UI prompt.
+     *
+     * @return whether successful
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES)
+    public boolean associate(
+            @NonNull String packageName,
+            @NonNull MacAddress macAddress) {
+        if (!checkFeaturePresent()) {
+            return false;
+        }
+        Objects.requireNonNull(packageName, "package name cannot be null");
+        Objects.requireNonNull(macAddress, "mac address cannot be null");
+
+        UserHandle user = android.os.Process.myUserHandle();
+        try {
+            return mService.createAssociation(
+                    packageName, macAddress.toString(), user.getIdentifier());
+        } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
