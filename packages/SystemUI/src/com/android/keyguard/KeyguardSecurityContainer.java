@@ -33,7 +33,6 @@ import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -107,7 +106,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private boolean mOneHandedMode = false;
     private SecurityMode mSecurityMode = SecurityMode.Invalid;
     private ViewPropertyAnimator mRunningOneHandedAnimator;
-    private final OrientationEventListener mOrientationEventListener;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -247,13 +245,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
         super(context, attrs, defStyle);
         mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
         mViewConfiguration = ViewConfiguration.get(context);
-
-        mOrientationEventListener = new OrientationEventListener(context) {
-            @Override
-            public void onOrientationChanged(int orientation) {
-                updateLayoutForSecurityMode(mSecurityMode);
-            }
-        };
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
@@ -262,7 +253,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
         updateBiometricRetry(securityMode, faceAuthEnabled);
 
         updateLayoutForSecurityMode(securityMode);
-        mOrientationEventListener.enable();
     }
 
     void updateLayoutForSecurityMode(SecurityMode securityMode) {
@@ -385,7 +375,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
             mAlertDialog = null;
         }
         mSecurityViewFlipper.setWindowInsetsAnimationCallback(null);
-        mOrientationEventListener.disable();
     }
 
     @Override
@@ -661,6 +650,15 @@ public class KeyguardSecurityContainer extends FrameLayout {
         setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
                 resolveSizeAndState(maxHeight, heightMeasureSpec,
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        // After a layout pass, we need to re-place the inner bouncer, as our bounds may have
+        // changed.
+        updateSecurityViewLocation(/* animate= */false);
     }
 
     void showAlmostAtWipeDialog(int attempts, int remaining, int userType) {

@@ -487,5 +487,9 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
                 mView.setLayoutParams(lp);
             }
         }
+
+        if (mKeyguardSecurityContainerController != null) {
+            mKeyguardSecurityContainerController.updateResources();
+        }
     }
 }
