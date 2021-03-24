@@ -389,6 +389,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @DataClass.ParcelWith(ForBoolean.class)
     private Boolean nativeHeapZeroInit;
 
+    @Nullable
+    @DataClass.ParcelWith(ForBoolean.class)
+    private Boolean requestOptimizedExternalStorageAccess;
+
     // TODO(chiuwinson): Non-null
     @Nullable
     private ArraySet<String> mimeGroups;
@@ -1068,6 +1072,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.setGwpAsanMode(gwpAsanMode);
         appInfo.setMemtagMode(memtagMode);
         appInfo.setNativeHeapZeroInit(nativeHeapZeroInit);
+        appInfo.setRequestOptimizedExternalStorageAccess(requestOptimizedExternalStorageAccess);
         appInfo.setBaseCodePath(mBaseApkPath);
         appInfo.setBaseResourcePath(mBaseApkPath);
         appInfo.setCodePath(mPath);
@@ -1203,6 +1208,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeMap(this.mProperties);
         dest.writeInt(this.memtagMode);
         sForBoolean.parcel(this.nativeHeapZeroInit, dest, flags);
+        sForBoolean.parcel(this.requestOptimizedExternalStorageAccess, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1326,6 +1332,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.mProperties = in.createTypedArrayMap(Property.CREATOR);
         this.memtagMode = in.readInt();
         this.nativeHeapZeroInit = sForBoolean.unparcel(in);
+        this.requestOptimizedExternalStorageAccess = sForBoolean.unparcel(in);
         assignDerivedFields();
     }
 
@@ -2105,6 +2112,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return nativeHeapZeroInit;
     }
 
+    @Nullable
+    @Override
+    public Boolean hasRequestOptimizedExternalStorageAccess() {
+        return requestOptimizedExternalStorageAccess;
+    }
+
     @Override
     public boolean isPartiallyDirectBootAware() {
         return getBoolean(Booleans.PARTIALLY_DIRECT_BOOT_AWARE);
@@ -2554,6 +2567,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return this;
     }
 
+    @Override
+    public ParsingPackageImpl setRequestOptimizedExternalStorageAccess(@Nullable Boolean value) {
+        requestOptimizedExternalStorageAccess = value;
+        return this;
+    }
     @Override
     public ParsingPackageImpl setPartiallyDirectBootAware(boolean value) {
         return setBoolean(Booleans.PARTIALLY_DIRECT_BOOT_AWARE, value);
