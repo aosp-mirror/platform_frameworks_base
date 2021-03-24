@@ -115,10 +115,12 @@ package android.net {
   }
 
   public final class VpnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
-    ctor public VpnTransportInfo(int);
+    ctor public VpnTransportInfo(int, @Nullable String);
     method public int describeContents();
+    method @NonNull public android.net.VpnTransportInfo makeCopy(long);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnTransportInfo> CREATOR;
+    field @Nullable public final String sessionId;
     field public final int type;
   }
 

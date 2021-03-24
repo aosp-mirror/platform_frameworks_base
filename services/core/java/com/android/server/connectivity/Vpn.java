@@ -464,7 +464,7 @@ public class Vpn {
                 .addTransportType(NetworkCapabilities.TRANSPORT_VPN)
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
-                .setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE))
+                .setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE, null))
                 .build();
 
         loadAlwaysOnPackage();
@@ -528,7 +528,7 @@ public class Vpn {
     private void resetNetworkCapabilities() {
         mNetworkCapabilities = new NetworkCapabilities.Builder(mNetworkCapabilities)
                 .setUids(null)
-                .setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE))
+                .setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE, null))
                 .build();
     }
 
@@ -1256,7 +1256,7 @@ public class Vpn {
         capsBuilder.setUids(createUserAndRestrictedProfilesRanges(mUserId,
                 mConfig.allowedApplications, mConfig.disallowedApplications));
 
-        capsBuilder.setTransportInfo(new VpnTransportInfo(getActiveVpnType()));
+        capsBuilder.setTransportInfo(new VpnTransportInfo(getActiveVpnType(), mConfig.session));
 
         // Only apps targeting Q and above can explicitly declare themselves as metered.
         // These VPNs are assumed metered unless they state otherwise.
