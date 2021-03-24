@@ -8999,6 +8999,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public String getName();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getType();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public android.os.ParcelUuid[] getUuids();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean setAlias(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPairingConfirmation(boolean);
     method public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
