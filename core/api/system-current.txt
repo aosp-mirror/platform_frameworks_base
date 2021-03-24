@@ -951,6 +951,9 @@ package android.app.admin {
     field @Deprecated public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3; // 0x3
     field public static final int PROVISIONING_TRIGGER_QR_CODE = 2; // 0x2
     field public static final int PROVISIONING_TRIGGER_UNSPECIFIED = 0; // 0x0
+    field public static final String REQUIRED_APP_MANAGED_DEVICE = "android.app.REQUIRED_APP_MANAGED_DEVICE";
+    field public static final String REQUIRED_APP_MANAGED_PROFILE = "android.app.REQUIRED_APP_MANAGED_PROFILE";
+    field public static final String REQUIRED_APP_MANAGED_USER = "android.app.REQUIRED_APP_MANAGED_USER";
     field public static final int STATE_USER_PROFILE_COMPLETE = 4; // 0x4
     field public static final int STATE_USER_PROFILE_FINALIZED = 5; // 0x5
     field public static final int STATE_USER_SETUP_COMPLETE = 2; // 0x2
