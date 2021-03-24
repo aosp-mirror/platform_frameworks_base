@@ -266,6 +266,7 @@ import android.security.Credentials;
 import android.system.Os;
 import android.telephony.TelephonyManager;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -9966,11 +9967,41 @@ public class ConnectivityServiceTest {
                         && session.getSessionType() == QosSession.TYPE_EPS_BEARER), eq(attributes));
 
         mQosCallbackMockHelper.mAgentWrapper.getNetworkAgent()
-                .sendQosSessionLost(qosCallbackId, sessionId);
+                .sendQosSessionLost(qosCallbackId, sessionId, QosSession.TYPE_EPS_BEARER);
         waitForIdle();
         verify(mQosCallbackMockHelper.mCallback).onQosSessionLost(argThat(session ->
                 session.getSessionId() == sessionId
                         && session.getSessionType() == QosSession.TYPE_EPS_BEARER));
+    }
+
+    @Test
+    public void testNrQosCallbackAvailableAndLost() throws Exception {
+        mQosCallbackMockHelper = new QosCallbackMockHelper();
+        final int sessionId = 10;
+        final int qosCallbackId = 1;
+
+        when(mQosCallbackMockHelper.mFilter.validate())
+                .thenReturn(QosCallbackException.EX_TYPE_FILTER_NONE);
+        mQosCallbackMockHelper.registerQosCallback(
+                mQosCallbackMockHelper.mFilter, mQosCallbackMockHelper.mCallback);
+        waitForIdle();
+
+        final NrQosSessionAttributes attributes = new NrQosSessionAttributes(
+                1, 2, 3, 4, 5, 6, 7, new ArrayList<>());
+        mQosCallbackMockHelper.mAgentWrapper.getNetworkAgent()
+                .sendQosSessionAvailable(qosCallbackId, sessionId, attributes);
+        waitForIdle();
+
+        verify(mQosCallbackMockHelper.mCallback).onNrQosSessionAvailable(argThat(session ->
+                session.getSessionId() == sessionId
+                        && session.getSessionType() == QosSession.TYPE_NR_BEARER), eq(attributes));
+
+        mQosCallbackMockHelper.mAgentWrapper.getNetworkAgent()
+                .sendQosSessionLost(qosCallbackId, sessionId, QosSession.TYPE_NR_BEARER);
+        waitForIdle();
+        verify(mQosCallbackMockHelper.mCallback).onQosSessionLost(argThat(session ->
+                session.getSessionId() == sessionId
+                        && session.getSessionType() == QosSession.TYPE_NR_BEARER));
     }
 
     @Test
