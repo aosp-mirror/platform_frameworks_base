@@ -6467,6 +6467,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private boolean isNetworkProviderWithIdRegistered(final int providerId) {
+        for (final NetworkProviderInfo npi : mNetworkProviderInfos.values()) {
+            if (npi.providerId == providerId) return true;
+        }
+        return false;
+    }
+
     /**
      * Register or update a network offer.
      * @param newOffer The new offer. If the callback member is the same as an existing
@@ -6474,7 +6481,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private void handleRegisterNetworkOffer(@NonNull final NetworkOffer newOffer) {
         ensureRunningOnConnectivityServiceThread();
-
+        if (!isNetworkProviderWithIdRegistered(newOffer.providerId)) {
+            // This may actually happen if a provider updates its score or registers and then
+            // immediately unregisters. The offer would still be in the handler queue, but the
+            // provider would have been removed.
+            if (DBG) log("Received offer from an unregistered provider");
+            return;
+        }
         final NetworkOfferInfo existingOffer = findNetworkOfferInfoByCallback(newOffer.callback);
         if (null != existingOffer) {
             handleUnregisterNetworkOffer(existingOffer);
