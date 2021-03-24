@@ -376,11 +376,11 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
 
         // Add root task with activity.
-        final Task rootTask = createTaskStackOnDisplay(dc);
+        final Task rootTask = createTask(dc);
         assertEquals(dc.getDisplayId(), rootTask.getDisplayContent().getDisplayId());
         assertEquals(dc, rootTask.getDisplayContent());
 
-        final Task task = createTaskInStack(rootTask, 0 /* userId */);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createNonAttachedActivityRecord(dc);
         task.addChild(activity, 0);
         assertEquals(dc, task.getDisplayContent());
@@ -450,15 +450,15 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc1 = createNewDisplay();
 
         // Add root task with activity.
-        final Task rootTask0 = createTaskStackOnDisplay(dc0);
-        final Task task0 = createTaskInStack(rootTask0, 0 /* userId */);
+        final Task rootTask0 = createTask(dc0);
+        final Task task0 = createTaskInRootTask(rootTask0, 0 /* userId */);
         final ActivityRecord activity = createNonAttachedActivityRecord(dc0);
         task0.addChild(activity, 0);
         dc0.configureDisplayPolicy();
         assertNotNull(dc0.mTapDetector);
 
-        final Task rootTask1 = createTaskStackOnDisplay(dc1);
-        final Task task1 = createTaskInStack(rootTask1, 0 /* userId */);
+        final Task rootTask1 = createTask(dc1);
+        final Task task1 = createTaskInRootTask(rootTask1, 0 /* userId */);
         final ActivityRecord activity1 = createNonAttachedActivityRecord(dc0);
         task1.addChild(activity1, 0);
         dc1.configureDisplayPolicy();
@@ -1681,8 +1681,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_behindWindow() {
         DisplayContent display = createNewDisplay();
-        Task rootTask = createTaskStackOnDisplay(display);
-        Task task = createTaskInStack(rootTask, 0 /* userId */);
+        Task rootTask = createTask(display);
+        Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         WindowState activityWindow = createAppWindow(task, TYPE_APPLICATION, "App Window");
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
 
@@ -1694,8 +1694,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_cantReceiveKeys() {
         DisplayContent display = createNewDisplay();
-        Task rootTask = createTaskStackOnDisplay(display);
-        Task task = createTaskInStack(rootTask, 0 /* userId */);
+        Task rootTask = createTask(display);
+        Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         WindowState activityWindow = createAppWindow(task, TYPE_APPLICATION, "App Window");
         WindowState invisible = createWindow(null, TYPE_APPLICATION, "invisible");
         invisible.mViewVisibility = View.INVISIBLE;  // make canReceiveKeys return false
@@ -1708,8 +1708,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_taskId() {
         DisplayContent display = createNewDisplay();
-        Task rootTask = createTaskStackOnDisplay(display);
-        Task task = createTaskInStack(rootTask, 0 /* userId */);
+        Task rootTask = createTask(display);
+        Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         WindowState window = createAppWindow(task, TYPE_APPLICATION, "App Window");
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
 
@@ -1720,8 +1720,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFindScrollCaptureTargetWindow_taskIdCantReceiveKeys() {
         DisplayContent display = createNewDisplay();
-        Task rootTask = createTaskStackOnDisplay(display);
-        Task task = createTaskInStack(rootTask, 0 /* userId */);
+        Task rootTask = createTask(display);
+        Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         WindowState window = createAppWindow(task, TYPE_APPLICATION, "App Window");
         window.mViewVisibility = View.INVISIBLE;  // make canReceiveKeys return false
         WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");

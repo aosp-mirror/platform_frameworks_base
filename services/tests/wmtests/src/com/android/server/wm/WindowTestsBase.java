@@ -429,47 +429,40 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return newTaskDisplayArea;
     }
 
-    /** Creates a {@link Task} and adds it to the specified {@link DisplayContent}. */
-    Task createTaskStackOnDisplay(DisplayContent dc) {
-        return createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);
-    }
-
-    Task createTaskStackOnDisplay(int windowingMode, int activityType, DisplayContent dc) {
-        return new TaskBuilder(dc.mAtmService.mTaskSupervisor)
-                .setDisplay(dc)
-                .setWindowingMode(windowingMode)
-                .setActivityType(activityType)
-                .setIntent(new Intent())
-                .build();
-    }
-
-    Task createTaskStackOnTaskDisplayArea(int windowingMode, int activityType,
-            TaskDisplayArea tda) {
-        return new TaskBuilder(tda.mDisplayContent.mAtmService.mTaskSupervisor)
-                .setTaskDisplayArea(tda)
-                .setWindowingMode(windowingMode)
-                .setActivityType(activityType)
-                .setIntent(new Intent())
-                .build();
-    }
-
-    /** Creates a {@link Task} and adds it to the specified {@link Task}. */
-    Task createTaskInStack(Task stack, int userId) {
-        final Task task = new TaskBuilder(stack.mTaskSupervisor)
-                .setUserId(userId)
-                .setParentTask(stack)
-                .build();
-        return task;
-    }
-
+    /**
+     *  Creates a {@link Task} with a simple {@link ActivityRecord} and adds to the given
+     *  {@link TaskDisplayArea}.
+     */
     Task createTaskWithActivity(TaskDisplayArea taskDisplayArea,
             int windowingMode, int activityType, boolean onTop, boolean twoLevelTask) {
+        return createTask(taskDisplayArea, windowingMode, activityType,
+                onTop, true /* createActivity */, twoLevelTask);
+    }
+
+    /** Creates a {@link Task} and adds to the given {@link DisplayContent}. */
+    Task createTask(DisplayContent dc) {
+        return createTask(dc.getDefaultTaskDisplayArea(),
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+    }
+
+    Task createTask(DisplayContent dc, int windowingMode, int activityType) {
+        return createTask(dc.getDefaultTaskDisplayArea(), windowingMode, activityType);
+    }
+
+    Task createTask(TaskDisplayArea taskDisplayArea, int windowingMode, int activityType) {
+        return createTask(taskDisplayArea, windowingMode, activityType,
+                true /* onTop */, false /* createActivity */, false /* twoLevelTask */);
+    }
+
+    /** Creates a {@link Task} and adds to the given {@link TaskDisplayArea}. */
+    Task createTask(TaskDisplayArea taskDisplayArea, int windowingMode, int activityType,
+            boolean onTop, boolean createActivity, boolean twoLevelTask) {
         final TaskBuilder builder = new TaskBuilder(mSupervisor)
                 .setTaskDisplayArea(taskDisplayArea)
                 .setWindowingMode(windowingMode)
                 .setActivityType(activityType)
                 .setOnTop(onTop)
-                .setCreateActivity(true);
+                .setCreateActivity(createActivity);
         if (twoLevelTask) {
             return builder
                     .setCreateParentTask(true)
@@ -478,6 +471,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         } else {
             return builder.build();
         }
+    }
+
+    /** Creates a {@link Task} and adds to the given root {@link Task}. */
+    Task createTaskInRootTask(Task rootTask, int userId) {
+        final Task task = new TaskBuilder(rootTask.mTaskSupervisor)
+                .setUserId(userId)
+                .setParentTask(rootTask)
+                .build();
+        return task;
     }
 
     /** Creates an {@link ActivityRecord}. */
@@ -503,7 +505,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     ActivityRecord createActivityRecord(DisplayContent dc, int windowingMode,
             int activityType) {
-        final Task task = createTaskStackOnDisplay(windowingMode, activityType, dc);
+        final Task task = createTask(dc, windowingMode, activityType);
         return createActivityRecord(dc, task);
     }
 
@@ -535,7 +537,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     ActivityRecord createActivityRecordWithParentTask(DisplayContent dc, int windowingMode,
             int activityType) {
-        final Task task = createTaskStackOnDisplay(windowingMode, activityType, dc);
+        final Task task = createTask(dc, windowingMode, activityType);
         return createActivityRecordWithParentTask(task);
     }
 
@@ -889,7 +891,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         .setParentTask(mParentTask).build();
             } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateRootTask(
                     mParentTask.getWindowingMode(), mParentTask.getActivityType())) {
-                // The stack can be the task root.
+                // The parent task can be the task root.
                 mTask = mParentTask;
             }
 
@@ -939,9 +941,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 doReturn(true).when(activity).fillsParent();
                 mTask.addChild(activity);
                 if (mOnTop) {
-                    // Move the task to front after activity added.
-                    // Or {@link TaskDisplayArea#mPreferredTopFocusableStack} could be other stacks
-                    // (e.g. home stack).
+                    // Move the task to front after activity is added.
+                    // Or {@link TaskDisplayArea#mPreferredTopFocusableRootTask} could be other
+                    // root tasks (e.g. home root task).
                     mTask.moveToFront("createActivity");
                 }
                 // Make visible by default...
@@ -1145,8 +1147,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         .build();
                 if (mOnTop) {
                     // We move the task to front again in order to regain focus after activity
-                    // added to the stack. Or {@link TaskDisplayArea#mPreferredTopFocusableStack}
-                    // could be other stacks (e.g. home stack).
+                    // is added. Or {@link TaskDisplayArea#mPreferredTopFocusableRootTask} could be
+                    // other root tasks (e.g. home root task).
                     task.moveToFront("createActivityTask");
                 } else {
                     task.moveToBack("createActivityTask", null);

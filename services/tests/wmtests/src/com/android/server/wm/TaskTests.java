@@ -121,8 +121,8 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer() {
-        final Task taskController1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(taskController1, 0 /* userId */);
+        final Task taskController1 = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(taskController1, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         task.removeIfPossible();
@@ -134,8 +134,8 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer_deferRemoval() {
-        final Task taskController1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(taskController1, 0 /* userId */);
+        final Task taskController1 = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(taskController1, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         doReturn(true).when(task).shouldDeferRemoval();
@@ -155,10 +155,10 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testReparent() {
-        final Task taskController1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(taskController1, 0 /* userId */);
-        final Task taskController2 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task2 = createTaskInStack(taskController2, 0 /* userId */);
+        final Task taskController1 = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(taskController1, 0 /* userId */);
+        final Task taskController2 = createTask(mDisplayContent);
+        final Task task2 = createTaskInRootTask(taskController2, 0 /* userId */);
 
         boolean gotException = false;
         try {
@@ -185,14 +185,14 @@ public class TaskTests extends WindowTestsBase {
     @Test
     public void testReparent_BetweenDisplays() {
         // Create first task on primary display.
-        final Task rootTask1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(rootTask1, 0 /* userId */);
+        final Task rootTask1 = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask1, 0 /* userId */);
         assertEquals(mDisplayContent, rootTask1.getDisplayContent());
 
         // Create second display and put second task on it.
         final DisplayContent dc = createNewDisplay();
-        final Task rootTask2 = createTaskStackOnDisplay(dc);
-        final Task task2 = createTaskInStack(rootTask2, 0 /* userId */);
+        final Task rootTask2 = createTask(dc);
+        final Task task2 = createTaskInRootTask(rootTask2, 0 /* userId */);
         // Reparent and check state
         clearInvocations(task);  // reset the number of onDisplayChanged for task.
         task.reparent(rootTask2, 0, false /* moveParents */, "testReparent_BetweenDisplays");
@@ -204,8 +204,8 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testBounds() {
-        final Task rootTask1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(rootTask1, 0 /* userId */);
+        final Task rootTask1 = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask1, 0 /* userId */);
 
         // Check that setting bounds also updates surface position
         task.setWindowingMode(WINDOWING_MODE_FREEFORM);
@@ -216,8 +216,8 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testIsInTask() {
-        final Task task1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task2 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task1 = createTask(mDisplayContent);
+        final Task task2 = createTask(mDisplayContent);
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent, task1);
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent, task2);
         assertEquals(activity1, task1.isInTask(activity1));
@@ -226,7 +226,7 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testRemoveChildForOverlayTask() {
-        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTask(mDisplayContent);
         final int taskId = task.mTaskId;
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent, task);
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent, task);
@@ -249,10 +249,10 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testSwitchUser() {
-        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        final Task childTask = createTaskInStack(rootTask, 0 /* userId */);
-        final Task leafTask1 = createTaskInStack(childTask, 10 /* userId */);
-        final Task leafTask2 = createTaskInStack(childTask, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task childTask = createTaskInRootTask(rootTask, 0 /* userId */);
+        final Task leafTask1 = createTaskInRootTask(childTask, 10 /* userId */);
+        final Task leafTask2 = createTaskInRootTask(childTask, 0 /* userId */);
         assertEquals(1, rootTask.getChildCount());
         assertEquals(leafTask2, childTask.getTopChild());
 
@@ -264,9 +264,9 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testEnsureActivitiesVisible() {
-        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        final Task leafTask1 = createTaskInStack(rootTask, 0 /* userId */);
-        final Task leafTask2 = createTaskInStack(rootTask, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task leafTask1 = createTaskInRootTask(rootTask, 0 /* userId */);
+        final Task leafTask2 = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent, leafTask1);
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent, leafTask2);
 
@@ -289,7 +289,7 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testResolveNonResizableTaskWindowingMode() {
-        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTask(mDisplayContent);
         Configuration parentConfig = task.getParent().getConfiguration();
         parentConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         doReturn(false).when(task).isResizeable();
@@ -320,10 +320,10 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testHandlesOrientationChangeFromDescendant() {
-        final Task rootTask = createTaskStackOnDisplay(WINDOWING_MODE_MULTI_WINDOW,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task leafTask1 = createTaskInStack(rootTask, 0 /* userId */);
-        final Task leafTask2 = createTaskInStack(rootTask, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent,
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        final Task leafTask1 = createTaskInRootTask(rootTask, 0 /* userId */);
+        final Task leafTask2 = createTaskInRootTask(rootTask, 0 /* userId */);
         leafTask1.getWindowConfiguration().setActivityType(ACTIVITY_TYPE_HOME);
         leafTask2.getWindowConfiguration().setActivityType(ACTIVITY_TYPE_STANDARD);
 
@@ -337,7 +337,7 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testAlwaysOnTop() {
-        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTask(mDisplayContent);
         task.setAlwaysOnTop(true);
         task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         assertTrue(task.isAlwaysOnTop());
@@ -1256,7 +1256,7 @@ public class TaskTests extends WindowTestsBase {
         task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
         task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        final Task leafTask = createTaskInStack(task, 0 /* userId */);
+        final Task leafTask = createTaskInRootTask(task, 0 /* userId */);
 
         leafTask.setHasBeenVisible(true);
         task.setHasBeenVisible(true);

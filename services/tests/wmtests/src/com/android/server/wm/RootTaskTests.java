@@ -111,9 +111,9 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testRootTaskPositionChildAt() {
-        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(rootTask, 0 /* userId */);
-        final Task task2 = createTaskInStack(rootTask, 1 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task1 = createTaskInRootTask(rootTask, 0 /* userId */);
+        final Task task2 = createTaskInRootTask(rootTask, 1 /* userId */);
 
         // Current user root task should be moved to top.
         rootTask.positionChildAt(WindowContainer.POSITION_TOP, task1, false /* includingParents */);
@@ -126,8 +126,8 @@ public class RootTaskTests extends WindowTestsBase {
         assertEquals(rootTask.mChildren.get(1), task1);
 
         // Non-leaf task should be moved to top regardless of the user id.
-        createTaskInStack(task2, 0 /* userId */);
-        createTaskInStack(task2, 1 /* userId */);
+        createTaskInRootTask(task2, 0 /* userId */);
+        createTaskInRootTask(task2, 1 /* userId */);
         rootTask.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
         assertEquals(rootTask.mChildren.get(0), task1);
         assertEquals(rootTask.mChildren.get(1), task2);
@@ -161,8 +161,8 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testRootTaskRemoveImmediately() {
-        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(rootTask, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         assertEquals(rootTask, task.getRootTask());
 
         // Remove root task and check if its child is also removed.
@@ -173,8 +173,8 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer() {
-        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(rootTask, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
 
         assertNotNull(rootTask);
         assertNotNull(task);
@@ -189,8 +189,8 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer_deferRemoval() {
-        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(rootTask, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
 
         // Root task removal is deferred if one of its child is animating.
         doReturn(true).when(rootTask).hasWindowsAlive();
@@ -213,12 +213,12 @@ public class RootTaskTests extends WindowTestsBase {
     @Test
     public void testReparent() {
         // Create first root task on primary display.
-        final Task rootTask1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(rootTask1, 0 /* userId */);
+        final Task rootTask1 = createTask(mDisplayContent);
+        final Task task1 = createTaskInRootTask(rootTask1, 0 /* userId */);
 
         // Create second display and put second root task on it.
         final DisplayContent dc = createNewDisplay();
-        final Task rootTask2 = createTaskStackOnDisplay(dc);
+        final Task rootTask2 = createTask(dc);
 
         // Reparent
         clearInvocations(task1); // reset the number of onDisplayChanged for task.
@@ -232,7 +232,7 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testTaskOutset() {
-        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTask(mDisplayContent);
         final int taskOutset = 10;
         spyOn(task);
         doReturn(taskOutset).when(task).getTaskOutset();

@@ -76,15 +76,15 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void getOrCreateLaunchRootRespectsResolvedWindowingMode() {
-        final Task rootTask = createTaskStackOnDisplay(
-                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task rootTask = createTask(
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         rootTask.mCreatedByOrganizer = true;
         final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
         taskDisplayArea.setLaunchRootTask(
                 rootTask, new int[]{WINDOWING_MODE_FREEFORM}, new int[]{ACTIVITY_TYPE_STANDARD});
 
-        final Task candidateRootTask = createTaskStackOnDisplay(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task candidateRootTask = createTask(
+                mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         final LaunchParams launchParams = new LaunchParams();
         launchParams.mWindowingMode = WINDOWING_MODE_FREEFORM;
@@ -97,15 +97,15 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void getOrCreateLaunchRootUsesActivityOptionsWindowingMode() {
-        final Task rootTask = createTaskStackOnDisplay(
-                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task rootTask = createTask(
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         rootTask.mCreatedByOrganizer = true;
         final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
         taskDisplayArea.setLaunchRootTask(
                 rootTask, new int[]{WINDOWING_MODE_FREEFORM}, new int[]{ACTIVITY_TYPE_STANDARD});
 
-        final Task candidateRootTask = createTaskStackOnDisplay(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task candidateRootTask = createTask(
+                mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
@@ -118,9 +118,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void testActivityWithZBoost_taskDisplayAreaDoesNotMoveUp() {
-        final Task rootTask = createTaskStackOnDisplay(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task task = createTaskInStack(rootTask, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         task.addChild(activity, 0 /* addPos */);
         final TaskDisplayArea taskDisplayArea = activity.getDisplayArea();
@@ -137,8 +136,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void testRootTaskPositionChildAt() {
-        Task pinnedTask = createTaskStackOnDisplay(
-                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        Task pinnedTask = createTask(
+                mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
         // Root task should contain visible app window to be considered visible.
         assertFalse(pinnedTask.isVisible());
         final ActivityRecord pinnedApp = createNonAttachedActivityRecord(mDisplayContent);
@@ -146,8 +145,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         assertTrue(pinnedTask.isVisible());
 
         // Test that always-on-top root task can't be moved to position other than top.
-        final Task rootTask1 = createTaskStackOnDisplay(mDisplayContent);
-        final Task rootTask2 = createTaskStackOnDisplay(mDisplayContent);
+        final Task rootTask1 = createTask(mDisplayContent);
+        final Task rootTask2 = createTask(mDisplayContent);
 
         final WindowContainer taskContainer = rootTask1.getParent();
 
@@ -170,8 +169,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void testRootTaskPositionBelowPinnedRootTask() {
-        Task pinnedTask = createTaskStackOnDisplay(
-                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        Task pinnedTask = createTask(
+                mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
         // Root task should contain visible app window to be considered visible.
         assertFalse(pinnedTask.isVisible());
         final ActivityRecord pinnedApp = createNonAttachedActivityRecord(mDisplayContent);
@@ -179,7 +178,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         assertTrue(pinnedTask.isVisible());
 
         // Test that no root task can be above pinned root task.
-        final Task rootTask1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task rootTask1 = createTask(mDisplayContent);
 
         final WindowContainer taskContainer = rootTask1.getParent();
 
@@ -206,8 +205,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         mDisplayContent.mDontMoveToTop = false;
 
         // The display contains pinned root task that was added in {@link #setUp}.
-        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(rootTask, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
 
         // Add another display at top.
         mWm.mRoot.positionChildAt(WindowContainer.POSITION_TOP, createNewDisplay(),
@@ -231,8 +230,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         mDisplayContent.mDontMoveToTop = false;
 
         // The display contains pinned root task that was added in {@link #setUp}.
-        Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        Task task = createTaskInStack(rootTask, 0 /* userId */);
+        Task rootTask = createTask(mDisplayContent);
+        Task task = createTaskInRootTask(rootTask, 0 /* userId */);
 
         // Add another display at top.
         mWm.mRoot.positionChildAt(WindowContainer.POSITION_TOP, createNewDisplay(),
@@ -260,8 +259,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         mDisplayContent.mDontMoveToTop = true;
 
         // The display contains pinned root task that was added in {@link #setUp}.
-        Task rootTask = createTaskStackOnDisplay(mDisplayContent);
-        Task task = createTaskInStack(rootTask, 0 /* userId */);
+        Task rootTask = createTask(mDisplayContent);
+        Task task = createTaskInRootTask(rootTask, 0 /* userId */);
 
         // Add another display at top.
         mWm.mRoot.positionChildAt(WindowContainer.POSITION_TOP, createNewDisplay(),
@@ -282,8 +281,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void testReuseTaskAsRootTask() {
-        final Task candidateTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task candidateTask = createTask(mDisplayContent);
         final int type = ACTIVITY_TYPE_STANDARD;
         assertGetOrCreateRootTask(WINDOWING_MODE_FULLSCREEN, type, candidateTask,
                 true /* reuseCandidate */);
@@ -428,7 +426,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     @Test
     @UseTestDisplay
     public void testRemove_reparentToDefault() {
-        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTask(mDisplayContent);
         final TaskDisplayArea displayArea = task.getDisplayArea();
         displayArea.remove();
         assertTrue(displayArea.isRemoved());
@@ -443,7 +441,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     @Test
     @UseTestDisplay
     public void testRemove_rootTaskCreatedByOrganizer() {
-        final Task task = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTask(mDisplayContent);
         task.mCreatedByOrganizer = true;
         final TaskDisplayArea displayArea = task.getDisplayArea();
         displayArea.remove();
