@@ -255,6 +255,7 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.utils.CoordinateTransforms;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -624,6 +625,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private PowerManager.WakeLock mDrawLock;
 
     private final Rect mTmpRect = new Rect();
+    private final Rect mTmpRect2 = new Rect();
     private final Point mTmpPoint = new Point();
 
     private final Transaction mTmpTransaction;
@@ -1136,13 +1138,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * @return {@code true} if the application runs in size compatibility mode or has an app level
-     * scaling override set.
+     * scaling override set. This method always returns {@code false} on child window because it
+     * should follow parent's scale.
      * @see CompatModePackages#getCompatScale
      * @see android.content.res.CompatibilityInfo#supportsScreen
      * @see ActivityRecord#hasSizeCompatBounds()
      */
     boolean hasCompatScale() {
-        return mOverrideScale != 1f || hasCompatScale(mAttrs, mActivityRecord);
+        return (mOverrideScale != 1f || hasCompatScale(mAttrs, mActivityRecord)) && !mIsChildWindow;
     }
 
     /**
@@ -1314,7 +1317,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            layoutDisplayFrame = new Rect(windowFrames.mDisplayFrame);
+            layoutDisplayFrame = mTmpRect2;
+            layoutDisplayFrame.set(windowFrames.mDisplayFrame);
             windowFrames.mDisplayFrame.set(windowFrames.mContainingFrame);
             layoutXDiff = mInsetFrame.left - windowFrames.mContainingFrame.left;
             layoutYDiff = mInsetFrame.top - windowFrames.mContainingFrame.top;
@@ -4359,6 +4363,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // required by {@link Gravity#apply} call.
             w = Math.min(w, pw);
             h = Math.min(h, ph);
+        }
+
+        if (mIsChildWindow) {
+            final WindowState parent = getTopParentWindow();
+            if (parent.hasCompatScale()) {
+                // Scale the containing and display frames because they are in screen coordinates.
+                // The position of frames are already relative to parent so only size is scaled.
+                mTmpRect.set(containingFrame);
+                containingFrame = mTmpRect;
+                CoordinateTransforms.scaleRectSize(containingFrame, parent.mInvGlobalScale);
+                if (fitToDisplay) {
+                    mTmpRect2.set(displayFrame);
+                    displayFrame = mTmpRect2;
+                    CoordinateTransforms.scaleRectSize(displayFrame, parent.mInvGlobalScale);
+                }
+            }
         }
 
         // Set mFrame
