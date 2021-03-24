@@ -53,6 +53,7 @@
 
 #include <media/MediaCodecBuffer.h>
 #include <media/hardware/VideoAPI.h>
+#include <media/stagefright/CodecBase.h>
 #include <media/stagefright/MediaCodec.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -82,6 +83,16 @@ enum {
     EVENT_SET_CALLBACK = 2,
     EVENT_FRAME_RENDERED = 3,
     EVENT_FIRST_TUNNEL_FRAME_READY = 4,
+};
+
+// From MediaFormat.java
+enum {
+    TYPE_NULL           = 0,
+    TYPE_INTEGER        = 1,
+    TYPE_LONG           = 2,
+    TYPE_FLOAT          = 3,
+    TYPE_STRING         = 4,
+    TYPE_BYTE_BUFFER    = 5,
 };
 
 static struct CryptoErrorCodes {
@@ -140,6 +151,8 @@ static struct {
 } gByteBufferInfo;
 
 static struct {
+    jclass clazz;
+    jmethodID ctorId;
     jmethodID sizeId;
     jmethodID getId;
     jmethodID addId;
@@ -153,6 +166,13 @@ static struct {
     jfieldID validId;
     jfieldID lockId;
 } gLinearBlockInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctorId;
+    jfieldID nameId;
+    jfieldID typeId;
+} gDescriptorInfo;
 
 struct fields_t {
     jmethodID postEventFromNativeID;
@@ -935,6 +955,74 @@ void JMediaCodec::selectAudioPresentation(const int32_t presentationId, const in
     msg->setInt32("audio-presentation-presentation-id", presentationId);
     msg->setInt32("audio-presentation-program-id", programId);
     (void)mCodec->setParameters(msg);
+}
+
+status_t JMediaCodec::querySupportedVendorParameters(JNIEnv *env, jobject *namesObj) {
+    std::vector<std::string> names;
+    status_t status = mCodec->querySupportedVendorParameters(&names);
+    if (status != OK) {
+        return status;
+    }
+    *namesObj = env->NewObject(gArrayListInfo.clazz, gArrayListInfo.ctorId);
+    for (const std::string &name : names) {
+        ScopedLocalRef<jstring> nameStr{env, env->NewStringUTF(name.c_str())};
+        (void)env->CallBooleanMethod(*namesObj, gArrayListInfo.addId, nameStr.get());
+    }
+    return OK;
+}
+
+status_t JMediaCodec::describeParameter(JNIEnv *env, jstring name, jobject *descObj) {
+    const char *tmp = env->GetStringUTFChars(name, nullptr);
+    CodecParameterDescriptor desc;
+    status_t status = mCodec->describeParameter(tmp, &desc);
+    env->ReleaseStringUTFChars(name, tmp);
+    if (status != OK) {
+        return status;
+    }
+    jint type = TYPE_NULL;
+    switch (desc.type) {
+        case AMessage::kTypeInt32:  type = TYPE_INTEGER;     break;
+        case AMessage::kTypeSize:
+        case AMessage::kTypeInt64:  type = TYPE_LONG;        break;
+        case AMessage::kTypeFloat:  type = TYPE_FLOAT;       break;
+        case AMessage::kTypeString: type = TYPE_STRING;      break;
+        case AMessage::kTypeBuffer: type = TYPE_BYTE_BUFFER; break;
+        default:                    type = TYPE_NULL;        break;
+    }
+    if (type == TYPE_NULL) {
+        return BAD_VALUE;
+    }
+    *descObj = env->NewObject(gDescriptorInfo.clazz, gDescriptorInfo.ctorId);
+    env->SetObjectField(*descObj, gDescriptorInfo.nameId, name);
+    env->SetIntField(*descObj, gDescriptorInfo.typeId, type);
+    return OK;
+}
+
+static void BuildVectorFromList(JNIEnv *env, jobject list, std::vector<std::string> *vec) {
+    ScopedLocalRef<jclass> listClazz{env, env->FindClass("java/util/List")};
+    ScopedLocalRef<jclass> iterClazz{env, env->FindClass("java/util/Iterator")};
+    jmethodID hasNextID = env->GetMethodID(iterClazz.get(), "hasNext", "()Z");
+    jmethodID nextID = env->GetMethodID(iterClazz.get(), "next", "()Ljava/lang/Object;");
+    jobject it = env->CallObjectMethod(
+            list, env->GetMethodID(listClazz.get(), "iterator", "()Ljava/util/Iterator;"));
+    while (env->CallBooleanMethod(it, hasNextID)) {
+        jstring name = (jstring)env->CallObjectMethod(it, nextID);
+        const char *tmp = env->GetStringUTFChars(name, nullptr);
+        vec->push_back(tmp);
+        env->ReleaseStringUTFChars(name, tmp);
+    }
+}
+
+status_t JMediaCodec::subscribeToVendorParameters(JNIEnv *env, jobject namesObj) {
+    std::vector<std::string> names;
+    BuildVectorFromList(env, namesObj, &names);
+    return mCodec->subscribeToVendorParameters(names);
+}
+
+status_t JMediaCodec::unsubscribeFromVendorParameters(JNIEnv *env, jobject namesObj) {
+    std::vector<std::string> names;
+    BuildVectorFromList(env, namesObj, &names);
+    return mCodec->unsubscribeFromVendorParameters(names);
 }
 
 static jthrowable createCodecException(
@@ -2671,6 +2759,73 @@ static void android_media_MediaCodec_setAudioPresentation(
     codec->selectAudioPresentation((int32_t)presentationId, (int32_t)programId);
 }
 
+static jobject android_media_MediaCodec_getSupportedVendorParameters(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return NULL;
+    }
+
+    jobject ret = NULL;
+    status_t status = codec->querySupportedVendorParameters(env, &ret);
+    if (status != OK) {
+        throwExceptionAsNecessary(env, status);
+    }
+
+    return ret;
+}
+
+static jobject android_media_MediaCodec_getParameterDescriptor(
+        JNIEnv *env, jobject thiz, jstring name) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return NULL;
+    }
+
+    jobject ret = NULL;
+    status_t status = codec->describeParameter(env, name, &ret);
+    if (status != OK) {
+        ret = NULL;
+    }
+    return ret;
+}
+
+static void android_media_MediaCodec_subscribeToVendorParameters(
+        JNIEnv *env, jobject thiz, jobject names) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    status_t status = codec->subscribeToVendorParameters(env, names);
+    if (status != OK) {
+        throwExceptionAsNecessary(env, status);
+    }
+    return;
+}
+
+static void android_media_MediaCodec_unsubscribeFromVendorParameters(
+        JNIEnv *env, jobject thiz, jobject names) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    status_t status = codec->unsubscribeFromVendorParameters(env, names);
+    if (status != OK) {
+        throwExceptionAsNecessary(env, status);
+    }
+    return;
+}
+
 static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     ScopedLocalRef<jclass> clazz(
             env, env->FindClass("android/media/MediaCodec"));
@@ -2930,6 +3085,10 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
 
     clazz.reset(env->FindClass("java/util/ArrayList"));
     CHECK(clazz.get() != NULL);
+    gArrayListInfo.clazz = (jclass)env->NewGlobalRef(clazz.get());
+
+    gArrayListInfo.ctorId = env->GetMethodID(clazz.get(), "<init>", "()V");
+    CHECK(gArrayListInfo.ctorId != NULL);
 
     gArrayListInfo.sizeId = env->GetMethodID(clazz.get(), "size", "()I");
     CHECK(gArrayListInfo.sizeId != NULL);
@@ -2960,6 +3119,19 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
 
     gLinearBlockInfo.lockId = env->GetFieldID(clazz.get(), "mLock", "Ljava/lang/Object;");
     CHECK(gLinearBlockInfo.lockId != NULL);
+
+    clazz.reset(env->FindClass("android/media/MediaCodec$ParameterDescriptor"));
+    CHECK(clazz.get() != NULL);
+    gDescriptorInfo.clazz = (jclass)env->NewGlobalRef(clazz.get());
+
+    gDescriptorInfo.ctorId = env->GetMethodID(clazz.get(), "<init>", "()V");
+    CHECK(gDescriptorInfo.ctorId != NULL);
+
+    gDescriptorInfo.nameId = env->GetFieldID(clazz.get(), "mName", "Ljava/lang/String;");
+    CHECK(gDescriptorInfo.nameId != NULL);
+
+    gDescriptorInfo.typeId = env->GetFieldID(clazz.get(), "mType", "I");
+    CHECK(gDescriptorInfo.typeId != NULL);
 }
 
 static void android_media_MediaCodec_native_setup(
@@ -3288,6 +3460,21 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_setAudioPresentation", "(II)V",
       (void *)android_media_MediaCodec_setAudioPresentation },
+
+    { "native_getSupportedVendorParameters", "()Ljava/util/List;",
+      (void *)android_media_MediaCodec_getSupportedVendorParameters },
+
+    { "native_getParameterDescriptor",
+      "(Ljava/lang/String;)Landroid/media/MediaCodec$ParameterDescriptor;",
+      (void *)android_media_MediaCodec_getParameterDescriptor },
+
+    { "native_subscribeToVendorParameters",
+      "(Ljava/util/List;)V",
+      (void *)android_media_MediaCodec_subscribeToVendorParameters},
+
+    { "native_unsubscribeFromVendorParameters",
+      "(Ljava/util/List;)V",
+      (void *)android_media_MediaCodec_unsubscribeFromVendorParameters},
 
     { "native_init", "()V", (void *)android_media_MediaCodec_native_init },
 
