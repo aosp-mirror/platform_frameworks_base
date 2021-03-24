@@ -4450,6 +4450,7 @@ package android.location {
     method public boolean hasLowPowerMode();
     method public boolean hasMeasurementCorrections();
     method public boolean hasMeasurementCorrectionsExcessPathLength();
+    method public boolean hasMeasurementCorrectionsForDriving();
     method public boolean hasMeasurementCorrectionsLosSats();
     method @Deprecated public boolean hasMeasurementCorrectionsReflectingPane();
     method public boolean hasMeasurementCorrectionsReflectingPlane();
@@ -4465,6 +4466,7 @@ package android.location {
     method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrections(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsExcessPathLength(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsForDriving(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsLosSats(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsReflectingPlane(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrelationVectors(boolean);
