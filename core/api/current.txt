@@ -20589,7 +20589,7 @@ package android.media {
     method public long getPresentationTimeUs();
   }
 
-  public class MediaCodec.ParameterDescriptor {
+  public static class MediaCodec.ParameterDescriptor {
     method @NonNull public String getName();
     method public int getType();
   }
