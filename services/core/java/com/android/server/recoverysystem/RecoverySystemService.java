@@ -734,7 +734,15 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             return REBOOT_ERROR_SLOT_MISMATCH;
         }
 
-        if (!mInjector.getLockSettingsService().armRebootEscrow()) {
+        final long origId = Binder.clearCallingIdentity();
+        boolean result;
+        try {
+            result = mInjector.getLockSettingsService().armRebootEscrow();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+
+        if (!result) {
             Slog.w(TAG, "Failure to escrow key for reboot");
             return REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE;
         }
@@ -742,11 +750,20 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return REBOOT_ERROR_NONE;
     }
 
+    private boolean useServerBasedRoR() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
+                    "server_based_ror_enabled", false);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     private void reportMetricsOnRebootWithLskf(String packageName, boolean slotSwitch,
             @ResumeOnRebootRebootErrorCode int errorCode) {
         int uid = mInjector.getUidFromPackageName(packageName);
-        boolean serverBased = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
-                "server_based_ror_enabled", false);
+        boolean serverBased = useServerBasedRoR();
         int preparedClientCount;
         synchronized (this) {
             preparedClientCount = mCallerPreparedForReboot.size();
