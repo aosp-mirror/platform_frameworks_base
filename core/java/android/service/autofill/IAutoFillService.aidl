@@ -31,4 +31,5 @@ oneway interface IAutoFillService {
     void onConnectedStateChanged(boolean connected);
     void onFillRequest(in FillRequest request, in IFillCallback callback);
     void onSaveRequest(in SaveRequest request, in ISaveCallback callback);
+    void onSavedPasswordCountRequest(in IResultReceiver receiver);
 }
