@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -851,6 +852,7 @@ public final class PermissionManager {
      *
      * @hide
      */
+    @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
     public List<PermGroupUsage> getIndicatorAppOpUsageData() {
