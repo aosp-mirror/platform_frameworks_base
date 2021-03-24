@@ -100,6 +100,21 @@ static bool isPageAligned(IncFsSize s) {
     return (s & (Constants::blockSize - 1)) == 0;
 }
 
+static bool getEnforceReadLogsMaxIntervalForSystemDataLoaders() {
+    return android::base::GetBoolProperty("debug.incremental.enforce_readlogs_max_interval_for_"
+                                          "system_dataloaders",
+                                          false);
+}
+
+static Seconds getReadLogsMaxInterval() {
+    constexpr int limit = duration_cast<Seconds>(Constants::readLogsMaxInterval).count();
+    int readlogs_max_interval_secs =
+            std::min(limit,
+                     android::base::GetIntProperty<
+                             int>("debug.incremental.readlogs_max_interval_sec", limit));
+    return Seconds{readlogs_max_interval_secs};
+}
+
 template <base::LogSeverity level = base::ERROR>
 bool mkdirOrLog(std::string_view name, int mode = 0770, bool allowExisting = true) {
     auto cstr = path::c_str(name);
@@ -711,7 +726,8 @@ bool IncrementalService::startLoading(StorageId storageId,
         dataLoaderStub = ifs->dataLoaderStub;
     }
 
-    if (dataLoaderStub->isSystemDataLoader()) {
+    if (dataLoaderStub->isSystemDataLoader() &&
+        !getEnforceReadLogsMaxIntervalForSystemDataLoaders()) {
         // Readlogs from system dataloader (adb) can always be collected.
         ifs->startLoadingTs = TimePoint::max();
     } else {
@@ -719,7 +735,7 @@ bool IncrementalService::startLoading(StorageId storageId,
         const auto startLoadingTs = mClock->now();
         ifs->startLoadingTs = startLoadingTs;
         // Setup a callback to disable the readlogs after max interval.
-        addTimedJob(*mTimedQueue, storageId, Constants::readLogsMaxInterval,
+        addTimedJob(*mTimedQueue, storageId, getReadLogsMaxInterval(),
                     [this, storageId, startLoadingTs]() {
                         const auto ifs = getIfs(storageId);
                         if (!ifs) {
@@ -807,7 +823,7 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
     // Check installation time.
     const auto now = mClock->now();
     const auto startLoadingTs = ifs->startLoadingTs;
-    if (startLoadingTs <= now && now - startLoadingTs > Constants::readLogsMaxInterval) {
+    if (startLoadingTs <= now && now - startLoadingTs > getReadLogsMaxInterval()) {
         LOG(ERROR) << "enableReadLogs failed, readlogs can't be enabled at this time, storageId: "
                    << storageId;
         return -EPERM;
