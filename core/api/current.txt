@@ -21634,6 +21634,7 @@ package android.media {
     field public static final String FEATURE_LowLatency = "low-latency";
     field public static final String FEATURE_MultipleFrames = "multiple-frames";
     field public static final String FEATURE_PartialFrame = "partial-frame";
+    field public static final String FEATURE_QpBounds = "qp-bounds";
     field public static final String FEATURE_SecurePlayback = "secure-playback";
     field public static final String FEATURE_TunneledPlayback = "tunneled-playback";
     field public int[] colorFormats;
