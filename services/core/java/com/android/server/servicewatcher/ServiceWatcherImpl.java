@@ -147,13 +147,23 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
 
     @Override
     public String toString() {
-        return mServiceConnection.getBoundServiceInfo().toString();
+        MyServiceConnection serviceConnection;
+        synchronized (this) {
+            serviceConnection = mServiceConnection;
+        }
+
+        return serviceConnection.getBoundServiceInfo().toString();
     }
 
     @Override
     public void dump(PrintWriter pw) {
-        pw.println("target service=" + mServiceConnection.getBoundServiceInfo());
-        pw.println("connected=" + mServiceConnection.isConnected());
+        MyServiceConnection serviceConnection;
+        synchronized (this) {
+            serviceConnection = mServiceConnection;
+        }
+
+        pw.println("target service=" + serviceConnection.getBoundServiceInfo());
+        pw.println("connected=" + serviceConnection.isConnected());
     }
 
     // runs on the handler thread, and expects most of it's methods to be called from that thread
