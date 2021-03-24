@@ -1991,8 +1991,20 @@ public class NotificationPanelViewController extends PanelViewController {
         float qsExpansionFraction = getQsExpansionFraction();
         mQs.setQsExpansion(qsExpansionFraction, getHeaderTranslation());
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
-        mScrimController.setQsExpansion(qsExpansionFraction);
+        mScrimController.setQsPosition(qsExpansionFraction,
+                calculateQsBottomPosition(qsExpansionFraction));
         mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
+    }
+
+    private int calculateQsBottomPosition(float qsExpansionFraction) {
+        int qsBottomY = (int) getHeaderTranslation() + mQs.getQsMinExpansionHeight();
+        if (qsExpansionFraction != 0.0) {
+            qsBottomY = (int) MathUtils.lerp(
+                    qsBottomY, mQs.getDesiredHeight(), qsExpansionFraction);
+        }
+        // to account for shade overshooting animation, see setSectionPadding method
+        if (mSectionPadding > 0) qsBottomY += mSectionPadding;
+        return qsBottomY;
     }
 
     private String determineAccessibilityPaneTitle() {
