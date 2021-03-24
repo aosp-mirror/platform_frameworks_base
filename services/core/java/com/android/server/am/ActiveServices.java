@@ -4878,17 +4878,20 @@ public final class ActiveServices {
             return true;
         }
 
-        if (r.app != null) {
+        if (r != null && r.app != null) {
             ActiveInstrumentation instr = r.app.getActiveInstrumentation();
             if (instr != null && instr.mHasBackgroundActivityStartsPermission) {
                 return true;
             }
         }
 
-        final boolean hasAllowBackgroundActivityStartsToken = r.app != null
-                ? !r.app.mAllowBackgroundActivityStartsTokens.isEmpty() : false;
-        if (hasAllowBackgroundActivityStartsToken) {
-            return true;
+        for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
+            final ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
+            if (pr.uid == callingUid) {
+                if (!pr.mAllowBackgroundActivityStartsTokens.isEmpty()) {
+                    return true;
+                }
+            }
         }
 
         if (mAm.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
@@ -4907,6 +4910,10 @@ public final class ActiveServices {
             return true;
         }
 
+        if (mAm.mInternal.isTempAllowlistedForFgsWhileInUse(callingUid)) {
+            return true;
+        }
+
         final boolean isWhiteListedPackage =
                 mWhiteListAllowWhileInUsePermissionInFgs.contains(callingPackage);
         if (isWhiteListedPackage) {
@@ -4919,5 +4926,11 @@ public final class ActiveServices {
             return true;
         }
         return false;
+    }
+
+    boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,
+            String callingPackage) {
+        return shouldAllowWhileInUsePermissionInFgsLocked(
+                callingPackage, callingPid, callingUid, null, null, false);
     }
 }
