@@ -8523,6 +8523,15 @@ public final class Settings {
                 "one_handed_tutorial_show_count";
 
         /**
+         * Indicates whether transform is enabled.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String TRANSFORM_ENABLED = "transform_enabled";
+
+        /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
