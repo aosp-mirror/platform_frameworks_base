@@ -103,7 +103,10 @@ public class NetworkUtils {
      * Determine if {@code uid} can access network designated by {@code netId}.
      * @return {@code true} if {@code uid} can access network, {@code false} otherwise.
      */
-    public native static boolean queryUserAccess(int uid, int netId);
+    public static boolean queryUserAccess(int uid, int netId) {
+        // TODO (b/183485986): remove this method
+        return false;
+    }
 
     /**
      * DNS resolver series jni method.
