@@ -35,6 +35,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.SyncResultReceiver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -262,6 +263,31 @@ public final class TranslationManager {
     }
 
     //TODO: Add method to propagate updates to mTCapabilityUpdateListeners
+
+    /**
+     * Returns an immutable PendingIntent which can used by apps to launch translation settings.
+     *
+     * @return An immutable PendingIntent or {@code null} if one of reason met:
+     * <ul>
+     *     <li>Device manufacturer (OEM) does not provide TranslationService.</li>
+     *     <li>The TranslationService doesn't provide the Settings.</li>
+     * </ul>
+     **/
+    @Nullable
+    public PendingIntent getTranslationSettingsActivityIntent() {
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        try {
+            mService.getServiceSettingsActivity(resultReceiver, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        try {
+            return resultReceiver.getParcelableResult();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            Log.e(TAG, "Fail to get translation service settings activity.");
+            return null;
+        }
+    }
 
     void removeTranslator(int id) {
         synchronized (mLock) {

@@ -100,9 +100,9 @@ public final class TranslationServiceInfo {
         if (!Manifest.permission.BIND_TRANSLATION_SERVICE.equals(si.permission)) {
             Slog.w(TAG, "TranslationServiceInfo from '" + si.packageName
                     + "' does not require permission "
-                    + Manifest.permission.BIND_CONTENT_CAPTURE_SERVICE);
+                    + Manifest.permission.BIND_TRANSLATION_SERVICE);
             throw new SecurityException("Service does not require permission "
-                    + Manifest.permission.BIND_CONTENT_CAPTURE_SERVICE);
+                    + Manifest.permission.BIND_TRANSLATION_SERVICE);
         }
 
         mServiceInfo = si;

@@ -52572,6 +52572,7 @@ package android.view.translation {
     method public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
     method @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
     method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getTranslationCapabilities(int, int);
+    method @Nullable public android.app.PendingIntent getTranslationSettingsActivityIntent();
     method public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
   }
 
