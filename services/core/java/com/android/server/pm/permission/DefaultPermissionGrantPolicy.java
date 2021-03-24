@@ -1729,6 +1729,14 @@ final class DefaultPermissionGrantPolicy {
         @Override
         public void grantPermission(@NonNull String permission, @NonNull PackageInfo pkg,
                 @NonNull UserHandle user) {
+            if (PermissionManager.DEBUG_TRACE_GRANTS
+                    && PermissionManager.shouldTraceGrant(
+                    pkg.packageName, permission, user.getIdentifier())) {
+                Log.i(PermissionManager.LOG_TAG_TRACE_GRANTS,
+                        "PregrantPolicy is granting " + pkg.packageName + " "
+                                + permission + " for user " + user.getIdentifier(),
+                        new RuntimeException());
+            }
             PermissionState state = getPermissionState(permission, pkg, user);
             state.initGranted();
             state.newGranted = true;
