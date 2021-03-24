@@ -31,6 +31,7 @@ import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
 import com.android.server.pm.verify.domain.DomainVerificationEnforcer
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
@@ -98,10 +99,13 @@ class DomainVerificationEnforcerTest {
                     mockThrowOnUnmocked {
                         whenever(callingUid) { callingUidInt.get() }
                         whenever(callingUserId) { callingUserIdInt.get() }
-                        whenever(getPackageSettingLocked(VISIBLE_PKG)) { visiblePkgSetting }
-                        whenever(getPackageLocked(VISIBLE_PKG)) { visiblePkg }
-                        whenever(getPackageSettingLocked(INVISIBLE_PKG)) { invisiblePkgSetting }
-                        whenever(getPackageLocked(INVISIBLE_PKG)) { invisiblePkg }
+                        mockPackageSettings {
+                            when (it) {
+                                VISIBLE_PKG -> visiblePkgSetting
+                                INVISIBLE_PKG -> invisiblePkgSetting
+                                else -> null
+                            }
+                        }
                         whenever(schedule(anyInt(), any()))
                         whenever(scheduleWriteSettings())
                         whenever(filterAppAccess(eq(VISIBLE_PKG), anyInt(), anyInt())) { false }

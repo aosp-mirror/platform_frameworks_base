@@ -30,6 +30,7 @@ import android.os.Process
 import android.util.ArraySet
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
@@ -83,10 +84,13 @@ class DomainVerificationUserStateOverrideTest {
                 // Need to provide an internal UID so some permission checks are ignored
                 whenever(callingUid) { Process.ROOT_UID }
                 whenever(callingUserId) { 0 }
-                whenever(getPackageSettingLocked(PKG_ONE)) { pkg1 }
-                whenever(getPackageSettingLocked(PKG_TWO)) { pkg2 }
-                whenever(getPackageLocked(PKG_ONE)) { pkg1.getPkg() }
-                whenever(getPackageLocked(PKG_TWO)) { pkg2.getPkg() }
+                mockPackageSettings {
+                    when (it) {
+                        PKG_ONE -> pkg1
+                        PKG_TWO -> pkg2
+                        else -> null
+                    }
+                }
             })
             addPackage(pkg1)
             addPackage(pkg2)

@@ -28,6 +28,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
+import android.content.pm.verify.domain.DomainVerificationState;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
@@ -35,8 +36,10 @@ import android.util.Pair;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
+import com.android.internal.util.FunctionalUtils;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.Settings;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 
@@ -46,6 +49,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface DomainVerificationManagerInternal {
@@ -108,9 +112,10 @@ public interface DomainVerificationManagerInternal {
     int APPROVAL_LEVEL_INSTANT_APP = 5;
 
     /**
-     * Defines the possible values for {@link #approvalLevelForDomain(PackageSetting, Intent, int)}
-     * which sorts packages by approval priority. A higher numerical value means the package should
-     * override all lower values. This means that comparison using less/greater than IS valid.
+     * Defines the possible values for
+     * {@link #approvalLevelForDomain(PackageSetting, Intent, List, int, int)} which sorts packages
+     * by approval priority. A higher numerical value means the package should override all lower
+     * values. This means that comparison using less/greater than IS valid.
      *
      * Negative values are possible, although not implemented, reserved if explicit disable of a
      * package for a domain needs to be tracked.
@@ -184,7 +189,7 @@ public interface DomainVerificationManagerInternal {
     /**
      * Migrates verification state from a previous install to a new one. It is expected that the
      * {@link PackageSetting#getDomainSetId()} already be set to the correct value, usually from
-     * {@link #generateNewId()}. This will preserve {@link DomainVerificationManager#STATE_SUCCESS}
+     * {@link #generateNewId()}. This will preserve {@link DomainVerificationState#STATE_SUCCESS}
      * domains under the assumption that the new package will pass the same server side config as
      * the previous package, as they have matching signatures.
      * <p>
@@ -276,7 +281,7 @@ public interface DomainVerificationManagerInternal {
 
     /**
      * Until the legacy APIs are entirely removed, returns the legacy state from the previously
-     * written info stored in {@link com.android.server.pm.Settings}.
+     * written info stored in {@link Settings}.
      */
     int getLegacyState(@NonNull String packageName, @UserIdInt int userId);
 
@@ -288,15 +293,12 @@ public interface DomainVerificationManagerInternal {
      * @param userId             the specific user to print, or null to skip printing user selection
      *                           states, supports {@link android.os.UserHandle#USER_ALL}
      * @param pkgSettingFunction the method by which to retrieve package data; if this is called
-     *                           from {@link com.android.server.pm.PackageManagerService}, it is
-     *                           expected to pass in the snapshot of {@link PackageSetting} objects,
-     *                           or if null is passed, the manager may decide to lock {@link
-     *                           com.android.server.pm.PackageManagerService} through {@link
-     *                           Connection#getPackageSettingLocked(String)}
+     *                           from {@link PackageManagerService}, it is
+     *                           expected to pass in the snapshot of {@link PackageSetting} objects
      */
     void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
             @Nullable @UserIdInt Integer userId,
-            @Nullable Function<String, PackageSetting> pkgSettingFunction)
+            @NonNull Function<String, PackageSetting> pkgSettingFunction)
             throws NameNotFoundException;
 
     @NonNull
@@ -368,17 +370,46 @@ public interface DomainVerificationManagerInternal {
          */
         void schedule(int code, @Nullable Object object);
 
-        // TODO(b/178733426): Make DomainVerificationService PMS snapshot aware so it can avoid
-        //  locking package state at all. This can be as simple as removing this method in favor of
-        //  accepting a PackageSetting function in at every method call, although should probably
-        //  be abstracted to a wrapper class.
-        @Nullable
-        PackageSetting getPackageSettingLocked(@NonNull String pkgName);
+        /**
+         * Run a function block that requires access to {@link PackageSetting} data. This will
+         * ensure the {@link PackageManagerService} is taken before
+         * {@link DomainVerificationManagerInternal}'s lock is taken to avoid deadlock.
+         */
+        void withPackageSettings(@NonNull Consumer<Function<String, PackageSetting>> block);
 
-        @Nullable
-        AndroidPackage getPackageLocked(@NonNull String pkgName);
+        /**
+         * Variant which returns a value to the caller.
+         * @see #withPackageSettings(Consumer)
+         */
+        <Output> Output withPackageSettingsReturning(
+                @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageSetting>, Output>
+                        block);
+
+        /**
+         * Variant which throws.
+         * @see #withPackageSettings(Consumer)
+         */
+        <ExceptionType extends Exception> void withPackageSettingsThrowing(
+                @NonNull ThrowingConsumer<Function<String, PackageSetting>, ExceptionType> block)
+                throws ExceptionType;
+
+        /**
+         * Variant which returns a value to the caller and throws.
+         * @see #withPackageSettings(Consumer)
+         */
+        <Output, ExceptionType extends Exception> Output withPackageSettingsReturningThrowing(
+                @NonNull ThrowingFunction<Function<String, PackageSetting>, Output, ExceptionType>
+                        block) throws ExceptionType;
 
         @UserIdInt
         int[] getAllUserIds();
+
+        interface ThrowingConsumer<Input, ExceptionType extends Exception> {
+            void accept(Input input) throws ExceptionType;
+        }
+
+        interface ThrowingFunction<Input, Output, ExceptionType extends Exception> {
+            Output apply(Input input) throws ExceptionType;
+        }
     }
 }

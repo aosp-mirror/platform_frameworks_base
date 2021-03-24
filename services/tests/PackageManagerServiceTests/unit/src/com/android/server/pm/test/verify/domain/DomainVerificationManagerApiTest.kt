@@ -32,6 +32,7 @@ import android.os.Process
 import android.util.ArraySet
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
@@ -445,11 +446,8 @@ class DomainVerificationManagerApiTest {
                     whenever(callingUid) { Process.ROOT_UID }
                     whenever(callingUserId) { 0 }
 
-                    whenever(getPackageSettingLocked(anyString())) {
-                        pkgSettingFunction(arguments[0] as String)
-                    }
-                    whenever(getPackageLocked(anyString())) {
-                        pkgSettingFunction(arguments[0] as String)?.getPkg()
+                    mockPackageSettings {
+                        pkgSettingFunction(it)
                     }
                 })
             }
