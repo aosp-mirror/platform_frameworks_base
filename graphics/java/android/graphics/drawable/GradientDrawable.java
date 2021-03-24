@@ -276,7 +276,11 @@ public class GradientDrawable extends Drawable {
      */
     @Nullable
     public float[] getCornerRadii() {
-        return mGradientState.mRadiusArray.clone();
+        float[] radii = mGradientState.mRadiusArray;
+        if (radii == null) {
+            return null;
+        }
+        return radii.clone();
     }
 
     /**
