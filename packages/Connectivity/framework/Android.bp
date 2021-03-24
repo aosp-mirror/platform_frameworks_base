@@ -112,10 +112,8 @@ cc_defaults {
         "-Wthread-safety",
     ],
     shared_libs: [
-        "libbase",
         "liblog",
         "libnativehelper",
-        "libnetd_client",
     ],
     header_libs: [
         "dnsproxyd_protocol_headers",
@@ -139,10 +137,11 @@ cc_library_shared {
     name: "libframework-connectivity-jni",
     defaults: ["libframework-connectivity-defaults"],
     srcs: [
+        "jni/android_net_NetworkUtils.cpp",
         "jni/onload.cpp",
     ],
     shared_libs: ["libandroid"],
-    static_libs: ["libconnectivityframeworkutils"],
+    stl: "libc++_static",
     apex_available: [
         "//apex_available:platform",
         "com.android.tethering",
