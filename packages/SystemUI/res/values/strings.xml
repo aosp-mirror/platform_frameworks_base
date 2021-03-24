@@ -1282,6 +1282,9 @@
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a managed profile which can be monitored by the profile owner [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_named_managed_profile_monitoring"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> may monitor network traffic in your work profile</string>
 
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device has a managed profile where network activity is visible to their IT admin [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_managed_profile_network_activity">Work profile network activity is visible to your IT admin</string>
+
     <!-- Disclosure at the bottom of Quick Settings that indicates that a certificate authorithy is installed on this device and the traffic might be monitored [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_monitoring">Network may be monitored</string>
 
