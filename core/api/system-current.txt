@@ -92,6 +92,7 @@ package android {
     field public static final String CREATE_USERS = "android.permission.CREATE_USERS";
     field public static final String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
     field public static final String DEVICE_POWER = "android.permission.DEVICE_POWER";
+    field public static final String DISABLE_SYSTEM_SOUND_EFFECTS = "android.permission.DISABLE_SYSTEM_SOUND_EFFECTS";
     field public static final String DISPATCH_PROVISIONING_MESSAGE = "android.permission.DISPATCH_PROVISIONING_MESSAGE";
     field public static final String DOMAIN_VERIFICATION_AGENT = "android.permission.DOMAIN_VERIFICATION_AGENT";
     field public static final String ENTER_CAR_MODE_PRIORITIZED = "android.permission.ENTER_CAR_MODE_PRIORITIZED";
@@ -311,6 +312,7 @@ package android {
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
+    field public static final int playHomeTransitionSound = 16844358; // 0x1010646
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
     field public static final int sdkVersion = 16844304; // 0x1010610
