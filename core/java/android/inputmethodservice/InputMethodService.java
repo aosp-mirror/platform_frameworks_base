@@ -938,7 +938,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
-        mPrivOps.setImeWindowStatus(visibilityFlags, backDisposition);
+        mPrivOps.setImeWindowStatusAsync(visibilityFlags, backDisposition);
     }
 
     /** Set region of the keyboard to be avoided from back gesture */
