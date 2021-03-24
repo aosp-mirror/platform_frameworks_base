@@ -349,7 +349,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
     }
 
-    private void enforceCallingUserAndCarrierPrivilege(ParcelUuid subscriptionGroup) {
+    private void enforceCallingUserAndCarrierPrivilege(
+            ParcelUuid subscriptionGroup, String pkgName) {
         // Only apps running in the primary (system) user are allowed to configure the VCN. This is
         // in line with Telephony's behavior with regards to binding to a Carrier App provided
         // CarrierConfigService.
@@ -363,12 +364,15 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                     subscriptionInfos.addAll(subMgr.getSubscriptionsInGroup(subscriptionGroup));
                 });
 
-        final TelephonyManager telMgr = mContext.getSystemService(TelephonyManager.class);
         for (SubscriptionInfo info : subscriptionInfos) {
+            final TelephonyManager telMgr = mContext.getSystemService(TelephonyManager.class)
+                    .createForSubscriptionId(info.getSubscriptionId());
+
             // Check subscription is active first; much cheaper/faster check, and an app (currently)
             // cannot be carrier privileged for inactive subscriptions.
             if (subMgr.isValidSlotIndex(info.getSimSlotIndex())
-                    && telMgr.hasCarrierPrivileges(info.getSubscriptionId())) {
+                    && telMgr.checkCarrierPrivilegesForPackage(pkgName)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 // TODO (b/173717728): Allow configuration for inactive, but manageable
                 // subscriptions.
                 // TODO (b/173718661): Check for whole subscription groups at a time.
@@ -536,7 +540,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         mContext.getSystemService(AppOpsManager.class)
                 .checkPackage(mDeps.getBinderCallingUid(), config.getProvisioningPackageName());
-        enforceCallingUserAndCarrierPrivilege(subscriptionGroup);
+        enforceCallingUserAndCarrierPrivilege(subscriptionGroup, opPkgName);
 
         Binder.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
@@ -554,11 +558,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
      * <p>Implements the IVcnManagementService Binder interface.
      */
     @Override
-    public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup) {
+    public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull String opPkgName) {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
+        requireNonNull(opPkgName, "opPkgName was null");
         Slog.v(TAG, "VCN config cleared for subGrp: " + subscriptionGroup);
 
-        enforceCallingUserAndCarrierPrivilege(subscriptionGroup);
+        mContext.getSystemService(AppOpsManager.class)
+                .checkPackage(mDeps.getBinderCallingUid(), opPkgName);
+        enforceCallingUserAndCarrierPrivilege(subscriptionGroup, opPkgName);
 
         Binder.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
