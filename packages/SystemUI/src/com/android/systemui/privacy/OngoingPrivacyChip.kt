@@ -33,8 +33,6 @@ class OngoingPrivacyChip @JvmOverloads constructor(
     private var iconMargin = 0
     private var iconSize = 0
     private var iconColor = 0
-    private var defaultBackgroundColor = 0
-    private var cameraBackgroundColor = 0
 
     private lateinit var iconsContainer: LinearLayout
 
@@ -75,11 +73,6 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         if (!privacyList.isEmpty()) {
             generateContentDescription(builder)
             setIcons(builder, iconsContainer)
-            if (builder.types.contains(PrivacyType.TYPE_CAMERA)) {
-                iconsContainer.background.setTint(cameraBackgroundColor)
-            } else {
-                iconsContainer.background.setTint(defaultBackgroundColor)
-            }
         } else {
             iconsContainer.removeAllViews()
         }
@@ -99,8 +92,6 @@ class OngoingPrivacyChip @JvmOverloads constructor(
                 .getDimensionPixelSize(R.dimen.ongoing_appops_chip_icon_size)
         iconColor =
                 Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorPrimary)
-        defaultBackgroundColor = context.getColor(R.color.privacy_circle_microphone_location)
-        cameraBackgroundColor = context.getColor(R.color.privacy_circle_camera)
 
         val padding = context.resources
                 .getDimensionPixelSize(R.dimen.ongoing_appops_chip_side_padding)

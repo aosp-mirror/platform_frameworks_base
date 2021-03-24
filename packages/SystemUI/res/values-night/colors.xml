@@ -99,8 +99,7 @@
     <color name="qs_user_switcher_avatar_background">#3C4043</color>
 
     <!-- Colors for privacy dialog. These should be changed to the new palette -->
-    <color name="privacy_circle_camera">#81C995</color> <!-- g300 -->
-    <color name="privacy_circle_microphone_location">#FCAD70</color> <!--o300 -->
+    <color name="privacy_circle">#81C995</color> <!-- g300 -->
 
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#B3000000</color> <!-- 70% -->
