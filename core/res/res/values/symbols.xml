@@ -4220,6 +4220,10 @@
 
   <java-symbol type="bool" name="config_enableOneHandedKeyguard" />
 
+  <java-symbol type="attr" name="colorAccentPrimary" />
+  <java-symbol type="attr" name="colorAccentSecondary" />
+  <java-symbol type="attr" name="colorAccentTertiary" />
+
   <!-- CEC Configuration -->
   <java-symbol type="bool" name="config_cecHdmiCecEnabled_userConfigurable" />
   <java-symbol type="bool" name="config_cecHdmiCecControlEnabled_allowed" />
