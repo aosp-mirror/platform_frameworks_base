@@ -135,7 +135,8 @@ public class TestHal extends IFace.Stub {
 
             @Override
             public void close(int cookie) throws RemoteException {
-                cb.onStateChanged(cookie, SessionState.CLOSED);
+                Slog.w(TAG, "close, cookie: " + cookie);
+                cb.onSessionClosed();
             }
         };
     }

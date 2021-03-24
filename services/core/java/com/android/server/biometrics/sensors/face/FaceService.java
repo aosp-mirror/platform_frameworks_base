@@ -502,9 +502,6 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 return false;
             }
 
-            final boolean enrolled = provider.getEnrolledFaces(sensorId, userId).size() > 0;
-            Slog.d(TAG, "hasEnrolledFaces, sensor: " + sensorId + ", enrolled: " + enrolled);
-
             return provider.getEnrolledFaces(sensorId, userId).size() > 0;
         }
 
