@@ -843,6 +843,30 @@ public class LauncherApps {
     }
 
     /**
+     * Returns PendingIntent associated with specified shortcut.
+     *
+     * @param packageName The packageName of the shortcut
+     * @param shortcutId The id of the shortcut
+     * @param opts Options to pass to the PendingIntent
+     * @param user The UserHandle of the profile
+     */
+    @Nullable
+    public PendingIntent getShortcutIntent(@NonNull final String packageName,
+            @NonNull final String shortcutId, @Nullable final Bundle opts,
+            @NonNull final UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        if (DEBUG) {
+            Log.i(TAG, "GetShortcutIntent " + packageName + "/" + shortcutId + " " + user);
+        }
+        try {
+            return mService.getShortcutIntent(
+                    mContext.getPackageName(), packageName, shortcutId, opts, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Retrieves a list of config activities for creating {@link ShortcutInfo}.
      *
      * @param packageName The specific package to query. If null, it checks all installed packages
