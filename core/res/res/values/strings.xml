@@ -1656,6 +1656,14 @@
     <string name="face_recalibrate_notification_title">Re-enroll your face</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_content">To improve recognition, please re-enroll your face</string>
+    <!-- Title of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
+    <string name="face_setup_notification_title">Set up face unlock</string>
+    <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
+    <string name="face_setup_notification_content">Unlock your phone by looking at it</string>
+    <!-- Title of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
+    <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_setup_notification_content">Tap to add a fingerprint</string>
 
     <!-- Message shown during face acquisition when the face cannot be recognized [CHAR LIMIT=50] -->
     <string name="face_acquired_insufficient">Couldn\u2019t capture accurate face data. Try again.</string>
