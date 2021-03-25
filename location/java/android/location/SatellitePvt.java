@@ -25,8 +25,9 @@ import android.os.Parcelable;
 
 /**
  * A class that contains GNSS satellite position, velocity and time information at the
- * signal transmission time {@link GnssMeasurement#getReceivedSvTimeNanos()}.
+ * same signal transmission time {@link GnssMeasurement#getReceivedSvTimeNanos()}.
  *
+ * <p>The position and velocity must be in ECEF coordinates.
  * @hide
  */
 @SystemApi
@@ -39,6 +40,9 @@ public final class SatellitePvt implements Parcelable {
 
     /**
      * Class containing estimates of the satellite position fields in ECEF coordinate frame.
+     *
+     * <p>The satellite position must be defined at the time of transmission of the signal
+     * receivedSvTimeNs.
      */
     public static final class PositionEcef implements Parcelable {
         private final double mXMeters;
@@ -133,6 +137,9 @@ public final class SatellitePvt implements Parcelable {
 
     /**
      * Class containing estimates of the satellite velocity fields in the ECEF coordinate frame.
+     *
+     * <p>The satellite velocity must be defined at the time of transmission of the signal
+     * receivedSvTimeNs.
      */
     public static final class VelocityEcef implements Parcelable {
         private final double mXMetersPerSecond;
