@@ -17,7 +17,6 @@
 package android.app.appsearch;
 
 import android.annotation.IntDef;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.appsearch.exceptions.IllegalSchemaException;
@@ -75,12 +74,6 @@ public final class AppSearchSchema {
     @NonNull
     public String getSchemaType() {
         return mBundle.getString(SCHEMA_TYPE_FIELD, "");
-    }
-
-    /** @deprecated Use {@link GetSchemaResponse#getVersion()} instead. */
-    @Deprecated
-    public @IntRange(from = 0) int getVersion() {
-        return 0;
     }
 
     /**
@@ -146,17 +139,6 @@ public final class AppSearchSchema {
                 throw new IllegalSchemaException("Property defined more than once: " + name);
             }
             mPropertyBundles.add(propertyConfig.mBundle);
-            return this;
-        }
-
-        /**
-         * @deprecated TODO(b/181887768): This method is a no-op and only exists for dogfooder
-         *     transition.
-         */
-        @Deprecated
-        @NonNull
-        public AppSearchSchema.Builder setVersion(@IntRange(from = 0) int version) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
             return this;
         }
 
