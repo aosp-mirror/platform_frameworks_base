@@ -304,6 +304,16 @@ final class CompatConfig {
     }
 
     /**
+     * Returns whether the change is overridable.
+     */
+    boolean isOverridable(long changeId) {
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            return c != null && c.getOverridable();
+        }
+    }
+
+    /**
      * Removes an override previously added via {@link #addOverride(long, String, boolean)}.
      *
      * <p>This restores the default behaviour for the given change and app, once any app processes
@@ -343,7 +353,7 @@ final class CompatConfig {
 
     /**
      * Removes all overrides previously added via {@link #addOverride(long, String, boolean)} or
-     * {@link #addOverrides(CompatibilityChangeConfig, String)} for a certain package.
+     * {@link #addOverrides(CompatibilityOverrideConfig, String)} for a certain package.
      *
      * <p>This restores the default behaviour for the given app.
      *
@@ -632,8 +642,11 @@ final class CompatConfig {
         }
         boolean shouldInvalidateCache = false;
         for (CompatChange c: changes) {
+            if (!c.hasPackageOverride(packageName)) {
+                continue;
+            }
             OverrideAllowedState allowedState =
-                    mOverrideValidator.getOverrideAllowedState(c.getId(), packageName);
+                    mOverrideValidator.getOverrideAllowedStateForRecheck(c.getId(), packageName);
             shouldInvalidateCache |= c.recheckOverride(packageName, allowedState, mContext);
         }
         if (shouldInvalidateCache) {
