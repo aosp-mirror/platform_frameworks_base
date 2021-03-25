@@ -426,6 +426,12 @@
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
     <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_fingerprint_dialog_fingerprint_icon">Fingerprint icon</string>
+    <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
+    <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
+    <!-- Message shown to ask the user to use fingerprint to continue.[CHAR LIMIT=50] -->
+    <string name="fingerprint_dialog_use_fingerprint">Use your fingerprint to continue</string>
+    <!-- Message shown to ask the user to use screenlock to continue.[CHAR LIMIT=NONE] -->
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock">Can\u2019t recognize fingerprint. Use screen lock instead.</string>
 
     <!-- Message shown when the system-provided face dialog is shown, asking for authentication [CHAR LIMIT=30] -->
     <string name="face_dialog_looking_for_face">Looking for you\u2026</string>
