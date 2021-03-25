@@ -189,11 +189,17 @@ final class VibratorController {
      * callback to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
      */
-    public void on(long milliseconds, long vibrationId) {
+    public long on(long milliseconds, long vibrationId) {
         synchronized (mLock) {
-            mNativeWrapper.on(milliseconds, vibrationId);
-            notifyVibratorOnLocked();
+            long duration = mNativeWrapper.on(milliseconds, vibrationId);
+            if (duration > 0) {
+                notifyVibratorOnLocked();
+            }
+            return duration;
         }
     }
 
@@ -203,7 +209,8 @@ final class VibratorController {
      *
      * <p>This will affect the state of {@link #isVibrating()}.
      *
-     * @return The duration of the effect playing, or 0 if unsupported.
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
      */
     public long on(PrebakedSegment prebaked, long vibrationId) {
         synchronized (mLock) {
@@ -222,7 +229,8 @@ final class VibratorController {
      *
      * <p>This will affect the state of {@link #isVibrating()}.
      *
-     * @return The duration of the effect playing, or 0 if unsupported.
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
      */
     public long on(PrimitiveSegment[] primitives, long vibrationId) {
         if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
@@ -327,7 +335,7 @@ final class VibratorController {
          */
         private static native long getNativeFinalizer();
         private static native boolean isAvailable(long nativePtr);
-        private static native void on(long nativePtr, long milliseconds, long vibrationId);
+        private static native long on(long nativePtr, long milliseconds, long vibrationId);
         private static native void off(long nativePtr);
         private static native void setAmplitude(long nativePtr, float amplitude);
         private static native int[] getSupportedEffects(long nativePtr);
@@ -365,8 +373,8 @@ final class VibratorController {
         }
 
         /** Turns vibrator on for given time. */
-        public void on(long milliseconds, long vibrationId) {
-            on(mNativePtr, milliseconds, vibrationId);
+        public long on(long milliseconds, long vibrationId) {
+            return on(mNativePtr, milliseconds, vibrationId);
         }
 
         /** Turns vibrator off. */

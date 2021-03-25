@@ -74,11 +74,12 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public void on(long milliseconds, long vibrationId) {
+        public long on(long milliseconds, long vibrationId) {
             mEffectSegments.add(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
                     /* frequency= */ 0, (int) milliseconds));
             applyLatency();
             scheduleListener(milliseconds, vibrationId);
+            return milliseconds;
         }
 
         @Override
