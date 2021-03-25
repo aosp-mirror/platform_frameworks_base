@@ -13409,6 +13409,63 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile owner of an organization-owned managed profile to acknowledge that the
+     * device is compliant and the user can turn the profile off if needed according to the maximum
+     * time off policy.
+     *
+     * This method should be called when the device is deemed compliant after getting
+     * {@link DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)} callback in
+     * case it is overridden. Before this method is called the user is still free to turn the
+     * profile off, but the timer won't be reset, so personal apps will be suspended sooner.
+     *
+     * DPCs only need acknowledging device compliance if they override
+     * {@link DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)}, otherwise
+     * compliance is acknowledged automatically.
+     *
+     * @throws IllegalStateException if the user isn't unlocked
+     * @see #isComplianceAcknowledgementRequired()
+     * @see #setManagedProfileMaximumTimeOff(ComponentName, long)
+     * @see DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)
+     */
+    public void acknowledgeDeviceCompliant() {
+        throwIfParentInstance("acknowledgeDeviceCompliant");
+        if (mService != null) {
+            try {
+                mService.acknowledgeDeviceCompliant();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner of an organization-owned managed profile to query whether it needs
+     * to acknowledge device compliance to allow the user to turn the profile off if needed
+     * according to the maximum profile time off policy.
+     *
+     * Normally when acknowledgement is needed the DPC gets a
+     * {@link DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)} callback.
+     * But if the callback was not delivered or handled for some reason, this method can be used to
+     * verify if acknowledgement is needed.
+     *
+     * @throws IllegalStateException if the user isn't unlocked
+     * @see #acknowledgeDeviceCompliant()
+     * @see #setManagedProfileMaximumTimeOff(ComponentName, long)
+     * @see DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)
+     */
+    public boolean isComplianceAcknowledgementRequired() {
+        throwIfParentInstance("isComplianceAcknowledgementRequired");
+        if (mService != null) {
+            try {
+                return mService.isComplianceAcknowledgementRequired();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns {@code true} when {@code userId} has a profile owner that is capable of resetting
      * password in RUNNING_LOCKED state. For that it should have at least one direct boot aware
      * component and have an active password reset token. Can only be called by the system.
