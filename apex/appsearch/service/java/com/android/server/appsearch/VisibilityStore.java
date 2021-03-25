@@ -156,7 +156,7 @@ public class VisibilityStore {
             AppSearchImpl.createPrefix(PACKAGE_NAME, DATABASE_NAME);
 
     /** Namespace of documents that contain visibility settings */
-    private static final String NAMESPACE = GenericDocument.DEFAULT_NAMESPACE;
+    private static final String NAMESPACE = "";
 
     /**
      * Prefix to add to all visibility document uri's. IcingSearchEngine doesn't allow empty uri's.
@@ -337,9 +337,9 @@ public class VisibilityStore {
         Preconditions.checkNotNull(schemasPackageAccessible);
 
         // Persist the document
-        GenericDocument.Builder visibilityDocument =
-                new GenericDocument.Builder(/*uri=*/ addUriPrefix(prefix), VISIBILITY_TYPE)
-                        .setNamespace(NAMESPACE);
+        GenericDocument.Builder<?> visibilityDocument =
+                new GenericDocument.Builder<>(
+                        NAMESPACE, /*uri=*/ addUriPrefix(prefix), VISIBILITY_TYPE);
         if (!schemasNotPlatformSurfaceable.isEmpty()) {
             visibilityDocument.setPropertyString(
                     NOT_PLATFORM_SURFACEABLE_PROPERTY,
@@ -351,17 +351,16 @@ public class VisibilityStore {
         for (Map.Entry<String, List<PackageIdentifier>> entry :
                 schemasPackageAccessible.entrySet()) {
             for (int i = 0; i < entry.getValue().size(); i++) {
-                GenericDocument packageAccessibleDocument =
-                        new GenericDocument.Builder(/*uri=*/ "", PACKAGE_ACCESSIBLE_TYPE)
-                                .setNamespace(NAMESPACE)
-                                .setPropertyString(
-                                        PACKAGE_NAME_PROPERTY,
-                                        entry.getValue().get(i).getPackageName())
-                                .setPropertyBytes(
-                                        SHA_256_CERT_PROPERTY,
-                                        entry.getValue().get(i).getSha256Certificate())
-                                .setPropertyString(ACCESSIBLE_SCHEMA_PROPERTY, entry.getKey())
-                                .build();
+                GenericDocument packageAccessibleDocument = new GenericDocument.Builder<>(
+                        NAMESPACE, /*uri=*/ "", PACKAGE_ACCESSIBLE_TYPE)
+                        .setPropertyString(
+                                PACKAGE_NAME_PROPERTY,
+                                entry.getValue().get(i).getPackageName())
+                        .setPropertyBytes(
+                                SHA_256_CERT_PROPERTY,
+                                entry.getValue().get(i).getSha256Certificate())
+                        .setPropertyString(ACCESSIBLE_SCHEMA_PROPERTY, entry.getKey())
+                        .build();
                 packageAccessibleDocuments.add(packageAccessibleDocument);
             }
             schemaToPackageIdentifierMap.put(entry.getKey(), new ArraySet<>(entry.getValue()));
