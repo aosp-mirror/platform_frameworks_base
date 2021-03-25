@@ -333,6 +333,14 @@ public class ConnectivitySettingsManager {
             "network_metered_multipath_preference";
 
     /**
+     * A list of apps that should go on cellular networks in preference even when higher-priority
+     * networks are connected.
+     *
+     * @hide
+     */
+    public static final String MOBILE_DATA_PREFERRED_APPS = "mobile_data_preferred_apps";
+
+    /**
      * Get mobile data activity timeout from {@link Settings}.
      *
      * @param context The {@link Context} to query the setting.
@@ -892,5 +900,30 @@ public class ConnectivitySettingsManager {
         }
         Settings.Global.putString(
                 context.getContentResolver(), NETWORK_METERED_MULTIPATH_PREFERENCE, preference);
+    }
+
+    /**
+     * Get the list of apps(from {@link Settings}) that should go on cellular networks in preference
+     * even when higher-priority networks are connected.
+     *
+     * @param context The {@link Context} to query the setting.
+     * @return A list of apps that should go on cellular networks in preference even when
+     *         higher-priority networks are connected or null if no setting value.
+     */
+    @Nullable
+    public static String getMobileDataPreferredApps(@NonNull Context context) {
+        return Settings.Secure.getString(context.getContentResolver(), MOBILE_DATA_PREFERRED_APPS);
+    }
+
+    /**
+     * Set the list of apps(to {@link Settings}) that should go on cellular networks in preference
+     * even when higher-priority networks are connected.
+     *
+     * @param context The {@link Context} to set the setting.
+     * @param list A list of apps that should go on cellular networks in preference even when
+     *             higher-priority networks are connected.
+     */
+    public static void setMobileDataPreferredApps(@NonNull Context context, @Nullable String list) {
+        Settings.Secure.putString(context.getContentResolver(), MOBILE_DATA_PREFERRED_APPS, list);
     }
 }
