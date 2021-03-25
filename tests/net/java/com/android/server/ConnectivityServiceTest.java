@@ -37,7 +37,6 @@ import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.EXTRA_NETWORK_INFO;
 import static android.net.ConnectivityManager.EXTRA_NETWORK_TYPE;
-import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
@@ -1202,12 +1201,10 @@ public class ConnectivityServiceTest {
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
 
-            final int expectedNetId = mMockVpn.getNetwork() == null ? NETID_UNSET
-                    : mMockVpn.getNetwork().getNetId();
-            verify(mMockNetd, times(1)).networkAddUidRanges(eq(expectedNetId),
+            verify(mMockNetd, times(1)).networkAddUidRanges(eq(mMockVpn.getNetwork().getNetId()),
                     eq(toUidRangeStableParcels(uids)));
             verify(mMockNetd, never())
-                    .networkRemoveUidRanges(eq(expectedNetId), any());
+                    .networkRemoveUidRanges(eq(mMockVpn.getNetwork().getNetId()), any());
             mAgentRegistered = true;
             updateState(NetworkInfo.DetailedState.CONNECTED, "registerAgent");
             mNetworkCapabilities.set(mMockNetworkAgent.getNetworkCapabilities());
@@ -9799,14 +9796,13 @@ public class ConnectivityServiceTest {
                 exemptUidCaptor.capture());
         assertContainsExactly(exemptUidCaptor.getValue(), Process.VPN_UID, exemptUid);
 
-        final int expectedNetId = mMockVpn.getNetwork() == null ? NETID_UNSET
-                : mMockVpn.getNetwork().getNetId();
-
         if (add) {
-            inOrder.verify(mMockNetd, times(1)).networkAddUidRanges(eq(expectedNetId),
+            inOrder.verify(mMockNetd, times(1))
+                    .networkAddUidRanges(eq(mMockVpn.getNetwork().getNetId()),
                     eq(toUidRangeStableParcels(vpnRanges)));
         } else {
-            inOrder.verify(mMockNetd, times(1)).networkRemoveUidRanges(eq(expectedNetId),
+            inOrder.verify(mMockNetd, times(1))
+                    .networkRemoveUidRanges(eq(mMockVpn.getNetwork().getNetId()),
                     eq(toUidRangeStableParcels(vpnRanges)));
         }
 
