@@ -4576,7 +4576,7 @@ final public class MediaCodec {
     /**
      * Contains description of a parameter.
      */
-    public class ParameterDescriptor {
+    public static class ParameterDescriptor {
         private ParameterDescriptor() {}
 
         /**
