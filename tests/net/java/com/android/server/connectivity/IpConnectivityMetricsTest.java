@@ -83,10 +83,10 @@ public class IpConnectivityMetricsTest {
 
     IpConnectivityMetrics mService;
     NetdEventListenerService mNetdListener;
-    final NetworkCapabilities mNcWifi = new NetworkCapabilities.Builder()
+    private static final NetworkCapabilities CAPABILITIES_WIFI = new NetworkCapabilities.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .build();
-    final NetworkCapabilities mNcCell = new NetworkCapabilities.Builder()
+    private static final NetworkCapabilities CAPABILITIES_CELL = new NetworkCapabilities.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
             .build();
 
@@ -590,7 +590,7 @@ public class IpConnectivityMetricsTest {
                 ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mCm).registerNetworkCallback(any(), networkCallback.capture());
         networkCallback.getValue().onCapabilitiesChanged(new Network(netId),
-                netId == 100 ? mNcWifi : mNcCell);
+                netId == 100 ? CAPABILITIES_WIFI : CAPABILITIES_CELL);
     }
 
     void connectEvent(int netId, int error, int latencyMs, String ipAddr) throws Exception {
