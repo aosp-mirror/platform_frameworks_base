@@ -984,21 +984,19 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void setHotwordDetectionServiceConfig(@Nullable PersistableBundle options,
+        public void updateState(@Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory) {
             enforceCallingPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION);
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
                 if (mImpl == null) {
-                    Slog.w(TAG,
-                            "setHotwordDetectionServiceConfig without running voice"
-                                    + " interaction service");
+                    Slog.w(TAG, "updateState without running voice interaction service");
                     return;
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.setHotwordDetectionServiceConfigLocked(options, sharedMemory);
+                    mImpl.updateStateLocked(options, sharedMemory);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

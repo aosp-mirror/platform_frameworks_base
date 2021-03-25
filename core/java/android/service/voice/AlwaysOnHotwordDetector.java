@@ -557,7 +557,7 @@ public class AlwaysOnHotwordDetector {
         mTargetSdkVersion = targetSdkVersion;
         mSupportHotwordDetectionService = supportHotwordDetectionService;
         if (mSupportHotwordDetectionService) {
-            setHotwordDetectionServiceConfig(options, sharedMemory);
+            updateState(options, sharedMemory);
         }
         try {
             Identity identity = new Identity();
@@ -573,30 +573,28 @@ public class AlwaysOnHotwordDetector {
     /**
      * Set configuration and pass read-only data to hotword detection service.
      *
-     * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
      * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob provided by the
-     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
      *
-     * @throws IllegalStateException if it doesn't support hotword detection service.
-     *
-     * @hide
+     * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
+     * {@link HotwordDetectionService} when it was created.
      */
-    public final void setHotwordDetectionServiceConfig(@Nullable PersistableBundle options,
+    public final void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         if (DBG) {
-            Slog.d(TAG, "setHotwordDetectionServiceConfig()");
+            Slog.d(TAG, "updateState()");
         }
         if (!mSupportHotwordDetectionService) {
             throw new IllegalStateException(
-                    "setHotwordDetectionServiceConfig called, but it doesn't support hotword"
-                            + " detection service");
+                    "updateState called, but it doesn't support hotword detection service");
         }
 
         try {
-            mModelManagementService.setHotwordDetectionServiceConfig(options, sharedMemory);
+            mModelManagementService.updateState(options, sharedMemory);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
