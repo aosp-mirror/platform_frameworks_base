@@ -2523,7 +2523,8 @@ std::optional<Milliseconds> IncrementalService::DataLoaderStub::needToBind() {
         now - mCurrentStatusTs <= Constants::bindingTimeout) {
         LOG(INFO) << "Binding still in progress. "
                   << (healthy ? "The DL is healthy/freshly bound, ok to retry for a few times."
-                              : "Already unhealthy, don't do anything.");
+                              : "Already unhealthy, don't do anything.")
+                  << " for storage " << mId;
         // Binding still in progress.
         if (!healthy) {
             // Already unhealthy, don't do anything.
@@ -2546,7 +2547,8 @@ std::optional<Milliseconds> IncrementalService::DataLoaderStub::needToBind() {
     const auto previousBindTs = mPreviousBindTs;
     mPreviousBindTs = now;
 
-    const auto nonCrashingInterval = std::max(castToMs(now - previousBindTs), 100ms);
+    const auto nonCrashingInterval =
+            std::max(castToMs(now - previousBindTs - mPreviousBindDelay), 100ms);
     if (previousBindTs.time_since_epoch() == Clock::duration::zero() ||
         nonCrashingInterval > Constants::healthyDataLoaderUptime) {
         mPreviousBindDelay = 0ms;
@@ -2575,7 +2577,8 @@ bool IncrementalService::DataLoaderStub::bind() {
     const auto bindDelay = *maybeBindDelay;
     if (bindDelay > 1s) {
         LOG(INFO) << "Delaying bind to " << mParams.packageName << " by "
-                  << bindDelay.count() / 1000 << "s";
+                  << bindDelay.count() / 1000 << "s"
+                  << " for storage " << mId;
     }
 
     bool result = false;
