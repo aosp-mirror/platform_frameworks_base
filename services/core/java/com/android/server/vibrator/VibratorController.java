@@ -30,6 +30,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -65,13 +66,9 @@ final class VibratorController {
             NativeWrapper nativeWrapper) {
         mNativeWrapper = nativeWrapper;
         mNativeWrapper.init(vibratorId, listener);
-
-        // TODO(b/167947076): load supported ones from HAL once API introduced
-        VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
-                Float.NaN, nativeWrapper.getResonantFrequency(), Float.NaN, Float.NaN, null);
-        mVibratorInfo = new VibratorInfo(vibratorId, nativeWrapper.getCapabilities(),
-                nativeWrapper.getSupportedEffects(), nativeWrapper.getSupportedPrimitives(),
-                nativeWrapper.getQFactor(), frequencyMapping);
+        mVibratorInfo = mNativeWrapper.getInfo();
+        Preconditions.checkNotNull(mVibratorInfo, "Failed to retrieve data for vibrator %d",
+                vibratorId);
     }
 
     /** Register state listener for this vibrator. */
@@ -338,19 +335,15 @@ final class VibratorController {
         private static native long on(long nativePtr, long milliseconds, long vibrationId);
         private static native void off(long nativePtr);
         private static native void setAmplitude(long nativePtr, float amplitude);
-        private static native int[] getSupportedEffects(long nativePtr);
-        private static native int[] getSupportedPrimitives(long nativePtr);
         private static native long performEffect(long nativePtr, long effect, long strength,
                 long vibrationId);
         private static native long performComposedEffect(long nativePtr, PrimitiveSegment[] effect,
                 long vibrationId);
         private static native void setExternalControl(long nativePtr, boolean enabled);
-        private static native long getCapabilities(long nativePtr);
         private static native void alwaysOnEnable(long nativePtr, long id, long effect,
                 long strength);
         private static native void alwaysOnDisable(long nativePtr, long id);
-        private static native float getResonantFrequency(long nativePtr);
-        private static native float getQFactor(long nativePtr);
+        private static native VibratorInfo getInfo(long nativePtr);
 
         private long mNativePtr = 0;
 
@@ -387,16 +380,6 @@ final class VibratorController {
             setAmplitude(mNativePtr, amplitude);
         }
 
-        /** Returns all predefined effects supported by the device vibrator. */
-        public int[] getSupportedEffects() {
-            return getSupportedEffects(mNativePtr);
-        }
-
-        /** Returns all compose primitives supported by the device vibrator. */
-        public int[] getSupportedPrimitives() {
-            return getSupportedPrimitives(mNativePtr);
-        }
-
         /** Turns vibrator on to perform one of the supported effects. */
         public long perform(long effect, long strength, long vibrationId) {
             return performEffect(mNativePtr, effect, strength, vibrationId);
@@ -412,11 +395,6 @@ final class VibratorController {
             setExternalControl(mNativePtr, enabled);
         }
 
-        /** Returns all capabilities of the device vibrator. */
-        public long getCapabilities() {
-            return getCapabilities(mNativePtr);
-        }
-
         /** Enable always-on vibration with given id and effect. */
         public void alwaysOnEnable(long id, long effect, long strength) {
             alwaysOnEnable(mNativePtr, id, effect, strength);
@@ -427,14 +405,9 @@ final class VibratorController {
             alwaysOnDisable(mNativePtr, id);
         }
 
-        /** Gets the vibrator's resonant frequency (F0) */
-        public float getResonantFrequency() {
-            return getResonantFrequency(mNativePtr);
-        }
-
-        /** Gets the vibrator's Q factor */
-        public float getQFactor() {
-            return getQFactor(mNativePtr);
+        /** Return device vibrator metadata. */
+        public VibratorInfo getInfo() {
+            return getInfo(mNativePtr);
         }
     }
 }

@@ -38,6 +38,7 @@ import android.hardware.vibrator.IVibrator;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -66,6 +67,7 @@ import org.mockito.junit.MockitoRule;
  */
 @Presubmit
 public class VibratorControllerTest {
+    private static final int VIBRATOR_ID = 0;
 
     @Rule public MockitoRule rule = MockitoJUnit.rule();
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
@@ -86,23 +88,18 @@ public class VibratorControllerTest {
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
         when(mVibratorStateListenerMock.asBinder()).thenReturn(mVibratorStateListenerBinderMock);
+        mockVibratorCapabilities(0);
     }
 
     private VibratorController createController() {
-        return new VibratorController(/* vibratorId= */ 0, mOnCompleteListenerMock,
-                mNativeWrapperMock);
-    }
-
-    private VibratorController createController(int vibratorId) {
-        return new VibratorController(vibratorId, mOnCompleteListenerMock, mNativeWrapperMock);
+        return new VibratorController(VIBRATOR_ID, mOnCompleteListenerMock, mNativeWrapperMock);
     }
 
     @Test
     public void createController_initializesNativeWrapper() {
-        int vibratorId = 13;
-        VibratorController controller = createController(vibratorId);
-        assertEquals(vibratorId, controller.getVibratorInfo().getId());
-        verify(mNativeWrapperMock).init(eq(vibratorId), notNull());
+        VibratorController controller = createController();
+        assertEquals(VIBRATOR_ID, controller.getVibratorInfo().getId());
+        verify(mNativeWrapperMock).init(eq(VIBRATOR_ID), notNull());
     }
 
     @Test
@@ -292,7 +289,11 @@ public class VibratorControllerTest {
     }
 
     private void mockVibratorCapabilities(int capabilities) {
-        when(mNativeWrapperMock.getCapabilities()).thenReturn((long) capabilities);
+        VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
+                Float.NaN, Float.NaN, Float.NaN, Float.NaN, null);
+        when(mNativeWrapperMock.getInfo()).thenReturn(
+                new VibratorInfo(VIBRATOR_ID, capabilities, null, null, Float.NaN,
+                        frequencyMapping));
     }
 
     private PrebakedSegment createPrebaked(int effectId, int effectStrength) {
