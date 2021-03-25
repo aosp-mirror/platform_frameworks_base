@@ -17,11 +17,14 @@
 package com.android.systemui.people.widget;
 
 import static android.app.Notification.CATEGORY_MISSED_CALL;
+import static android.app.Notification.EXTRA_PEOPLE_LIST;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
 import static android.app.people.ConversationStatus.ACTIVITY_BIRTHDAY;
 import static android.app.people.ConversationStatus.ACTIVITY_GAME;
+import static android.content.PermissionChecker.PERMISSION_GRANTED;
+import static android.content.PermissionChecker.PERMISSION_HARD_DENIED;
 
 import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_STRING;
 import static com.android.systemui.people.PeopleSpaceUtils.INVALID_USER_ID;
@@ -55,6 +58,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -86,6 +90,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -106,6 +111,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private static final int SECOND_WIDGET_ID_WITH_SHORTCUT = 3;
     private static final int WIDGET_ID_WITHOUT_SHORTCUT = 2;
     private static final int WIDGET_ID_WITH_KEY_IN_OPTIONS = 4;
+    private static final int WIDGET_ID_WITH_SAME_URI = 5;
+    private static final int WIDGET_ID_WITH_DIFFERENT_URI = 6;
     private static final String SHORTCUT_ID = "101";
     private static final String OTHER_SHORTCUT_ID = "102";
     private static final String NOTIFICATION_KEY = "0|com.android.systemui.tests|0|null|0";
@@ -123,10 +130,21 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             new PeopleSpaceTile
                     .Builder(SHORTCUT_ID, "username", ICON, new Intent())
                     .setPackageName(TEST_PACKAGE_A)
-                    .setUserHandle(new UserHandle(1))
+                    .setUserHandle(new UserHandle(0))
                     .setNotificationKey(NOTIFICATION_KEY + "1")
                     .setNotificationContent(NOTIFICATION_CONTENT)
                     .setNotificationDataUri(URI)
+                    .setContactUri(URI)
+                    .build();
+    private static final PeopleSpaceTile PERSON_TILE_WITH_SAME_URI =
+            new PeopleSpaceTile
+                    // Different shortcut ID
+                    .Builder(OTHER_SHORTCUT_ID, "username", ICON, new Intent())
+                    // Different package name
+                    .setPackageName(TEST_PACKAGE_B)
+                    .setUserHandle(new UserHandle(0))
+                    // Same contact uri.
+                    .setContactUri(URI)
                     .build();
     private final ShortcutInfo mShortcutInfo = new ShortcutInfo.Builder(mContext,
             SHORTCUT_ID).setLongLabel("name").build();
@@ -149,6 +167,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private LauncherApps mLauncherApps;
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
+    @Mock
+    private PackageManager mPackageManager;
 
     @Captor
     private ArgumentCaptor<NotificationHandler> mListenerCaptor;
@@ -167,7 +187,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
         mManager = new PeopleSpaceWidgetManager(mContext);
         mManager.setAppWidgetManager(mAppWidgetManager, mIPeopleManager, mPeopleManager,
-                mLauncherApps, mNotificationEntryManager);
+                mLauncherApps, mNotificationEntryManager, mPackageManager, true);
         mManager.attach(mListenerService);
         mProvider = new PeopleSpaceWidgetProvider();
         mProvider.setPeopleSpaceWidgetManager(mManager);
@@ -177,16 +197,10 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mNoMan.addListener(serviceListener);
 
         clearStorage();
-        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
-
-        Bundle options = new Bundle();
-        options.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
-        when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT)))
-                .thenReturn(options);
+        addTileForWidget(PERSON_TILE, WIDGET_ID_WITH_SHORTCUT);
+        addTileForWidget(PERSON_TILE_WITH_SAME_URI, WIDGET_ID_WITH_SAME_URI);
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITHOUT_SHORTCUT)))
                 .thenReturn(new Bundle());
-        when(mIPeopleManager.getConversation(TEST_PACKAGE_A, 0, SHORTCUT_ID)).thenReturn(
-                getConversationWithShortcutId(SHORTCUT_ID));
     }
 
     @Test
@@ -477,7 +491,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         addSecondWidgetForPersonTile();
 
         PeopleSpaceUtils.removeSharedPreferencesStorageForTile(
-                mContext, KEY, SECOND_WIDGET_ID_WITH_SHORTCUT);
+                mContext, KEY, SECOND_WIDGET_ID_WITH_SHORTCUT, EMPTY_STRING);
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(createNotification(
                         SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false))
@@ -501,7 +515,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             throws Exception {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
-        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
 
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(createNotification(
@@ -527,7 +540,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             throws Exception {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
-        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
 
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(createNotification(
@@ -548,10 +560,267 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUpdateMissedCallNotificationWithContentPostedIfMatchingUriTile()
+            throws Exception {
+        int[] widgetIdsArray =
+                {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT, WIDGET_ID_WITH_SAME_URI};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ true))
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
+        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
+                NOTIFICATION_CONTENT);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundleForSameUriTile = requireNonNull(mBundleArgumentCaptor.getValue());
+        PeopleSpaceTile tileWithSameUri = bundleForSameUriTile.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithSameUri.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tileWithSameUri.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
+                any());
+    }
+
+    @Test
+    public void testRemoveMissedCallNotificationWithContentPostedIfMatchingUriTile()
+            throws Exception {
+        int[] widgetIdsArray =
+                {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT, WIDGET_ID_WITH_SAME_URI};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ true))
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+        NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn.cloneLight(), 0);
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(2)).updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                mBundleArgumentCaptor.capture());
+        Bundle bundle = mBundleArgumentCaptor.getValue();
+        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(null);
+        assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(null);
+        verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+        verify(mAppWidgetManager, times(2))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundleForSameUriTile = requireNonNull(mBundleArgumentCaptor.getValue());
+        PeopleSpaceTile tileWithSameUri = bundleForSameUriTile.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithSameUri.getNotificationKey()).isEqualTo(null);
+        assertThat(tileWithSameUri.getNotificationContent()).isEqualTo(null);
+        verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
+                any());
+    }
+
+    @Test
+    public void testDoNotRemoveMissedCallIfMatchingUriTileMissingReadContactsPermissionWhenPosted()
+            throws Exception {
+        when(mPackageManager.checkPermission(any(),
+                eq(PERSON_TILE_WITH_SAME_URI.getPackageName()))).thenReturn(
+                PERMISSION_HARD_DENIED);
+        int[] widgetIdsArray =
+                {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT, WIDGET_ID_WITH_SAME_URI};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ true))
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+        // We should only try to remove the notification if the Missed Call was added when posted.
+        NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn.cloneLight(), 0);
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(2)).updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                mBundleArgumentCaptor.capture());
+        Bundle bundle = mBundleArgumentCaptor.getValue();
+        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(null);
+        assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(null);
+        verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+        verify(mAppWidgetManager, times(0))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI), any());
+        verify(mAppWidgetManager, times(0)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
+                any());
+    }
+
+    @Test
+    public void testUpdateMissedCallNotificationWithContentPostedIfMatchingUriTileFromSender()
+            throws Exception {
+        int[] widgetIdsArray =
+                {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT, WIDGET_ID_WITH_SAME_URI};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        Notification notificationWithPersonOnlyInSender =
+                createMessagingStyleNotificationWithoutExtras(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */
+                        true).build();
+        StatusBarNotification sbn = new SbnBuilder()
+                .setNotification(notificationWithPersonOnlyInSender)
+                .setPkg(TEST_PACKAGE_A)
+                .setUid(0)
+                .setUser(new UserHandle(0))
+                .build();
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(sbn)
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
+        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
+                NOTIFICATION_CONTENT);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundleForSameUriTile = requireNonNull(mBundleArgumentCaptor.getValue());
+        PeopleSpaceTile tileWithSameUri = bundleForSameUriTile.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithSameUri.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tileWithSameUri.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
+                any());
+    }
+
+    @Test
+    public void testDoNotUpdateMissedCallNotificationWithContentPostedIfNoPersonsAttached()
+            throws Exception {
+        int[] widgetIdsArray =
+                {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT, WIDGET_ID_WITH_SAME_URI};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        // Notification posted without any Person attached.
+        Notification notificationWithoutPersonObject =
+                createMessagingStyleNotificationWithoutExtras(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */
+                        true).setStyle(new Notification.MessagingStyle("sender")
+                        .addMessage(
+                                new Notification.MessagingStyle.Message(NOTIFICATION_CONTENT, 10,
+                                        "sender"))
+                ).build();
+        StatusBarNotification sbn = new SbnBuilder()
+                .setNotification(notificationWithoutPersonObject)
+                .setPkg(TEST_PACKAGE_A)
+                .setUid(0)
+                .setUser(new UserHandle(0))
+                .build();
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(sbn)
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
+        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
+                NOTIFICATION_CONTENT);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+        // Do not update since notification doesn't include a Person reference.
+        verify(mAppWidgetManager, times(0))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
+                        any());
+        verify(mAppWidgetManager, times(0)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
+                any());
+    }
+
+    @Test
+    public void testDoNotUpdateMissedCallNotificationWithContentPostedIfNotMatchingUriTile()
+            throws Exception {
+        clearStorage();
+        addTileForWidget(PERSON_TILE, WIDGET_ID_WITH_SHORTCUT);
+        addTileForWidget(PERSON_TILE_WITH_SAME_URI.toBuilder().setContactUri(
+                Uri.parse("different_uri")).build(), WIDGET_ID_WITH_DIFFERENT_URI);
+        int[] widgetIdsArray =
+                {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT, WIDGET_ID_WITH_DIFFERENT_URI};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ true))
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
+        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
+                NOTIFICATION_CONTENT);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+        // Do not update since missing permission to read contacts.
+        verify(mAppWidgetManager, times(0))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_DIFFERENT_URI),
+                        any());
+        verify(mAppWidgetManager, times(0)).updateAppWidget(eq(WIDGET_ID_WITH_DIFFERENT_URI),
+                any());
+    }
+
+    @Test
+    public void testDoNotUpdateMissedCallIfMatchingUriTileMissingReadContactsPermission()
+            throws Exception {
+        when(mPackageManager.checkPermission(any(),
+                eq(PERSON_TILE_WITH_SAME_URI.getPackageName()))).thenReturn(
+                PERMISSION_HARD_DENIED);
+        int[] widgetIdsArray =
+                {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT, WIDGET_ID_WITH_SAME_URI};
+        when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ true))
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
+        PeopleSpaceTile tileWithMissedCallOrigin = bundle.getParcelable(OPTIONS_PEOPLE_TILE);
+        assertThat(tileWithMissedCallOrigin.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tileWithMissedCallOrigin.getNotificationContent()).isEqualTo(
+                NOTIFICATION_CONTENT);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+        // Do not update since missing permission to read contacts.
+        verify(mAppWidgetManager, times(0))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SAME_URI),
+                        any());
+        verify(mAppWidgetManager, times(0)).updateAppWidget(eq(WIDGET_ID_WITH_SAME_URI),
+                any());
+    }
+
+    @Test
     public void testUpdateNotificationRemovedIfExistingTile() throws Exception {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
-        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
 
         StatusBarNotification sbn = createNotification(
                 SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false);
@@ -574,7 +843,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDeleteAllWidgetsForConversationsUncachesShortcutAndRemovesListeners() {
+    public void testDeleteAllWidgetsForConversationsUncachesShortcutAndRemovesListeners()
+            throws Exception {
         addSecondWidgetForPersonTile();
         mProvider.onUpdate(mContext, mAppWidgetManager,
                 new int[]{WIDGET_ID_WITH_SHORTCUT, SECOND_WIDGET_ID_WITH_SHORTCUT});
@@ -746,17 +1016,24 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
      * Adds another widget for {@code PERSON_TILE} with widget ID: {@code
      * SECOND_WIDGET_ID_WITH_SHORTCUT}.
      */
-    private void addSecondWidgetForPersonTile() {
-        Bundle options = new Bundle();
-        options.putParcelable(OPTIONS_PEOPLE_TILE, PERSON_TILE);
-        when(mAppWidgetManager.getAppWidgetOptions(eq(SECOND_WIDGET_ID_WITH_SHORTCUT)))
-                .thenReturn(options);
+    private void addSecondWidgetForPersonTile() throws Exception {
         // Set the same Person associated on another People Tile widget ID.
-        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
-        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, SECOND_WIDGET_ID_WITH_SHORTCUT);
+        addTileForWidget(PERSON_TILE, SECOND_WIDGET_ID_WITH_SHORTCUT);
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT,
                 SECOND_WIDGET_ID_WITH_SHORTCUT};
         when(mAppWidgetManager.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+    }
+
+    private void addTileForWidget(PeopleSpaceTile tile, int widgetId) throws Exception {
+        setStorageForTile(tile.getId(), tile.getPackageName(), widgetId, tile.getContactUri());
+        Bundle options = new Bundle();
+        options.putParcelable(OPTIONS_PEOPLE_TILE, tile);
+        when(mAppWidgetManager.getAppWidgetOptions(eq(widgetId)))
+                .thenReturn(options);
+        when(mIPeopleManager.getConversation(tile.getPackageName(), 0, tile.getId())).thenReturn(
+                getConversationWithShortcutId(tile.getId()));
+        when(mPackageManager.checkPermission(any(), eq(tile.getPackageName()))).thenReturn(
+                PERMISSION_GRANTED);
     }
 
     /**
@@ -772,13 +1049,37 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private ConversationChannel getConversationWithShortcutId(String shortcutId,
             List<ConversationStatus> statuses) throws Exception {
         ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext, shortcutId).setLongLabel(
-                "name").build();
+                "name").setPerson(PERSON).build();
         ConversationChannel convo = new ConversationChannel(shortcutInfo, 0, null, null,
                 0L, false, false, statuses);
         return convo;
     }
 
     private Notification createMessagingStyleNotification(String shortcutId,
+            boolean isMessagingStyle, boolean isMissedCall) {
+        Bundle extras = new Bundle();
+        ArrayList<Person> person = new ArrayList<Person>();
+        person.add(PERSON);
+        extras.putParcelableArrayList(EXTRA_PEOPLE_LIST, person);
+        Notification.Builder builder = new Notification.Builder(mContext)
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setExtras(extras)
+                .setShortcutId(shortcutId);
+        if (isMessagingStyle) {
+            builder.setStyle(new Notification.MessagingStyle(PERSON)
+                    .addMessage(
+                            new Notification.MessagingStyle.Message(NOTIFICATION_CONTENT, 10,
+                                    PERSON))
+            );
+        }
+        if (isMissedCall) {
+            builder.setCategory(CATEGORY_MISSED_CALL);
+        }
+        return builder.build();
+    }
+
+    private Notification.Builder createMessagingStyleNotificationWithoutExtras(String shortcutId,
             boolean isMessagingStyle, boolean isMissedCall) {
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setContentTitle("TEST_TITLE")
@@ -794,8 +1095,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         if (isMissedCall) {
             builder.setCategory(CATEGORY_MISSED_CALL);
         }
-        return builder.build();
+        return builder;
     }
+
 
     private StatusBarNotification createNotification(String shortcutId,
             boolean isMessagingStyle, boolean isMissedCall) {
@@ -804,6 +1106,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         return new SbnBuilder()
                 .setNotification(notification)
                 .setPkg(TEST_PACKAGE_A)
+                .setUid(0)
+                .setUser(new UserHandle(0))
                 .build();
     }
 
@@ -824,11 +1128,16 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS),
                 Context.MODE_PRIVATE);
         widgetSp4.edit().clear().commit();
+        SharedPreferences widgetSp5 = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_SAME_URI),
+                Context.MODE_PRIVATE);
+        widgetSp5.edit().clear().commit();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         sp.edit().clear().commit();
     }
 
-    private void setStorageForTile(String shortcutId, String packageName, int widgetId) {
+    private void setStorageForTile(String shortcutId, String packageName, int widgetId,
+            Uri contactUri) {
         SharedPreferences widgetSp = mContext.getSharedPreferences(
                 String.valueOf(widgetId),
                 Context.MODE_PRIVATE);
@@ -840,11 +1149,17 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(String.valueOf(widgetId), shortcutId);
+        editor.putString(String.valueOf(widgetId), contactUri.toString());
+
         String key = new PeopleTileKey(shortcutId, 0, packageName).toString();
         Set<String> storedWidgetIds = new HashSet<>(sp.getStringSet(key, new HashSet<>()));
         storedWidgetIds.add(String.valueOf(widgetId));
         editor.putStringSet(key, storedWidgetIds);
+
+        Set<String> storedWidgetIdsByUri = new HashSet<>(
+                sp.getStringSet(contactUri.toString(), new HashSet<>()));
+        storedWidgetIdsByUri.add(String.valueOf(widgetId));
+        editor.putStringSet(contactUri.toString(), storedWidgetIdsByUri);
         editor.apply();
     }
 }
