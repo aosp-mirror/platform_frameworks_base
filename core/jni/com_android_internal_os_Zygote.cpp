@@ -1015,21 +1015,6 @@ static void ClearUsapTable() {
   gUsapPoolCount = 0;
 }
 
-NO_PAC_FUNC
-static void PAuthKeyChange(JNIEnv* env) {
-#ifdef __aarch64__
-  unsigned long int hwcaps = getauxval(AT_HWCAP);
-  if (hwcaps & HWCAP_PACA) {
-    const unsigned long key_mask = PR_PAC_APIAKEY | PR_PAC_APIBKEY |
-                                   PR_PAC_APDAKEY | PR_PAC_APDBKEY | PR_PAC_APGAKEY;
-    if (prctl(PR_PAC_RESET_KEYS, key_mask, 0, 0, 0) != 0) {
-      ALOGE("Failed to change the PAC keys: %s", strerror(errno));
-      RuntimeAbort(env, __LINE__, "PAC key change failed.");
-    }
-  }
-#endif
-}
-
 // Create an app data directory over tmpfs overlayed CE / DE storage, and bind mount it
 // from the actual app data directory in data mirror.
 static bool createAndMountAppData(std::string_view package_name,
@@ -1980,7 +1965,6 @@ void zygote::ZygoteFailure(JNIEnv* env,
 }
 
 // Utility routine to fork a process from the zygote.
-NO_PAC_FUNC
 pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
                          const std::vector<int>& fds_to_close,
                          const std::vector<int>& fds_to_ignore,
@@ -2035,7 +2019,6 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
     }
 
     // The child process.
-    PAuthKeyChange(env);
     PreApplicationInit();
 
     // Clean up any descriptors which must be closed immediately
@@ -2067,7 +2050,6 @@ static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jcl
   PreApplicationInit();
 }
 
-NO_PAC_FUNC
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids, jint runtime_flags,
         jobjectArray rlimits, jint mount_external, jstring se_info, jstring nice_name,
@@ -2117,7 +2099,6 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     return pid;
 }
 
-NO_PAC_FUNC
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
         JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
         jint runtime_flags, jobjectArray rlimits, jlong permitted_capabilities,
@@ -2189,7 +2170,6 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
  * @param is_priority_fork  Controls the nice level assigned to the newly created process
  * @return child pid in the parent, 0 in the child
  */
-NO_PAC_FUNC
 static jint com_android_internal_os_Zygote_nativeForkApp(JNIEnv* env,
                                                          jclass,
                                                          jint read_pipe_fd,
@@ -2204,7 +2184,6 @@ static jint com_android_internal_os_Zygote_nativeForkApp(JNIEnv* env,
                             args_known == JNI_TRUE, is_priority_fork == JNI_TRUE, true);
 }
 
-NO_PAC_FUNC
 int zygote::forkApp(JNIEnv* env,
                     int read_pipe_fd,
                     int write_pipe_fd,

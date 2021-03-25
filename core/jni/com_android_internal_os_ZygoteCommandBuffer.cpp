@@ -365,7 +365,6 @@ void com_android_internal_os_ZygoteCommandBuffer_nativeReadFullyAndReset(JNIEnv*
 // We only process fork commands if the peer uid matches expected_uid.
 // For every fork command after the first, we check that the requested uid is at
 // least minUid.
-NO_PAC_FUNC
 jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
             JNIEnv* env,
             jclass,
