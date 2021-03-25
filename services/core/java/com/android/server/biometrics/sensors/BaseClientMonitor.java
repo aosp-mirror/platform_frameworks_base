@@ -52,7 +52,8 @@ public abstract class BaseClientMonitor extends LoggableMonitor
          *
          * @param clientMonitor Reference of the ClientMonitor that is starting.
          */
-        default void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {}
+        default void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
+        }
 
         /**
          * Invoked when the ClientMonitor operation is complete. This abstracts away asynchronous
@@ -63,10 +64,11 @@ public abstract class BaseClientMonitor extends LoggableMonitor
          * @param clientMonitor Reference of the ClientMonitor that finished.
          * @param success True if the operation completed successfully.
          */
-        default void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {}
+        default void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
+        }
     }
 
-    protected final int mSequentialId;
+    private final int mSequentialId;
     @NonNull private final Context mContext;
     private final int mTargetUserId;
     @NonNull private final String mOwner;

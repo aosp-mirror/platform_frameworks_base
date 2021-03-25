@@ -138,11 +138,6 @@ public class Sensor {
         }
 
         @Override
-        public void onStateChanged(int cookie, byte state) {
-            // TODO(b/162973174)
-        }
-
-        @Override
         public void onChallengeGenerated(long challenge) {
             mHandler.post(() -> {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
@@ -535,7 +530,7 @@ public class Sensor {
                 if (mCurrentSession != null && mCurrentSession.mSession != null) {
                     // TODO(181984005): This should be scheduled instead of directly invoked
                     Slog.d(mTag, "Closing old session");
-                    mCurrentSession.mSession.close(888 /* cookie */);
+                    mCurrentSession.mSession.close();
                 }
             } catch (RemoteException e) {
                 Slog.e(mTag, "RemoteException", e);

@@ -54,7 +54,7 @@ class FingerprintRemovalClient extends RemovalClient<Fingerprint, ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().removeEnrollments(mSequentialId, mBiometricIds);
+            getFreshDaemon().removeEnrollments(mBiometricIds);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting remove", e);
             mCallback.onClientFinished(this, false /* success */);
