@@ -917,20 +917,31 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     boolean prevHostConnected = mHostConnected;
                     UsbPort port = (UsbPort) args.arg1;
                     UsbPortStatus status = (UsbPortStatus) args.arg2;
-                    mHostConnected = status.getCurrentDataRole() == DATA_ROLE_HOST;
-                    mSourcePower = status.getCurrentPowerRole() == POWER_ROLE_SOURCE;
-                    mSinkPower = status.getCurrentPowerRole() == POWER_ROLE_SINK;
-                    mAudioAccessoryConnected = (status.getCurrentMode() == MODE_AUDIO_ACCESSORY);
+
+                    if (status != null) {
+                        mHostConnected = status.getCurrentDataRole() == DATA_ROLE_HOST;
+                        mSourcePower = status.getCurrentPowerRole() == POWER_ROLE_SOURCE;
+                        mSinkPower = status.getCurrentPowerRole() == POWER_ROLE_SINK;
+                        mAudioAccessoryConnected = (status.getCurrentMode() == MODE_AUDIO_ACCESSORY);
+
+                        // Ideally we want to see if PR_SWAP and DR_SWAP is supported.
+                        // But, this should be suffice, since, all four combinations are only supported
+                        // when PR_SWAP and DR_SWAP are supported.
+                        mSupportsAllCombinations = status.isRoleCombinationSupported(
+                                POWER_ROLE_SOURCE, DATA_ROLE_HOST)
+                                && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_HOST)
+                                && status.isRoleCombinationSupported(POWER_ROLE_SOURCE,
+                                DATA_ROLE_DEVICE)
+                                && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_DEVICE);
+                    } else {
+                        mHostConnected = false;
+                        mSourcePower = false;
+                        mSinkPower = false;
+                        mAudioAccessoryConnected = false;
+                        mSupportsAllCombinations = false;
+                    }
+
                     mAudioAccessorySupported = port.isModeSupported(MODE_AUDIO_ACCESSORY);
-                    // Ideally we want to see if PR_SWAP and DR_SWAP is supported.
-                    // But, this should be suffice, since, all four combinations are only supported
-                    // when PR_SWAP and DR_SWAP are supported.
-                    mSupportsAllCombinations = status.isRoleCombinationSupported(
-                            POWER_ROLE_SOURCE, DATA_ROLE_HOST)
-                            && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_HOST)
-                            && status.isRoleCombinationSupported(POWER_ROLE_SOURCE,
-                            DATA_ROLE_DEVICE)
-                            && status.isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_DEVICE);
 
                     args.recycle();
                     updateUsbNotification(false);
