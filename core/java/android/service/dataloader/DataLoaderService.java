@@ -19,7 +19,6 @@ package android.service.dataloader;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.DataLoaderParams;
@@ -41,25 +40,15 @@ import java.util.Collection;
 
 /**
  * The base class for implementing data loader service to control data loaders. Expecting
- * Incremental Service to bind to a children class of this.
- *
- * WARNING: This is a system API to aid internal development.
- * Use at your own risk. It will change or be removed without warning.
- *
- * TODO(b/136132412): update with latest API design
- *
- * @hide
+ * Installation Session to bind to a children class of this.
  */
-@SystemApi
 public abstract class DataLoaderService extends Service {
     private static final String TAG = "DataLoaderService";
     private final DataLoaderBinderService mBinder = new DataLoaderBinderService();
 
     /**
      * Managed DataLoader interface. Each instance corresponds to a single installation session.
-     * @hide
      */
-    @SystemApi
     public interface DataLoader {
         /**
          * A virtual constructor.
@@ -88,9 +77,7 @@ public abstract class DataLoaderService extends Service {
      * DataLoader factory method.
      *
      * @return An instance of a DataLoader.
-     * @hide
      */
-    @SystemApi
     public @Nullable DataLoader onCreateDataLoader(@NonNull DataLoaderParams dataLoaderParams) {
         return null;
     }
@@ -156,10 +143,7 @@ public abstract class DataLoaderService extends Service {
 
     /**
      * Used by the DataLoaderService implementations.
-     *
-     * @hide
      */
-    @SystemApi
     public static final class FileSystemConnector {
         /**
          * Create a wrapper for a native instance.
