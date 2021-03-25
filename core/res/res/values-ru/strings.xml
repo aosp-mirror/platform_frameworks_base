@@ -224,7 +224,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Подготовка обновлений…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Обработка обновлений…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезагрузка…"</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Сбросить к заводским настройкам"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Сбросить настройки"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезагрузка…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Выключение..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Планшетный ПК будет отключен."</string>
