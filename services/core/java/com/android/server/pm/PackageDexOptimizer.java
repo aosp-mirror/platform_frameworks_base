@@ -258,23 +258,22 @@ public class PackageDexOptimizer {
                         packageStats, options.isDowngrade(), profileName, dexMetadataPath,
                         options.getCompilationReason());
 
-                // Only report metrics for base apk for now.
-                // TODO: add ISA and APK type to metrics.
                 // OTAPreopt doesn't have stats so don't report in that case.
-                if (pkg.getBaseCodePath().equals(path) && packageStats != null) {
+                if (packageStats != null) {
                     Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
                     try {
                         long sessionId = Math.randomLongInternal();
                         ArtStatsLogUtils.writeStatsLog(
                                 mArtStatsLogger,
                                 sessionId,
-                                path,
                                 compilerFilter,
                                 sharedGid,
                                 packageStats.getCompileTime(path),
                                 dexMetadataPath,
                                 options.getCompilationReason(),
-                                newResult);
+                                newResult,
+                                ArtStatsLogUtils.getApkType(path),
+                                dexCodeIsa);
                     } finally {
                         Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
                     }
