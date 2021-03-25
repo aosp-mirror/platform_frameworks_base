@@ -32,8 +32,10 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.SystemClock;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -47,8 +49,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * Tests of {@link ScrollCaptureTargetSelector}.
+ * Tests of {@link ScrollCaptureSearchResults}.
  */
+@Presubmit
+@SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ScrollCaptureSearchResultsTest {
 
