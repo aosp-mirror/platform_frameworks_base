@@ -107,6 +107,12 @@ class ProcessRecord implements WindowProcessListener {
     int mPid;
 
     /**
+     * The process ID which will be set when we're killing this process.
+     */
+    @GuardedBy("mService")
+    private int mDyingPid;
+
+    /**
      * The gids this process was launched with.
      */
     @GuardedBy("mService")
@@ -572,6 +578,16 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy("mService")
+    int getDyingPid() {
+        return mDyingPid;
+    }
+
+    @GuardedBy("mService")
+    void setDyingPid(int dyingPid) {
+        mDyingPid = dyingPid;
+    }
+
+    @GuardedBy("mService")
     int[] getGids() {
         return mGids;
     }
@@ -730,6 +746,11 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy("mService")
     void setDeathRecipient(IBinder.DeathRecipient deathRecipient) {
         mDeathRecipient = deathRecipient;
+    }
+
+    @GuardedBy("mService")
+    IBinder.DeathRecipient getDeathRecipient() {
+        return mDeathRecipient;
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -896,11 +917,14 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    boolean onCleanupApplicationRecordLSP(ProcessStatsService processStats, boolean allowRestart) {
+    boolean onCleanupApplicationRecordLSP(ProcessStatsService processStats, boolean allowRestart,
+            boolean unlinkDeath) {
         mErrorState.onCleanupApplicationRecordLSP();
 
         resetPackageList(processStats);
-        unlinkDeathRecipient();
+        if (unlinkDeath) {
+            unlinkDeathRecipient();
+        }
         makeInactive(processStats);
         setWaitingToKill(null);
 
