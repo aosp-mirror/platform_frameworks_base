@@ -5564,6 +5564,7 @@
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"
                 android:protectionLevel="signature|privileged" />
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
 
     <!-- Allows input events to be monitored. Very dangerous!  @hide -->
     <permission android:name="android.permission.MONITOR_INPUT"

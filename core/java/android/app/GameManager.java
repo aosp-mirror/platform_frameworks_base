@@ -135,4 +135,20 @@ public final class GameManager {
             throw e.rethrowFromSystemServer();
         }
     }
+    /**
+     * Returns a list of supported game modes for a given package.
+     * <p>
+     * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public @GameMode int[] getAvailableGameModes(@NonNull String packageName) {
+        try {
+            return mService.getAvailableGameModes(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 }
