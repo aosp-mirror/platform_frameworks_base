@@ -209,8 +209,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private @TransitionMode int mNavigationBarMode;
     private ContentResolver mContentResolver;
     private boolean mAssistantAvailable;
-    private boolean mLongPressHomeEnabled;
-    private boolean mAssistantTouchGestureEnabled;
 
     private int mDisabledFlags1;
     private int mDisabledFlags2;
@@ -311,7 +309,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
             // Send the assistant availability upon connection
             if (isConnected) {
-                updateAssistantEntrypoints();
+                sendAssistantAvailability(mAssistantAvailable);
             }
         }
 
@@ -406,7 +404,12 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             new Handler(Looper.getMainLooper())) {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            updateAssistantEntrypoints();
+            boolean available = mAssistManagerLazy.get()
+                    .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
+            if (mAssistantAvailable != available) {
+                sendAssistantAvailability(available);
+                mAssistantAvailable = available;
+            }
         }
     };
 
@@ -528,13 +531,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT),
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
-        mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED),
-                false, mAssistContentObserver, UserHandle.USER_ALL);
-        mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
-                false, mAssistContentObserver, UserHandle.USER_ALL);
-        updateAssistantEntrypoints();
 
         if (savedState != null) {
             mDisabledFlags1 = savedState.getInt(EXTRA_DISABLE_STATE, 0);
@@ -827,7 +823,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 || mNavigationBarView.getHomeButton().getCurrentView() == null) {
             return;
         }
-        if (mHomeButtonLongPressDurationMs.isPresent() || !mLongPressHomeEnabled) {
+        if (mHomeButtonLongPressDurationMs.isPresent()) {
             mNavigationBarView.getHomeButton().getCurrentView().setLongClickable(false);
             mNavigationBarView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(false);
             mNavigationBarView.getHomeButton().setOnLongClickListener(null);
@@ -849,8 +845,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         pw.println("  mStartingQuickSwitchRotation=" + mStartingQuickSwitchRotation);
         pw.println("  mCurrentRotation=" + mCurrentRotation);
         pw.println("  mHomeButtonLongPressDurationMs=" + mHomeButtonLongPressDurationMs);
-        pw.println("  mLongPressHomeEnabled=" + mLongPressHomeEnabled);
-        pw.println("  mAssistantTouchGestureEnabled=" + mAssistantTouchGestureEnabled);
 
         if (mNavigationBarView != null) {
             pw.println("  mNavigationBarWindowState="
@@ -1212,11 +1206,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                         return true;
                     }
                 }
-                if (mLongPressHomeEnabled) {
-                    mHomeButtonLongPressDurationMs.ifPresent(longPressDuration -> {
-                        mHandler.postDelayed(mOnVariableDurationHomeLongClick, longPressDuration);
-                    });
-                }
+                mHomeButtonLongPressDurationMs.ifPresent(longPressDuration -> {
+                    mHandler.postDelayed(mOnVariableDurationHomeLongClick, longPressDuration);
+                });
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -1488,23 +1480,15 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 | (requestingServices >= 2 ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
     }
 
-    private void updateAssistantEntrypoints() {
-        mAssistantAvailable = mAssistManagerLazy.get()
-                .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
-        mLongPressHomeEnabled = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, 1) != 0;
-        mAssistantTouchGestureEnabled = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, 1) != 0;
+    private void sendAssistantAvailability(boolean available) {
         if (mOverviewProxyService.getProxy() != null) {
             try {
-                mOverviewProxyService.getProxy().onAssistantAvailable(mAssistantAvailable
-                        && mAssistantTouchGestureEnabled
+                mOverviewProxyService.getProxy().onAssistantAvailable(available
                         && QuickStepContract.isGesturalMode(mNavBarMode));
             } catch (RemoteException e) {
                 Log.w(TAG, "Unable to send assistant availability data to launcher");
             }
         }
-        reconfigureHomeLongClick();
     }
 
     // ----- Methods that DisplayNavigationBarController talks to -----
