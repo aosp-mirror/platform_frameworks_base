@@ -3167,8 +3167,57 @@ public abstract class PackageManager {
     public static final String FEATURE_VR_HEADTRACKING = "android.hardware.vr.headtracking";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device has a StrongBox hardware-backed Keystore.
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device implements
+     * the Android Keystore backed by an isolated execution environment. The version indicates
+     * which features are implemented in the isolated execution environment:
+     * <ul>
+     * <li>100: Hardware support for ECDH (see {@link javax.crypto.KeyAgreement}) and support
+     * for app-generated attestation keys (see {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder#setAttestKeyAlias(String)}).
+     * <li>41: Hardware enforcement of device-unlocked keys (see {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder#setUnlockedDeviceRequired(boolean)}).
+     * <li>40: Support for wrapped key import (see {@link
+     * android.security.keystore.WrappedKeyEntry}), optional support for ID attestation (see {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder#setDevicePropertiesAttestationIncluded(boolean)}),
+     * attestation (see {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])}),
+     * AES, HMAC, ECDSA and RSA support where the secret or private key never leaves secure
+     * hardware, and support for requiring user authentication before a key can be used.
+     * </ul>
+     * This feature version is guaranteed to be set for all devices launching with Android 12 and
+     * may be set on devices launching with an earlier version. If the feature version is set, it
+     * will at least have the value 40. If it's not set the device may have a version of
+     * hardware-backed keystore but it may not support all features listed above.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_HARDWARE_KEYSTORE = "android.hardware.hardware_keystore";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures}, {@link #hasSystemFeature(String)}, and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device implements
+     * the Android Keystore backed by a dedicated secure processor referred to as
+     * <a href="https://source.android.com/security/best-practices/hardware#strongbox-keymaster">
+     * StrongBox</a>. If this feature has a version, the version number indicates which features are
+     * implemented in StrongBox:
+     * <ul>
+     * <li>100: Hardware support for ECDH (see {@link javax.crypto.KeyAgreement}) and support
+     * for app-generated attestation keys (see {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder#setAttestKeyAlias(String)}).
+     * <li>41: Hardware enforcement of device-unlocked keys (see {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder#setUnlockedDeviceRequired(boolean)}).
+     * <li>40: Support for wrapped key import (see {@link
+     * android.security.keystore.WrappedKeyEntry}), optional support for ID attestation (see {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder#setDevicePropertiesAttestationIncluded(boolean)}),
+     * attestation (see {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])}),
+     * AES, HMAC, ECDSA and RSA support where the secret or private key never leaves secure
+     * hardware, and support for requiring user authentication before a key can be used.
+     * </ul>
+     * If a device has StrongBox, this feature version number is guaranteed to be set for all
+     * devices launching with Android 12 and may be set on devices launching with an earlier
+     * version. If the feature version is set, it will at least have the value 40. If it's not
+     * set the device may have StrongBox but it may not support all features listed above.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_STRONGBOX_KEYSTORE =
