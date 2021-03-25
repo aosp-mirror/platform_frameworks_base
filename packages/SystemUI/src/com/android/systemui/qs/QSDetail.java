@@ -140,9 +140,10 @@ public class QSDetail extends LinearLayout {
     }
 
     private void updateDetailText() {
-        mDetailDoneButton.setText(R.string.quick_settings_done);
-        final int resId =
-                mDetailAdapter != null ? mDetailAdapter.getSettingsText() : Resources.ID_NULL;
+        int resId = mDetailAdapter != null ? mDetailAdapter.getDoneText() : Resources.ID_NULL;
+        mDetailDoneButton.setText(
+                (resId != Resources.ID_NULL) ? resId : R.string.quick_settings_done);
+        resId = mDetailAdapter != null ? mDetailAdapter.getSettingsText() : Resources.ID_NULL;
         mDetailSettingsButton.setText(
                 (resId != Resources.ID_NULL) ? resId : R.string.quick_settings_more_settings);
     }
