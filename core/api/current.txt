@@ -21845,6 +21845,7 @@ package android.media {
     method public android.util.Range<java.lang.Integer> getQualityRange();
     method public boolean isBitrateModeSupported(int);
     field public static final int BITRATE_MODE_CBR = 2; // 0x2
+    field public static final int BITRATE_MODE_CBR_FD = 3; // 0x3
     field public static final int BITRATE_MODE_CQ = 0; // 0x0
     field public static final int BITRATE_MODE_VBR = 1; // 0x1
   }
