@@ -370,6 +370,14 @@ public abstract class NetworkAgent {
      */
     public static final int CMD_NETWORK_CREATED = BASE + 22;
 
+    /**
+     * Sent by ConnectivityService to {@link NetworkAgent} to inform the agent that its native
+     * network was destroyed.
+     *
+     * @hide
+     */
+    public static final int CMD_NETWORK_DISCONNECTED = BASE + 23;
+
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
         // The subtype can be changed with (TODO) setLegacySubtype, but it starts
         // with 0 (TelephonyManager.NETWORK_TYPE_UNKNOWN) and an empty description.
@@ -574,6 +582,10 @@ public abstract class NetworkAgent {
                     onNetworkCreated();
                     break;
                 }
+                case CMD_NETWORK_DISCONNECTED: {
+                    onNetworkDisconnected();
+                    break;
+                }
             }
         }
     }
@@ -718,6 +730,11 @@ public abstract class NetworkAgent {
         @Override
         public void onNetworkCreated() {
             mHandler.sendMessage(mHandler.obtainMessage(CMD_NETWORK_CREATED));
+        }
+
+        @Override
+        public void onNetworkDisconnected() {
+            mHandler.sendMessage(mHandler.obtainMessage(CMD_NETWORK_DISCONNECTED));
         }
     }
 
@@ -1030,6 +1047,12 @@ public abstract class NetworkAgent {
      * Called when ConnectivityService has successfully created this NetworkAgent's native network.
      */
     public void onNetworkCreated() {}
+
+
+    /**
+     * Called when ConnectivityService has successfully destroy this NetworkAgent's native network.
+     */
+    public void onNetworkDisconnected() {}
 
     /**
      * Requests that the network hardware send the specified packet at the specified interval.
