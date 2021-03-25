@@ -25,6 +25,8 @@ import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sVerbose;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -1370,15 +1372,16 @@ public final class AutofillManagerService
         }
 
         @Override
-        public void startSession(IBinder activityToken, IBinder appCallback, AutofillId autofillId,
-                Rect bounds, AutofillValue value, int userId, boolean hasCallback, int flags,
-                ComponentName componentName, boolean compatMode, IResultReceiver receiver) {
+        public void startSession(IBinder activityToken, IBinder clientCallback,
+                AutofillId autofillId, Rect bounds, AutofillValue value, int userId,
+                boolean hasCallback, int flags, ComponentName clientActivity,
+                boolean compatMode, IResultReceiver receiver) {
 
-            activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
-            appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
-            autofillId = Preconditions.checkNotNull(autofillId, "autoFillId");
-            componentName = Preconditions.checkNotNull(componentName, "componentName");
-            final String packageName = Preconditions.checkNotNull(componentName.getPackageName());
+            requireNonNull(activityToken, "activityToken");
+            requireNonNull(clientCallback, "clientCallback");
+            requireNonNull(autofillId, "autofillId");
+            requireNonNull(clientActivity, "clientActivity");
+            final String packageName = requireNonNull(clientActivity.getPackageName());
 
             Preconditions.checkArgument(userId == UserHandle.getUserId(getCallingUid()), "userId");
 
@@ -1395,7 +1398,7 @@ public final class AutofillManagerService
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
                 result = service.startSessionLocked(activityToken, taskId, getCallingUid(),
-                        appCallback, autofillId, bounds, value, hasCallback, componentName,
+                        clientCallback, autofillId, bounds, value, hasCallback, clientActivity,
                         compatMode, mAllowInstantService, flags);
             }
             final int sessionId = (int) result;
