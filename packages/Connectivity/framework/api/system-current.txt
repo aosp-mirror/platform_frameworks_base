@@ -316,6 +316,19 @@ package android.net {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
   }
 
+  public final class NetworkScore implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getLegacyInt();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkScore> CREATOR;
+  }
+
+  public static final class NetworkScore.Builder {
+    ctor public NetworkScore.Builder();
+    method @NonNull public android.net.NetworkScore build();
+    method @NonNull public android.net.NetworkScore.Builder setLegacyInt(int);
+  }
+
   public final class OemNetworkPreferences implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getNetworkPreferences();
