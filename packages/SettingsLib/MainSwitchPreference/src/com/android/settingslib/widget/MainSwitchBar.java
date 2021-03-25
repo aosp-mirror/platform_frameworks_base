@@ -63,7 +63,8 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        LayoutInflater.from(context).inflate(R.layout.main_switch_bar, this);
+        LayoutInflater.from(context).inflate(resourceId(context, "layout", "main_switch_bar"),
+                this);
 
         setFocusable(true);
         setClickable(true);
@@ -254,5 +255,9 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         mSwitch.setOnCheckedChangeListener(ss.mVisible ? this : null);
 
         requestLayout();
+    }
+
+    private int resourceId(Context context, String type, String name) {
+        return context.getResources().getIdentifier(name, type, context.getPackageName());
     }
 }
