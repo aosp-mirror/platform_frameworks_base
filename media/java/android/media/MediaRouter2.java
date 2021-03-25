@@ -299,24 +299,6 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Registers a callback to receive route related events when they change.
-     * <p>
-     * If the specified callback is already registered, its registration will be updated for the
-     * given {@link Executor executor}.
-     * <p>
-     * This will be no-op for non-system routers.
-     * @hide
-     */
-    @SystemApi
-    public void registerRouteCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull RouteCallback routeCallback) {
-        if (!isSystemRouter()) {
-            return;
-        }
-        registerRouteCallback(executor, routeCallback, RouteDiscoveryPreference.EMPTY);
-    }
-
-    /**
      * Registers a callback to discover routes and to receive events when they change.
      * <p>
      * If the specified callback is already registered, its registration will be updated for the
