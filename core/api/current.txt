@@ -18612,6 +18612,7 @@ package android.hardware.camera2.params {
     method @NonNull public java.util.List<android.util.Size> getAvailableSizes();
     method public int getFormat();
     method public boolean isInput();
+    method public boolean isUltraHighResolution();
   }
 
   public final class MeteringRectangle {
