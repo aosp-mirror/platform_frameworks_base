@@ -244,6 +244,7 @@ package android {
     field public static final String REVIEW_ACCESSIBILITY_SERVICES = "android.permission.REVIEW_ACCESSIBILITY_SERVICES";
     field public static final String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final String ROTATE_SURFACE_FLINGER = "android.permission.ROTATE_SURFACE_FLINGER";
+    field public static final String SCHEDULE_PRIORITIZED_ALARM = "android.permission.SCHEDULE_PRIORITIZED_ALARM";
     field public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final String SECURE_ELEMENT_PRIVILEGED_OPERATION = "android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION";
     field public static final String SEND_CATEGORY_CAR_NOTIFICATIONS = "android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS";
@@ -423,6 +424,7 @@ package android.app {
   public class AlarmManager {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, android.app.PendingIntent, android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, android.app.AlarmManager.OnAlarmListener, android.os.Handler, android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.SCHEDULE_PRIORITIZED_ALARM) public void setPrioritized(int, long, long, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.app.AlarmManager.OnAlarmListener);
   }
 
   public class AppOpsManager {
