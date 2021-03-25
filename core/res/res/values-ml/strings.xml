@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ആപ്പ് പ്രവർത്തിക്കുന്നു"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"മാഗ്നിഫിക്കേഷൻ"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"ഉപയോഗസഹായി സുരക്ഷാ നയം"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ബാറ്ററി, ഡാറ്റ ഉപയോഗം എന്നിവയുടെ വിശദാംശങ്ങളറിയാൻ ടാപ്പുചെയ്യുക"</string>
@@ -1251,9 +1250,9 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> ഹീപ്പ് ഡംപ് തയ്യാറാണ്"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"ഹീപ്പ് ഡംപ് ശേഖരിച്ചു. പങ്കിടാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"ഹീപ്പ് ഡംപ് പങ്കിടണോ?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസിന്, മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. അതിന്റെ ഡവലപ്പറുമായി പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് നിങ്ങൾക്ക് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: ഈ ഹീപ്പ് ഡംപിൽ ആപ്പിന് ആക്‌സസുള്ള ഏതെങ്കിലും വ്യക്തിഗത വിവരം അടങ്ങിയിരിക്കാം."</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസ് അതിൻ്റെ മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. നിങ്ങൾക്ക് പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിഗത വിവരം ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"നിങ്ങൾക്ക് പങ്കിടാൻ <xliff:g id="PROC">%1$s</xliff:g> എന്നതിൻ്റെ പ്രോസസിൻ്റെ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിഗത വിവരം ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസിന്, മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. അതിന്റെ ഡവലപ്പറുമായി പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് നിങ്ങൾക്ക് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: ഈ ഹീപ്പ് ഡംപിൽ ആപ്പിന് ആക്‌സസുള്ള ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ അടങ്ങിയിരിക്കാം."</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> പ്രോസസ് അതിൻ്റെ മെമ്മറി പരിധിയായ <xliff:g id="SIZE">%2$s</xliff:g> കവിഞ്ഞു. നിങ്ങൾക്ക് പങ്കിടാൻ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"നിങ്ങൾക്ക് പങ്കിടാൻ <xliff:g id="PROC">%1$s</xliff:g> എന്നതിൻ്റെ പ്രോസസിൻ്റെ ഒരു ഹീപ്പ് ഡംപ് ലഭ്യമാണ്. ശ്രദ്ധിക്കുക: പ്രോസസിന് ആക്‌സസ് ചെയ്യാനാകുന്ന, സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട ഏതെങ്കിലും വ്യക്തിപരമായ വിവരങ്ങൾ ഈ ഹീപ്പ് ഡംപിൽ അടങ്ങിയിരിക്കാം, നിങ്ങൾ ടൈപ്പ് ചെയ്‌തിട്ടുള്ള കാര്യങ്ങൾ ഇതിൽ ഉൾപ്പെട്ടിരിക്കാം."</string>
     <string name="sendText" msgid="493003724401350724">"വാചകസന്ദേശത്തിനായി ഒരു പ്രവർത്തനം തിരഞ്ഞെടുക്കുക"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"റിംഗർ വോളിയം"</string>
     <string name="volume_music" msgid="7727274216734955095">"മീഡിയ വോളിയം"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"കുറുക്കുവഴി ഉപയോഗിക്കുക"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"വർണ്ണ വിപര്യയം"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"നിറം ക്രമീകരിക്കൽ"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"തെളിച്ചം കുറയ്ക്കുക"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"കൂടുതൽ ഡിം ചെയ്യൽ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കി."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"വോളിയം കീകൾ അമർത്തിപ്പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫാക്കി."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഉപയോഗിക്കാൻ, രണ്ട് വോളിയം കീകളും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"സെൻസർ സ്വകാര്യത"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ആപ്പ് ഐക്കൺ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"അപ്ലിക്കേഷൻ ബ്രാൻഡിംഗ് ഇമേജ്"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ആക്‌സസ് ക്രമീകരണം പരിശോധിക്കുക"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> എന്നതിന് നിങ്ങളുടെ സ്ക്രീൻ കാണാനും നിയന്ത്രിക്കാനും കഴിയും. അവലോകനം ചെയ്യുന്നതിന് ടാപ്പ് ചെയ്യുക."</string>
 </resources>
