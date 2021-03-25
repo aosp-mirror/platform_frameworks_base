@@ -257,12 +257,12 @@ public final class HdmiCecConfigTest {
         HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getDefaultStringValue(
                     HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
-                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_TV);
+                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM);
     }
 
     @Test
     public void getDefaultStringValue_WithOverride() {
-        setBooleanResource(R.bool.config_cecPowerControlModeTv_default, false);
+        setBooleanResource(R.bool.config_cecPowerControlModeTvAndAudioSystem_default, false);
         setBooleanResource(R.bool.config_cecPowerControlModeBroadcast_default, true);
         HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getDefaultStringValue(
@@ -279,7 +279,7 @@ public final class HdmiCecConfigTest {
 
     @Test
     public void getDefaultStringValue_NoDefault() {
-        setBooleanResource(R.bool.config_cecPowerControlModeTv_default, false);
+        setBooleanResource(R.bool.config_cecPowerControlModeTvAndAudioSystem_default, false);
         assertThrows(RuntimeException.class,
                 () -> new HdmiCecConfig(mContext, mStorageAdapter));
     }
@@ -336,7 +336,7 @@ public final class HdmiCecConfigTest {
     public void getStringValue_GlobalSetting_BasicSanity() {
         when(mStorageAdapter.retrieveGlobalSetting(
                   Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                  HdmiControlManager.POWER_CONTROL_MODE_TV))
+                  HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM))
             .thenReturn(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
         HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         assertThat(hdmiCecConfig.getStringValue(
