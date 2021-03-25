@@ -1955,9 +1955,12 @@ public final class DisplayManagerService extends SystemService {
         if (mBrightnessTracker == null) {
             mBrightnessTracker = new BrightnessTracker(mContext, null);
         }
+
+        final BrightnessSetting brightnessSetting = new BrightnessSetting(mPersistentDataStore,
+                display, mContext);
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
-                mDisplayBlanker, display, mBrightnessTracker);
+                mDisplayBlanker, display, mBrightnessTracker, brightnessSetting);
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
     }
 
@@ -2662,6 +2665,48 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public void setBrightness(int displayId, float brightness) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to set the display's brightness");
+            if (!isValidBrightness(brightness)) {
+                Slog.w(TAG, "Attempted to set invalid brightness" + brightness);
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+                    if (dpc != null) {
+                        dpc.putScreenBrightnessSetting(brightness);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public float getBrightness(int displayId) {
+            float brightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to set the display's brightness");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+                    if (dpc != null) {
+                        brightness = dpc.getScreenBrightnessSetting();
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return brightness;
+        }
+
+        @Override // Binder call
         public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
@@ -2809,6 +2854,13 @@ public final class DisplayManagerService extends SystemService {
             Slog.w(TAG, msg);
             return false;
         }
+
+    }
+
+    private static boolean isValidBrightness(float brightness) {
+        return !Float.isNaN(brightness)
+                && (brightness >= PowerManager.BRIGHTNESS_MIN)
+                && (brightness <= PowerManager.BRIGHTNESS_MAX);
     }
 
     private final class LocalService extends DisplayManagerInternal {
