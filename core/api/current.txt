@@ -20898,6 +20898,7 @@ package android.media {
   public class CamcorderProfile {
     method public static android.media.CamcorderProfile get(int);
     method public static android.media.CamcorderProfile get(int, int);
+    method @Nullable public static android.media.EncoderProfiles getAll(@NonNull String, int);
     method public static boolean hasProfile(int);
     method public static boolean hasProfile(int, int);
     field public static final int QUALITY_1080P = 6; // 0x6
@@ -20976,6 +20977,32 @@ package android.media {
     field public final byte[] data;
     field public final String mimeType;
     field @NonNull public final java.util.UUID uuid;
+  }
+
+  public class EncoderProfiles {
+    method @NonNull public java.util.List<android.media.EncoderProfiles.AudioProfile> getAudioProfiles();
+    method public int getDurationSeconds();
+    method public int getFileFormat();
+    method @NonNull public java.util.List<android.media.EncoderProfiles.VideoProfile> getVideoProfiles();
+  }
+
+  public static class EncoderProfiles.AudioProfile {
+    method public int getBitrate();
+    method public int getChannels();
+    method public int getCodec();
+    method @NonNull public String getMediaType();
+    method public int getProfile();
+    method public int getSampleRate();
+  }
+
+  public static class EncoderProfiles.VideoProfile {
+    method public int getBitrate();
+    method public int getCodec();
+    method public int getFrameRate();
+    method public int getHeight();
+    method @NonNull public String getMediaType();
+    method public int getProfile();
+    method public int getWidth();
   }
 
   public class ExifInterface {
@@ -22903,6 +22930,7 @@ package android.media {
     method public void setAudioChannels(int);
     method public void setAudioEncoder(int) throws java.lang.IllegalStateException;
     method public void setAudioEncodingBitRate(int);
+    method public void setAudioProfile(@NonNull android.media.EncoderProfiles.AudioProfile);
     method public void setAudioSamplingRate(int);
     method public void setAudioSource(int) throws java.lang.IllegalStateException;
     method @Deprecated public void setCamera(android.hardware.Camera);
@@ -22931,6 +22959,7 @@ package android.media {
     method public void setVideoEncodingBitRate(int);
     method public void setVideoEncodingProfileLevel(int, int);
     method public void setVideoFrameRate(int) throws java.lang.IllegalStateException;
+    method public void setVideoProfile(@NonNull android.media.EncoderProfiles.VideoProfile);
     method public void setVideoSize(int, int) throws java.lang.IllegalStateException;
     method public void setVideoSource(int) throws java.lang.IllegalStateException;
     method public void start() throws java.lang.IllegalStateException;
