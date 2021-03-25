@@ -53,6 +53,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -137,7 +138,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 mFlagsCache,
                 mAudioManager,
                 mSensorPrivacyController,
-                mDispatcher
+                mDispatcher,
+                new FakeSystemClock()
         );
     }
 
