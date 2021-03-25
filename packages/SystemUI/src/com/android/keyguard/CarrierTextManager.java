@@ -160,11 +160,18 @@ public class CarrierTextManager {
      *
      * @param separator Separator between different parts of the text
      */
-    private CarrierTextManager(Context context, CharSequence separator, boolean showAirplaneMode,
-            boolean showMissingSim, @Nullable WifiManager wifiManager,
-            TelephonyManager telephonyManager, TelephonyListenerManager telephonyListenerManager,
-            WakefulnessLifecycle wakefulnessLifecycle, @Main Executor mainExecutor,
-            @Background Executor bgExecutor, KeyguardUpdateMonitor keyguardUpdateMonitor) {
+    private CarrierTextManager(
+            Context context,
+            CharSequence separator,
+            boolean showAirplaneMode,
+            boolean showMissingSim,
+            @Nullable WifiManager wifiManager,
+            TelephonyManager telephonyManager,
+            TelephonyListenerManager telephonyListenerManager,
+            WakefulnessLifecycle wakefulnessLifecycle,
+            @Main Executor mainExecutor,
+            @Background Executor bgExecutor,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
         mIsEmergencyCallCapable = telephonyManager.isVoiceCapable();
 
@@ -633,12 +640,15 @@ public class CarrierTextManager {
         private boolean mShowMissingSim;
 
         @Inject
-        public Builder(Context context, @Main Resources resources,
+        public Builder(
+                Context context,
+                @Main Resources resources,
                 @Nullable WifiManager wifiManager,
                 TelephonyManager telephonyManager,
                 TelephonyListenerManager telephonyListenerManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
-                @Main Executor mainExecutor, @Background Executor bgExecutor,
+                @Main Executor mainExecutor,
+                @Background Executor bgExecutor,
                 KeyguardUpdateMonitor keyguardUpdateMonitor) {
             mContext = context;
             mSeparator = resources.getString(
@@ -668,8 +678,8 @@ public class CarrierTextManager {
         public CarrierTextManager build() {
             return new CarrierTextManager(
                     mContext, mSeparator, mShowAirplaneMode, mShowMissingSim, mWifiManager,
-                    mTelephonyManager, mTelephonyListenerManager,
-                    mWakefulnessLifecycle, mMainExecutor, mBgExecutor, mKeyguardUpdateMonitor);
+                    mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle,
+                    mMainExecutor, mBgExecutor, mKeyguardUpdateMonitor);
         }
     }
     /**
