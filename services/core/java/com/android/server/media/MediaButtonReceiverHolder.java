@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -196,6 +197,8 @@ final class MediaButtonReceiverHolder {
         // TODO: Find a way to also send PID/UID in secure way.
         mediaButtonIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, callingPackageName);
 
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setBackgroundActivityStartsAllowed(true);
         if (mPendingIntent != null) {
             if (DEBUG_KEY_EVENT) {
                 Log.d(TAG, "Sending " + keyEvent + " to the last known PendingIntent "
@@ -203,7 +206,8 @@ final class MediaButtonReceiverHolder {
             }
             try {
                 mPendingIntent.send(
-                        context, resultCode, mediaButtonIntent, onFinishedListener, handler);
+                        context, resultCode, mediaButtonIntent, onFinishedListener, handler,
+                        /* requiredPermission= */null, options.toBundle());
             } catch (PendingIntent.CanceledException e) {
                 Log.w(TAG, "Error sending key event to media button receiver " + mPendingIntent, e);
                 return false;
@@ -226,7 +230,8 @@ final class MediaButtonReceiverHolder {
                         break;
                     default:
                         // Legacy behavior for other cases.
-                        context.sendBroadcastAsUser(mediaButtonIntent, userHandle);
+                        context.sendBroadcastAsUser(mediaButtonIntent, userHandle,
+                                /* requiredPermission= */null, options.toBundle());
                 }
             } catch (Exception e) {
                 Log.w(TAG, "Error sending media button to the restored intent "
