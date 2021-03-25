@@ -96,10 +96,10 @@ final class HotwordDetectionConnection {
                     mBound = connected;
                     if (connected) {
                         try {
-                            service.setConfig(options, sharedMemory);
+                            service.updateState(options, sharedMemory);
                         } catch (RemoteException e) {
                             // TODO: (b/181842909) Report an error to voice interactor
-                            Slog.w(TAG, "Failed to setConfig for HotwordDetectionService", e);
+                            Slog.w(TAG, "Failed to updateState for HotwordDetectionService", e);
                         }
                     }
                 }
@@ -129,9 +129,9 @@ final class HotwordDetectionConnection {
         }
     }
 
-    void setConfigLocked(PersistableBundle options, SharedMemory sharedMemory) {
+    void updateStateLocked(PersistableBundle options, SharedMemory sharedMemory) {
         mRemoteHotwordDetectionService.run(
-                service -> service.setConfig(options, sharedMemory));
+                service -> service.updateState(options, sharedMemory));
     }
 
     private void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
