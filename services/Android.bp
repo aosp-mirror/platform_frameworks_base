@@ -153,7 +153,7 @@ stubs_defaults {
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
     visibility: ["//visibility:private"],
-    filter_packages: ["com.android."]
+    filter_packages: ["com.android."],
 }
 
 droidstubs {
@@ -168,7 +168,7 @@ droidstubs {
         last_released: {
             api_file: ":android.api.system-server.latest",
             removed_api_file: ":removed.api.system-server.latest",
-            baseline_file: ":android-incompatibilities.api.system-server.latest"
+            baseline_file: ":android-incompatibilities.api.system-server.latest",
         },
         api_lint: {
             enabled: true,
@@ -178,18 +178,24 @@ droidstubs {
     },
     dists: [
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system-server/api",
             dest: "android.txt",
-            tag: ".api.txt"
+            tag: ".api.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system-server/api",
             dest: "removed.txt",
             tag: ".removed-api.txt",
         },
-    ]
+    ],
 }
 
 java_library {
@@ -223,16 +229,22 @@ droidstubs {
     },
     dists: [
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system-server/api",
             dest: "android-non-updatable.txt",
-            tag: ".api.txt"
+            tag: ".api.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system-server/api",
             dest: "android-non-updatable-removed.txt",
             tag: ".removed-api.txt",
         },
-    ]
+    ],
 }
