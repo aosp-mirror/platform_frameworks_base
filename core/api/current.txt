@@ -12140,6 +12140,7 @@ package android.content.pm {
     method @Nullable public android.content.IntentSender getShortcutConfigActivityIntent(@NonNull android.content.pm.LauncherActivityInfo);
     method public java.util.List<android.content.pm.LauncherActivityInfo> getShortcutConfigActivityList(@Nullable String, @NonNull android.os.UserHandle);
     method public android.graphics.drawable.Drawable getShortcutIconDrawable(@NonNull android.content.pm.ShortcutInfo, int);
+    method @Nullable public android.app.PendingIntent getShortcutIntent(@NonNull String, @NonNull String, @Nullable android.os.Bundle, @NonNull android.os.UserHandle);
     method @Nullable public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(@NonNull android.content.pm.LauncherApps.ShortcutQuery, @NonNull android.os.UserHandle);
     method @Nullable public android.os.Bundle getSuspendedPackageLauncherExtras(String, android.os.UserHandle);
     method public boolean hasShortcutHostPermission();
