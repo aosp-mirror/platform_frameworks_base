@@ -891,6 +891,8 @@
     <string name="quick_settings_more_user_settings">User settings</string>
     <!-- QuickSettings: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_done">Done</string>
+    <!-- QuickSettings: Control panel: Label for button that dismisses user switcher control panel. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_close_user_panel">Close</string>
     <!-- QuickSettings: Control panel: Label for connected device. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_connected">Connected</string>
     <!-- QuickSettings: Control panel: Label for connected device, showing remote device battery level. [CHAR LIMIT=NONE] -->

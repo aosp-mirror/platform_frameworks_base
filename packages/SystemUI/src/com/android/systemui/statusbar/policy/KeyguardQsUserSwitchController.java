@@ -321,6 +321,11 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
         }
 
         @Override
+        public int getDoneText() {
+            return R.string.quick_settings_close_user_panel;
+        }
+
+        @Override
         public boolean onDoneButtonClicked() {
             if (mNotificationPanelViewController != null) {
                 mNotificationPanelViewController.animateCloseQs(true /* animateAway */);
