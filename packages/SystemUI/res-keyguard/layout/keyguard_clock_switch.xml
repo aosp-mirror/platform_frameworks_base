@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:textSize="60dp"
+            android:textSize="86dp"
             android:fontFamily="@font/clock"
             android:typeface="monospace"
             android:elegantTextHeight="false"
@@ -98,7 +98,7 @@
             android:fontFamily="@font/clock"
             android:typeface="monospace"
             android:elegantTextHeight="false"
-            dozeWeight="100"
+            dozeWeight="200"
             lockScreenWeight="400"
         />
     </FrameLayout>
