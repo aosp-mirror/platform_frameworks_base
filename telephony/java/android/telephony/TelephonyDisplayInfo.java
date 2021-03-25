@@ -84,7 +84,7 @@ public final class TelephonyDisplayInfo implements Parcelable {
      * </ul>
      * One of the use case is that UX can show a different icon, for example, "5G+"
      */
-    public static final int OVERRIDE_NETWORK_TYPE_NR_ADVANCED = 4;
+    public static final int OVERRIDE_NETWORK_TYPE_NR_ADVANCED = 5;
 
     @NetworkType
     private final  int mNetworkType;
@@ -186,7 +186,8 @@ public final class TelephonyDisplayInfo implements Parcelable {
             case OVERRIDE_NETWORK_TYPE_LTE_CA: return "LTE_CA";
             case OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO: return "LTE_ADV_PRO";
             case OVERRIDE_NETWORK_TYPE_NR_NSA: return "NR_NSA";
-            case OVERRIDE_NETWORK_TYPE_NR_ADVANCED: return "NR_NSA_MMWAVE";
+            case OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE: return "NR_NSA_MMWAVE";
+            case OVERRIDE_NETWORK_TYPE_NR_ADVANCED: return "NR_ADVANCED";
             default: return "UNKNOWN";
         }
     }

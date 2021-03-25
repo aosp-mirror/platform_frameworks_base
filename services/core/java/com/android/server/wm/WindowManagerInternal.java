@@ -113,7 +113,7 @@ public abstract class WindowManagerInternal {
          *
          * @param magnificationRegion the current magnification region
          */
-        public void onMagnificationRegionChanged(Region magnificationRegion);
+        void onMagnificationRegionChanged(Region magnificationRegion);
 
         /**
          * Called when an application requests a rectangle on the screen to allow
@@ -124,20 +124,27 @@ public abstract class WindowManagerInternal {
          * @param right The rectangle right.
          * @param bottom The rectangle bottom.
          */
-        public void onRectangleOnScreenRequested(int left, int top, int right, int bottom);
+        void onRectangleOnScreenRequested(int left, int top, int right, int bottom);
 
         /**
          * Notifies that the rotation changed.
          *
          * @param rotation The current rotation.
          */
-        public void onRotationChanged(int rotation);
+        void onRotationChanged(int rotation);
 
         /**
          * Notifies that the context of the user changed. For example, an application
          * was started.
          */
-        public void onUserContextChanged();
+        void onUserContextChanged();
+
+        /**
+         * Notifies that the IME window visibility changed.
+         * @param shown {@code true} means the IME window shows on the screen. Otherwise it's
+         *                           hidden.
+         */
+        void onImeWindowVisibilityChanged(boolean shown);
     }
 
     /**

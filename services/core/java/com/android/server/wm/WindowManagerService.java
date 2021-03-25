@@ -2235,11 +2235,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mPendingPositionChanged = null;
             }
 
-            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
-                win.prepareDrawHandlers();
-                result |= RELAYOUT_RES_BLAST_SYNC;
-            }
-
             int attrChanges = 0;
             int flagChanges = 0;
             int privateFlagChanges = 0;
@@ -2512,6 +2507,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             win.mInRelayout = false;
 
+            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
+                win.prepareDrawHandlers();
+                win.markRedrawForSyncReported();
+                result |= RELAYOUT_RES_BLAST_SYNC;
+            }
+
             if (configChanged) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                         "relayoutWindow: postNewConfigurationToHandler");
@@ -2707,7 +2708,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Registers a listener for a {@link android.app.WindowContext} to subscribe to configuration
+     * Registers a listener for a {@link android.window.WindowContext} to subscribe to configuration
      * changes of a {@link DisplayArea}.
      *
      * @param clientToken the window context's token

@@ -32,7 +32,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockPatternView.Cell;
 import com.android.internal.widget.LockscreenCredential;
-import com.android.keyguard.EmergencyButton.EmergencyButtonCallback;
+import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
@@ -54,6 +54,7 @@ public class KeyguardPatternViewController
     private final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
     private final FalsingCollector mFalsingCollector;
+    private final EmergencyButtonController mEmergencyButtonController;
     private final KeyguardMessageAreaController.Factory mMessageAreaControllerFactory;
 
     private KeyguardMessageAreaController mMessageAreaController;
@@ -189,12 +190,14 @@ public class KeyguardPatternViewController
             KeyguardSecurityCallback keyguardSecurityCallback,
             LatencyTracker latencyTracker,
             FalsingCollector falsingCollector,
+            EmergencyButtonController emergencyButtonController,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
-        super(view, securityMode, keyguardSecurityCallback);
+        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
         mFalsingCollector = falsingCollector;
+        mEmergencyButtonController = emergencyButtonController;
         mMessageAreaControllerFactory = messageAreaControllerFactory;
         KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
         mMessageAreaController = mMessageAreaControllerFactory.create(kma);
@@ -222,11 +225,7 @@ public class KeyguardPatternViewController
             }
             return false;
         });
-
-        EmergencyButton button = mView.findViewById(R.id.emergency_call_button);
-        if (button != null) {
-            button.setCallback(mEmergencyButtonCallback);
-        }
+        mEmergencyButtonController.setEmergencyButtonCallback(mEmergencyButtonCallback);
 
         View cancelBtn = mView.findViewById(R.id.cancel_button);
         if (cancelBtn != null) {
@@ -242,10 +241,7 @@ public class KeyguardPatternViewController
         super.onViewDetached();
         mLockPatternView.setOnPatternListener(null);
         mLockPatternView.setOnTouchListener(null);
-        EmergencyButton button = mView.findViewById(R.id.emergency_call_button);
-        if (button != null) {
-            button.setCallback(null);
-        }
+        mEmergencyButtonController.setEmergencyButtonCallback(null);
         View cancelBtn = mView.findViewById(R.id.cancel_button);
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(null);

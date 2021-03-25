@@ -1141,4 +1141,9 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean isPackageFrozen(
             @NonNull String packageName, int callingUid, int userId);
+
+    /**
+     * Deletes the OAT artifacts of a package.
+     */
+    public abstract void deleteOatArtifactsOfPackage(String packageName);
 }

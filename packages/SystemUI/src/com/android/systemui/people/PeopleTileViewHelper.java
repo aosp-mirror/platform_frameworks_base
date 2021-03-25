@@ -58,8 +58,10 @@ import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -82,6 +84,8 @@ class PeopleTileViewHelper {
     private static final int FIXED_HEIGHT_DIMENS_FOR_SMALL = 6 + 4 + 8;
     private static final int FIXED_WIDTH_DIMENS_FOR_SMALL = 4 + 4;
 
+    private static final int MESSAGES_COUNT_OVERFLOW = 7;
+
     private static final Pattern DOUBLE_EXCLAMATION_PATTERN = Pattern.compile("[!][!]+");
     private static final Pattern DOUBLE_QUESTION_PATTERN = Pattern.compile("[?][?]+");
     private static final Pattern ANY_DOUBLE_MARK_PATTERN = Pattern.compile("[!?][!?]+");
@@ -96,6 +100,9 @@ class PeopleTileViewHelper {
     private int mWidth;
     private int mHeight;
     private int mLayoutSize;
+
+    private Locale mLocale;
+    private NumberFormat mIntegerFormat;
 
     PeopleTileViewHelper(Context context, PeopleSpaceTile tile,
             int appWidgetId, Bundle options) {
@@ -354,10 +361,36 @@ class PeopleTileViewHelper {
             views.setViewVisibility(R.id.image, View.GONE);
             views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_message);
         }
+        if (mTile.getMessagesCount() > 1) {
+            views.setViewVisibility(R.id.messages_count, View.VISIBLE);
+            views.setTextViewText(R.id.messages_count,
+                    getMessagesCountText(mTile.getMessagesCount()));
+            if (mLayoutSize == LAYOUT_SMALL) {
+                views.setViewVisibility(R.id.predefined_icon, View.GONE);
+            }
+        }
         // TODO: Set subtext as Group Sender name once storing the name in PeopleSpaceTile and
         //  subtract 1 from maxLines when present.
         views.setViewVisibility(R.id.subtext, View.GONE);
         return views;
+    }
+
+    // Some messaging apps only include up to 7 messages in their notifications.
+    private String getMessagesCountText(int count) {
+        if (count >= MESSAGES_COUNT_OVERFLOW) {
+            return mContext.getResources().getString(
+                    R.string.messages_count_overflow_indicator, MESSAGES_COUNT_OVERFLOW);
+        }
+
+        // Cache the locale-appropriate NumberFormat.  Configuration locale is guaranteed
+        // non-null, so the first time this is called we will always get the appropriate
+        // NumberFormat, then never regenerate it unless the locale changes on the fly.
+        final Locale curLocale = mContext.getResources().getConfiguration().getLocales().get(0);
+        if (!curLocale.equals(mLocale)) {
+            mLocale = curLocale;
+            mIntegerFormat = NumberFormat.getIntegerInstance(curLocale);
+        }
+        return mIntegerFormat.format(count);
     }
 
     private RemoteViews createStatusRemoteViews(ConversationStatus status) {

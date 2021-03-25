@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.app;
+package android.window;
 
 import android.annotation.NonNull;
+import android.app.ActivityThread;
+import android.app.IWindowToken;
+import android.app.ResourcesManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -25,18 +28,22 @@ import android.view.WindowManagerGlobal;
 import java.lang.ref.WeakReference;
 
 /**
- * Client implementation of {@link IWindowToken}. It can receive configuration change callbacks from
- * server when window token config is updated or when it is moved between displays, and update the
- * resources associated with this token on the client side. This will make sure that
- * {@link WindowContext} instances will have updated resources and configuration.
+ * This class is used to receive {@link Configuration} changes from the associated window manager
+ * node on the server side, and apply the change to the {@link Context#getResources() associated
+ * Resources} of the attached {@link Context}. It is also used as
+ * {@link Context#getWindowContextToken() the token of non-Activity UI Contexts}.
+ *
+ * @see WindowContext
+ * @see android.view.IWindowManager#registerWindowContextListener(IBinder, int, int, Bundle)
+ *
  * @hide
  */
 public class WindowTokenClient extends IWindowToken.Stub {
     /**
      * Attached {@link Context} for this window token to update configuration and resources.
-     * Initialized by {@link #attachContext(WindowContext)}.
+     * Initialized by {@link #attachContext(Context)}.
      */
-    private WeakReference<WindowContext> mContextRef = null;
+    private WeakReference<Context> mContextRef = null;
 
     private final ResourcesManager mResourcesManager = ResourcesManager.getInstance();
 
@@ -50,18 +57,16 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * @param context context to be attached
      * @throws IllegalStateException if attached context has already existed.
      */
-    void attachContext(@NonNull WindowContext context) {
+    public void attachContext(@NonNull Context context) {
         if (mContextRef != null) {
             throw new IllegalStateException("Context is already attached.");
         }
         mContextRef = new WeakReference<>(context);
-        final ContextImpl impl = ContextImpl.getImpl(context);
-        impl.setResources(impl.createWindowContextResources());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
-        final WindowContext context = mContextRef.get();
+        final Context context = mContextRef.get();
         if (context == null) {
             return;
         }
@@ -72,8 +77,10 @@ public class WindowTokenClient extends IWindowToken.Stub {
         if (displayChanged || configChanged) {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
             mResourcesManager.updateResourcesForActivity(this, newConfig, newDisplayId);
-            ActivityThread.currentActivityThread().getHandler().post(
-                    () -> context.dispatchConfigurationChanged(newConfig));
+            if (context instanceof WindowContext) {
+                ActivityThread.currentActivityThread().getHandler().post(
+                        () -> ((WindowContext) context).dispatchConfigurationChanged(newConfig));
+            }
         }
         if (displayChanged) {
             context.updateDisplay(newDisplayId);
@@ -82,7 +89,7 @@ public class WindowTokenClient extends IWindowToken.Stub {
 
     @Override
     public void onWindowTokenRemoved() {
-        final WindowContext context = mContextRef.get();
+        final Context context = mContextRef.get();
         if (context != null) {
             context.destroy();
             mContextRef.clear();

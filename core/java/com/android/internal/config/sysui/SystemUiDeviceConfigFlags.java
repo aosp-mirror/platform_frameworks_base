@@ -374,11 +374,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SCREENSHOT_CORNER_FLOW = "enable_screenshot_corner_flow";
 
-    /**
-     * (boolean) Whether scrolling screenshots are enabled.
-     */
-    public static final String SCREENSHOT_SCROLLING_ENABLED = "enable_screenshot_scrolling";
-
     // Flags related to Nav Bar
 
     /**

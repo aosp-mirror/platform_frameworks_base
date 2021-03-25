@@ -41,10 +41,10 @@ import android.media.permission.Identity;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.util.Slog;
@@ -237,18 +237,6 @@ public class AlwaysOnHotwordDetector {
             MODEL_PARAM_THRESHOLD_FACTOR,
     })
     public @interface ModelParams {}
-
-    /**
-     * Indicates that the given audio data is a false alert for {@link VoiceInteractionService}.
-     */
-    public static final int HOTWORD_DETECTION_FALSE_ALERT = 0;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "HOTWORD_DETECTION_" }, value = {
-            HOTWORD_DETECTION_FALSE_ALERT,
-    })
-    public @interface HotwordDetectionResult {}
 
     /**
      * Controls the sensitivity threshold adjustment factor for a given model.
@@ -478,11 +466,14 @@ public class AlwaysOnHotwordDetector {
         public abstract void onRecognitionResumed();
 
         /**
-         * Called when the validated result is invalid.
+         * Called when the {@link HotwordDetectionService second stage detection} did not detect the
+         * keyphrase.
          *
-         * @param reason The reason why the validated result is invalid.
+         * @param result Info about the second stage detection result, provided by the
+         *         {@link HotwordDetectionService}.
          */
-        public void onRejected(@HotwordDetectionResult int reason) {}
+        public void onRejected(@Nullable HotwordRejectedResult result) {
+        }
     }
 
     /**
@@ -494,8 +485,8 @@ public class AlwaysOnHotwordDetector {
      * @param supportHotwordDetectionService {@code true} if hotword detection service should be
      * triggered, otherwise {@code false}.
      * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
-     * contents that can be used to communicate with other processes.
+     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
      * @param sharedMemory The unrestricted data blob provided by the
      * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
@@ -505,7 +496,7 @@ public class AlwaysOnHotwordDetector {
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportHotwordDetectionService, @Nullable Bundle options,
+            boolean supportHotwordDetectionService, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         mText = text;
         mLocale = locale;
@@ -534,8 +525,8 @@ public class AlwaysOnHotwordDetector {
      * Set configuration and pass read-only data to hotword detection service.
      *
      * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
-     * contents that can be used to communicate with other processes.
+     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
      * @param sharedMemory The unrestricted data blob provided by the
      * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
@@ -544,7 +535,7 @@ public class AlwaysOnHotwordDetector {
      *
      * @hide
      */
-    public final void setHotwordDetectionServiceConfig(@Nullable Bundle options,
+    public final void setHotwordDetectionServiceConfig(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         if (DBG) {
             Slog.d(TAG, "setHotwordDetectionServiceConfig()");
@@ -1069,13 +1060,13 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onRejected(int reason) {
+        public void onRejected(HotwordRejectedResult result) {
             if (DBG) {
-                Slog.d(TAG, "onRejected(" + reason + ")");
+                Slog.d(TAG, "onRejected(" + result + ")");
             } else {
                 Slog.i(TAG, "onRejected");
             }
-            Message.obtain(mHandler, MSG_HOTWORD_REJECTED, reason).sendToTarget();
+            Message.obtain(mHandler, MSG_HOTWORD_REJECTED, result).sendToTarget();
         }
 
         @Override
@@ -1124,7 +1115,7 @@ public class AlwaysOnHotwordDetector {
                     mExternalCallback.onRecognitionResumed();
                     break;
                 case MSG_HOTWORD_REJECTED:
-                    mExternalCallback.onRejected(msg.arg1);
+                    mExternalCallback.onRejected((HotwordRejectedResult) msg.obj);
                     break;
                 default:
                     super.handleMessage(msg);

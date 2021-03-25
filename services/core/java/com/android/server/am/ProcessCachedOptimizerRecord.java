@@ -47,6 +47,12 @@ final class ProcessCachedOptimizerRecord {
     private int mLastCompactAction;
 
     /**
+     * This process has been scheduled for a memory compaction.
+     */
+    @GuardedBy("mProcLock")
+    private boolean mPendingCompact;
+
+    /**
      * True when the process is frozen.
      */
     @GuardedBy("mProcLock")
@@ -98,6 +104,16 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     void setLastCompactAction(int lastCompactAction) {
         mLastCompactAction = lastCompactAction;
+    }
+
+    @GuardedBy("mProcLock")
+    boolean hasPendingCompact() {
+        return mPendingCompact;
+    }
+
+    @GuardedBy("mProcLock")
+    void setHasPendingCompact(boolean pendingCompact) {
+        mPendingCompact = pendingCompact;
     }
 
     @GuardedBy("mProcLock")

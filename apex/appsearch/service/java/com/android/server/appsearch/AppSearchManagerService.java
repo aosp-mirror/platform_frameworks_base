@@ -24,6 +24,7 @@ import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.IAppSearchBatchResultCallback;
 import android.app.appsearch.IAppSearchManager;
 import android.app.appsearch.IAppSearchResultCallback;
@@ -86,21 +87,6 @@ public class AppSearchManagerService extends SystemService {
         }
     }
 
-    @Override
-    public void onUserStopping(@NonNull TargetUser user) {
-        synchronized (mUnlockedUserIdsLocked) {
-            mUnlockedUserIdsLocked.remove(user.getUserIdentifier());
-            try {
-                AppSearchImpl impl =
-                        mImplInstanceManager.getAppSearchImpl(
-                                getContext(), user.getUserIdentifier());
-                impl.close();
-            } catch (Throwable t) {
-                Log.e(TAG, "Error handling user stopping.", t);
-            }
-        }
-    }
-
     private class Stub extends IAppSearchManager.Stub {
         @Override
         public void setSchema(
@@ -111,6 +97,7 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
                 boolean forceOverride,
                 @UserIdInt int userId,
+                int schemaVersion,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(packageName);
             Preconditions.checkNotNull(databaseName);
@@ -144,7 +131,8 @@ public class AppSearchManagerService extends SystemService {
                         schemas,
                         schemasNotDisplayedBySystem,
                         schemasPackageAccessible,
-                        forceOverride);
+                        forceOverride,
+                        schemaVersion);
                 invokeCallbackOnResult(
                         callback, AppSearchResult.newSuccessfulResult(/*result=*/ null));
             } catch (Throwable t) {
@@ -171,13 +159,35 @@ public class AppSearchManagerService extends SystemService {
                 verifyCallingPackage(callingUid, packageName);
                 AppSearchImpl impl =
                         mImplInstanceManager.getAppSearchImpl(callingUserId);
-                List<AppSearchSchema> schemas = impl.getSchema(packageName, databaseName);
-                List<Bundle> schemaBundles = new ArrayList<>(schemas.size());
-                for (int i = 0; i < schemas.size(); i++) {
-                    schemaBundles.add(schemas.get(i).getBundle());
-                }
+                GetSchemaResponse response = impl.getSchema(packageName, databaseName);
                 invokeCallbackOnResult(
-                        callback, AppSearchResult.newSuccessfulResult(schemaBundles));
+                        callback, AppSearchResult.newSuccessfulResult(response.getBundle()));
+            } catch (Throwable t) {
+                invokeCallbackOnError(callback, t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void getNamespaces(
+                @NonNull String packageName,
+                @NonNull String databaseName,
+                @UserIdInt int userId,
+                @NonNull IAppSearchResultCallback callback) {
+            Preconditions.checkNotNull(packageName);
+            Preconditions.checkNotNull(databaseName);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = handleIncomingUser(userId, callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                verifyUserUnlocked(callingUserId);
+                verifyCallingPackage(callingUid, packageName);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(callingUserId);
+                List<String> namespaces = impl.getNamespaces(packageName, databaseName);
+                invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(namespaces));
             } catch (Throwable t) {
                 invokeCallbackOnError(callback, t);
             } finally {
@@ -395,6 +405,7 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String namespace,
                 @NonNull String uri,
                 long usageTimeMillis,
+                boolean systemUsage,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Objects.requireNonNull(databaseName);
@@ -406,9 +417,16 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 verifyUserUnlocked(callingUserId);
+
+                if (systemUsage) {
+                    // TODO(b/183031844): Validate that the call comes from the system
+                }
+
                 AppSearchImpl impl =
                         mImplInstanceManager.getAppSearchImpl(callingUserId);
-                impl.reportUsage(packageName, databaseName, namespace, uri, usageTimeMillis);
+                impl.reportUsage(
+                        packageName, databaseName, namespace, uri,
+                        usageTimeMillis, systemUsage);
                 invokeCallbackOnResult(
                         callback, AppSearchResult.newSuccessfulResult(/*result=*/ null));
             } catch (Throwable t) {

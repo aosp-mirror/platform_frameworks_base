@@ -22,7 +22,7 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
-import android.media.metrics.PlaybackComponent;
+import android.media.metrics.LogSessionId;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.IHwBinder;
@@ -75,10 +75,8 @@ import java.util.stream.Collectors;
  * <p>This class requires the {@link android.Manifest.permission#INTERNET} permission
  * when used with network-based content.
  */
-public final class MediaExtractor implements PlaybackComponent {
-
+public final class MediaExtractor {
     public MediaExtractor() {
-        mPlaybackId = "";
         native_setup();
     }
 
@@ -771,16 +769,20 @@ public final class MediaExtractor implements PlaybackComponent {
      */
     public native boolean hasCacheReachedEndOfStream();
 
-    @Override
-    public void setPlaybackId(@NonNull String playbackId) {
-        mPlaybackId = Objects.requireNonNull(playbackId);
-        native_setPlaybackId(playbackId);
+    /**
+     * Sets the {@link LogSessionId} for MediaExtractor.
+     */
+    public void setLogSessionId(@NonNull LogSessionId logSessionId) {
+        mLogSessionId = Objects.requireNonNull(logSessionId);
+        native_setPlaybackId(logSessionId.getStringId());
     }
 
+    /**
+     * Returns the {@link LogSessionId} for MediaExtractor.
+     */
     @NonNull
-    @Override
-    public String getPlaybackId() {
-        return mPlaybackId;
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
     }
 
     /**
@@ -813,7 +815,7 @@ public final class MediaExtractor implements PlaybackComponent {
     }
 
     private MediaCas mMediaCas;
-    private String mPlaybackId;
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
 
     private long mNativeContext;
 

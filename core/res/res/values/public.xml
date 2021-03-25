@@ -3092,6 +3092,7 @@
     <public name="attributionTags"/>
     <public name="suppressesSpellChecker" />
     <public name="usesPermissionFlags" />
+    <public name="requestOptimizedExternalStorageAccess" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">

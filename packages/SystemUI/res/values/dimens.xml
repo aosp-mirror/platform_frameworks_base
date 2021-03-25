@@ -462,6 +462,10 @@
 
     <dimen name="volume_dialog_slider_height">116dp</dimen>
 
+    <dimen name="volume_dialog_slider_width">@dimen/volume_dialog_panel_width</dimen>
+
+    <dimen name="volume_dialog_slider_corner_radius">@dimen/volume_dialog_panel_width_half</dimen>
+
     <dimen name="volume_dialog_ringer_size">64dp</dimen>
 
     <dimen name="volume_dialog_ringer_icon_padding">20dp</dimen>
@@ -1353,6 +1357,7 @@
 
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>
+    <dimen name="people_space_messages_count_radius">12dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
     <dimen name="required_width_for_medium">146dp</dimen>
     <dimen name="required_width_for_large">138dp</dimen>

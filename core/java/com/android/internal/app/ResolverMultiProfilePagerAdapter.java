@@ -205,7 +205,7 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     protected void showNoPersonalToWorkIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         showEmptyState(activeListAdapter,
                 R.drawable.ic_sharing_disabled,
-                R.string.resolver_cant_access_work_apps,
+                R.string.resolver_cross_profile_blocked,
                 R.string.resolver_cant_access_work_apps_explanation);
     }
 
@@ -213,7 +213,7 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     protected void showNoWorkToPersonalIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         showEmptyState(activeListAdapter,
                 R.drawable.ic_sharing_disabled,
-                R.string.resolver_cant_access_personal_apps,
+                R.string.resolver_cross_profile_blocked,
                 R.string.resolver_cant_access_personal_apps_explanation);
     }
 

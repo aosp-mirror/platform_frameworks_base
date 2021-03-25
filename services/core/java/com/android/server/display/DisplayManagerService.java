@@ -203,6 +203,8 @@ public final class DisplayManagerService extends SystemService {
     private WindowManagerInternal mWindowManagerInternal;
     private InputManagerInternal mInputManagerInternal;
     private IMediaProjectionManager mProjectionService;
+    private int[] mUserDisabledHdrTypes = {};
+    private boolean mAreUserDisabledHdrTypesAllowed = true;
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
@@ -557,6 +559,8 @@ public final class DisplayManagerService extends SystemService {
             recordTopInsetLocked(mLogicalDisplayMapper.getDisplayLocked(Display.DEFAULT_DISPLAY));
 
             updateSettingsLocked();
+
+            updateUserDisabledHdrTypesFromSettingsLocked();
         }
 
         mDisplayModeDirector.setDesiredDisplayModeSpecsListener(
@@ -566,6 +570,7 @@ public final class DisplayManagerService extends SystemService {
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
 
         mSettingsObserver = new SettingsObserver();
+
         mBrightnessSynchronizer.startSynchronizing();
     }
 
@@ -735,6 +740,42 @@ public final class DisplayManagerService extends SystemService {
     private void updateSettingsLocked() {
         mMinimalPostProcessingAllowed = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED, 1, UserHandle.USER_CURRENT) != 0;
+    }
+
+    private void updateUserDisabledHdrTypesFromSettingsLocked() {
+        mAreUserDisabledHdrTypesAllowed = (Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.ARE_USER_DISABLED_HDR_FORMATS_ALLOWED,
+                1) != 0);
+
+        String userDisabledHdrTypes = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.USER_DISABLED_HDR_FORMATS);
+
+        if (userDisabledHdrTypes != null) {
+            try {
+                String[] userDisabledHdrTypeStrings =
+                        TextUtils.split(userDisabledHdrTypes, ",");
+                mUserDisabledHdrTypes = new int[userDisabledHdrTypeStrings.length];
+                for (int i = 0; i < userDisabledHdrTypeStrings.length; i++) {
+                    mUserDisabledHdrTypes[i] = Integer.parseInt(userDisabledHdrTypeStrings[i]);
+                }
+            } catch (NumberFormatException e) {
+                Slog.e(TAG,
+                        "Failed to parse USER_DISABLED_HDR_FORMATS. "
+                                + "Clearing the setting.", e);
+                clearUserDisabledHdrTypesLocked();
+            }
+        } else {
+            clearUserDisabledHdrTypesLocked();
+        }
+    }
+
+    private void clearUserDisabledHdrTypesLocked() {
+        mUserDisabledHdrTypes = new int[]{};
+        synchronized (mSyncRoot) {
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.USER_DISABLED_HDR_FORMATS, "");
+        }
     }
 
     private DisplayInfo getDisplayInfoForFrameRateOverride(DisplayEventReceiver.FrameRateOverride[]
@@ -957,6 +998,61 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void setUserDisabledHdrTypesInternal(int[] userDisabledHdrTypes) {
+        synchronized (mSyncRoot) {
+            if (userDisabledHdrTypes == null) {
+                Slog.e(TAG, "Null is not an expected argument to "
+                        + "setUserDisabledHdrTypesInternal");
+                return;
+            }
+            Arrays.sort(userDisabledHdrTypes);
+            if (Arrays.equals(mUserDisabledHdrTypes, userDisabledHdrTypes)) {
+                return;
+            }
+            String userDisabledFormatsString = "";
+            if (userDisabledHdrTypes.length != 0) {
+                userDisabledFormatsString = TextUtils.join(",",
+                        Arrays.stream(userDisabledHdrTypes).boxed().toArray());
+            }
+            Settings.Global.putString(mContext.getContentResolver(),
+                    Settings.Global.USER_DISABLED_HDR_FORMATS, userDisabledFormatsString);
+            mUserDisabledHdrTypes = userDisabledHdrTypes;
+            if (!mAreUserDisabledHdrTypesAllowed) {
+                mLogicalDisplayMapper.forEachLocked(
+                        display -> {
+                            display.setUserDisabledHdrTypes(userDisabledHdrTypes);
+                            handleLogicalDisplayChangedLocked(display);
+                        });
+            }
+        }
+    }
+
+    private void setAreUserDisabledHdrTypesAllowedInternal(
+            boolean areUserDisabledHdrTypesAllowed) {
+        synchronized (mSyncRoot) {
+            if (mAreUserDisabledHdrTypesAllowed == areUserDisabledHdrTypesAllowed) {
+                return;
+            }
+            mAreUserDisabledHdrTypesAllowed = areUserDisabledHdrTypesAllowed;
+            if (mUserDisabledHdrTypes.length == 0) {
+                return;
+            }
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.ARE_USER_DISABLED_HDR_FORMATS_ALLOWED,
+                    areUserDisabledHdrTypesAllowed ? 1 : 0);
+            int userDisabledHdrTypes[] = {};
+            if (!mAreUserDisabledHdrTypesAllowed) {
+                userDisabledHdrTypes = mUserDisabledHdrTypes;
+            }
+            int[] finalUserDisabledHdrTypes = userDisabledHdrTypes;
+            mLogicalDisplayMapper.forEachLocked(
+                    display -> {
+                        display.setUserDisabledHdrTypes(finalUserDisabledHdrTypes);
+                        handleLogicalDisplayChangedLocked(display);
+                    });
+        }
+    }
+
     private void requestColorModeInternal(int displayId, int colorMode) {
         synchronized (mSyncRoot) {
             final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
@@ -1130,6 +1226,9 @@ public final class DisplayManagerService extends SystemService {
         final int displayId = display.getDisplayIdLocked();
         final boolean isDefault = displayId == Display.DEFAULT_DISPLAY;
         configureColorModeLocked(display, device);
+        if (!mAreUserDisabledHdrTypesAllowed) {
+            display.setUserDisabledHdrTypes(mUserDisabledHdrTypes);
+        }
         if (isDefault) {
             recordStableDisplayStatsIfNeededLocked(display);
             recordTopInsetLocked(display);
@@ -1814,6 +1913,14 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mMinimumBrightnessCurve=" + mMinimumBrightnessCurve);
 
             pw.println();
+            if (!mAreUserDisabledHdrTypesAllowed) {
+                pw.println("  mUserDisabledHdrTypes: size=" + mUserDisabledHdrTypes.length);
+                for (int type : mUserDisabledHdrTypes) {
+                    pw.println("  " + type);
+                }
+            }
+
+            pw.println();
             final int displayStateCount = mDisplayStates.size();
             pw.println("Display States: size=" + displayStateCount);
             for (int i = 0; i < displayStateCount; i++) {
@@ -2335,6 +2442,40 @@ public final class DisplayManagerService extends SystemService {
                 return getWifiDisplayStatusInternal();
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setUserDisabledHdrTypes(int[] userDisabledFormats) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.WRITE_SECURE_SETTINGS,
+                    "Permission required to write the user settings.");
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setUserDisabledHdrTypesInternal(userDisabledFormats);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.WRITE_SECURE_SETTINGS,
+                    "Permission required to write the user settings.");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setAreUserDisabledHdrTypesAllowedInternal(areUserDisabledHdrTypesAllowed);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public boolean areUserDisabledHdrTypesAllowed() {
+            synchronized (mSyncRoot) {
+                return mAreUserDisabledHdrTypesAllowed;
             }
         }
 

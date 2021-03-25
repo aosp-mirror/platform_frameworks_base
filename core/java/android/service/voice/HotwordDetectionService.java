@@ -27,11 +27,11 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioFormat;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.util.Log;
@@ -82,7 +82,8 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         @Override
-        public void setConfig(Bundle options, SharedMemory sharedMemory) throws RemoteException {
+        public void setConfig(PersistableBundle options, SharedMemory sharedMemory)
+                throws RemoteException {
             if (DBG) {
                 Log.d(TAG, "#setConfig");
             }
@@ -137,13 +138,13 @@ public abstract class HotwordDetectionService extends Service {
 
     /**
      * Called when the {@link VoiceInteractionService#createAlwaysOnHotwordDetector(String, Locale,
-     * Bundle, SharedMemory, AlwaysOnHotwordDetector.Callback)} or {@link AlwaysOnHotwordDetector#
-     * setHotwordDetectionServiceConfig(Bundle, SharedMemory)} requests an update of the hotword
-     * detection parameters.
+     * PersistableBundle, SharedMemory, AlwaysOnHotwordDetector.Callback)} or
+     * {@link AlwaysOnHotwordDetector#setHotwordDetectionServiceConfig(PersistableBundle,
+     * SharedMemory)} requests an update of the hotword detection parameters.
      *
      * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
-     * contents that can be used to communicate with other processes.
+     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
      * @param sharedMemory The unrestricted data blob provided by the
      * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
@@ -151,7 +152,8 @@ public abstract class HotwordDetectionService extends Service {
      * @hide
      */
     @SystemApi
-    public void onUpdateState(@Nullable Bundle options, @Nullable SharedMemory sharedMemory) {
+    public void onUpdateState(@Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory) {
     }
 
     /**
@@ -180,11 +182,14 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         /**
-         * Called when the detected result is invalid.
+         * Informs the {@link AlwaysOnHotwordDetector} that the keyphrase was not detected.
+         *
+         * @param result Info about the second stage detection result. This is provided to
+         *         the {@link AlwaysOnHotwordDetector}.
          */
-        public void onRejected() {
+        public void onRejected(@Nullable HotwordRejectedResult result) {
             try {
-                mRemoteCallback.onRejected();
+                mRemoteCallback.onRejected(result);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -17,13 +17,19 @@
 package com.android.server.translation;
 
 import static android.Manifest.permission.MANAGE_UI_TRANSLATION;
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.content.Context.TRANSLATION_MANAGER_SERVICE;
 import static android.view.translation.TranslationManager.STATUS_SYNC_CALL_FAIL;
+import static android.view.translation.TranslationManager.STATUS_SYNC_CALL_SUCCESS;
+
+import static com.android.internal.util.SyncResultReceiver.bundleFor;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -31,6 +37,7 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.translation.ITranslationManager;
@@ -228,6 +235,46 @@ public final class TranslationManagerService
             }
             if (service != null) {
                 service.unregisterUiTranslationStateCallback(callback);
+            }
+        }
+
+        @Override
+        public void getServiceSettingsActivity(IResultReceiver result, int userId) {
+            final TranslationManagerServiceImpl service;
+            synchronized (mLock) {
+                service = getServiceForUserLocked(userId);
+            }
+            if (service != null) {
+                final ComponentName componentName = service.getServiceSettingsActivityLocked();
+                if (componentName == null) {
+                    try {
+                        result.send(STATUS_SYNC_CALL_SUCCESS, null);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Unable to send getServiceSettingsActivity(): " + e);
+                    }
+                }
+                final Intent intent = new Intent();
+                intent.setComponent(componentName);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    final PendingIntent pendingIntent =
+                            PendingIntent.getActivityAsUser(getContext(), 0, intent, FLAG_IMMUTABLE,
+                                    null, new UserHandle(userId));
+                    try {
+
+                        result.send(STATUS_SYNC_CALL_SUCCESS, bundleFor(pendingIntent));
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Unable to send getServiceSettingsActivity(): " + e);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            } else {
+                try {
+                    result.send(STATUS_SYNC_CALL_FAIL, null);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to send getServiceSettingsActivity(): " + e);
+                }
             }
         }
 

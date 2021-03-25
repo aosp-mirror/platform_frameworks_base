@@ -46,12 +46,13 @@ public final class SchemaToProtoConverter {
      * SchemaTypeConfigProto}.
      */
     @NonNull
-    public static SchemaTypeConfigProto toSchemaTypeConfigProto(@NonNull AppSearchSchema schema) {
+    public static SchemaTypeConfigProto toSchemaTypeConfigProto(
+            @NonNull AppSearchSchema schema, int version) {
         Preconditions.checkNotNull(schema);
         SchemaTypeConfigProto.Builder protoBuilder =
                 SchemaTypeConfigProto.newBuilder()
                         .setSchemaType(schema.getSchemaType())
-                        .setVersion(schema.getVersion());
+                        .setVersion(version);
         List<AppSearchSchema.PropertyConfig> properties = schema.getProperties();
         for (int i = 0; i < properties.size(); i++) {
             PropertyConfigProto propertyProto = toPropertyConfigProto(properties.get(i));
@@ -116,8 +117,7 @@ public final class SchemaToProtoConverter {
     @NonNull
     public static AppSearchSchema toAppSearchSchema(@NonNull SchemaTypeConfigProtoOrBuilder proto) {
         Preconditions.checkNotNull(proto);
-        AppSearchSchema.Builder builder =
-                new AppSearchSchema.Builder(proto.getSchemaType()).setVersion(proto.getVersion());
+        AppSearchSchema.Builder builder = new AppSearchSchema.Builder(proto.getSchemaType());
         List<PropertyConfigProto> properties = proto.getPropertiesList();
         for (int i = 0; i < properties.size(); i++) {
             AppSearchSchema.PropertyConfig propertyConfig = toPropertyConfig(properties.get(i));

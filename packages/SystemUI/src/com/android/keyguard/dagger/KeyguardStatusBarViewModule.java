@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package android.media.metrics;
+package com.android.keyguard.dagger;
 
-import android.annotation.NonNull;
+import com.android.keyguard.CarrierText;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 
-/**
- * Interface for playback related components used by playback metrics.
- */
-public interface PlaybackComponent {
+import dagger.Module;
+import dagger.Provides;
 
-    /**
-     * Sets the playback ID of the component.
-     */
-    void setPlaybackId(@NonNull String playbackId);
-
-    /**
-     * Gets playback ID.
-     */
-    @NonNull String getPlaybackId();
+/** Dagger module for {@link KeyguardStatusBarViewComponent}. */
+@Module
+public abstract class KeyguardStatusBarViewModule {
+    @Provides
+    @KeyguardStatusBarViewScope
+    static CarrierText getCarrierText(KeyguardStatusBarView view) {
+        return view.findViewById(R.id.keyguard_carrier_text);
+    }
 }

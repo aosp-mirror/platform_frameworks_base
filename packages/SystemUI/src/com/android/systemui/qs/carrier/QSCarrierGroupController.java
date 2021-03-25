@@ -34,7 +34,7 @@ import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.keyguard.CarrierTextController;
+import com.android.keyguard.CarrierTextManager;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.R;
@@ -59,7 +59,7 @@ public class QSCarrierGroupController {
     private final ActivityStarter mActivityStarter;
     private final Handler mBgHandler;
     private final NetworkController mNetworkController;
-    private final CarrierTextController mCarrierTextController;
+    private final CarrierTextManager mCarrierTextManager;
     private final TextView mNoSimTextView;
     private final H mMainHandler;
     private final Callback mCallback;
@@ -149,7 +149,7 @@ public class QSCarrierGroupController {
                 }
             };
 
-    private static class Callback implements CarrierTextController.CarrierTextCallback {
+    private static class Callback implements CarrierTextManager.CarrierTextCallback {
         private H mHandler;
 
         Callback(H handler) {
@@ -157,7 +157,7 @@ public class QSCarrierGroupController {
         }
 
         @Override
-        public void updateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
+        public void updateCarrierInfo(CarrierTextManager.CarrierTextCallbackInfo info) {
             mHandler.obtainMessage(H.MSG_UPDATE_CARRIER_INFO, info).sendToTarget();
         }
     }
@@ -165,7 +165,7 @@ public class QSCarrierGroupController {
     private QSCarrierGroupController(QSCarrierGroup view, ActivityStarter activityStarter,
             @Background Handler bgHandler, @Main Looper mainLooper,
             NetworkController networkController,
-            CarrierTextController.Builder carrierTextControllerBuilder, Context context) {
+            CarrierTextManager.Builder carrierTextManagerBuilder, Context context) {
         if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
             mProviderModel = true;
         } else {
@@ -174,7 +174,7 @@ public class QSCarrierGroupController {
         mActivityStarter = activityStarter;
         mBgHandler = bgHandler;
         mNetworkController = networkController;
-        mCarrierTextController = carrierTextControllerBuilder
+        mCarrierTextManager = carrierTextManagerBuilder
                 .setShowAirplaneMode(false)
                 .setShowMissingSim(false)
                 .build();
@@ -191,7 +191,6 @@ public class QSCarrierGroupController {
         mNoSimTextView.setOnClickListener(onClickListener);
         mMainHandler = new H(mainLooper, this::handleUpdateCarrierInfo, this::handleUpdateState);
         mCallback = new Callback(mMainHandler);
-
 
         mCarrierGroups[0] = view.getCarrier1View();
         mCarrierGroups[1] = view.getCarrier2View();
@@ -243,10 +242,10 @@ public class QSCarrierGroupController {
             if (mNetworkController.hasVoiceCallingFeature()) {
                 mNetworkController.addCallback(mSignalCallback);
             }
-            mCarrierTextController.setListening(mCallback);
+            mCarrierTextManager.setListening(mCallback);
         } else {
             mNetworkController.removeCallback(mSignalCallback);
-            mCarrierTextController.setListening(null);
+            mCarrierTextManager.setListening(null);
         }
     }
 
@@ -273,7 +272,7 @@ public class QSCarrierGroupController {
     }
 
     @MainThread
-    private void handleUpdateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
+    private void handleUpdateCarrierInfo(CarrierTextManager.CarrierTextCallbackInfo info) {
         if (!mMainHandler.getLooper().isCurrentThread()) {
             mMainHandler.obtainMessage(H.MSG_UPDATE_CARRIER_INFO, info).sendToTarget();
             return;
@@ -327,13 +326,13 @@ public class QSCarrierGroupController {
     }
 
     private static class H extends Handler {
-        private Consumer<CarrierTextController.CarrierTextCallbackInfo> mUpdateCarrierInfo;
+        private Consumer<CarrierTextManager.CarrierTextCallbackInfo> mUpdateCarrierInfo;
         private Runnable mUpdateState;
         static final int MSG_UPDATE_CARRIER_INFO = 0;
         static final int MSG_UPDATE_STATE = 1;
 
         H(Looper looper,
-                Consumer<CarrierTextController.CarrierTextCallbackInfo> updateCarrierInfo,
+                Consumer<CarrierTextManager.CarrierTextCallbackInfo> updateCarrierInfo,
                 Runnable updateState) {
             super(looper);
             mUpdateCarrierInfo = updateCarrierInfo;
@@ -345,7 +344,7 @@ public class QSCarrierGroupController {
             switch (msg.what) {
                 case MSG_UPDATE_CARRIER_INFO:
                     mUpdateCarrierInfo.accept(
-                            (CarrierTextController.CarrierTextCallbackInfo) msg.obj);
+                            (CarrierTextManager.CarrierTextCallbackInfo) msg.obj);
                     break;
                 case MSG_UPDATE_STATE:
                     mUpdateState.run();
@@ -362,13 +361,13 @@ public class QSCarrierGroupController {
         private final Handler mHandler;
         private final Looper mLooper;
         private final NetworkController mNetworkController;
-        private final CarrierTextController.Builder mCarrierTextControllerBuilder;
+        private final CarrierTextManager.Builder mCarrierTextControllerBuilder;
         private final Context mContext;
 
         @Inject
         public Builder(ActivityStarter activityStarter, @Background Handler handler,
                 @Main Looper looper, NetworkController networkController,
-                CarrierTextController.Builder carrierTextControllerBuilder, Context context) {
+                CarrierTextManager.Builder carrierTextControllerBuilder, Context context) {
             mActivityStarter = activityStarter;
             mHandler = handler;
             mLooper = looper;

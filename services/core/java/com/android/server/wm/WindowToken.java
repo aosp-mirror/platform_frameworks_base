@@ -54,6 +54,7 @@ import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.WindowContext;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
@@ -109,7 +110,7 @@ class WindowToken extends WindowContainer<WindowState> {
     private FixedRotationTransformState mFixedRotationTransformState;
 
     /**
-     * When set to {@code true}, this window token is created from {@link android.app.WindowContext}
+     * When set to {@code true}, this window token is created from {@link WindowContext}
      */
     private final boolean mFromClientToken;
 

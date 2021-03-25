@@ -453,6 +453,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
         assertThat(statusContent.getMaxLines()).isEqualTo(3);
 
+        // Has a single message, no count shown.
+        assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
+
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_medium) - 1);
         RemoteViews smallView = new PeopleTileViewHelper(mContext,
@@ -466,6 +469,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has person icon.
         assertEquals(View.VISIBLE,
                 smallResult.findViewById(R.id.person_icon).getVisibility());
+
+        // Has a single message, no count shown.
+        assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
@@ -489,7 +495,84 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(View.VISIBLE, statusContent.getVisibility());
         assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
         assertThat(statusContent.getMaxLines()).isEqualTo(3);
+
+        // Has a single message, no count shown.
+        assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
+
     }
+
+    @Test
+    public void testCreateRemoteViewsWithNotificationTemplateTwoMessages() {
+        PeopleSpaceTile tileWithStatusAndNotification = PERSON_TILE.toBuilder()
+                .setNotificationDataUri(null)
+                .setStatuses(Arrays.asList(GAME_STATUS,
+                        NEW_STORY_WITH_AVAILABILITY))
+                .setMessagesCount(2).build();
+        RemoteViews views = new PeopleTileViewHelper(mContext,
+                tileWithStatusAndNotification, 0, mOptions).getViews();
+        View result = views.apply(mContext, null);
+
+        TextView name = (TextView) result.findViewById(R.id.name);
+        assertEquals(name.getText(), NAME);
+        assertEquals(View.GONE, result.findViewById(R.id.subtext).getVisibility());
+        assertEquals(View.GONE, result.findViewById(R.id.predefined_icon).getVisibility());
+        // Has availability.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.availability).getVisibility());
+        // Has person icon.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.person_icon).getVisibility());
+        // Has notification content.
+        TextView statusContent = (TextView) result.findViewById(R.id.text_content);
+        assertEquals(View.VISIBLE, statusContent.getVisibility());
+        assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
+        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+
+        // Has two messages, show count.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.messages_count).getVisibility());
+
+        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
+                getSizeInDp(R.dimen.required_width_for_medium) - 1);
+        RemoteViews smallView = new PeopleTileViewHelper(mContext,
+                tileWithStatusAndNotification, 0, mOptions).getViews();
+        View smallResult = smallView.apply(mContext, null);
+
+        // Show icon instead of name.
+        assertEquals(View.GONE, smallResult.findViewById(R.id.name).getVisibility());
+        assertEquals(View.GONE,
+                smallResult.findViewById(R.id.predefined_icon).getVisibility());
+        // Has person icon.
+        assertEquals(View.VISIBLE,
+                smallResult.findViewById(R.id.person_icon).getVisibility());
+
+        // Has two messages, show count.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.messages_count).getVisibility());
+
+        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
+                getSizeInDp(R.dimen.required_width_for_large));
+        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
+                getSizeInDp(R.dimen.required_height_for_large));
+        RemoteViews largeView = new PeopleTileViewHelper(mContext,
+                tileWithStatusAndNotification, 0, mOptions).getViews();
+        View largeResult = largeView.apply(mContext, null);
+
+        name = (TextView) largeResult.findViewById(R.id.name);
+        assertEquals(name.getText(), NAME);
+        assertEquals(View.GONE, largeResult.findViewById(R.id.subtext).getVisibility());
+        assertEquals(View.GONE, largeResult.findViewById(R.id.predefined_icon).getVisibility());
+        // Has availability.
+        assertEquals(View.VISIBLE, largeResult.findViewById(R.id.availability).getVisibility());
+        // Has person icon.
+        View personIcon = largeResult.findViewById(R.id.person_icon);
+        assertEquals(View.VISIBLE, personIcon.getVisibility());
+        // Has notification content.
+        statusContent = (TextView) largeResult.findViewById(R.id.text_content);
+        assertEquals(View.VISIBLE, statusContent.getVisibility());
+        assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
+        assertThat(statusContent.getMaxLines()).isEqualTo(3);
+
+        // Has two messages, show count.
+        assertEquals(View.VISIBLE, result.findViewById(R.id.messages_count).getVisibility());
+    }
+
 
     @Test
     public void testGetBackgroundTextFromMessageNoPunctuation() {

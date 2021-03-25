@@ -81,7 +81,7 @@ public class UserAwareBiometricSchedulerTest {
 
                     @NonNull
                     @Override
-                    public StartUserClient<?> getStartUserClient(int newUserId) {
+                    public StartUserClient<?, ?> getStartUserClient(int newUserId) {
                         return new TestStartUserClient(mContext, Object::new, mToken, newUserId,
                                 TEST_SENSOR_ID, mUserStartedCallback);
                     }
@@ -157,12 +157,12 @@ public class UserAwareBiometricSchedulerTest {
         }
     }
 
-    private class TestUserStartedCallback implements StartUserClient.UserStartedCallback {
+    private class TestUserStartedCallback implements StartUserClient.UserStartedCallback<Object> {
 
         int numInvocations;
 
         @Override
-        public void onUserStarted(int newUserId) {
+        public void onUserStarted(int newUserId, Object newObject) {
             numInvocations++;
             mCurrentUserId = newUserId;
         }
@@ -183,8 +183,7 @@ public class UserAwareBiometricSchedulerTest {
         @Override
         public void start(@NonNull Callback callback) {
             super.start(callback);
-            mUserStoppedCallback.onUserStopped();
-            callback.onClientFinished(this, true /* success */);
+            onUserStopped();
         }
 
         @Override
@@ -193,10 +192,10 @@ public class UserAwareBiometricSchedulerTest {
         }
     }
 
-    private static class TestStartUserClient extends StartUserClient<Object> {
+    private static class TestStartUserClient extends StartUserClient<Object, Object> {
         public TestStartUserClient(@NonNull Context context,
                 @NonNull LazyDaemon<Object> lazyDaemon, @Nullable IBinder token, int userId,
-                int sensorId, @NonNull UserStartedCallback callback) {
+                int sensorId, @NonNull UserStartedCallback<Object> callback) {
             super(context, lazyDaemon, token, userId, sensorId, callback);
         }
 
@@ -208,7 +207,7 @@ public class UserAwareBiometricSchedulerTest {
         @Override
         public void start(@NonNull Callback callback) {
             super.start(callback);
-            mUserStartedCallback.onUserStarted(getTargetUserId());
+            mUserStartedCallback.onUserStarted(getTargetUserId(), new Object());
             callback.onClientFinished(this, true /* success */);
         }
 

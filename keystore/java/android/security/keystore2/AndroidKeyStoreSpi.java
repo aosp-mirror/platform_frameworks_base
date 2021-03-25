@@ -100,7 +100,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     public static final String NAME = "AndroidKeyStore";
 
     private KeyStore2 mKeyStore;
-    private int mNamespace = KeyProperties.NAMESPACE_APPLICATION;
+    private @KeyProperties.Namespace int mNamespace = KeyProperties.NAMESPACE_APPLICATION;
 
     @Override
     public Key engineGetKey(String alias, char[] password) throws NoSuchAlgorithmException,
@@ -1125,7 +1125,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     @Override
     public void engineLoad(LoadStoreParameter param) throws IOException,
             NoSuchAlgorithmException, CertificateException {
-        int namespace = KeyProperties.NAMESPACE_APPLICATION;
+        @KeyProperties.Namespace int namespace = KeyProperties.NAMESPACE_APPLICATION;
         if (param != null) {
             if (param instanceof AndroidKeyStoreLoadStoreParameter) {
                 namespace = ((AndroidKeyStoreLoadStoreParameter) param).getNamespace();

@@ -57,9 +57,11 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker,
             LiftToActivateListener liftToActivateListener,
+            EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
-                messageAreaControllerFactory, latencyTracker, falsingCollector);
+                messageAreaControllerFactory, latencyTracker, falsingCollector,
+                emergencyButtonController);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());

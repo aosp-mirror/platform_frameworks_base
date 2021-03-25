@@ -252,7 +252,6 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
@@ -371,6 +370,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
+import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -777,16 +777,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String PACKAGE_SCHEME = "package";
 
     private static final String COMPANION_PACKAGE_NAME = "com.android.companiondevicemanager";
-
-    /** Canonical intent used to identify what counts as a "web browser" app */
-    private static final Intent sBrowserIntent;
-    static {
-        sBrowserIntent = new Intent();
-        sBrowserIntent.setAction(Intent.ACTION_VIEW);
-        sBrowserIntent.addCategory(Intent.CATEGORY_BROWSABLE);
-        sBrowserIntent.setData(Uri.parse("http:"));
-        sBrowserIntent.addFlags(Intent.FLAG_IGNORE_EPHEMERAL);
-    }
 
     // Compilation reasons.
     public static final int REASON_UNKNOWN = -1;
@@ -5636,7 +5626,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // Work that needs to happen on first install within each user
             if (firstUserIds != null && firstUserIds.length > 0) {
                 for (int userId : firstUserIds) {
-                    clearRolesAndRestorePermissionsForNewUserInstall(packageName,
+                    restorePermissionsAndUpdateRolesForNewUserInstall(packageName,
                             pkgSetting.getInstallReason(userId), userId);
                 }
             }
@@ -7750,19 +7740,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         return matches.get(0).getComponentInfo().getComponentName();
-    }
-
-    private boolean packageIsBrowser(String packageName, int userId) {
-        List<ResolveInfo> list = queryIntentActivitiesInternal(sBrowserIntent, null,
-                PackageManager.MATCH_ALL, userId);
-        final int N = list.size();
-        for (int i = 0; i < N; i++) {
-            ResolveInfo info = list.get(i);
-            if (info.priority >= 0 && packageName.equals(info.activityInfo.packageName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -12304,9 +12281,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public ArraySet<String> getOptimizablePackages() {
         ArraySet<String> pkgs = new ArraySet<>();
+        final boolean hibernationEnabled = AppHibernationService.isAppHibernationEnabled();
+        AppHibernationManagerInternal appHibernationManager =
+                mInjector.getLocalService(AppHibernationManagerInternal.class);
         synchronized (mLock) {
             for (AndroidPackage p : mPackages.values()) {
-                if (PackageDexOptimizer.canOptimizePackage(p)) {
+                // Checking hibernation state is an inexpensive call.
+                boolean isHibernating = hibernationEnabled
+                        && appHibernationManager.isHibernatingGlobally(p.getPackageName());
+                if (PackageDexOptimizer.canOptimizePackage(p) && !isHibernating) {
                     pkgs.add(p.getPackageName());
                 }
             }
@@ -15459,16 +15442,55 @@ public class PackageManagerService extends IPackageManager.Stub
                 null);
     }
 
-    private void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
             boolean suspended) {
-        final Bundle extras = new Bundle(3);
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        sendPackageBroadcast(
-                suspended ? Intent.ACTION_PACKAGES_SUSPENDED
-                        : Intent.ACTION_PACKAGES_UNSUSPENDED,
-                null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
-                new int[] {userId}, null, null, null);
+        final List<List<String>> pkgsToSend = new ArrayList(pkgList.length);
+        final List<IntArray> uidsToSend = new ArrayList(pkgList.length);
+        final List<SparseArray<int[]>> allowListsToSend = new ArrayList(pkgList.length);
+        final int[] userIds = new int[] {userId};
+        // Get allow lists for the pkg in the pkgList. Merge into the existed pkgs and uids if
+        // allow lists are the same.
+        synchronized (mLock) {
+            for (int i = 0; i < pkgList.length; i++) {
+                final String pkgName = pkgList[i];
+                final int uid = uidList[i];
+                SparseArray<int[]> allowList = mAppsFilter.getVisibilityAllowList(
+                        getPackageSettingInternal(pkgName, Process.SYSTEM_UID),
+                        userIds, mSettings.getPackagesLocked());
+                if (allowList == null) {
+                    allowList = new SparseArray<>(0);
+                }
+                boolean merged = false;
+                for (int j = 0; j < allowListsToSend.size(); j++) {
+                    if (Arrays.equals(allowListsToSend.get(j).get(userId), allowList.get(userId))) {
+                        pkgsToSend.get(j).add(pkgName);
+                        uidsToSend.get(j).add(uid);
+                        merged = true;
+                        break;
+                    }
+                }
+                if (!merged) {
+                    pkgsToSend.add(new ArrayList<>(Arrays.asList(pkgName)));
+                    uidsToSend.add(IntArray.wrap(new int[] {uid}));
+                    allowListsToSend.add(allowList);
+                }
+            }
+        }
+
+        for (int i = 0; i < pkgsToSend.size(); i++) {
+            final Bundle extras = new Bundle(3);
+            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
+                    pkgsToSend.get(i).toArray(new String[pkgsToSend.get(i).size()]));
+            extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidsToSend.get(i).toArray());
+            final SparseArray<int[]> allowList = allowListsToSend.get(i).size() == 0
+                    ? null : allowListsToSend.get(i);
+            sendPackageBroadcast(
+                    suspended ? Intent.ACTION_PACKAGES_SUSPENDED
+                            : Intent.ACTION_PACKAGES_UNSUSPENDED,
+                    null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
+                    userIds, null, allowList, null);
+        }
     }
 
     /**
@@ -15612,7 +15634,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 PostInstallData postInstallData =
                         new PostInstallData(null, res, () -> {
-                            clearRolesAndRestorePermissionsForNewUserInstall(packageName,
+                            restorePermissionsAndUpdateRolesForNewUserInstall(packageName,
                                     pkgSetting.getInstallReason(userId), userId);
                             if (intentSender != null) {
                                 onRestoreComplete(res.returnCode, mContext, intentSender);
@@ -21178,7 +21200,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 final SparseBooleanArray changedUsers = new SparseBooleanArray();
                 synchronized (mLock) {
                     mDomainVerificationManager.clearPackage(deletedPs.name);
-                    clearDefaultBrowserIfNeeded(packageName);
                     mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
                     mAppsFilter.removePackage(getPackageSetting(packageName));
                     removedAppId = mSettings.removePackageLPw(packageName);
@@ -21736,7 +21757,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 destroyAppDataLIF(pkg, nextUserId,
                         FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
             }
-            clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
             clearPackagePreferredActivities(ps.name, nextUserId);
             mPermissionManager.onPackageUninstalled(ps.name, ps.appId, pkg, sharedUserPkgs,
@@ -22253,36 +22273,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mSettings.clearPackagePreferredActivities(packageName, outUserChanged, userId);
     }
 
-    /** Clears state for all users, and touches intent filter verification policy */
-    void clearDefaultBrowserIfNeeded(String packageName) {
-        for (int oneUserId : mUserManager.getUserIds()) {
-            clearDefaultBrowserIfNeededForUser(packageName, oneUserId);
-        }
-    }
-
-    private void clearDefaultBrowserIfNeededForUser(String packageName, int userId) {
-        final String defaultBrowserPackageName = mDefaultAppProvider.getDefaultBrowser(userId);
-        if (!TextUtils.isEmpty(defaultBrowserPackageName)) {
-            if (packageName.equals(defaultBrowserPackageName)) {
-                mDefaultAppProvider.setDefaultBrowser(null, true, userId);
-            }
-        }
-    }
-
-    private void clearRolesAndRestorePermissionsForNewUserInstall(String packageName,
+    private void restorePermissionsAndUpdateRolesForNewUserInstall(String packageName,
             int installReason, @UserIdInt int userId) {
-        // If this app is a browser and it's newly-installed for some
-        // users, clear any default-browser state in those users. The
-        // app's nature doesn't depend on the user, so we can just check
-        // its browser nature in any user and generalize.
-        if (packageIsBrowser(packageName, userId)) {
-            // If this browser is restored from user's backup, do not clear
-            // default-browser state for this user
-            if (installReason != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                mDefaultAppProvider.setDefaultBrowser(null, true, userId);
-            }
-        }
-
         // We may also need to apply pending (restored) runtime permission grants
         // within these users.
         mPermissionManager.restoreDelayedRuntimePermissions(packageName, userId);
@@ -22316,11 +22308,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             updateDefaultHomeNotLocked(userId);
-            // TODO: We have to reset the default SMS and Phone. This requires
-            // significant refactoring to keep all default apps in the package
-            // manager (cleaner but more work) or have the services provide
-            // callbacks to the package manager to request a default app reset.
-            mDefaultAppProvider.setDefaultBrowser(null, true, userId);
             resetNetworkPolicies(userId);
             synchronized (mLock) {
                 scheduleWritePackageRestrictionsLocked(userId);
@@ -27363,6 +27350,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 int callingUid, int userId) {
             return PackageManagerService.this.getPackageStartability(
                     packageName, callingUid, userId) == PACKAGE_STARTABILITY_FROZEN;
+        }
+
+        @Override
+        public void deleteOatArtifactsOfPackage(String packageName) {
+            PackageManagerService.this.deleteOatArtifactsOfPackage(packageName);
         }
     }
 
