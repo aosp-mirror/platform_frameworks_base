@@ -5662,15 +5662,11 @@
     <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
     <string name="resolver_switch_on_work">Tap to turn on</string>
 
-    <!-- Error message. This text lets the user know that their current work apps don't support the specific content that they're trying to share. [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_work_apps_available_share">No work apps can support this content</string>
-    <!-- Error message. This text lets the user know that their current work apps can't open this specific content. [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_work_apps_available_resolve">No work apps can open this content</string>
+    <!-- Error message. This text lets the user know that their current work apps don't support the specific content. [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_work_apps_available">No work apps</string>
 
-    <!-- Error message. This text lets the user know that their current personal apps don't support the specific content that they're trying to share. [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_personal_apps_available_share">No personal apps can support this content</string>
-    <!-- Error message. This text lets the user know that their current personal apps can't open this specific content. [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_personal_apps_available_resolve">No personal apps can open this content</string>
+    <!-- Error message. This text lets the user know that their current personal apps don't support the specific content. [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_personal_apps_available">No personal apps</string>
 
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_open_in_personal">Open in <xliff:g id="app" example="YouTube">%s</xliff:g> in personal profile?</string>

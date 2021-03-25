@@ -221,7 +221,7 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
         showEmptyState(listAdapter,
                 R.drawable.ic_no_apps,
-                R.string.resolver_no_personal_apps_available_resolve,
+                R.string.resolver_no_personal_apps_available,
                 /* subtitleRes */ 0);
     }
 
@@ -229,7 +229,7 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
         showEmptyState(listAdapter,
                 R.drawable.ic_no_apps,
-                R.string.resolver_no_work_apps_available_resolve,
+                R.string.resolver_no_work_apps_available,
                 /* subtitleRes */ 0);
     }
 
