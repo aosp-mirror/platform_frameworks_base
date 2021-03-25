@@ -47,7 +47,9 @@ public class TelephonyListenerManager {
     private boolean mListening = false;
 
     @Inject
-    public TelephonyListenerManager(TelephonyManager telephonyManager, @Main Executor executor,
+    public TelephonyListenerManager(
+            TelephonyManager telephonyManager,
+            @Main Executor executor,
             TelephonyCallback telephonyCallback) {
         mTelephonyManager = telephonyManager;
         mExecutor = executor;
