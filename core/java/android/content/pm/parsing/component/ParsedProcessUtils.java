@@ -17,6 +17,7 @@
 package android.content.pm.parsing.component;
 
 import android.annotation.NonNull;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
@@ -104,9 +105,11 @@ public class ParsedProcessUtils {
 
             proc.gwpAsanMode = sa.getInt(R.styleable.AndroidManifestProcess_gwpAsanMode, -1);
             proc.memtagMode = sa.getInt(R.styleable.AndroidManifestProcess_memtagMode, -1);
-            if (sa.hasValue(R.styleable.AndroidManifestProcess_nativeHeapZeroInit)) {
-                proc.nativeHeapZeroInit =
-                        sa.getBoolean(R.styleable.AndroidManifestProcess_nativeHeapZeroInit, false);
+            if (sa.hasValue(R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized)) {
+                Boolean v = sa.getBoolean(
+                        R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized, false);
+                proc.nativeHeapZeroInitialized =
+                        v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED;
             }
         } finally {
             sa.recycle();
