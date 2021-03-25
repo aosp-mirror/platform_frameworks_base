@@ -73,7 +73,6 @@ import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
@@ -180,7 +179,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
                 // the location service must be functioning after this boot phase
                 mSystemInjector.onSystemReady();
-                mService.onSystemReady();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 // some providers rely on third party code, so we wait to initialize
                 // providers until third party code is allowed to run
@@ -352,24 +350,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             manager.setMockProvider(null);
             manager.setRealProvider(null);
             manager.stopManager();
-        }
-    }
-
-    void onSystemReady() {
-        if (Build.IS_DEBUGGABLE) {
-            // on debug builds, watch for location noteOps while location is off. there are some
-            // scenarios (emergency location) where this is expected, but generally this should
-            // rarely occur, and may indicate bugs. dump occurrences to logs for further evaluation
-            AppOpsManager appOps = Objects.requireNonNull(
-                    mContext.getSystemService(AppOpsManager.class));
-            appOps.startWatchingNoted(
-                    new int[]{AppOpsManager.OP_FINE_LOCATION, AppOpsManager.OP_COARSE_LOCATION},
-                    (code, uid, packageName, attributionTag, flags, result) -> {
-                        if (!isLocationEnabledForUser(UserHandle.getUserId(uid))) {
-                            Log.w(TAG, "location noteOp with location off - "
-                                    + CallerIdentity.forTest(uid, 0, packageName, attributionTag));
-                        }
-                    });
         }
     }
 
