@@ -381,8 +381,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static StartingWindowController provideStartingWindowController(Context context,
-            @ShellSplashscreenThread ShellExecutor executor, TransactionPool pool) {
-        return new StartingWindowController(context, executor, pool);
+            @ShellSplashscreenThread ShellExecutor splashScreenExecutor, TransactionPool pool) {
+        return new StartingWindowController(context, splashScreenExecutor, pool);
     }
 
     //
