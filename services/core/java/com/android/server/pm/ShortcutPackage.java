@@ -2407,6 +2407,8 @@ class ShortcutPackage extends ShortcutPackageItem {
             mAppSearchSession = session;
             return cb.apply(mAppSearchSession);
         } catch (Exception e) {
+            Slog.e(TAG, "Failed to initiate app search for shortcut package "
+                    + getPackageName() + " user " + mShortcutUser.getUserId(), e);
             return AndroidFuture.completedFuture(null);
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
