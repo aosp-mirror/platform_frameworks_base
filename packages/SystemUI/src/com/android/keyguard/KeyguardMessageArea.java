@@ -70,7 +70,7 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
     void onThemeChanged() {
         TypedArray array = mContext.obtainStyledAttributes(new int[] {
-                android.R.attr.textColor
+                android.R.attr.textColorPrimary
         });
         ColorStateList newTextColors = ColorStateList.valueOf(array.getColor(0, Color.RED));
         array.recycle();
