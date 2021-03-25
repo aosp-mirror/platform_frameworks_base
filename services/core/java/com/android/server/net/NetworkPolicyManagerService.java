@@ -179,7 +179,6 @@ import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
@@ -1922,16 +1921,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Collect all ifaces from a {@link NetworkStateSnapshot} into the given set.
      */
     private static void collectIfaces(ArraySet<String> ifaces, NetworkStateSnapshot snapshot) {
-        final String baseIface = snapshot.linkProperties.getInterfaceName();
-        if (baseIface != null) {
-            ifaces.add(baseIface);
-        }
-        for (LinkProperties stackedLink : snapshot.linkProperties.getStackedLinks()) {
-            final String stackedIface = stackedLink.getInterfaceName();
-            if (stackedIface != null) {
-                ifaces.add(stackedIface);
-            }
-        }
+        ifaces.addAll(snapshot.linkProperties.getAllInterfaceNames());
     }
 
     /**

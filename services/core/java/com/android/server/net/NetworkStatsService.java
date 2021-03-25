@@ -92,7 +92,6 @@ import android.net.DataUsageRequest;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
@@ -131,6 +130,7 @@ import android.service.NetworkInterfaceProto;
 import android.service.NetworkStatsServiceDumpProto;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionPlan;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1358,17 +1358,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // (or non eBPF offloaded) TX they would appear on both, however egress interface
             // accounting is explicitly bypassed for traffic from the clat uid.
             //
-            final List<LinkProperties> stackedLinks = snapshot.linkProperties.getStackedLinks();
-            for (LinkProperties stackedLink : stackedLinks) {
-                final String stackedIface = stackedLink.getInterfaceName();
-                if (stackedIface != null) {
-                    findOrCreateNetworkIdentitySet(mActiveIfaces, stackedIface).add(ident);
-                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
+            // TODO: This code might be combined to above code.
+            for (String iface : snapshot.linkProperties.getAllInterfaceNames()) {
+                // baseIface has been handled, so ignore it.
+                if (TextUtils.equals(baseIface, iface)) continue;
+                if (iface != null) {
+                    findOrCreateNetworkIdentitySet(mActiveIfaces, iface).add(ident);
+                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, iface).add(ident);
                     if (isMobile) {
-                        mobileIfaces.add(stackedIface);
+                        mobileIfaces.add(iface);
                     }
 
-                    mStatsFactory.noteStackedIface(stackedIface, baseIface);
+                    mStatsFactory.noteStackedIface(iface, baseIface);
                 }
             }
         }
