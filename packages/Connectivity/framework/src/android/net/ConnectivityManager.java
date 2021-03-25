@@ -1210,12 +1210,13 @@ public class ConnectivityManager {
      * @param ranges the UID ranges to restrict
      * @param requireVpn whether the specified UID ranges must use a VPN
      *
-     * TODO: expose as @SystemApi.
      * @hide
      */
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_STACK})
+            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    @SystemApi(client = MODULE_LIBRARIES)
     public void setRequireVpnForUids(boolean requireVpn,
             @NonNull Collection<Range<Integer>> ranges) {
         Objects.requireNonNull(ranges);
@@ -1259,13 +1260,13 @@ public class ConnectivityManager {
      *
      * @param enabled whether legacy lockdown VPN is enabled or disabled
      *
-     * TODO: @SystemApi(client = MODULE_LIBRARIES)
-     *
      * @hide
      */
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK,
             android.Manifest.permission.NETWORK_SETTINGS})
+    @SystemApi(client = MODULE_LIBRARIES)
     public void setLegacyLockdownVpnEnabled(boolean enabled) {
         try {
             mService.setLegacyLockdownVpnEnabled(enabled);
@@ -2212,6 +2213,7 @@ public class ConnectivityManager {
      */
     @Deprecated
     @UnsupportedAppUsage
+    @SystemApi(client = MODULE_LIBRARIES)
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         checkLegacyRoutingApiAccess();
         try {
