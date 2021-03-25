@@ -8313,12 +8313,8 @@ package android.os {
   }
 
   public class PowerExemptionManager {
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToPermanentAllowList(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToPermanentAllowList(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void addToTemporaryAllowList(@NonNull String, int, @Nullable String, long);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long addToTemporaryAllowListForEvent(@NonNull String, int, @Nullable String, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public int[] getAllowListedAppIds(boolean);
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void removeFromPermanentAllowList(@NonNull String);
     field public static final int EVENT_MMS = 2; // 0x2
     field public static final int EVENT_SMS = 1; // 0x1
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
