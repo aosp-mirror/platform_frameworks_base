@@ -154,6 +154,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
         int phoneId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
+        int targetSdk;
 
         boolean matchTelephonyCallbackEvent(int event) {
             return (callback != null) && (this.eventList.contains(event));
@@ -919,6 +920,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             r.phoneId = phoneId;
             r.eventList = events;
+            r.targetSdk = TelephonyPermissions.getTargetSdk(mContext, callingPackage);
+
             if (DBG) {
                 log("listen:  Register r=" + r + " r.subId=" + r.subId + " phoneId=" + phoneId);
             }
@@ -1748,6 +1751,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             TelephonyCallback.EVENT_DISPLAY_INFO_CHANGED)
                             && idMatchWithoutDefaultPhoneCheck(r.subId, subId)) {
                         try {
+                            if (r.targetSdk <= android.os.Build.VERSION_CODES.R) {
+                                telephonyDisplayInfo =
+                                        getBackwardCompatibleTelephonyDisplayInfo(
+                                                telephonyDisplayInfo);
+                            }
                             r.callback.onDisplayInfoChanged(telephonyDisplayInfo);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
@@ -1757,6 +1765,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             handleRemoveListLocked();
         }
+    }
+
+    private TelephonyDisplayInfo getBackwardCompatibleTelephonyDisplayInfo(
+            @NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
+        int networkType = telephonyDisplayInfo.getNetworkType();
+        int overrideNetworkType = telephonyDisplayInfo.getOverrideNetworkType();
+        if (networkType == TelephonyManager.NETWORK_TYPE_NR) {
+            overrideNetworkType = TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE;
+        } else if (networkType == TelephonyManager.NETWORK_TYPE_LTE
+                && overrideNetworkType == TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED) {
+            overrideNetworkType = TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE;
+        }
+        return new TelephonyDisplayInfo(networkType, overrideNetworkType);
     }
 
     public void notifyCallForwardingChanged(boolean cfi) {

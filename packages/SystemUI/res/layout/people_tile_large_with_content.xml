@@ -22,27 +22,50 @@
     android:padding="16dp"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="start|top"
-        android:orientation="horizontal">
+        android:gravity="start|top">
 
-        <ImageView
-            android:id="@+id/person_icon"
-            android:layout_marginStart="-2dp"
-            android:layout_marginTop="-2dp"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_alignParentStart="true"
+            android:gravity="start|top"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/availability"
-            android:layout_marginStart="-2dp"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:background="@drawable/circle_green_10dp" />
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/person_icon"
+                android:layout_marginStart="-2dp"
+                android:layout_marginTop="-2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/availability"
+                android:layout_marginStart="-2dp"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/circle_green_10dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/messages_count"
+            android:layout_alignParentEnd="true"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+            android:textColor="?android:attr/textColorPrimary"
+            android:background="@drawable/people_space_messages_count_background"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            />
+    </RelativeLayout>
 
     <TextView
         android:layout_gravity="center"

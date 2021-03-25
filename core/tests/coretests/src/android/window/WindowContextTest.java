@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.window;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -24,6 +24,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.app.Activity;
+import android.app.EmptyActivity;
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
@@ -142,8 +145,8 @@ public class WindowContextTest {
      * {@link WindowManager.LayoutParams#token}.
      *
      * The window context token should be overridden to
-     * {@link android.view.WindowManager.LayoutParams} and the {@link Activity}'s token must
-     * not be removed regardless of the release of window context.
+     * {@link android.view.WindowManager.LayoutParams} and the {@link Activity}'s token must not be
+     * removed regardless of release of window context.
      */
     @Test
     public void testCreateWindowContext_AttachActivity_TokenNotRemovedAfterRelease()

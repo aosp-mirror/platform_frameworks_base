@@ -25,7 +25,7 @@ package {
 
 cc_library_shared {
     name: "libservice-connectivity",
-    // TODO: build against the NDK (sdk_version: "30" for example)
+    min_sdk_version: "30",
     cflags: [
         "-Wall",
         "-Werror",
@@ -36,13 +36,13 @@ cc_library_shared {
         "jni/com_android_server_TestNetworkService.cpp",
         "jni/onload.cpp",
     ],
+    stl: "libc++_static",
+    header_libs: [
+        "libbase_headers",
+    ],
     shared_libs: [
-        "libbase",
         "liblog",
         "libnativehelper",
-        // TODO: remove dependency on ifc_[add/del]_address by having Java code to add/delete
-        // addresses, and remove dependency on libnetutils.
-        "libnetutils",
     ],
     apex_available: [
         "com.android.tethering",
@@ -52,6 +52,7 @@ cc_library_shared {
 java_library {
     name: "service-connectivity-pre-jarjar",
     sdk_version: "system_server_current",
+    min_sdk_version: "30",
     srcs: [
         ":connectivity-service-srcs",
         ":framework-connectivity-shared-srcs",
@@ -90,6 +91,7 @@ java_library {
 java_library {
     name: "service-connectivity-protos",
     sdk_version: "system_current",
+    min_sdk_version: "30",
     proto: {
         type: "nano",
     },
@@ -106,6 +108,7 @@ java_library {
 java_library {
     name: "service-connectivity",
     sdk_version: "system_server_current",
+    min_sdk_version: "30",
     installable: true,
     static_libs: [
         "service-connectivity-pre-jarjar",

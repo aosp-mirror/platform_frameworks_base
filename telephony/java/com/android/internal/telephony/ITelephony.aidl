@@ -2351,6 +2351,16 @@ interface ITelephony {
     boolean getCarrierSingleRegistrationEnabled(int subId);
 
     /**
+     * Overrides the ims feature validation result
+     */
+    boolean setImsFeatureValidationOverride(int subId, String enabled);
+
+    /**
+     * Gets the ims feature validation override value
+     */
+    boolean getImsFeatureValidationOverride(int subId);
+
+    /**
      *  Return the mobile provisioning url that is used to launch a browser to allow users to manage
      *  their mobile plan.
      */

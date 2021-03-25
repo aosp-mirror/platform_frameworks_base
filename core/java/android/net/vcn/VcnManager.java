@@ -154,7 +154,7 @@ public class VcnManager {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
 
         try {
-            mService.clearVcnConfig(subscriptionGroup);
+            mService.clearVcnConfig(subscriptionGroup, mContext.getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw new IOException(e);
         } catch (RemoteException e) {

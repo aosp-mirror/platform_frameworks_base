@@ -33,7 +33,6 @@ import static android.net.ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.EXTRA_NETWORK_INFO;
 import static android.net.ConnectivityManager.EXTRA_NETWORK_TYPE;
-import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
@@ -1201,12 +1200,10 @@ public class ConnectivityServiceTest {
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
 
-            final int expectedNetId = mMockVpn.getNetwork() == null ? NETID_UNSET
-                    : mMockVpn.getNetwork().getNetId();
-            verify(mMockNetd, times(1)).networkAddUidRanges(eq(expectedNetId),
+            verify(mMockNetd, times(1)).networkAddUidRanges(eq(mMockVpn.getNetwork().getNetId()),
                     eq(toUidRangeStableParcels(uids)));
             verify(mMockNetd, never())
-                    .networkRemoveUidRanges(eq(expectedNetId), any());
+                    .networkRemoveUidRanges(eq(mMockVpn.getNetwork().getNetId()), any());
             mAgentRegistered = true;
             updateState(NetworkInfo.DetailedState.CONNECTED, "registerAgent");
             mNetworkCapabilities.set(mMockNetworkAgent.getNetworkCapabilities());
@@ -1573,7 +1570,7 @@ public class ConnectivityServiceTest {
         doReturn(mNetworkStack).when(deps).getNetworkStack();
         doReturn(mSystemProperties).when(deps).getSystemProperties();
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
-        doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
+        doReturn(true).when(deps).queryUserAccess(anyInt(), any(), any());
         doAnswer(inv -> {
             mPolicyTracker = new WrappedMultinetworkPolicyTracker(
                     inv.getArgument(0), inv.getArgument(1), inv.getArgument(2));
@@ -9799,14 +9796,13 @@ public class ConnectivityServiceTest {
                 exemptUidCaptor.capture());
         assertContainsExactly(exemptUidCaptor.getValue(), Process.VPN_UID, exemptUid);
 
-        final int expectedNetId = mMockVpn.getNetwork() == null ? NETID_UNSET
-                : mMockVpn.getNetwork().getNetId();
-
         if (add) {
-            inOrder.verify(mMockNetd, times(1)).networkAddUidRanges(eq(expectedNetId),
+            inOrder.verify(mMockNetd, times(1))
+                    .networkAddUidRanges(eq(mMockVpn.getNetwork().getNetId()),
                     eq(toUidRangeStableParcels(vpnRanges)));
         } else {
-            inOrder.verify(mMockNetd, times(1)).networkRemoveUidRanges(eq(expectedNetId),
+            inOrder.verify(mMockNetd, times(1))
+                    .networkRemoveUidRanges(eq(mMockVpn.getNetwork().getNetId()),
                     eq(toUidRangeStableParcels(vpnRanges)));
         }
 

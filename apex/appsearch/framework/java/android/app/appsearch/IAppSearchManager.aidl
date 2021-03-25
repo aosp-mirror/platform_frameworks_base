@@ -51,6 +51,7 @@ interface IAppSearchManager {
         in Map<String, List<Bundle>> schemasPackageAccessibleBundles,
         boolean forceOverride,
         in int userId,
+        in int schemaVersion,
         in IAppSearchResultCallback callback);
 
     /**
@@ -60,10 +61,24 @@ interface IAppSearchManager {
      * @param databaseName  The name of the database to retrieve.
      * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
-     *     {@link AppSearchResult}&lt;{@link List}&lt;{@link Bundle}&gt;&gt;, where the value are
-     *     AppSearchSchema bundle.
+     *     {@link AppSearchResult}&lt;{@link Bundle}&gt; where the bundle is a GetSchemaResponse.
      */
     void getSchema(
+        in String packageName,
+        in String databaseName,
+        in int userId,
+        in IAppSearchResultCallback callback);
+
+    /**
+     * Retrieves the set of all namespaces in the current database with at least one document.
+     *
+     * @param packageName The name of the package that owns the schema.
+     * @param databaseName  The name of the database to retrieve.
+     * @param userId Id of the calling user
+     * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+     *     {@link AppSearchResult}&lt;{@link List}&lt;{@link String}&gt;&gt;.
+     */
+    void getNamespaces(
         in String packageName,
         in String databaseName,
         in int userId,
@@ -190,6 +205,7 @@ interface IAppSearchManager {
      * @param namespace Namespace the document being used belongs to.
      * @param uri URI of the document being used.
      * @param usageTimeMillis The timestamp at which the document was used.
+     * @param systemUsage Whether the usage was reported by a system app against another app's doc.
      * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
@@ -200,6 +216,7 @@ interface IAppSearchManager {
          in String namespace,
          in String uri,
          in long usageTimeMillis,
+         in boolean systemUsage,
          in int userId,
          in IAppSearchResultCallback callback);
 

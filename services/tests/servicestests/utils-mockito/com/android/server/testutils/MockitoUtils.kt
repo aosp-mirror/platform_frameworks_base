@@ -93,3 +93,24 @@ inline fun <reified T> mockThrowOnUnmocked(block: T.() -> Unit = {}) =
         spyThrowOnUnmocked<T>(null, block)
 
 inline fun <reified T : Any> nullable() = ArgumentMatchers.nullable(T::class.java)
+
+/**
+ * Returns Mockito.any() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
+
+/**
+ * Wrapper around [Mockito.any] for generic types.
+ */
+inline fun <reified T> any() = any(T::class.java)
+
+/**
+ * Returns Mockito.eq() as nullable type to avoid java.lang.IllegalStateException when
+ * null is returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> eq(obj: T): T = Mockito.eq<T>(obj)

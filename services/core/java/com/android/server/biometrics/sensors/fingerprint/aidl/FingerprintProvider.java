@@ -82,7 +82,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull private final String mHalInstanceName;
     @NonNull @VisibleForTesting
     final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
-    @NonNull private final HalClientMonitor.LazyDaemon<IFingerprint> mLazyDaemon;
     @NonNull private final Handler mHandler;
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final ActivityTaskManager mActivityTaskManager;
@@ -131,7 +130,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mContext = context;
         mHalInstanceName = halInstanceName;
         mSensors = new SparseArray<>();
-        mLazyDaemon = this::getHalInstance;
         mHandler = new Handler(Looper.getMainLooper());
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mActivityTaskManager = ActivityTaskManager.getInstance();
@@ -169,7 +167,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Nullable
-    private synchronized IFingerprint getHalInstance() {
+    @VisibleForTesting
+    synchronized IFingerprint getHalInstance() {
         if (mTestHalEnabled) {
             // Enabling the test HAL for a single sensor in a multi-sensor HAL currently enables
             // the test HAL for all sensors under that HAL. This can be updated in the future if
@@ -224,21 +223,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client, callback);
     }
 
-    private void createNewSessionWithoutHandler(@NonNull IFingerprint daemon, int sensorId,
-            int userId) throws RemoteException {
-        // Note that per IFingerprint createSession contract, this method will block until all
-        // existing operations are canceled/finished. However, also note that this is fine, since
-        // this method "withoutHandler" means it should only ever be invoked from the worker thread,
-        // so callers will never be blocked.
-        mSensors.get(sensorId).createNewSession(daemon, sensorId, userId);
-
-        if (FingerprintUtils.getInstance(sensorId).isInvalidationInProgress(mContext, userId)) {
-            Slog.w(getTag(), "Scheduling unfinished invalidation request for sensor: " + sensorId
-                    + ", user: " + userId);
-            scheduleInvalidationRequest(sensorId, userId);
-        }
-    }
-
     @Override
     public boolean containsSensor(int sensorId) {
         return mSensors.contains(sensorId);
@@ -275,32 +259,16 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     private void scheduleLoadAuthenticatorIdsForUser(int sensorId, int userId) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during loadAuthenticatorIds, sensorId: " + sensorId);
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final FingerprintGetAuthenticatorIdClient client =
-                        new FingerprintGetAuthenticatorIdClient(mContext,
-                                mSensors.get(sensorId).getLazySession(), userId,
-                                mContext.getOpPackageName(), sensorId,
-                                mSensors.get(sensorId).getAuthenticatorIds());
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling loadAuthenticatorId"
-                        + ", sensorId: " + sensorId
-                        + ", userId: " + userId, e);
-            }
+            final FingerprintGetAuthenticatorIdClient client =
+                    new FingerprintGetAuthenticatorIdClient(mContext,
+                            mSensors.get(sensorId).getLazySession(), userId,
+                            mContext.getOpPackageName(), sensorId,
+                            mSensors.get(sensorId).getAuthenticatorIds());
+            scheduleForSensor(sensorId, client);
         });
     }
 
-    private void scheduleInvalidationRequest(int sensorId, int userId) {
+    void scheduleInvalidationRequest(int sensorId, int userId) {
         mHandler.post(() -> {
             final InvalidationRequesterClient<Fingerprint> client =
                     new InvalidationRequesterClient<>(mContext, userId, sensorId,
@@ -312,25 +280,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public void scheduleResetLockout(int sensorId, int userId, @Nullable byte[] hardwareAuthToken) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during resetLockout, sensorId: " + sensorId);
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final FingerprintResetLockoutClient client = new FingerprintResetLockoutClient(
-                        mContext, mSensors.get(sensorId).getLazySession(), userId,
-                        mContext.getOpPackageName(), sensorId, hardwareAuthToken,
-                        mSensors.get(sensorId).getLockoutCache(), mLockoutResetDispatcher);
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling resetLockout", e);
-            }
+            final FingerprintResetLockoutClient client = new FingerprintResetLockoutClient(
+                    mContext, mSensors.get(sensorId).getLazySession(), userId,
+                    mContext.getOpPackageName(), sensorId, hardwareAuthToken,
+                    mSensors.get(sensorId).getLockoutCache(), mLockoutResetDispatcher);
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -338,26 +292,12 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleGenerateChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, String opPackageName) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during generateChallenge, sensorId: " + sensorId);
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final FingerprintGenerateChallengeClient client =
-                        new FingerprintGenerateChallengeClient(mContext,
-                                mSensors.get(sensorId).getLazySession(), token,
-                                new ClientMonitorCallbackConverter(receiver), opPackageName,
-                                sensorId);
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling generateChallenge", e);
-            }
+            final FingerprintGenerateChallengeClient client =
+                    new FingerprintGenerateChallengeClient(mContext,
+                            mSensors.get(sensorId).getLazySession(), token,
+                            new ClientMonitorCallbackConverter(receiver), opPackageName,
+                            sensorId);
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -365,25 +305,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during revokeChallenge, sensorId: " + sensorId);
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final FingerprintRevokeChallengeClient client =
-                        new FingerprintRevokeChallengeClient(mContext,
-                                mSensors.get(sensorId).getLazySession(), token,
-                                opPackageName, sensorId, challenge);
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling revokeChallenge", e);
-            }
+            final FingerprintRevokeChallengeClient client =
+                    new FingerprintRevokeChallengeClient(mContext,
+                            mSensors.get(sensorId).getLazySession(), token,
+                            opPackageName, sensorId, challenge);
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -392,40 +318,23 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             int userId, @NonNull IFingerprintServiceReceiver receiver,
             @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during enroll, sensorId: " + sensorId);
-                // If this happens, we need to send HW_UNAVAILABLE after the scheduler gets to
-                // this operation. We should not send the callback yet, since the scheduler may
-                // be processing something else.
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final int maxTemplatesPerUser = mSensors.get(sensorId).getSensorProperties()
-                        .maxEnrollmentsPerUser;
-                final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
-                        mSensors.get(sensorId).getLazySession(), token,
-                        new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                        opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
-                        mUdfpsOverlayController, maxTemplatesPerUser, enrollReason);
-                scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
-                    @Override
-                    public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
-                            boolean success) {
-                        if (success) {
-                            scheduleLoadAuthenticatorIdsForUser(sensorId, userId);
-                            scheduleInvalidationRequest(sensorId, userId);
-                        }
+            final int maxTemplatesPerUser = mSensors.get(sensorId).getSensorProperties()
+                    .maxEnrollmentsPerUser;
+            final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
+                    mSensors.get(sensorId).getLazySession(), token,
+                    new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
+                    opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
+                    mUdfpsOverlayController, maxTemplatesPerUser, enrollReason);
+            scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
+                @Override
+                public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
+                        boolean success) {
+                    if (success) {
+                        scheduleLoadAuthenticatorIdsForUser(sensorId, userId);
+                        scheduleInvalidationRequest(sensorId, userId);
                     }
-                });
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling enroll", e);
-            }
+                }
+            });
         });
     }
 
@@ -439,29 +348,12 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
             int statsClient) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during finger detect, sensorId: " + sensorId);
-                // If this happens, we need to send HW_UNAVAILABLE after the scheduler gets to
-                // this operation. We should not send the callback yet, since the scheduler may
-                // be processing something else.
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
-                final FingerprintDetectClient client = new FingerprintDetectClient(mContext,
-                        mSensors.get(sensorId).getLazySession(), token, callback, userId,
-                        opPackageName, sensorId, mUdfpsOverlayController, isStrongBiometric,
-                        statsClient);
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling finger detect", e);
-            }
+            final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
+            final FingerprintDetectClient client = new FingerprintDetectClient(mContext,
+                    mSensors.get(sensorId).getLazySession(), token, callback, userId,
+                    opPackageName, sensorId, mUdfpsOverlayController, isStrongBiometric,
+                    statsClient);
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -471,31 +363,14 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             @NonNull String opPackageName, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during authenticate, sensorId: " + sensorId);
-                // If this happens, we need to send HW_UNAVAILABLE after the scheduler gets to
-                // this operation. We should not send the callback yet, since the scheduler may
-                // be processing something else.
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
-                final FingerprintAuthenticationClient client = new FingerprintAuthenticationClient(
-                        mContext, mSensors.get(sensorId).getLazySession(), token, callback, userId,
-                        operationId, restricted, opPackageName, cookie,
-                        false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
-                        mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
-                        mUdfpsOverlayController, allowBackgroundAuthentication);
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling authenticate", e);
-            }
+            final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
+            final FingerprintAuthenticationClient client = new FingerprintAuthenticationClient(
+                    mContext, mSensors.get(sensorId).getLazySession(), token, callback, userId,
+                    operationId, restricted, opPackageName, cookie,
+                    false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
+                    mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
+                    mUdfpsOverlayController, allowBackgroundAuthentication);
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -535,29 +410,12 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             int[] fingerprintIds, int userId, @NonNull IFingerprintServiceReceiver receiver,
             @NonNull String opPackageName) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during remove, sensorId: " + sensorId);
-                // If this happens, we need to send HW_UNAVAILABLE after the scheduler gets to
-                // this operation. We should not send the callback yet, since the scheduler may
-                // be processing something else.
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
-                        mSensors.get(sensorId).getLazySession(), token,
-                        new ClientMonitorCallbackConverter(receiver), fingerprintIds, userId,
-                        opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
-                        mSensors.get(sensorId).getAuthenticatorIds());
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling remove", e);
-            }
+            final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
+                    mSensors.get(sensorId).getLazySession(), token,
+                    new ClientMonitorCallbackConverter(receiver), fingerprintIds, userId,
+                    opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
+                    mSensors.get(sensorId).getAuthenticatorIds());
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -565,28 +423,14 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable BaseClientMonitor.Callback callback) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during internal cleanup, sensorId: " + sensorId);
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final List<Fingerprint> enrolledList = getEnrolledFingerprints(sensorId, userId);
-                final FingerprintInternalCleanupClient client =
-                        new FingerprintInternalCleanupClient(mContext,
-                                mSensors.get(sensorId).getLazySession(), userId,
-                                mContext.getOpPackageName(), sensorId, enrolledList,
-                                FingerprintUtils.getInstance(sensorId),
-                                mSensors.get(sensorId).getAuthenticatorIds());
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when scheduling internal cleanup", e);
-            }
+            final List<Fingerprint> enrolledList = getEnrolledFingerprints(sensorId, userId);
+            final FingerprintInternalCleanupClient client =
+                    new FingerprintInternalCleanupClient(mContext,
+                            mSensors.get(sensorId).getLazySession(), userId,
+                            mContext.getOpPackageName(), sensorId, enrolledList,
+                            FingerprintUtils.getInstance(sensorId),
+                            mSensors.get(sensorId).getAuthenticatorIds());
+            scheduleForSensor(sensorId, client);
         });
     }
 
@@ -611,26 +455,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
             @NonNull IInvalidationCallback callback) {
         mHandler.post(() -> {
-            final IFingerprint daemon = getHalInstance();
-            if (daemon == null) {
-                Slog.e(getTag(), "Null daemon during scheduleInvalidateAuthenticatorId: "
-                        + sensorId);
-                return;
-            }
-
-            try {
-                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
-                    createNewSessionWithoutHandler(daemon, sensorId, userId);
-                }
-
-                final FingerprintInvalidationClient client =
-                        new FingerprintInvalidationClient(mContext,
-                                mSensors.get(sensorId).getLazySession(), userId, sensorId,
-                                mSensors.get(sensorId).getAuthenticatorIds(), callback);
-                scheduleForSensor(sensorId, client);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception", e);
-            }
+            final FingerprintInvalidationClient client =
+                    new FingerprintInvalidationClient(mContext,
+                            mSensors.get(sensorId).getLazySession(), userId, sensorId,
+                            mSensors.get(sensorId).getAuthenticatorIds(), callback);
+            scheduleForSensor(sensorId, client);
         });
     }
 

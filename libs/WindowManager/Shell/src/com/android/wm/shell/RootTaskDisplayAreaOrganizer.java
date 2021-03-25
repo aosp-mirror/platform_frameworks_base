@@ -16,6 +16,8 @@
 
 package com.android.wm.shell;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
+
 import android.annotation.UiContext;
 import android.app.ResourcesManager;
 import android.content.Context;
@@ -34,6 +36,8 @@ import android.window.DisplayAreaOrganizer;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,14 +48,14 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     private static final String TAG = RootTaskDisplayAreaOrganizer.class.getSimpleName();
 
-    // Display area info. mapped by displayIds.
+    /** {@link DisplayAreaInfo} list, which is mapped by display IDs. */
     private final SparseArray<DisplayAreaInfo> mDisplayAreasInfo = new SparseArray<>();
-    // Display area leashes. mapped by displayIds.
+    /** Display area leashes, which is mapped by display IDs. */
     private final SparseArray<SurfaceControl> mLeashes = new SparseArray<>();
 
     private final SparseArray<ArrayList<RootTaskDisplayAreaListener>> mListeners =
             new SparseArray<>();
-
+    /** {@link DisplayAreaContext} list, which is mapped by display IDs. */
     private final SparseArray<DisplayAreaContext> mDisplayAreaContexts = new SparseArray<>();
 
     private final Context mContext;
@@ -173,8 +177,9 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         final Display display = mContext.getSystemService(DisplayManager.class)
                 .getDisplay(displayId);
         if (display == null) {
-            throw new UnsupportedOperationException("The display #" + displayId + " is invalid."
-                    + "displayAreaInfo:" + displayAreaInfo);
+            ProtoLog.w(WM_SHELL_TASK_ORG, "The display#%d has been removed."
+                    + " Skip following steps", displayId);
+            return;
         }
         DisplayAreaContext daContext = mDisplayAreaContexts.get(displayId);
         if (daContext == null) {
