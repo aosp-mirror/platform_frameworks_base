@@ -55,6 +55,7 @@ package android.net {
     method @Nullable public static android.net.ProxyInfo getGlobalProxy(@NonNull android.content.Context);
     method @NonNull public static java.time.Duration getMobileDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
     method public static boolean getMobileDataAlwaysOn(@NonNull android.content.Context, boolean);
+    method @Nullable public static String getMobileDataPreferredApps(@NonNull android.content.Context);
     method public static int getNetworkAvoidBadWifi(@NonNull android.content.Context);
     method @Nullable public static String getNetworkMeteredMultipathPreference(@NonNull android.content.Context);
     method public static int getNetworkSwitchNotificationMaximumDailyCount(@NonNull android.content.Context, int);
@@ -72,6 +73,7 @@ package android.net {
     method public static void setGlobalProxy(@NonNull android.content.Context, @NonNull android.net.ProxyInfo);
     method public static void setMobileDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
     method public static void setMobileDataAlwaysOn(@NonNull android.content.Context, boolean);
+    method public static void setMobileDataPreferredApps(@NonNull android.content.Context, @Nullable String);
     method public static void setNetworkAvoidBadWifi(@NonNull android.content.Context, int);
     method public static void setNetworkMeteredMultipathPreference(@NonNull android.content.Context, @NonNull String);
     method public static void setNetworkSwitchNotificationMaximumDailyCount(@NonNull android.content.Context, @IntRange(from=0) int);
