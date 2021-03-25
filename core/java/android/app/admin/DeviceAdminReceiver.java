@@ -524,6 +524,16 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             "android.app.action.OPERATION_SAFETY_STATE_CHANGED";
 
     /**
+     * Broadcast action: notify the profile owner on an organization-owned device that it needs to
+     * acknowledge device compliance.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED =
+            "android.app.action.COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED";
+
+    /**
      * An {@code int} extra specifying an {@link OperationSafetyReason}.
      *
      * @hide
@@ -1116,6 +1126,29 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         onOperationSafetyStateChanged(context, reason, isSafe);
     }
 
+    /**
+     * Called to notify a profile owner of an organization-owned device that it needs to acknowledge
+     * device compliance to allow the user to turn the profile off if needed according to the
+     * maximum profile time off policy.
+     *
+     * Default implementation acknowledges compliance immediately. DPC may prefer to override this
+     * implementation to delay acknowledgement until a successful policy sync. Until compliance is
+     * acknowledged the user is still free to turn the profile off, but the timer won't be reset,
+     * so personal apps will be suspended sooner. This callback is delivered using a foreground
+     * broadcast and should be handled quickly.
+     *
+     * @param context the running context as per {@link #onReceive}
+     * @param intent The received intent as per {@link #onReceive}.
+     *
+     * @see DevicePolicyManager#acknowledgeDeviceCompliant()
+     * @see DevicePolicyManager#isComplianceAcknowledgementRequired()
+     * @see DevicePolicyManager#setManagedProfileMaximumTimeOff(ComponentName, long)
+     */
+    public void onComplianceAcknowledgementRequired(
+            @NonNull Context context, @NonNull Intent intent) {
+        getManager(context).acknowledgeDeviceCompliant();
+    }
+
     private boolean hasRequiredExtra(Intent intent, String extra) {
         if (intent.hasExtra(extra)) return true;
 
@@ -1204,6 +1237,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
                     intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_OPERATION_SAFETY_STATE_CHANGED.equals(action)) {
             onOperationSafetyStateChanged(context, intent);
+        } else if (ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED.equals(action)) {
+            onComplianceAcknowledgementRequired(context, intent);
         }
     }
 }
