@@ -80,6 +80,24 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
         super.navBarLayerRotatesAndScales()
     }
 
+    @FlakyTest
+    @Test
+    override fun statusBarLayerRotatesScales() {
+        super.statusBarLayerRotatesScales()
+    }
+
+    @FlakyTest
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    @FlakyTest
+    @Test
+    override fun focusChanges() {
+        super.focusChanges()
+    }
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
