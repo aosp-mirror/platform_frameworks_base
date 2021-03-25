@@ -5231,7 +5231,6 @@ package android.media {
     method @Nullable public String getClientPackageName();
     method @Nullable public android.media.MediaRouter2.RoutingController getController(@NonNull String);
     method @Nullable public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
-    method public void registerRouteCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaRouter2.RouteCallback);
     method public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
     method public void startScan();
     method public void stopScan();
@@ -5253,6 +5252,10 @@ package android.media {
 
   public class RingtoneManager {
     method @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void ensureDefaultRingtones(@NonNull android.content.Context);
+  }
+
+  public final class RouteDiscoveryPreference implements android.os.Parcelable {
+    field public static final android.media.RouteDiscoveryPreference EMPTY;
   }
 
 }
