@@ -175,7 +175,7 @@ public class PeopleSpaceUtils {
 
     /** Sets all relevant storage for {@code appWidgetId} association to {@code tile}. */
     public static void setSharedPreferencesStorageForTile(Context context, PeopleTileKey key,
-            int appWidgetId) {
+            int appWidgetId, Uri contactUri) {
         // Write relevant persisted storage.
         SharedPreferences widgetSp = context.getSharedPreferences(String.valueOf(appWidgetId),
                 Context.MODE_PRIVATE);
@@ -186,27 +186,24 @@ public class PeopleSpaceUtils {
         widgetEditor.apply();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(String.valueOf(appWidgetId), key.getShortcutId());
+        String contactUriString = contactUri == null ? EMPTY_STRING : contactUri.toString();
+        editor.putString(String.valueOf(appWidgetId), contactUriString);
 
         // Don't overwrite existing widgets with the same key.
-        Set<String> storedWidgetIds = new HashSet<>(
-                sp.getStringSet(key.toString(), new HashSet<>()));
-        storedWidgetIds.add(String.valueOf(appWidgetId));
-        editor.putStringSet(key.toString(), storedWidgetIds);
+        addAppWidgetIdForKey(sp, editor, appWidgetId, key.toString());
+        addAppWidgetIdForKey(sp, editor, appWidgetId, contactUriString);
         editor.apply();
     }
 
     /** Removes stored data when tile is deleted. */
     public static void removeSharedPreferencesStorageForTile(Context context, PeopleTileKey key,
-            int widgetId) {
+            int widgetId, String contactUriString) {
         // Delete widgetId mapping to key.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sp.edit();
-        Set<String> storedWidgetIds = new HashSet<>(
-                sp.getStringSet(key.toString(), new HashSet<>()));
-        storedWidgetIds.remove(String.valueOf(widgetId));
-        editor.putStringSet(key.toString(), storedWidgetIds);
         editor.remove(String.valueOf(widgetId));
+        removeAppWidgetIdForKey(sp, editor, widgetId, key.toString());
+        removeAppWidgetIdForKey(sp, editor, widgetId, contactUriString);
         editor.apply();
 
         // Delete all data specifically mapped to widgetId.
@@ -217,6 +214,23 @@ public class PeopleSpaceUtils {
         widgetEditor.remove(USER_ID);
         widgetEditor.remove(SHORTCUT_ID);
         widgetEditor.apply();
+    }
+
+    private static void addAppWidgetIdForKey(SharedPreferences sp, SharedPreferences.Editor editor,
+            int widgetId, String storageKey) {
+        Set<String> storedWidgetIdsByKey = new HashSet<>(
+                sp.getStringSet(storageKey, new HashSet<>()));
+        storedWidgetIdsByKey.add(String.valueOf(widgetId));
+        editor.putStringSet(storageKey, storedWidgetIdsByKey);
+    }
+
+    private static void removeAppWidgetIdForKey(SharedPreferences sp,
+            SharedPreferences.Editor editor,
+            int widgetId, String storageKey) {
+        Set<String> storedWidgetIds = new HashSet<>(
+                sp.getStringSet(storageKey, new HashSet<>()));
+        storedWidgetIds.remove(String.valueOf(widgetId));
+        editor.putStringSet(storageKey, storedWidgetIds);
     }
 
     /** Augments a single {@link PeopleSpaceTile} with notification content, if one is present. */
@@ -256,7 +270,7 @@ public class PeopleSpaceUtils {
             PeopleSpaceTile tile, Map<PeopleTileKey, NotificationEntry> visibleNotifications) {
         PeopleTileKey key = new PeopleTileKey(
                 tile.getId(), getUserId(tile), tile.getPackageName());
-
+        // TODO: Match missed calls with matching Uris in addition to keys.
         if (!visibleNotifications.containsKey(key)) {
             if (DEBUG) Log.d(TAG, "No existing notifications for key:" + key.toString());
             return tile;
