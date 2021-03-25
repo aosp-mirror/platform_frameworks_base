@@ -733,6 +733,37 @@ public final class DisplayManagerGlobal {
         }
     }
 
+
+    /**
+     * Sets the brightness of the display.
+     *
+     * @param brightness The brightness value from 0.0f to 1.0f.
+     *
+     * @hide
+     */
+    public void setBrightness(int displayId, float brightness) {
+        try {
+            mDm.setBrightness(displayId, brightness);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the brightness of the display.
+     *
+     * @param displayId The display from which to get the brightness
+     *
+     * @hide
+     */
+    public float getBrightness(int displayId) {
+        try {
+            return mDm.getBrightness(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Temporarily sets the auto brightness adjustment factor.
      * <p>

@@ -62,6 +62,7 @@ import java.util.Objects;
  *   &lt;display-states>
  *      &lt;display unique-id="XXXXXXX">
  *          &lt;color-mode>0&lt;/color-mode>
+ *          &lt;brightness-value>0&lt;/brightness-value>
  *      &lt;/display>
  *  &lt;/display-states>
  *  &lt;stable-device-values>
@@ -82,7 +83,7 @@ import java.util.Objects;
  * TODO: refactor this to extract common code shared with the input manager's data store
  */
 final class PersistentDataStore {
-    static final String TAG = "DisplayManager";
+    static final String TAG = "DisplayManager.PersistentDataStore";
 
     private static final String TAG_DISPLAY_MANAGER_STATE = "display-manager-state";
 
@@ -95,6 +96,7 @@ final class PersistentDataStore {
     private static final String TAG_DISPLAY_STATES = "display-states";
     private static final String TAG_DISPLAY = "display";
     private static final String TAG_COLOR_MODE = "color-mode";
+    private static final String TAG_BRIGHTNESS_VALUE = "brightness-value";
     private static final String ATTR_UNIQUE_ID = "unique-id";
 
     private static final String TAG_STABLE_DEVICE_VALUES = "stable-device-values";
@@ -249,6 +251,30 @@ final class PersistentDataStore {
         }
         DisplayState state = getDisplayState(device.getUniqueId(), true);
         if (state.setColorMode(colorMode)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public float getBrightness(DisplayDevice device) {
+        if (device == null || !device.hasStableUniqueId()) {
+            return Float.NaN;
+        }
+        final DisplayState state = getDisplayState(device.getUniqueId(), false);
+        if (state == null) {
+            return Float.NaN;
+        }
+        return state.getBrightness();
+    }
+
+    public boolean setBrightness(DisplayDevice displayDevice, float brightness) {
+        final String displayDeviceUniqueId = displayDevice.getUniqueId();
+        if (!displayDevice.hasStableUniqueId() || displayDeviceUniqueId == null) {
+            return false;
+        }
+        final DisplayState state = getDisplayState(displayDeviceUniqueId, true);
+        if (state.setBrightness(brightness)) {
             setDirty();
             return true;
         }
@@ -473,6 +499,7 @@ final class PersistentDataStore {
 
     private static final class DisplayState {
         private int mColorMode;
+        private float mBrightness;
 
         public boolean setColorMode(int colorMode) {
             if (colorMode == mColorMode) {
@@ -486,14 +513,33 @@ final class PersistentDataStore {
             return mColorMode;
         }
 
+        public boolean setBrightness(float brightness) {
+            if (brightness == mBrightness) {
+                return false;
+            }
+            mBrightness = brightness;
+            return true;
+        }
+
+        public float getBrightness() {
+            return mBrightness;
+        }
+
+
         public void loadFromXml(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
 
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                if (parser.getName().equals(TAG_COLOR_MODE)) {
-                    String value = parser.nextText();
-                    mColorMode = Integer.parseInt(value);
+                switch (parser.getName()) {
+                    case TAG_COLOR_MODE:
+                        String value = parser.nextText();
+                        mColorMode = Integer.parseInt(value);
+                        break;
+                    case TAG_BRIGHTNESS_VALUE:
+                        String brightness = parser.nextText();
+                        mBrightness = Float.parseFloat(brightness);
+                        break;
                 }
             }
         }
@@ -502,10 +548,15 @@ final class PersistentDataStore {
             serializer.startTag(null, TAG_COLOR_MODE);
             serializer.text(Integer.toString(mColorMode));
             serializer.endTag(null, TAG_COLOR_MODE);
+            serializer.startTag(null, TAG_BRIGHTNESS_VALUE);
+            serializer.text(Float.toString(mBrightness));
+            serializer.endTag(null, TAG_BRIGHTNESS_VALUE);
+
         }
 
         public void dump(final PrintWriter pw, final String prefix) {
             pw.println(prefix + "ColorMode=" + mColorMode);
+            pw.println(prefix + "BrightnessValue=" + mBrightness);
         }
     }
 
