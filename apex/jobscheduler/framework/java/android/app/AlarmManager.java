@@ -18,6 +18,7 @@ package android.app;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
@@ -29,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -42,7 +44,9 @@ import com.android.i18n.timezone.ZoneInfoDb;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -194,6 +198,15 @@ public class AlarmManager {
     public static final int FLAG_ALLOW_WHILE_IDLE_COMPAT = 1 << 5;
 
     /**
+     * Flag for alarms: Used to mark prioritized alarms. These alarms will get to execute while idle
+     * and can be sent separately from other alarms that may be already due at the time.
+     * These alarms can be set via
+     * {@link #setPrioritized(int, long, long, String, Executor, OnAlarmListener)}
+     * @hide
+     */
+    public static final int FLAG_PRIORITIZE = 1 << 6;
+
+    /**
      * For apps targeting {@link Build.VERSION_CODES#S} or above, APIs
      * {@link #setExactAndAllowWhileIdle(int, long, PendingIntent)} and
      * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} will require holding a new
@@ -227,15 +240,15 @@ public class AlarmManager {
 
     final class ListenerWrapper extends IAlarmListener.Stub implements Runnable {
         final OnAlarmListener mListener;
-        Handler mHandler;
+        Executor mExecutor;
         IAlarmCompleteListener mCompletion;
 
         public ListenerWrapper(OnAlarmListener listener) {
             mListener = listener;
         }
 
-        public void setHandler(Handler h) {
-           mHandler = h;
+        void setExecutor(Executor e) {
+            mExecutor = e;
         }
 
         public void cancel() {
@@ -250,7 +263,7 @@ public class AlarmManager {
         public void doAlarm(IAlarmCompleteListener alarmManager) {
             mCompletion = alarmManager;
 
-            mHandler.post(this);
+            mExecutor.execute(this);
         }
 
         @Override
@@ -368,7 +381,7 @@ public class AlarmManager {
      */
     public void set(@AlarmType int type, long triggerAtMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, operation, null, null,
-                null, null, null);
+                (Handler) null, null, null);
     }
 
     /**
@@ -457,7 +470,7 @@ public class AlarmManager {
     public void setRepeating(@AlarmType int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, 0, operation,
-                null, null, null, null, null);
+                null, null, (Handler) null, null, null);
     }
 
     /**
@@ -507,7 +520,7 @@ public class AlarmManager {
     public void setWindow(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
             PendingIntent operation) {
         setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, operation,
-                null, null, null, null, null);
+                null, null, (Handler) null, null, null);
     }
 
     /**
@@ -523,6 +536,53 @@ public class AlarmManager {
             String tag, OnAlarmListener listener, Handler targetHandler) {
         setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, null, listener, tag,
                 targetHandler, null, null);
+    }
+
+    /**
+     * Schedule an alarm that is prioritized by the system while the device is in power saving modes
+     * such as battery saver and device idle (doze).
+     *
+     * <p>
+     * Apps that use this are not guaranteed to get all alarms as requested during power saving
+     * modes, i.e. the system may still impose restrictions on how frequently these alarms will go
+     * off for a particular application, like requiring a certain minimum duration be elapsed
+     * between consecutive alarms. This duration will be normally be in the order of a few minutes.
+     *
+     * <p>
+     * When the system wakes up to deliver these alarms, it may not deliver any of the other pending
+     * alarms set earlier by the calling app, even the special ones set via
+     * {@link #setAndAllowWhileIdle(int, long, PendingIntent)} or
+     * {@link #setExactAndAllowWhileIdle(int, long, PendingIntent)}. So the caller should not
+     * expect these to arrive in any relative order to its other alarms.
+     *
+     * @param type type of alarm
+     * @param windowStartMillis The earliest time, in milliseconds, that the alarm should
+     *        be delivered, expressed in the appropriate clock's units (depending on the alarm
+     *        type).
+     * @param windowLengthMillis The length of the requested delivery window,
+     *        in milliseconds.  The alarm will be delivered no later than this many
+     *        milliseconds after {@code windowStartMillis}.  Note that this parameter
+     *        is a <i>duration,</i> not the timestamp of the end of the window.
+     * @param tag string describing the alarm, used for logging and battery-use
+     *         attribution
+     * @param listener {@link OnAlarmListener} instance whose
+     *         {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     *         called when the alarm time is reached.  A given OnAlarmListener instance can
+     *         only be the target of a single pending alarm, just as a given PendingIntent
+     *         can only be used with one alarm at a time.
+     * @param executor {@link Executor} on which to execute the listener's onAlarm()
+     *         callback.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.SCHEDULE_PRIORITIZED_ALARM)
+    public void setPrioritized(@AlarmType int type, long windowStartMillis, long windowLengthMillis,
+            @NonNull String tag, @NonNull Executor executor, @NonNull OnAlarmListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(tag);
+        Objects.requireNonNull(listener);
+        setImpl(type, windowStartMillis, windowLengthMillis, 0, FLAG_PRIORITIZE, null, listener,
+                tag, executor, null, null);
     }
 
     /**
@@ -565,7 +625,7 @@ public class AlarmManager {
      */
     @RequiresPermission(value = Manifest.permission.SCHEDULE_EXACT_ALARM, conditional = true)
     public void setExact(@AlarmType int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null, null,
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null, (Handler) null,
                 null, null);
     }
 
@@ -645,7 +705,7 @@ public class AlarmManager {
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     public void setAlarmClock(AlarmClockInfo info, PendingIntent operation) {
         setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, 0, operation,
-                null, null, null, null, info);
+                null, null, (Handler) null, null, info);
     }
 
     /** @hide */
@@ -654,7 +714,7 @@ public class AlarmManager {
     public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, PendingIntent operation, WorkSource workSource) {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, operation, null, null,
-                null, workSource, null);
+                (Handler) null, workSource, null);
     }
 
     /**
@@ -698,6 +758,15 @@ public class AlarmManager {
             long intervalMillis, int flags, PendingIntent operation, final OnAlarmListener listener,
             String listenerTag, Handler targetHandler, WorkSource workSource,
             AlarmClockInfo alarmClock) {
+        final Handler handlerToUse = (targetHandler != null) ? targetHandler : mMainThreadHandler;
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, flags, operation, listener,
+                listenerTag, new HandlerExecutor(handlerToUse), workSource, alarmClock);
+    }
+
+    private void setImpl(@AlarmType int type, long triggerAtMillis, long windowMillis,
+            long intervalMillis, int flags, PendingIntent operation, final OnAlarmListener listener,
+            String listenerTag, Executor targetExecutor, WorkSource workSource,
+            AlarmClockInfo alarmClock) {
         if (triggerAtMillis < 0) {
             /* NOTYET
             if (mAlwaysExact) {
@@ -726,9 +795,7 @@ public class AlarmManager {
                     sWrappers.put(listener, new WeakReference<>(recipientWrapper));
                 }
             }
-
-            final Handler handler = (targetHandler != null) ? targetHandler : mMainThreadHandler;
-            recipientWrapper.setHandler(handler);
+            recipientWrapper.setExecutor(targetExecutor);
         }
 
         try {
@@ -834,7 +901,7 @@ public class AlarmManager {
     public void setInexactRepeating(@AlarmType int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, 0, operation, null,
-                null, null, null, null);
+                null, (Handler) null, null, null);
     }
 
     /**
@@ -884,7 +951,7 @@ public class AlarmManager {
     public void setAndAllowWhileIdle(@AlarmType int type, long triggerAtMillis,
             PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, 0, FLAG_ALLOW_WHILE_IDLE,
-                operation, null, null, null, null, null);
+                operation, null, null, (Handler) null, null, null);
     }
 
     /**
@@ -945,7 +1012,7 @@ public class AlarmManager {
     public void setExactAndAllowWhileIdle(@AlarmType int type, long triggerAtMillis,
             PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_ALLOW_WHILE_IDLE, operation,
-                null, null, null, null, null);
+                null, null, (Handler) null, null, null);
     }
 
     /**
