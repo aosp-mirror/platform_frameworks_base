@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.app;
+package android.window;
 
 import static android.view.WindowManagerImpl.createWindowContextWindowManager;
 
@@ -27,11 +27,7 @@ import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.view.Display;
-import android.view.IWindowManager;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -49,11 +45,11 @@ import java.lang.ref.Reference;
 @UiContext
 public class WindowContext extends ContextWrapper {
     private final WindowManager mWindowManager;
-    private final IWindowManager mWms;
-    private final WindowTokenClient mToken;
-    private boolean mListenerRegistered;
+    private final @WindowManager.LayoutParams.WindowType int mType;
+    private final @Nullable Bundle mOptions;
     private final ComponentCallbacksController mCallbacksController =
             new ComponentCallbacksController();
+    private final WindowContextController mController;
 
     /**
      * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
@@ -64,47 +60,23 @@ public class WindowContext extends ContextWrapper {
      * @hide
      */
     public WindowContext(@NonNull Context base, int type, @Nullable Bundle options) {
-        this(base, null /* display */, type, options);
-    }
+        super(base);
 
-    /**
-     * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
-     * the token.
-     *
-     * @param base Base {@link Context} for this new instance.
-     * @param display the {@link Display} to override.
-     * @param type Window type to be used with this context.
-     * @hide
-     */
-    public WindowContext(@NonNull Context base, @Nullable Display display, int type,
-            @Nullable Bundle options) {
-        // Correct base context will be built once the token is resolved, so passing 'null' here.
-        super(null /* base */);
-
-        mWms = WindowManagerGlobal.getWindowManagerService();
-        mToken = new WindowTokenClient();
-
-        final ContextImpl contextImpl = createBaseWindowContext(base, mToken, display);
-        attachBaseContext(contextImpl);
-        contextImpl.setOuterContext(this);
-
-        mToken.attachContext(this);
-
+        mType = type;
+        mOptions = options;
         mWindowManager = createWindowContextWindowManager(this);
+        IBinder token = getWindowContextToken();
+        mController = new WindowContextController(token);
 
-        try {
-            mListenerRegistered = mWms.registerWindowContextListener(mToken, type, getDisplayId(),
-                    options);
-        }  catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
         Reference.reachabilityFence(this);
     }
 
-    private static ContextImpl createBaseWindowContext(Context outer, IBinder token,
-            Display display) {
-        final ContextImpl contextImpl = ContextImpl.getImpl(outer);
-        return contextImpl.createBaseWindowContext(token, display);
+    /**
+     * Registers this {@link WindowContext} with {@link com.android.server.wm.WindowManagerService}
+     * to receive configuration changes of the associated {@link WindowManager} node.
+     */
+    public void registerWithServer() {
+        mController.registerListener(mType, getDisplayId(), mOptions);
     }
 
     @Override
@@ -124,21 +96,15 @@ public class WindowContext extends ContextWrapper {
     /** Used for test to invoke because we can't invoke finalize directly. */
     @VisibleForTesting
     public void release() {
-        if (mListenerRegistered) {
-            mListenerRegistered = false;
-            try {
-                mWms.unregisterWindowContextListener(mToken);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
+        mController.unregisterListenerIfNeeded();
         destroy();
     }
 
-    void destroy() {
+    @Override
+    public void destroy() {
         mCallbacksController.clearCallbacks();
-        final ContextImpl impl = (ContextImpl) getBaseContext();
-        impl.scheduleFinalCleanup(getClass().getName(), "WindowContext");
+        // Called to the base ContextImpl to do final clean-up.
+        getBaseContext().destroy();
         Reference.reachabilityFence(this);
     }
 

@@ -235,6 +235,7 @@ filegroup {
         "java/com/android/server/connectivity/NetworkAgentInfo.java",
         "java/com/android/server/connectivity/NetworkDiagnostics.java",
         "java/com/android/server/connectivity/NetworkNotificationManager.java",
+        "java/com/android/server/connectivity/NetworkOffer.java",
         "java/com/android/server/connectivity/NetworkRanker.java",
         "java/com/android/server/connectivity/OsCompat.java",
         "java/com/android/server/connectivity/PermissionMonitor.java",

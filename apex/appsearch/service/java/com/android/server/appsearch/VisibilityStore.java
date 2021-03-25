@@ -24,6 +24,7 @@ import android.annotation.UserIdInt;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetSchemaResponse;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
@@ -72,6 +73,9 @@ public class VisibilityStore {
 
     /** Schema type for documents that hold AppSearch's metadata, e.g. visibility settings */
     private static final String VISIBILITY_TYPE = "VisibilityType";
+
+    /** Version for the visibility schema */
+    private static final int SCHEMA_VERSION = 0;
 
     /**
      * Property that holds the list of platform-hidden schemas, as part of the visibility settings.
@@ -218,11 +222,10 @@ public class VisibilityStore {
      * @throws AppSearchException AppSearchException on AppSearchImpl error.
      */
     public void initialize() throws AppSearchException {
-        List<AppSearchSchema> schemas = mAppSearchImpl.getSchema(PACKAGE_NAME, DATABASE_NAME);
+        GetSchemaResponse getSchemaResponse = mAppSearchImpl.getSchema(PACKAGE_NAME, DATABASE_NAME);
         boolean hasVisibilityType = false;
         boolean hasPackageAccessibleType = false;
-        for (int i = 0; i < schemas.size(); i++) {
-            AppSearchSchema schema = schemas.get(i);
+        for (AppSearchSchema schema : getSchemaResponse.getSchemas()) {
             if (schema.getSchemaType().equals(VISIBILITY_TYPE)) {
                 hasVisibilityType = true;
             } else if (schema.getSchemaType().equals(PACKAGE_ACCESSIBLE_TYPE)) {
@@ -242,7 +245,8 @@ public class VisibilityStore {
                     Arrays.asList(VISIBILITY_SCHEMA, PACKAGE_ACCESSIBLE_SCHEMA),
                     /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                     /*schemasPackageAccessible=*/ Collections.emptyMap(),
-                    /*forceOverride=*/ false);
+                    /*forceOverride=*/ false,
+                    /*version=*/ SCHEMA_VERSION);
         }
 
         // Populate visibility settings set

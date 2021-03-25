@@ -30,10 +30,10 @@ import java.util.Map;
 /**
  * Provides results for AppSearch batch operations which encompass multiple documents.
  *
- * <p>Individual results of a batch operation are separated into two maps: one for successes and one
- * for failures. For successes, {@link #getSuccesses()} will return a map of keys to instances of
- * the value type. For failures, {@link #getFailures()} will return a map of keys to {@link
- * AppSearchResult} objects.
+ * <p>Individual results of a batch operation are separated into two maps: one for successes and
+ * one for failures. For successes, {@link #getSuccesses()} will return a map of keys to
+ * instances of the value type. For failures, {@link #getFailures()} will return a map of keys to
+ * {@link AppSearchResult} objects.
  *
  * <p>Alternatively, {@link #getAll()} returns a map of keys to {@link AppSearchResult} objects for
  * both successes and failures.
@@ -97,8 +97,8 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
     }
 
     /**
-     * Returns a {@link Map} of keys mapped to instances of {@link AppSearchResult} for all failed
-     * individual results.
+     * Returns a {@link Map} of keys mapped to instances of {@link AppSearchResult} for all
+     * failed individual results.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
      */
@@ -120,7 +120,6 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
 
     /**
      * Asserts that this {@link AppSearchBatchResult} has no failures.
-     *
      * @hide
      */
     public void checkSuccess() {
@@ -162,8 +161,6 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
      * Builder for {@link AppSearchBatchResult} objects.
      *
      * <p>Once {@link #build} is called, the instance can no longer be used.
-     *
-     * @hide
      */
     public static final class Builder<KeyType, ValueType> {
         private final Map<KeyType, ValueType> mSuccesses = new ArrayMap<>();
@@ -178,6 +175,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
          *
          * @throws IllegalStateException if the builder has already been used.
          */
+        @SuppressWarnings("MissingGetterMatchingBuilder")  // See getSuccesses
         @NonNull
         public Builder<KeyType, ValueType> setSuccess(
                 @NonNull KeyType key, @Nullable ValueType result) {
@@ -193,6 +191,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
          *
          * @throws IllegalStateException if the builder has already been used.
          */
+        @SuppressWarnings("MissingGetterMatchingBuilder")  // See getFailures
         @NonNull
         public Builder<KeyType, ValueType> setFailure(
                 @NonNull KeyType key,
@@ -210,6 +209,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
          *
          * @throws IllegalStateException if the builder has already been used.
          */
+        @SuppressWarnings("MissingGetterMatchingBuilder")  // See getAll
         @NonNull
         public Builder<KeyType, ValueType> setResult(
                 @NonNull KeyType key, @NonNull AppSearchResult<ValueType> result) {

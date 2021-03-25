@@ -92,18 +92,28 @@ public class NetworkUtils {
     @Deprecated
     public native static boolean bindProcessToNetworkForHostResolution(int netId);
 
+    private static native int bindSocketToNetworkHandle(FileDescriptor fd, long netHandle);
+
     /**
      * Explicitly binds {@code fd} to the network designated by {@code netId}.  This
      * overrides any binding via {@link #bindProcessToNetwork}.
      * @return 0 on success or negative errno on failure.
      */
-    public static native int bindSocketToNetwork(FileDescriptor fd, int netId);
+    public static int bindSocketToNetwork(FileDescriptor fd, int netId) {
+        return bindSocketToNetworkHandle(fd, new Network(netId).getNetworkHandle());
+    }
 
     /**
      * Determine if {@code uid} can access network designated by {@code netId}.
      * @return {@code true} if {@code uid} can access network, {@code false} otherwise.
      */
-    public native static boolean queryUserAccess(int uid, int netId);
+    public static boolean queryUserAccess(int uid, int netId) {
+        // TODO (b/183485986): remove this method
+        return false;
+    }
+
+    private static native FileDescriptor resNetworkSend(
+            long netHandle, byte[] msg, int msglen, int flags) throws ErrnoException;
 
     /**
      * DNS resolver series jni method.
@@ -111,8 +121,13 @@ public class NetworkUtils {
      * {@code flags} is an additional config to control actual querying behavior.
      * @return a file descriptor to watch for read events
      */
-    public static native FileDescriptor resNetworkSend(
-            int netId, byte[] msg, int msglen, int flags) throws ErrnoException;
+    public static FileDescriptor resNetworkSend(
+            int netId, byte[] msg, int msglen, int flags) throws ErrnoException {
+        return resNetworkSend(new Network(netId).getNetworkHandle(), msg, msglen, flags);
+    }
+
+    private static native FileDescriptor resNetworkQuery(
+            long netHandle, String dname, int nsClass, int nsType, int flags) throws ErrnoException;
 
     /**
      * DNS resolver series jni method.
@@ -121,8 +136,11 @@ public class NetworkUtils {
      * {@code flags} is an additional config to control actual querying behavior.
      * @return a file descriptor to watch for read events
      */
-    public static native FileDescriptor resNetworkQuery(
-            int netId, String dname, int nsClass, int nsType, int flags) throws ErrnoException;
+    public static FileDescriptor resNetworkQuery(
+            int netId, String dname, int nsClass, int nsType, int flags) throws ErrnoException {
+        return resNetworkQuery(new Network(netId).getNetworkHandle(), dname, nsClass, nsType,
+                flags);
+    }
 
     /**
      * DNS resolver series jni method.

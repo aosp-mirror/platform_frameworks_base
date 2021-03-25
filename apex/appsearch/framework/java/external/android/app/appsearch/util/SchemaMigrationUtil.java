@@ -20,12 +20,11 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.Migrator;
+import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -36,83 +35,70 @@ import java.util.Set;
  * @hide
  */
 public final class SchemaMigrationUtil {
-    private static final String TAG = "AppSearchMigrateUtil";
-
     private SchemaMigrationUtil() {}
 
-    /**
-     * Finds out which incompatible schema type won't be migrated by comparing its current and final
-     * version number.
-     */
+    /** Returns all active {@link Migrator}s that need to be triggered in this migration. */
     @NonNull
-    public static Set<String> getUnmigratedIncompatibleTypes(
-            @NonNull Set<String> incompatibleSchemaTypes,
+    public static Map<String, Migrator> getActiveMigrators(
+            @NonNull Set<AppSearchSchema> existingSchemas,
             @NonNull Map<String, Migrator> migrators,
-            @NonNull Map<String, Integer> currentVersionMap,
-            @NonNull Map<String, Integer> finalVersionMap)
-            throws AppSearchException {
-        Set<String> unmigratedSchemaTypes = new ArraySet<>();
-        for (String unmigratedSchemaType : incompatibleSchemaTypes) {
-            Integer currentVersion = currentVersionMap.get(unmigratedSchemaType);
-            Integer finalVersion = finalVersionMap.get(unmigratedSchemaType);
-            if (currentVersion == null) {
-                // impossible, we have done something wrong.
-                throw new AppSearchException(
-                        AppSearchResult.RESULT_UNKNOWN_ERROR,
-                        "Cannot find the current version number for schema type: "
-                                + unmigratedSchemaType);
-            }
-            if (finalVersion == null) {
-                // The schema doesn't exist in the SetSchemaRequest.
-                unmigratedSchemaTypes.add(unmigratedSchemaType);
-                continue;
-            }
-            // we don't have migrator or won't trigger migration for this schema type.
-            Migrator migrator = migrators.get(unmigratedSchemaType);
-            if (migrator == null
-                    || !migrator.shouldMigrateToFinalVersion(currentVersion, finalVersion)) {
-                unmigratedSchemaTypes.add(unmigratedSchemaType);
+            int currentVersion,
+            int finalVersion) {
+        if (currentVersion == finalVersion) {
+            return Collections.emptyMap();
+        }
+        Set<String> existingTypes = new ArraySet<>(existingSchemas.size());
+        for (AppSearchSchema schema : existingSchemas) {
+            existingTypes.add(schema.getSchemaType());
+        }
+
+        Map<String, Migrator> activeMigrators = new ArrayMap<>();
+        for (Map.Entry<String, Migrator> entry : migrators.entrySet()) {
+            // The device contains the source type, and we should trigger migration for the type.
+            String schemaType = entry.getKey();
+            Migrator migrator = entry.getValue();
+            if (existingTypes.contains(schemaType)
+                    && migrator.shouldMigrate(currentVersion, finalVersion)) {
+                activeMigrators.put(schemaType, migrator);
             }
         }
-        return Collections.unmodifiableSet(unmigratedSchemaTypes);
+        return activeMigrators;
     }
 
     /**
-     * Triggers upgrade or downgrade migration for the given schema type if its version stored in
-     * AppSearch is different with the version in the request.
-     *
-     * @return {@code True} if we trigger the migration for the given type.
+     * Checks the setSchema() call won't delete any types or has incompatible types after all {@link
+     * Migrator} has been triggered..
      */
-    public static boolean shouldTriggerMigration(
-            @NonNull String schemaType,
-            @NonNull Migrator migrator,
-            @NonNull Map<String, Integer> currentVersionMap,
-            @NonNull Map<String, Integer> finalVersionMap)
+    public static void checkDeletedAndIncompatibleAfterMigration(
+            @NonNull SetSchemaResponse setSchemaResponse, @NonNull Set<String> activeMigrators)
             throws AppSearchException {
-        Integer currentVersion = currentVersionMap.get(schemaType);
-        Integer finalVersion = finalVersionMap.get(schemaType);
-        if (currentVersion == null) {
-            Log.d(TAG, "The SchemaType: " + schemaType + " not present in AppSearch.");
-            return false;
-        }
-        if (finalVersion == null) {
-            throw new AppSearchException(
-                    AppSearchResult.RESULT_INVALID_ARGUMENT,
-                    "Receive a migrator for schema type : "
-                            + schemaType
-                            + ", but the schema doesn't exist in the request.");
-        }
-        return migrator.shouldMigrateToFinalVersion(currentVersion, finalVersion);
+        Set<String> unmigratedIncompatibleTypes =
+                new ArraySet<>(setSchemaResponse.getIncompatibleTypes());
+        unmigratedIncompatibleTypes.removeAll(activeMigrators);
+
+        Set<String> unmigratedDeletedTypes = new ArraySet<>(setSchemaResponse.getDeletedTypes());
+        unmigratedDeletedTypes.removeAll(activeMigrators);
+
+        // check if there are any unmigrated incompatible types or deleted types. If there
+        // are, we will getActiveMigratorsthrow an exception. That's the only case we
+        // swallowed in the AppSearchImpl#setSchema().
+        // Since the force override is false, the schema will not have been set if there are
+        // any incompatible or deleted types.
+        checkDeletedAndIncompatible(unmigratedDeletedTypes, unmigratedIncompatibleTypes);
     }
 
-    /** Builds a Map of SchemaType and its version of given set of {@link AppSearchSchema}. */
-    @NonNull
-    public static Map<String, Integer> buildVersionMap(
-            @NonNull Collection<AppSearchSchema> schemas) {
-        Map<String, Integer> currentVersionMap = new ArrayMap<>(schemas.size());
-        for (AppSearchSchema currentSchema : schemas) {
-            currentVersionMap.put(currentSchema.getSchemaType(), currentSchema.getVersion());
+    /** Checks the setSchema() call won't delete any types or has incompatible types. */
+    public static void checkDeletedAndIncompatible(
+            @NonNull Set<String> deletedTypes, @NonNull Set<String> incompatibleTypes)
+            throws AppSearchException {
+        if (deletedTypes.size() > 0 || incompatibleTypes.size() > 0) {
+            String newMessage =
+                    "Schema is incompatible."
+                            + "\n  Deleted types: "
+                            + deletedTypes
+                            + "\n  Incompatible types: "
+                            + incompatibleTypes;
+            throw new AppSearchException(AppSearchResult.RESULT_INVALID_SCHEMA, newMessage);
         }
-        return currentVersionMap;
     }
 }

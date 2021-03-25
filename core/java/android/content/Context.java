@@ -81,6 +81,7 @@ import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
+import android.window.WindowContext;
 
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.compat.IPlatformCompatNative;
@@ -6793,4 +6794,15 @@ public abstract class Context {
     public boolean isUiContext() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
+
+    /**
+     * Called when a {@link Context} is going to be released.
+     * This method can be overridden to perform the final cleanups, such as release
+     * {@link BroadcastReceiver} registrations.
+     *
+     * @see WindowContext#destroy()
+     *
+     * @hide
+     */
+    public void destroy() { }
 }

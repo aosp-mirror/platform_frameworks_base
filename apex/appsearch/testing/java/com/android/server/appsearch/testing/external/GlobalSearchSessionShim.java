@@ -18,6 +18,8 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.io.Closeable;
 
 /**
@@ -50,6 +52,26 @@ public interface GlobalSearchSessionShim extends Closeable {
      */
     @NonNull
     SearchResultsShim search(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
+
+    /**
+     * Reports that a particular document has been used from a system surface.
+     *
+     * <p>See {@link AppSearchSessionShim#reportUsage} for a general description of document usage,
+     * as well as an API that can be used by the app itself.
+     *
+     * <p>Usage reported via this method is accounted separately from usage reported via {@link
+     * AppSearchSessionShim#reportUsage} and may be accessed using the constants {@link
+     * SearchSpec#RANKING_STRATEGY_SYSTEM_USAGE_COUNT} and {@link
+     * SearchSpec#RANKING_STRATEGY_SYSTEM_USAGE_LAST_USED_TIMESTAMP}.
+     *
+     * @return The pending result of performing this operation which resolves to {@code null} on
+     *     success. The pending result will be completed with an {@link
+     *     android.app.appsearch.exceptions.AppSearchException} with a code of {@link
+     *     AppSearchResult#RESULT_SECURITY_ERROR} if this API is invoked by an app which is not part
+     *     of the system.
+     */
+    @NonNull
+    ListenableFuture<Void> reportSystemUsage(@NonNull ReportSystemUsageRequest request);
 
     /** Closes the {@link GlobalSearchSessionShim}. */
     @Override

@@ -361,10 +361,13 @@ class PeopleTileViewHelper {
             views.setViewVisibility(R.id.image, View.GONE);
             views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_message);
         }
-        if (mTile.getMessagesCount() > 1 && mLayoutSize == LAYOUT_MEDIUM) {
+        if (mTile.getMessagesCount() > 1) {
             views.setViewVisibility(R.id.messages_count, View.VISIBLE);
             views.setTextViewText(R.id.messages_count,
                     getMessagesCountText(mTile.getMessagesCount()));
+            if (mLayoutSize == LAYOUT_SMALL) {
+                views.setViewVisibility(R.id.predefined_icon, View.GONE);
+            }
         }
         // TODO: Set subtext as Group Sender name once storing the name in PeopleSpaceTile and
         //  subtract 1 from maxLines when present.
