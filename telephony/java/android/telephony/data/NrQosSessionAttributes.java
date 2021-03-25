@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package android.telephony.data;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.net.QosSessionAttributes;
@@ -26,41 +27,54 @@ import android.util.Log;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * Provides Qos attributes of an EPS bearer.
+ * Provides Qos attributes of an NR bearer.
  *
  * {@hide}
  */
 @SystemApi
-public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessionAttributes {
-    private static final String TAG = EpsBearerQosSessionAttributes.class.getSimpleName();
-    private final int mQci;
+public final class NrQosSessionAttributes implements Parcelable, QosSessionAttributes {
+    private static final String TAG = NrQosSessionAttributes.class.getSimpleName();
+    private final int m5Qi;
+    private final @IntRange(from=1, to=63) int mQfi;
     private final long mMaxUplinkBitRate;
     private final long mMaxDownlinkBitRate;
     private final long mGuaranteedUplinkBitRate;
     private final long mGuaranteedDownlinkBitRate;
+    private final long mAveragingWindow;
     @NonNull private final List<InetSocketAddress> mRemoteAddresses;
 
     /**
-     * Quality of Service Class Identifier (QCI), see 3GPP TS 23.203 and 29.212.
+     * 5G QOS Identifier (5QI), see 3GPP TS 24.501 and 23.501.
      * The allowed values are standard values(1-9, 65-68, 69-70, 75, 79-80, 82-85)
      * defined in the spec and operator specific values in the range 128-254.
      *
-     * @return the qci of the session
+     * @return the 5QI of the QOS flow
      */
     public int getQosIdentifier() {
-        return mQci;
+        return m5Qi;
+    }
+
+    /**
+     * QOS flow identifier of the QOS flow description in the
+     * range of 1 to 63. see 3GPP TS 24.501 and 23.501.
+     *
+     * @return the QOS flow identifier of the session
+     */
+    public @IntRange(from=1, to=63) int getQosFlowIdentifier() {
+        return mQfi;
     }
 
     /**
      * Minimum bit rate in kbps that is guaranteed to be provided by the network on the uplink.
      *
-     * see 3GPP TS 23.107 section 6.4.3.1
+     * see 3GPP TS 24.501 section 6.2.5
      *
      * Note: The Qos Session may be shared with OTHER applications besides yours.
      *
@@ -73,7 +87,7 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
     /**
      * Minimum bit rate in kbps that is guaranteed to be provided by the network on the downlink.
      *
-     * see 3GPP TS 23.107 section 6.4.3.1
+     * see 3GPP TS 24.501 section 6.2.5
      *
      * Note: The Qos Session may be shared with OTHER applications besides yours.
      *
@@ -84,9 +98,9 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
     }
 
     /**
-     * The maximum kbps that the network will accept.
+     * The maximum uplink kbps that the network will accept.
      *
-     * see 3GPP TS 23.107 section 6.4.3.1
+     * see 3GPP TS 24.501 section 6.2.5
      *
      * Note: The Qos Session may be shared with OTHER applications besides yours.
      *
@@ -97,9 +111,9 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
     }
 
     /**
-     * The maximum kbps that the network can provide.
+     * The maximum downlink kbps that the network can provide.
      *
-     * see 3GPP TS 23.107 section 6.4.3.1
+     * see 3GPP TS 24.501 section 6.2.5
      *
      * Note: The Qos Session may be shared with OTHER applications besides yours.
      *
@@ -107,6 +121,19 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
      */
     public long getMaxDownlinkBitRateKbps() {
         return mMaxDownlinkBitRate;
+    }
+
+    /**
+     * The duration in milliseconds over which the maximum bit rates and guaranteed bit rates
+     * are calculated
+     *
+     * see 3GPP TS 24.501 section 6.2.5
+     *
+     * @return the averaging window duration in milliseconds
+     */
+    @NonNull
+    public Duration getBitRateWindowDuration() {
+        return Duration.ofMillis(mAveragingWindow);
     }
 
     /**
@@ -126,25 +153,29 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
     /**
      * ..ctor for attributes
      *
-     * @param qci quality class indicator
+     * @param fiveQi 5G quality class indicator
+     * @param qfi QOS flow identifier
      * @param maxDownlinkBitRate the max downlink bit rate in kbps
      * @param maxUplinkBitRate the max uplink bit rate in kbps
      * @param guaranteedDownlinkBitRate the guaranteed downlink bit rate in kbps
      * @param guaranteedUplinkBitRate the guaranteed uplink bit rate in kbps
+     * @param averagingWindow the averaging window duration in milliseconds
      * @param remoteAddresses the remote addresses that the uplink bit rates apply to
      *
      * @hide
      */
-    public EpsBearerQosSessionAttributes(final int qci,
+    public NrQosSessionAttributes(final int fiveQi, final int qfi,
             final long maxDownlinkBitRate, final long maxUplinkBitRate,
             final long guaranteedDownlinkBitRate, final long guaranteedUplinkBitRate,
-            @NonNull final List<InetSocketAddress> remoteAddresses) {
+            final long averagingWindow, @NonNull final List<InetSocketAddress> remoteAddresses) {
         Objects.requireNonNull(remoteAddresses, "remoteAddress must be non-null");
-        mQci = qci;
+        m5Qi = fiveQi;
+        mQfi = qfi;
         mMaxDownlinkBitRate = maxDownlinkBitRate;
         mMaxUplinkBitRate = maxUplinkBitRate;
         mGuaranteedDownlinkBitRate = guaranteedDownlinkBitRate;
         mGuaranteedUplinkBitRate = guaranteedUplinkBitRate;
+        mAveragingWindow = averagingWindow;
 
         final List<InetSocketAddress> remoteAddressesTemp = copySocketAddresses(remoteAddresses);
         mRemoteAddresses = Collections.unmodifiableList(remoteAddressesTemp);
@@ -161,12 +192,14 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
         return remoteAddressesTemp;
     }
 
-    private EpsBearerQosSessionAttributes(@NonNull final Parcel in) {
-        mQci = in.readInt();
+    private NrQosSessionAttributes(@NonNull final Parcel in) {
+        m5Qi = in.readInt();
+        mQfi = in.readInt();
         mMaxDownlinkBitRate = in.readLong();
         mMaxUplinkBitRate = in.readLong();
         mGuaranteedDownlinkBitRate = in.readLong();
         mGuaranteedUplinkBitRate = in.readLong();
+        mAveragingWindow = in.readLong();
 
         final int size = in.readInt();
         final List<InetSocketAddress> remoteAddresses = new ArrayList<>(size);
@@ -177,7 +210,7 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
                 remoteAddresses.add(
                         new InetSocketAddress(InetAddress.getByAddress(addressBytes), port));
             } catch (final UnknownHostException e) {
-                // Impossible case since we filter out null values in the ..ctor
+                // Impossible case since its filtered out the null values in the ..ctor
                 Log.e(TAG, "unable to unparcel remote address at index: " + i, e);
             }
         }
@@ -191,11 +224,13 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
 
     @Override
     public void writeToParcel(@NonNull final Parcel dest, final int flags) {
-        dest.writeInt(mQci);
+        dest.writeInt(m5Qi);
+        dest.writeInt(mQfi);
         dest.writeLong(mMaxDownlinkBitRate);
         dest.writeLong(mMaxUplinkBitRate);
         dest.writeLong(mGuaranteedDownlinkBitRate);
         dest.writeLong(mGuaranteedUplinkBitRate);
+        dest.writeLong(mAveragingWindow);
 
         final int size = mRemoteAddresses.size();
         dest.writeInt(size);
@@ -207,18 +242,18 @@ public final class EpsBearerQosSessionAttributes implements Parcelable, QosSessi
     }
 
     @NonNull
-    public static final Creator<EpsBearerQosSessionAttributes> CREATOR =
-            new Creator<EpsBearerQosSessionAttributes>() {
+    public static final Creator<NrQosSessionAttributes> CREATOR =
+            new Creator<NrQosSessionAttributes>() {
         @NonNull
         @Override
-        public EpsBearerQosSessionAttributes createFromParcel(@NonNull final Parcel in) {
-            return new EpsBearerQosSessionAttributes(in);
+        public NrQosSessionAttributes createFromParcel(@NonNull final Parcel in) {
+            return new NrQosSessionAttributes(in);
         }
 
         @NonNull
         @Override
-        public EpsBearerQosSessionAttributes[] newArray(final int size) {
-            return new EpsBearerQosSessionAttributes[size];
+        public NrQosSessionAttributes[] newArray(final int size) {
+            return new NrQosSessionAttributes[size];
         }
     };
 }

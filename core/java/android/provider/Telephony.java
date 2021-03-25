@@ -4557,6 +4557,15 @@ public final class Telephony {
         public static final String VOICE_REG_STATE = "voice_reg_state";
 
         /**
+         * An integer value indicating the current data service state.
+         * <p>
+         * Valid values: {@link ServiceState#STATE_IN_SERVICE},
+         * {@link ServiceState#STATE_OUT_OF_SERVICE}, {@link ServiceState#STATE_EMERGENCY_ONLY},
+         * {@link ServiceState#STATE_POWER_OFF}.
+         */
+        public static final String DATA_REG_STATE = "data_reg_state";
+
+        /**
          * The current registered operator numeric id.
          * <p>
          * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
@@ -4579,6 +4588,17 @@ public final class Telephony {
          * This is the same as {@link TelephonyManager#getDataNetworkType()}.
          */
         public static final String DATA_NETWORK_TYPE = "data_network_type";
+
+        /**
+         * An integer value indicating the current duplex mode if the radio technology is LTE,
+         * LTE-CA or NR.
+         * <p>
+         * Valid values: {@link ServiceState#DUPLEX_MODE_UNKNOWN},
+         * {@link ServiceState#DUPLEX_MODE_FDD}, {@link ServiceState#DUPLEX_MODE_TDD}.
+         * <p>
+         * This is the same as {@link ServiceState#getDuplexMode()}.
+         */
+        public static final String DUPLEX_MODE = "duplex_mode";
     }
 
     /**

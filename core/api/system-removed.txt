@@ -48,6 +48,14 @@ package android.app.prediction {
 
 }
 
+package android.bluetooth {
+
+  public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
+  }
+
+}
+
 package android.content {
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
