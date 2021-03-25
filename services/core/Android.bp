@@ -217,6 +217,7 @@ filegroup {
         "java/com/android/server/connectivity/AutodestructReference.java",
         "java/com/android/server/connectivity/ConnectivityConstants.java",
         "java/com/android/server/connectivity/DnsManager.java",
+        "java/com/android/server/connectivity/FullScore.java",
         "java/com/android/server/connectivity/KeepaliveTracker.java",
         "java/com/android/server/connectivity/LingerMonitor.java",
         "java/com/android/server/connectivity/MockableSystemProperties.java",
