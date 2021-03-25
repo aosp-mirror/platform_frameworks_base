@@ -101,6 +101,7 @@ public class WifiNl80211Manager {
 
     // Cached wificond binder handlers.
     private IWificond mWificond;
+    private WificondEventHandler mWificondEventHandler = new WificondEventHandler();
     private HashMap<String, IClientInterface> mClientInterfaces = new HashMap<>();
     private HashMap<String, IApInterface> mApInterfaces = new HashMap<>();
     private HashMap<String, IWifiScannerImpl> mWificondScanners = new HashMap<>();
@@ -112,6 +113,18 @@ public class WifiNl80211Manager {
      * Ensures that no more than one sendMgmtFrame operation runs concurrently.
      */
     private AtomicBoolean mSendMgmtFrameInProgress = new AtomicBoolean(false);
+
+    /**
+     * Interface used to listen country code event
+     */
+    public interface CountryCodeChangeListener {
+        /**
+         * Called when country code changed.
+         *
+         * @param countryCode A new country code which is 2-Character alphanumeric.
+         */
+        void onChanged(@NonNull String countryCode);
+    }
 
     /**
      * Interface used when waiting for scans to be completed (with results).
@@ -145,6 +158,46 @@ public class WifiNl80211Manager {
          * Called when a PNO scan request fails.
          */
         void onPnoRequestFailed();
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public class WificondEventHandler extends IWificondEventCallback.Stub {
+        private Map<CountryCodeChangeListener, Executor> mCountryCodeChangeListenerHolder =
+                new HashMap<>();
+
+        /**
+         * Register CountryCodeChangeListener with pid.
+         *
+         * @param executor The Executor on which to execute the callbacks.
+         * @param listener listener for country code changed events.
+         */
+        public void registerCountryCodeChangeListener(Executor executor,
+                CountryCodeChangeListener listener) {
+            mCountryCodeChangeListenerHolder.put(listener, executor);
+        }
+
+        /**
+         * Unregister CountryCodeChangeListener with pid.
+         *
+         * @param listener listener which registered country code changed events.
+         */
+        public void unregisterCountryCodeChangeListener(CountryCodeChangeListener listener) {
+            mCountryCodeChangeListenerHolder.remove(listener);
+        }
+
+        @Override
+        public void OnRegDomainChanged(String countryCode) {
+            Log.d(TAG, "OnRegDomainChanged " + countryCode);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mCountryCodeChangeListenerHolder.forEach((listener, executor) -> {
+                    executor.execute(() -> listener.onChanged(countryCode));
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 
     private class ScanEventHandler extends IScanEvent.Stub {
@@ -345,6 +398,12 @@ public class WifiNl80211Manager {
     public WifiNl80211Manager(Context context, IWificond wificond) {
         this(context);
         mWificond = wificond;
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public WificondEventHandler getWificondEventHandler() {
+        return mWificondEventHandler;
     }
 
     private class PnoScanEventHandler extends IPnoScanEvent.Stub {
@@ -574,6 +633,7 @@ public class WifiNl80211Manager {
         }
         try {
             mWificond.asBinder().linkToDeath(() -> binderDied(), 0);
+            mWificond.registerWificondEventCallback(mWificondEventHandler);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register death notification for wificond");
             // The remote has already died.
@@ -1171,6 +1231,34 @@ public class WifiNl80211Manager {
         } catch (RemoteException e) {
             return null;
         }
+    }
+
+    /**
+     * Register the provided listener for country code event.
+     *
+     * @param executor The Executor on which to execute the callbacks.
+     * @param listener listener for country code changed events.
+     * @return true on success, false on failure.
+     */
+    public boolean registerCountryCodeChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull CountryCodeChangeListener listener) {
+        if (!retrieveWificondAndRegisterForDeath()) {
+            return false;
+        }
+        Log.d(TAG, "registerCountryCodeEventListener called");
+        mWificondEventHandler.registerCountryCodeChangeListener(executor, listener);
+        return true;
+    }
+
+
+    /**
+     * Unregister CountryCodeChangeListener with pid.
+     *
+     * @param listener listener which registered country code changed events.
+     */
+    public void unregisterCountryCodeChangeListener(@NonNull CountryCodeChangeListener listener) {
+        Log.d(TAG, "unregisterCountryCodeEventListener called");
+        mWificondEventHandler.unregisterCountryCodeChangeListener(listener);
     }
 
     /**

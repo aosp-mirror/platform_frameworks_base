@@ -61,6 +61,8 @@ public final class GnssCapabilities implements Parcelable {
     public static final int TOP_HAL_CAPABILITY_CORRELATION_VECTOR = 4096;
     /** @hide */
     public static final int TOP_HAL_CAPABILITY_SATELLITE_PVT = 8192;
+    /** @hide */
+    public static final int TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING = 16384;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TOP_HAL_CAPABILITY_"}, value = {TOP_HAL_CAPABILITY_SCHEDULING,
@@ -69,7 +71,8 @@ public final class GnssCapabilities implements Parcelable {
             TOP_HAL_CAPABILITY_MEASUREMENTS, TOP_HAL_CAPABILITY_NAV_MESSAGES,
             TOP_HAL_CAPABILITY_LOW_POWER_MODE, TOP_HAL_CAPABILITY_SATELLITE_BLOCKLIST,
             TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS, TOP_HAL_CAPABILITY_ANTENNA_INFO,
-            TOP_HAL_CAPABILITY_CORRELATION_VECTOR, TOP_HAL_CAPABILITY_SATELLITE_PVT})
+            TOP_HAL_CAPABILITY_CORRELATION_VECTOR, TOP_HAL_CAPABILITY_SATELLITE_PVT,
+            TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING})
 
     @Retention(RetentionPolicy.SOURCE)
     public @interface TopHalCapabilityFlags {}
@@ -351,6 +354,17 @@ public final class GnssCapabilities implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if GNSS chipset will benefit from measurement corrections for driving
+     * use case if provided, {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean hasMeasurementCorrectionsForDriving() {
+        return (mTopFlags & TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING) != 0;
+    }
+
+    /**
      * Returns {@code true} if GNSS chipset supports line-of-sight satellite identification
      * measurement corrections, {@code false} otherwise.
      *
@@ -550,6 +564,9 @@ public final class GnssCapabilities implements Parcelable {
         if (hasMeasurementCorrelationVectors()) {
             builder.append("MEASUREMENT_CORRELATION_VECTORS ");
         }
+        if (hasMeasurementCorrectionsForDriving()) {
+            builder.append("MEASUREMENT_CORRECTIONS_FOR_DRIVING ");
+        }
         if (hasMeasurementCorrectionsLosSats()) {
             builder.append("LOS_SATS ");
         }
@@ -744,6 +761,18 @@ public final class GnssCapabilities implements Parcelable {
         @SystemApi
         public @NonNull Builder setHasMeasurementCorrelationVectors(boolean capable) {
             mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_CORRELATION_VECTOR, capable);
+            return this;
+        }
+
+        /**
+         * Sets measurement corrections for driving capability.
+         *
+         * @hide
+         */
+        @SystemApi
+        public @NonNull Builder setHasMeasurementCorrectionsForDriving(boolean capable) {
+            mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING,
+                    capable);
             return this;
         }
 

@@ -462,6 +462,10 @@
 
     <dimen name="volume_dialog_slider_height">116dp</dimen>
 
+    <dimen name="volume_dialog_slider_width">@dimen/volume_dialog_panel_width</dimen>
+
+    <dimen name="volume_dialog_slider_corner_radius">@dimen/volume_dialog_panel_width_half</dimen>
+
     <dimen name="volume_dialog_ringer_size">64dp</dimen>
 
     <dimen name="volume_dialog_ringer_icon_padding">20dp</dimen>

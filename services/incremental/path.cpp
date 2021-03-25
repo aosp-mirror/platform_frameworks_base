@@ -44,19 +44,20 @@ bool PathLess::operator()(std::string_view l, std::string_view r) const {
                                         PathCharsLess());
 }
 
-static void preparePathComponent(std::string_view& path, bool trimFront) {
-    if (trimFront) {
-        while (!path.empty() && path.front() == '/') {
-            path.remove_prefix(1);
-        }
+static void preparePathComponent(std::string_view& path, bool trimAll) {
+    // need to check for double front slash as a single one has a separate meaning in front
+    while (!path.empty() && path.front() == '/' &&
+           (trimAll || (path.size() > 1 && path[1] == '/'))) {
+        path.remove_prefix(1);
     }
-    while (!path.empty() && path.back() == '/') {
+    // for the back we don't care about double-vs-single slash difference
+    while (path.size() > !trimAll && path.back() == '/') {
         path.remove_suffix(1);
     }
 }
 
 void details::append_next_path(std::string& target, std::string_view path) {
-    preparePathComponent(path, true);
+    preparePathComponent(path, !target.empty());
     if (path.empty()) {
         return;
     }

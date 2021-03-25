@@ -38,6 +38,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.window.WindowContext;
 
 import androidx.test.filters.SmallTest;
 
@@ -208,7 +209,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
     /**
      * Test that {@link android.view.SurfaceControl} should not be created for the
-     * {@link WindowToken} which was created for {@link android.app.WindowContext} initially, the
+     * {@link WindowToken} which was created for {@link WindowContext} initially, the
      * surface should be create after addWindow for this token.
      */
     @Test

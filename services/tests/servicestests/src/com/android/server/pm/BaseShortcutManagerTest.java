@@ -641,7 +641,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         public void setSchema(String packageName, String databaseName, List<Bundle> schemaBundles,
                 List<String> schemasNotPlatformSurfaceable,
                 Map<String, List<Bundle>> schemasPackageAccessibleBundles, boolean forceOverride,
-                int userId, IAppSearchResultCallback callback) throws RemoteException {
+                int userId, int version, IAppSearchResultCallback callback) throws RemoteException {
             for (Map.Entry<String, List<Bundle>> entry :
                     schemasPackageAccessibleBundles.entrySet()) {
                 final String key = entry.getKey();
@@ -661,6 +661,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void getSchema(String packageName, String databaseName, int userId,
+                IAppSearchResultCallback callback) throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void getNamespaces(String packageName, String databaseName, int userId,
                 IAppSearchResultCallback callback) throws RemoteException {
             ignore(callback);
         }
@@ -764,7 +770,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         public void reportUsage(String packageName, String databaseName, String namespace,
-                String uri, long usageTimeMillis, int userId, IAppSearchResultCallback callback)
+                String uri, long usageTimeMillis, boolean systemUsage, int userId,
+                IAppSearchResultCallback callback)
                 throws RemoteException {
             ignore(callback);
         }

@@ -1836,6 +1836,127 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /** @see AudioManager#isSurroundFormatEnabled(int) */
+    @Override
+    public boolean isSurroundFormatEnabled(int audioFormat) {
+        if (!isSurroundFormat(audioFormat)) {
+            Log.w(TAG, "audioFormat to enable is not a surround format.");
+            return false;
+        }
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing WRITE_SETTINGS permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSettingsLock) {
+                HashSet<Integer> enabledFormats = getEnabledFormats();
+                return enabledFormats.contains(audioFormat);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /** @see AudioManager#setSurroundFormatEnabled(int, boolean) */
+    @Override
+    public boolean setSurroundFormatEnabled(int audioFormat, boolean enabled) {
+        if (!isSurroundFormat(audioFormat)) {
+            Log.w(TAG, "audioFormat to enable is not a surround format.");
+            return false;
+        }
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing WRITE_SETTINGS permission");
+        }
+
+        HashSet<Integer> enabledFormats = getEnabledFormats();
+        if (enabled) {
+            enabledFormats.add(audioFormat);
+        } else {
+            enabledFormats.remove(audioFormat);
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSettingsLock) {
+                Settings.Global.putString(mContentResolver,
+                        Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
+                        TextUtils.join(",", enabledFormats));
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
+    }
+
+    /** @see AudioManager#setEncodedSurroundMode(int) */
+    @Override
+    public boolean setEncodedSurroundMode(int mode) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing WRITE_SETTINGS permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSettingsLock) {
+                Settings.Global.putInt(mContentResolver,
+                        Settings.Global.ENCODED_SURROUND_OUTPUT,
+                        mode);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
+    }
+
+    /** @see AudioManager#getEncodedSurroundMode() */
+    @Override
+    public int getEncodedSurroundMode() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing WRITE_SETTINGS permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSettingsLock) {
+                return Settings.Global.getInt(mContentResolver,
+                        Settings.Global.ENCODED_SURROUND_OUTPUT,
+                        AudioManager.ENCODED_SURROUND_OUTPUT_AUTO);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /** @return the formats that are enabled in global settings */
+    private HashSet<Integer> getEnabledFormats() {
+        HashSet<Integer> formats = new HashSet<>();
+        String enabledFormats = Settings.Global.getString(mContentResolver,
+                Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
+        if (enabledFormats != null) {
+            try {
+                Arrays.stream(TextUtils.split(enabledFormats, ","))
+                        .mapToInt(Integer::parseInt)
+                        .forEach(formats::add);
+            } catch (NumberFormatException e) {
+                Log.w(TAG, "ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS misformatted.", e);
+            }
+        }
+        return formats;
+    }
+
+    private boolean isSurroundFormat(int audioFormat) {
+        for (int sf : AudioFormat.SURROUND_SOUND_ENCODING) {
+            if (sf == audioFormat) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void sendEnabledSurroundFormats(ContentResolver cr, boolean forceUpdate) {
         if (mEncodedSurroundMode != Settings.Global.ENCODED_SURROUND_OUTPUT_MANUAL) {
             // Manually enable surround formats only when the setting is in manual mode.
@@ -1860,14 +1981,7 @@ public class AudioService extends IAudioService.Stub
         for (String format : surroundFormats) {
             try {
                 int audioFormat = Integer.valueOf(format);
-                boolean isSurroundFormat = false;
-                for (int sf : AudioFormat.SURROUND_SOUND_ENCODING) {
-                    if (sf == audioFormat) {
-                        isSurroundFormat = true;
-                        break;
-                    }
-                }
-                if (isSurroundFormat && !formats.contains(audioFormat)) {
+                if (isSurroundFormat(audioFormat) && !formats.contains(audioFormat)) {
                     formats.add(audioFormat);
                 }
             } catch (Exception e) {
@@ -7343,7 +7457,6 @@ public class AudioService extends IAudioService.Stub
                     Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.ENCODED_SURROUND_OUTPUT), false, this);
-
             mEnabledSurroundFormats = Settings.Global.getString(
                     mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(

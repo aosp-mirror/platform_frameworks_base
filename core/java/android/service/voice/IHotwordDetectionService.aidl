@@ -17,8 +17,8 @@
 package android.service.voice;
 
 import android.media.AudioFormat;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.SharedMemory;
 import android.service.voice.IDspHotwordDetectionCallback;
 
@@ -34,5 +34,5 @@ oneway interface IHotwordDetectionService {
     long timeoutMillis,
     in IDspHotwordDetectionCallback callback);
 
-    void setConfig(in Bundle options, in SharedMemory sharedMemory);
+    void setConfig(in PersistableBundle options, in SharedMemory sharedMemory);
 }

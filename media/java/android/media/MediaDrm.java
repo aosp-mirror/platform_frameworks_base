@@ -27,7 +27,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.media.metrics.PlaybackComponent;
+import android.media.metrics.LogSessionId;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1379,7 +1380,7 @@ public final class MediaDrm implements AutoCloseable {
     public byte[] openSession(@SecurityLevel int level) throws
             NotProvisionedException, ResourceBusyException {
         byte[] sessionId = openSessionNative(level);
-        mPlaybackComponentMap.put(ByteBuffer.wrap(sessionId), new PlaybackComponentImpl(sessionId));
+        mPlaybackComponentMap.put(ByteBuffer.wrap(sessionId), new PlaybackComponent(sessionId));
         return sessionId;
     }
 
@@ -2929,8 +2930,8 @@ public final class MediaDrm implements AutoCloseable {
 
     /**
      * Obtain a {@link PlaybackComponent} associated with a DRM session.
-     * Call {@link PlaybackComponent#setPlaybackId(String)} on the returned object
-     * to associate a playback session with the DRM session.
+     * Call {@link PlaybackComponent#setLogSessionId(LogSessionId)} on
+     * the returned object to associate a playback session with the DRM session.
      *
      * @param sessionId a DRM session ID obtained from {@link #openSession()}
      * @return a {@link PlaybackComponent} associated with the session,
@@ -2945,28 +2946,37 @@ public final class MediaDrm implements AutoCloseable {
         return mPlaybackComponentMap.get(ByteBuffer.wrap(sessionId));
     }
 
-    private native void setPlaybackId(byte[] sessionId, String playbackId);
+    private native void setPlaybackId(byte[] sessionId, String logSessionId);
 
-    private final class PlaybackComponentImpl implements PlaybackComponent {
+    /** This class contains the Drm session ID and log session ID */
+    public final class PlaybackComponent {
         private final byte[] mSessionId;
-        private String mPlaybackId = "";
+        @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
 
-        public PlaybackComponentImpl(byte[] sessionId) {
+        /** @hide */
+        public PlaybackComponent(byte[] sessionId) {
             mSessionId = sessionId;
         }
 
-        @Override
-        public void setPlaybackId(@NonNull String playbackId) {
-            if (playbackId == null) {
+
+        /**
+         * Gets the {@link LogSessionId}.
+         */
+        public void setLogSessionId(@NonNull LogSessionId logSessionId) {
+            Objects.requireNonNull(logSessionId);
+            if (logSessionId.getStringId() == null) {
                 throw new IllegalArgumentException("playbackId is null");
             }
-            MediaDrm.this.setPlaybackId(mSessionId, playbackId);
-            mPlaybackId = playbackId;
+            MediaDrm.this.setPlaybackId(mSessionId, logSessionId.getStringId());
+            mLogSessionId = logSessionId;
         }
 
-        @Override
-        @NonNull public String getPlaybackId() {
-            return mPlaybackId;
+
+        /**
+         * Returns the {@link LogSessionId}.
+         */
+        @NonNull public LogSessionId getLogSessionId() {
+            return mLogSessionId;
         }
     }
 

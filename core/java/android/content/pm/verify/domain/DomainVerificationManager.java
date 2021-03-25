@@ -16,6 +16,7 @@
 
 package android.content.pm.verify.domain;
 
+import android.annotation.CheckResult;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,6 +29,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+
+import com.android.internal.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -80,22 +83,6 @@ public final class DomainVerificationManager {
     public static final int ERROR_DOMAIN_SET_ID_INVALID = 1;
 
     /**
-     * The provided domain set ID was null. This is a developer error.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int ERROR_DOMAIN_SET_ID_NULL = 2;
-
-    /**
-     * The provided set of domains was null or empty. This is a developer error.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int ERROR_DOMAIN_SET_NULL_OR_EMPTY = 3;
-
-    /**
      * The provided set of domains contains a domain not declared by the target package. This
      * usually means the work being processed by the verification agent is outdated and a new
      * request should be scheduled, which should already be in progress as part of the
@@ -104,7 +91,7 @@ public final class DomainVerificationManager {
      * @hide
      */
     @SystemApi
-    public static final int ERROR_UNKNOWN_DOMAIN = 4;
+    public static final int ERROR_UNKNOWN_DOMAIN = 2;
 
     /**
      * The system was unable to select the domain for approval. This indicates another application
@@ -114,17 +101,7 @@ public final class DomainVerificationManager {
      * @hide
      */
     @SystemApi
-    public static final int ERROR_UNABLE_TO_APPROVE = 5;
-
-    /**
-     * The provided state code is incorrect. The domain verification agent is only allowed to
-     * assign {@link DomainVerificationInfo#STATE_SUCCESS} or error codes equal to or greater than
-     * {@link DomainVerificationInfo#STATE_FIRST_VERIFIER_DEFINED}.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int ERROR_INVALID_STATE_CODE = 6;
+    public static final int ERROR_UNABLE_TO_APPROVE = 3;
 
     /**
      * Used to communicate through {@link ServiceSpecificException}. Should not be exposed as API.
@@ -138,11 +115,8 @@ public final class DomainVerificationManager {
      */
     @IntDef(prefix = {"ERROR_"}, value = {
             ERROR_DOMAIN_SET_ID_INVALID,
-            ERROR_DOMAIN_SET_ID_NULL,
-            ERROR_DOMAIN_SET_NULL_OR_EMPTY,
             ERROR_UNKNOWN_DOMAIN,
             ERROR_UNABLE_TO_APPROVE,
-            ERROR_INVALID_STATE_CODE
     })
     public @interface Error {
     }
@@ -232,19 +206,21 @@ public final class DomainVerificationManager {
      * @param domainSetId See {@link DomainVerificationInfo#getIdentifier()}.
      * @param domains     List of host names to change the state of.
      * @param state       See {@link DomainVerificationInfo#getHostToStateMap()}.
-     * @throws NameNotFoundException    If the ID is known to be good, but the package is
-     *                                  unavailable. This may be because the package is installed on
-     *                                  a volume that is no longer mounted. This error is
-     *                                  unrecoverable until the package is available again, and
-     *                                  should not be re-tried except on a time scheduled basis.
      * @return error code or {@link #STATUS_OK} if successful
-     *
+     * @throws NameNotFoundException If the ID is known to be good, but the package is
+     *                               unavailable. This may be because the package is installed on
+     *                               a volume that is no longer mounted. This error is
+     *                               unrecoverable until the package is available again, and
+     *                               should not be re-tried except on a time scheduled basis.
      * @hide
      */
+    @CheckResult
     @SystemApi
     @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
     public int setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
             int state) throws NameNotFoundException {
+        validateInput(domainSetId, domains);
+
         try {
             return mDomainVerificationManager.setDomainVerificationStatus(domainSetId.toString(),
                     new DomainSet(domains), state);
@@ -312,19 +288,21 @@ public final class DomainVerificationManager {
      * @param domainSetId See {@link DomainVerificationInfo#getIdentifier()}.
      * @param domains     The domains to toggle the state of.
      * @param enabled     Whether or not the app should automatically open the domains specified.
-     * @throws NameNotFoundException    If the ID is known to be good, but the package is
-     *                                  unavailable. This may be because the package is installed on
-     *                                  a volume that is no longer mounted. This error is
-     *                                  unrecoverable until the package is available again, and
-     *                                  should not be re-tried except on a time scheduled basis.
      * @return error code or {@link #STATUS_OK} if successful
-     *
+     * @throws NameNotFoundException If the ID is known to be good, but the package is
+     *                               unavailable. This may be because the package is installed on
+     *                               a volume that is no longer mounted. This error is
+     *                               unrecoverable until the package is available again, and
+     *                               should not be re-tried except on a time scheduled basis.
      * @hide
      */
+    @CheckResult
     @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
     public int setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled) throws NameNotFoundException {
+        validateInput(domainSetId, domains);
+
         try {
             return mDomainVerificationManager.setDomainVerificationUserSelection(
                     domainSetId.toString(), new DomainSet(domains), enabled, mContext.getUserId());
@@ -403,6 +381,14 @@ public final class DomainVerificationManager {
             return ((RemoteException) exception).rethrowFromSystemServer();
         } else {
             return exception;
+        }
+    }
+
+    private void validateInput(@Nullable UUID domainSetId, @Nullable Set<String> domains) {
+        if (domainSetId == null) {
+            throw new IllegalArgumentException("domainSetId cannot be null");
+        } else if (CollectionUtils.isEmpty(domains)) {
+            throw new IllegalArgumentException("Provided domain set cannot be empty");
         }
     }
 }

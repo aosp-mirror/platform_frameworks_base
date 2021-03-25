@@ -79,6 +79,26 @@ public class SurfaceControlViewHost {
             mInputToken = inputToken;
         }
 
+        /**
+         * Constructs a copy of {@code SurfacePackage} with an independent lifetime.
+         *
+         * The caller can use this to create an independent copy in situations where ownership of
+         * the {@code SurfacePackage} would be transferred elsewhere, such as attaching to a
+         * {@code SurfaceView}, returning as {@code Binder} result value, etc. The caller is
+         * responsible for releasing this copy when its done.
+         *
+         * @param other {@code SurfacePackage} to create a copy of.
+         */
+        public SurfacePackage(@NonNull SurfacePackage other) {
+            SurfaceControl otherSurfaceControl = other.mSurfaceControl;
+            if (otherSurfaceControl != null && otherSurfaceControl.isValid()) {
+                mSurfaceControl = new SurfaceControl();
+                mSurfaceControl.copyFrom(otherSurfaceControl, "SurfacePackage");
+            }
+            mAccessibilityEmbeddedConnection = other.mAccessibilityEmbeddedConnection;
+            mInputToken = other.mInputToken;
+        }
+
         private SurfacePackage(Parcel in) {
             mSurfaceControl = new SurfaceControl();
             mSurfaceControl.readFromParcel(in);

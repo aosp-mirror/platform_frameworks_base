@@ -15,8 +15,5 @@
 -->
 
 <resources>
-    <style name="PreferenceCategoryStartMargin">
-        <item name="android:paddingLeft">24dp</item>
-        <item name="android:paddingStart">24dp</item>
-    </style>
+    <dimen name="settings_shared_axis_x_slide_distance">96dp</dimen>
 </resources>

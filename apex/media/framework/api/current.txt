@@ -69,10 +69,12 @@ package android.media {
     method public boolean advance(@NonNull android.media.MediaParser.SeekableInputReader) throws java.io.IOException;
     method @NonNull public static android.media.MediaParser create(@NonNull android.media.MediaParser.OutputConsumer, @NonNull java.lang.String...);
     method @NonNull public static android.media.MediaParser createByName(@NonNull String, @NonNull android.media.MediaParser.OutputConsumer);
+    method @NonNull public android.media.metrics.LogSessionId getLogSessionId();
     method @NonNull public String getParserName();
     method @NonNull public static java.util.List<java.lang.String> getParserNames(@NonNull android.media.MediaFormat);
     method public void release();
     method public void seek(@NonNull android.media.MediaParser.SeekPoint);
+    method public void setLogSessionId(@NonNull android.media.metrics.LogSessionId);
     method @NonNull public android.media.MediaParser setParameter(@NonNull String, @NonNull Object);
     method public boolean supportsParameter(@NonNull String);
     field public static final String PARAMETER_ADTS_ENABLE_CBR_SEEKING = "android.media.mediaparser.adts.enableCbrSeeking";

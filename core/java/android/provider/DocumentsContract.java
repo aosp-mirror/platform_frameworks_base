@@ -236,9 +236,20 @@ public final class DocumentsContract {
     public static final String
             ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
 
-    /** {@hide} */
+    /**
+     * External Storage Provider's authority string
+     * {@hide}
+     */
+    @SystemApi
     public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY =
             "com.android.externalstorage.documents";
+
+    /**
+     * Download Manager's authority string
+     * {@hide}
+     */
+    @SystemApi
+    public static final String DOWNLOADS_PROVIDER_AUTHORITY = Downloads.Impl.AUTHORITY;
 
     /** {@hide} */
     public static final String EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID = "primary";

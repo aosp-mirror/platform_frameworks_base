@@ -29,6 +29,7 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.metrics.LogMaker;
 import android.os.UserHandle;
 import android.util.Log;
@@ -73,6 +74,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
     private final SecurityCallback mSecurityCallback;
     private final ConfigurationController mConfigurationController;
+
+    private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
 
@@ -212,6 +215,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mAdminSecondaryLockScreenController = adminSecondaryLockScreenControllerFactory.create(
                 mKeyguardSecurityCallback);
         mConfigurationController = configurationController;
+        mLastOrientation = getResources().getConfiguration().orientation;
     }
 
     @Override
@@ -496,6 +500,19 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             SecurityMode securityMode) {
         mCurrentSecurityMode = securityMode;
         return getCurrentSecurityController();
+    }
+
+    /**
+     * Apply keyguard configuration from the currently active resources. This can be called when the
+     * device configuration changes, to re-apply some resources that are qualified on the device
+     * configuration.
+     */
+    public void updateResources() {
+        int newOrientation = getResources().getConfiguration().orientation;
+        if (newOrientation != mLastOrientation) {
+            mLastOrientation = newOrientation;
+            mView.updateLayoutForSecurityMode(mCurrentSecurityMode);
+        }
     }
 
     static class Factory {

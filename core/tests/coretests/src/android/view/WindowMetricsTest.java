@@ -73,17 +73,17 @@ public class WindowMetricsTest {
             // Check get metrics do not crash.
             WindowMetrics currentMetrics = mWm.getCurrentWindowMetrics();
             WindowMetrics maxMetrics = mWm.getMaximumWindowMetrics();
-            verifyMetricsSanity(currentMetrics, maxMetrics);
+            verifyMetricsValidity(currentMetrics, maxMetrics);
 
             mWm.removeViewImmediate(view);
             // Check get metrics do not crash.
             currentMetrics = mWm.getCurrentWindowMetrics();
             maxMetrics = mWm.getMaximumWindowMetrics();
-            verifyMetricsSanity(currentMetrics, maxMetrics);
+            verifyMetricsValidity(currentMetrics, maxMetrics);
         }, 0);
     }
 
-    private static void verifyMetricsSanity(WindowMetrics currentMetrics,
+    private static void verifyMetricsValidity(WindowMetrics currentMetrics,
             WindowMetrics maxMetrics) {
         Rect currentBounds = currentMetrics.getBounds();
         Rect maxBounds = maxMetrics.getBounds();

@@ -1314,22 +1314,16 @@ public class ResourcesImpl {
         }
 
         void applyStyle(int resId, boolean force) {
-            synchronized (mKey) {
-                mAssets.applyStyleToTheme(mTheme, resId, force);
-                mThemeResId = resId;
-                mKey.append(resId, force);
-            }
+            mAssets.applyStyleToTheme(mTheme, resId, force);
+            mThemeResId = resId;
+            mKey.append(resId, force);
         }
 
         void setTo(ThemeImpl other) {
-            synchronized (mKey) {
-                synchronized (other.mKey) {
-                    mAssets.setThemeTo(mTheme, other.mAssets, other.mTheme);
+            mAssets.setThemeTo(mTheme, other.mAssets, other.mTheme);
 
-                    mThemeResId = other.mThemeResId;
-                    mKey.setTo(other.getKey());
-                }
-            }
+            mThemeResId = other.mThemeResId;
+            mKey.setTo(other.getKey());
         }
 
         @NonNull
@@ -1338,46 +1332,40 @@ public class ResourcesImpl {
                 @StyleableRes int[] attrs,
                 @AttrRes int defStyleAttr,
                 @StyleRes int defStyleRes) {
-            synchronized (mKey) {
-                final int len = attrs.length;
-                final TypedArray array = TypedArray.obtain(wrapper.getResources(), len);
+            final int len = attrs.length;
+            final TypedArray array = TypedArray.obtain(wrapper.getResources(), len);
 
-                // XXX note that for now we only work with compiled XML files.
-                // To support generic XML files we will need to manually parse
-                // out the attributes from the XML file (applying type information
-                // contained in the resources and such).
-                final XmlBlock.Parser parser = (XmlBlock.Parser) set;
-                mAssets.applyStyle(mTheme, defStyleAttr, defStyleRes, parser, attrs,
-                        array.mDataAddress, array.mIndicesAddress);
-                array.mTheme = wrapper;
-                array.mXml = parser;
-                return array;
-            }
+            // XXX note that for now we only work with compiled XML files.
+            // To support generic XML files we will need to manually parse
+            // out the attributes from the XML file (applying type information
+            // contained in the resources and such).
+            final XmlBlock.Parser parser = (XmlBlock.Parser) set;
+            mAssets.applyStyle(mTheme, defStyleAttr, defStyleRes, parser, attrs,
+                    array.mDataAddress, array.mIndicesAddress);
+            array.mTheme = wrapper;
+            array.mXml = parser;
+            return array;
         }
 
         @NonNull
         TypedArray resolveAttributes(@NonNull Resources.Theme wrapper,
                 @NonNull int[] values,
                 @NonNull int[] attrs) {
-            synchronized (mKey) {
-                final int len = attrs.length;
-                if (values == null || len != values.length) {
-                    throw new IllegalArgumentException(
-                            "Base attribute values must the same length as attrs");
-                }
-
-                final TypedArray array = TypedArray.obtain(wrapper.getResources(), len);
-                mAssets.resolveAttrs(mTheme, 0, 0, values, attrs, array.mData, array.mIndices);
-                array.mTheme = wrapper;
-                array.mXml = null;
-                return array;
+            final int len = attrs.length;
+            if (values == null || len != values.length) {
+                throw new IllegalArgumentException(
+                        "Base attribute values must the same length as attrs");
             }
+
+            final TypedArray array = TypedArray.obtain(wrapper.getResources(), len);
+            mAssets.resolveAttrs(mTheme, 0, 0, values, attrs, array.mData, array.mIndices);
+            array.mTheme = wrapper;
+            array.mXml = null;
+            return array;
         }
 
         boolean resolveAttribute(int resid, TypedValue outValue, boolean resolveRefs) {
-            synchronized (mKey) {
-                return mAssets.getThemeValue(mTheme, resid, outValue, resolveRefs);
-            }
+            return mAssets.getThemeValue(mTheme, resid, outValue, resolveRefs);
         }
 
         int[] getAllAttributes() {
@@ -1385,35 +1373,29 @@ public class ResourcesImpl {
         }
 
         @Config int getChangingConfigurations() {
-            synchronized (mKey) {
-                final @NativeConfig int nativeChangingConfig =
-                        AssetManager.nativeThemeGetChangingConfigurations(mTheme);
-                return ActivityInfo.activityInfoConfigNativeToJava(nativeChangingConfig);
-            }
+            final @NativeConfig int nativeChangingConfig =
+                    AssetManager.nativeThemeGetChangingConfigurations(mTheme);
+            return ActivityInfo.activityInfoConfigNativeToJava(nativeChangingConfig);
         }
 
         public void dump(int priority, String tag, String prefix) {
-            synchronized (mKey) {
-                mAssets.dumpTheme(mTheme, priority, tag, prefix);
-            }
+            mAssets.dumpTheme(mTheme, priority, tag, prefix);
         }
 
         String[] getTheme() {
-            synchronized (mKey) {
-                final int N = mKey.mCount;
-                final String[] themes = new String[N * 2];
-                for (int i = 0, j = N - 1; i < themes.length; i += 2, --j) {
-                    final int resId = mKey.mResId[j];
-                    final boolean forced = mKey.mForce[j];
-                    try {
-                        themes[i] = getResourceName(resId);
-                    } catch (NotFoundException e) {
-                        themes[i] = Integer.toHexString(i);
-                    }
-                    themes[i + 1] = forced ? "forced" : "not forced";
+            final int n = mKey.mCount;
+            final String[] themes = new String[n * 2];
+            for (int i = 0, j = n - 1; i < themes.length; i += 2, --j) {
+                final int resId = mKey.mResId[j];
+                final boolean forced = mKey.mForce[j];
+                try {
+                    themes[i] = getResourceName(resId);
+                } catch (NotFoundException e) {
+                    themes[i] = Integer.toHexString(i);
                 }
-                return themes;
+                themes[i + 1] = forced ? "forced" : "not forced";
             }
+            return themes;
         }
 
         /**
@@ -1422,15 +1404,13 @@ public class ResourcesImpl {
          * {@link #applyStyle(int, boolean)}.
          */
         void rebase() {
-            synchronized (mKey) {
-                AssetManager.nativeThemeClear(mTheme);
+            AssetManager.nativeThemeClear(mTheme);
 
-                // Reapply the same styles in the same order.
-                for (int i = 0; i < mKey.mCount; i++) {
-                    final int resId = mKey.mResId[i];
-                    final boolean force = mKey.mForce[i];
-                    mAssets.applyStyleToTheme(mTheme, resId, force);
-                }
+            // Reapply the same styles in the same order.
+            for (int i = 0; i < mKey.mCount; i++) {
+                final int resId = mKey.mResId[i];
+                final boolean force = mKey.mForce[i];
+                mAssets.applyStyleToTheme(mTheme, resId, force);
             }
         }
 
@@ -1455,10 +1435,8 @@ public class ResourcesImpl {
         @Nullable
         public int[] getAttributeResolutionStack(@AttrRes int defStyleAttr,
                 @StyleRes int defStyleRes, @StyleRes int explicitStyleRes) {
-            synchronized (mKey) {
-                return mAssets.getAttributeResolutionStack(
-                        mTheme, defStyleAttr, defStyleRes, explicitStyleRes);
-            }
+            return mAssets.getAttributeResolutionStack(
+                    mTheme, defStyleAttr, defStyleRes, explicitStyleRes);
         }
     }
 

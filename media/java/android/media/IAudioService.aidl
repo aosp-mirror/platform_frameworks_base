@@ -158,6 +158,14 @@ interface IAudioService {
 
     oneway void reloadAudioSettings();
 
+    boolean setSurroundFormatEnabled(int audioFormat, boolean enabled);
+
+    boolean isSurroundFormatEnabled(int audioFormat);
+
+    boolean setEncodedSurroundMode(int mode);
+
+    int getEncodedSurroundMode();
+
     oneway void avrcpSupportsAbsoluteVolume(String address, boolean support);
 
     void setSpeakerphoneOn(IBinder cb, boolean on);

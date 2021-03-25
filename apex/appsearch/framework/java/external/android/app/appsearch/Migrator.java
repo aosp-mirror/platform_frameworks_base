@@ -19,8 +19,6 @@ package android.app.appsearch;
 import android.annotation.NonNull;
 import android.annotation.WorkerThread;
 
-import com.android.internal.util.Preconditions;
-
 /**
  * A migrator class to translate {@link GenericDocument} from different version of {@link
  * AppSearchSchema}
@@ -37,37 +35,14 @@ import com.android.internal.util.Preconditions;
  * documents won't have any observable changes.
  */
 public abstract class Migrator {
-    private final int mStartVersion;
-
     /**
-     * Creates a {@link Migrator} will trigger migration for any version less than the final version
-     * in the new schema.
-     */
-    public Migrator() {
-        this(/*startVersion=*/ 0);
-    }
-
-    /**
-     * Creates a {@link Migrator} with a non-negative start version.
+     * Returns {@code true} if this migrator's source type needs to be migrated to update from
+     * currentVersion to finalVersion.
      *
-     * <p>Providing 0 will trigger migration for any version less than the final version in the new
-     * schema.
-     *
-     * @param startVersion The migration will be only triggered for those versions greater or equal
-     *     to the given startVersion.
+     * <p>Migration won't be triggered if currentVersion is equal to finalVersion even if {@link
+     * #shouldMigrate} return true;
      */
-    public Migrator(int startVersion) {
-        Preconditions.checkArgumentNonnegative(startVersion);
-        mStartVersion = startVersion;
-    }
-
-    /**
-     * @return {@code True} if the current version need to be migrated.
-     * @hide
-     */
-    public boolean shouldMigrateToFinalVersion(int currentVersion, int finalVersion) {
-        return currentVersion >= mStartVersion && currentVersion != finalVersion;
-    }
+    public abstract boolean shouldMigrate(int currentVersion, int finalVersion);
 
     /**
      * Migrates {@link GenericDocument} to a newer version of {@link AppSearchSchema}.
@@ -75,17 +50,22 @@ public abstract class Migrator {
      * <p>This method will be invoked only if the {@link SetSchemaRequest} is setting a higher
      * version number than the current {@link AppSearchSchema} saved in AppSearch.
      *
-     * <p>This method will be invoked on the background worker thread.
+     * <p>If this {@link Migrator} is provided to cover a compatible schema change via {@link
+     * AppSearchSession#setSchema}, documents under the old version won't be removed unless you use
+     * the same URI.
+     *
+     * <p>This method will be invoked on the background worker thread provided via {@link
+     * AppSearchSession#setSchema}.
      *
      * @param currentVersion The current version of the document's schema.
-     * @param targetVersion The final version that documents need to be migrated to.
+     * @param finalVersion The final version that documents need to be migrated to.
      * @param document The {@link GenericDocument} need to be translated to new version.
      * @return A {@link GenericDocument} in new version.
      */
     @WorkerThread
     @NonNull
     public abstract GenericDocument onUpgrade(
-            int currentVersion, int targetVersion, @NonNull GenericDocument document);
+            int currentVersion, int finalVersion, @NonNull GenericDocument document);
 
     /**
      * Migrates {@link GenericDocument} to an older version of {@link AppSearchSchema}.
@@ -93,15 +73,19 @@ public abstract class Migrator {
      * <p>This method will be invoked only if the {@link SetSchemaRequest} is setting a lower
      * version number than the current {@link AppSearchSchema} saved in AppSearch.
      *
+     * <p>If this {@link Migrator} is provided to cover a compatible schema change via {@link
+     * AppSearchSession#setSchema}, documents under the old version won't be removed unless you use
+     * the same URI.
+     *
      * <p>This method will be invoked on the background worker thread.
      *
      * @param currentVersion The current version of the document's schema.
-     * @param targetVersion The final version that documents need to be migrated to.
+     * @param finalVersion The final version that documents need to be migrated to.
      * @param document The {@link GenericDocument} need to be translated to new version.
      * @return A {@link GenericDocument} in new version.
      */
     @WorkerThread
     @NonNull
     public abstract GenericDocument onDowngrade(
-            int currentVersion, int targetVersion, @NonNull GenericDocument document);
+            int currentVersion, int finalVersion, @NonNull GenericDocument document);
 }

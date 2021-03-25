@@ -19,6 +19,7 @@ package android.app.appsearch;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.IllegalSearchSpecException;
 import android.os.Bundle;
 import android.util.ArrayMap;
@@ -58,6 +59,8 @@ public final class SearchSpec {
     static final String SNIPPET_COUNT_PER_PROPERTY_FIELD = "snippetCountPerProperty";
     static final String MAX_SNIPPET_FIELD = "maxSnippet";
     static final String PROJECTION_TYPE_PROPERTY_PATHS_FIELD = "projectionTypeFieldMasks";
+    static final String RESULT_GROUPING_TYPE_FLAGS = "resultGroupingTypeFlags";
+    static final String RESULT_GROUPING_LIMIT = "resultGroupingLimit";
 
     /** @hide */
     public static final int DEFAULT_NUM_PER_PAGE = 10;
@@ -107,7 +110,9 @@ public final class SearchSpec {
                 RANKING_STRATEGY_CREATION_TIMESTAMP,
                 RANKING_STRATEGY_RELEVANCE_SCORE,
                 RANKING_STRATEGY_USAGE_COUNT,
-                RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP
+                RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP,
+                RANKING_STRATEGY_SYSTEM_USAGE_COUNT,
+                RANKING_STRATEGY_SYSTEM_USAGE_LAST_USED_TIMESTAMP,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RankingStrategy {}
@@ -120,10 +125,14 @@ public final class SearchSpec {
     public static final int RANKING_STRATEGY_CREATION_TIMESTAMP = 2;
     /** Ranked by document relevance score. */
     public static final int RANKING_STRATEGY_RELEVANCE_SCORE = 3;
-    /** Ranked by number of usages. */
+    /** Ranked by number of usages, as reported by the app. */
     public static final int RANKING_STRATEGY_USAGE_COUNT = 4;
-    /** Ranked by timestamp of last usage. */
+    /** Ranked by timestamp of last usage, as reported by the app. */
     public static final int RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP = 5;
+    /** Ranked by number of usages from a system UI surface. */
+    public static final int RANKING_STRATEGY_SYSTEM_USAGE_COUNT = 6;
+    /** Ranked by timestamp of last usage from a system UI surface. */
+    public static final int RANKING_STRATEGY_SYSTEM_USAGE_LAST_USED_TIMESTAMP = 7;
 
     /**
      * Order for query result.
@@ -140,6 +149,28 @@ public final class SearchSpec {
     public static final int ORDER_DESCENDING = 0;
     /** Search results will be returned in an ascending order. */
     public static final int ORDER_ASCENDING = 1;
+
+    /**
+     * Grouping type for result limits.
+     *
+     * @hide
+     */
+    @IntDef(
+            flag = true,
+            value = {GROUPING_TYPE_PER_PACKAGE, GROUPING_TYPE_PER_NAMESPACE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GroupingType {}
+
+    /**
+     * Results should be grouped together by package for the purpose of enforcing a limit on the
+     * number of results returned per package.
+     */
+    public static final int GROUPING_TYPE_PER_PACKAGE = 0b01;
+    /**
+     * Results should be grouped together by namespace for the purpose of enforcing a limit on the
+     * number of results returned per namespace.
+     */
+    public static final int GROUPING_TYPE_PER_NAMESPACE = 0b10;
 
     private final Bundle mBundle;
 
@@ -257,6 +288,24 @@ public final class SearchSpec {
             typePropertyPathsMap.put(schema, typePropertyPathsBundle.getStringArrayList(schema));
         }
         return typePropertyPathsMap;
+    }
+
+    /**
+     * Get the type of grouping limit to apply, or 0 if {@link Builder#setResultGrouping} was not
+     * called.
+     */
+    public @GroupingType int getResultGroupingTypeFlags() {
+        return mBundle.getInt(RESULT_GROUPING_TYPE_FLAGS);
+    }
+
+    /**
+     * Get the maximum number of results to return for each group.
+     *
+     * @return the maximum number of results to return for each group or Integer.MAX_VALUE if {@link
+     *     Builder#setResultGrouping(int, int)} was not called.
+     */
+    public int getResultGroupingLimit() {
+        return mBundle.getInt(RESULT_GROUPING_LIMIT, Integer.MAX_VALUE);
     }
 
     /** Builder for {@link SearchSpec objects}. */
@@ -391,7 +440,7 @@ public final class SearchSpec {
             Preconditions.checkArgumentInRange(
                     rankingStrategy,
                     RANKING_STRATEGY_NONE,
-                    RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP,
+                    RANKING_STRATEGY_SYSTEM_USAGE_LAST_USED_TIMESTAMP,
                     "Result ranking strategy");
             mBundle.putInt(RANKING_STRATEGY_FIELD, rankingStrategy);
             return this;
@@ -545,6 +594,34 @@ public final class SearchSpec {
                 propertyPathsArrayList.add(propertyPath);
             }
             mProjectionTypePropertyMasks.putStringArrayList(schema, propertyPathsArrayList);
+            return this;
+        }
+
+        /**
+         * Set the maximum number of results to return for each group, where groups are defined by
+         * grouping type.
+         *
+         * <p>Calling this method will override any previous calls. So calling
+         * setResultGrouping(GROUPING_TYPE_PER_PACKAGE, 7) and then calling
+         * setResultGrouping(GROUPING_TYPE_PER_PACKAGE, 2) will result in only the latter, a limit
+         * of two results per package, being applied. Or calling setResultGrouping
+         * (GROUPING_TYPE_PER_PACKAGE, 1) and then calling setResultGrouping
+         * (GROUPING_TYPE_PER_PACKAGE | GROUPING_PER_NAMESPACE, 5) will result in five results per
+         * package per namespace.
+         *
+         * @param groupingTypeFlags One or more combination of grouping types.
+         * @param limit Number of results to return per {@code groupingTypeFlags}.
+         * @throws IllegalArgumentException if groupingTypeFlags is zero.
+         */
+        // Individual parameters available from getResultGroupingTypeFlags and
+        // getResultGroupingLimit
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setResultGrouping(@GroupingType int groupingTypeFlags, int limit) {
+            Preconditions.checkState(
+                    groupingTypeFlags != 0, "Result grouping type cannot be zero.");
+            mBundle.putInt(RESULT_GROUPING_TYPE_FLAGS, groupingTypeFlags);
+            mBundle.putInt(RESULT_GROUPING_LIMIT, limit);
             return this;
         }
 
