@@ -378,6 +378,8 @@ public class PowerExemptionManager {
 
     /**
      * Add the specified package to the permanent power save allow list.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void addToPermanentAllowList(@NonNull String packageName) {
@@ -386,6 +388,8 @@ public class PowerExemptionManager {
 
     /**
      * Add the specified packages to the permanent power save allow list.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void addToPermanentAllowList(@NonNull List<String> packageNames) {
@@ -402,6 +406,7 @@ public class PowerExemptionManager {
      *
      * @param includingIdle Set to true if the app should be allow-listed from device idle as well
      *                      as other power save restrictions
+     * @hide
      */
     @NonNull
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
@@ -443,6 +448,7 @@ public class PowerExemptionManager {
      * removed. Apps allow-listed by default by the system cannot be removed.
      *
      * @param packageName The app to remove from the allow list
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void removeFromPermanentAllowList(@NonNull String packageName) {
