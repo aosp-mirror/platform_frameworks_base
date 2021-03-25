@@ -2796,12 +2796,20 @@ public class StorageManager {
     }
 
     /**
+     * Reason to provide if app IO is blocked/resumed for unknown reasons
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int APP_IO_BLOCKED_REASON_UNKNOWN = 0;
+
+    /**
      * Reason to provide if app IO is blocked/resumed because of transcoding
      *
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 0;
+    public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 1;
 
     /**
      * Constants for use with
@@ -2812,7 +2820,8 @@ public class StorageManager {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "APP_IO_BLOCKED_REASON_" }, value = {
-            APP_IO_BLOCKED_REASON_TRANSCODING
+                APP_IO_BLOCKED_REASON_TRANSCODING,
+                APP_IO_BLOCKED_REASON_UNKNOWN,
     })
     public @interface AppIoBlockedReason {}
 
