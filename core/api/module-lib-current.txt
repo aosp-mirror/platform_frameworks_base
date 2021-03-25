@@ -309,7 +309,8 @@ package android.os.storage {
   public class StorageManager {
     method public void notifyAppIoBlocked(@NonNull java.util.UUID, int, int, int);
     method public void notifyAppIoResumed(@NonNull java.util.UUID, int, int, int);
-    field public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 0; // 0x0
+    field public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 1; // 0x1
+    field public static final int APP_IO_BLOCKED_REASON_UNKNOWN = 0; // 0x0
   }
 
 }
