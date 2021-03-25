@@ -89,6 +89,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -766,6 +767,21 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         public void invalidateNextPageToken(long nextPageToken, int userId) throws RemoteException {
 
+        }
+
+        @Override
+        public void writeQueryResultsToFile(String packageName, String databaseName,
+                ParcelFileDescriptor fileDescriptor, String queryExpression,
+                Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void putDocumentsFromFile(String packageName, String databaseName,
+                ParcelFileDescriptor fileDescriptor, int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
         }
 
         @Override

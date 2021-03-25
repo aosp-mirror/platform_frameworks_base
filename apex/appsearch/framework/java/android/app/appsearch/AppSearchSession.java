@@ -19,6 +19,8 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.appsearch.exceptions.AppSearchException;
+import android.app.appsearch.util.SchemaMigrationUtil;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
@@ -26,14 +28,17 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -54,7 +59,6 @@ public final class AppSearchSession implements Closeable {
 
     private boolean mIsMutated = false;
     private boolean mIsClosed = false;
-
 
     /**
      * Creates a search session for the client, defined by the {@code userId} and
@@ -157,26 +161,65 @@ public final class AppSearchSession implements Closeable {
             }
             schemasPackageAccessibleBundles.put(entry.getKey(), packageIdentifierBundles);
         }
+
+        // No need to trigger migration if user never set migrator
+        if (request.getMigrators().isEmpty()) {
+            setSchemaNoMigrations(
+                    request,
+                    schemaBundles,
+                    schemasPackageAccessibleBundles,
+                    callbackExecutor,
+                    callback);
+            return;
+        }
+
         try {
+            // Migration process
+            // 1. Generate the current and the final version map.
+            // TODO(b/182855402) Release binder thread and move the heavy work into worker thread.
+            AndroidFuture<AppSearchResult<GetSchemaResponse>> future = new AndroidFuture<>();
+            getSchema(callbackExecutor, future::complete);
+            AppSearchResult<GetSchemaResponse> getSchemaResult = future.get();
+            if (!getSchemaResult.isSuccess()) {
+                callback.accept(AppSearchResult.newFailedResult(getSchemaResult));
+                return;
+            }
+            GetSchemaResponse getSchemaResponse = getSchemaResult.getResultValue();
+            Set<AppSearchSchema> currentSchemas = getSchemaResponse.getSchemas();
+            Map<String, Integer> currentVersionMap =
+                    SchemaMigrationUtil.buildVersionMap(currentSchemas,
+                            getSchemaResponse.getVersion());
+            Map<String, Integer> finalVersionMap =
+                    SchemaMigrationUtil.buildVersionMap(request.getSchemas(), request.getVersion());
+
+            // 2. SetSchema with forceOverride=false, to retrieve the list of incompatible/deleted
+            // types.
             mService.setSchema(
                     mPackageName,
                     mDatabaseName,
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
                     schemasPackageAccessibleBundles,
-                    request.isForceOverride(),
+                    /*forceOverride=*/ false,
                     mUserId,
                     request.getVersion(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             callbackExecutor.execute(() -> {
                                 if (result.isSuccess()) {
-                                    callback.accept(
-                                            // TODO(b/177266929) implement Migration in platform.
-                                            // TODO(b/183177268): once migration is implemented, run
-                                            //  it on workExecutor.
-                                            AppSearchResult.newSuccessfulResult(
-                                                    new SetSchemaResponse.Builder().build()));
+                                    // TODO(b/183177268): once migration is implemented, run
+                                    //  it on workExecutor.
+                                    try {
+                                        Bundle bundle = (Bundle) result.getResultValue();
+                                        SetSchemaResponse setSchemaResponse =
+                                                new SetSchemaResponse(bundle);
+                                        setSchemaMigration(
+                                                request, setSchemaResponse, schemaBundles,
+                                                schemasPackageAccessibleBundles, currentVersionMap,
+                                                finalVersionMap, callback);
+                                    } catch (Throwable t) {
+                                        callback.accept(AppSearchResult.throwableToFailedResult(t));
+                                    }
                                 } else {
                                     callback.accept(result);
                                 }
@@ -186,6 +229,8 @@ public final class AppSearchSession implements Closeable {
             mIsMutated = true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }  catch (Throwable t) {
+            callback.accept(AppSearchResult.throwableToFailedResult(t));
         }
     }
 
@@ -625,6 +670,161 @@ public final class AppSearchSession implements Closeable {
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to close the AppSearchSession", e);
             }
+        }
+    }
+
+    /**
+     * Set schema to Icing for no-migration scenario.
+     *
+     * <p>We only need one time {@link #setSchema} call for no-migration scenario by using the
+     * forceoverride in the request.
+     */
+    private void setSchemaNoMigrations(@NonNull SetSchemaRequest request,
+            @NonNull List<Bundle> schemaBundles,
+            @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<AppSearchResult<SetSchemaResponse>> callback) {
+        try {
+            mService.setSchema(
+                    mPackageName,
+                    mDatabaseName,
+                    schemaBundles,
+                    new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
+                    schemasPackageAccessibleBundles,
+                    request.isForceOverride(),
+                    mUserId,
+                    request.getVersion(),
+                    new IAppSearchResultCallback.Stub() {
+                        public void onResult(AppSearchResult result) {
+                            executor.execute(() -> {
+                                if (result.isSuccess()) {
+                                    try {
+                                        SetSchemaResponse setSchemaResponse =
+                                                new SetSchemaResponse(
+                                                        (Bundle) result.getResultValue());
+                                        if (!request.isForceOverride()) {
+                                            // Throw exception if there is any deleted types or
+                                            // incompatible types. That's the only case we swallowed
+                                            // in the AppSearchImpl#setSchema().
+                                            checkDeletedAndIncompatible(
+                                                    setSchemaResponse.getDeletedTypes(),
+                                                    setSchemaResponse.getIncompatibleTypes());
+                                        }
+                                        callback.accept(AppSearchResult
+                                                .newSuccessfulResult(setSchemaResponse));
+                                    } catch (Throwable t) {
+                                        callback.accept(AppSearchResult.throwableToFailedResult(t));
+                                    }
+                                } else {
+                                    callback.accept(result);
+                                }
+                            });
+                        }
+                    });
+            mIsMutated = true;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set schema to Icing for migration scenario.
+     *
+     * <p>First time {@link #setSchema} call with forceOverride is false gives us all incompatible
+     * changes. After trigger migrations, the second time call {@link #setSchema} will actually
+     * apply the changes.
+     *
+     * @param setSchemaResponse the result of the first setSchema call with forceOverride=false.
+     */
+    private void setSchemaMigration(@NonNull SetSchemaRequest request,
+            @NonNull SetSchemaResponse setSchemaResponse,
+            @NonNull List<Bundle> schemaBundles,
+            @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
+            @NonNull Map<String, Integer> currentVersionMap, Map<String, Integer> finalVersionMap,
+            @NonNull Consumer<AppSearchResult<SetSchemaResponse>> callback)
+            throws AppSearchException, IOException, RemoteException, ExecutionException,
+            InterruptedException {
+        // 1. If forceOverride is false, check that all incompatible types will be migrated.
+        // If some aren't we must throw an error, rather than proceeding and deleting those
+        // types.
+        if (!request.isForceOverride()) {
+            Set<String> unmigratedTypes = SchemaMigrationUtil.getUnmigratedIncompatibleTypes(
+                    setSchemaResponse.getIncompatibleTypes(),
+                    request.getMigrators(),
+                    currentVersionMap,
+                    finalVersionMap);
+            // check if there are any unmigrated types or deleted types. If there are, we will throw
+            // an exception.
+            // Since the force override is false, the schema will not have been set if there are any
+            // incompatible or deleted types.
+            checkDeletedAndIncompatible(setSchemaResponse.getDeletedTypes(),
+                    unmigratedTypes);
+        }
+
+        try (AppSearchMigrationHelper migrationHelper =
+                     new AppSearchMigrationHelper(mService, mUserId, currentVersionMap,
+                             finalVersionMap, mPackageName, mDatabaseName)) {
+            Map<String, Migrator> migratorMap = request.getMigrators();
+
+            // 2. Trigger migration for all migrators.
+            // TODO(b/177266929) trigger migration for all types together rather than separately.
+            Set<String> migratedTypes = new ArraySet<>();
+            for (Map.Entry<String, Migrator> entry : migratorMap.entrySet()) {
+                String schemaType = entry.getKey();
+                Migrator migrator = entry.getValue();
+                if (SchemaMigrationUtil.shouldTriggerMigration(
+                        schemaType, migrator, currentVersionMap, finalVersionMap)) {
+                    migrationHelper.queryAndTransform(schemaType, migrator);
+                    migratedTypes.add(schemaType);
+                }
+            }
+
+            // 3. SetSchema a second time with forceOverride=true if the first attempted failed.
+            if (!setSchemaResponse.getIncompatibleTypes().isEmpty()
+                    || !setSchemaResponse.getDeletedTypes().isEmpty()) {
+                AndroidFuture<AppSearchResult<SetSchemaResponse>> future = new AndroidFuture<>();
+                // only trigger second setSchema() call if the first one is fail.
+                mService.setSchema(
+                        mPackageName,
+                        mDatabaseName,
+                        schemaBundles,
+                        new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
+                        schemasPackageAccessibleBundles,
+                        /*forceOverride=*/ true,
+                        mUserId,
+                        request.getVersion(),
+                        new IAppSearchResultCallback.Stub() {
+                            @Override
+                            public void onResult(AppSearchResult result) throws RemoteException {
+                                future.complete(result);
+                            }
+                        });
+                AppSearchResult<SetSchemaResponse> secondSetSchemaResult = future.get();
+                if (!secondSetSchemaResult.isSuccess()) {
+                    // we failed to set the schema in second time with force override = true, which
+                    // is an impossible case. Since we only swallow the incompatible error in the
+                    // first setSchema call, all other errors will be thrown at the first time.
+                    callback.accept(secondSetSchemaResult);
+                    return;
+                }
+            }
+
+            SetSchemaResponse.Builder responseBuilder = setSchemaResponse.toBuilder()
+                    .addMigratedTypes(migratedTypes);
+            callback.accept(migrationHelper.putMigratedDocuments(responseBuilder));
+        }
+    }
+
+    /**  Checks the setSchema() call won't delete any types or has incompatible types. */
+    //TODO(b/177266929) move this method to util
+    private void checkDeletedAndIncompatible(Set<String> deletedTypes,
+            Set<String> incompatibleTypes)
+            throws AppSearchException {
+        if (!deletedTypes.isEmpty() || !incompatibleTypes.isEmpty()) {
+            String newMessage = "Schema is incompatible."
+                    + "\n  Deleted types: " + deletedTypes
+                    + "\n  Incompatible types: " + incompatibleTypes;
+            throw new AppSearchException(AppSearchResult.RESULT_INVALID_SCHEMA, newMessage);
         }
     }
 }
