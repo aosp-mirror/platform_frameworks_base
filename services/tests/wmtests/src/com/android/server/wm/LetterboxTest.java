@@ -66,12 +66,6 @@ public class LetterboxTest {
         mTransaction = spy(StubTransaction.class);
     }
 
-    @Test
-    public void testOverlappingWith_usesGlobalCoordinates() {
-        mLetterbox.layout(new Rect(0, 0, 10, 50), new Rect(0, 2, 10, 45), new Point(1000, 2000));
-        assertTrue(mLetterbox.isOverlappingWith(new Rect(0, 0, 1, 1)));
-    }
-
     private static final int TOP_BAR = 0x1;
     private static final int BOTTOM_BAR = 0x2;
     private static final int LEFT_BAR = 0x4;
@@ -224,15 +218,6 @@ public class LetterboxTest {
         mLetterbox.applySurfaceChanges(mTransaction);
 
         assertNotNull(mSurfaces.behind);
-    }
-
-    @Test
-    public void testIsOverlappingWith_cornersRounded_doesNotCheckSurfaceBehind() {
-        mAreCornersRounded = true;
-        mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(0, 0));
-        mLetterbox.applySurfaceChanges(mTransaction);
-
-        assertFalse(mLetterbox.isOverlappingWith(new Rect(1, 2, 9, 9)));
     }
 
     @Test

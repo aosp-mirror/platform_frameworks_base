@@ -4001,10 +4001,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord == null || mActivityRecord.isFullyTransparentBarAllowed(frame);
     }
 
-    public boolean isLetterboxedOverlappingWith(Rect rect) {
-        return mActivityRecord != null && mActivityRecord.isLetterboxOverlappingWith(rect);
-    }
-
     boolean isDragResizeChanged() {
         return mDragResizing != computeDragResizing();
     }

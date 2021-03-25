@@ -1417,14 +1417,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mLetterboxUiController.isFullyTransparentBarAllowed(rect);
     }
 
-    /**
-     * @return {@code true} if there is a letterbox and any part of that letterbox overlaps with
-     * the given {@code rect}.
-     */
-    boolean isLetterboxOverlappingWith(Rect rect) {
-        return mLetterboxUiController.isLetterboxOverlappingWith(rect);
-    }
-
     static class Token extends IApplicationToken.Stub {
         private WeakReference<ActivityRecord> weakActivity;
         private final String name;

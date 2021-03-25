@@ -156,6 +156,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 opaque, dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
     }
 
+    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
     @Test
     public void testUpdateLightNavigationBarLw() {
         DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -167,7 +168,19 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final WindowState imeDrawDarkNavBar = createInputMethodWindow(true, true, false);
         final WindowState imeDrawLightNavBar = createInputMethodWindow(true, true, true);
 
-        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS,
+        mDisplayContent.setLayoutNeeded();
+        mDisplayContent.performLayout(true /* initial */, false /* updateImeWindows */);
+
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        navSource.setFrame(mNavBarWindow.getFrame());
+        opaqueDarkNavBar.mAboveInsetsState.addSource(navSource);
+        opaqueLightNavBar.mAboveInsetsState.addSource(navSource);
+        dimming.mAboveInsetsState.addSource(navSource);
+        imeDrawDarkNavBar.mAboveInsetsState.addSource(navSource);
+        imeDrawLightNavBar.mAboveInsetsState.addSource(navSource);
+
+        // If there is no window, APPEARANCE_LIGHT_NAVIGATION_BARS is not allowed.
+        assertEquals(0,
                 displayPolicy.updateLightNavigationBarLw(
                         APPEARANCE_LIGHT_NAVIGATION_BARS, null, null,
                         null, null));
