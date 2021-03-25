@@ -236,12 +236,13 @@ public class ContentCaptureEventTest {
     @Test
     public void testMergeEvent_typeViewTextChanged() {
         final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_TEXT_CHANGED)
-                .setText("test");
+                .setText("test", false);
         final ContentCaptureEvent event2 = new ContentCaptureEvent(43, TYPE_VIEW_TEXT_CHANGED)
-                .setText("empty");
+                .setText("empty", true);
 
         event.mergeEvent(event2);
         assertThat(event.getText()).isEqualTo(event2.getText());
+        assertThat(event.getTextHasComposingSpan()).isEqualTo(event2.getTextHasComposingSpan());
     }
 
     @Test
@@ -282,16 +283,18 @@ public class ContentCaptureEventTest {
     @Test
     public void testMergeEvent_differentEventTypes() {
         final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED)
-                .setText("test").setAutofillId(new AutofillId(1));
+                .setText("test", false).setAutofillId(new AutofillId(1));
         final ContentCaptureEvent event2 = new ContentCaptureEvent(17, TYPE_VIEW_TEXT_CHANGED)
-                .setText("empty").setAutofillId(new AutofillId(2));
+                .setText("empty", true).setAutofillId(new AutofillId(2));
 
         event.mergeEvent(event2);
         assertThat(event.getText()).isEqualTo("test");
+        assertThat(event.getTextHasComposingSpan()).isFalse();
         assertThat(event.getId()).isEqualTo(new AutofillId(1));
 
         event2.mergeEvent(event);
         assertThat(event2.getText()).isEqualTo("empty");
+        assertThat(event2.getTextHasComposingSpan()).isTrue();
         assertThat(event2.getId()).isEqualTo(new AutofillId(2));
     }
 
