@@ -575,6 +575,7 @@
     <protected-broadcast android:name="android.intent.action.MEDIA_RESOURCE_GRANTED" />
     <protected-broadcast android:name="android.app.action.NETWORK_LOGS_AVAILABLE" />
     <protected-broadcast android:name="android.app.action.SECURITY_LOGS_AVAILABLE" />
+    <protected-broadcast android:name="android.app.action.COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED" />
 
     <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED" />
     <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL" />
