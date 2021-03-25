@@ -811,18 +811,18 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testOnDisplayChanged() {
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         final DisplayContent newDc = createNewDisplay();
-        stack.getDisplayArea().removeRootTask(stack);
-        newDc.getDefaultTaskDisplayArea().addChild(stack, POSITION_TOP);
+        rootTask.getDisplayArea().removeRootTask(rootTask);
+        newDc.getDefaultTaskDisplayArea().addChild(rootTask, POSITION_TOP);
 
-        verify(stack).onDisplayChanged(newDc);
+        verify(rootTask).onDisplayChanged(newDc);
         verify(task).onDisplayChanged(newDc);
         verify(activity).onDisplayChanged(newDc);
-        assertEquals(newDc, stack.mDisplayContent);
+        assertEquals(newDc, rootTask.mDisplayContent);
         assertEquals(newDc, task.mDisplayContent);
         assertEquals(newDc, activity.mDisplayContent);
     }
@@ -854,21 +854,21 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testTaskCanApplyAnimation() {
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent, task);
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent, task);
         verifyWindowContainerApplyAnimation(task, activity1, activity2);
     }
 
     @Test
-    public void testStackCanApplyAnimation() {
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
+    public void testRootTaskCanApplyAnimation() {
+        final Task rootTask = createTask(mDisplayContent);
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
-                createTaskInStack(stack, 0 /* userId */));
+                createTaskInRootTask(rootTask, 0 /* userId */));
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
-                createTaskInStack(stack, 0 /* userId */));
-        verifyWindowContainerApplyAnimation(stack, activity1, activity2);
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        verifyWindowContainerApplyAnimation(rootTask, activity1, activity2);
     }
 
     @Test
@@ -878,21 +878,21 @@ public class WindowContainerTests extends WindowTestsBase {
 
         assertNull(windowContainer.getDisplayArea());
 
-        // ActivityStack > WindowContainer
-        final Task activityStack = createTaskStackOnDisplay(mDisplayContent);
-        activityStack.addChild(windowContainer, 0);
-        activityStack.setParent(null);
+        // Task > WindowContainer
+        final Task task = createTask(mDisplayContent);
+        task.addChild(windowContainer, 0);
+        task.setParent(null);
 
         assertNull(windowContainer.getDisplayArea());
-        assertNull(activityStack.getDisplayArea());
+        assertNull(task.getDisplayArea());
 
-        // TaskDisplayArea > ActivityStack > WindowContainer
+        // TaskDisplayArea > Task > WindowContainer
         final TaskDisplayArea taskDisplayArea = new TaskDisplayArea(
                 mDisplayContent, mWm, "TaskDisplayArea", FEATURE_DEFAULT_TASK_CONTAINER);
-        taskDisplayArea.addChild(activityStack, 0);
+        taskDisplayArea.addChild(task, 0);
 
         assertEquals(taskDisplayArea, windowContainer.getDisplayArea());
-        assertEquals(taskDisplayArea, activityStack.getDisplayArea());
+        assertEquals(taskDisplayArea, task.getDisplayArea());
         assertEquals(taskDisplayArea, taskDisplayArea.getDisplayArea());
 
         // DisplayArea
@@ -986,8 +986,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testFreezeInsets() {
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final ActivityRecord activity = createActivityRecord(mDisplayContent, stack);
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
 
         // Set visibility to false, verify the main window of the task will be set the frozen
@@ -1002,8 +1002,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testFreezeInsetsStateWhenAppTransition() {
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
         task.getDisplayContent().prepareAppTransition(TRANSIT_CLOSE);
