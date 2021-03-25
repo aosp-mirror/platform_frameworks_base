@@ -17,6 +17,7 @@
 package com.android.tests.stagedinstallinternal;
 
 import static com.android.cts.install.lib.InstallUtils.getPackageInstaller;
+import static com.android.cts.shim.lib.ShimPackage.SHIM_APEX_PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -50,6 +51,9 @@ public class StagedInstallInternalTest {
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
     private static final TestApp TEST_APEX_WITH_APK_V2 = new TestApp("TestApexWithApkV2",
             APK_IN_APEX_TESTAPEX_NAME, 2, /*isApex*/true, APK_IN_APEX_TESTAPEX_NAME + "_v2.apex");
+    private static final TestApp APEX_WRONG_SHA_V2 = new TestApp(
+            "ApexWrongSha2", SHIM_APEX_PACKAGE_NAME, 2, /*isApex*/true,
+            "com.android.apex.cts.shim.v2_wrong_sha.apex");
 
     private File mTestStateFile = new File(
             InstrumentationRegistry.getInstrumentation().getContext().getFilesDir(),
@@ -125,6 +129,26 @@ public class StagedInstallInternalTest {
         InstallUtils.getPackageInstaller().abandonSession(id3);
         int id4 = Install.multi(TestApp.A1).setStaged().commit();
         InstallUtils.getPackageInstaller().abandonSession(id4);
+    }
+
+    @Test
+    public void testStagedSessionShouldCleanUpOnVerificationFailure() throws Exception {
+        InstallUtils.commitExpectingFailure(AssertionError.class, "apexd verification failed",
+                Install.single(APEX_WRONG_SHA_V2).setStaged());
+    }
+
+    @Test
+    public void testStagedSessionShouldCleanUpOnOnSuccess_Commit() throws Exception {
+        int sessionId = Install.single(TestApp.A1).setStaged().commit();
+        storeSessionId(sessionId);
+    }
+
+    @Test
+    public void testStagedSessionShouldCleanUpOnOnSuccess_Verify() throws Exception {
+        int sessionId = retrieveLastSessionId();
+        PackageInstaller.SessionInfo info = InstallUtils.getStagedSessionInfo(sessionId);
+        assertThat(info).isNotNull();
+        assertThat(info.isStagedSessionApplied()).isTrue();
     }
 
     @Test

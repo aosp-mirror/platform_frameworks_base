@@ -45,11 +45,13 @@ import java.util.function.Consumer;
  */
 public final class AppSearchSession implements Closeable {
     private static final String TAG = "AppSearchSession";
+
     private final String mPackageName;
     private final String mDatabaseName;
     @UserIdInt
     private final int mUserId;
     private final IAppSearchManager mService;
+
     private boolean mIsMutated = false;
     private boolean mIsClosed = false;
 
@@ -148,6 +150,7 @@ public final class AppSearchSession implements Closeable {
                     schemasPackageAccessibleBundles,
                     request.isForceOverride(),
                     mUserId,
+                    request.getVersion(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> {
@@ -176,7 +179,7 @@ public final class AppSearchSession implements Closeable {
      */
     public void getSchema(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<AppSearchResult<Set<AppSearchSchema>>> callback) {
+            @NonNull Consumer<AppSearchResult<GetSchemaResponse>> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
@@ -189,14 +192,46 @@ public final class AppSearchSession implements Closeable {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> {
                                 if (result.isSuccess()) {
-                                    List<Bundle> schemaBundles =
-                                            (List<Bundle>) result.getResultValue();
-                                    Set<AppSearchSchema> schemas = new ArraySet<>(
-                                            schemaBundles.size());
-                                    for (int i = 0; i < schemaBundles.size(); i++) {
-                                        schemas.add(new AppSearchSchema(schemaBundles.get(i)));
-                                    }
-                                    callback.accept(AppSearchResult.newSuccessfulResult(schemas));
+                                    Bundle responseBundle = (Bundle) result.getResultValue();
+                                    GetSchemaResponse response =
+                                            new GetSchemaResponse(responseBundle);
+                                    callback.accept(AppSearchResult.newSuccessfulResult(response));
+                                } else {
+                                    callback.accept(result);
+                                }
+                            });
+                        }
+                    });
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves the set of all namespaces in the current database with at least one document.
+     *
+     * @param executor        Executor on which to invoke the callback.
+     * @param callback        Callback to receive the namespaces.
+     */
+    public void getNamespaces(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<AppSearchResult<Set<String>>> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
+        try {
+            mService.getNamespaces(
+                    mPackageName,
+                    mDatabaseName,
+                    mUserId,
+                    new IAppSearchResultCallback.Stub() {
+                        public void onResult(AppSearchResult result) {
+                            executor.execute(() -> {
+                                if (result.isSuccess()) {
+                                    Set<String> namespaces =
+                                            new ArraySet<>((List<String>) result.getResultValue());
+                                    callback.accept(
+                                            AppSearchResult.newSuccessfulResult(namespaces));
                                 } else {
                                     callback.accept(result);
                                 }
@@ -437,6 +472,7 @@ public final class AppSearchSession implements Closeable {
                     request.getNamespace(),
                     request.getUri(),
                     request.getUsageTimeMillis(),
+                    /*systemUsage=*/ false,
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
@@ -538,6 +574,25 @@ public final class AppSearchSession implements Closeable {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Gets the storage info for this {@link AppSearchSession} database.
+     *
+     * <p>This may take time proportional to the number of documents and may be inefficient to
+     * call repeatedly.
+     *
+     * @param executor        Executor on which to invoke the callback.
+     * @param callback        Callback to receive the storage info.
+     */
+    public void getStorageInfo(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<AppSearchResult<StorageInfo>> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
+        // TODO(b/182909475): Implement getStorageInfo
+        throw new UnsupportedOperationException();
     }
 
     /**

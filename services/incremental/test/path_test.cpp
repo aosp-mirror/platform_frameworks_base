@@ -40,4 +40,24 @@ TEST(Path, Comparator) {
     EXPECT_TRUE(!PathLess()("/a/b", "/a"));
 }
 
+TEST(Path, Join) {
+    EXPECT_STREQ("", path::join("", "").c_str());
+
+    EXPECT_STREQ("/", path::join("", "/").c_str());
+    EXPECT_STREQ("/", path::join("/", "").c_str());
+    EXPECT_STREQ("/", path::join("/", "/").c_str());
+    EXPECT_STREQ("/", path::join("/"s, "/").c_str());
+    EXPECT_STREQ("/", path::join("/"sv, "/").c_str());
+    EXPECT_STREQ("/", path::join("/", "/", "/", "/", "/", "/", "/", "/", "/", "/").c_str());
+
+    EXPECT_STREQ("/a/b/c/d", path::join("/a/b/"s, "c", "d").c_str());
+    EXPECT_STREQ("/a/b/c/d", path::join("/a/b/", "c", "d").c_str());
+    EXPECT_STREQ("/a/b/c/d", path::join("/", "a/b/", "c", "d").c_str());
+    EXPECT_STREQ("/a/b/c/d", path::join("/", "a/b", "c", "d").c_str());
+    EXPECT_STREQ("/a/b/c/d", path::join("/", "//a/b//", "c", "d").c_str());
+    EXPECT_STREQ("/a/b/c/d", path::join("", "", "/", "//a/b//", "c", "d").c_str());
+    EXPECT_STREQ("/a/b/c/d", path::join(""s, "", "/", "//a/b//", "c", "d").c_str());
+    EXPECT_STREQ("/a/b/c/d", path::join("/a/b", "", "", "/", "", "/", "/", "/c", "d").c_str());
+}
+
 } // namespace android::incremental::path

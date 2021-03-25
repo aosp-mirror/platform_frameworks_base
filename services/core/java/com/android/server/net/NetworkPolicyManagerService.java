@@ -430,7 +430,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_METERED_RESTRICTED_PACKAGES_CHANGED = 17;
     private static final int MSG_SET_NETWORK_TEMPLATE_ENABLED = 18;
     private static final int MSG_SUBSCRIPTION_PLANS_CHANGED = 19;
-    private static final int MSG_STATS_PROVIDER_LIMIT_REACHED = 20;
+    private static final int MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED = 20;
     // TODO: Add similar docs for other messages.
     /**
      * Message to indicate that reasons for why an uid is blocked changed.
@@ -2034,39 +2034,34 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final boolean hasWarning = policy.warningBytes != LIMIT_DISABLED;
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
-            if (hasLimit || policy.metered) {
-                final long quotaBytes;
-                if (hasLimit && policy.hasCycle()) {
-                    final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
-                            .cycleIterator(policy).next();
-                    final long start = cycle.first.toInstant().toEpochMilli();
-                    final long end = cycle.second.toInstant().toEpochMilli();
-                    final long totalBytes = getTotalBytes(policy.template, start, end);
+            long limitBytes = Long.MAX_VALUE;
+            if (hasLimit && policy.hasCycle()) {
+                final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
+                        .cycleIterator(policy).next();
+                final long start = cycle.first.toInstant().toEpochMilli();
+                final long end = cycle.second.toInstant().toEpochMilli();
+                final long totalBytes = getTotalBytes(policy.template, start, end);
 
-                    if (policy.lastLimitSnooze >= start) {
-                        // snoozing past quota, but we still need to restrict apps,
-                        // so push really high quota.
-                        quotaBytes = Long.MAX_VALUE;
-                    } else {
-                        // remaining "quota" bytes are based on total usage in
-                        // current cycle. kernel doesn't like 0-byte rules, so we
-                        // set 1-byte quota and disable the radio later.
-                        quotaBytes = Math.max(1, policy.limitBytes - totalBytes);
-                    }
-                } else {
-                    // metered network, but no policy limit; we still need to
-                    // restrict apps, so push really high quota.
-                    quotaBytes = Long.MAX_VALUE;
+                if (policy.lastLimitSnooze < start) {
+                    // remaining "quota" bytes are based on total usage in
+                    // current cycle. kernel doesn't like 0-byte rules, so we
+                    // set 1-byte quota and disable the radio later.
+                    limitBytes = Math.max(1, policy.limitBytes - totalBytes);
                 }
+            }
 
+            if (hasLimit || policy.metered) {
                 if (matchingIfaces.size() > 1) {
                     // TODO: switch to shared quota once NMS supports
                     Slog.w(TAG, "shared quota unsupported; generating rule for each iface");
                 }
 
+                // Set the interface limit. For interfaces which has no cycle, or metered with
+                // no policy limit, or snoozed limit notification; we still need to put iptables
+                // rule hooks to restrict apps for data saver, so push really high quota.
                 for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
                     final String iface = matchingIfaces.valueAt(j);
-                    setInterfaceQuotaAsync(iface, quotaBytes);
+                    setInterfaceQuotaAsync(iface, limitBytes);
                     newMeteredIfaces.add(iface);
                 }
             }
@@ -4970,7 +4965,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mListeners.finishBroadcast();
                     return true;
                 }
-                case MSG_STATS_PROVIDER_LIMIT_REACHED: {
+                case MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED: {
                     mNetworkStats.forceUpdate();
 
                     synchronized (mNetworkPoliciesSecondLock) {
@@ -5726,9 +5721,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
-        public void onStatsProviderLimitReached(@NonNull String tag) {
-            Log.v(TAG, "onStatsProviderLimitReached: " + tag);
-            mHandler.obtainMessage(MSG_STATS_PROVIDER_LIMIT_REACHED).sendToTarget();
+        public void onStatsProviderWarningOrLimitReached(@NonNull String tag) {
+            Log.v(TAG, "onStatsProviderWarningOrLimitReached: " + tag);
+            mHandler.obtainMessage(MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED).sendToTarget();
         }
     }
 

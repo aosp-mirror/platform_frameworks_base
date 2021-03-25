@@ -546,9 +546,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         row.sliderBgSolid = seekbarBgDrawable.findDrawableByLayerId(
                 R.id.volume_seekbar_background_solid);
 
-        row.sliderBgIcon = (AlphaTintDrawableWrapper)
-                ((RotateDrawable) seekbarBgDrawable.findDrawableByLayerId(
-                        R.id.volume_seekbar_background_icon)).getDrawable();
+        final Drawable sliderBgIcon = seekbarBgDrawable.findDrawableByLayerId(
+                        R.id.volume_seekbar_background_icon);
+        row.sliderBgIcon =  sliderBgIcon != null ? (AlphaTintDrawableWrapper)
+                ((RotateDrawable) sliderBgIcon).getDrawable() : null;
 
         final LayerDrawable seekbarProgressDrawable = (LayerDrawable)
                 ((RoundedCornerProgressDrawable) seekbarDrawable.findDrawableByLayerId(
@@ -556,13 +557,12 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         row.sliderProgressSolid = seekbarProgressDrawable.findDrawableByLayerId(
                 R.id.volume_seekbar_progress_solid);
-
-        row.sliderProgressIcon = (AlphaTintDrawableWrapper)
-                ((RotateDrawable) seekbarProgressDrawable.findDrawableByLayerId(
-                        R.id.volume_seekbar_progress_icon)).getDrawable();
+        final Drawable sliderProgressIcon = seekbarProgressDrawable.findDrawableByLayerId(
+                        R.id.volume_seekbar_progress_icon);
+        row.sliderProgressIcon = sliderProgressIcon != null ? (AlphaTintDrawableWrapper)
+                ((RotateDrawable) sliderProgressIcon).getDrawable() : null;
 
         row.slider.setProgressDrawable(seekbarDrawable);
-        row.slider.setThumb(null);
 
         row.icon = row.view.findViewById(R.id.volume_row_icon);
 
@@ -1484,10 +1484,14 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mContext, android.R.attr.colorBackgroundFloating);
 
         row.sliderProgressSolid.setTintList(colorTint);
-        row.sliderBgIcon.setTintList(colorTint);
+        if (row.sliderBgIcon != null) {
+            row.sliderBgIcon.setTintList(colorTint);
+        }
 
         row.sliderBgSolid.setTintList(bgTint);
-        row.sliderProgressIcon.setTintList(bgTint);
+        if (row.sliderProgressIcon != null) {
+            row.sliderProgressIcon.setTintList(bgTint);
+        }
 
         if (row.icon != null) {
             row.icon.setImageTintList(colorTint);
@@ -1878,8 +1882,12 @@ public class VolumeDialogImpl implements VolumeDialog,
                 icon.setImageResource(iconRes);
             }
 
-            sliderProgressIcon.setDrawable(view.getResources().getDrawable(iconRes, theme));
-            sliderBgIcon.setDrawable(view.getResources().getDrawable(iconRes, theme));
+            if (sliderProgressIcon != null) {
+                sliderProgressIcon.setDrawable(view.getResources().getDrawable(iconRes, theme));
+            }
+            if (sliderBgIcon != null) {
+                sliderBgIcon.setDrawable(view.getResources().getDrawable(iconRes, theme));
+            }
         }
     }
 

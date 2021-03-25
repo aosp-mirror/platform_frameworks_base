@@ -1068,8 +1068,8 @@ public final class Settings {
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_MANAGE_ALL_SUBSCRIPTIONS_SETTINGS =
-            "android.settings.MANAGE_ALL_SUBSCRIPTIONS_SETTINGS";
+    public static final String ACTION_MANAGE_ALL_SIM_PROFILES_SETTINGS =
+            "android.settings.MANAGE_ALL_SIM_PROFILES_SETTINGS";
 
     /**
      * Activity Action: Show screen for controlling which apps can draw on top of other apps.
@@ -8521,6 +8521,15 @@ public final class Settings {
          */
         public static final String ONE_HANDED_TUTORIAL_SHOW_COUNT =
                 "one_handed_tutorial_show_count";
+
+        /**
+         * Indicates whether transform is enabled.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String TRANSFORM_ENABLED = "transform_enabled";
 
         /**
          * The current night mode that has been selected by the user.  Owned

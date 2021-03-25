@@ -24,10 +24,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.common.CommonProps;
+import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
@@ -56,7 +58,7 @@ public class FaceProviderTest {
 
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
-    private FaceProvider mFaceProvider;
+    private TestableFaceProvider mFaceProvider;
 
     private static void waitForIdle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
@@ -80,7 +82,7 @@ public class FaceProviderTest {
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
-        mFaceProvider = new FaceProvider(mContext, mSensorProps, TAG,
+        mFaceProvider = new TestableFaceProvider(mContext, mSensorProps, TAG,
                 mLockoutResetDispatcher);
     }
 
@@ -123,4 +125,19 @@ public class FaceProviderTest {
             assertEquals(0, scheduler.getCurrentPendingCount());
         }
     }
+
+    private static class TestableFaceProvider extends FaceProvider {
+        public TestableFaceProvider(@NonNull Context context,
+                @NonNull SensorProps[] props,
+                @NonNull String halInstanceName,
+                @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            super(context, props, halInstanceName, lockoutResetDispatcher);
+        }
+
+        @Override
+        synchronized IFace getHalInstance() {
+            return mock(IFace.class);
+        }
+    }
+
 }

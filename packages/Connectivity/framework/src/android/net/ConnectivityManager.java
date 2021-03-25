@@ -3234,7 +3234,60 @@ public class ConnectivityManager {
         provider.setProviderId(NetworkProvider.ID_NONE);
     }
 
+    /**
+     * Register or update a network offer with ConnectivityService.
+     *
+     * ConnectivityService keeps track of offers made by the various providers and matches
+     * them to networking requests made by apps or the system. The provider supplies a score
+     * and the capabilities of the network it might be able to bring up ; these act as filters
+     * used by ConnectivityService to only send those requests that can be fulfilled by the
+     * provider.
+     *
+     * The provider is under no obligation to be able to bring up the network it offers at any
+     * given time. Instead, this mechanism is meant to limit requests received by providers
+     * to those they actually have a chance to fulfill, as providers don't have a way to compare
+     * the quality of the network satisfying a given request to their own offer.
+     *
+     * An offer can be updated by calling this again with the same callback object. This is
+     * similar to calling unofferNetwork and offerNetwork again, but will only update the
+     * provider with the changes caused by the changes in the offer.
+     *
+     * @param provider The provider making this offer.
+     * @param score The prospective score of the network.
+     * @param caps The prospective capabilities of the network.
+     * @param callback The callback to call when this offer is needed or unneeded.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
+    public void offerNetwork(@NonNull final int providerId,
+            @NonNull final NetworkScore score, @NonNull final NetworkCapabilities caps,
+            @NonNull final INetworkOfferCallback callback) {
+        try {
+            mService.offerNetwork(providerId,
+                    Objects.requireNonNull(score, "null score"),
+                    Objects.requireNonNull(caps, "null caps"),
+                    Objects.requireNonNull(callback, "null callback"));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
+    /**
+     * Withdraw a network offer made with {@link #offerNetwork}.
+     *
+     * @param callback The callback passed at registration time. This must be the same object
+     *                 that was passed to {@link #offerNetwork}
+     * @hide
+     */
+    public void unofferNetwork(@NonNull final INetworkOfferCallback callback) {
+        try {
+            mService.unofferNetwork(Objects.requireNonNull(callback));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
     /** @hide exposed via the NetworkProvider class. */
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,

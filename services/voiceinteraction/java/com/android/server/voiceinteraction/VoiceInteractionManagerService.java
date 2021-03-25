@@ -56,6 +56,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -983,7 +984,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void setHotwordDetectionServiceConfig(@Nullable Bundle options,
+        public void setHotwordDetectionServiceConfig(@Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory) {
             enforceCallingPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION);
             synchronized (this) {

@@ -88,7 +88,7 @@ public class AudioProfile {
         if (ints == null || ints.length == 0) {
             return "";
         }
-        return Arrays.stream(ints).mapToObj(anInt -> String.format("0x%02X, ", anInt))
-                .collect(Collectors.joining());
+        return Arrays.stream(ints).mapToObj(anInt -> String.format("0x%02X", anInt))
+                .collect(Collectors.joining(", "));
     }
 }

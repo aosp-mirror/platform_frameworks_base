@@ -181,3 +181,14 @@ package android.telephony.data {
 
 }
 
+package android.view.translation {
+
+  public final class UiTranslationManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, int);
+  }
+
+}
+

@@ -15,7 +15,6 @@
  */
 
 package com.android.server;
-
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.content.pm.PackageManager.FEATURE_BLUETOOTH;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -122,6 +121,7 @@ import android.net.INetworkActivityListener;
 import android.net.INetworkAgent;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
+import android.net.INetworkOfferCallback;
 import android.net.IOnCompleteListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
@@ -229,6 +229,7 @@ import com.android.net.module.util.PermissionUtils;
 import com.android.server.connectivity.AutodestructReference;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
+import com.android.server.connectivity.FullScore;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.LingerMonitor;
 import com.android.server.connectivity.MockableSystemProperties;
@@ -236,6 +237,7 @@ import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkNotificationManager;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
+import com.android.server.connectivity.NetworkOffer;
 import com.android.server.connectivity.NetworkRanker;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProfileNetworkPreferences;
@@ -591,6 +593,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * arg2 = blockedReasons
      */
     private static final int EVENT_UID_BLOCKED_REASON_CHANGED = 51;
+
+    /**
+     * Event to register a new network offer
+     * obj = NetworkOffer
+     */
+    private static final int EVENT_REGISTER_NETWORK_OFFER = 52;
+
+    /**
+     * Event to unregister an existing network offer
+     * obj = INetworkOfferCallback
+     */
+    private static final int EVENT_UNREGISTER_NETWORK_OFFER = 53;
 
     /**
      * Argument for {@link #EVENT_PROVISIONING_NOTIFICATION} to indicate that the notification
@@ -1145,8 +1159,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         /**
          * @see NetworkUtils#queryUserAccess(int, int)
          */
-        public boolean queryUserAccess(int uid, int netId) {
-            return NetworkUtils.queryUserAccess(uid, netId);
+        public boolean queryUserAccess(int uid, Network network, ConnectivityService cs) {
+            return cs.queryUserAccess(uid, network);
         }
 
         /**
@@ -4565,6 +4579,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handleUnregisterNetworkProvider((Messenger) msg.obj);
                     break;
                 }
+                case EVENT_REGISTER_NETWORK_OFFER: {
+                    handleRegisterNetworkOffer((NetworkOffer) msg.obj);
+                    break;
+                }
+                case EVENT_UNREGISTER_NETWORK_OFFER: {
+                    final NetworkOfferInfo offer =
+                            findNetworkOfferInfoByCallback((INetworkOfferCallback) msg.obj);
+                    if (null != offer) {
+                        handleUnregisterNetworkOffer(offer);
+                    }
+                    break;
+                }
                 case EVENT_REGISTER_NETWORK_AGENT: {
                     final Pair<NetworkAgentInfo, INetworkMonitor> arg =
                             (Pair<NetworkAgentInfo, INetworkMonitor>) msg.obj;
@@ -4840,6 +4866,42 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.networkMonitor().forceReevaluation(uid);
     }
 
+    // TODO: call into netd.
+    private boolean queryUserAccess(int uid, Network network) {
+        final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+        if (nai == null) return false;
+
+        // Any UID can use its default network.
+        if (nai == getDefaultNetworkForUid(uid)) return true;
+
+        // Privileged apps can use any network.
+        if (mPermissionMonitor.hasRestrictedNetworksPermission(uid)) {
+            return true;
+        }
+
+        // An unprivileged UID can use a VPN iff the VPN applies to it.
+        if (nai.isVPN()) {
+            return nai.networkCapabilities.appliesToUid(uid);
+        }
+
+        // An unprivileged UID can bypass the VPN that applies to it only if it can protect its
+        // sockets, i.e., if it is the owner.
+        final NetworkAgentInfo vpn = getVpnForUid(uid);
+        if (vpn != null && !vpn.networkAgentConfig.allowBypass
+                && uid != vpn.networkCapabilities.getOwnerUid()) {
+            return false;
+        }
+
+        // The UID's permission must be at least sufficient for the network. Since the restricted
+        // permission was already checked above, that just leaves background networks.
+        if (!nai.networkCapabilities.hasCapability(NET_CAPABILITY_FOREGROUND)) {
+            return mPermissionMonitor.hasUseBackgroundNetworksPermission(uid);
+        }
+
+        // Unrestricted network. Anyone gets to use it.
+        return true;
+    }
+
     /**
      * Returns information about the proxy a certain network is using. If given a null network, it
      * it will return the proxy for the bound network for the caller app or the default proxy if
@@ -4860,7 +4922,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return null;
             }
             return getLinkPropertiesProxyInfo(activeNetwork);
-        } else if (mDeps.queryUserAccess(mDeps.getCallingUid(), network.getNetId())) {
+        } else if (mDeps.queryUserAccess(mDeps.getCallingUid(), network, this)) {
             // Don't call getLinkProperties() as it requires ACCESS_NETWORK_STATE permission, which
             // caller may not have.
             return getLinkPropertiesProxyInfo(network);
@@ -6010,11 +6072,36 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_UNREGISTER_NETWORK_PROVIDER, messenger));
     }
 
+    @Override
+    public void offerNetwork(final int providerId,
+            @NonNull final NetworkScore score, @NonNull final NetworkCapabilities caps,
+            @NonNull final INetworkOfferCallback callback) {
+        final NetworkOffer offer = new NetworkOffer(
+                FullScore.makeProspectiveScore(score, caps), caps, callback, providerId);
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_OFFER, offer));
+    }
+
+    @Override
+    public void unofferNetwork(@NonNull final INetworkOfferCallback callback) {
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_UNREGISTER_NETWORK_OFFER, callback));
+    }
+
     private void handleUnregisterNetworkProvider(Messenger messenger) {
         NetworkProviderInfo npi = mNetworkProviderInfos.remove(messenger);
         if (npi == null) {
             loge("Failed to find Messenger in unregisterNetworkProvider");
             return;
+        }
+        // Unregister all the offers from this provider
+        final ArrayList<NetworkOfferInfo> toRemove = new ArrayList<>();
+        for (final NetworkOfferInfo noi : mNetworkOffers) {
+            if (noi.offer.providerId == npi.providerId) {
+                // Can't call handleUnregisterNetworkOffer here because iteration is in progress
+                toRemove.add(noi);
+            }
+        }
+        for (NetworkOfferInfo noi : toRemove) {
+            handleUnregisterNetworkOffer(noi);
         }
         if (DBG) log("unregisterNetworkProvider for " + npi.name);
     }
@@ -6053,6 +6140,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // contents must never be mutated. When the ranges change, the array is replaced with a new one
     // (on the handler thread).
     private volatile List<UidRange> mVpnBlockedUidRanges = new ArrayList<>();
+
+    // Must only be accessed on the handler thread
+    @NonNull
+    private final ArrayList<NetworkOfferInfo> mNetworkOffers = new ArrayList<>();
 
     @GuardedBy("mBlockedAppUids")
     private final HashSet<Integer> mBlockedAppUids = new HashSet<>();
@@ -6361,6 +6452,71 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkInfo networkInfo = nai.networkInfo;
         updateNetworkInfo(nai, networkInfo);
         updateUids(nai, null, nai.networkCapabilities);
+    }
+
+    private class NetworkOfferInfo implements IBinder.DeathRecipient {
+        @NonNull public final NetworkOffer offer;
+
+        NetworkOfferInfo(@NonNull final NetworkOffer offer) {
+            this.offer = offer;
+        }
+
+        @Override
+        public void binderDied() {
+            mHandler.post(() -> handleUnregisterNetworkOffer(this));
+        }
+    }
+
+    private boolean isNetworkProviderWithIdRegistered(final int providerId) {
+        for (final NetworkProviderInfo npi : mNetworkProviderInfos.values()) {
+            if (npi.providerId == providerId) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Register or update a network offer.
+     * @param newOffer The new offer. If the callback member is the same as an existing
+     *                 offer, it is an update of that offer.
+     */
+    private void handleRegisterNetworkOffer(@NonNull final NetworkOffer newOffer) {
+        ensureRunningOnConnectivityServiceThread();
+        if (!isNetworkProviderWithIdRegistered(newOffer.providerId)) {
+            // This may actually happen if a provider updates its score or registers and then
+            // immediately unregisters. The offer would still be in the handler queue, but the
+            // provider would have been removed.
+            if (DBG) log("Received offer from an unregistered provider");
+            return;
+        }
+        final NetworkOfferInfo existingOffer = findNetworkOfferInfoByCallback(newOffer.callback);
+        if (null != existingOffer) {
+            handleUnregisterNetworkOffer(existingOffer);
+            newOffer.migrateFrom(existingOffer.offer);
+        }
+        final NetworkOfferInfo noi = new NetworkOfferInfo(newOffer);
+        try {
+            noi.offer.callback.asBinder().linkToDeath(noi, 0 /* flags */);
+        } catch (RemoteException e) {
+            noi.binderDied();
+            return;
+        }
+        mNetworkOffers.add(noi);
+        // TODO : send requests to the provider.
+    }
+
+    private void handleUnregisterNetworkOffer(@NonNull final NetworkOfferInfo noi) {
+        ensureRunningOnConnectivityServiceThread();
+        mNetworkOffers.remove(noi);
+        noi.offer.callback.asBinder().unlinkToDeath(noi, 0 /* flags */);
+    }
+
+    @Nullable private NetworkOfferInfo findNetworkOfferInfoByCallback(
+            @NonNull final INetworkOfferCallback callback) {
+        ensureRunningOnConnectivityServiceThread();
+        for (final NetworkOfferInfo noi : mNetworkOffers) {
+            if (noi.offer.callback.equals(callback)) return noi;
+        }
+        return null;
     }
 
     /**

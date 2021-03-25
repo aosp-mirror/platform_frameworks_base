@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.media.metrics.LogSessionId;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.IHwBinder;
@@ -40,6 +41,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -73,7 +75,7 @@ import java.util.stream.Collectors;
  * <p>This class requires the {@link android.Manifest.permission#INTERNET} permission
  * when used with network-based content.
  */
-final public class MediaExtractor {
+public final class MediaExtractor {
     public MediaExtractor() {
         native_setup();
     }
@@ -768,6 +770,22 @@ final public class MediaExtractor {
     public native boolean hasCacheReachedEndOfStream();
 
     /**
+     * Sets the {@link LogSessionId} for MediaExtractor.
+     */
+    public void setLogSessionId(@NonNull LogSessionId logSessionId) {
+        mLogSessionId = Objects.requireNonNull(logSessionId);
+        // TODO: implement native_setPlaybackId(playbackId);
+    }
+
+    /**
+     * Returns the {@link LogSessionId} for MediaExtractor.
+     */
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
+    }
+
+    /**
      *  Return Metrics data about the current media container.
      *
      * @return a {@link PersistableBundle} containing the set of attributes and values
@@ -796,6 +814,7 @@ final public class MediaExtractor {
     }
 
     private MediaCas mMediaCas;
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
 
     private long mNativeContext;
 

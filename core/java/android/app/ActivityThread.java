@@ -2328,7 +2328,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @UnsupportedAppUsage
-    final Handler getHandler() {
+    public Handler getHandler() {
         return mH;
     }
 

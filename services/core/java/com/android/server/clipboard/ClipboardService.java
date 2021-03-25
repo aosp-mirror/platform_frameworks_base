@@ -1054,27 +1054,16 @@ public class ClipboardService extends SystemService {
         clipboard.mNotifiedUids.put(uid, true);
 
         Binder.withCleanCallingIdentity(() -> {
-            // Retrieve the app label of the source of the clip data
-            CharSequence sourceAppLabel = null;
-            if (clipboard.mPrimaryClipPackage != null) {
-                try {
-                    sourceAppLabel = mPm.getApplicationLabel(mPm.getApplicationInfoAsUser(
-                            clipboard.mPrimaryClipPackage, 0, userId));
-                } catch (PackageManager.NameNotFoundException e) {
-                    // leave label as null
-                }
-            }
-
             try {
                 CharSequence callingAppLabel = mPm.getApplicationLabel(
                         mPm.getApplicationInfoAsUser(callingPackage, 0, userId));
                 String message;
-                if (sourceAppLabel != null) {
+                if (isText(clipboard.primaryClip)) {
                     message = getContext().getString(
-                            R.string.pasted_from_app, callingAppLabel, sourceAppLabel);
+                            R.string.pasted_text, callingAppLabel);
                 } else {
                     message = getContext().getString(
-                            R.string.pasted_from_clipboard, callingAppLabel);
+                            R.string.pasted_content, callingAppLabel);
                 }
                 Slog.i(TAG, message);
                 Toast.makeText(
@@ -1085,4 +1074,21 @@ public class ClipboardService extends SystemService {
             }
         });
     }
+
+    /**
+     * Returns true if the provided {@link ClipData} represents a single piece of text. That is, if
+     * there is only on {@link ClipData.Item}, and that item contains a non-empty piece of text and
+     * no URI or Intent. Note that HTML may be provided along with text so the presence of
+     * HtmlText in the clip does not prevent this method returning true.
+     */
+    private static boolean isText(@NonNull ClipData data) {
+        if (data.getItemCount() > 1) {
+            return false;
+        }
+        ClipData.Item item = data.getItemAt(0);
+
+        return !TextUtils.isEmpty(item.getText()) && item.getUri() == null
+                && item.getIntent() == null;
+    }
+
 }

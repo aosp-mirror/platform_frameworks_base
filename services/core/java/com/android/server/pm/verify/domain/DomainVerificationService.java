@@ -284,7 +284,8 @@ public class DomainVerificationService extends SystemService
             int state) throws NameNotFoundException {
         if (state < DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED) {
             if (state != DomainVerificationState.STATE_SUCCESS) {
-                return DomainVerificationManager.ERROR_INVALID_STATE_CODE;
+                throw new IllegalArgumentException(
+                        "Caller is not allowed to set state code " + state);
             }
         }
 
@@ -1119,7 +1120,7 @@ public class DomainVerificationService extends SystemService
             @NonNull Set<String> domains, boolean forAutoVerify, int callingUid,
             @Nullable Integer userIdForFilter) throws NameNotFoundException {
         if (domainSetId == null) {
-            return GetAttachedResult.error(DomainVerificationManager.ERROR_DOMAIN_SET_ID_NULL);
+            throw new IllegalArgumentException("domainSetId cannot be null");
         }
 
         DomainVerificationPkgState pkgState = mAttachedPkgStates.get(domainSetId);
@@ -1140,9 +1141,9 @@ public class DomainVerificationService extends SystemService
         }
 
         if (CollectionUtils.isEmpty(domains)) {
-            return GetAttachedResult.error(
-                    DomainVerificationManager.ERROR_DOMAIN_SET_NULL_OR_EMPTY);
+            throw new IllegalArgumentException("Provided domain set cannot be empty");
         }
+
         AndroidPackage pkg = pkgSetting.getPkg();
         ArraySet<String> declaredDomains = forAutoVerify
                 ? mCollector.collectValidAutoVerifyDomains(pkg)
