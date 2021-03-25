@@ -108,18 +108,6 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * TODO(b/181887768): This method exists only for dogfooder transition and must be removed.
-     * @deprecated This method exists only for dogfooder transition and must be removed.
-     */
-    @Deprecated
-    public void setSchema(
-            @NonNull SetSchemaRequest request,
-            @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull Consumer<AppSearchResult<SetSchemaResponse>> callback) {
-        setSchema(request, callbackExecutor, callbackExecutor, callback);
-    }
-
-    /**
      * Sets the schema that represents the organizational structure of data within the AppSearch
      * database.
      *

@@ -2347,7 +2347,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 }
                 final List<ShortcutInfo> page = new ArrayList<>(results.size());
                 for (SearchResult result : results) {
-                    final ShortcutInfo si = new AppSearchShortcutInfo(result.getDocument())
+                    final ShortcutInfo si = new AppSearchShortcutInfo(result.getGenericDocument())
                             .toShortcutInfo(mShortcutUser.getUserId());
                     page.add(si);
                 }
@@ -2398,8 +2398,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             @NonNull final Function<AppSearchSession, CompletableFuture<T>> cb) {
         final long callingIdentity = Binder.clearCallingIdentity();
         final AppSearchManager.SearchContext searchContext =
-                new AppSearchManager.SearchContext.Builder()
-                        .setDatabaseName(getPackageName()).build();
+                new AppSearchManager.SearchContext.Builder(getPackageName()).build();
         final AppSearchSession session;
         try {
             session = ConcurrentUtils.waitForFutureNoInterrupt(
@@ -2427,7 +2426,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                             AppSearchShortcutInfo.SCHEMA_TYPE, true, pi);
         }
         final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();
-        session.setSchema(schemaBuilder.build(), mShortcutUser.mExecutor, result -> {
+        session.setSchema(
+                schemaBuilder.build(), mShortcutUser.mExecutor, mShortcutUser.mExecutor, result -> {
             if (!result.isSuccess()) {
                 future.completeExceptionally(
                         new IllegalArgumentException(result.getErrorMessage()));

@@ -42,8 +42,8 @@ public class AppSearchSessionUnitTest {
     public void setUp() throws Exception {
         // Remove all documents from any instances that may have been created in the tests.
         Objects.requireNonNull(mAppSearch);
-        AppSearchManager.SearchContext searchContext = new AppSearchManager.SearchContext.Builder()
-                .setDatabaseName("testDb").build();
+        AppSearchManager.SearchContext searchContext =
+                new AppSearchManager.SearchContext.Builder("testDb").build();
         CompletableFuture<AppSearchResult<AppSearchSession>> future = new CompletableFuture<>();
         mAppSearch.createSearchSession(searchContext, mExecutor, future::complete);
         mSearchSession = future.get().getResultValue();
