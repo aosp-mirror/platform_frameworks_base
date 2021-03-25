@@ -2970,9 +2970,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     final void handleAppDiedLocked(ProcessRecord app, int pid,
-            boolean restarting, boolean allowRestart) {
+            boolean restarting, boolean allowRestart, boolean fromBinderDied) {
         boolean kept = cleanUpApplicationRecordLocked(app, pid, restarting, allowRestart, -1,
-                false /*replacingPid*/);
+                false /*replacingPid*/, fromBinderDied);
         if (!kept && !restarting) {
             removeLruProcessLocked(app);
             if (pid > 0) {
@@ -3030,12 +3030,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     final void appDiedLocked(ProcessRecord app, int pid, IApplicationThread thread,
             boolean fromBinderDied, String reason) {
         // First check if this ProcessRecord is actually active for the pid.
+        final ProcessRecord curProc;
         synchronized (mPidsSelfLocked) {
-            ProcessRecord curProc = mPidsSelfLocked.get(pid);
-            if (curProc != app) {
+            curProc = mPidsSelfLocked.get(pid);
+        }
+        if (curProc != app) {
+            if (!fromBinderDied || !mProcessList.handleDyingAppDeathLocked(app, pid)) {
                 Slog.w(TAG, "Spurious death for " + app + ", curProc for " + pid + ": " + curProc);
-                return;
             }
+            return;
         }
 
         mBatteryStatsService.noteProcessDied(app.info.uid, pid);
@@ -3075,7 +3078,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             EventLogTags.writeAmProcDied(app.userId, pid, app.processName, setAdj, setProcState);
             if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
                 "Dying app: " + app + ", pid: " + pid + ", thread: " + thread.asBinder());
-            handleAppDiedLocked(app, pid, false, true);
+            handleAppDiedLocked(app, pid, false, true, fromBinderDied);
 
             if (doOomAdj) {
                 updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
@@ -4232,7 +4235,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 EventLog.writeEvent(0x534e4554, "131105245", app.getStartUid(), msg);
                 // If there is already an app occupying that pid that hasn't been cleaned up
                 cleanUpApplicationRecordLocked(app, pid, false, false, -1,
-                        true /*replacingPid*/);
+                        true /*replacingPid*/, false /* fromBinderDied */);
                 removePidLocked(pid, app);
                 app = null;
             }
@@ -4274,7 +4277,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If this application record is still attached to a previous
         // process, clean it up now.
         if (app.getThread() != null) {
-            handleAppDiedLocked(app, pid, true, true);
+            handleAppDiedLocked(app, pid, true, true, false /* fromBinderDied */);
         }
 
         // Tell the process all about itself.
@@ -4477,7 +4480,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.unlinkDeathRecipient();
             app.killLocked("error during bind", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
                     true);
-            handleAppDiedLocked(app, pid, false, true);
+            handleAppDiedLocked(app, pid, false, true, false /* fromBinderDied */);
             return false;
         }
 
@@ -4542,7 +4545,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (badApp) {
             app.killLocked("error during init", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
                     true);
-            handleAppDiedLocked(app, pid, false, true);
+            handleAppDiedLocked(app, pid, false, true, false /* fromBinderDied */);
             return false;
         }
 
@@ -11500,7 +11503,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     final boolean cleanUpApplicationRecordLocked(ProcessRecord app, int pid,
-            boolean restarting, boolean allowRestart, int index, boolean replacingPid) {
+            boolean restarting, boolean allowRestart, int index, boolean replacingPid,
+            boolean fromBinderDied) {
         boolean restart;
         synchronized (mProcLock) {
             if (index >= 0) {
@@ -11508,7 +11512,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessList.remove(pid);
             }
 
-            restart = app.onCleanupApplicationRecordLSP(mProcessStats, allowRestart);
+            // We don't want to unlinkDeathRecipient immediately, if it's not called from binder
+            // and it's not isolated, as we'd need the signal to bookkeeping the dying process list.
+            restart = app.onCleanupApplicationRecordLSP(mProcessStats, allowRestart,
+                    fromBinderDied || app.isolated /* unlinkDeath */);
         }
         mAppProfiler.onCleanupApplicationRecordLocked(app);
         skipCurrentReceiverLocked(app);
@@ -11538,25 +11545,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessList.scheduleDispatchProcessDiedLocked(pid, app.info.uid);
 
         // If this is a preceding instance of another process instance
-        allowRestart = true;
-        synchronized (app) {
-            if (app.mSuccessor != null) {
-                // We don't allow restart with this ProcessRecord now,
-                // because we have created a new one already.
-                allowRestart = false;
-                // If it's persistent, add the successor to mPersistentStartingProcesses
-                if (app.isPersistent() && !app.isRemoved()) {
-                    if (mPersistentStartingProcesses.indexOf(app.mSuccessor) < 0) {
-                        mPersistentStartingProcesses.add(app.mSuccessor);
-                    }
-                }
-                // clean up the field so the successor's proc starter could proceed.
-                app.mSuccessor.mPredecessor = null;
-                app.mSuccessor = null;
-                // Notify if anyone is waiting for it.
-                app.notifyAll();
-            }
-        }
+        allowRestart = mProcessList.handlePrecedingAppDiedLocked(app);
 
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
@@ -14652,7 +14641,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 didSomething = true;
-                cleanUpApplicationRecordLocked(app, pid, false, true, -1, false /*replacingPid*/);
+                cleanUpApplicationRecordLocked(app, pid, false, true, -1, false /*replacingPid*/,
+                        false /* fromBinderDied */);
                 mProcessList.mRemovedProcesses.remove(i);
 
                 if (app.isPersistent()) {
