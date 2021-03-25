@@ -5581,7 +5581,6 @@
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"
                 android:protectionLevel="signature|privileged" />
-    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
     <!-- @SystemApi Allows an app to override compat change config on release builds.
         Only ChangeIds that are annotated as @Overridable can be overridden on release builds.
         @hide -->
