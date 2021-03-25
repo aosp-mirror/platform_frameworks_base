@@ -17,8 +17,6 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
@@ -124,9 +122,8 @@ public class DragDropControllerTests extends WindowTestsBase {
      */
     private WindowState createDropTargetWindow(String name, int ownerId) {
         final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
-        final Task stack = createTaskStackOnDisplay(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task task = createTaskInStack(stack, ownerId);
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, ownerId);
         task.addChild(activity, 0);
 
         // Use a new TestIWindow so we don't collect events for other windows

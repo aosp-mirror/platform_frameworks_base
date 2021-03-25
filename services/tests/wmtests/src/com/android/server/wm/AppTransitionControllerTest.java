@@ -405,7 +405,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     public void testGetAnimationTargets_taskContainsMultipleTasks() {
         // [DisplayContent] - [Task] -+- [Task1] - [ActivityRecord1] (opening, invisible)
         //                            +- [Task2] - [ActivityRecord2] (closing, visible)
-        final Task parentTask = createTaskStackOnDisplay(mDisplayContent);
+        final Task parentTask = createTask(mDisplayContent);
         final ActivityRecord activity1 = createActivityRecordWithParentTask(parentTask);
         activity1.setVisible(false);
         activity1.mVisibleRequested = true;
