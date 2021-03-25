@@ -186,7 +186,7 @@ public class DozeSensors {
                 new TriggerSensor(
                         findSensorWithType(config.quickPickupSensorType()),
                         Settings.Secure.DOZE_QUICK_PICKUP_GESTURE,
-                        false /* setting default */,
+                        true /* setting default */,
                         config.quickPickupSensorEnabled(KeyguardUpdateMonitor.getCurrentUser())
                                 && udfpsEnrolled,
                         DozeLog.REASON_SENSOR_QUICK_PICKUP,
