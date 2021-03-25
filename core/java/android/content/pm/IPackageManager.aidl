@@ -796,6 +796,10 @@ interface IPackageManager {
 
     void setMimeGroup(String packageName, String group, in List<String> mimeTypes);
 
+    String getSplashScreenTheme(String packageName, int userId);
+
+    void setSplashScreenTheme(String packageName, String themeName, int userId);
+
     List<String> getMimeGroup(String packageName, String group);
 
     boolean isAutoRevokeWhitelisted(String packageName);
