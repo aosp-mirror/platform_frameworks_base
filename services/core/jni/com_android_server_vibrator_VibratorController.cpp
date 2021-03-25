@@ -150,15 +150,16 @@ static jboolean vibratorIsAvailable(JNIEnv* env, jclass /* clazz */, jlong ptr) 
     return wrapper->hal()->ping().isOk() ? JNI_TRUE : JNI_FALSE;
 }
 
-static void vibratorOn(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong timeoutMs,
-                       jlong vibrationId) {
+static jlong vibratorOn(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong timeoutMs,
+                        jlong vibrationId) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
     if (wrapper == nullptr) {
         ALOGE("vibratorOn failed because native wrapper was not initialized");
-        return;
+        return -1;
     }
     auto callback = wrapper->createCallback(vibrationId);
-    wrapper->hal()->on(std::chrono::milliseconds(timeoutMs), callback);
+    auto result = wrapper->hal()->on(std::chrono::milliseconds(timeoutMs), callback);
+    return result.isOk() ? timeoutMs : (result.isUnsupported() ? 0 : -1);
 }
 
 static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong ptr) {
@@ -234,7 +235,7 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong ptr, j
     aidl::EffectStrength effectStrength = static_cast<aidl::EffectStrength>(strength);
     auto callback = wrapper->createCallback(vibrationId);
     auto result = wrapper->hal()->performEffect(effectType, effectStrength, callback);
-    return result.isOk() ? result.value().count() : -1;
+    return result.isOk() ? result.value().count() : (result.isUnsupported() ? 0 : -1);
 }
 
 static jlong vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
@@ -252,7 +253,7 @@ static jlong vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlon
     }
     auto callback = wrapper->createCallback(vibrationId);
     auto result = wrapper->hal()->performComposedEffect(effects, callback);
-    return result.isOk() ? result.value().count() : -1;
+    return result.isOk() ? result.value().count() : (result.isUnsupported() ? 0 : -1);
 }
 
 static jlong vibratorGetCapabilities(JNIEnv* env, jclass /* clazz */, jlong ptr) {
@@ -311,7 +312,7 @@ static const JNINativeMethod method_table[] = {
          (void*)vibratorNativeInit},
         {"getNativeFinalizer", "()J", (void*)vibratorGetNativeFinalizer},
         {"isAvailable", "(J)Z", (void*)vibratorIsAvailable},
-        {"on", "(JJJ)V", (void*)vibratorOn},
+        {"on", "(JJJ)J", (void*)vibratorOn},
         {"off", "(J)V", (void*)vibratorOff},
         {"setAmplitude", "(JF)V", (void*)vibratorSetAmplitude},
         {"performEffect", "(JJJJ)J", (void*)vibratorPerformEffect},

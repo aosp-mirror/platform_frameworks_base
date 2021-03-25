@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -379,6 +380,42 @@ public class VibrationThreadTest {
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
                 eq(Vibration.Status.IGNORED_UNSUPPORTED));
         assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments().isEmpty());
+    }
+
+    @Test
+    public void vibrate_singleVibratorComposedEffects_runsDifferentVibrations() throws Exception {
+        mVibratorProviders.get(VIBRATOR_ID).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        mVibratorProviders.get(VIBRATOR_ID).setSupportedPrimitives(
+                VibrationEffect.Composition.PRIMITIVE_CLICK,
+                VibrationEffect.Composition.PRIMITIVE_TICK);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS,
+                IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addEffect(VibrationEffect.createOneShot(10, 100))
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK), 10)
+                .compose();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        // Use first duration the vibrator is turned on since we cannot estimate the clicks.
+        verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(10L));
+        verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks, times(4)).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(
+                expectedOneShot(10),
+                expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0),
+                expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f, 0),
+                expectedPrebaked(VibrationEffect.EFFECT_CLICK),
+                expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertEquals(expectedAmplitudes(100), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
     }
 
     @Test
