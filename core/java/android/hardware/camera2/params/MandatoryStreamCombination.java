@@ -62,6 +62,7 @@ public final class MandatoryStreamCombination {
         private final int mFormat;
         private final ArrayList<Size> mAvailableSizes = new ArrayList<Size> ();
         private final boolean mIsInput;
+        private final boolean mIsUltraHighResolution;
 
         /**
          * Create a new {@link MandatoryStreamInformation}.
@@ -74,8 +75,8 @@ public final class MandatoryStreamCombination {
          *              ImageFormat/PixelFormat.
          * @hide
          */
-        public MandatoryStreamInformation(@NonNull List<Size> availableSizes, int format) {
-            this(availableSizes, format, /*isInput*/false);
+        public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format) {
+            this(availableSizes, format, /*isInput*/false, /*maximumResolution*/false);
         }
 
         /**
@@ -92,12 +93,31 @@ public final class MandatoryStreamCombination {
          */
         public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format,
                 boolean isInput) {
+            this(availableSizes, format, isInput, /*maximumResolution*/ false);
+        }
+
+        /**
+         * Create a new {@link MandatoryStreamInformation}.
+         *
+           @param availableSizes List of possible stream sizes.
+         * @param format Image format.
+         * @param isInput Flag indicating whether this stream is input.
+         * @param isMaxResolution Flag indicating whether this is a maximum resolution stream.
+         *
+         * @throws IllegalArgumentException
+         *              if sizes is empty or if the format was not user-defined in
+         *              ImageFormat/PixelFormat.
+         * @hide
+         */
+        public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format,
+                boolean isInput, boolean isUltraHighResolution) {
             if (availableSizes.isEmpty()) {
                 throw new IllegalArgumentException("No available sizes");
             }
             mAvailableSizes.addAll(availableSizes);
             mFormat = checkArgumentFormat(format);
             mIsInput = isInput;
+            mIsUltraHighResolution = isUltraHighResolution;
         }
 
         /**
@@ -106,6 +126,18 @@ public final class MandatoryStreamCombination {
          */
         public boolean isInput() {
             return mIsInput;
+        }
+
+        /**
+         * Confirms whether or not this is an ultra high resolution stream.
+         * An 'ultra high resolution' stream is one which has a configuration which appears in
+         * {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION},
+         * Streams which are ultra high resolution must not be included with streams which are not
+         * ultra high resolution in the same {@link android.hardware.camera2.CaptureRequest}.
+         * @return true in case the stream is ultra high resolution, false otherwise.
+        */
+        public boolean isUltraHighResolution() {
+            return mIsUltraHighResolution;
         }
 
         /**
@@ -153,6 +185,7 @@ public final class MandatoryStreamCombination {
             if (obj instanceof MandatoryStreamInformation) {
                 final MandatoryStreamInformation other = (MandatoryStreamInformation) obj;
                 if ((mFormat != other.mFormat) || (mIsInput != other.mIsInput) ||
+                        (mIsUltraHighResolution != other.mIsUltraHighResolution) ||
                         (mAvailableSizes.size() != other.mAvailableSizes.size())) {
                     return false;
                 }
@@ -169,7 +202,7 @@ public final class MandatoryStreamCombination {
         @Override
         public int hashCode() {
             return HashCodeHelpers.hashCode(mFormat, Boolean.hashCode(mIsInput),
-                    mAvailableSizes.hashCode());
+                    Boolean.hashCode(mIsUltraHighResolution), mAvailableSizes.hashCode());
         }
     }
 
@@ -273,15 +306,20 @@ public final class MandatoryStreamCombination {
         public int mFormat;
         public SizeThreshold mSizeThreshold;
         public boolean mIsInput;
+        public boolean mIsUltraHighResolution;
         public StreamTemplate(int format, SizeThreshold sizeThreshold) {
-            this(format, sizeThreshold, /*isInput*/false);
+            this(format, sizeThreshold, /*isInput*/false, /*ultraHighResolution*/false);
         }
-
         public StreamTemplate(@Format int format, @NonNull SizeThreshold sizeThreshold,
                 boolean isInput) {
+            this(format, sizeThreshold, isInput, /*ultraHighResolution*/ false);
+        }
+        public StreamTemplate(@Format int format, @NonNull SizeThreshold sizeThreshold,
+                boolean isInput, boolean isUltraHighResolution) {
             mFormat = format;
             mSizeThreshold = sizeThreshold;
             mIsInput = isInput;
+            mIsUltraHighResolution = isUltraHighResolution;
         }
     }
 
@@ -852,12 +890,12 @@ public final class MandatoryStreamCombination {
                 inputSize.add(maxRawInputSize);
 
                 streamsInfo.add(new MandatoryStreamInformation(inputSize,
-                        ImageFormat.RAW_SENSOR, /*isInput*/true));
+                        ImageFormat.RAW_SENSOR, /*isInput*/true, /*ultraHighResolution*/true));
                 streamsInfo.add(new MandatoryStreamInformation(inputSize,
-                        ImageFormat.RAW_SENSOR));
+                        ImageFormat.RAW_SENSOR, /*isInput*/ false, /*ultraHighResolution*/true));
                 MandatoryStreamCombination streamCombination;
                 streamCombination = new MandatoryStreamCombination(streamsInfo,
-                        "Remosaic reprocessing", true);
+                        "Remosaic reprocessing", /*isReprocess*/true);
                 availableStreamCombinations.add(streamCombination);
             }
             return Collections.unmodifiableList(availableStreamCombinations);
@@ -881,7 +919,8 @@ public final class MandatoryStreamCombination {
                                     template.mFormat));
                     sizes.add(sizeChosen);
                     try {
-                        streamInfo = new MandatoryStreamInformation(sizes, template.mFormat);
+                        streamInfo = new MandatoryStreamInformation(sizes, template.mFormat,
+                                /*isInput*/ false, /*ultraHighResolution*/ true);
                     } catch (IllegalArgumentException e) {
                         String cause = "No available sizes found for format: " + template.mFormat
                                 + " size threshold: " + template.mSizeThreshold + " combination: "
