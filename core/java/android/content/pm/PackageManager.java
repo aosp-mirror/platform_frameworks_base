@@ -4473,12 +4473,17 @@ public abstract class PackageManager {
      * main activity in the category {@link Intent#CATEGORY_LAUNCHER}. Returns
      * <code>null</code> if neither are found.
      *
+     * <p>Consider using {@link #getLaunchIntentSenderForPackage(String)} if
+     * the caller is not allowed to query for the <code>packageName</code>.
+     *
      * @param packageName The name of the package to inspect.
      *
      * @return A fully-qualified {@link Intent} that can be used to launch the
      * main activity in the package. Returns <code>null</code> if the package
      * does not contain such an activity, or if <em>packageName</em> is not
      * recognized.
+     *
+     * @see #getLaunchIntentSenderForPackage(String)
      */
     public abstract @Nullable Intent getLaunchIntentForPackage(@NonNull String packageName);
 
@@ -4511,6 +4516,28 @@ public abstract class PackageManager {
      */
     @SuppressWarnings("HiddenAbstractMethod")
     public abstract @Nullable Intent getCarLaunchIntentForPackage(@NonNull String packageName);
+
+    /**
+     * Returns an {@link IntentSender} that can be used to launch a front-door activity in a
+     * package. This is used, for example, to implement an "open" button when browsing through
+     * packages. The current implementation is the same with
+     * {@link #getLaunchIntentForPackage(String)}. Instead of returning the {@link Intent}, it
+     * returns the {@link IntentSender} which is not restricted by the package visibility.
+     *
+     * <p>The caller can invoke
+     * {@link IntentSender#sendIntent(Context, int, Intent, IntentSender.OnFinished, Handler)}
+     * to launch the activity. An {@link IntentSender.SendIntentException} is thrown if the
+     * package does not contain such an activity, or if <em>packageName</em> is not recognized.
+     *
+     * @param packageName The name of the package to inspect.
+     * @return Returns a {@link IntentSender} to launch the activity.
+     *
+     * @see #getLaunchIntentForPackage(String)
+     */
+    public @NonNull IntentSender getLaunchIntentSenderForPackage(@NonNull String packageName) {
+        throw new UnsupportedOperationException("getLaunchIntentSenderForPackage not implemented"
+                + "in subclass");
+    }
 
     /**
      * Return an array of all of the POSIX secondary group IDs that have been

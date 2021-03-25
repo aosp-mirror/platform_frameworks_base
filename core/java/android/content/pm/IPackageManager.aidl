@@ -757,6 +757,9 @@ interface IPackageManager {
 
     void requestChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IOnChecksumsReadyListener onChecksumsReadyListener, int userId);
 
+    IntentSender getLaunchIntentSenderForPackage(String packageName, String callingPackage,
+                String featureId, int userId);
+
     //------------------------------------------------------------------------
     //
     // The following binder interfaces have been moved to IPermissionManager

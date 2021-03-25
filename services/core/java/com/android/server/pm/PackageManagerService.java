@@ -149,6 +149,7 @@ import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
+import android.app.PendingIntent;
 import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
@@ -161,6 +162,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -28009,6 +28011,56 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
+    }
+
+    @Override
+    public IntentSender getLaunchIntentSenderForPackage(String packageName, String callingPackage,
+            String featureId, int userId) throws RemoteException {
+        Objects.requireNonNull(packageName);
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "get launch intent sender for package");
+        final int packageUid = getPackageUid(callingPackage, 0 /* flags */, userId);
+        if (!UserHandle.isSameApp(callingUid, packageUid)) {
+            throw new SecurityException("getLaunchIntentSenderForPackage() from calling uid: "
+                    + callingUid + " does not own package: " + callingPackage);
+        }
+
+        // Using the same implementation with the #getLaunchIntentForPackage to get the ResolveInfo.
+        // Pass the resolveForStart as true in queryIntentActivities to skip the app filtering.
+        final Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
+        intentToResolve.addCategory(Intent.CATEGORY_INFO);
+        intentToResolve.setPackage(packageName);
+        String resolvedType = intentToResolve.resolveTypeIfNeeded(mContext.getContentResolver());
+        List<ResolveInfo> ris = queryIntentActivitiesInternal(intentToResolve, resolvedType,
+                0 /* flags */, 0 /* privateResolveFlags */, callingUid, userId,
+                true /* resolveForStart */, false /* allowDynamicSplits */);
+        if (ris == null || ris.size() <= 0) {
+            intentToResolve.removeCategory(Intent.CATEGORY_INFO);
+            intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
+            intentToResolve.setPackage(packageName);
+            resolvedType = intentToResolve.resolveTypeIfNeeded(mContext.getContentResolver());
+            ris = queryIntentActivitiesInternal(intentToResolve, resolvedType,
+                    0 /* flags */, 0 /* privateResolveFlags */, callingUid, userId,
+                    true /* resolveForStart */, false /* allowDynamicSplits */);
+        }
+
+        final Intent intent = new Intent(intentToResolve);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // For the case of empty result, no component name is assigned into the intent. A
+        // non-launchable IntentSender which contains the failed intent is created. The
+        // SendIntentException is thrown if the IntentSender#sendIntent is invoked.
+        if (ris != null && !ris.isEmpty()) {
+            intent.setClassName(ris.get(0).activityInfo.packageName,
+                    ris.get(0).activityInfo.name);
+        }
+        final IIntentSender target = ActivityManager.getService().getIntentSenderWithFeature(
+                ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                featureId, null /* token */, null /* resultWho */,
+                1 /* requestCode */, new Intent[] { intent },
+                resolvedType != null ? new String[] { resolvedType } : null,
+                PendingIntent.FLAG_IMMUTABLE, null /* bOptions */, userId);
+        return new IntentSender(target);
     }
 }
 
