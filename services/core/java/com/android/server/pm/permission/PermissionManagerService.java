@@ -1798,9 +1798,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // PermissionPolicyService will handle the app op for runtime permissions later.
                 grantRuntimePermissionInternal(packageName, permName, false,
                         Process.SYSTEM_UID, userId, delayingPermCallback);
-            // If permission review is enabled the permissions for a legacy apps
-            // are represented as constantly granted runtime ones, so don't revoke.
-            } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
+            // In certain cases we should leave the state unchanged:
+            // -- If permission review is enabled the permissions for a legacy apps
+            // are represented as constantly granted runtime ones
+            // -- If the permission was split from a non-runtime permission
+            } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0
+                    && !isPermissionSplitFromNonRuntime(permName, targetSdk)) {
                 // Otherwise, reset the permission.
                 revokeRuntimePermissionInternal(packageName, permName, false, Process.SYSTEM_UID,
                         userId, null, delayingPermCallback);
@@ -1830,6 +1833,28 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         mPackageManagerInt.writePermissionSettings(syncUpdatedUsers.toArray(), false);
         mPackageManagerInt.writePermissionSettings(asyncUpdatedUsers.toArray(), true);
+    }
+
+    /**
+     * Determine if the given permission should be treated as split from a
+     * non-runtime permission for an application targeting the given SDK level.
+     */
+    private boolean isPermissionSplitFromNonRuntime(String permName, int targetSdk) {
+        final List<PermissionManager.SplitPermissionInfo> splitPerms = getSplitPermissionInfos();
+        final int size = splitPerms.size();
+        for (int i = 0; i < size; i++) {
+            final PermissionManager.SplitPermissionInfo splitPerm = splitPerms.get(i);
+            if (targetSdk < splitPerm.getTargetSdk()
+                    && splitPerm.getNewPermissions().contains(permName)) {
+                synchronized (mLock) {
+                    final Permission perm =
+                            mRegistry.getPermission(splitPerm.getSplitPermission());
+                    return perm != null && perm.getType() != Permission.TYPE_CONFIG
+                            && !perm.isRuntime();
+                }
+            }
+        }
+        return false;
     }
 
     /**
