@@ -162,6 +162,12 @@ enum DebugLevel {
  */
 #define PROPERTY_IS_EMULATOR "ro.boot.qemu"
 
+/**
+ * Turns on the Skia GPU option "reduceOpsTaskSplitting" which improves GPU
+ * efficiency but may increase VRAM consumption. Default is "false".
+ */
+#define PROPERTY_REDUCE_OPS_TASK_SPLITTING "renderthread.skia.reduceopstasksplitting"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
