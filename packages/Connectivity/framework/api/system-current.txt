@@ -219,6 +219,7 @@ package android.net {
     method public void onAutomaticReconnectDisabled();
     method public void onBandwidthUpdateRequested();
     method public void onNetworkCreated();
+    method public void onNetworkDisconnected();
     method public void onNetworkUnwanted();
     method public void onQosCallbackRegistered(int, @NonNull android.net.QosFilter);
     method public void onQosCallbackUnregistered(int);
