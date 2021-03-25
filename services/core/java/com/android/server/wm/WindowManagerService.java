@@ -2228,13 +2228,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setFrameNumber(frameNumber);
 
-            final DisplayContent dc = win.getDisplayContent();
-
-            if (win.mPendingPositionChanged != null) {
-                win.mPendingPositionChanged.updateLeashPosition(frameNumber);
-                win.mPendingPositionChanged = null;
-            }
-
             int attrChanges = 0;
             int flagChanges = 0;
             int privateFlagChanges = 0;
