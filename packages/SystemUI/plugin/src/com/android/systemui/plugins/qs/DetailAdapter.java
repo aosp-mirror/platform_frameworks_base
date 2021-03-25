@@ -51,6 +51,15 @@ public interface DetailAdapter {
         return Resources.ID_NULL;
     }
 
+    /**
+     * @return resource id of the string to use for closing the detail panel. If
+     * {@code Resources.ID_NULL}, then use the default string:
+     * {@code com.android.systemui.R.string.quick_settings_done}
+     */
+    default int getDoneText() {
+        return Resources.ID_NULL;
+    }
+
     void setToggleState(boolean state);
     int getMetricsCategory();
 
