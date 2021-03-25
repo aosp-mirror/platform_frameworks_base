@@ -292,6 +292,14 @@ public final class PhysicalChannelConfig implements Parcelable {
     }
 
     /**
+     * Return a copy of this PhysicalChannelConfig object but redact all the location info.
+     * @hide
+     */
+    public PhysicalChannelConfig createLocationInfoSanitizedCopy() {
+        return new Builder(this).setPhysicalCellId(PHYSICAL_CELL_ID_UNKNOWN).build();
+    }
+
+    /**
      * @return String representation of the connection status
      * @hide
      */
@@ -538,6 +546,23 @@ public final class PhysicalChannelConfig implements Parcelable {
             mContextIds = new int[0];
             mPhysicalCellId = PHYSICAL_CELL_ID_UNKNOWN;
             mBand = BAND_UNKNOWN;
+        }
+
+        /**
+         * Builder object constructed from existing PhysicalChannelConfig object.
+         * @hide
+         */
+        public Builder(PhysicalChannelConfig config) {
+            mNetworkType = config.getNetworkType();
+            mFrequencyRange = config.getFrequencyRange();
+            mDownlinkChannelNumber = config.getDownlinkChannelNumber();
+            mUplinkChannelNumber = config.getUplinkChannelNumber();
+            mCellBandwidthDownlinkKhz = config.getCellBandwidthDownlinkKhz();
+            mCellBandwidthUplinkKhz = config.getCellBandwidthUplinkKhz();
+            mCellConnectionStatus = config.getConnectionStatus();
+            mContextIds = Arrays.copyOf(config.getContextIds(), config.getContextIds().length);
+            mPhysicalCellId = config.getPhysicalCellId();
+            mBand = config.getBand();
         }
 
         public PhysicalChannelConfig build() {
