@@ -10692,10 +10692,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private String[] populateNonExemptAndExemptFromPolicyApps(String[] packageNames,
             Set<String> outputExemptApps) {
         Preconditions.checkArgument(outputExemptApps.isEmpty(), "outputExemptApps is not empty");
-        List<String> exemptApps = listPolicyExemptAppsUnchecked();
-        if (exemptApps.isEmpty()) {
+        List<String> exemptAppsList = listPolicyExemptAppsUnchecked();
+        if (exemptAppsList.isEmpty()) {
             return packageNames;
         }
+        // Using a set so contains() is O(1)
+        Set<String> exemptApps = new HashSet<>(exemptAppsList);
         List<String> nonExemptApps = new ArrayList<>(packageNames.length);
         for (int i = 0; i < packageNames.length; i++) {
             String app = packageNames[i];
@@ -10974,6 +10976,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_PACKAGE_ACCESS)));
 
+        List<String> exemptApps = listPolicyExemptAppsUnchecked();
+        if (exemptApps.contains(packageName)) {
+            Slog.d(LOG_TAG, "setApplicationHidden(): ignoring %s as it's on policy-exempt list",
+                    packageName);
+            return false;
+        }
+
         final int userId = parent ? getProfileParentId(caller.getUserId()) : caller.getUserId();
         boolean result;
         synchronized (getLockObject()) {
@@ -10988,6 +10997,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_APPLICATION_HIDDEN);
 
+            if (VERBOSE_LOG) {
+                Slog.v(LOG_TAG, "calling pm.setApplicationHiddenSettingAsUser(%s, %b, %d)",
+                        packageName, hidden, userId);
+            }
             result = mInjector.binderWithCleanCallingIdentity(() -> mIPackageManager
                     .setApplicationHiddenSettingAsUser(packageName, hidden, userId));
         }
