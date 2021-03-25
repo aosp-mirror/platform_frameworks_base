@@ -386,7 +386,7 @@ public class UsbManager {
     /**
 
      * A long extra indicating the timestamp just before
-     * sending {@link  ACTION_USB_ACCESSORY_HANDSHAKE}.
+     * sending {@link #ACTION_USB_ACCESSORY_HANDSHAKE}.
      * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
      *
      * {@hide}
