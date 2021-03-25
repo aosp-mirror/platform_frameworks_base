@@ -4547,9 +4547,8 @@ public class ConnectivityServiceTest {
             expectNoRequestChanged(testFactory);
             testFactory.assertRequestCountEquals(0);
             assertFalse(testFactory.getMyStartRequested());
-            // ...  and cell data to be torn down after nascent network timeout.
-            cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent,
-                    mService.mNascentDelayMs + TEST_CALLBACK_TIMEOUT_MS);
+            // ...  and cell data to be torn down immediately since it is no longer nascent.
+            cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
             waitForIdle();
             assertLength(1, mCm.getAllNetworks());
         } finally {
@@ -11788,6 +11787,11 @@ public class ConnectivityServiceTest {
         internetFactory.expectRequestRemove();
         internetFactory.assertRequestCountEquals(0);
 
+        // Create a request that holds the upcoming wifi network.
+        final TestNetworkCallback wifiCallback = new TestNetworkCallback();
+        mCm.requestNetwork(new NetworkRequest.Builder().addTransportType(TRANSPORT_WIFI).build(),
+                wifiCallback);
+
         // Now WiFi connects and it's unmetered, but it's weaker than cell.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
@@ -11796,7 +11800,7 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.connect(true);
 
         // The OEM_PAID preference prefers an unmetered network to an OEM_PAID network, so
-        // the oemPaidFactory can't beat this no matter how high its score.
+        // the oemPaidFactory can't beat wifi no matter how high its score.
         oemPaidFactory.expectRequestRemove();
         expectNoRequestChanged(internetFactory);
 
@@ -11807,6 +11811,7 @@ public class ConnectivityServiceTest {
         // unmetered network, so the oemPaidNetworkFactory still can't beat this.
         expectNoRequestChanged(oemPaidFactory);
         internetFactory.expectRequestAdd();
+        mCm.unregisterNetworkCallback(wifiCallback);
     }
 
     /**
