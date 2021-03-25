@@ -627,12 +627,17 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Integer argument specifying the end index of the requested text location data. Must be
-     * positive.
+     * positive and no larger than {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH}.
      *
      * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";
+
+    /**
+     * The maximum allowed length of the requested text location data.
+     */
+    public static final int EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH = 20000;
 
     /**
      * Key used to request extra data for the rendering information.
@@ -1038,6 +1043,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      * recycled).
      */
     public boolean refreshWithExtraData(String extraDataKey, Bundle args) {
+        // limits the text location length to make sure the rectangle array allocation avoids
+        // the binder transaction failure and OOM crash.
+        if (args.getInt(EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH, -1)
+                > EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH) {
+            args.putInt(EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH,
+                    EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH);
+        }
+
         args.putString(EXTRA_DATA_REQUESTED_KEY, extraDataKey);
         return refresh(args, true);
     }
