@@ -1461,7 +1461,7 @@ java_library {
     ],
     libs: [
         "framework-annotations-lib",
-        "framework-connectivity",
+        "framework-connectivity.stubs.module_lib",
         "unsupportedappusage",
     ],
     visibility: [
