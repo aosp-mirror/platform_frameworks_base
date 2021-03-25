@@ -43,7 +43,6 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.MathUtils;
 import android.util.Slog;
-import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -296,9 +295,9 @@ class WallpaperController {
     }
 
     boolean updateWallpaperOffset(WindowState wallpaperWin, boolean sync) {
-        final DisplayInfo displayInfo = wallpaperWin.getDisplayInfo();
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
+        final Rect parentFrame = wallpaperWin.getParentFrame();
+        final int dw = parentFrame.width();
+        final int dh = parentFrame.height();
 
         int xOffset = 0;
         int yOffset = 0;
