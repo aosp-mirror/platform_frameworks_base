@@ -1551,16 +1551,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetworkInfoBlockingLogs.log(action + " " + uid);
     }
 
-    private void maybeLogBlockedStatusChanged(NetworkRequestInfo nri, Network net,
-            boolean blocked) {
+    private void maybeLogBlockedStatusChanged(NetworkRequestInfo nri, Network net, int blocked) {
         if (nri == null || net == null || !LOGD_BLOCKED_NETWORKINFO) {
             return;
         }
-        final String action = blocked ? "BLOCKED" : "UNBLOCKED";
+        final String action = (blocked != 0) ? "BLOCKED" : "UNBLOCKED";
         final int requestId = nri.getActiveRequest() != null
                 ? nri.getActiveRequest().requestId : nri.mRequests.get(0).requestId;
         mNetworkInfoBlockingLogs.log(String.format(
-                "%s %d(%d) on netId %d", action, nri.mAsUid, requestId, net.getNetId()));
+                "%s %d(%d) on netId %d: %s", action, nri.mAsUid, requestId, net.getNetId(),
+                blockedReasonsToString(blocked)));
     }
 
     /**
@@ -7348,7 +7348,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 break;
             }
             case ConnectivityManager.CALLBACK_BLK_CHANGED: {
-                maybeLogBlockedStatusChanged(nri, networkAgent.network, arg1 != 0);
+                maybeLogBlockedStatusChanged(nri, networkAgent.network, arg1);
                 msg.arg1 = arg1;
                 break;
             }

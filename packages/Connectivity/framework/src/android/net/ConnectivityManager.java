@@ -921,6 +921,7 @@ public class ConnectivityManager {
             BLOCKED_REASON_DOZE,
             BLOCKED_REASON_APP_STANDBY,
             BLOCKED_REASON_RESTRICTED_MODE,
+            BLOCKED_REASON_LOCKDOWN_VPN,
             BLOCKED_METERED_REASON_DATA_SAVER,
             BLOCKED_METERED_REASON_USER_RESTRICTED,
             BLOCKED_METERED_REASON_ADMIN_DISABLED,
@@ -3659,7 +3660,8 @@ public class ConnectivityManager {
         public void onBlockedStatusChanged(@NonNull Network network, boolean blocked) {}
 
         /**
-         * Called when access to the specified network is blocked or unblocked.
+         * Called when access to the specified network is blocked or unblocked, or the reason for
+         * access being blocked changes.
          *
          * If a NetworkCallback object implements this method,
          * {@link #onBlockedStatusChanged(Network, boolean)} will not be called.
