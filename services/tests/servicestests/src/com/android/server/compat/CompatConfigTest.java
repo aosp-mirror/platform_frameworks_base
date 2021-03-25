@@ -260,6 +260,36 @@ public class CompatConfigTest {
     }
 
     @Test
+    public void testInstallerCanSetOverrides() throws Exception {
+        final long changeId = 1234L;
+        final int installerUid = 23;
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addOverridableChangeWithId(1234L)
+                .build();
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("com.some.package")
+                .build();
+        PackageManager packageManager = mock(PackageManager.class);
+        when(mContext.getPackageManager()).thenReturn(packageManager);
+        when(packageManager.getApplicationInfo(eq("com.some.package"), anyInt()))
+                .thenReturn(applicationInfo);
+
+        // Force the validator to prevent overriding the change by using a user build.
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+
+        CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(
+                Collections.singletonMap(1234L,
+                        new PackageOverride.Builder()
+                                .setMaxVersionCode(99L)
+                                .setEnabled(true)
+                                .build()));
+
+        compatConfig.addOverrides(config, "com.some.package");
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isTrue();
+    }
+
+    @Test
     public void testApplyDeferredOverridesAfterInstallingApp() throws Exception {
         ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
                 .withPackageName("com.notinstalled.foo")
@@ -639,9 +669,18 @@ public class CompatConfigTest {
                         .build());
         when(mPackageManager.getApplicationInfo(eq("bar.baz"), anyInt()))
                 .thenThrow(new NameNotFoundException());
-
-        compatConfig.addOverride(1L, "foo.bar", true);
-        compatConfig.addOverride(2L, "bar.baz", false);
+        compatConfig.addOverrides(
+                new CompatibilityOverrideConfig(
+                        Collections.singletonMap(
+                                1L,
+                                new PackageOverride.Builder().setEnabled(true).build())),
+                "foo.bar");
+        compatConfig.addOverrides(
+                new CompatibilityOverrideConfig(
+                        Collections.singletonMap(
+                                2L,
+                                new PackageOverride.Builder().setEnabled(false).build())),
+                "bar.baz");
 
         assertThat(readFile(overridesFile)).isEqualTo("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                 + "<overrides>\n"

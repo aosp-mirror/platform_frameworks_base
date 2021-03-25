@@ -5131,8 +5131,15 @@
     <permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"
                 android:protectionLevel="signature|privileged" />
     <!-- Allows an app to override compat change config.
+         This permission only allows to override config on debuggable builds or test-apks and is
+         therefore a less powerful version of OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"
+                android:protectionLevel="signature|privileged" />
+    <!-- @SystemApi Allows an app to override compat change config on release builds.
+        Only ChangeIds that are annotated as @Overridable can be overridden on release builds.
+        @hide -->
+    <permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"
                 android:protectionLevel="signature|privileged" />
 
     <!-- Allows input events to be monitored. Very dangerous!  @hide -->
