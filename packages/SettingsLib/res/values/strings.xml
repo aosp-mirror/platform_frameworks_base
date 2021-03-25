@@ -1272,6 +1272,22 @@
     <!-- Button label for generic OK action [CHAR LIMIT=20] -->
     <string name="okay">OK</string>
 
+    <!-- Label for the settings activity for controlling apps that can schedule alarms [CHAR LIMIT=30] -->
+    <string name="alarms_and_reminders_label">Alarms and reminders</string>
+    <!-- Label for the switch to toggler the permission for scheduling alarms [CHAR LIMIT=50] -->
+    <string name="alarms_and_reminders_switch_title">Allow to set alarms or reminders</string>
+    <!-- Title for the setting screen for controlling apps that can schedule alarms [CHAR LIMIT=30] -->
+    <string name="alarms_and_reminders_title">Alarms and reminders</string>
+    <!-- Description that appears below the alarms_and_reminders switch [CHAR LIMIT=NONE] -->
+    <string name="alarms_and_reminders_footer_title">
+        Allow this app to schedule alarms or other timing based events.
+        This will allow the app to wake up and run even when you are not using the device.
+        Note that revoking this permission may cause the app to malfunction, specifically any alarms
+        that the app has scheduled will no longer work.
+    </string>
+    <!-- Keywords for setting screen for controlling apps that can schedule alarms [CHAR LIMIT=100] -->
+    <string name="keywords_alarms_and_reminders">schedule, alarm, reminder, event</string>
+
     <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
     <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
     <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
