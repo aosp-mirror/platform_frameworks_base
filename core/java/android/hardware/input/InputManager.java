@@ -1571,12 +1571,12 @@ public final class InputManager {
     }
 
     /**
-     * Gets a battery object associated with an input device, assuming it has one.
+     * Gets a battery state object associated with an input device, assuming it has one.
      * @return The battery, never null.
      * @hide
      */
-    public InputDeviceBattery getInputDeviceBattery(int deviceId, boolean hasBattery) {
-        return new InputDeviceBattery(this, deviceId, hasBattery);
+    public InputDeviceBatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
+        return new InputDeviceBatteryState(this, deviceId, hasBattery);
     }
 
     /**

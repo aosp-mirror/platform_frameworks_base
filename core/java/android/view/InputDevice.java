@@ -22,7 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.hardware.Battery;
+import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
@@ -88,7 +88,7 @@ public final class InputDevice implements Parcelable {
     private SensorManager mSensorManager;
 
     @GuardedBy("mMotionRanges")
-    private Battery mBattery;
+    private BatteryState mBatteryState;
 
     @GuardedBy("mMotionRanges")
     private LightsManager mLightsManager;
@@ -848,19 +848,19 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
-     * Gets the battery object associated with the device, if there is one.
+     * Gets the battery state object associated with the device, if there is one.
      * Even if the device does not have a battery, the result is never null.
-     * Use {@link Battery#hasBattery} to determine whether a battery is
+     * Use {@link BatteryState#isPresent} to determine whether a battery is
      * present.
      *
      * @return The battery object associated with the device, never null.
      */
     @NonNull
-    public Battery getBattery() {
-        if (mBattery == null) {
-            mBattery = InputManager.getInstance().getInputDeviceBattery(mId, mHasBattery);
+    public BatteryState getBatteryState() {
+        if (mBatteryState == null) {
+            mBatteryState = InputManager.getInstance().getInputDeviceBatteryState(mId, mHasBattery);
         }
-        return mBattery;
+        return mBatteryState;
     }
 
     /**

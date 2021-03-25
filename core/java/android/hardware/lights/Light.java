@@ -141,6 +141,11 @@ public final class Light implements Parcelable {
         return mId;
     }
 
+    @Override
+    public String toString() {
+        return "[Name=" + mName + " Id=" + mId + " Type=" + mType + " Ordinal=" + mOrdinal + "]";
+    }
+
     /**
      * Returns the id of the light.
      *
