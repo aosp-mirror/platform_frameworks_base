@@ -10686,11 +10686,11 @@ package android.telephony.data {
 
   public final class EpsBearerQosSessionAttributes implements android.os.Parcelable android.net.QosSessionAttributes {
     method public int describeContents();
-    method public long getGuaranteedDownlinkBitRate();
-    method public long getGuaranteedUplinkBitRate();
-    method public long getMaxDownlinkBitRate();
-    method public long getMaxUplinkBitRate();
-    method public int getQci();
+    method public long getGuaranteedDownlinkBitRateKbps();
+    method public long getGuaranteedUplinkBitRateKbps();
+    method public long getMaxDownlinkBitRateKbps();
+    method public long getMaxUplinkBitRateKbps();
+    method public int getQosIdentifier();
     method @NonNull public java.util.List<java.net.InetSocketAddress> getRemoteAddresses();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.EpsBearerQosSessionAttributes> CREATOR;
@@ -10698,13 +10698,13 @@ package android.telephony.data {
 
   public final class NrQosSessionAttributes implements android.os.Parcelable android.net.QosSessionAttributes {
     method public int describeContents();
-    method public int get5Qi();
-    method public long getAveragingWindow();
-    method public long getGuaranteedDownlinkBitRate();
-    method public long getGuaranteedUplinkBitRate();
-    method public long getMaxDownlinkBitRate();
-    method public long getMaxUplinkBitRate();
-    method public int getQfi();
+    method @NonNull public java.time.Duration getBitRateWindowDuration();
+    method public long getGuaranteedDownlinkBitRateKbps();
+    method public long getGuaranteedUplinkBitRateKbps();
+    method public long getMaxDownlinkBitRateKbps();
+    method public long getMaxUplinkBitRateKbps();
+    method @IntRange(from=1, to=63) public int getQosFlowIdentifier();
+    method public int getQosIdentifier();
     method @NonNull public java.util.List<java.net.InetSocketAddress> getRemoteAddresses();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.NrQosSessionAttributes> CREATOR;
