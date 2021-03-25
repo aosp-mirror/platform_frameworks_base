@@ -104,16 +104,15 @@ public final class CompatChanges {
      *
      * @param packageName The package name of the app in question.
      * @param overrides A map from changeId to the override applied for this change id.
-     * @hide
      */
-    @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG)
-    public static void setPackageOverride(String packageName,
-            Map<Long, PackageOverride> overrides) {
+    @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
+    public static void setPackageOverride(@NonNull String packageName,
+            @NonNull Map<Long, PackageOverride> overrides) {
         IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(overrides);
         try {
-            platformCompat.setOverridesFromInstaller(config, packageName);
+            platformCompat.setOverridesOnReleaseBuilds(config, packageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
