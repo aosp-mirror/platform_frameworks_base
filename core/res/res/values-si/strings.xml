@@ -1689,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"කෙටිමඟ භාවිතා කරන්න"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"වර්ණ අපවර්තනය"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"වර්ණ නිවැරදි කිරීම"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"දීප්තිය අඩු කරන්න"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"තවත් අඳුරු"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මකයි."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිතයි."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> භාවිත කිරීමට හඬ පරිමා යතුරු දෙකම තත්පර තුනකට ඔබාගෙන සිටින්න"</string>

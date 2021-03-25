@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ऐप अभी इस्तेमाल हो रहा है"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"बैटरी की खपत करने वाले ऐप"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ज़ूम करने की सुविधा"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"सुलभता सुविधाओं से जुड़ी सुरक्षा नीति"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> बैटरी का इस्तेमाल कर रहा है"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ऐप बैटरी का इस्तेमाल कर रहे हैं"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"बैटरी और डेटा खर्च की जानकारी के लिए छूएं"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट का उपयोग करें"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंग बदलने की सुविधा"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग में सुधार करने की सुविधा"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"स्क्रीन की चमक कम करें"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"स्क्रीन की रोशनी को सामान्य लेवल से और कम करने की सुविधा"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू कर दिया गया."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद कर दिया गया."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> इस्तेमाल करने के लिए आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेंसर से जुड़ी निजता के बारे में सूचना"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ऐप्लिकेशन का आइकॉन"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ऐप्लिकेशन की ब्रैंड इमेज"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ऐक्सेस से जुड़ी सेटिंग देखें"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> आपकी स्क्रीन को देख सकता है और कंट्रोल कर सकता है. ऐक्सेस की समीक्षा करने के लिए टैप करें."</string>
 </resources>

@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Tətbiq işləyir"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Batareyadan istifadə edən tətbiqlər"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Böyütmə"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Əlçatımlılıq güvənlik siyasəti"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> batareyadan istifadə edir"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> tətbiq batareyadan istifadə edir"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Batareya və data istifadəsi haqqında ətraflı məlumat üçün klikləyin"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Qısayol İstifadə edin"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Rəng İnversiyası"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Rəng korreksiyası"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Parlaqlığı azaldın"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Əlavə qaraltma"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Səs səviyyəsi düymələrinə basıb saxlayın. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktiv edildi."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Səs səviyyəsi düymələrinə basılaraq saxlanıb. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> deaktiv edilib."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> istifadə etmək üçün hər iki səs düyməsini üç saniyə basıb saxlayın"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensor Məxfiliyi"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Tətbiq ikonası"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Tətbiqin brend şəkli"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Giriş ayarlarını yoxlayın"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ekranınıza baxa və nəzarət edə bilər. Nəzərdən keçirmək üçün toxunun."</string>
 </resources>

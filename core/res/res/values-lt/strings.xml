@@ -300,8 +300,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Programa paleista"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Programos, naudojančios akumuliatoriaus energiją"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Didinimas"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Pritaikomumo saugos politika"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ naudoja akumuliatoriaus energiją"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Programų, naudojančių akumuliatoriaus energiją: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Palieskite ir sužinokite išsamios informacijos apie akumuliatoriaus bei duomenų naudojimą"</string>
@@ -1734,7 +1733,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Naudoti spartųjį klavišą"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Spalvų inversija"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Spalvų taisymas"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Šviesumo mažinimas"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Itin blanku"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Laikomi garsumo klavišai. „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“ įjungta."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Laikomi garsumo klavišai. „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“ išjungta."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Jei norite naudoti „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“, paspauskite abu garsumo klavišus ir palaikykite tris sekundes"</string>
@@ -2315,8 +2314,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Jutiklių privatumas"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Programos piktograma"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Programos prekės ženklo vaizdas"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Patikrinkite prieigos nustatymus"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"„<xliff:g id="SERVICE_NAME">%s</xliff:g>“ gali peržiūrėti ir valdyti jūsų ekraną. Palieskite ir peržiūrėkite."</string>
 </resources>

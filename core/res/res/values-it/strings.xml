@@ -1689,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usa scorciatoia"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversione dei colori"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correzione del colore"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Riduci la luminosità"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Attenuazione extra"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Tieni premuti entrambi i tasti del volume per tre secondi per utilizzare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
