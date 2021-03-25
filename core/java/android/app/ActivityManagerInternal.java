@@ -440,4 +440,11 @@ public abstract class ActivityManagerInternal {
      * @return true if exists, false otherwise.
      */
     public abstract boolean isPendingTopUid(int uid);
+
+    public abstract void tempAllowWhileInUsePermissionInFgs(int uid, long duration);
+
+    public abstract boolean isTempAllowlistedForFgsWhileInUse(int uid);
+
+    public abstract boolean canAllowWhileInUsePermissionInFgs(int pid, int uid,
+            @NonNull String packageName);
 }

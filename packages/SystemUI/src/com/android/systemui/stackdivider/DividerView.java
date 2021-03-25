@@ -845,15 +845,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     void enterSplitMode(boolean isHomeStackResizable) {
-        post(() -> {
-            final SurfaceControl sc = getWindowSurfaceControl();
-            if (sc == null) {
-                return;
-            }
-            Transaction t = mTiles.getTransaction();
-            t.show(sc).apply();
-            mTiles.releaseTransaction(t);
-        });
+        setHidden(false);
 
         SnapTarget miniMid =
                 mSplitLayout.getMinimizedSnapAlgorithm(isHomeStackResizable).getMiddleTarget();
@@ -880,14 +872,17 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     void exitSplitMode() {
-        // Reset tile bounds
         final SurfaceControl sc = getWindowSurfaceControl();
         if (sc == null) {
             return;
         }
         Transaction t = mTiles.getTransaction();
-        t.hide(sc).apply();
+        t.hide(sc);
+        mImeController.setDimsHidden(t, true);
+        t.apply();
         mTiles.releaseTransaction(t);
+
+        // Reset tile bounds
         int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
         mWindowManagerProxy.applyResizeSplits(midPos, mSplitLayout);
     }
