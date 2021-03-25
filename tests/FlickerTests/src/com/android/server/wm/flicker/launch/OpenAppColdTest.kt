@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -24,6 +25,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -55,6 +57,12 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
                 wmHelper.waitForFullScreenApp(testApp.component)
             }
         }
+
+    @FlakyTest
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
