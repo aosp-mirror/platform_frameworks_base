@@ -246,10 +246,11 @@
     <!-- permissions required for CTS test - PhoneStateListenerTest -->
     <uses-permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH" />
 
-    <!-- Permissions required for ganting and logging -->
+    <!-- Permissions required for granting and logging -->
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
     <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
 
     <!-- Permission required for CTS test - BatterySaverTest -->
     <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
