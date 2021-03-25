@@ -87,10 +87,10 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     fun appsStartingBounds() {
         testSpec.assertLayersStart {
             val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-            coversExactly(appPairsHelper.getPrimaryBounds(dividerRegion),
-                primaryApp.defaultWindowName)
-            coversExactly(appPairsHelper.getSecondaryBounds(dividerRegion),
-                secondaryApp.defaultWindowName)
+            visibleRegion(primaryApp.defaultWindowName)
+                .coversExactly(appPairsHelper.getPrimaryBounds(dividerRegion))
+            visibleRegion(secondaryApp.defaultWindowName)
+                .coversExactly(appPairsHelper.getSecondaryBounds(dividerRegion))
         }
     }
 
