@@ -9793,6 +9793,7 @@ public final class Settings {
          * @hide
          */
         @TestApi
+        @Readable
         public static final String ACCESSIBILITY_MAGNIFICATION_CAPABILITY =
                 "accessibility_magnification_capability";
 
