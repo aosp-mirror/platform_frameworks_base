@@ -455,15 +455,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAllowBackgroundActivityStarts = allowBackgroundActivityStarts;
     }
 
-    boolean areBackgroundActivityStartsAllowed() {
-        // allow if the whitelisting flag was explicitly set
-        if (mAllowBackgroundActivityStarts) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[WindowProcessController(" + mPid
-                        + ")] Activity start allowed: mAllowBackgroundActivityStarts = true");
-            }
-            return true;
+    public boolean areBackgroundActivityStartsAllowedByGracePeriodSafe() {
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
+            return areBackgroundActivityStartsAllowedByGracePeriod();
         }
+    }
+
+    boolean areBackgroundActivityStartsAllowedByGracePeriod() {
         // allow if any activity in the caller has either started or finished very recently, and
         // it must be started or finished after last stop app switches time.
         final long now = SystemClock.uptimeMillis();
@@ -485,8 +483,24 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                         + ACTIVITY_BG_START_GRACE_PERIOD_MS
                         + "ms grace period but also within stop app switch window");
             }
-
         }
+        return false;
+    }
+
+    boolean areBackgroundActivityStartsAllowed() {
+        // allow if the whitelisting flag was explicitly set
+        if (mAllowBackgroundActivityStarts) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: mAllowBackgroundActivityStarts = true");
+            }
+            return true;
+        }
+
+        if (areBackgroundActivityStartsAllowedByGracePeriod()) {
+            return true;
+        }
+
         // allow if the proc is instrumenting with background activity starts privs
         if (mInstrumentingWithBackgroundActivityStartPrivileges) {
             if (DEBUG_ACTIVITY_STARTS) {
