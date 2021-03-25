@@ -8481,7 +8481,8 @@ public class PackageManagerService extends IPackageManager.Stub
             int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         Preconditions.checkArgumentNonnegative(userId, "userId must be >= 0");
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
 
@@ -8492,8 +8493,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         == PERMISSION_GRANTED
                 || mContext.checkCallingOrSelfPermission(DELETE_PACKAGES)
                         == PERMISSION_GRANTED
-                || canRequestPackageInstallsInternal(packageName,
-                        PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId,
+                || canRequestPackageInstallsInternal(packageName, callingUid, userId,
                         false  /* throwIfPermNotDeclared*/)
                 || mContext.checkCallingOrSelfPermission(REQUEST_DELETE_PACKAGES)
                         == PERMISSION_GRANTED
@@ -27514,51 +27514,60 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean canRequestPackageInstalls(String packageName, int userId) {
-        return canRequestPackageInstallsInternal(packageName, 0, userId,
+        return canRequestPackageInstallsInternal(packageName, Binder.getCallingUid(), userId,
                 true /* throwIfPermNotDeclared*/);
     }
 
-    private boolean canRequestPackageInstallsInternal(String packageName, int flags, int userId,
-            boolean throwIfPermNotDeclared) {
-        int callingUid = Binder.getCallingUid();
-        int uid = getPackageUid(packageName, 0, userId);
+    private boolean canRequestPackageInstallsInternal(String packageName, int callingUid,
+            int userId, boolean throwIfPermNotDeclared) {
+        int uid = getPackageUidInternal(packageName, 0, userId, callingUid);
         if (callingUid != uid && callingUid != Process.ROOT_UID
                 && callingUid != Process.SYSTEM_UID) {
             throw new SecurityException(
                     "Caller uid " + callingUid + " does not own package " + packageName);
         }
-        if (isInstantApp(packageName, userId)) {
+        if (isInstantAppInternal(packageName, userId, callingUid)) {
             return false;
         }
+        final AndroidPackage pkg;
         synchronized (mLock) {
-            final AndroidPackage pkg = mPackages.get(packageName);
-            if (pkg == null) {
+            pkg = mPackages.get(packageName);
+        }
+        if (pkg == null) {
+            return false;
+        }
+        if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.O) {
+            return false;
+        }
+        if (!pkg.getRequestedPermissions().contains(
+                android.Manifest.permission.REQUEST_INSTALL_PACKAGES)) {
+            final String message = "Need to declare "
+                    + android.Manifest.permission.REQUEST_INSTALL_PACKAGES
+                    + " to call this api";
+            if (throwIfPermNotDeclared) {
+                throw new SecurityException(message);
+            } else {
+                Slog.e(TAG, message);
                 return false;
-            }
-            if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.O) {
-                return false;
-            }
-            if (!pkg.getRequestedPermissions().contains(
-                    android.Manifest.permission.REQUEST_INSTALL_PACKAGES)) {
-                final String message = "Need to declare "
-                        + android.Manifest.permission.REQUEST_INSTALL_PACKAGES
-                        + " to call this api";
-                if (throwIfPermNotDeclared) {
-                    throw new SecurityException(message);
-                } else {
-                    Slog.e(TAG, message);
-                    return false;
-                }
             }
         }
+
+        return !isInstallDisabledForPackage(packageName, uid, userId);
+    }
+
+    /**
+     * Returns true if the system or user is explicitly preventing an otherwise valid installer to
+     * complete an install. This includes checks like unknown sources and user restrictions.
+     */
+    public boolean isInstallDisabledForPackage(String packageName, int uid, int userId) {
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId)
-                  || mUserManager.hasUserRestriction(
-                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY, userId)) {
-            return false;
+                || mUserManager.hasUserRestriction(
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY, userId)) {
+            return true;
         }
         if (mExternalSourcesPolicy != null) {
             int isTrusted = mExternalSourcesPolicy.getPackageTrustedToInstallApps(packageName, uid);
-            return isTrusted == PackageManagerInternal.ExternalSourcesPolicy.USER_TRUSTED;
+            return isTrusted != PackageManagerInternal.ExternalSourcesPolicy.USER_TRUSTED;
         }
         return false;
     }

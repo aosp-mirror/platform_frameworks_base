@@ -106,7 +106,7 @@ public class ApkLiteParseUtils {
             final String packagePath = packageFile.getAbsolutePath();
             return input.success(
                     new PackageLite(packagePath, baseApk.getPath(), baseApk, null,
-                            null, null, null, null, null));
+                            null, null, null, null, null, baseApk.getTargetSdkVersion()));
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -242,7 +242,8 @@ public class ApkLiteParseUtils {
                 splitNameToFileName(baseApk)).getAbsolutePath() : baseApk.getPath();
         return input.success(
                 new PackageLite(codePath, baseCodePath, baseApk, splitNames, isFeatureSplits,
-                        usesSplitNames, configForSplits, splitCodePaths, splitRevisionCodes));
+                        usesSplitNames, configForSplits, splitCodePaths, splitRevisionCodes,
+                        baseApk.getTargetSdkVersion()));
     }
 
     /**
