@@ -10677,8 +10677,6 @@ public class NotificationManagerService extends SystemService {
      * TODO(b/161957908): Remove dogfooder toast.
      */
     private class NotificationTrampolineCallback implements BackgroundActivityStartCallback {
-        private final Set<String> mPackagesShown = new ArraySet<>();
-
         @Override
         public boolean isActivityStartAllowed(Collection<IBinder> tokens, int uid,
                 String packageName) {
@@ -10691,16 +10689,12 @@ public class NotificationManagerService extends SystemService {
             }
             String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
-            // Call to toast() method is posted to mHandler below to offload PM lookup from the
-            // activity start path
             if (CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid)) {
-                mHandler.post(() -> toast(packageName, uid, /* blocked */ true));
+                // Post toast() call to mHandler to offload PM lookup from the activity start path
+                mHandler.post(() -> toast(packageName, uid));
                 Slog.e(TAG, logcatMessage + " blocked");
                 return false;
             } else {
-                if (mPackagesShown.add(packageName)) {
-                    mHandler.post(() -> toast(packageName, uid, /* blocked */ false));
-                }
                 Slog.w(TAG, logcatMessage + ", this should be avoided for performance reasons");
                 return true;
             }
@@ -10715,7 +10709,7 @@ public class NotificationManagerService extends SystemService {
                     && !CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
         }
 
-        private void toast(String packageName, int uid, boolean blocked) {
+        private void toast(String packageName, int uid) {
             final CharSequence label;
             try {
                 label = mPackageManagerClient.getApplicationLabel(
@@ -10726,8 +10720,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             mUiHandler.post(() -> Toast.makeText(getUiContext(),
-                    label + " launch " + (blocked ? "blocked" : "will be blocked")
-                            + "\ng.co/dev/trampolines", Toast.LENGTH_LONG).show());
+                    label + " launch blocked\ng.co/dev/trampolines", Toast.LENGTH_LONG).show());
         }
     }
 }
