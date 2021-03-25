@@ -18,9 +18,8 @@ package com.android.server.graphics.fonts;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.graphics.FontListParser;
+import android.graphics.fonts.FontUpdateRequest;
 import android.platform.test.annotations.Presubmit;
-import android.text.FontConfig;
 import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
@@ -49,9 +48,9 @@ public final class PersistentSystemFontConfigTest {
         config.updatedFontDirs.add("~~abc");
         config.updatedFontDirs.add("~~def");
 
-        FontConfig.FontFamily fontFamily = parseFontFamily(
+        FontUpdateRequest.Family fontFamily = parseFontFamily(
                 "<family name='test'>"
-                + "  <font>test.ttf</font>"
+                + "  <font name=\"test\" />"
                 + "</family>");
         config.fontFamilies.add(fontFamily);
 
@@ -86,11 +85,11 @@ public final class PersistentSystemFontConfigTest {
         }
     }
 
-    private static FontConfig.FontFamily parseFontFamily(String xml) throws Exception {
+    private static FontUpdateRequest.Family parseFontFamily(String xml) throws Exception {
         XmlPullParser parser = Xml.newPullParser();
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
         parser.setInput(is, "UTF-8");
         parser.nextTag();
-        return FontListParser.readFamily(parser, "", null);
+        return FontUpdateRequest.Family.readFromXml(parser);
     }
 }

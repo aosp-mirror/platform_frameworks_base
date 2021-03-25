@@ -25,8 +25,6 @@ import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
 import android.os.LocaleList;
 import android.text.FontConfig;
-import android.text.TextUtils;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -194,32 +192,6 @@ public class FontListParser {
         return new FontConfig.FontFamily(fonts, name, LocaleList.forLanguageTags(lang), intVariant);
     }
 
-    /**
-     * Write a family tag representing {@code fontFamily}. The tag should be started by the caller.
-     */
-    public static void writeFamily(TypedXmlSerializer out, FontConfig.FontFamily fontFamily)
-            throws IOException {
-        if (!TextUtils.isEmpty(fontFamily.getName())) {
-            out.attribute(null, ATTR_NAME, fontFamily.getName());
-        }
-        if (!fontFamily.getLocaleList().isEmpty()) {
-            out.attribute(null, ATTR_LANG, fontFamily.getLocaleList().toLanguageTags());
-        }
-        switch (fontFamily.getVariant()) {
-            case FontConfig.FontFamily.VARIANT_COMPACT:
-                out.attribute(null, ATTR_VARIANT, VARIANT_COMPACT);
-                break;
-            case FontConfig.FontFamily.VARIANT_ELEGANT:
-                out.attribute(null, ATTR_VARIANT, VARIANT_ELEGANT);
-                break;
-        }
-        for (FontConfig.Font font : fontFamily.getFontList()) {
-            out.startTag(null, TAG_FONT);
-            writeFont(out, font);
-            out.endTag(null, TAG_FONT);
-        }
-    }
-
     /** Matches leading and trailing XML whitespace. */
     private static final Pattern FILENAME_WHITESPACE_PATTERN =
             Pattern.compile("^[ \\n\\r\\t]+|[ \\n\\r\\t]+$");
@@ -292,46 +264,12 @@ public class FontListParser {
         return null;
     }
 
-    private static void writeFont(TypedXmlSerializer out, FontConfig.Font font)
-            throws IOException {
-        if (font.getTtcIndex() != 0) {
-            out.attributeInt(null, ATTR_INDEX, font.getTtcIndex());
-        }
-        if (font.getStyle().getWeight() != FontStyle.FONT_WEIGHT_NORMAL) {
-            out.attributeInt(null, ATTR_WEIGHT, font.getStyle().getWeight());
-        }
-        if (font.getStyle().getSlant() == FontStyle.FONT_SLANT_ITALIC) {
-            out.attribute(null, ATTR_STYLE, STYLE_ITALIC);
-        } else {
-            out.attribute(null, ATTR_STYLE, STYLE_NORMAL);
-        }
-        if (!TextUtils.isEmpty(font.getFontFamilyName())) {
-            out.attribute(null, ATTR_FALLBACK_FOR, font.getFontFamilyName());
-        }
-        out.text(font.getFile().getName());
-        FontVariationAxis[] axes =
-                FontVariationAxis.fromFontVariationSettings(font.getFontVariationSettings());
-        if (axes != null) {
-            for (FontVariationAxis axis : axes) {
-                out.startTag(null, TAG_AXIS);
-                writeAxis(out, axis);
-                out.endTag(null, TAG_AXIS);
-            }
-        }
-    }
-
     private static FontVariationAxis readAxis(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         String tagStr = parser.getAttributeValue(null, ATTR_TAG);
         String styleValueStr = parser.getAttributeValue(null, ATTR_STYLEVALUE);
         skip(parser);  // axis tag is empty, ignore any contents and consume end tag
         return new FontVariationAxis(tagStr, Float.parseFloat(styleValueStr));
-    }
-
-    private static void writeAxis(TypedXmlSerializer out, FontVariationAxis axis)
-            throws IOException {
-        out.attribute(null, ATTR_TAG, axis.getTag());
-        out.attributeFloat(null, ATTR_STYLEVALUE, axis.getStyleValue());
     }
 
     /**
