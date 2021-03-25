@@ -324,8 +324,11 @@ public abstract class IContextHubWrapper {
         }
 
         public void onMicrophoneDisableSettingChanged(boolean enabled) {
-            sendSettingChanged(android.hardware.contexthub.V1_2.Setting.GLOBAL_MIC_DISABLE,
-                    enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
+            // The SensorPrivacyManager reports if microphone privacy was enabled,
+            // which translates to microphone access being disabled (and vice-versa).
+            // With this in mind, we flip the argument before piping it to CHRE.
+            sendSettingChanged(android.hardware.contexthub.V1_2.Setting.MICROPHONE,
+                    enabled ? SettingValue.DISABLED : SettingValue.ENABLED);
         }
 
         private void sendSettingChanged(byte setting, byte newValue) {
