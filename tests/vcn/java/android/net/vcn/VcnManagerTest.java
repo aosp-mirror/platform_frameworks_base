@@ -204,7 +204,7 @@ public class VcnManagerTest {
                 new VcnStatusCallbackBinder(INLINE_EXECUTOR, mMockStatusCallback);
 
         cbBinder.onVcnStatusChanged(VCN_STATUS_CODE_ACTIVE);
-        verify(mMockStatusCallback).onVcnStatusChanged(VCN_STATUS_CODE_ACTIVE);
+        verify(mMockStatusCallback).onStatusChanged(VCN_STATUS_CODE_ACTIVE);
 
         cbBinder.onGatewayConnectionError(
                 UNDERLYING_NETWORK_CAPABILITIES,

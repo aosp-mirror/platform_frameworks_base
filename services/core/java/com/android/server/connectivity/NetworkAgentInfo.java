@@ -49,6 +49,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -576,6 +577,17 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
     }
 
+    /**
+     * Notify the NetworkAgent that the network is successfully connected.
+     */
+    public void onNetworkCreated() {
+        try {
+            networkAgent.onNetworkCreated();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending network created event", e);
+        }
+    }
+
     // TODO: consider moving out of NetworkAgentInfo into its own class
     private class NetworkAgentMessageHandler extends INetworkAgentRegistry.Stub {
         private final Handler mHandler;
@@ -633,7 +645,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         @Override
         public void sendEpsQosSessionAvailable(final int qosCallbackId, final QosSession session,
                 final EpsBearerQosSessionAttributes attributes) {
-            mQosCallbackTracker.sendEventQosSessionAvailable(qosCallbackId, session, attributes);
+            mQosCallbackTracker.sendEventEpsQosSessionAvailable(qosCallbackId, session, attributes);
+        }
+
+        @Override
+        public void sendNrQosSessionAvailable(final int qosCallbackId, final QosSession session,
+                final NrQosSessionAttributes attributes) {
+            mQosCallbackTracker.sendEventNrQosSessionAvailable(qosCallbackId, session, attributes);
         }
 
         @Override

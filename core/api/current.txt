@@ -12139,6 +12139,7 @@ package android.content.pm {
     field public static final String FEATURE_FINGERPRINT = "android.hardware.fingerprint";
     field public static final String FEATURE_FREEFORM_WINDOW_MANAGEMENT = "android.software.freeform_window_management";
     field public static final String FEATURE_GAMEPAD = "android.hardware.gamepad";
+    field public static final String FEATURE_HARDWARE_KEYSTORE = "android.hardware.hardware_keystore";
     field public static final String FEATURE_HIFI_SENSORS = "android.hardware.sensor.hifi_sensors";
     field public static final String FEATURE_HOME_SCREEN = "android.software.home_screen";
     field public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE = "android.hardware.identity_credential";
@@ -20445,7 +20446,9 @@ package android.media {
     method @NonNull public android.media.MediaFormat getOutputFormat(int);
     method @NonNull public android.media.MediaCodec.OutputFrame getOutputFrame(int);
     method @Nullable public android.media.Image getOutputImage(int);
+    method @Nullable public android.media.MediaCodec.ParameterDescriptor getParameterDescriptor(@NonNull String);
     method @NonNull public android.media.MediaCodec.QueueRequest getQueueRequest(int);
+    method @NonNull public java.util.List<java.lang.String> getSupportedVendorParameters();
     method @Nullable public static android.media.Image mapHardwareBuffer(@NonNull android.hardware.HardwareBuffer);
     method public void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
     method public void queueSecureInputBuffer(int, int, @NonNull android.media.MediaCodec.CryptoInfo, long, int) throws android.media.MediaCodec.CryptoException;
@@ -20464,6 +20467,8 @@ package android.media {
     method public void signalEndOfInputStream();
     method public void start();
     method public void stop();
+    method public void subscribeToVendorParameters(@NonNull java.util.List<java.lang.String>);
+    method public void unsubscribeFromVendorParameters(@NonNull java.util.List<java.lang.String>);
     field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
     field public static final int BUFFER_FLAG_END_OF_STREAM = 4; // 0x4
     field public static final int BUFFER_FLAG_KEY_FRAME = 1; // 0x1
@@ -20583,6 +20588,11 @@ package android.media {
     method @Nullable public android.hardware.HardwareBuffer getHardwareBuffer();
     method @Nullable public android.media.MediaCodec.LinearBlock getLinearBlock();
     method public long getPresentationTimeUs();
+  }
+
+  public static class MediaCodec.ParameterDescriptor {
+    method @NonNull public String getName();
+    method public int getType();
   }
 
   public final class MediaCodec.QueueRequest {
@@ -25723,7 +25733,7 @@ package android.net.vcn {
   public abstract static class VcnManager.VcnStatusCallback {
     ctor public VcnManager.VcnStatusCallback();
     method public abstract void onGatewayConnectionError(@NonNull int[], int, @Nullable Throwable);
-    method public abstract void onVcnStatusChanged(int);
+    method public abstract void onStatusChanged(int);
   }
 
 }
@@ -33591,7 +33601,7 @@ package android.provider {
     field public static final String ACTION_LOCATION_SOURCE_SETTINGS = "android.settings.LOCATION_SOURCE_SETTINGS";
     field public static final String ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS = "android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS";
     field public static final String ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION = "android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION";
-    field public static final String ACTION_MANAGE_ALL_SUBSCRIPTIONS_SETTINGS = "android.settings.MANAGE_ALL_SUBSCRIPTIONS_SETTINGS";
+    field public static final String ACTION_MANAGE_ALL_SIM_PROFILES_SETTINGS = "android.settings.MANAGE_ALL_SIM_PROFILES_SETTINGS";
     field public static final String ACTION_MANAGE_APPLICATIONS_SETTINGS = "android.settings.MANAGE_APPLICATIONS_SETTINGS";
     field public static final String ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION = "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
     field public static final String ACTION_MANAGE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
@@ -34220,6 +34230,8 @@ package android.provider {
     field public static final String AUTHORITY = "service-state";
     field public static final android.net.Uri CONTENT_URI;
     field public static final String DATA_NETWORK_TYPE = "data_network_type";
+    field public static final String DATA_REG_STATE = "data_reg_state";
+    field public static final String DUPLEX_MODE = "duplex_mode";
     field public static final String IS_MANUAL_NETWORK_SELECTION = "is_manual_network_selection";
     field public static final String VOICE_OPERATOR_NUMERIC = "voice_operator_numeric";
     field public static final String VOICE_REG_STATE = "voice_reg_state";
@@ -39392,6 +39404,7 @@ package android.telephony {
     field public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT = "ims.non_rcs_capabilities_cache_expiration_sec_int";
     field public static final String KEY_PREFIX = "ims.";
     field public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL = "ims.rcs_bulk_capability_exchange_bool";
+    field public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY = "ims.rcs_feature_tag_allowed_string_array";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
   }
 
@@ -40663,7 +40676,6 @@ package android.telephony {
     method public static int[] calculateLength(String, boolean);
     method @Deprecated public static android.telephony.SmsMessage createFromPdu(byte[]);
     method public static android.telephony.SmsMessage createFromPdu(byte[], String);
-    method @Nullable public static android.telephony.SmsMessage createSmsSubmitPdu(@NonNull byte[], boolean);
     method public String getDisplayMessageBody();
     method public String getDisplayOriginatingAddress();
     method public String getEmailBody();

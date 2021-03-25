@@ -32,6 +32,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -361,6 +362,14 @@ public abstract class NetworkAgent {
      */
     public static final int CMD_UNREGISTER_QOS_CALLBACK = BASE + 21;
 
+    /**
+     * Sent by ConnectivityService to {@link NetworkAgent} to inform the agent that its native
+     * network was created and the Network object is now valid.
+     *
+     * @hide
+     */
+    public static final int CMD_NETWORK_CREATED = BASE + 22;
+
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
         // The subtype can be changed with (TODO) setLegacySubtype, but it starts
         // with 0 (TelephonyManager.NETWORK_TYPE_UNKNOWN) and an empty description.
@@ -390,7 +399,6 @@ public abstract class NetworkAgent {
      * @param score the initial score of this network. Update with sendNetworkScore.
      * @param config an immutable {@link NetworkAgentConfig} for this agent.
      * @param provider the {@link NetworkProvider} managing this agent.
-     * @hide TODO : unhide when impl is complete
      */
     public NetworkAgent(@NonNull Context context, @NonNull Looper looper, @NonNull String logTag,
             @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp,
@@ -562,6 +570,10 @@ public abstract class NetworkAgent {
                             msg.arg1 /* QoS callback id */);
                     break;
                 }
+                case CMD_NETWORK_CREATED: {
+                    onNetworkCreated();
+                    break;
+                }
             }
         }
     }
@@ -701,6 +713,11 @@ public abstract class NetworkAgent {
         public void onQosCallbackUnregistered(final int qosCallbackId) {
             mHandler.sendMessage(mHandler.obtainMessage(
                     CMD_UNREGISTER_QOS_CALLBACK, qosCallbackId, 0, null));
+        }
+
+        @Override
+        public void onNetworkCreated() {
+            mHandler.sendMessage(mHandler.obtainMessage(CMD_NETWORK_CREATED));
         }
     }
 
@@ -1010,6 +1027,11 @@ public abstract class NetworkAgent {
     }
 
     /**
+     * Called when ConnectivityService has successfully created this NetworkAgent's native network.
+     */
+    public void onNetworkCreated() {}
+
+    /**
      * Requests that the network hardware send the specified packet at the specified interval.
      *
      * @param slot the hardware slot on which to start the keepalive.
@@ -1160,29 +1182,37 @@ public abstract class NetworkAgent {
 
 
     /**
-     * Sends the attributes of Eps Bearer Qos Session back to the Application
+     * Sends the attributes of Qos Session back to the Application
      *
      * @param qosCallbackId the callback id that the session belongs to
-     * @param sessionId the unique session id across all Eps Bearer Qos Sessions
-     * @param attributes the attributes of the Eps Qos Session
+     * @param sessionId the unique session id across all Qos Sessions
+     * @param attributes the attributes of the Qos Session
      */
     public final void sendQosSessionAvailable(final int qosCallbackId, final int sessionId,
-            @NonNull final EpsBearerQosSessionAttributes attributes) {
+            @NonNull final QosSessionAttributes attributes) {
         Objects.requireNonNull(attributes, "The attributes must be non-null");
-        queueOrSendMessage(ra -> ra.sendEpsQosSessionAvailable(qosCallbackId,
-                new QosSession(sessionId, QosSession.TYPE_EPS_BEARER),
-                attributes));
+        if (attributes instanceof EpsBearerQosSessionAttributes) {
+            queueOrSendMessage(ra -> ra.sendEpsQosSessionAvailable(qosCallbackId,
+                    new QosSession(sessionId, QosSession.TYPE_EPS_BEARER),
+                    (EpsBearerQosSessionAttributes)attributes));
+        } else if (attributes instanceof NrQosSessionAttributes) {
+            queueOrSendMessage(ra -> ra.sendNrQosSessionAvailable(qosCallbackId,
+                    new QosSession(sessionId, QosSession.TYPE_NR_BEARER),
+                    (NrQosSessionAttributes)attributes));
+        }
     }
 
     /**
-     * Sends event that the Eps Qos Session was lost.
+     * Sends event that the Qos Session was lost.
      *
      * @param qosCallbackId the callback id that the session belongs to
-     * @param sessionId the unique session id across all Eps Bearer Qos Sessions
+     * @param sessionId the unique session id across all Qos Sessions
+     * @param qosSessionType the session type {@code QosSesson#QosSessionType}
      */
-    public final void sendQosSessionLost(final int qosCallbackId, final int sessionId) {
+    public final void sendQosSessionLost(final int qosCallbackId,
+            final int sessionId, final int qosSessionType) {
         queueOrSendMessage(ra -> ra.sendQosSessionLost(qosCallbackId,
-                new QosSession(sessionId, QosSession.TYPE_EPS_BEARER)));
+                new QosSession(sessionId, qosSessionType)));
     }
 
     /**

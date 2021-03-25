@@ -28,6 +28,17 @@
         ]]> appears at the top of your screen when VPN is active.
     </string>
 
+    <!-- TV specific dialog message to warn about the risk of using a VPN application. [CHAR LIMIT=NONE] -->
+    <string name="warning" product="tv">
+      <xliff:g id="app">%s</xliff:g> wants to set up a VPN connection
+        that allows it to monitor network traffic. Only accept if you trust the source.
+        <![CDATA[
+        <br />
+        <br />
+        <img src="vpn_icon" />
+        ]]> appears on your screen when VPN is active.
+    </string>
+
     <!-- Dialog title for built-in VPN. [CHAR LIMIT=40]  -->
     <string name="legacy_title">VPN is connected</string>
     <!-- Label for the name of the current VPN session. [CHAR LIMIT=20] -->

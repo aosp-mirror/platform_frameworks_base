@@ -1651,7 +1651,7 @@ public class IpSecService extends IIpSecService.Stub {
                         c.getMode(),
                         c.getSourceAddress(),
                         c.getDestinationAddress(),
-                        (c.getNetwork() != null) ? c.getNetwork().netId : 0,
+                        (c.getNetwork() != null) ? c.getNetwork().getNetId() : 0,
                         spiRecord.getSpi(),
                         c.getMarkValue(),
                         c.getMarkMask(),
