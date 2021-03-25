@@ -5371,4 +5371,23 @@ public class ConnectivityManager {
         if (TextUtils.isEmpty(mode)) mode = PRIVATE_DNS_MODE_OPPORTUNISTIC;
         return mode;
     }
+
+    /**
+     * Set private DNS mode to settings.
+     *
+     * @param context The {@link Context} to set the private DNS mode.
+     * @param mode The private dns mode. This should be one of the PRIVATE_DNS_MODE_* constants.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void setPrivateDnsMode(@NonNull Context context,
+            @NonNull @PrivateDnsMode String mode) {
+        if (!(mode == PRIVATE_DNS_MODE_OFF
+                || mode == PRIVATE_DNS_MODE_OPPORTUNISTIC
+                || mode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME)) {
+            throw new IllegalArgumentException("Invalid private dns mode");
+        }
+        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_MODE, mode);
+    }
 }
