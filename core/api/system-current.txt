@@ -1956,7 +1956,6 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean disconnect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
   }
 
   public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
