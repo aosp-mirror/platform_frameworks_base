@@ -3059,7 +3059,7 @@
     <public name="fontProviderSystemFontFamily" />
     <public name="hand_second" />
     <public name="memtagMode" />
-    <public name="nativeHeapZeroInit" />
+    <public name="nativeHeapZeroInitialized" />
     <!-- @hide @SystemApi -->
     <public name="hotwordDetectionService" />
     <public name="previewLayout" />
