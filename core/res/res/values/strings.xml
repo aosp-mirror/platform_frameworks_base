@@ -745,7 +745,7 @@
 
     <!-- Text shown when viewing channel settings for notifications related to accessibility
          security policy. [CHAR_LIMIT=NONE]-->
-    <string name="notification_channel_accessibility_security_policy">Accessibility security policy</string>
+    <string name="notification_channel_accessibility_security_policy">Accessibility usage</string>
 
     <!-- Label for foreground service notification when one app is running.
     [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
