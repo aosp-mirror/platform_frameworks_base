@@ -474,22 +474,21 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (tiles.contains("internet") || tiles.contains("wifi") || tiles.contains("cell")) {
             if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
                 if (!tiles.contains("internet")) {
-                    tiles.add("internet");
-                }
-                if (tiles.contains("wifi")) {
+                    if (tiles.contains("wifi")) {
+                        // Replace the WiFi with Internet, and remove the Cell
+                        tiles.set(tiles.indexOf("wifi"), "internet");
+                        tiles.remove("cell");
+                    } else if (tiles.contains("cell")) {
+                        // Replace the Cell with Internet
+                        tiles.set(tiles.indexOf("cell"), "internet");
+                    }
+                } else {
                     tiles.remove("wifi");
-                }
-                if (tiles.contains("cell")) {
                     tiles.remove("cell");
                 }
             } else {
                 if (tiles.contains("internet")) {
-                    tiles.remove("internet");
-                }
-                if (!tiles.contains("wifi")) {
-                    tiles.add("wifi");
-                }
-                if (!tiles.contains("cell")) {
+                    tiles.set(tiles.indexOf("internet"), "wifi");
                     tiles.add("cell");
                 }
             }
@@ -512,6 +511,14 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (Build.IS_DEBUGGABLE
                 && GarbageMonitor.ADD_MEMORY_TILE_TO_DEFAULT_ON_DEBUGGABLE_BUILDS) {
             tiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
+        }
+        // TODO(b/174753536): Change the config file directly.
+        // Filter out unused tiles from the default QS config.
+        if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+            tiles.remove("cell");
+            tiles.remove("wifi");
+        } else {
+            tiles.remove("internet");
         }
         return tiles;
     }
