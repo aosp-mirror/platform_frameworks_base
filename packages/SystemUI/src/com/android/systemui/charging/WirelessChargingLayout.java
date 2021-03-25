@@ -20,6 +20,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.PointF;
 import android.graphics.drawable.Animatable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -29,8 +30,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.charging.ChargingRippleView;
 
 import java.text.NumberFormat;
 
@@ -38,7 +41,9 @@ import java.text.NumberFormat;
  * @hide
  */
 public class WirelessChargingLayout extends FrameLayout {
-    public final static int UNKNOWN_BATTERY_LEVEL = -1;
+    public static final int UNKNOWN_BATTERY_LEVEL = -1;
+    private static final long RIPPLE_ANIMATION_DURATION = 2000;
+    private ChargingRippleView mRippleView;
 
     public WirelessChargingLayout(Context context) {
         super(context);
@@ -120,6 +125,8 @@ public class WirelessChargingLayout extends FrameLayout {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator);
 
+        mRippleView = findViewById(R.id.wireless_charging_ripple);
+
         if (!showTransmittingBatteryLevel) {
             chargingAnimation.start();
             animatorSet.start();
@@ -194,5 +201,22 @@ public class WirelessChargingLayout extends FrameLayout {
         animatorSet.start();
         animatorSetTransmitting.start();
         animatorSetIcon.start();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (mRippleView != null) {
+            int width = getMeasuredWidth();
+            int height = getMeasuredHeight();
+            mRippleView.setColor(
+                    Utils.getColorAttr(mRippleView.getContext(),
+                            android.R.attr.colorAccent).getDefaultColor());
+            mRippleView.setOrigin(new PointF(width / 2, height / 2));
+            mRippleView.setRadius(Math.max(width, height) * 0.5f);
+            mRippleView.setDuration(RIPPLE_ANIMATION_DURATION);
+            mRippleView.startRipple();
+        }
+
+        super.onLayout(changed, left, top, right, bottom);
     }
 }
