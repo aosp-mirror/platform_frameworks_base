@@ -4022,6 +4022,7 @@ package android.app {
     method public void onPictureInPictureModeChanged(boolean, android.content.res.Configuration);
     method @Deprecated public void onPictureInPictureModeChanged(boolean);
     method public boolean onPictureInPictureRequested();
+    method public void onPictureInPictureUiStateChanged(@NonNull android.app.PictureInPictureUiState);
     method @CallSuper protected void onPostCreate(@Nullable android.os.Bundle);
     method public void onPostCreate(@Nullable android.os.Bundle, @Nullable android.os.PersistableBundle);
     method @CallSuper protected void onPostResume();
@@ -6412,6 +6413,13 @@ package android.app {
     method @NonNull public android.app.PictureInPictureParams.Builder setAutoEnterEnabled(boolean);
     method @NonNull public android.app.PictureInPictureParams.Builder setSeamlessResizeEnabled(boolean);
     method public android.app.PictureInPictureParams.Builder setSourceRectHint(android.graphics.Rect);
+  }
+
+  public final class PictureInPictureUiState implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isStashed();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.PictureInPictureUiState> CREATOR;
   }
 
   public class Presentation extends android.app.Dialog {

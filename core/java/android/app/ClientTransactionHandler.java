@@ -159,6 +159,10 @@ public abstract class ClientTransactionHandler {
     /** Request that an activity enter picture-in-picture. */
     public abstract void handlePictureInPictureRequested(@NonNull ActivityClientRecord r);
 
+    /** Signal to an activity (that is currently in PiP) of PiP state changes. */
+    public abstract void handlePictureInPictureStateChanged(@NonNull ActivityClientRecord r,
+            PictureInPictureUiState pipState);
+
     /** Whether the activity want to handle splash screen exit animation */
     public abstract boolean isHandleSplashScreenExit(@NonNull IBinder token);
 

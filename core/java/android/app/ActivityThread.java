@@ -39,7 +39,6 @@ import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
-import android.app.backup.BackupManager;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -3985,6 +3984,12 @@ public final class ActivityThread extends ClientTransactionHandler
             // trigger onUserLeavingHint(), then we return the activity to its previous state.
             schedulePauseWithUserLeaveHintAndReturnToCurrentState(r);
         }
+    }
+
+    @Override
+    public void handlePictureInPictureStateChanged(@NonNull ActivityClientRecord r,
+            PictureInPictureUiState pipState) {
+        r.activity.onPictureInPictureUiStateChanged(pipState);
     }
 
     /**

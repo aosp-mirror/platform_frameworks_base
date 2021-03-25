@@ -36,6 +36,7 @@ import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.PictureInPictureUiState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.assist.AssistContent;
@@ -330,4 +331,9 @@ interface IActivityTaskManager {
      */
     void onSplashScreenViewCopyFinished(int taskId,
             in SplashScreenView.SplashScreenViewParcelable material);
+
+    /**
+     * When the Picture-in-picture state has changed.
+     */
+    void onPictureInPictureStateChanged(in PictureInPictureUiState pipState);
 }

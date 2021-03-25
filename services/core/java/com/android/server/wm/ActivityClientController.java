@@ -45,8 +45,10 @@ import android.app.ActivityTaskManager;
 import android.app.IActivityClientController;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
+import android.app.PictureInPictureUiState;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
+import android.app.servertransaction.PipStateTransactionItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -775,6 +777,26 @@ class ActivityClientController extends IActivityClientController.Stub {
             mService.getLifecycleManager().scheduleTransaction(transaction);
         } catch (Exception e) {
             Slog.w(TAG, "Failed to send enter pip requested item: "
+                    + r.intent.getComponent(), e);
+        }
+    }
+
+    /**
+     * Alert the client that the Picture-in-Picture state has changed.
+     */
+    void onPictureInPictureStateChanged(@NonNull ActivityRecord r,
+            PictureInPictureUiState pipState) {
+        if (!r.inPinnedWindowingMode()) {
+            throw new IllegalStateException("Activity is not in PIP mode");
+        }
+
+        try {
+            final ClientTransaction transaction = ClientTransaction.obtain(
+                    r.app.getThread(), r.token);
+            transaction.addCallback(PipStateTransactionItem.obtain(pipState));
+            mService.getLifecycleManager().scheduleTransaction(transaction);
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to send pip state transaction item: "
                     + r.intent.getComponent(), e);
         }
     }

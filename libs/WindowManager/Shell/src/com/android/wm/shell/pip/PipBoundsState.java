@@ -19,10 +19,14 @@ package com.android.wm.shell.pip;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
+import android.app.PictureInPictureUiState;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.RemoteException;
+import android.util.Log;
 import android.util.Size;
 import android.view.Display;
 
@@ -185,7 +189,18 @@ public final class PipBoundsState {
 
     /** Dictate where PiP currently should be stashed, if at all. */
     public void setStashed(@StashType int stashedState) {
+        if (mStashedState == stashedState) {
+            return;
+        }
+
         mStashedState = stashedState;
+        try {
+            ActivityTaskManager.getService().onPictureInPictureStateChanged(
+                    new PictureInPictureUiState(stashedState != STASH_TYPE_NONE /* isStashed */)
+            );
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to set alert PiP state change.");
+        }
     }
 
     /**
