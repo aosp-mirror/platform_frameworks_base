@@ -26,7 +26,6 @@ import android.os.Message;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Gravity;
-import android.view.View;
 import android.view.WindowManager;
 
 /**
@@ -98,8 +97,8 @@ public class WirelessChargingAnimation {
         private final Handler mHandler;
 
         private int mGravity;
-        private View mView;
-        private View mNextView;
+        private WirelessChargingLayout mView;
+        private WirelessChargingLayout mNextView;
         private WindowManager mWM;
         private Callback mCallback;
 
@@ -112,7 +111,7 @@ public class WirelessChargingAnimation {
             mGravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER;
 
             final WindowManager.LayoutParams params = mParams;
-            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            params.height = WindowManager.LayoutParams.MATCH_PARENT;
             params.width = WindowManager.LayoutParams.MATCH_PARENT;
             params.format = PixelFormat.TRANSLUCENT;
 
