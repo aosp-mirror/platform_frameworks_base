@@ -12381,19 +12381,13 @@ public class Notification implements Parcelable
         }
 
         public StandardTemplateParams decorationType(int decorationType) {
-            // These fields are removed by the decoration process, and thus would not show anyway;
-            // hiding them is a minimal time/space optimization.
-            hideAppName(true);
             hideTitle(true);
-            hideSubText(true);
-            hideTime(true);
             // Minimally decorated custom views do not show certain pieces of chrome that have
             // always been shown when using DecoratedCustomViewStyle.
             boolean hideOtherFields = decorationType <= DECORATION_MINIMAL;
             hideLargeIcon(hideOtherFields);
             hideProgress(hideOtherFields);
             hideActions(hideOtherFields);
-            hideSnoozeButton(hideOtherFields);
             return this;
         }
     }
