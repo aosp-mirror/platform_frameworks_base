@@ -4919,6 +4919,15 @@ public class SettingsProvider extends ContentProvider {
                                     String.valueOf(defAccessibilityButtonMode), /* tag= */
                                     null, /* makeDefault= */ true,
                                     SettingsState.SYSTEM_PACKAGE_NAME);
+
+                            if (hasValueInA11yButtonTargets(secureSettings)) {
+                                secureSettings.insertSettingLocked(
+                                        Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
+                                        /* enabled */ "1",
+                                        /* tag= */ null,
+                                        /* makeDefault= */ false,
+                                        SettingsState.SYSTEM_PACKAGE_NAME);
+                            }
                         }
                     }
 
@@ -5145,13 +5154,21 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private boolean isAccessibilityButtonInNavigationBarOn(SettingsState secureSettings) {
-            final boolean hasValueInA11yBtnTargets = !TextUtils.isEmpty(
-                    secureSettings.getSettingLocked(
-                            Secure.ACCESSIBILITY_BUTTON_TARGETS).getValue());
+            return hasValueInA11yButtonTargets(secureSettings) && !isGestureNavigateEnabled();
+        }
+
+        private boolean isGestureNavigateEnabled() {
             final int navigationMode = getContext().getResources().getInteger(
                     com.android.internal.R.integer.config_navBarInteractionMode);
+            return navigationMode == NAV_BAR_MODE_GESTURAL;
+        }
 
-            return hasValueInA11yBtnTargets && (navigationMode != NAV_BAR_MODE_GESTURAL);
+        private boolean hasValueInA11yButtonTargets(SettingsState secureSettings) {
+            final Setting a11yButtonTargetsSettings =
+                    secureSettings.getSettingLocked(Secure.ACCESSIBILITY_BUTTON_TARGETS);
+
+            return !a11yButtonTargetsSettings.isNull()
+                    && !TextUtils.isEmpty(a11yButtonTargetsSettings.getValue());
         }
     }
 }

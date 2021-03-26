@@ -1442,6 +1442,15 @@
     <dimen name="accessibility_floating_menu_large_single_radius">33dp</dimen>
     <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
 
+    <dimen name="accessibility_floating_tooltip_arrow_width">8dp</dimen>
+    <dimen name="accessibility_floating_tooltip_arrow_height">16dp</dimen>
+    <dimen name="accessibility_floating_tooltip_arrow_margin">-2dp</dimen>
+    <dimen name="accessibility_floating_tooltip_arrow_corner_radius">2dp</dimen>
+    <dimen name="accessibility_floating_tooltip_text_corner_radius">8dp</dimen>
+    <dimen name="accessibility_floating_tooltip_margin">16dp</dimen>
+    <dimen name="accessibility_floating_tooltip_padding">16dp</dimen>
+    <dimen name="accessibility_floating_tooltip_font_size">14sp</dimen>
+
     <dimen name="rounded_slider_height">48dp</dimen>
     <!-- rounded_slider_height / 2 -->
     <dimen name="rounded_slider_corner_radius">24dp</dimen>
