@@ -588,6 +588,17 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
     }
 
+    /**
+     * Notify the NetworkAgent that the network is disconnected and destroyed.
+     */
+    public void onNetworkDisconnected() {
+        try {
+            networkAgent.onNetworkDisconnected();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending network disconnected event", e);
+        }
+    }
+
     // TODO: consider moving out of NetworkAgentInfo into its own class
     private class NetworkAgentMessageHandler extends INetworkAgentRegistry.Stub {
         private final Handler mHandler;
