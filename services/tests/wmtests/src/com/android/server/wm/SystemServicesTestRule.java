@@ -110,6 +110,7 @@ public class SystemServicesTestRule implements TestRule {
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
     private TestWindowManagerPolicy mWMPolicy;
+    private TestDisplayWindowSettingsProvider mTestDisplayWindowSettingsProvider;
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
@@ -284,10 +285,12 @@ public class SystemServicesTestRule implements TestRule {
         mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
         mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService,
                 mPowerManagerWrapper);
+        mTestDisplayWindowSettingsProvider = new TestDisplayWindowSettingsProvider();
         // Suppress StrictMode violation (DisplayWindowSettings) to avoid log flood.
         DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
-                mContext, mImService, false, false, mWMPolicy, mAtmService, StubTransaction::new,
+                mContext, mImService, false, false, mWMPolicy, mAtmService,
+                mTestDisplayWindowSettingsProvider, StubTransaction::new,
                 () -> mSurfaceFactory.get(), (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
