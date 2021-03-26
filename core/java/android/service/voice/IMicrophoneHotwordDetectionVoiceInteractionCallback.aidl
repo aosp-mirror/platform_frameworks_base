@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,21 @@
 
 package android.service.voice;
 
+import android.media.AudioFormat;
 import android.service.voice.HotwordDetectedResult;
-import android.service.voice.HotwordRejectedResult;
 
 /**
  * Callback for returning the detected result from the HotwordDetectionService.
  *
  * @hide
  */
-// TODO: Rename this.
-oneway interface IDspHotwordDetectionCallback {
+oneway interface IMicrophoneHotwordDetectionVoiceInteractionCallback {
 
     /**
      * Called when the detected result is valid.
      */
     void onDetected(
-        in HotwordDetectedResult hotwordDetectedResult);
-
-    /**
-     * Sends {@code result} to the HotwordDetector.
-     */
-    void onRejected(in HotwordRejectedResult result);
+        in HotwordDetectedResult hotwordDetectedResult,
+        in AudioFormat audioFormat,
+        in ParcelFileDescriptor audioStream);
 }
