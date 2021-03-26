@@ -16,12 +16,16 @@
 
 package android.net;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Object representing the quality of a network as perceived by the user.
@@ -36,6 +40,17 @@ public final class NetworkScore implements Parcelable {
     // a migration.
     private final int mLegacyInt;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            KEEP_CONNECTED_NONE,
+            KEEP_CONNECTED_FOR_HANDOVER
+    })
+    public @interface KeepConnectedReason { }
+
+    public static final int KEEP_CONNECTED_NONE = 0;
+    public static final int KEEP_CONNECTED_FOR_HANDOVER = 1;
+
     // Agent-managed policies
     // TODO : add them here, starting from 1
     /** @hide */
@@ -46,19 +61,31 @@ public final class NetworkScore implements Parcelable {
     // Bitmask of all the policies applied to this score.
     private final long mPolicies;
 
+    private final int mKeepConnectedReason;
+
     /** @hide */
-    NetworkScore(final int legacyInt, final long policies) {
+    NetworkScore(final int legacyInt, final long policies,
+            @KeepConnectedReason final int keepConnectedReason) {
         mLegacyInt = legacyInt;
         mPolicies = policies;
+        mKeepConnectedReason = keepConnectedReason;
     }
 
     private NetworkScore(@NonNull final Parcel in) {
         mLegacyInt = in.readInt();
         mPolicies = in.readLong();
+        mKeepConnectedReason = in.readInt();
     }
 
     public int getLegacyInt() {
         return mLegacyInt;
+    }
+
+    /**
+     * Returns the keep-connected reason, or KEEP_CONNECTED_NONE.
+     */
+    public int getKeepConnectedReason() {
+        return mKeepConnectedReason;
     }
 
     /**
@@ -80,6 +107,7 @@ public final class NetworkScore implements Parcelable {
     public void writeToParcel(@NonNull final Parcel dest, final int flags) {
         dest.writeInt(mLegacyInt);
         dest.writeLong(mPolicies);
+        dest.writeInt(mKeepConnectedReason);
     }
 
     @Override
@@ -108,6 +136,7 @@ public final class NetworkScore implements Parcelable {
         private static final long POLICY_NONE = 0L;
         private static final int INVALID_LEGACY_INT = Integer.MIN_VALUE;
         private int mLegacyInt = INVALID_LEGACY_INT;
+        private int mKeepConnectedReason = KEEP_CONNECTED_NONE;
 
         /**
          * Sets the legacy int for this score.
@@ -124,12 +153,23 @@ public final class NetworkScore implements Parcelable {
         }
 
         /**
+         * Set the keep-connected reason.
+         *
+         * This can be reset by calling it again with {@link KEEP_CONNECTED_NONE}.
+         */
+        @NonNull
+        public Builder setKeepConnectedReason(@KeepConnectedReason final int reason) {
+            mKeepConnectedReason = reason;
+            return this;
+        }
+
+        /**
          * Builds this NetworkScore.
          * @return The built NetworkScore object.
          */
         @NonNull
         public NetworkScore build() {
-            return new NetworkScore(mLegacyInt, POLICY_NONE);
+            return new NetworkScore(mLegacyInt, POLICY_NONE, mKeepConnectedReason);
         }
     }
 }
