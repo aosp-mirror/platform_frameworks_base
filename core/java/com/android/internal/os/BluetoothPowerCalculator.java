@@ -84,16 +84,16 @@ public class BluetoothPowerCalculator extends PowerCalculator {
 
         // Subtract what the apps used, but clamp to 0.
         final long systemComponentDurationMs = Math.max(0, systemDurationMs - total.durationMs);
-        final double systemComponentPowerMah = Math.max(0, systemPowerMah - total.powerMah);
-        if (DEBUG && systemComponentPowerMah != 0) {
+        if (DEBUG) {
             Log.d(TAG, "Bluetooth active: time=" + (systemComponentDurationMs)
-                    + " power=" + formatCharge(systemComponentPowerMah));
+                    + " power=" + formatCharge(systemPowerMah));
         }
         systemBatteryConsumerBuilder
                 .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_BLUETOOTH,
                         systemComponentDurationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
-                        systemComponentPowerMah);
+                        Math.max(systemPowerMah, total.powerMah))
+                .setPowerConsumedByApps(total.powerMah);
     }
 
     private void calculateApp(UidBatteryConsumer.Builder app, PowerAndDuration total,
