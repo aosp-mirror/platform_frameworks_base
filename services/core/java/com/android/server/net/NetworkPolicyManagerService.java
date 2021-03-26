@@ -40,6 +40,7 @@ import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_ADMIN_DISABLED;
 import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_MASK;
 import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
 import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
@@ -74,7 +75,6 @@ import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_ALLOWLI
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
-import static android.net.NetworkPolicyManager.BLOCKED_METERED_REASON_MASK;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
