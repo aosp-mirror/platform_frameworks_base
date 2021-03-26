@@ -65,9 +65,13 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
+import android.view.autofill.AutofillId;
 import android.view.autofill.Helper;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
+import android.view.translation.TranslationCapability;
+import android.view.translation.TranslationSpec.DataFormat;
+import android.view.translation.ViewTranslationRequest;
 
 import com.android.internal.R;
 
@@ -9262,6 +9266,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         if (mParent != null) {
             mParent.onDescendantUnbufferedRequested();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * The implementation calls {@link #dispatchRequestTranslation} for all the child views.
+     */
+    @Override
+    public void dispatchRequestTranslation(@NonNull Map<AutofillId, long[]> viewIds,
+            @NonNull @DataFormat int[] supportedFormats,
+            @Nullable TranslationCapability capability,
+            @NonNull List<ViewTranslationRequest> requests) {
+        super.dispatchRequestTranslation(viewIds, supportedFormats, capability, requests);
+        final int childCount = getChildCount();
+        if (childCount == 0) {
+            return;
+        }
+        for (int i = 0; i < childCount; ++i) {
+            final View child = getChildAt(i);
+            child.dispatchRequestTranslation(viewIds, supportedFormats, capability, requests);
         }
     }
 }
