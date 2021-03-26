@@ -46,7 +46,7 @@ import java.util.Arrays;
  * The indices used to retrieve values from this structure correspond to
  * the positions of the attributes given to obtainStyledAttributes.
  */
-public class TypedArray {
+public class TypedArray implements AutoCloseable {
 
     static TypedArray obtain(Resources res, int len) {
         TypedArray attrs = res.mTypedArrayPool.acquire();
@@ -1250,6 +1250,17 @@ public class TypedArray {
         mAssets = null;
 
         mResources.mTypedArrayPool.release(this);
+    }
+
+    /**
+     * Recycles the TypedArray, to be re-used by a later caller. After calling
+     * this function you must not ever touch the typed array again.
+     *
+     * @see #recycle()
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     */
+    public void close() {
+        recycle();
     }
 
     /**

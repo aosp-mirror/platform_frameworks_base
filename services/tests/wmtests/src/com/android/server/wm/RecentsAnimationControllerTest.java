@@ -488,9 +488,9 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testIsAnimatingByRecents() {
         final ActivityRecord homeActivity = createHomeActivity();
-        final Task rootTask = createTaskStackOnDisplay(mDefaultDisplay);
-        final Task childTask = createTaskInStack(rootTask, 0 /* userId */);
-        final Task leafTask = createTaskInStack(childTask, 0 /* userId */);
+        final Task rootTask = createTask(mDefaultDisplay);
+        final Task childTask = createTaskInRootTask(rootTask, 0 /* userId */);
+        final Task leafTask = createTaskInRootTask(childTask, 0 /* userId */);
         spyOn(leafTask);
         doReturn(true).when(leafTask).isVisible();
 

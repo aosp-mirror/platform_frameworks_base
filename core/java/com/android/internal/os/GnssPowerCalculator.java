@@ -61,7 +61,17 @@ public class GnssPowerCalculator extends PowerCalculator {
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
             double averageGnssPowerMa) {
         final long durationMs = computeDuration(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
-        double powerMah = computePower(durationMs, averageGnssPowerMa);
+
+        final long measuredChargeUC = u.getGnssMeasuredBatteryConsumptionUC();
+        final boolean isMeasuredPowerAvailable = !query.shouldForceUsePowerProfileModel()
+                && measuredChargeUC != BatteryStats.POWER_DATA_UNAVAILABLE;
+
+        final double powerMah;
+        if (isMeasuredPowerAvailable) {
+            powerMah = uCtoMah(measuredChargeUC);
+        } else {
+            powerMah = computePower(durationMs, averageGnssPowerMa);
+        }
         app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_GNSS, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS, powerMah);
     }
@@ -73,15 +83,25 @@ public class GnssPowerCalculator extends PowerCalculator {
         for (int i = sippers.size() - 1; i >= 0; i--) {
             final BatterySipper app = sippers.get(i);
             if (app.drainType == BatterySipper.DrainType.APP) {
-                calculateApp(app, app.uidObj, rawRealtimeUs, statsType, averageGnssPowerMa);
+                calculateApp(app, app.uidObj, rawRealtimeUs, statsType, averageGnssPowerMa, false);
             }
         }
     }
 
     protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            int statsType, double averageGnssPowerMa) {
+            int statsType, double averageGnssPowerMa, boolean shouldForceUsePowerProfileModel) {
         final long durationMs = computeDuration(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
-        double powerMah = computePower(durationMs, averageGnssPowerMa);
+
+        final long measuredChargeUC = u.getGnssMeasuredBatteryConsumptionUC();
+        final boolean isMeasuredPowerAvailable = shouldForceUsePowerProfileModel
+                && measuredChargeUC != BatteryStats.POWER_DATA_UNAVAILABLE;
+
+        final double powerMah;
+        if (isMeasuredPowerAvailable) {
+            powerMah = uCtoMah(measuredChargeUC);
+        } else {
+            powerMah = computePower(durationMs, averageGnssPowerMa);
+        }
 
         app.gpsTimeMs = durationMs;
         app.gpsPowerMah = powerMah;

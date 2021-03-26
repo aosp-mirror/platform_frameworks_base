@@ -1773,57 +1773,75 @@ public class NetworkPolicyManagerServiceTest {
                 true);
     }
 
-    /**
-     * Test that when StatsProvider triggers limit reached, new limit will be calculated and
-     * re-armed.
-     */
-    @Test
-    public void testStatsProviderLimitReached() throws Exception {
-        final int CYCLE_DAY = 15;
-
-        final NetworkStats stats = new NetworkStats(0L, 1);
+    private void increaseMockedTotalBytes(NetworkStats stats, long rxBytes, long txBytes) {
         stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
-                2999, 1, 2000, 1, 0);
+                rxBytes, 1, txBytes, 1, 0);
         when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
                 .thenReturn(stats.getTotalBytes());
         when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
                 .thenReturn(stats);
+    }
+
+    private void triggerOnStatsProviderWarningOrLimitReached() throws InterruptedException {
+        final NetworkPolicyManagerInternal npmi = LocalServices
+                .getService(NetworkPolicyManagerInternal.class);
+        npmi.onStatsProviderWarningOrLimitReached("TEST");
+        // Wait for processing of MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED.
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).forceUpdate();
+        // Wait for processing of MSG_*_INTERFACE_QUOTAS.
+        postMsgAndWaitForCompletion();
+    }
+
+    /**
+     * Test that when StatsProvider triggers warning and limit reached, new quotas will be
+     * calculated and re-armed.
+     */
+    @Test
+    public void testStatsProviderWarningAndLimitReached() throws Exception {
+        final int CYCLE_DAY = 15;
+
+        final NetworkStats stats = new NetworkStats(0L, 1);
+        increaseMockedTotalBytes(stats, 2999, 2000);
 
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
-        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, Long.MAX_VALUE);
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE,
+                Long.MAX_VALUE);
 
-        // Set limit to 10KB.
+        // Set warning to 7KB and limit to 10KB.
         setNetworkPolicies(new NetworkPolicy(
-                sTemplateMobileAll, CYCLE_DAY, TIMEZONE_UTC, WARNING_DISABLED, 10000L,
-                true));
+                sTemplateMobileAll, CYCLE_DAY, TIMEZONE_UTC, 7000L, 10000L, true));
         postMsgAndWaitForCompletion();
 
-        // Verifies that remaining quota is set to providers.
-        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, 10000L - 4999L);
-
+        // Verifies that remaining quotas are set to providers.
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2001L, 5001L);
         reset(mStatsService);
 
-        // Increase the usage.
-        stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
-                1000, 1, 999, 1, 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats.getTotalBytes());
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats);
+        // Increase the usage and simulates that limit reached fires earlier by provider,
+        // but actually the quota is not yet reached. Verifies that the limit reached leads to
+        // a force update and new quotas should be set.
+        increaseMockedTotalBytes(stats, 1000, 999);
+        triggerOnStatsProviderWarningOrLimitReached();
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2L, 3002L);
+        reset(mStatsService);
 
-        // Simulates that limit reached fires earlier by provider, but actually the quota is not
-        // yet reached.
-        final NetworkPolicyManagerInternal npmi = LocalServices
-                .getService(NetworkPolicyManagerInternal.class);
-        npmi.onStatsProviderWarningOrLimitReached("TEST");
+        // Increase the usage and simulate warning reached, the new warning should be unlimited
+        // since service will disable warning quota to stop lower layer from keep triggering
+        // warning reached event.
+        increaseMockedTotalBytes(stats, 1000L, 1000);
+        triggerOnStatsProviderWarningOrLimitReached();
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(
+                TEST_IFACE, Long.MAX_VALUE, 1002L);
+        reset(mStatsService);
 
-        // Verifies that the limit reached leads to a force update and new limit should be set.
-        postMsgAndWaitForCompletion();
-        verify(mStatsService).forceUpdate();
-        postMsgAndWaitForCompletion();
-        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, 10000L - 4999L - 1999L);
+        // Increase the usage that over the warning and limit, the new limit should set to 1 to
+        // block the network traffic.
+        increaseMockedTotalBytes(stats, 1000L, 1000);
+        triggerOnStatsProviderWarningOrLimitReached();
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE, 1L);
+        reset(mStatsService);
     }
 
     /**

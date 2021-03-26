@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.charging
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.PointF
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroupOverlay
@@ -31,6 +32,7 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.io.PrintWriter
+import java.lang.Integer.max
 import javax.inject.Inject
 
 /***
@@ -46,7 +48,7 @@ class WiredChargingRippleController @Inject constructor(
     private val context: Context,
     private val keyguardStateController: KeyguardStateController
 ) {
-    private var pluggedIn: Boolean? = null
+    private var charging: Boolean? = null
     private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled
     @VisibleForTesting
     var rippleView: ChargingRippleView = ChargingRippleView(context, attrs = null)
@@ -55,16 +57,18 @@ class WiredChargingRippleController @Inject constructor(
         val batteryStateChangeCallback = object : BatteryController.BatteryStateChangeCallback {
             override fun onBatteryLevelChanged(
                 level: Int,
-                nowPluggedIn: Boolean,
-                charging: Boolean
+                pluggedIn: Boolean,
+                nowCharging: Boolean
             ) {
-                if (!rippleEnabled) {
+                // Suppresses the ripple when it's disabled, or when the state change comes
+                // from wireless charging.
+                if (!rippleEnabled || batteryController.isWirelessCharging) {
                     return
                 }
-                val wasPluggedIn = pluggedIn
-                pluggedIn = nowPluggedIn
+                val wasCharging = charging
+                charging = nowCharging
                 // Only triggers when the keyguard is active and the device is just plugged in.
-                if (wasPluggedIn == false && nowPluggedIn && keyguardStateController.isShowing) {
+                if (wasCharging == false && nowCharging && keyguardStateController.isShowing) {
                     rippleView.startRipple()
                 }
             }
@@ -113,10 +117,13 @@ class WiredChargingRippleController @Inject constructor(
         val width = displayMetrics.widthPixels
         val height = displayMetrics.heightPixels
         if (width != rippleView.width || height != rippleView.height) {
-            rippleView.measure(
-                    View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
-                    View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY))
-            rippleView.layout(0, 0, width, height)
+            rippleView.apply {
+                measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                        View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY))
+                layout(0, 0, width, height)
+                origin = PointF(width / 2f, height.toFloat())
+                radius = max(width, height).toFloat()
+            }
         }
     }
 

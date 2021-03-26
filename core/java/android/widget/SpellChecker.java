@@ -20,12 +20,10 @@ import android.annotation.Nullable;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.method.WordIterator;
 import android.text.style.SpellCheckSpan;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
-import android.util.LruCache;
 import android.util.Range;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SpellCheckerSession;
@@ -98,10 +96,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private Runnable mSpellRunnable;
 
-    private static final int SUGGESTION_SPAN_CACHE_SIZE = 10;
-    private final LruCache<Long, SuggestionSpan> mSuggestionSpanCache =
-            new LruCache<Long, SuggestionSpan>(SUGGESTION_SPAN_CACHE_SIZE);
-
     public SpellChecker(TextView textView) {
         mTextView = textView;
 
@@ -144,7 +138,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         // Remove existing misspelled SuggestionSpans
         mTextView.removeMisspelledSpans((Editable) mTextView.getText());
-        mSuggestionSpanCache.evictAll();
     }
 
     private void setLocale(Locale locale) {
@@ -410,22 +403,42 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     }
                     if (spellCheckSpanStart >= 0 && spellCheckSpanEnd > spellCheckSpanStart
                             && end > start) {
-                        final Long key = Long.valueOf(TextUtils.packRangeInLong(start, end));
-                        final SuggestionSpan tempSuggestionSpan = mSuggestionSpanCache.get(key);
-                        if (tempSuggestionSpan != null) {
-                            if (DBG) {
-                                Log.i(TAG, "Remove existing misspelled span. "
-                                        + editable.subSequence(start, end));
-                            }
-                            editable.removeSpan(tempSuggestionSpan);
-                            mSuggestionSpanCache.remove(key);
-                        }
+                        removeErrorSuggestionSpan(editable, start, end, RemoveReason.OBSOLETE);
                     }
                 }
                 return spellCheckSpan;
             }
         }
         return null;
+    }
+
+    private enum RemoveReason {
+        /**
+         * Indicates the previous SuggestionSpan is replaced by a new SuggestionSpan.
+         */
+        REPLACE,
+        /**
+         * Indicates the previous SuggestionSpan is removed because corresponding text is
+         * considered as valid words now.
+         */
+        OBSOLETE,
+    }
+
+    private static void removeErrorSuggestionSpan(
+            Editable editable, int start, int end, RemoveReason reason) {
+        SuggestionSpan[] spans = editable.getSpans(start, end, SuggestionSpan.class);
+        for (SuggestionSpan span : spans) {
+            if (editable.getSpanStart(span) == start
+                    && editable.getSpanEnd(span) == end
+                    && (span.getFlags() & (SuggestionSpan.FLAG_MISSPELLED
+                    | SuggestionSpan.FLAG_GRAMMAR_ERROR)) != 0) {
+                if (DBG) {
+                    Log.i(TAG, "Remove existing misspelled/grammar error span on "
+                            + editable.subSequence(start, end) + ", reason: " + reason);
+                }
+                editable.removeSpan(span);
+            }
+        }
     }
 
     @Override
@@ -543,16 +556,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
         }
         SuggestionSpan suggestionSpan =
                 new SuggestionSpan(mTextView.getContext(), suggestions, flags);
-        final Long key = Long.valueOf(TextUtils.packRangeInLong(start, end));
-        final SuggestionSpan tempSuggestionSpan = mSuggestionSpanCache.get(key);
-        if (tempSuggestionSpan != null) {
-            if (DBG) {
-                Log.i(TAG, "Cached span on the same position is cleard. "
-                        + editable.subSequence(start, end));
-            }
-            editable.removeSpan(tempSuggestionSpan);
-        }
-        mSuggestionSpanCache.put(key, suggestionSpan);
+        removeErrorSuggestionSpan(editable, start, end, RemoveReason.REPLACE);
         editable.setSpan(suggestionSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         mTextView.invalidateRegion(start, end, false /* No cursor involved */);

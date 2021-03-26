@@ -40,7 +40,7 @@ public class FaceInvalidationClient extends InvalidationClient<Face, ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().invalidateAuthenticatorId(mSequentialId);
+            getFreshDaemon().invalidateAuthenticatorId();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
             mCallback.onClientFinished(this, false /* success */);

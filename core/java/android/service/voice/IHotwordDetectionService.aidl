@@ -34,5 +34,5 @@ oneway interface IHotwordDetectionService {
     long timeoutMillis,
     in IDspHotwordDetectionCallback callback);
 
-    void setConfig(in PersistableBundle options, in SharedMemory sharedMemory);
+    void updateState(in PersistableBundle options, in SharedMemory sharedMemory);
 }

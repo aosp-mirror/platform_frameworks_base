@@ -822,6 +822,11 @@ public class UserSwitcherController implements Dumpable {
         }
 
         @Override
+        public int getSettingsText() {
+            return R.string.quick_settings_more_user_settings;
+        }
+
+        @Override
         public Boolean getToggleState() {
             return null;
         }

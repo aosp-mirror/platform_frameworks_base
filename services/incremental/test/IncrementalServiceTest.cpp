@@ -379,6 +379,7 @@ public:
                                                                    std::string_view path));
     MOCK_CONST_METHOD2(isFileFullyLoaded,
                        incfs::LoadingState(const Control& control, std::string_view path));
+    MOCK_CONST_METHOD2(isFileFullyLoaded, incfs::LoadingState(const Control& control, FileId id));
     MOCK_CONST_METHOD1(isEverythingFullyLoaded, incfs::LoadingState(const Control& control));
     MOCK_CONST_METHOD3(link,
                        ErrorCode(const Control& control, std::string_view from,
@@ -386,14 +387,15 @@ public:
     MOCK_CONST_METHOD2(unlink, ErrorCode(const Control& control, std::string_view path));
     MOCK_CONST_METHOD2(openForSpecialOps, UniqueFd(const Control& control, FileId id));
     MOCK_CONST_METHOD1(writeBlocks, ErrorCode(std::span<const DataBlock> blocks));
-    MOCK_CONST_METHOD3(reserveSpace,
-                       ErrorCode(const Control& control, std::string_view path, IncFsSize size));
+    MOCK_CONST_METHOD3(reserveSpace, ErrorCode(const Control& control, FileId id, IncFsSize size));
     MOCK_CONST_METHOD3(waitForPendingReads,
                        WaitResult(const Control& control, std::chrono::milliseconds timeout,
                                   std::vector<incfs::ReadInfo>* pendingReadsBuffer));
     MOCK_CONST_METHOD2(setUidReadTimeouts,
                        ErrorCode(const Control& control,
                                  const std::vector<PerUidReadTimeouts>& perUidReadTimeouts));
+    MOCK_CONST_METHOD2(forEachFile, ErrorCode(const Control& control, FileCallback cb));
+    MOCK_CONST_METHOD2(forEachIncompleteFile, ErrorCode(const Control& control, FileCallback cb));
 
     MockIncFs() {
         ON_CALL(*this, listExistingMounts(_)).WillByDefault(Return());
@@ -1594,7 +1596,7 @@ TEST_F(IncrementalServiceTest, testIsFileFullyLoadedNoData) {
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
                                                IncrementalService::CreateOptions::CreateNew);
-    EXPECT_CALL(*mIncFs, isFileFullyLoaded(_, _))
+    EXPECT_CALL(*mIncFs, isFileFullyLoaded(_, An<std::string_view>()))
             .Times(1)
             .WillOnce(Return(incfs::LoadingState::MissingBlocks));
     ASSERT_GT((int)mIncrementalService->isFileFullyLoaded(storageId, "base.apk"), 0);
@@ -1605,7 +1607,7 @@ TEST_F(IncrementalServiceTest, testIsFileFullyLoadedError) {
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
                                                IncrementalService::CreateOptions::CreateNew);
-    EXPECT_CALL(*mIncFs, isFileFullyLoaded(_, _))
+    EXPECT_CALL(*mIncFs, isFileFullyLoaded(_, An<std::string_view>()))
             .Times(1)
             .WillOnce(Return(incfs::LoadingState(-1)));
     ASSERT_LT((int)mIncrementalService->isFileFullyLoaded(storageId, "base.apk"), 0);
@@ -1616,7 +1618,7 @@ TEST_F(IncrementalServiceTest, testIsFileFullyLoadedSuccess) {
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
                                                IncrementalService::CreateOptions::CreateNew);
-    EXPECT_CALL(*mIncFs, isFileFullyLoaded(_, _))
+    EXPECT_CALL(*mIncFs, isFileFullyLoaded(_, An<std::string_view>()))
             .Times(1)
             .WillOnce(Return(incfs::LoadingState::Full));
     ASSERT_EQ(0, (int)mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));

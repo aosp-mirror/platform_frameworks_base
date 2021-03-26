@@ -196,7 +196,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /** userId the session belongs to */
     public final int userId;
 
-    /** uid the session is for */
+    /** The uid of the app that's being autofilled */
     public final int uid;
 
     /** ID of the task associated with this session's activity */
@@ -208,7 +208,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     @NonNull private IBinder mActivityToken;
 
-    /** Component that's being auto-filled */
+    /** The app activity that's being autofilled */
     @NonNull private final ComponentName mComponentName;
 
     /** Whether the app being autofilled is running in compat mode. */

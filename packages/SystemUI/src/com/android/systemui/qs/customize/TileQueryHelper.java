@@ -115,34 +115,13 @@ public class TileQueryHelper {
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
         // TODO(b/174753536): Move it into the config file.
-        // Only do the below hacking when at least one of the below tiles exist
-        //   --InternetTile
-        //   --WiFiTile
-        //   --CellularTIle
-        if (possibleTiles.contains("internet") || possibleTiles.contains("wifi")
-                || possibleTiles.contains("cell")) {
-            if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
-                if (!possibleTiles.contains("internet")) {
-                    possibleTiles.add("internet");
-                }
-                if (possibleTiles.contains("wifi")) {
-                    possibleTiles.remove("wifi");
-                }
-                if (possibleTiles.contains("cell")) {
-                    possibleTiles.remove("cell");
-                }
-            } else {
-                if (possibleTiles.contains("internet")) {
-                    possibleTiles.remove("internet");
-                }
-                if (!possibleTiles.contains("wifi")) {
-                    possibleTiles.add("wifi");
-                }
-                if (!possibleTiles.contains("cell")) {
-                    possibleTiles.add("cell");
-                }
-            }
+        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+            possibleTiles.remove("cell");
+            possibleTiles.remove("wifi");
+        } else {
+            possibleTiles.remove("internet");
         }
+
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.
             // Do not include CustomTile. Those will be created by `addPackageTiles`.

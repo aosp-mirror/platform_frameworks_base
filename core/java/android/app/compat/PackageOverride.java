@@ -17,8 +17,9 @@
 package android.app.compat;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
-import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,15 +33,16 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public class PackageOverride implements Parcelable {
+@SystemApi
+public final class PackageOverride {
 
+    /** @hide */
     @IntDef({
             VALUE_UNDEFINED,
             VALUE_ENABLED,
             VALUE_DISABLED
     })
     @Retention(RetentionPolicy.SOURCE)
-    /** @hide */
     public @interface EvaluatedOverride {
     }
 
@@ -73,10 +75,6 @@ public class PackageOverride implements Parcelable {
         this.mMinVersionCode = minVersionCode;
         this.mMaxVersionCode = maxVersionCode;
         this.mEnabled = enabled;
-    }
-
-    private PackageOverride(Parcel in) {
-        this(in.readLong(), in.readLong(), in.readBoolean());
     }
 
     /**
@@ -114,22 +112,20 @@ public class PackageOverride implements Parcelable {
     }
 
     /** Returns the enabled value for the override. */
-    public boolean getEnabled() {
+    public boolean isEnabled() {
         return mEnabled;
     }
 
     /** @hide */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    /** @hide */
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest) {
         dest.writeLong(mMinVersionCode);
         dest.writeLong(mMaxVersionCode);
         dest.writeBoolean(mEnabled);
+    }
+
+    /** @hide */
+    public static PackageOverride createFromParcel(Parcel in) {
+        return new PackageOverride(in.readLong(), in.readLong(), in.readBoolean());
     }
 
     /** @hide */
@@ -141,25 +137,10 @@ public class PackageOverride implements Parcelable {
         return String.format("[%d,%d,%b]", mMinVersionCode, mMaxVersionCode, mEnabled);
     }
 
-    /** @hide */
-    public static final Creator<PackageOverride> CREATOR =
-            new Creator<PackageOverride>() {
-
-                @Override
-                public PackageOverride createFromParcel(Parcel in) {
-                    return new PackageOverride(in);
-                }
-
-                @Override
-                public PackageOverride[] newArray(int size) {
-                    return new PackageOverride[size];
-                }
-            };
-
     /**
      * Builder to construct a PackageOverride.
      */
-    public static class Builder {
+    public static final class Builder {
         private long mMinVersionCode = Long.MIN_VALUE;
         private long mMaxVersionCode = Long.MAX_VALUE;
         private boolean mEnabled;
@@ -169,6 +150,7 @@ public class PackageOverride implements Parcelable {
          *
          * default value: {@code Long.MIN_VALUE}.
          */
+        @NonNull
         public Builder setMinVersionCode(long minVersionCode) {
             mMinVersionCode = minVersionCode;
             return this;
@@ -179,6 +161,7 @@ public class PackageOverride implements Parcelable {
          *
          * default value: {@code Long.MAX_VALUE}.
          */
+        @NonNull
         public Builder setMaxVersionCode(long maxVersionCode) {
             mMaxVersionCode = maxVersionCode;
             return this;
@@ -189,6 +172,7 @@ public class PackageOverride implements Parcelable {
          *
          * default value: {@code false}.
          */
+        @NonNull
         public Builder setEnabled(boolean enabled) {
             mEnabled = enabled;
             return this;
@@ -200,6 +184,7 @@ public class PackageOverride implements Parcelable {
          * @throws IllegalArgumentException if {@code minVersionCode} is larger than
          *                                  {@code maxVersionCode}.
          */
+        @NonNull
         public PackageOverride build() {
             if (mMinVersionCode > mMaxVersionCode) {
                 throw new IllegalArgumentException("minVersionCode must not be larger than "

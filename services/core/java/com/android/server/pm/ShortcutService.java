@@ -342,7 +342,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final IPackageManager mIPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
-    private final UserManagerInternal mUserManagerInternal;
+    final UserManagerInternal mUserManagerInternal;
     private final UsageStatsManagerInternal mUsageStatsManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
     private final IUriGrantsManager mUriGrantsManager;

@@ -123,7 +123,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
                 UdfpsHelper.getReasonFromEnrollReason(mEnrollReason),
                 mUdfpsOverlayController, this);
         try {
-            mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
+            mCancellationSignal = getFreshDaemon().enroll(
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken));
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);

@@ -149,7 +149,10 @@ public class ParsedActivityUtils {
                         | flag(ActivityInfo.FLAG_TURN_SCREEN_ON, R.styleable.AndroidManifestActivity_turnScreenOn, sa)
                         | flag(ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING, R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, sa);
 
-                activity.privateFlags |= flag(ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED, R.styleable.AndroidManifestActivity_inheritShowWhenLocked, sa);
+                activity.privateFlags |= flag(ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED,
+                        R.styleable.AndroidManifestActivity_inheritShowWhenLocked, sa)
+                        | flag(ActivityInfo.PRIVATE_FLAG_HOME_TRANSITION_SOUND,
+                        R.styleable.AndroidManifestActivity_playHomeTransitionSound, true, sa);
 
                 activity.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode, ActivityInfo.COLOR_MODE_DEFAULT);
                 activity.documentLaunchMode = sa.getInt(R.styleable.AndroidManifestActivity_documentLaunchMode, ActivityInfo.DOCUMENT_LAUNCH_NONE);

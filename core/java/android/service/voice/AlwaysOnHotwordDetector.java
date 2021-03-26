@@ -44,6 +44,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
@@ -342,14 +343,35 @@ public class AlwaysOnHotwordDetector {
         // Raw data associated with the event.
         // This is the audio that triggered the keyphrase if {@code isTriggerAudio} is true.
         private final byte[] mData;
+        private final HotwordDetectedResult mHotwordDetectedResult;
+        private final ParcelFileDescriptor mAudioStream;
 
         private EventPayload(boolean triggerAvailable, boolean captureAvailable,
                 AudioFormat audioFormat, int captureSession, byte[] data) {
+            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data, null,
+                    null);
+        }
+
+        EventPayload(AudioFormat audioFormat, HotwordDetectedResult hotwordDetectedResult) {
+            this(false, false, audioFormat, -1, null, hotwordDetectedResult, null);
+        }
+
+        EventPayload(AudioFormat audioFormat,
+                HotwordDetectedResult hotwordDetectedResult,
+                ParcelFileDescriptor audioStream) {
+            this(false, false, audioFormat, -1, null, hotwordDetectedResult, audioStream);
+        }
+
+        private EventPayload(boolean triggerAvailable, boolean captureAvailable,
+                AudioFormat audioFormat, int captureSession, byte[] data,
+                HotwordDetectedResult hotwordDetectedResult, ParcelFileDescriptor audioStream) {
             mTriggerAvailable = triggerAvailable;
             mCaptureAvailable = captureAvailable;
             mCaptureSession = captureSession;
             mAudioFormat = audioFormat;
             mData = data;
+            mHotwordDetectedResult = hotwordDetectedResult;
+            mAudioStream = audioStream;
         }
 
         /**
@@ -404,6 +426,33 @@ public class AlwaysOnHotwordDetector {
             } else {
                 return null;
             }
+        }
+
+        /**
+         * Returns {@link HotwordDetectedResult} associated with the hotword event, passed from
+         * {@link HotwordDetectionService}.
+         */
+        @Nullable
+        public HotwordDetectedResult getHotwordDetectedResult() {
+            return mHotwordDetectedResult;
+        }
+
+        /**
+         * Returns a stream with bytes corresponding to the open audio stream with hotword data.
+         *
+         * <p>This data represents an audio stream in the format returned by
+         * {@link #getCaptureAudioFormat}.
+         *
+         * <p>Clients are expected to start consuming the stream within 1 second of receiving the
+         * event.
+         *
+         * <p>When this method returns a non-null, clients must close this stream when it's no
+         * longer needed. Failing to do so will result in microphone being open for longer periods
+         * of time, and app being attributed for microphone usage.
+         */
+        @Nullable
+        public ParcelFileDescriptor getAudioStream() {
+            return mAudioStream;
         }
     }
 
@@ -508,7 +557,7 @@ public class AlwaysOnHotwordDetector {
         mTargetSdkVersion = targetSdkVersion;
         mSupportHotwordDetectionService = supportHotwordDetectionService;
         if (mSupportHotwordDetectionService) {
-            setHotwordDetectionServiceConfig(options, sharedMemory);
+            updateState(options, sharedMemory);
         }
         try {
             Identity identity = new Identity();
@@ -524,30 +573,28 @@ public class AlwaysOnHotwordDetector {
     /**
      * Set configuration and pass read-only data to hotword detection service.
      *
-     * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
      * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob provided by the
-     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
      *
-     * @throws IllegalStateException if it doesn't support hotword detection service.
-     *
-     * @hide
+     * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
+     * {@link HotwordDetectionService} when it was created.
      */
-    public final void setHotwordDetectionServiceConfig(@Nullable PersistableBundle options,
+    public final void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         if (DBG) {
-            Slog.d(TAG, "setHotwordDetectionServiceConfig()");
+            Slog.d(TAG, "updateState()");
         }
         if (!mSupportHotwordDetectionService) {
             throw new IllegalStateException(
-                    "setHotwordDetectionServiceConfig called, but it doesn't support hotword"
-                            + " detection service");
+                    "updateState called, but it doesn't support hotword detection service");
         }
 
         try {
-            mModelManagementService.setHotwordDetectionServiceConfig(options, sharedMemory);
+            mModelManagementService.updateState(options, sharedMemory);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

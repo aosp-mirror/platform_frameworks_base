@@ -109,16 +109,6 @@ public final class SetSchemaRequest {
     }
 
     /**
-     * TODO(b/181887768): This method exists only for dogfooder transition and must be removed.
-     * @deprecated This method exists only for dogfooder transition and must be removed.
-     */
-    @Deprecated
-    @NonNull
-    public Set<String> getSchemasNotVisibleToSystemUi() {
-        return getSchemasNotDisplayedBySystem();
-    }
-
-    /**
      * Returns all the schema types that are opted out of being displayed and visible on any system
      * UI surface.
      */
@@ -219,17 +209,6 @@ public final class SetSchemaRequest {
             Preconditions.checkNotNull(schemas);
             mSchemas.addAll(schemas);
             return this;
-        }
-
-        /**
-         * TODO(b/181887768): This method exists only for dogfooder transition and must be removed.
-         * @deprecated This method exists only for dogfooder transition and must be removed.
-         */
-        @Deprecated
-        @NonNull
-        public Builder setSchemaTypeVisibilityForSystemUi(
-                @NonNull String schemaType, boolean displayed) {
-            return setSchemaTypeDisplayedBySystem(schemaType, displayed);
         }
 
         /**

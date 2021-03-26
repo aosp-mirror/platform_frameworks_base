@@ -618,7 +618,7 @@ public abstract class AugmentedAutofillService extends Service {
                         mFirstOnSuccessTime = SystemClock.elapsedRealtime();
                         duration = mFirstOnSuccessTime - mFirstRequestTime;
                         if (sDebug) {
-                            Log.d(TAG, "Service responded nothing in " + formatDuration(duration));
+                            Log.d(TAG, "Inline response in " + formatDuration(duration));
                         }
                     }
                 } break;

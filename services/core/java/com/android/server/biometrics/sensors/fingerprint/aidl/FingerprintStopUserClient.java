@@ -44,7 +44,7 @@ public class FingerprintStopUserClient extends StopUserClient<ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().close(mSequentialId);
+            getFreshDaemon().close();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
             getCallback().onClientFinished(this, false /* success */);

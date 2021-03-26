@@ -229,15 +229,14 @@ interface IVoiceInteractionManagerService {
     /**
      * Set configuration and pass read-only data to hotword detection service.
      *
-     * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
      * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob provided by the
-     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
      */
-    void setHotwordDetectionServiceConfig(
-            in PersistableBundle options, in SharedMemory sharedMemory);
+    void updateState(in PersistableBundle options, in SharedMemory sharedMemory);
 
     /**
      * Requests to shutdown hotword detection service.

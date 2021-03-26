@@ -337,6 +337,52 @@ final class InputMethodUtils {
         return getDefaultEnabledImes(context, imis, false /* onlyMinimum */);
     }
 
+    /**
+     * Chooses an eligible system voice IME from the given IMEs.
+     *
+     * @param methodMap Map from the IME ID to {@link InputMethodInfo}.
+     * @param systemSpeechRecognizerPackageName System speech recognizer configured by the system
+     *                                          config.
+     * @param currentDefaultVoiceImeId IME ID currently set to
+     *                                 {@link Settings.Secure#DEFAULT_VOICE_INPUT_METHOD}
+     * @return {@link InputMethodInfo} that is found in {@code methodMap} and most suitable for
+     *                                 the system voice IME.
+     */
+    @Nullable
+    static InputMethodInfo chooseSystemVoiceIme(
+            @NonNull ArrayMap<String, InputMethodInfo> methodMap,
+            @Nullable String systemSpeechRecognizerPackageName,
+            @Nullable String currentDefaultVoiceImeId) {
+        if (TextUtils.isEmpty(systemSpeechRecognizerPackageName)) {
+            return null;
+        }
+        final InputMethodInfo defaultVoiceIme = methodMap.get(currentDefaultVoiceImeId);
+        // If the config matches the package of the setting, use the current one.
+        if (defaultVoiceIme != null && defaultVoiceIme.isSystem()
+                && defaultVoiceIme.getPackageName().equals(systemSpeechRecognizerPackageName)) {
+            return defaultVoiceIme;
+        }
+        InputMethodInfo firstMatchingIme = null;
+        final int methodCount = methodMap.size();
+        for (int i = 0; i < methodCount; ++i) {
+            final InputMethodInfo imi = methodMap.valueAt(i);
+            if (!imi.isSystem()) {
+                continue;
+            }
+            if (!TextUtils.equals(imi.getPackageName(), systemSpeechRecognizerPackageName)) {
+                continue;
+            }
+            if (firstMatchingIme != null) {
+                Slog.e(TAG, "At most one InputMethodService can be published in "
+                        + "systemSpeechRecognizer: " + systemSpeechRecognizerPackageName
+                        + ". Ignoring all of them.");
+                return null;
+            }
+            firstMatchingIme = imi;
+        }
+        return firstMatchingIme;
+    }
+
     static boolean containsSubtypeOf(InputMethodInfo imi, @Nullable Locale locale,
             boolean checkCountry, String mode) {
         if (locale == null) {
@@ -1229,6 +1275,22 @@ final class InputMethodUtils {
             final String imi = getString(Settings.Secure.DEFAULT_INPUT_METHOD, null);
             if (DEBUG) {
                 Slog.d(TAG, "getSelectedInputMethodStr: " + imi);
+            }
+            return imi;
+        }
+
+        void putDefaultVoiceInputMethod(String imeId) {
+            if (DEBUG) {
+                Slog.d(TAG, "putDefaultVoiceInputMethodStr: " + imeId + ", " + mCurrentUserId);
+            }
+            putString(Settings.Secure.DEFAULT_VOICE_INPUT_METHOD, imeId);
+        }
+
+        @Nullable
+        String getDefaultVoiceInputMethod() {
+            final String imi = getString(Settings.Secure.DEFAULT_VOICE_INPUT_METHOD, null);
+            if (DEBUG) {
+                Slog.d(TAG, "getDefaultVoiceInputMethodStr: " + imi);
             }
             return imi;
         }

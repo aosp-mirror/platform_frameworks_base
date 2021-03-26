@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.Animatable;
 import android.util.AttributeSet;
 import android.util.SparseArray;
@@ -139,8 +140,12 @@ public class QSDetail extends LinearLayout {
     }
 
     private void updateDetailText() {
-        mDetailDoneButton.setText(R.string.quick_settings_done);
-        mDetailSettingsButton.setText(R.string.quick_settings_more_settings);
+        int resId = mDetailAdapter != null ? mDetailAdapter.getDoneText() : Resources.ID_NULL;
+        mDetailDoneButton.setText(
+                (resId != Resources.ID_NULL) ? resId : R.string.quick_settings_done);
+        resId = mDetailAdapter != null ? mDetailAdapter.getSettingsText() : Resources.ID_NULL;
+        mDetailSettingsButton.setText(
+                (resId != Resources.ID_NULL) ? resId : R.string.quick_settings_more_settings);
     }
 
     public void updateResources() {
@@ -218,6 +223,7 @@ public class QSDetail extends LinearLayout {
             mQsPanelController.setGridContentVisibility(true);
             mQsPanelCallback.onScanStateChanged(false);
         }
+        updateDetailText();
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
 
         if (mShouldAnimate) {
