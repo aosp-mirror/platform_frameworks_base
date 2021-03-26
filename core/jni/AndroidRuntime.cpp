@@ -156,7 +156,6 @@ extern int register_android_os_SharedMemory(JNIEnv* env);
 extern int register_android_service_DataLoaderService(JNIEnv* env);
 extern int register_android_os_incremental_IncrementalManager(JNIEnv* env);
 extern int register_android_net_LocalSocketImpl(JNIEnv* env);
-extern int register_android_net_NetworkUtils(JNIEnv* env);
 extern int register_android_text_AndroidCharacter(JNIEnv *env);
 extern int register_android_text_Hyphenator(JNIEnv *env);
 extern int register_android_opengl_classes(JNIEnv *env);
@@ -1548,7 +1547,6 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_Trace),
         REG_JNI(register_android_os_UEventObserver),
         REG_JNI(register_android_net_LocalSocketImpl),
-        REG_JNI(register_android_net_NetworkUtils),
         REG_JNI(register_android_os_MemoryFile),
         REG_JNI(register_android_os_SharedMemory),
         REG_JNI(register_android_os_incremental_IncrementalManager),

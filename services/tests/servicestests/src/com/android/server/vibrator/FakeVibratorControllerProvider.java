@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
@@ -38,7 +39,6 @@ import java.util.Map;
  * interactions.
  */
 final class FakeVibratorControllerProvider {
-
     private static final int EFFECT_DURATION = 20;
 
     private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();
@@ -74,11 +74,12 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public void on(long milliseconds, long vibrationId) {
+        public long on(long milliseconds, long vibrationId) {
             mEffectSegments.add(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
                     /* frequency= */ 0, (int) milliseconds));
             applyLatency();
             scheduleListener(milliseconds, vibrationId);
+            return milliseconds;
         }
 
         @Override
@@ -89,26 +90,6 @@ final class FakeVibratorControllerProvider {
         public void setAmplitude(float amplitude) {
             mAmplitudes.add(amplitude);
             applyLatency();
-        }
-
-        @Override
-        public int[] getSupportedEffects() {
-            return mSupportedEffects;
-        }
-
-        @Override
-        public int[] getSupportedPrimitives() {
-            return mSupportedPrimitives;
-        }
-
-        @Override
-        public float getResonantFrequency() {
-            return mResonantFrequency;
-        }
-
-        @Override
-        public float getQFactor() {
-            return mQFactor;
         }
 
         @Override
@@ -140,11 +121,6 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public long getCapabilities() {
-            return mCapabilities;
-        }
-
-        @Override
         public void alwaysOnEnable(long id, long effect, long strength) {
             PrebakedSegment prebaked = new PrebakedSegment((int) effect, false, (int) strength);
             mEnabledAlwaysOnEffects.put(id, prebaked);
@@ -153,6 +129,14 @@ final class FakeVibratorControllerProvider {
         @Override
         public void alwaysOnDisable(long id) {
             mEnabledAlwaysOnEffects.remove(id);
+        }
+
+        @Override
+        public VibratorInfo getInfo() {
+            VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
+                    Float.NaN, mResonantFrequency, Float.NaN, Float.NaN, null);
+            return new VibratorInfo(vibratorId, mCapabilities, mSupportedEffects,
+                    mSupportedPrimitives, mQFactor, frequencyMapping);
         }
 
         private void applyLatency() {

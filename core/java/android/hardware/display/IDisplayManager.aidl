@@ -77,6 +77,9 @@ interface IDisplayManager {
     // No permissions required.
     boolean areUserDisabledHdrTypesAllowed();
 
+    // No permissions required.
+    int[] getUserDisabledHdrTypes();
+
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
 
@@ -127,6 +130,12 @@ interface IDisplayManager {
 
     // Temporarily sets the display brightness.
     void setTemporaryBrightness(int displayId, float brightness);
+
+    // Saves the display brightness.
+    void setBrightness(int displayId, float brightness);
+
+    // Retrieves the display brightness.
+    float getBrightness(int displayId);
 
     // Temporarily sets the auto brightness adjustment factor.
     void setTemporaryAutoBrightnessAdjustment(float adjustment);

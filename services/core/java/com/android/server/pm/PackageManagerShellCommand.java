@@ -561,7 +561,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 }
                 final ApkLite apkLite = apkLiteResult.getResult();
                 final PackageLite pkgLite = new PackageLite(null, apkLite.getPath(), apkLite, null,
-                        null, null, null, null, null);
+                        null, null, null, null, null, apkLite.getTargetSdkVersion());
                 sessionSize += PackageHelper.calculateInstalledSize(pkgLite,
                         params.sessionParams.abiOverride, fd.getFileDescriptor());
             } catch (IOException e) {

@@ -1561,12 +1561,14 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @TestApi
     public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
     /**
      * Phone call is using camera
      *
      * @hide
      */
+    @TestApi
     public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
 
     /**

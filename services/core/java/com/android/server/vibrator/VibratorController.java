@@ -30,6 +30,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -65,13 +66,9 @@ final class VibratorController {
             NativeWrapper nativeWrapper) {
         mNativeWrapper = nativeWrapper;
         mNativeWrapper.init(vibratorId, listener);
-
-        // TODO(b/167947076): load supported ones from HAL once API introduced
-        VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
-                Float.NaN, nativeWrapper.getResonantFrequency(), Float.NaN, Float.NaN, null);
-        mVibratorInfo = new VibratorInfo(vibratorId, nativeWrapper.getCapabilities(),
-                nativeWrapper.getSupportedEffects(), nativeWrapper.getSupportedPrimitives(),
-                nativeWrapper.getQFactor(), frequencyMapping);
+        mVibratorInfo = mNativeWrapper.getInfo();
+        Preconditions.checkNotNull(mVibratorInfo, "Failed to retrieve data for vibrator %d",
+                vibratorId);
     }
 
     /** Register state listener for this vibrator. */
@@ -189,11 +186,17 @@ final class VibratorController {
      * callback to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
      */
-    public void on(long milliseconds, long vibrationId) {
+    public long on(long milliseconds, long vibrationId) {
         synchronized (mLock) {
-            mNativeWrapper.on(milliseconds, vibrationId);
-            notifyVibratorOnLocked();
+            long duration = mNativeWrapper.on(milliseconds, vibrationId);
+            if (duration > 0) {
+                notifyVibratorOnLocked();
+            }
+            return duration;
         }
     }
 
@@ -203,7 +206,8 @@ final class VibratorController {
      *
      * <p>This will affect the state of {@link #isVibrating()}.
      *
-     * @return The duration of the effect playing, or 0 if unsupported.
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
      */
     public long on(PrebakedSegment prebaked, long vibrationId) {
         synchronized (mLock) {
@@ -222,7 +226,8 @@ final class VibratorController {
      *
      * <p>This will affect the state of {@link #isVibrating()}.
      *
-     * @return The duration of the effect playing, or 0 if unsupported.
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
      */
     public long on(PrimitiveSegment[] primitives, long vibrationId) {
         if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
@@ -327,22 +332,18 @@ final class VibratorController {
          */
         private static native long getNativeFinalizer();
         private static native boolean isAvailable(long nativePtr);
-        private static native void on(long nativePtr, long milliseconds, long vibrationId);
+        private static native long on(long nativePtr, long milliseconds, long vibrationId);
         private static native void off(long nativePtr);
         private static native void setAmplitude(long nativePtr, float amplitude);
-        private static native int[] getSupportedEffects(long nativePtr);
-        private static native int[] getSupportedPrimitives(long nativePtr);
         private static native long performEffect(long nativePtr, long effect, long strength,
                 long vibrationId);
         private static native long performComposedEffect(long nativePtr, PrimitiveSegment[] effect,
                 long vibrationId);
         private static native void setExternalControl(long nativePtr, boolean enabled);
-        private static native long getCapabilities(long nativePtr);
         private static native void alwaysOnEnable(long nativePtr, long id, long effect,
                 long strength);
         private static native void alwaysOnDisable(long nativePtr, long id);
-        private static native float getResonantFrequency(long nativePtr);
-        private static native float getQFactor(long nativePtr);
+        private static native VibratorInfo getInfo(long nativePtr);
 
         private long mNativePtr = 0;
 
@@ -365,8 +366,8 @@ final class VibratorController {
         }
 
         /** Turns vibrator on for given time. */
-        public void on(long milliseconds, long vibrationId) {
-            on(mNativePtr, milliseconds, vibrationId);
+        public long on(long milliseconds, long vibrationId) {
+            return on(mNativePtr, milliseconds, vibrationId);
         }
 
         /** Turns vibrator off. */
@@ -377,16 +378,6 @@ final class VibratorController {
         /** Sets the amplitude for the vibrator to run. */
         public void setAmplitude(float amplitude) {
             setAmplitude(mNativePtr, amplitude);
-        }
-
-        /** Returns all predefined effects supported by the device vibrator. */
-        public int[] getSupportedEffects() {
-            return getSupportedEffects(mNativePtr);
-        }
-
-        /** Returns all compose primitives supported by the device vibrator. */
-        public int[] getSupportedPrimitives() {
-            return getSupportedPrimitives(mNativePtr);
         }
 
         /** Turns vibrator on to perform one of the supported effects. */
@@ -404,11 +395,6 @@ final class VibratorController {
             setExternalControl(mNativePtr, enabled);
         }
 
-        /** Returns all capabilities of the device vibrator. */
-        public long getCapabilities() {
-            return getCapabilities(mNativePtr);
-        }
-
         /** Enable always-on vibration with given id and effect. */
         public void alwaysOnEnable(long id, long effect, long strength) {
             alwaysOnEnable(mNativePtr, id, effect, strength);
@@ -419,14 +405,9 @@ final class VibratorController {
             alwaysOnDisable(mNativePtr, id);
         }
 
-        /** Gets the vibrator's resonant frequency (F0) */
-        public float getResonantFrequency() {
-            return getResonantFrequency(mNativePtr);
-        }
-
-        /** Gets the vibrator's Q factor */
-        public float getQFactor() {
-            return getQFactor(mNativePtr);
+        /** Return device vibrator metadata. */
+        public VibratorInfo getInfo() {
+            return getInfo(mNativePtr);
         }
     }
 }

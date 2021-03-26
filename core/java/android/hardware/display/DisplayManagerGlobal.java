@@ -551,6 +551,18 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Returns the HDR formats disabled by the user.
+     *
+     */
+    public int[] getUserDisabledHdrTypes() {
+        try {
+            return mDm.getUserDisabledHdrTypes();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     public void requestColorMode(int displayId, int colorMode) {
         try {
             mDm.requestColorMode(displayId, colorMode);
@@ -728,6 +740,37 @@ public final class DisplayManagerGlobal {
     public void setTemporaryBrightness(int displayId, float brightness) {
         try {
             mDm.setTemporaryBrightness(displayId, brightness);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Sets the brightness of the display.
+     *
+     * @param brightness The brightness value from 0.0f to 1.0f.
+     *
+     * @hide
+     */
+    public void setBrightness(int displayId, float brightness) {
+        try {
+            mDm.setBrightness(displayId, brightness);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the brightness of the display.
+     *
+     * @param displayId The display from which to get the brightness
+     *
+     * @hide
+     */
+    public float getBrightness(int displayId) {
+        try {
+            return mDm.getBrightness(displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

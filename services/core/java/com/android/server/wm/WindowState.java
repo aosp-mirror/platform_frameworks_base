@@ -726,8 +726,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private InsetsState mFrozenInsetsState;
 
-    @Nullable InsetsSourceProvider mPendingPositionChanged;
-
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
     private KeyInterceptionInfo mKeyInterceptionInfo;
 
@@ -822,6 +820,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Consumer<SurfaceControl.Transaction> mSeamlessRotationFinishedConsumer = t -> {
         finishSeamlessRotation(t);
         updateSurfacePosition(t);
+    };
+
+    private final Consumer<SurfaceControl.Transaction> mSetSurfacePositionConsumer = t -> {
+        if (mSurfaceControl != null && mSurfaceControl.isValid()) {
+            t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+        }
     };
 
     /**
@@ -2180,18 +2184,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int left = mWindowFrames.mFrame.left;
         final int top = mWindowFrames.mFrame.top;
 
-        // During the transition from pip to fullscreen, the activity windowing mode is set to
-        // fullscreen at the beginning while the task is kept in pinned mode. Skip the move
-        // animation in such case since the transition is handled in SysUI.
-        final boolean hasMovementAnimation = getTask() == null
-                ? getWindowConfiguration().hasMovementAnimations()
-                : getTask().getWindowConfiguration().hasMovementAnimations();
-        if (mToken.okToAnimate()
-                && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                && !isDragResizing()
-                && hasMovementAnimation
-                && !mWinAnimator.mLastHidden
-                && !mSeamlesslyRotated) {
+        if (canPlayMoveAnimation()) {
             startMoveAnimation(left, top);
         }
 
@@ -2205,6 +2198,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } catch (RemoteException e) {
         }
         mMovedByResize = false;
+    }
+
+    private boolean canPlayMoveAnimation() {
+
+        // During the transition from pip to fullscreen, the activity windowing mode is set to
+        // fullscreen at the beginning while the task is kept in pinned mode. Skip the move
+        // animation in such case since the transition is handled in SysUI.
+        final boolean hasMovementAnimation = getTask() == null
+                ? getWindowConfiguration().hasMovementAnimations()
+                : getTask().getWindowConfiguration().hasMovementAnimations();
+        return mToken.okToAnimate()
+                && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
+                && !isDragResizing()
+                && hasMovementAnimation
+                && !mWinAnimator.mLastHidden
+                && !mSeamlesslyRotated;
     }
 
     /**
@@ -5380,13 +5389,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // prior to the rotation.
         if (!mSurfaceAnimator.hasLeash() && mPendingSeamlessRotate == null
                 && !mLastSurfacePosition.equals(mSurfacePosition)) {
-            t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+            final boolean frameSizeChanged = mWindowFrames.isFrameSizeChangeReported();
+            final boolean surfaceInsetsChanged = surfaceInsetsChanging();
+            final boolean surfaceSizeChanged = frameSizeChanged || surfaceInsetsChanged;
             mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
-            if (surfaceInsetsChanging() && mWinAnimator.hasSurface()) {
+            if (surfaceInsetsChanged) {
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
-                t.deferTransactionUntil(mSurfaceControl,
-                        mWinAnimator.mSurfaceController.mSurfaceControl,
-                        getFrameNumber());
+            }
+            if (surfaceSizeChanged && mWinAnimator.getShown() && !canPlayMoveAnimation()
+                    && okToDisplay()) {
+                applyWithNextDraw(mSetSurfacePositionConsumer);
+            } else {
+                mSetSurfacePositionConsumer.accept(t);
             }
         }
     }

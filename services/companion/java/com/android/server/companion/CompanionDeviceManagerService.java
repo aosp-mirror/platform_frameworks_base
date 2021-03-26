@@ -649,6 +649,16 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             restartBleScan();
         }
 
+        @Override
+        public boolean createAssociation(String packageName, String macAddress, int userId) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES, "createAssociation");
+
+            addAssociation(new Association(
+                    userId, macAddress, packageName, null, false, System.currentTimeMillis()));
+            return true;
+        }
+
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
             checkCallerIsSystemOr(callingPackage);
             int userId = getCallingUserId();

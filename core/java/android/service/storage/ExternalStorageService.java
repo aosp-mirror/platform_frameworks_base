@@ -175,7 +175,7 @@ public abstract class ExternalStorageService extends Service {
      *
      * @param packageName the package name of the ANR'ing app
      * @param uid the uid of the ANR'ing app
-     * @param tid the tid of the ANR'ing app
+     * @param tid the thread id of the ANR'ing app
      * @param reason the reason the app is ANR'ing
      */
     public void onAnrDelayStarted(@NonNull String packageName, int uid, int tid,

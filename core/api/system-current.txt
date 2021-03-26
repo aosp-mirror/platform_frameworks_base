@@ -3,6 +3,7 @@ package android {
 
   public static final class Manifest.permission {
     field public static final String ACCESS_AMBIENT_LIGHT_STATS = "android.permission.ACCESS_AMBIENT_LIGHT_STATS";
+    field public static final String ACCESS_BLOBS_ACROSS_USERS = "android.permission.ACCESS_BLOBS_ACROSS_USERS";
     field public static final String ACCESS_BROADCAST_RADIO = "android.permission.ACCESS_BROADCAST_RADIO";
     field public static final String ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
     field public static final String ACCESS_CONTEXT_HUB = "android.permission.ACCESS_CONTEXT_HUB";
@@ -92,6 +93,7 @@ package android {
     field public static final String CREATE_USERS = "android.permission.CREATE_USERS";
     field public static final String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
     field public static final String DEVICE_POWER = "android.permission.DEVICE_POWER";
+    field public static final String DISABLE_SYSTEM_SOUND_EFFECTS = "android.permission.DISABLE_SYSTEM_SOUND_EFFECTS";
     field public static final String DISPATCH_PROVISIONING_MESSAGE = "android.permission.DISPATCH_PROVISIONING_MESSAGE";
     field public static final String DOMAIN_VERIFICATION_AGENT = "android.permission.DOMAIN_VERIFICATION_AGENT";
     field public static final String ENTER_CAR_MODE_PRIORITIZED = "android.permission.ENTER_CAR_MODE_PRIORITIZED";
@@ -185,6 +187,7 @@ package android {
     field public static final String OBSERVE_ROLE_HOLDERS = "android.permission.OBSERVE_ROLE_HOLDERS";
     field public static final String OBSERVE_SENSOR_PRIVACY = "android.permission.OBSERVE_SENSOR_PRIVACY";
     field public static final String OPEN_ACCESSIBILITY_DETAILS_SETTINGS = "android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS";
+    field public static final String OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD = "android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD";
     field public static final String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
     field public static final String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
     field public static final String PACKET_KEEPALIVE_OFFLOAD = "android.permission.PACKET_KEEPALIVE_OFFLOAD";
@@ -242,6 +245,7 @@ package android {
     field public static final String REVIEW_ACCESSIBILITY_SERVICES = "android.permission.REVIEW_ACCESSIBILITY_SERVICES";
     field public static final String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final String ROTATE_SURFACE_FLINGER = "android.permission.ROTATE_SURFACE_FLINGER";
+    field public static final String SCHEDULE_PRIORITIZED_ALARM = "android.permission.SCHEDULE_PRIORITIZED_ALARM";
     field public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final String SECURE_ELEMENT_PRIVILEGED_OPERATION = "android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION";
     field public static final String SEND_CATEGORY_CAR_NOTIFICATIONS = "android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS";
@@ -311,6 +315,7 @@ package android {
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
+    field public static final int playHomeTransitionSound = 16844358; // 0x1010646
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
     field public static final int sdkVersion = 16844304; // 0x1010610
@@ -420,6 +425,7 @@ package android.app {
   public class AlarmManager {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, android.app.PendingIntent, android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, android.app.AlarmManager.OnAlarmListener, android.os.Handler, android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.SCHEDULE_PRIORITIZED_ALARM) public void setPrioritized(int, long, long, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.app.AlarmManager.OnAlarmListener);
   }
 
   public class AppOpsManager {
@@ -949,6 +955,9 @@ package android.app.admin {
     field @Deprecated public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3; // 0x3
     field public static final int PROVISIONING_TRIGGER_QR_CODE = 2; // 0x2
     field public static final int PROVISIONING_TRIGGER_UNSPECIFIED = 0; // 0x0
+    field public static final String REQUIRED_APP_MANAGED_DEVICE = "android.app.REQUIRED_APP_MANAGED_DEVICE";
+    field public static final String REQUIRED_APP_MANAGED_PROFILE = "android.app.REQUIRED_APP_MANAGED_PROFILE";
+    field public static final String REQUIRED_APP_MANAGED_USER = "android.app.REQUIRED_APP_MANAGED_USER";
     field public static final int STATE_USER_PROFILE_COMPLETE = 4; // 0x4
     field public static final int STATE_USER_PROFILE_FINALIZED = 5; // 0x5
     field public static final int STATE_USER_SETUP_COMPLETE = 2; // 0x2
@@ -1221,6 +1230,21 @@ package android.app.compat {
     method public static boolean isChangeEnabled(long);
     method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, int);
+    method @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD) public static void setPackageOverride(@NonNull String, @NonNull java.util.Map<java.lang.Long,android.app.compat.PackageOverride>);
+  }
+
+  public final class PackageOverride {
+    method public long getMaxVersionCode();
+    method public long getMinVersionCode();
+    method public boolean isEnabled();
+  }
+
+  public static final class PackageOverride.Builder {
+    ctor public PackageOverride.Builder();
+    method @NonNull public android.app.compat.PackageOverride build();
+    method @NonNull public android.app.compat.PackageOverride.Builder setEnabled(boolean);
+    method @NonNull public android.app.compat.PackageOverride.Builder setMaxVersionCode(long);
+    method @NonNull public android.app.compat.PackageOverride.Builder setMinVersionCode(long);
   }
 
 }
@@ -1951,7 +1975,6 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean disconnect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
   }
 
   public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
@@ -2178,6 +2201,7 @@ package android.bluetooth.le {
 package android.companion {
 
   public final class CompanionDeviceManager {
+    method @RequiresPermission("android.permission.ASSOCIATE_COMPANION_DEVICES") public boolean associate(@NonNull String, @NonNull android.net.MacAddress);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean canPairWithoutPrompt(@NonNull String, @NonNull String, int);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociatedForWifiConnection(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
   }
@@ -2459,14 +2483,6 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
   }
 
-  public final class InstallationFile {
-    method public long getLengthBytes();
-    method public int getLocation();
-    method @Nullable public byte[] getMetadata();
-    method @NonNull public String getName();
-    method @Nullable public byte[] getSignature();
-  }
-
   public final class InstantAppInfo implements android.os.Parcelable {
     ctor public InstantAppInfo(android.content.pm.ApplicationInfo, String[], String[]);
     ctor public InstantAppInfo(String, CharSequence, String[], String[]);
@@ -2561,7 +2577,6 @@ package android.content.pm {
 
   public static class PackageInstaller.Session implements java.io.Closeable {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void commitTransferred(@NonNull android.content.IntentSender);
-    method public void removeFile(int, @NonNull String);
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
@@ -2805,7 +2820,9 @@ package android.content.pm {
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setMessage(@StringRes int);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonAction(int);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonText(@StringRes int);
+    method @NonNull public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonText(@NonNull String);
     method @NonNull public android.content.pm.SuspendDialogInfo.Builder setTitle(@StringRes int);
+    method @NonNull public android.content.pm.SuspendDialogInfo.Builder setTitle(@NonNull String);
   }
 
 }
@@ -2871,7 +2888,7 @@ package android.content.pm.verify.domain {
   }
 
   public final class DomainVerificationManager {
-    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.DOMAIN_VERIFICATION_AGENT, android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION}) public android.content.pm.verify.domain.DomainVerificationInfo getDomainVerificationInfo(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Nullable @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public android.content.pm.verify.domain.DomainVerificationInfo getDomainVerificationInfo(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public java.util.List<android.content.pm.verify.domain.DomainOwner> getOwnersForDomain(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public java.util.List<java.lang.String> queryValidVerificationPackageNames();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public void setDomainVerificationLinkHandlingAllowed(@NonNull String, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -4825,7 +4842,7 @@ package android.location {
   public class Location implements android.os.Parcelable {
     method public boolean isComplete();
     method public void makeComplete();
-    method public void setIsFromMockProvider(boolean);
+    method @Deprecated public void setIsFromMockProvider(boolean);
     field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
@@ -5233,7 +5250,6 @@ package android.media {
     method @Nullable public String getClientPackageName();
     method @Nullable public android.media.MediaRouter2.RoutingController getController(@NonNull String);
     method @Nullable public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
-    method public void registerRouteCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaRouter2.RouteCallback);
     method public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
     method public void startScan();
     method public void stopScan();
@@ -5255,6 +5271,10 @@ package android.media {
 
   public class RingtoneManager {
     method @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void ensureDefaultRingtones(@NonNull android.content.Context);
+  }
+
+  public final class RouteDiscoveryPreference implements android.os.Parcelable {
+    field public static final android.media.RouteDiscoveryPreference EMPTY;
   }
 
 }
@@ -7575,9 +7595,11 @@ package android.net.netstats.provider {
     method public void notifyAlertReached();
     method public void notifyLimitReached();
     method public void notifyStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
+    method public void notifyWarningReached();
     method public abstract void onRequestStatsUpdate(int);
     method public abstract void onSetAlert(long);
     method public abstract void onSetLimit(@NonNull String, long);
+    method public void onSetWarningAndLimit(@NonNull String, long, long);
     field public static final int QUOTA_UNLIMITED = -1; // 0xffffffff
   }
 
@@ -8282,12 +8304,8 @@ package android.os {
   }
 
   public class PowerExemptionManager {
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToPermanentAllowList(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToPermanentAllowList(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void addToTemporaryAllowList(@NonNull String, int, @Nullable String, long);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long addToTemporaryAllowListForEvent(@NonNull String, int, @Nullable String, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public int[] getAllowListedAppIds(boolean);
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void removeFromPermanentAllowList(@NonNull String);
     field public static final int EVENT_MMS = 2; // 0x2
     field public static final int EVENT_SMS = 1; // 0x1
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
@@ -8959,6 +8977,7 @@ package android.provider {
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
+    field public static final String NAMESPACE_MEDIA = "media";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
     field public static final String NAMESPACE_OTA = "ota";
@@ -9730,24 +9749,6 @@ package android.service.contentsuggestions {
 
 }
 
-package android.service.dataloader {
-
-  public abstract class DataLoaderService extends android.app.Service {
-    ctor public DataLoaderService();
-    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
-  }
-
-  public static interface DataLoaderService.DataLoader {
-    method public boolean onCreate(@NonNull android.content.pm.DataLoaderParams, @NonNull android.service.dataloader.DataLoaderService.FileSystemConnector);
-    method public boolean onPrepareImage(@NonNull java.util.Collection<android.content.pm.InstallationFile>, @NonNull java.util.Collection<java.lang.String>);
-  }
-
-  public static final class DataLoaderService.FileSystemConnector {
-    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
-  }
-
-}
-
 package android.service.displayhash {
 
   public final class DisplayHashParams implements android.os.Parcelable {
@@ -10349,6 +10350,7 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public int setParameter(int, int);
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition(int);
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean stopRecognition();
+    method public final void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
     field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
     field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
     field public static final int MODEL_PARAM_THRESHOLD_FACTOR = 0; // 0x0
@@ -10377,7 +10379,9 @@ package android.service.voice {
   }
 
   public static class AlwaysOnHotwordDetector.EventPayload {
+    method @Nullable public android.os.ParcelFileDescriptor getAudioStream();
     method @Nullable public android.media.AudioFormat getCaptureAudioFormat();
+    method @Nullable public android.service.voice.HotwordDetectedResult getHotwordDetectedResult();
     method @Nullable public byte[] getTriggerAudio();
   }
 
@@ -12292,14 +12296,28 @@ package android.telephony.data {
 
   public final class EpsBearerQosSessionAttributes implements android.os.Parcelable android.net.QosSessionAttributes {
     method public int describeContents();
-    method public long getGuaranteedDownlinkBitRate();
-    method public long getGuaranteedUplinkBitRate();
-    method public long getMaxDownlinkBitRate();
-    method public long getMaxUplinkBitRate();
-    method public int getQci();
+    method public long getGuaranteedDownlinkBitRateKbps();
+    method public long getGuaranteedUplinkBitRateKbps();
+    method public long getMaxDownlinkBitRateKbps();
+    method public long getMaxUplinkBitRateKbps();
+    method public int getQosIdentifier();
     method @NonNull public java.util.List<java.net.InetSocketAddress> getRemoteAddresses();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.EpsBearerQosSessionAttributes> CREATOR;
+  }
+
+  public final class NrQosSessionAttributes implements android.os.Parcelable android.net.QosSessionAttributes {
+    method public int describeContents();
+    method @NonNull public java.time.Duration getBitRateWindowDuration();
+    method public long getGuaranteedDownlinkBitRateKbps();
+    method public long getGuaranteedUplinkBitRateKbps();
+    method public long getMaxDownlinkBitRateKbps();
+    method public long getMaxUplinkBitRateKbps();
+    method @IntRange(from=1, to=63) public int getQosFlowIdentifier();
+    method public int getQosIdentifier();
+    method @NonNull public java.util.List<java.net.InetSocketAddress> getRemoteAddresses();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.NrQosSessionAttributes> CREATOR;
   }
 
   public abstract class QualifiedNetworksService extends android.app.Service {
@@ -14049,7 +14067,7 @@ package android.util {
 package android.uwb {
 
   public final class AngleMeasurement implements android.os.Parcelable {
-    ctor public AngleMeasurement(double, double, double);
+    ctor public AngleMeasurement(@FloatRange(from=-3.141592653589793, to=3.141592653589793) double, @FloatRange(from=0.0, to=3.141592653589793) double, @FloatRange(from=0.0, to=1.0) double);
     method public int describeContents();
     method @FloatRange(from=0.0, to=1.0) public double getConfidenceLevel();
     method @FloatRange(from=0.0, to=3.141592653589793) public double getErrorRadians();

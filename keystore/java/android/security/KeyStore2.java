@@ -18,8 +18,7 @@ package android.security;
 
 import android.annotation.NonNull;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
-import android.os.Build;
+import android.compat.annotation.Disabled;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
@@ -86,7 +85,7 @@ public class KeyStore2 {
      * successfully conclude an operation.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    @Disabled // See b/180133780
     static final long KEYSTORE_OPERATION_CREATION_MAY_FAIL = 169897160L;
 
     // Never use mBinder directly, use KeyStore2.getService() instead or better yet

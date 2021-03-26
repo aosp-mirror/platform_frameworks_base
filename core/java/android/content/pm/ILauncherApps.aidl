@@ -90,6 +90,8 @@ interface ILauncherApps {
             String callingPackage, String packageName, in UserHandle user);
     IntentSender getShortcutConfigActivityIntent(String callingPackage, in ComponentName component,
             in UserHandle user);
+    PendingIntent getShortcutIntent(String callingPackage, String packageName, String shortcutId,
+            in Bundle opts, in UserHandle user);
 
     // Unregister is performed using package installer
     void registerPackageInstallerCallback(String callingPackage,

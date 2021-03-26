@@ -674,6 +674,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public List<BatteryUsageStats> getBatteryUsageStats(List<BatteryUsageStatsQuery> queries) {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
+        awaitCompletion();
+
+        if (mBatteryUsageStatsProvider.shouldUpdateStats(queries,
+                mWorker.getLastCollectionTimeStamp())) {
+            syncStats("get-stats", BatteryExternalStatsWorker.UPDATE_ALL);
+        }
+
         return mBatteryUsageStatsProvider.getBatteryUsageStats(queries);
     }
 
@@ -1966,7 +1973,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
-                mStats.noteModemControllerActivity(info, elapsedRealtime, uptime);
+                mStats.noteModemControllerActivity(info, POWER_DATA_UNAVAILABLE, elapsedRealtime,
+                        uptime);
             });
         }
     }

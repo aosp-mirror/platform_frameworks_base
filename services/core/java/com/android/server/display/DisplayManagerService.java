@@ -1233,13 +1233,9 @@ public final class DisplayManagerService extends SystemService {
             recordStableDisplayStatsIfNeededLocked(display);
             recordTopInsetLocked(display);
         }
-        final int groupId = mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(displayId);
-        if (groupId != Display.INVALID_DISPLAY_GROUP) {
-            addDisplayPowerControllerLocked(display);
-            mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
-        } else {
-            mDisplayStates.append(displayId, Display.STATE_ON);
-        }
+        addDisplayPowerControllerLocked(display);
+        mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
+
         mDisplayBrightnesses.append(displayId, display.getDisplayInfoLocked().brightnessDefault);
 
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
@@ -2050,8 +2046,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void initializeDisplayPowerControllersLocked() {
-        mLogicalDisplayMapper.forEachLocked((logicalDisplay) -> addDisplayPowerControllerLocked(
-                logicalDisplay));
+        mLogicalDisplayMapper.forEachLocked(this::addDisplayPowerControllerLocked);
     }
 
     private void addDisplayPowerControllerLocked(LogicalDisplay display) {
@@ -2062,9 +2057,12 @@ public final class DisplayManagerService extends SystemService {
         if (mBrightnessTracker == null) {
             mBrightnessTracker = new BrightnessTracker(mContext, null);
         }
+
+        final BrightnessSetting brightnessSetting = new BrightnessSetting(mPersistentDataStore,
+                display, mContext);
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
-                mDisplayBlanker, display, mBrightnessTracker);
+                mDisplayBlanker, display, mBrightnessTracker, brightnessSetting);
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
     }
 
@@ -2480,6 +2478,11 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public int[] getUserDisabledHdrTypes() {
+            return mUserDisabledHdrTypes;
+        }
+
+        @Override // Binder call
         public void requestColorMode(int displayId, int colorMode) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE,
@@ -2803,6 +2806,48 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public void setBrightness(int displayId, float brightness) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to set the display's brightness");
+            if (!isValidBrightness(brightness)) {
+                Slog.w(TAG, "Attempted to set invalid brightness" + brightness);
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+                    if (dpc != null) {
+                        dpc.putScreenBrightnessSetting(brightness);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public float getBrightness(int displayId) {
+            float brightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to set the display's brightness");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+                    if (dpc != null) {
+                        brightness = dpc.getScreenBrightnessSetting();
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return brightness;
+        }
+
+        @Override // Binder call
         public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
@@ -2950,6 +2995,13 @@ public final class DisplayManagerService extends SystemService {
             Slog.w(TAG, msg);
             return false;
         }
+
+    }
+
+    private static boolean isValidBrightness(float brightness) {
+        return !Float.isNaN(brightness)
+                && (brightness >= PowerManager.BRIGHTNESS_MIN)
+                && (brightness <= PowerManager.BRIGHTNESS_MAX);
     }
 
     private final class LocalService extends DisplayManagerInternal {
@@ -2980,10 +3032,16 @@ public final class DisplayManagerService extends SystemService {
                 final int size = displayGroup.getSizeLocked();
                 boolean ready = true;
                 for (int i = 0; i < size; i++) {
-                    final DisplayPowerController displayPowerController =
-                            mDisplayPowerControllers.get(displayGroup.getIdLocked(i));
-                    ready &= displayPowerController.requestPowerState(request,
-                            waitForNegativeProximity);
+                    final int id = displayGroup.getIdLocked(i);
+                    final DisplayDevice displayDevice = mLogicalDisplayMapper.getDisplayLocked(
+                            id).getPrimaryDisplayDeviceLocked();
+                    final int flags = displayDevice.getDisplayDeviceInfoLocked().flags;
+                    if ((flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
+                        final DisplayPowerController displayPowerController =
+                                mDisplayPowerControllers.get(id);
+                        ready &= displayPowerController.requestPowerState(request,
+                                waitForNegativeProximity);
+                    }
                 }
 
                 return ready;

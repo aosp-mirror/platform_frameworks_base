@@ -69,10 +69,8 @@ public class TransitionTests extends WindowTestsBase {
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
 
-        final Task newTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task oldTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task newTask = createTask(mDisplayContent);
+        final Task oldTask = createTask(mDisplayContent);
         final ActivityRecord closing = createActivityRecord(oldTask);
         final ActivityRecord opening = createActivityRecord(newTask);
         // Start states.
@@ -128,12 +126,10 @@ public class TransitionTests extends WindowTestsBase {
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
 
-        final Task newTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task newNestedTask = createTaskInStack(newTask, 0);
-        final Task newNestedTask2 = createTaskInStack(newTask, 0);
-        final Task oldTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task newTask = createTask(mDisplayContent);
+        final Task newNestedTask = createTaskInRootTask(newTask, 0);
+        final Task newNestedTask2 = createTaskInRootTask(newTask, 0);
+        final Task oldTask = createTask(mDisplayContent);
         final ActivityRecord closing = createActivityRecord(oldTask);
         final ActivityRecord opening = createActivityRecord(newNestedTask);
         final ActivityRecord opening2 = createActivityRecord(newNestedTask2);
@@ -179,11 +175,9 @@ public class TransitionTests extends WindowTestsBase {
         final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
-        final Task showTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task showNestedTask = createTaskInStack(showTask, 0);
-        final Task showTask2 = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task showTask = createTask(mDisplayContent);
+        final Task showNestedTask = createTaskInRootTask(showTask, 0);
+        final Task showTask2 = createTask(mDisplayContent);
         final DisplayArea tda = showTask.getDisplayArea();
         final ActivityRecord showing = createActivityRecord(showNestedTask);
         final ActivityRecord showing2 = createActivityRecord(showTask2);
@@ -231,12 +225,10 @@ public class TransitionTests extends WindowTestsBase {
     public void testCreateInfo_existenceChange() {
         final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
 
-        final Task openTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task openTask = createTask(mDisplayContent);
         final ActivityRecord opening = createActivityRecord(openTask);
         opening.mVisibleRequested = false; // starts invisible
-        final Task closeTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final Task closeTask = createTask(mDisplayContent);
         final ActivityRecord closing = createActivityRecord(closeTask);
         closing.mVisibleRequested = true; // starts visible
 
@@ -268,8 +260,8 @@ public class TransitionTests extends WindowTestsBase {
         final Task[] tasks = new Task[taskCount];
         for (int i = 0; i < taskCount; ++i) {
             // Each add goes on top, so at the end of this, task[9] should be on top
-            tasks[i] = createTaskStackOnDisplay(WINDOWING_MODE_FREEFORM,
-                    ACTIVITY_TYPE_STANDARD, mDisplayContent);
+            tasks[i] = createTask(mDisplayContent,
+                    WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
             final ActivityRecord act = createActivityRecord(tasks[i]);
             // alternate so that the transition doesn't get promoted to the display area
             act.mVisibleRequested = (i % 2) == 0; // starts invisible
@@ -305,8 +297,8 @@ public class TransitionTests extends WindowTestsBase {
         final Task[] tasks = new Task[taskCount];
         for (int i = 0; i < taskCount; ++i) {
             // Each add goes on top, so at the end of this, task[9] should be on top
-            tasks[i] = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                    ACTIVITY_TYPE_STANDARD, mDisplayContent);
+            tasks[i] = createTask(mDisplayContent,
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             final ActivityRecord act = createActivityRecord(tasks[i]);
             // alternate so that the transition doesn't get promoted to the display area
             act.mVisibleRequested = (i % 2) == 0; // starts invisible
@@ -353,15 +345,13 @@ public class TransitionTests extends WindowTestsBase {
         ArraySet<WindowContainer> participants = transition.mParticipants;
         ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
 
-        final Task openTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task openInOpenTask = createTaskInStack(openTask, 0);
+        final Task openTask = createTask(mDisplayContent);
+        final Task openInOpenTask = createTaskInRootTask(openTask, 0);
         final ActivityRecord openInOpen = createActivityRecord(openInOpenTask);
 
-        final Task changeTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task changeInChangeTask = createTaskInStack(changeTask, 0);
-        final Task openInChangeTask = createTaskInStack(changeTask, 0);
+        final Task changeTask = createTask(mDisplayContent);
+        final Task changeInChangeTask = createTaskInRootTask(changeTask, 0);
+        final Task openInChangeTask = createTaskInRootTask(changeTask, 0);
         final ActivityRecord changeInChange = createActivityRecord(changeInChangeTask);
         final ActivityRecord openInChange = createActivityRecord(openInChangeTask);
         // set organizer for everything so that they all get added to transition info

@@ -201,14 +201,6 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidRestrictedOnMeteredNetworks(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void registerNetworkPolicyCallback(@Nullable java.util.concurrent.Executor, @NonNull android.net.NetworkPolicyManager.NetworkPolicyCallback);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void unregisterNetworkPolicyCallback(@NonNull android.net.NetworkPolicyManager.NetworkPolicyCallback);
-    field public static final int BLOCKED_METERED_REASON_ADMIN_DISABLED = 262144; // 0x40000
-    field public static final int BLOCKED_METERED_REASON_DATA_SAVER = 65536; // 0x10000
-    field public static final int BLOCKED_METERED_REASON_USER_RESTRICTED = 131072; // 0x20000
-    field public static final int BLOCKED_REASON_APP_STANDBY = 4; // 0x4
-    field public static final int BLOCKED_REASON_BATTERY_SAVER = 1; // 0x1
-    field public static final int BLOCKED_REASON_DOZE = 2; // 0x2
-    field public static final int BLOCKED_REASON_NONE = 0; // 0x0
-    field public static final int BLOCKED_REASON_RESTRICTED_MODE = 8; // 0x8
   }
 
   public static interface NetworkPolicyManager.NetworkPolicyCallback {
@@ -309,7 +301,8 @@ package android.os.storage {
   public class StorageManager {
     method public void notifyAppIoBlocked(@NonNull java.util.UUID, int, int, int);
     method public void notifyAppIoResumed(@NonNull java.util.UUID, int, int, int);
-    field public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 0; // 0x0
+    field public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 1; // 0x1
+    field public static final int APP_IO_BLOCKED_REASON_UNKNOWN = 0; // 0x0
   }
 
   public final class StorageVolume implements android.os.Parcelable {

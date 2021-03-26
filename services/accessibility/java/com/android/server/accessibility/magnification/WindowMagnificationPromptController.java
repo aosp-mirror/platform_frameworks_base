@@ -108,7 +108,7 @@ public class WindowMagnificationPromptController {
                 SystemNotificationChannels.ACCESSIBILITY_MAGNIFICATION);
         final String message = mContext.getString(R.string.window_magnification_prompt_content);
 
-        notificationBuilder.setSmallIcon(R.drawable.ic_settings_24dp)
+        notificationBuilder.setSmallIcon(R.drawable.ic_accessibility_24dp)
                 .setContentTitle(mContext.getString(R.string.window_magnification_prompt_title))
                 .setContentText(message)
                 .setLargeIcon(Icon.createWithResource(mContext,
@@ -118,7 +118,7 @@ public class WindowMagnificationPromptController {
                 .setStyle(new Notification.BigTextStyle().bigText(message))
                 .setDeleteIntent(createPendingIntent(ACTION_DISMISS))
                 .setContentIntent(createPendingIntent(ACTION_TURN_ON_IN_SETTINGS))
-                .setActions(buildTurnOnAction(), buildDismissAction());
+                .setActions(buildTurnOnAction());
         mNotificationManager.notify(NOTE_A11Y_WINDOW_MAGNIFICATION_FEATURE,
                 notificationBuilder.build());
         registerReceiverIfNeeded();
@@ -143,11 +143,6 @@ public class WindowMagnificationPromptController {
         return new Notification.Action.Builder(null,
                 mContext.getString(R.string.turn_on_magnification_settings_action),
                 createPendingIntent(ACTION_TURN_ON_IN_SETTINGS)).build();
-    }
-
-    private Notification.Action buildDismissAction() {
-        return new Notification.Action.Builder(null, mContext.getString(R.string.dismiss_action),
-                createPendingIntent(ACTION_DISMISS)).build();
     }
 
     private PendingIntent createPendingIntent(String action) {

@@ -89,7 +89,7 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
     @NonNull
     public ListenableFuture<SetSchemaResponse> setSchema(@NonNull SetSchemaRequest request) {
         SettableFuture<AppSearchResult<SetSchemaResponse>> future = SettableFuture.create();
-        mAppSearchSession.setSchema(request, mExecutor, future::set);
+        mAppSearchSession.setSchema(request, mExecutor, mExecutor, future::set);
         return Futures.transformAsync(future, this::transformResult, mExecutor);
     }
 

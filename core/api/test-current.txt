@@ -233,6 +233,8 @@ package android.app {
     field public static final String KEY_FG_SERVICE_STATE_SETTLE_TIME = "fg_service_state_settle_time";
     field public static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
+    field public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
+    field public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
     field public static final String OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER = "android:use_icc_auth_with_device_identifier";
     field public static final int OP_COARSE_LOCATION = 0; // 0x0
     field public static final int OP_RECORD_AUDIO = 27; // 0x1b
@@ -268,6 +270,10 @@ package android.app {
   public abstract class HomeVisibilityListener {
     ctor public HomeVisibilityListener();
     method public abstract void onHomeVisibilityChanged(boolean);
+  }
+
+  public class Notification implements android.os.Parcelable {
+    method public boolean shouldShowForegroundImmediately();
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
@@ -1136,6 +1142,7 @@ package android.hardware.display {
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public int getRefreshRateSwitchingType();
+    method @NonNull public int[] getUserDisabledHdrTypes();
     method public boolean isMinimalPostProcessingRequested(int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAreUserDisabledHdrTypesAllowed(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public void setRefreshRateSwitchingType(int);
@@ -1356,9 +1363,12 @@ package android.media {
   }
 
   public class AudioManager {
+    method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
+    method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
     method public boolean hasRegisteredDynamicPolicy();
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE}) public boolean isFullVolumeDevice();
+    method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
   }
 
   public static final class AudioRecord.MetricsConstants {
@@ -1939,6 +1949,17 @@ package android.os.vibrator {
 
 package android.permission {
 
+  public final class PermGroupUsage {
+    ctor public PermGroupUsage(@NonNull String, int, @NonNull String, long, boolean, boolean, @Nullable CharSequence);
+    method @Nullable public CharSequence getAttribution();
+    method public long getLastAccess();
+    method @NonNull public String getPackageName();
+    method @NonNull public String getPermGroupName();
+    method public int getUid();
+    method public boolean isActive();
+    method public boolean isPhoneCall();
+  }
+
   public final class PermissionControllerManager {
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void countPermissionApps(@NonNull java.util.List<java.lang.String>, int, @NonNull android.permission.PermissionControllerManager.OnCountPermissionAppsResultCallback, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void getAppPermissions(@NonNull String, @NonNull android.permission.PermissionControllerManager.OnGetAppPermissionResultCallback, @Nullable android.os.Handler);
@@ -1951,6 +1972,10 @@ package android.permission {
 
   public static interface PermissionControllerManager.OnGetAppPermissionResultCallback {
     method public void onGetAppPermissions(@NonNull java.util.List<android.permission.RuntimePermissionPresentationInfo>);
+  }
+
+  public final class PermissionManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
   }
 
 }
@@ -2578,6 +2603,7 @@ package android.view {
   }
 
   public final class Display {
+    method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method public int getType();
     method public boolean hasAccess(int);

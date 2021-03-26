@@ -107,6 +107,12 @@ class ProcessRecord implements WindowProcessListener {
     int mPid;
 
     /**
+     * The process ID which will be set when we're killing this process.
+     */
+    @GuardedBy("mService")
+    private int mDyingPid;
+
+    /**
      * The gids this process was launched with.
      */
     @GuardedBy("mService")
@@ -479,7 +485,7 @@ class ProcessRecord implements WindowProcessListener {
                 if (procInfo != null && procInfo.deniedPermissions == null
                         && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT
                         && procInfo.memtagMode == ApplicationInfo.MEMTAG_DEFAULT
-                        && procInfo.nativeHeapZeroInit == null) {
+                        && procInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_DEFAULT) {
                     // If this process hasn't asked for permissions to be denied, or for a
                     // non-default GwpAsan mode, or any other non-default setting, then we don't
                     // care about it.
@@ -569,6 +575,16 @@ class ProcessRecord implements WindowProcessListener {
         mThread = null;
         mWindowProcessController.setThread(null);
         mProfile.onProcessInactive(tracker);
+    }
+
+    @GuardedBy("mService")
+    int getDyingPid() {
+        return mDyingPid;
+    }
+
+    @GuardedBy("mService")
+    void setDyingPid(int dyingPid) {
+        mDyingPid = dyingPid;
     }
 
     @GuardedBy("mService")
@@ -730,6 +746,11 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy("mService")
     void setDeathRecipient(IBinder.DeathRecipient deathRecipient) {
         mDeathRecipient = deathRecipient;
+    }
+
+    @GuardedBy("mService")
+    IBinder.DeathRecipient getDeathRecipient() {
+        return mDeathRecipient;
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -896,11 +917,14 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    boolean onCleanupApplicationRecordLSP(ProcessStatsService processStats, boolean allowRestart) {
+    boolean onCleanupApplicationRecordLSP(ProcessStatsService processStats, boolean allowRestart,
+            boolean unlinkDeath) {
         mErrorState.onCleanupApplicationRecordLSP();
 
         resetPackageList(processStats);
-        unlinkDeathRecipient();
+        if (unlinkDeath) {
+            unlinkDeathRecipient();
+        }
         makeInactive(processStats);
         setWaitingToKill(null);
 

@@ -153,7 +153,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0, testSpec.config.endRotation)
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {

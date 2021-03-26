@@ -24,30 +24,17 @@ import android.util.ArraySet;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 
 /** The response class of {@link AppSearchSession#getSchema} */
-// TODO(b/181887768) extends only for dogfooder transition. */
-public class GetSchemaResponse extends HashSet<AppSearchSchema> {
+public class GetSchemaResponse {
     private static final String VERSION_FIELD = "version";
     private static final String SCHEMAS_FIELD = "schemas";
 
     private final Bundle mBundle;
 
-    // TODO(b/181887768) Remove this method once this class no longer extends HashSet. */
-    private static Set<AppSearchSchema> getSchemasFromBundle(Bundle bundle) {
-        ArrayList<Bundle> schemaBundles = bundle.getParcelableArrayList(SCHEMAS_FIELD);
-        Set<AppSearchSchema> schemas = new ArraySet<>(schemaBundles.size());
-        for (int i = 0; i < schemaBundles.size(); i++) {
-            schemas.add(new AppSearchSchema(schemaBundles.get(i)));
-        }
-        return schemas;
-    }
-
     GetSchemaResponse(@NonNull Bundle bundle) {
-        super(getSchemasFromBundle(Preconditions.checkNotNull(bundle)));
-        mBundle = bundle;
+        mBundle = Preconditions.checkNotNull(bundle);
     }
 
     /**
@@ -72,10 +59,17 @@ public class GetSchemaResponse extends HashSet<AppSearchSchema> {
 
     /**
      * Return the schemas most recently successfully provided to {@link AppSearchSession#setSchema}.
+     *
+     * <p>It is inefficient to call this method repeatedly.
      */
     @NonNull
     public Set<AppSearchSchema> getSchemas() {
-        return this;
+        ArrayList<Bundle> schemaBundles = mBundle.getParcelableArrayList(SCHEMAS_FIELD);
+        Set<AppSearchSchema> schemas = new ArraySet<>(schemaBundles.size());
+        for (int i = 0; i < schemaBundles.size(); i++) {
+            schemas.add(new AppSearchSchema(schemaBundles.get(i)));
+        }
+        return schemas;
     }
 
     /** Builder for {@link GetSchemaResponse} objects. */

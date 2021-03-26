@@ -575,6 +575,7 @@
     <protected-broadcast android:name="android.intent.action.MEDIA_RESOURCE_GRANTED" />
     <protected-broadcast android:name="android.app.action.NETWORK_LOGS_AVAILABLE" />
     <protected-broadcast android:name="android.app.action.SECURITY_LOGS_AVAILABLE" />
+    <protected-broadcast android:name="android.app.action.COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED" />
 
     <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED" />
     <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL" />
@@ -2689,6 +2690,11 @@
     <permission android:name="android.permission.CREATE_USERS"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi @hide Allows an application to access data blobs across users.
+         This permission is not available to third party applications. -->
+    <permission android:name="android.permission.ACCESS_BLOBS_ACROSS_USERS"
+        android:protectionLevel="signature|privileged|development" />
+
     <!-- @hide Allows an application to set the profile owners and the device owner.
          This permission is not available to third party applications.-->
     <permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"
@@ -3998,6 +4004,15 @@
     <permission android:name="android.permission.SET_KEYBOARD_LAYOUT"
         android:protectionLevel="signature" />
 
+    <!-- Allows an app to schedule a prioritized alarm that can be used to perform
+         background work even when the device is in doze.
+         <p>Not for use by third-party applications.
+         @hide
+         @SystemApi
+     -->
+    <permission android:name="android.permission.SCHEDULE_PRIORITIZED_ALARM"
+                android:protectionLevel="signature|privileged"/>
+
     <!-- Allows an app to use exact alarm scheduling APIs to perform timing
          sensitive background work.
      -->
@@ -4227,6 +4242,11 @@
     <permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE"
                 android:protectionLevel="normal" />
 
+    <!-- Allows an application to create new companion device associations.
+         @hide -->
+    <permission android:name="android.permission.ASSOCIATE_COMPANION_DEVICES"
+        android:protectionLevel="internal|role" />
+
     <!-- @SystemApi Allows an application to use SurfaceFlinger's low level features.
          <p>Not for use by third-party applications.
          @hide
@@ -4438,6 +4458,13 @@
          <p>Not for use by third-party applications.</p>
          @hide -->
     <permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to disable system sound effects when the user exits one of
+         the application's activities.
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.DISABLE_SYSTEM_SOUND_EFFECTS"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to provide remote displays.
@@ -5417,12 +5444,6 @@
     <permission android:name="android.permission.WATCH_APPOPS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to directly open the "Open by default" page inside a package's
-         Details screen.
-         @hide <p>Not for use by third-party applications. -->
-    <permission android:name="android.permission.OPEN_APP_OPEN_BY_DEFAULT_SETTINGS"
-                android:protectionLevel="signature" />
-
     <!-- Allows hidden API checks to be disabled when starting a process.
          @hide <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.DISABLE_HIDDEN_API_CHECKS"
@@ -5549,8 +5570,16 @@
     <permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"
                 android:protectionLevel="signature|privileged" />
     <!-- Allows an app to override compat change config.
+         This permission only allows to override config on debuggable builds or test-apks and is
+         therefore a less powerful version of OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"
+                android:protectionLevel="signature|privileged" />
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
+    <!-- @SystemApi Allows an app to override compat change config on release builds.
+        Only ChangeIds that are annotated as @Overridable can be overridden on release builds.
+        @hide -->
+    <permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"
                 android:protectionLevel="signature|privileged" />
 
     <!-- Allows input events to be monitored. Very dangerous!  @hide -->
@@ -5658,6 +5687,19 @@
          @hide -->
     <permission android:name="android.permission.SET_CLIP_SOURCE"
                 android:protectionLevel="signature|recents" />
+
+    <!-- Allows an application to request installs that update existing packages do so without
+         user action via
+         {@link android.content.pm.PackageInstaller.SessionParams#setRequireUserAction(boolean)}.
+         This permission only grants the ability to make the request and is not a guarantee that the
+         request will be honored. In order to execute the install, the caller must also have the
+         "android.permission.REQUEST_INSTALL_PACKAGES" or "android.permission.INSTALL_PACKAGES"
+         permissions.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"
+                android:protectionLevel="normal" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"/>
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

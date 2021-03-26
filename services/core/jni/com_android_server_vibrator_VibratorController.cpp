@@ -39,6 +39,10 @@ namespace android {
 
 static JavaVM* sJvm = nullptr;
 static jmethodID sMethodIdOnComplete;
+static jclass sFrequencyMappingClass;
+static jmethodID sFrequencyMappingCtor;
+static jclass sVibratorInfoClass;
+static jmethodID sVibratorInfoCtor;
 static struct {
     jfieldID id;
     jfieldID scale;
@@ -97,7 +101,17 @@ public:
         jniEnv->DeleteGlobalRef(mCallbackListener);
     }
 
-    vibrator::HalController* hal() const { return mHal.get(); }
+    int32_t getVibratorId() const { return mVibratorId; }
+
+    vibrator::Info getVibratorInfo() { return mHal->getInfo(); }
+
+    void initHal() { mHal->init(); }
+
+    template <typename T>
+    vibrator::HalResult<T> halCall(const vibrator::HalFunction<vibrator::HalResult<T>>& fn,
+                                   const char* functionName) {
+        return mHal->doWithRetry(fn, functionName);
+    }
 
     std::function<void()> createCallback(jlong vibrationId) {
         return [vibrationId, this]() {
@@ -133,7 +147,7 @@ static jlong vibratorNativeInit(JNIEnv* env, jclass /* clazz */, jint vibratorId
                                 jobject callbackListener) {
     std::unique_ptr<VibratorControllerWrapper> wrapper =
             std::make_unique<VibratorControllerWrapper>(env, vibratorId, callbackListener);
-    wrapper->hal()->init();
+    wrapper->initHal();
     return reinterpret_cast<jlong>(wrapper.release());
 }
 
@@ -147,18 +161,23 @@ static jboolean vibratorIsAvailable(JNIEnv* env, jclass /* clazz */, jlong ptr) 
         ALOGE("vibratorIsAvailable failed because native wrapper was not initialized");
         return JNI_FALSE;
     }
-    return wrapper->hal()->ping().isOk() ? JNI_TRUE : JNI_FALSE;
+    auto pingFn = [](std::shared_ptr<vibrator::HalWrapper> hal) { return hal->ping(); };
+    return wrapper->halCall<void>(pingFn, "ping").isOk() ? JNI_TRUE : JNI_FALSE;
 }
 
-static void vibratorOn(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong timeoutMs,
-                       jlong vibrationId) {
+static jlong vibratorOn(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong timeoutMs,
+                        jlong vibrationId) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
     if (wrapper == nullptr) {
         ALOGE("vibratorOn failed because native wrapper was not initialized");
-        return;
+        return -1;
     }
     auto callback = wrapper->createCallback(vibrationId);
-    wrapper->hal()->on(std::chrono::milliseconds(timeoutMs), callback);
+    auto onFn = [&](std::shared_ptr<vibrator::HalWrapper> hal) {
+        return hal->on(std::chrono::milliseconds(timeoutMs), callback);
+    };
+    auto result = wrapper->halCall<void>(onFn, "on");
+    return result.isOk() ? timeoutMs : (result.isUnsupported() ? 0 : -1);
 }
 
 static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong ptr) {
@@ -167,7 +186,8 @@ static void vibratorOff(JNIEnv* env, jclass /* clazz */, jlong ptr) {
         ALOGE("vibratorOff failed because native wrapper was not initialized");
         return;
     }
-    wrapper->hal()->off();
+    auto offFn = [](std::shared_ptr<vibrator::HalWrapper> hal) { return hal->off(); };
+    wrapper->halCall<void>(offFn, "off");
 }
 
 static void vibratorSetAmplitude(JNIEnv* env, jclass /* clazz */, jlong ptr, jfloat amplitude) {
@@ -176,7 +196,10 @@ static void vibratorSetAmplitude(JNIEnv* env, jclass /* clazz */, jlong ptr, jfl
         ALOGE("vibratorSetAmplitude failed because native wrapper was not initialized");
         return;
     }
-    wrapper->hal()->setAmplitude(static_cast<float>(amplitude));
+    auto setAmplitudeFn = [&](std::shared_ptr<vibrator::HalWrapper> hal) {
+        return hal->setAmplitude(static_cast<float>(amplitude));
+    };
+    wrapper->halCall<void>(setAmplitudeFn, "setAmplitude");
 }
 
 static void vibratorSetExternalControl(JNIEnv* env, jclass /* clazz */, jlong ptr,
@@ -186,41 +209,10 @@ static void vibratorSetExternalControl(JNIEnv* env, jclass /* clazz */, jlong pt
         ALOGE("vibratorSetExternalControl failed because native wrapper was not initialized");
         return;
     }
-    wrapper->hal()->setExternalControl(enabled);
-}
-
-static jintArray vibratorGetSupportedEffects(JNIEnv* env, jclass /* clazz */, jlong ptr) {
-    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
-    if (wrapper == nullptr) {
-        ALOGE("vibratorGetSupportedEffects failed because native wrapper was not initialized");
-        return nullptr;
-    }
-    auto result = wrapper->hal()->getSupportedEffects();
-    if (!result.isOk()) {
-        return nullptr;
-    }
-    std::vector<aidl::Effect> supportedEffects = result.value();
-    jintArray effects = env->NewIntArray(supportedEffects.size());
-    env->SetIntArrayRegion(effects, 0, supportedEffects.size(),
-                           reinterpret_cast<jint*>(supportedEffects.data()));
-    return effects;
-}
-
-static jintArray vibratorGetSupportedPrimitives(JNIEnv* env, jclass /* clazz */, jlong ptr) {
-    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
-    if (wrapper == nullptr) {
-        ALOGE("vibratorGetSupportedPrimitives failed because native wrapper was not initialized");
-        return nullptr;
-    }
-    auto result = wrapper->hal()->getSupportedPrimitives();
-    if (!result.isOk()) {
-        return nullptr;
-    }
-    std::vector<aidl::CompositePrimitive> supportedPrimitives = result.value();
-    jintArray primitives = env->NewIntArray(supportedPrimitives.size());
-    env->SetIntArrayRegion(primitives, 0, supportedPrimitives.size(),
-                           reinterpret_cast<jint*>(supportedPrimitives.data()));
-    return primitives;
+    auto setExternalControlFn = [&](std::shared_ptr<vibrator::HalWrapper> hal) {
+        return hal->setExternalControl(enabled);
+    };
+    wrapper->halCall<void>(setExternalControlFn, "setExternalControl");
 }
 
 static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong effect,
@@ -233,8 +225,11 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong ptr, j
     aidl::Effect effectType = static_cast<aidl::Effect>(effect);
     aidl::EffectStrength effectStrength = static_cast<aidl::EffectStrength>(strength);
     auto callback = wrapper->createCallback(vibrationId);
-    auto result = wrapper->hal()->performEffect(effectType, effectStrength, callback);
-    return result.isOk() ? result.value().count() : -1;
+    auto performEffectFn = [&](std::shared_ptr<vibrator::HalWrapper> hal) {
+        return hal->performEffect(effectType, effectStrength, callback);
+    };
+    auto result = wrapper->halCall<std::chrono::milliseconds>(performEffectFn, "performEffect");
+    return result.isOk() ? result.value().count() : (result.isUnsupported() ? 0 : -1);
 }
 
 static jlong vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
@@ -251,18 +246,12 @@ static jlong vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlon
         effects.push_back(effectFromJavaPrimitive(env, element));
     }
     auto callback = wrapper->createCallback(vibrationId);
-    auto result = wrapper->hal()->performComposedEffect(effects, callback);
-    return result.isOk() ? result.value().count() : -1;
-}
-
-static jlong vibratorGetCapabilities(JNIEnv* env, jclass /* clazz */, jlong ptr) {
-    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
-    if (wrapper == nullptr) {
-        ALOGE("vibratorGetCapabilities failed because native wrapper was not initialized");
-        return 0;
-    }
-    auto result = wrapper->hal()->getCapabilities();
-    return result.isOk() ? static_cast<jlong>(result.value()) : 0;
+    auto performComposedEffectFn = [&](std::shared_ptr<vibrator::HalWrapper> hal) {
+        return hal->performComposedEffect(effects, callback);
+    };
+    auto result = wrapper->halCall<std::chrono::milliseconds>(performComposedEffectFn,
+                                                              "performComposedEffect");
+    return result.isOk() ? result.value().count() : (result.isUnsupported() ? 0 : -1);
 }
 
 static void vibratorAlwaysOnEnable(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong id,
@@ -272,8 +261,11 @@ static void vibratorAlwaysOnEnable(JNIEnv* env, jclass /* clazz */, jlong ptr, j
         ALOGE("vibratorAlwaysOnEnable failed because native wrapper was not initialized");
         return;
     }
-    wrapper->hal()->alwaysOnEnable(static_cast<int32_t>(id), static_cast<aidl::Effect>(effect),
+    auto alwaysOnEnableFn = [&](std::shared_ptr<vibrator::HalWrapper> hal) {
+        return hal->alwaysOnEnable(static_cast<int32_t>(id), static_cast<aidl::Effect>(effect),
                                    static_cast<aidl::EffectStrength>(strength));
+    };
+    wrapper->halCall<void>(alwaysOnEnableFn, "alwaysOnEnable");
 }
 
 static void vibratorAlwaysOnDisable(JNIEnv* env, jclass /* clazz */, jlong ptr, jlong id) {
@@ -282,27 +274,48 @@ static void vibratorAlwaysOnDisable(JNIEnv* env, jclass /* clazz */, jlong ptr, 
         ALOGE("vibratorAlwaysOnDisable failed because native wrapper was not initialized");
         return;
     }
-    wrapper->hal()->alwaysOnDisable(static_cast<int32_t>(id));
+    auto alwaysOnDisableFn = [&](std::shared_ptr<vibrator::HalWrapper> hal) {
+        return hal->alwaysOnDisable(static_cast<int32_t>(id));
+    };
+    wrapper->halCall<void>(alwaysOnDisableFn, "alwaysOnDisable");
 }
 
-static float vibratorGetResonantFrequency(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+static jobject vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
     if (wrapper == nullptr) {
-        ALOGE("vibratorGetResonantFrequency failed because native wrapper was not initialized");
-        return NAN;
+        ALOGE("vibratorGetInfo failed because native wrapper was not initialized");
+        return nullptr;
     }
-    auto result = wrapper->hal()->getResonantFrequency();
-    return result.isOk() ? static_cast<jfloat>(result.value()) : NAN;
-}
+    vibrator::Info info = wrapper->getVibratorInfo();
 
-static float vibratorGetQFactor(JNIEnv* env, jclass /* clazz */, jlong ptr) {
-    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
-    if (wrapper == nullptr) {
-        ALOGE("vibratorGetQFactor failed because native wrapper was not initialized");
-        return NAN;
+    jlong capabilities =
+            static_cast<jlong>(info.capabilities.valueOr(vibrator::Capabilities::NONE));
+    jfloat resonantFrequency = static_cast<jfloat>(info.resonantFrequency.valueOr(NAN));
+    jfloat qFactor = static_cast<jfloat>(info.qFactor.valueOr(NAN));
+    jintArray supportedEffects = nullptr;
+    jintArray supportedPrimitives = nullptr;
+
+    if (info.supportedEffects.isOk()) {
+        std::vector<aidl::Effect> effects = info.supportedEffects.value();
+        supportedEffects = env->NewIntArray(effects.size());
+        env->SetIntArrayRegion(supportedEffects, 0, effects.size(),
+                               reinterpret_cast<jint*>(effects.data()));
     }
-    auto result = wrapper->hal()->getQFactor();
-    return result.isOk() ? static_cast<jfloat>(result.value()) : NAN;
+    if (info.supportedPrimitives.isOk()) {
+        std::vector<aidl::CompositePrimitive> primitives = info.supportedPrimitives.value();
+        supportedPrimitives = env->NewIntArray(primitives.size());
+        env->SetIntArrayRegion(supportedPrimitives, 0, primitives.size(),
+                               reinterpret_cast<jint*>(primitives.data()));
+    }
+
+    jobject frequencyMapping =
+            env->NewObject(sFrequencyMappingClass, sFrequencyMappingCtor, NAN /* minFrequencyHz*/,
+                           resonantFrequency, NAN /* frequencyResolutionHz*/,
+                           NAN /* suggestedSafeRangeHz */, nullptr /* maxAmplitudes */);
+
+    return env->NewObject(sVibratorInfoClass, sVibratorInfoCtor, wrapper->getVibratorId(),
+                          capabilities, supportedEffects, supportedPrimitives, qFactor,
+                          frequencyMapping);
 }
 
 static const JNINativeMethod method_table[] = {
@@ -311,20 +324,16 @@ static const JNINativeMethod method_table[] = {
          (void*)vibratorNativeInit},
         {"getNativeFinalizer", "()J", (void*)vibratorGetNativeFinalizer},
         {"isAvailable", "(J)Z", (void*)vibratorIsAvailable},
-        {"on", "(JJJ)V", (void*)vibratorOn},
+        {"on", "(JJJ)J", (void*)vibratorOn},
         {"off", "(J)V", (void*)vibratorOff},
         {"setAmplitude", "(JF)V", (void*)vibratorSetAmplitude},
         {"performEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
         {"performComposedEffect", "(J[Landroid/os/vibrator/PrimitiveSegment;J)J",
          (void*)vibratorPerformComposedEffect},
-        {"getSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
-        {"getSupportedPrimitives", "(J)[I", (void*)vibratorGetSupportedPrimitives},
         {"setExternalControl", "(JZ)V", (void*)vibratorSetExternalControl},
-        {"getCapabilities", "(J)J", (void*)vibratorGetCapabilities},
         {"alwaysOnEnable", "(JJJJ)V", (void*)vibratorAlwaysOnEnable},
         {"alwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
-        {"getResonantFrequency", "(J)F", (void*)vibratorGetResonantFrequency},
-        {"getQFactor", "(J)F", (void*)vibratorGetQFactor},
+        {"getInfo", "(J)Landroid/os/VibratorInfo;", (void*)vibratorGetInfo},
 };
 
 int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env) {
@@ -338,6 +347,15 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sPrimitiveClassInfo.id = GetFieldIDOrDie(env, primitiveClass, "mPrimitiveId", "I");
     sPrimitiveClassInfo.scale = GetFieldIDOrDie(env, primitiveClass, "mScale", "F");
     sPrimitiveClassInfo.delay = GetFieldIDOrDie(env, primitiveClass, "mDelay", "I");
+
+    jclass frequencyMappingClass = FindClassOrDie(env, "android/os/VibratorInfo$FrequencyMapping");
+    sFrequencyMappingClass = (jclass)env->NewGlobalRef(frequencyMappingClass);
+    sFrequencyMappingCtor = GetMethodIDOrDie(env, sFrequencyMappingClass, "<init>", "(FFFF[F)V");
+
+    jclass vibratorInfoClass = FindClassOrDie(env, "android/os/VibratorInfo");
+    sVibratorInfoClass = (jclass)env->NewGlobalRef(vibratorInfoClass);
+    sVibratorInfoCtor = GetMethodIDOrDie(env, sVibratorInfoClass, "<init>",
+                                         "(IJ[I[IFLandroid/os/VibratorInfo$FrequencyMapping;)V");
 
     return jniRegisterNativeMethods(env,
                                     "com/android/server/vibrator/VibratorController$NativeWrapper",

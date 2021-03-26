@@ -45,7 +45,7 @@ public class FalsingDataProvider {
     private final float mYdpi;
     private final List<SessionListener> mSessionListeners = new ArrayList<>();
     private final List<MotionEventListener> mMotionEventListeners = new ArrayList<>();
-    private final List<GestureCompleteListener> mGestureCompleteListeners = new ArrayList<>();
+    private final List<GestureFinalizedListener> mGestureFinalizedListeners = new ArrayList<>();
 
     private TimeLimitedMotionEventBuffer mRecentMotionEvents =
             new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
@@ -90,7 +90,7 @@ public class FalsingDataProvider {
 
         mMotionEventListeners.forEach(listener -> listener.onMotionEvent(motionEvent));
 
-        // We explicitly do not complete a gesture on UP or CANCEL events.
+        // We explicitly do not "finalize" a gesture on UP or CANCEL events.
         // We wait for the next gesture to start before marking the prior gesture as complete.  This
         // has multiple benefits. First, it makes it trivial to track the "current" or "recent"
         // gesture, as it will always be found in mRecentMotionEvents. Second, and most importantly,
@@ -102,7 +102,7 @@ public class FalsingDataProvider {
 
     private void completePriorGesture() {
         if (!mRecentMotionEvents.isEmpty()) {
-            mGestureCompleteListeners.forEach(listener -> listener.onGestureComplete(
+            mGestureFinalizedListeners.forEach(listener -> listener.onGestureFinalized(
                     mRecentMotionEvents.get(mRecentMotionEvents.size() - 1).getEventTime()));
 
             mPriorMotionEvents = mRecentMotionEvents;
@@ -312,14 +312,14 @@ public class FalsingDataProvider {
         mMotionEventListeners.remove(listener);
     }
 
-    /** Register a {@link GestureCompleteListener}. */
-    public void addGestureCompleteListener(GestureCompleteListener listener) {
-        mGestureCompleteListeners.add(listener);
+    /** Register a {@link GestureFinalizedListener}. */
+    public void addGestureCompleteListener(GestureFinalizedListener listener) {
+        mGestureFinalizedListeners.add(listener);
     }
 
-    /** Unregister a {@link GestureCompleteListener}. */
-    public void removeGestureCompleteListener(GestureCompleteListener listener) {
-        mGestureCompleteListeners.remove(listener);
+    /** Unregister a {@link GestureFinalizedListener}. */
+    public void removeGestureCompleteListener(GestureFinalizedListener listener) {
+        mGestureFinalizedListeners.remove(listener);
     }
 
     void onSessionStarted() {
@@ -362,8 +362,12 @@ public class FalsingDataProvider {
     }
 
     /** Callback to be alerted when the current gesture ends. */
-    public interface GestureCompleteListener {
-        /** */
-        void onGestureComplete(long completionTimeMs);
+    public interface GestureFinalizedListener {
+        /**
+         * Called just before a new gesture starts.
+         *
+         * Any pending work on a prior gesture can be considered cemented in place.
+         */
+        void onGestureFinalized(long completionTimeMs);
     }
 }

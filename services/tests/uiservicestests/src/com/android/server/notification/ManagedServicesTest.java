@@ -58,7 +58,6 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.UiServiceTestCase;
 
@@ -70,8 +69,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -514,6 +511,20 @@ public class ManagedServicesTest extends UiServiceTestCase {
         List<ComponentName> components =  service.getAllowedComponents(0);
         assertEquals(5, components.size());
         assertTrue(components.contains(new ComponentName("package", "default")));
+    }
+
+    @Test
+    public void resetPackage_clearsUserSet() {
+        // setup
+        ManagedServices service =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        String componentName = "package/user-allowed";
+        service.addApprovedList(componentName, 0, true);
+
+        service.resetComponents("package", 0);
+
+        assertFalse(service.isPackageOrComponentUserSet(componentName, 0));
     }
 
     /** Test that backup only writes packages/components that belong to the target user. */

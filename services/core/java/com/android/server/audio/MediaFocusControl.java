@@ -862,11 +862,13 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @param forceDuck only true if
      *     {@link android.media.AudioFocusRequest.Builder#setFocusGain(int)} was set to true for
      *                  accessibility.
+     * @param testUid ignored if flags is not AudioManager.AUDIOFOCUS_FLAG_TEST (strictly equals to)
+     *                otherwise the UID being injected for testing
      * @return
      */
     protected int requestAudioFocus(@NonNull AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, @NonNull String clientId, @NonNull String callingPackageName,
-            int flags, int sdk, boolean forceDuck) {
+            int flags, int sdk, boolean forceDuck, int testUid) {
         new MediaMetrics.Item(mMetricsId)
                 .setUid(Binder.getCallingUid())
                 .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
@@ -878,8 +880,13 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 //.set(MediaMetrics.Property.SDK, sdk)
                 .record();
 
+        // when using the test API, a fake UID can be injected (testUid is ignored otherwise)
+        // note that the test on flags is not a mask test on purpose, AUDIOFOCUS_FLAG_TEST is
+        // supposed to be alone in bitfield
+        final int uid = (flags == AudioManager.AUDIOFOCUS_FLAG_TEST)
+                ? testUid : Binder.getCallingUid();
         mEventLogger.log((new AudioEventLogger.StringEvent(
-                "requestAudioFocus() from uid/pid " + Binder.getCallingUid()
+                "requestAudioFocus() from uid/pid " + uid
                     + "/" + Binder.getCallingPid()
                     + " clientId=" + clientId + " callingPack=" + callingPackageName
                     + " req=" + focusChangeHint
@@ -892,8 +899,10 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
-        if (mAppOps.noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, Binder.getCallingUid(),
-                callingPackageName) != AppOpsManager.MODE_ALLOWED) {
+        if ((flags != AudioManager.AUDIOFOCUS_FLAG_TEST)
+                // note we're using the real uid for appOp evaluation
+                && (mAppOps.noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, Binder.getCallingUid(),
+                        callingPackageName) != AppOpsManager.MODE_ALLOWED)) {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
@@ -910,7 +919,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             final AudioFocusInfo afiForExtPolicy;
             if (mFocusPolicy != null) {
                 // construct AudioFocusInfo as it will be communicated to audio focus policy
-                afiForExtPolicy = new AudioFocusInfo(aa, Binder.getCallingUid(),
+                afiForExtPolicy = new AudioFocusInfo(aa, uid,
                         clientId, callingPackageName, focusChangeHint, 0 /*lossReceived*/,
                         flags, sdk);
             } else {
@@ -980,7 +989,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             removeFocusStackEntry(clientId, false /* signal */, false /*notifyFocusFollowers*/);
 
             final FocusRequester nfr = new FocusRequester(aa, focusChangeHint, flags, fd, cb,
-                    clientId, afdh, callingPackageName, Binder.getCallingUid(), this, sdk);
+                    clientId, afdh, callingPackageName, uid, this, sdk);
 
             if (mMultiAudioFocusEnabled
                     && (focusChangeHint == AudioManager.AUDIOFOCUS_GAIN)) {
@@ -1141,6 +1150,13 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
     public boolean getMultiAudioFocusEnabled() {
         return mMultiAudioFocusEnabled;
+    }
+
+    /*package*/ long getFadeOutDurationOnFocusLossMillis(AudioAttributes aa) {
+        if (!ENFORCE_FADEOUT_FOR_FOCUS_LOSS) {
+            return 0;
+        }
+        return FadeOutManager.getFadeOutDurationOnFocusLossMillis(aa);
     }
 
     private void dumpMultiAudioFocus(PrintWriter pw) {

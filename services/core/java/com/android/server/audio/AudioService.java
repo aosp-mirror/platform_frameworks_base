@@ -1836,6 +1836,127 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /** @see AudioManager#isSurroundFormatEnabled(int) */
+    @Override
+    public boolean isSurroundFormatEnabled(int audioFormat) {
+        if (!isSurroundFormat(audioFormat)) {
+            Log.w(TAG, "audioFormat to enable is not a surround format.");
+            return false;
+        }
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing WRITE_SETTINGS permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSettingsLock) {
+                HashSet<Integer> enabledFormats = getEnabledFormats();
+                return enabledFormats.contains(audioFormat);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /** @see AudioManager#setSurroundFormatEnabled(int, boolean) */
+    @Override
+    public boolean setSurroundFormatEnabled(int audioFormat, boolean enabled) {
+        if (!isSurroundFormat(audioFormat)) {
+            Log.w(TAG, "audioFormat to enable is not a surround format.");
+            return false;
+        }
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing WRITE_SETTINGS permission");
+        }
+
+        HashSet<Integer> enabledFormats = getEnabledFormats();
+        if (enabled) {
+            enabledFormats.add(audioFormat);
+        } else {
+            enabledFormats.remove(audioFormat);
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSettingsLock) {
+                Settings.Global.putString(mContentResolver,
+                        Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
+                        TextUtils.join(",", enabledFormats));
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
+    }
+
+    /** @see AudioManager#setEncodedSurroundMode(int) */
+    @Override
+    public boolean setEncodedSurroundMode(int mode) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing WRITE_SETTINGS permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSettingsLock) {
+                Settings.Global.putInt(mContentResolver,
+                        Settings.Global.ENCODED_SURROUND_OUTPUT,
+                        mode);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
+    }
+
+    /** @see AudioManager#getEncodedSurroundMode() */
+    @Override
+    public int getEncodedSurroundMode() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing WRITE_SETTINGS permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSettingsLock) {
+                return Settings.Global.getInt(mContentResolver,
+                        Settings.Global.ENCODED_SURROUND_OUTPUT,
+                        AudioManager.ENCODED_SURROUND_OUTPUT_AUTO);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /** @return the formats that are enabled in global settings */
+    private HashSet<Integer> getEnabledFormats() {
+        HashSet<Integer> formats = new HashSet<>();
+        String enabledFormats = Settings.Global.getString(mContentResolver,
+                Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
+        if (enabledFormats != null) {
+            try {
+                Arrays.stream(TextUtils.split(enabledFormats, ","))
+                        .mapToInt(Integer::parseInt)
+                        .forEach(formats::add);
+            } catch (NumberFormatException e) {
+                Log.w(TAG, "ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS misformatted.", e);
+            }
+        }
+        return formats;
+    }
+
+    private boolean isSurroundFormat(int audioFormat) {
+        for (int sf : AudioFormat.SURROUND_SOUND_ENCODING) {
+            if (sf == audioFormat) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void sendEnabledSurroundFormats(ContentResolver cr, boolean forceUpdate) {
         if (mEncodedSurroundMode != Settings.Global.ENCODED_SURROUND_OUTPUT_MANUAL) {
             // Manually enable surround formats only when the setting is in manual mode.
@@ -1860,14 +1981,7 @@ public class AudioService extends IAudioService.Stub
         for (String format : surroundFormats) {
             try {
                 int audioFormat = Integer.valueOf(format);
-                boolean isSurroundFormat = false;
-                for (int sf : AudioFormat.SURROUND_SOUND_ENCODING) {
-                    if (sf == audioFormat) {
-                        isSurroundFormat = true;
-                        break;
-                    }
-                }
-                if (isSurroundFormat && !formats.contains(audioFormat)) {
+                if (isSurroundFormat(audioFormat) && !formats.contains(audioFormat)) {
                     formats.add(audioFormat);
                 }
             } catch (Exception e) {
@@ -7343,7 +7457,6 @@ public class AudioService extends IAudioService.Stub
                     Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.ENCODED_SURROUND_OUTPUT), false, this);
-
             mEnabledSurroundFormats = Settings.Global.getString(
                     mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
@@ -7794,7 +7907,24 @@ public class AudioService extends IAudioService.Stub
         mmi.record();
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
                 clientId, callingPackageName, flags, sdk,
-                forceFocusDuckingForAccessibility(aa, durationHint, uid));
+                forceFocusDuckingForAccessibility(aa, durationHint, uid), -1 /*testUid, ignored*/);
+    }
+
+    /** see {@link AudioManager#requestAudioFocusForTest(AudioFocusRequest, String, int, int)} */
+    public int requestAudioFocusForTest(AudioAttributes aa, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName,
+            int fakeUid, int sdk) {
+        if (!enforceQueryAudioStateForTest("focus request")) {
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+        if (callingPackageName == null || clientId == null || aa == null) {
+            final String reason = "Invalid null parameter to request audio focus";
+            Log.e(TAG, reason);
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+        return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
+                clientId, callingPackageName, AudioManager.AUDIOFOCUS_FLAG_TEST,
+                sdk, false /*forceDuck*/, fakeUid);
     }
 
     public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa,
@@ -7811,6 +7941,15 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         mmi.record();
+        return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
+    }
+
+    /** see {@link AudioManager#abandonAudioFocusForTest(AudioFocusRequest, String)} */
+    public int abandonAudioFocusForTest(IAudioFocusDispatcher fd, String clientId,
+            AudioAttributes aa, String callingPackageName) {
+        if (!enforceQueryAudioStateForTest("focus abandon")) {
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
         return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
     }
 
@@ -7834,6 +7973,25 @@ public class AudioService extends IAudioService.Stub
     @VisibleForTesting
     public boolean hasAudioFocusUsers() {
         return mMediaFocusControl.hasAudioFocusUsers();
+    }
+
+    /** see {@link AudioManager#getFadeOutDurationOnFocusLossMillis(AudioAttributes)} */
+    public long getFadeOutDurationOnFocusLossMillis(AudioAttributes aa) {
+        if (!enforceQueryAudioStateForTest("fade out duration")) {
+            return 0;
+        }
+        return mMediaFocusControl.getFadeOutDurationOnFocusLossMillis(aa);
+    }
+
+    private boolean enforceQueryAudioStateForTest(String mssg) {
+        if (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
+                Manifest.permission.QUERY_AUDIO_STATE)) {
+            final String reason = "Doesn't have QUERY_AUDIO_STATE permission for "
+                    + mssg + " test API";
+            Log.e(TAG, reason, new Exception());
+            return false;
+        }
+        return true;
     }
 
     //==========================================================================================

@@ -829,6 +829,94 @@ public class ConnectivityManager {
     })
     public @interface PrivateDnsMode {}
 
+    /**
+     * Flag to indicate that an app is not subject to any restrictions that could result in its
+     * network access blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_NONE = 0;
+
+    /**
+     * Flag to indicate that an app is subject to Battery saver restrictions that would
+     * result in its network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_BATTERY_SAVER = 1 << 0;
+
+    /**
+     * Flag to indicate that an app is subject to Doze restrictions that would
+     * result in its network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_DOZE = 1 << 1;
+
+    /**
+     * Flag to indicate that an app is subject to App Standby restrictions that would
+     * result in its network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_APP_STANDBY = 1 << 2;
+
+    /**
+     * Flag to indicate that an app is subject to Restricted mode restrictions that would
+     * result in its network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_RESTRICTED_MODE = 1 << 3;
+
+    /**
+     * Flag to indicate that an app is subject to Data saver restrictions that would
+     * result in its metered network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_METERED_REASON_DATA_SAVER = 1 << 16;
+
+    /**
+     * Flag to indicate that an app is subject to user restrictions that would
+     * result in its metered network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_METERED_REASON_USER_RESTRICTED = 1 << 17;
+
+    /**
+     * Flag to indicate that an app is subject to Device admin restrictions that would
+     * result in its metered network access being blocked.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_METERED_REASON_ADMIN_DISABLED = 1 << 18;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = {"BLOCKED_"}, value = {
+            BLOCKED_REASON_NONE,
+            BLOCKED_REASON_BATTERY_SAVER,
+            BLOCKED_REASON_DOZE,
+            BLOCKED_REASON_APP_STANDBY,
+            BLOCKED_REASON_RESTRICTED_MODE,
+            BLOCKED_METERED_REASON_DATA_SAVER,
+            BLOCKED_METERED_REASON_USER_RESTRICTED,
+            BLOCKED_METERED_REASON_ADMIN_DISABLED,
+    })
+    public @interface BlockedReason {}
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private final IConnectivityManager mService;
 
@@ -3238,9 +3326,10 @@ public class ConnectivityManager {
      * Register or update a network offer with ConnectivityService.
      *
      * ConnectivityService keeps track of offers made by the various providers and matches
-     * them to networking requests made by apps or the system. The provider supplies a score
-     * and the capabilities of the network it might be able to bring up ; these act as filters
-     * used by ConnectivityService to only send those requests that can be fulfilled by the
+     * them to networking requests made by apps or the system. A callback identifies an offer
+     * uniquely, and later calls with the same callback update the offer. The provider supplies a
+     * score and the capabilities of the network it might be able to bring up ; these act as
+     * filters used by ConnectivityService to only send those requests that can be fulfilled by the
      * provider.
      *
      * The provider is under no obligation to be able to bring up the network it offers at any
@@ -5337,5 +5426,24 @@ public class ConnectivityManager {
         // PRIVATE_DNS_MODE_OPPORTUNISTIC as default mode.
         if (TextUtils.isEmpty(mode)) mode = PRIVATE_DNS_MODE_OPPORTUNISTIC;
         return mode;
+    }
+
+    /**
+     * Set private DNS mode to settings.
+     *
+     * @param context The {@link Context} to set the private DNS mode.
+     * @param mode The private dns mode. This should be one of the PRIVATE_DNS_MODE_* constants.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void setPrivateDnsMode(@NonNull Context context,
+            @NonNull @PrivateDnsMode String mode) {
+        if (!(mode == PRIVATE_DNS_MODE_OFF
+                || mode == PRIVATE_DNS_MODE_OPPORTUNISTIC
+                || mode == PRIVATE_DNS_MODE_PROVIDER_HOSTNAME)) {
+            throw new IllegalArgumentException("Invalid private dns mode");
+        }
+        Settings.Global.putString(context.getContentResolver(), PRIVATE_DNS_MODE, mode);
     }
 }

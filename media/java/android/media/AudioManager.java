@@ -568,6 +568,42 @@ public class AudioManager {
     public static final int FLAG_FROM_KEY = 1 << 12;
 
     /** @hide */
+    @IntDef(prefix = {"ENCODED_SURROUND_OUTPUT_"}, value = {
+            ENCODED_SURROUND_OUTPUT_AUTO,
+            ENCODED_SURROUND_OUTPUT_NEVER,
+            ENCODED_SURROUND_OUTPUT_ALWAYS,
+            ENCODED_SURROUND_OUTPUT_MANUAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EncodedSurroundOutputMode {}
+
+    /**
+     * The surround sound formats are available for use if they are detected. This is the default
+     * mode.
+     */
+    public static final int ENCODED_SURROUND_OUTPUT_AUTO = 0;
+
+    /**
+     * The surround sound formats are NEVER available, even if they are detected by the hardware.
+     * Those formats will not be reported.
+     */
+    public static final int ENCODED_SURROUND_OUTPUT_NEVER = 1;
+
+    /**
+     * The surround sound formats are ALWAYS available, even if they are not detected by the
+     * hardware. Those formats will be reported as part of the HDMI output capability.
+     * Applications are then free to use either PCM or encoded output.
+     */
+    public static final int ENCODED_SURROUND_OUTPUT_ALWAYS = 2;
+
+    /**
+     * Surround sound formats are available according to the choice of user, even if they are not
+     * detected by the hardware. Those formats will be reported as part of the HDMI output
+     * capability. Applications are then free to use either PCM or encoded output.
+     */
+    public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3;
+
+    /** @hide */
     @IntDef(flag = true, prefix = "FLAG", value = {
             FLAG_SHOW_UI,
             FLAG_ALLOW_RINGER_MODES,
@@ -3185,6 +3221,23 @@ public class AudioManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int NUM_SOUND_EFFECTS = 16;
 
+    /** @hide */
+    @IntDef(prefix = { "FX_" }, value = {
+            FX_KEY_CLICK,
+            FX_FOCUS_NAVIGATION_UP,
+            FX_FOCUS_NAVIGATION_DOWN,
+            FX_FOCUS_NAVIGATION_LEFT,
+            FX_FOCUS_NAVIGATION_RIGHT,
+            FX_KEYPRESS_STANDARD,
+            FX_KEYPRESS_SPACEBAR,
+            FX_KEYPRESS_DELETE,
+            FX_KEYPRESS_RETURN,
+            FX_KEYPRESS_INVALID,
+            FX_BACK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemSoundEffect {}
+
     /**
      * @hide Number of FX_FOCUS_NAVIGATION_REPEAT_* sound effects
      */
@@ -3260,22 +3313,11 @@ public class AudioManager {
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
-     * @param effectType The type of sound effect. One of
-     *            {@link #FX_KEY_CLICK},
-     *            {@link #FX_FOCUS_NAVIGATION_UP},
-     *            {@link #FX_FOCUS_NAVIGATION_DOWN},
-     *            {@link #FX_FOCUS_NAVIGATION_LEFT},
-     *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
-     *            {@link #FX_KEYPRESS_STANDARD},
-     *            {@link #FX_KEYPRESS_SPACEBAR},
-     *            {@link #FX_KEYPRESS_DELETE},
-     *            {@link #FX_KEYPRESS_RETURN},
-     *            {@link #FX_KEYPRESS_INVALID},
-     *            {@link #FX_BACK},
+     * @param effectType The type of sound effect.
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
      */
-    public void playSoundEffect(int effectType) {
+    public void playSoundEffect(@SystemSoundEffect int effectType) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
             return;
         }
@@ -3294,24 +3336,13 @@ public class AudioManager {
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
-     * @param effectType The type of sound effect. One of
-     *            {@link #FX_KEY_CLICK},
-     *            {@link #FX_FOCUS_NAVIGATION_UP},
-     *            {@link #FX_FOCUS_NAVIGATION_DOWN},
-     *            {@link #FX_FOCUS_NAVIGATION_LEFT},
-     *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
-     *            {@link #FX_KEYPRESS_STANDARD},
-     *            {@link #FX_KEYPRESS_SPACEBAR},
-     *            {@link #FX_KEYPRESS_DELETE},
-     *            {@link #FX_KEYPRESS_RETURN},
-     *            {@link #FX_KEYPRESS_INVALID},
-     *            {@link #FX_BACK},
+     * @param effectType The type of sound effect.
      * @param userId The current user to pull sound settings from
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
      * @hide
      */
-    public void  playSoundEffect(int effectType, int userId) {
+    public void  playSoundEffect(@SystemSoundEffect int effectType, int userId) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
             return;
         }
@@ -3330,25 +3361,14 @@ public class AudioManager {
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
-     * @param effectType The type of sound effect. One of
-     *            {@link #FX_KEY_CLICK},
-     *            {@link #FX_FOCUS_NAVIGATION_UP},
-     *            {@link #FX_FOCUS_NAVIGATION_DOWN},
-     *            {@link #FX_FOCUS_NAVIGATION_LEFT},
-     *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
-     *            {@link #FX_KEYPRESS_STANDARD},
-     *            {@link #FX_KEYPRESS_SPACEBAR},
-     *            {@link #FX_KEYPRESS_DELETE},
-     *            {@link #FX_KEYPRESS_RETURN},
-     *            {@link #FX_KEYPRESS_INVALID},
-     *            {@link #FX_BACK},
+     * @param effectType The type of sound effect.
      * @param volume Sound effect volume.
      * The volume value is a raw scalar so UI controls should be scaled logarithmically.
      * If a volume of -1 is specified, the AudioManager.STREAM_MUSIC stream volume minus 3dB will be used.
      * NOTE: This version is for applications that have their own
      * settings panel for enabling and controlling volume.
      */
-    public void  playSoundEffect(int effectType, float volume) {
+    public void  playSoundEffect(@SystemSoundEffect int effectType, float volume) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
             return;
         }
@@ -3791,6 +3811,14 @@ public class AudioManager {
      */
     @SystemApi
     public static final int AUDIOFOCUS_FLAG_LOCK     = 0x1 << 2;
+
+    /**
+     * @hide
+     * flag set on test API calls,
+     * see {@link #requestAudioFocusForTest(AudioFocusRequest, String, int, int)},
+     * note that it isn't used in conjunction with other flags, it is passed as the single
+     * value for flags */
+    public static final int AUDIOFOCUS_FLAG_TEST = 0x1 << 3;
     /** @hide */
     public static final int AUDIOFOCUS_FLAGS_APPS = AUDIOFOCUS_FLAG_DELAY_OK
             | AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS;
@@ -3948,6 +3976,76 @@ public class AudioManager {
                 .setLocksFocus((flags & AUDIOFOCUS_FLAG_LOCK) == AUDIOFOCUS_FLAG_LOCK)
                 .build();
         return requestAudioFocus(afr, ap);
+    }
+
+    /**
+     * @hide
+     * Test API to request audio focus for an arbitrary client operating from a (fake) given UID.
+     * Used to simulate conditions of the test, not the behavior of the focus requester under test.
+     * @param afr the parameters of the request
+     * @param clientFakeId the identifier of the AudioManager the client would be requesting from
+     * @param clientFakeUid the UID of the client, here an arbitrary int,
+     *                      doesn't have to be a real UID
+     * @param clientTargetSdk the target SDK used by the client
+     * @return return code indicating status of the request
+     */
+    @TestApi
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
+    public @FocusRequestResult int requestAudioFocusForTest(@NonNull AudioFocusRequest afr,
+            @NonNull String clientFakeId, int clientFakeUid, int clientTargetSdk) {
+        Objects.requireNonNull(afr);
+        Objects.requireNonNull(clientFakeId);
+        try {
+            return getService().requestAudioFocusForTest(afr.getAudioAttributes(),
+                    afr.getFocusGain(),
+                    mICallBack,
+                    mAudioFocusDispatcher,
+                    clientFakeId, "com.android.test.fakeclient", clientFakeUid, clientTargetSdk);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Test API to abandon audio focus for an arbitrary client.
+     * Used to simulate conditions of the test, not the behavior of the focus requester under test.
+     * @param afr the parameters used for the request
+     * @param clientFakeId clientFakeId the identifier of the AudioManager from which the client
+     *      would be requesting
+     * @return return code indicating status of the request
+     */
+    @TestApi
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
+    public @FocusRequestResult int abandonAudioFocusForTest(@NonNull AudioFocusRequest afr,
+            @NonNull String clientFakeId) {
+        Objects.requireNonNull(afr);
+        Objects.requireNonNull(clientFakeId);
+        try {
+            return getService().abandonAudioFocusForTest(mAudioFocusDispatcher,
+                    clientFakeId, afr.getAudioAttributes(), "com.android.test.fakeclient");
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Return the duration of the fade out applied when a player of the given AudioAttributes
+     * is losing audio focus
+     * @param aa the AudioAttributes of the player losing focus with {@link #AUDIOFOCUS_LOSS}
+     * @return a duration in ms, 0 indicates no fade out is applied
+     */
+    @TestApi
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
+    public @IntRange(from = 0) long getFadeOutDurationOnFocusLossMillis(@NonNull AudioAttributes aa)
+    {
+        Objects.requireNonNull(aa);
+        try {
+            return getService().getFadeOutDurationOnFocusLossMillis(aa);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -6754,6 +6852,34 @@ public class AudioManager {
     }
 
     /**
+     * Sets the surround sound mode.
+     *
+     * @return true if successful, otherwise false
+     */
+    @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS)
+    public boolean setEncodedSurroundMode(@EncodedSurroundOutputMode int mode) {
+        try {
+            return getService().setEncodedSurroundMode(mode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the surround sound mode.
+     *
+     * @return true if successful, otherwise false
+     */
+    @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS)
+    public @EncodedSurroundOutputMode int getEncodedSurroundMode() {
+        try {
+            return getService().getEncodedSurroundMode();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      * Returns all surround formats.
      * @return a map where the key is a surround format and
@@ -6771,7 +6897,6 @@ public class AudioManager {
     }
 
     /**
-     * @hide
      * Set a certain surround format as enabled or not.
      * @param audioFormat a surround format, the value is one of
      *        {@link AudioFormat#ENCODING_AC3}, {@link AudioFormat#ENCODING_E_AC3},
@@ -6785,10 +6910,29 @@ public class AudioManager {
      * @param enabled the required surround format state, true for enabled, false for disabled
      * @return true if successful, otherwise false
      */
+    @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS)
     public boolean setSurroundFormatEnabled(
             @AudioFormat.SurroundSoundEncoding int audioFormat, boolean enabled) {
-        int status = AudioSystem.setSurroundFormatEnabled(audioFormat, enabled);
-        return status == AudioManager.SUCCESS;
+        try {
+            return getService().setSurroundFormatEnabled(audioFormat, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets whether a certain surround format is enabled or not.
+     * @param audioFormat a surround format
+     *
+     * @return whether the required surround format is enabled
+     */
+    @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS)
+    public boolean isSurroundFormatEnabled(@AudioFormat.SurroundSoundEncoding int audioFormat) {
+        try {
+            return getService().isSurroundFormatEnabled(audioFormat);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
