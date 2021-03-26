@@ -27,6 +27,7 @@ import android.net.QosSession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 import android.util.Log;
 
 import java.util.Objects;
@@ -146,13 +147,23 @@ class QosCallbackAgentConnection implements IBinder.DeathRecipient {
         mNetworkAgentInfo.onQosCallbackUnregistered(mAgentCallbackId);
     }
 
-    void sendEventQosSessionAvailable(final QosSession session,
+    void sendEventEpsQosSessionAvailable(final QosSession session,
             final EpsBearerQosSessionAttributes attributes) {
         try {
-            if (DBG) log("sendEventQosSessionAvailable: sending...");
+            if (DBG) log("sendEventEpsQosSessionAvailable: sending...");
             mCallback.onQosEpsBearerSessionAvailable(session, attributes);
         } catch (final RemoteException e) {
-            loge("sendEventQosSessionAvailable: remote exception", e);
+            loge("sendEventEpsQosSessionAvailable: remote exception", e);
+        }
+    }
+
+    void sendEventNrQosSessionAvailable(final QosSession session,
+            final NrQosSessionAttributes attributes) {
+        try {
+            if (DBG) log("sendEventNrQosSessionAvailable: sending...");
+            mCallback.onNrQosSessionAvailable(session, attributes);
+        } catch (final RemoteException e) {
+            loge("sendEventNrQosSessionAvailable: remote exception", e);
         }
     }
 

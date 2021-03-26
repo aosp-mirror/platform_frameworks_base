@@ -21,6 +21,7 @@ import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.IAppSearchBatchResultCallback;
 import android.app.appsearch.IAppSearchResultCallback;
+import android.os.ParcelFileDescriptor;
 import com.android.internal.infra.AndroidFuture;
 
 parcelable SearchResults;
@@ -41,7 +42,8 @@ interface IAppSearchManager {
      *     incompatible documents will be deleted.
      * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
-     *     {@link AppSearchResult}&lt;{@link Void}&gt;.
+     *     {@link AppSearchResult}&lt;{@link Bundle}&gt;, where the value are
+     *     {@link SetSchemaResponse} bundle.
      */
     void setSchema(
         in String packageName,
@@ -187,6 +189,47 @@ interface IAppSearchManager {
      * @param userId Id of the calling user
      */
     void invalidateNextPageToken(in long nextPageToken, in int userId);
+
+    /**
+    * Searches a document based on a given specifications.
+    *
+    * <p>Documents will be save to the given ParcelFileDescriptor
+    *
+    * @param packageName The name of the package to query over.
+    * @param databaseName The databaseName this query for.
+    * @param fileDescriptor The ParcelFileDescriptor where documents should be written to.
+    * @param queryExpression String to search for.
+    * @param searchSpecBundle SearchSpec bundle.
+    * @param userId Id of the calling user.
+    * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+    *        {@link AppSearchResult}&lt;{@code null}&gt;.
+    */
+    void writeQueryResultsToFile(
+        in String packageName,
+        in String databaseName,
+        in ParcelFileDescriptor fileDescriptor,
+        in String queryExpression,
+        in Bundle searchSpecBundle,
+        in int userId,
+        in IAppSearchResultCallback callback);
+
+    /**
+    * Inserts documents from the given file into the index.
+    *
+    * @param packageName The name of the package that owns this document.
+    * @param databaseName  The name of the database where this document lives.
+    * @param fileDescriptor The ParcelFileDescriptor where documents should be read from.
+    * @param userId Id of the calling user.
+    * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+    *     {@link AppSearchResult}&lt;{@link List}&lt;{@link Bundle}&gt;&gt;, where the value are
+    *     MigrationFailure bundles.
+    */
+    void putDocumentsFromFile(
+        in String packageName,
+        in String databaseName,
+        in ParcelFileDescriptor fileDescriptor,
+        in int userId,
+        in IAppSearchResultCallback callback);
 
     /**
      * Reports usage of a particular document by URI and namespace.

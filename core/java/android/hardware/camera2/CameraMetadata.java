@@ -586,7 +586,7 @@ public abstract class CameraMetadata<TKey> {
      *   that is, {@link android.graphics.ImageFormat#PRIVATE } is included in the lists of
      *   formats returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.</li>
      * <li>{@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
-     *   returns non empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
+     *   returns non-empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
      * <li>Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(ImageFormat.PRIVATE)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(ImageFormat.PRIVATE)}</li>
      * <li>Using {@link android.graphics.ImageFormat#PRIVATE } does not cause a frame rate drop
      *   relative to the sensor's maximum capture rate (at that resolution).</li>
@@ -1113,6 +1113,63 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING = 15;
+
+    /**
+     * <p>This camera device is capable of producing ultra high resolution images in
+     * addition to the image sizes described in the
+     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.
+     * It can operate in 'default' mode and 'max resolution' mode. It generally does this
+     * by binning pixels in 'default' mode and not binning them in 'max resolution' mode.
+     * <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}</code> describes the streams supported in 'default'
+     * mode.
+     * The stream configurations supported in 'max resolution' mode are described by
+     * <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION android.scaler.streamConfigurationMapMaximumResolution}</code>.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR = 16;
+
+    /**
+     * <p>The device supports reprocessing from the <code>RAW_SENSOR</code> format with a bayer pattern
+     * given by {@link CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR android.sensor.info.binningFactor} (m x n group of pixels with the same
+     * color filter) to a remosaiced regular bayer pattern.</p>
+     * <p>This capability will only be present for devices with
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability. When
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * devices do not advertise this capability,
+     * {@link android.graphics.ImageFormat#RAW_SENSOR } images will already have a
+     * regular bayer pattern.</p>
+     * <p>If a <code>RAW_SENSOR</code> stream is requested along with another non-RAW stream in a
+     * {@link android.hardware.camera2.CaptureRequest } (if multiple streams are supported
+     * when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }),
+     * the <code>RAW_SENSOR</code> stream will have a regular bayer pattern.</p>
+     * <p>This capability requires the camera device to support the following :
+     * * The {@link android.hardware.camera2.params.StreamConfigurationMap } mentioned below
+     *   refers to the one, described by
+     *   <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION android.scaler.streamConfigurationMapMaximumResolution}</code>.
+     * * One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.
+     * * {@link android.graphics.ImageFormat#RAW_SENSOR } is supported as an output/input
+     *   format, that is, {@link android.graphics.ImageFormat#RAW_SENSOR } is included in the
+     *   lists of formats returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.
+     * * {@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
+     *   returns non-empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.
+     * * Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(ImageFormat.RAW_SENSOR)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(ImageFormat.RAW_SENSOR)}
+     * * Using {@link android.graphics.ImageFormat#RAW_SENSOR } does not cause a frame rate
+     *   drop relative to the sensor's maximum capture rate (at that resolution).
+     * * No CaptureRequest controls will be applicable when a request has an input target
+     *   with {@link android.graphics.ImageFormat#RAW_SENSOR } format.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING = 17;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
@@ -2953,6 +3010,27 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
     public static final int SENSOR_TEST_PATTERN_MODE_CUSTOM1 = 256;
+
+    //
+    // Enumeration values for CaptureRequest#SENSOR_PIXEL_MODE
+    //
+
+    /**
+     * <p>This is the default sensor pixel mode. This is the only sensor pixel mode
+     * supported unless a camera device advertises
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.</p>
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    public static final int SENSOR_PIXEL_MODE_DEFAULT = 0;
+
+    /**
+     * <p>This sensor pixel mode is offered by devices with capability
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.
+     * In this mode, sensors typically do not bin pixels, as a result can offer larger
+     * image sizes.</p>
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    public static final int SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION = 1;
 
     //
     // Enumeration values for CaptureRequest#SHADING_MODE

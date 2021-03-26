@@ -46,7 +46,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * A controller to manage the ui translation requests for the {@link Activity}.
@@ -77,6 +77,7 @@ public class UiTranslationController {
     private final HandlerThread mWorkerThread;
     @NonNull
     private final Handler mWorkerHandler;
+    private int mCurrentState;
 
     public UiTranslationController(Activity activity, Context context) {
         mActivity = activity;
@@ -101,6 +102,9 @@ public class UiTranslationController {
         }
         Log.i(TAG, "updateUiTranslationState state: " + stateToString(state)
                 + (DEBUG ? ", views: " + views : ""));
+        synchronized (mLock) {
+            mCurrentState = state;
+        }
         switch (state) {
             case STATE_UI_TRANSLATION_STARTED:
                 final Pair<TranslationSpec, TranslationSpec> specs =
@@ -114,14 +118,14 @@ public class UiTranslationController {
                 }
                 break;
             case STATE_UI_TRANSLATION_PAUSED:
-                runForEachView(View::onPauseUiTranslation);
+                runForEachView((view, callback) -> callback.onHideTranslation(view));
                 break;
             case STATE_UI_TRANSLATION_RESUMED:
-                runForEachView(View::onRestoreUiTranslation);
+                runForEachView((view, callback) -> callback.onShowTranslation(view));
                 break;
             case STATE_UI_TRANSLATION_FINISHED:
                 destroyTranslators();
-                runForEachView(View::onFinishUiTranslation);
+                runForEachView((view, callback) -> callback.onClearTranslation(view));
                 synchronized (mLock) {
                     mViews.clear();
                 }
@@ -232,11 +236,16 @@ public class UiTranslationController {
         }
         final SparseArray<ViewTranslationResponse> translatedResult =
                 response.getViewTranslationResponses();
+        // TODO(b/177960696): handle virtual views. Check the result if the AutofillId is virtual
+        // AutofillId?
         onTranslationCompleted(translatedResult);
     }
 
     private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult) {
         if (!mActivity.isResumed()) {
+            if (DEBUG) {
+                Log.v(TAG, "onTranslationCompleted: Activity is not resumed.");
+            }
             return;
         }
         final int resultCount = translatedResult.size();
@@ -244,6 +253,11 @@ public class UiTranslationController {
             Log.v(TAG, "onTranslationCompleted: receive " + resultCount + " responses.");
         }
         synchronized (mLock) {
+            if (mCurrentState == STATE_UI_TRANSLATION_FINISHED) {
+                Log.w(TAG, "onTranslationCompleted: the translation state is finished now. "
+                        + "Skip to show the translated text.");
+                return;
+            }
             for (int i = 0; i < resultCount; i++) {
                 final ViewTranslationResponse response = translatedResult.get(i);
                 final AutofillId autofillId = response.getAutofillId();
@@ -256,18 +270,28 @@ public class UiTranslationController {
                             + " may be gone.");
                     continue;
                 }
-                mActivity.runOnUiThread(() -> view.onTranslationComplete(response));
+                mActivity.runOnUiThread(() -> {
+                    if (view.getViewTranslationCallback() == null) {
+                        if (DEBUG) {
+                            Log.d(TAG, view + " doesn't support showing translation because of "
+                                    + "null ViewTranslationCallback.");
+                        }
+                        return;
+                    }
+                    view.onTranslationResponse(response);
+                    view.getViewTranslationCallback().onShowTranslation(view);
+                });
             }
         }
     }
 
     /**
-     * Called when there is an ui translation request comes to request view translation.
+     * Creates a Translator for the given source and target translation specs and start the ui
+     * translation when the Translator is created successfully.
      */
     @WorkerThread
     private void createTranslatorAndStart(TranslationSpec sourceSpec, TranslationSpec destSpec,
             List<AutofillId> views) {
-        // Create Translator
         final Translator translator = createTranslatorIfNeeded(sourceSpec, destSpec);
         if (translator == null) {
             Log.w(TAG, "Can not create Translator for sourceSpec:" + sourceSpec + " destSpec:"
@@ -295,29 +319,49 @@ public class UiTranslationController {
      */
     private void onUiTranslationStarted(Translator translator, List<AutofillId> views) {
         synchronized (mLock) {
-            // Find Views collect the translation data
-            final ArrayList<ViewTranslationRequest> requests = new ArrayList<>();
-            final ArrayList<View> foundViews = new ArrayList<>();
-            findViewsTraversalByAutofillIds(views, foundViews);
-            for (int i = 0; i < foundViews.size(); i++) {
-                final View view = foundViews.get(i);
-                final int currentCount = i;
-                mActivity.runOnUiThread(() -> {
-                    final ViewTranslationRequest request = view.onCreateTranslationRequest();
-                    if (request != null
-                            && request.getKeys().size() > 0) {
-                        requests.add(request);
-                    }
-                    if (currentCount == (foundViews.size() - 1)) {
-                        Log.v(TAG, "onUiTranslationStarted: collect " + requests.size()
-                                + " requests.");
-                        mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
-                                UiTranslationController::sendTranslationRequest,
-                                UiTranslationController.this, translator, requests));
-                    }
-                });
-            }
+            // TODO(b/177960696): handle virtual views. Need to check the requested view list is
+            //  virtual AutofillId or not
+            findViewsAndCollectViewTranslationRequest(translator, views);
         }
+    }
+
+    /**
+     * If the translation requested views are not virtual view, we need to traverse the tree to
+     * find the views and get the View's ViewTranslationRequest.
+     */
+    private void findViewsAndCollectViewTranslationRequest(Translator translator,
+            List<AutofillId> views) {
+        // Find Views collect the translation data
+        final ArrayList<ViewTranslationRequest> requests = new ArrayList<>();
+            final ArrayList<View> foundViews = new ArrayList<>();
+        findViewsTraversalByAutofillIds(views, foundViews);
+        final int[] supportedFormats = getSupportedFormatsLocked();
+        for (int i = 0; i < foundViews.size(); i++) {
+            final View view = foundViews.get(i);
+            final int currentCount = i;
+            mActivity.runOnUiThread(() -> {
+                final ViewTranslationRequest request =
+                        view.createTranslationRequest(supportedFormats);
+                // TODO(b/177960696): handle null case, the developers may want to handle the
+                //  translation, call dispatchRequestTranslation() instead.
+                if (request != null
+                        && request.getKeys().size() > 0) {
+                    requests.add(request);
+                }
+                if (currentCount == (foundViews.size() - 1)) {
+                    Log.v(TAG, "onUiTranslationStarted: collect " + requests.size()
+                            + " requests.");
+                    mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
+                            UiTranslationController::sendTranslationRequest,
+                            UiTranslationController.this, translator, requests));
+                }
+            });
+        }
+    }
+
+    private int[] getSupportedFormatsLocked() {
+        // We only support text now
+        return new int[] {TranslationSpec.DATA_FORMAT_TEXT};
     }
 
     private void findViewsTraversalByAutofillIds(List<AutofillId> sourceViewIds,
@@ -356,20 +400,21 @@ public class UiTranslationController {
         }
     }
 
-    private void runForEachView(Consumer<View> action) {
+    private void runForEachView(BiConsumer<View, ViewTranslationCallback> action) {
         synchronized (mLock) {
             final ArrayMap<AutofillId, WeakReference<View>> views = new ArrayMap<>(mViews);
             mActivity.runOnUiThread(() -> {
                 final int viewCounts = views.size();
                 for (int i = 0; i < viewCounts; i++) {
                     final View view = views.valueAt(i).get();
-                    if (view == null) {
+                    if (view == null || view.getViewTranslationCallback() == null) {
                         if (DEBUG) {
-                            Log.d(TAG, "View was gone for autofillid = " + views.keyAt(i));
+                            Log.d(TAG, "View was gone or ViewTranslationCallback for autofillid "
+                                    + "= " + views.keyAt(i));
                         }
                         continue;
                     }
-                    action.accept(view);
+                    action.accept(view, view.getViewTranslationCallback());
                 }
             });
         }

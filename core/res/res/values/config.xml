@@ -3732,6 +3732,13 @@
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
 
+    <!-- The package name for the companion provider app.
+         This package must be trusted, as it has the permissions to associate apps with devices
+         without a UI prompt.
+         Example: "com.google.android.gms"
+     -->
+    <string name="config_companionProviderPackage" translatable="false"></string>
+
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          See android.attention.AttentionManagerService.

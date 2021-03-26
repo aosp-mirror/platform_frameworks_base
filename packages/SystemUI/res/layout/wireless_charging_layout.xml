@@ -22,6 +22,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.android.systemui.statusbar.charging.ChargingRippleView
+        android:id="@+id/wireless_charging_ripple"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <!-- Circle animation -->
     <ImageView
         android:id="@+id/wireless_charging_view"

@@ -3536,6 +3536,7 @@
   <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="notification_channel_accessibility_magnification" />
   <java-symbol type="string" name="notification_channel_accessibility_security_policy" />
+  <java-symbol type="string" name="config_companionProviderPackage" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultOnDeviceSpeechRecognitionService" />
   <java-symbol type="string" name="config_defaultTextClassifierPackage" />
@@ -4101,10 +4102,8 @@
   <java-symbol type="string" name="resolver_cant_access_work_apps_explanation" />
   <java-symbol type="string" name="resolver_cant_access_personal_apps_explanation" />
   <java-symbol type="string" name="resolver_turn_on_work_apps" />
-  <java-symbol type="string" name="resolver_no_work_apps_available_share" />
-  <java-symbol type="string" name="resolver_no_work_apps_available_resolve" />
-  <java-symbol type="string" name="resolver_no_personal_apps_available_share" />
-  <java-symbol type="string" name="resolver_no_personal_apps_available_resolve" />
+  <java-symbol type="string" name="resolver_no_work_apps_available" />
+  <java-symbol type="string" name="resolver_no_personal_apps_available" />
   <java-symbol type="string" name="resolver_switch_on_work" />
   <java-symbol type="drawable" name="ic_work_apps_off" />
   <java-symbol type="drawable" name="ic_sharing_disabled" />

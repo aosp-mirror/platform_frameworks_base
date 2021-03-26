@@ -74,7 +74,7 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> {
                 IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD,
                 mUdfpsOverlayController, this);
         try {
-            mCancellationSignal = getFreshDaemon().detectInteraction(mSequentialId);
+            mCancellationSignal = getFreshDaemon().detectInteraction();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting finger detect", e);
             UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);

@@ -221,32 +221,19 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
 
     @Override
     protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        if (mIsSendAction) {
-            showEmptyState(listAdapter,
-                    R.drawable.ic_no_apps,
-                    R.string.resolver_no_personal_apps_available_share,
-                    /* subtitleRes */ 0);
-        } else {
-            showEmptyState(listAdapter,
-                    R.drawable.ic_no_apps,
-                    R.string.resolver_no_personal_apps_available_resolve,
-                    /* subtitleRes */ 0);
-        }
+        showEmptyState(listAdapter,
+                R.drawable.ic_no_apps,
+                R.string.resolver_no_personal_apps_available,
+                /* subtitleRes */ 0);
+
     }
 
     @Override
     protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        if (mIsSendAction) {
-            showEmptyState(listAdapter,
-                    R.drawable.ic_no_apps,
-                    R.string.resolver_no_work_apps_available_share,
-                    /* subtitleRes */ 0);
-        } else {
-            showEmptyState(listAdapter,
-                    R.drawable.ic_no_apps,
-                    R.string.resolver_no_work_apps_available_resolve,
-                    /* subtitleRes */ 0);
-        }
+        showEmptyState(listAdapter,
+                R.drawable.ic_no_apps,
+                R.string.resolver_no_work_apps_available,
+                /* subtitleRes */ 0);
     }
 
     void setEmptyStateBottomOffset(int bottomOffset) {

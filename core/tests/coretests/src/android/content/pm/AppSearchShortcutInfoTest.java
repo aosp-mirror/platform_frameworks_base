@@ -45,7 +45,7 @@ public class AppSearchShortcutInfoTest {
         final Set<String> categorySet = new ArraySet<>();
         categorySet.add(category);
         final Intent shortcutIntent = new Intent(Intent.ACTION_VIEW);
-        final ShortcutInfo shortcut = new AppSearchShortcutInfo.Builder(id)
+        final ShortcutInfo shortcut = new AppSearchShortcutInfo.Builder(/*packageName=*/"", id)
                 .setActivity(activity)
                 .setLongLabel(id)
                 .setIconResName(shortcutIconResName)

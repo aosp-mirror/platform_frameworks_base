@@ -24,7 +24,6 @@ import android.view.ViewGroup;
 import android.widget.Toolbar;
 
 import androidx.annotation.Nullable;
-import androidx.core.os.BuildCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -41,15 +40,8 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO(b/181723278): Update the version check after SDK for S is finalized
-        // The collapsing toolbar is only supported if the android platform version is S or higher.
-        // Otherwise the regular action bar will be shown.
-        if (BuildCompat.isAtLeastS()) {
-            super.setContentView(R.layout.collapsing_toolbar_base_layout);
-            mCollapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
-        } else {
-            super.setContentView(R.layout.toolbar_base_layout);
-        }
+        super.setContentView(R.layout.collapsing_toolbar_base_layout);
+        mCollapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
 
         final Toolbar toolbar = findViewById(R.id.action_bar);
         setActionBar(toolbar);

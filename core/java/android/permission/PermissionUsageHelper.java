@@ -71,13 +71,10 @@ public class PermissionUsageHelper {
     private static final String PROPERTY_PERMISSIONS_HUB_2_ENABLED = "permissions_hub_2_enabled";
 
     /** How long after an access to show it as "recent" */
-    private static final String RECENT_ACCESS_TIME_MS = "recent_acccess_time_ms";
+    private static final String RECENT_ACCESS_TIME_MS = "recent_access_time_ms";
 
     /** How long after an access to show it as "running" */
-    private static final String RUNNING_ACCESS_TIME_MS = "running_acccess_time_ms";
-
-    /** The name of the expected voice IME subtype */
-    private static final String VOICE_IME_SUBTYPE = "voice";
+    private static final String RUNNING_ACCESS_TIME_MS = "running_access_time_ms";
 
     private static final String SYSTEM_PKG = "android";
 
@@ -279,6 +276,10 @@ public class PermissionUsageHelper {
                             opEntry.getAttributedOpEntries().get(attributionTag);
 
                     long lastAccessTime = attrOpEntry.getLastAccessTime(opFlags);
+                    if (attrOpEntry.isRunning()) {
+                        lastAccessTime = now;
+                    }
+
                     if (lastAccessTime < recentThreshold && !attrOpEntry.isRunning()) {
                         continue;
                     }

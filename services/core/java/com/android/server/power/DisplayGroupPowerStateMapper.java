@@ -248,6 +248,30 @@ public class DisplayGroupPowerStateMapper {
         return false;
     }
 
+    long getLastUserActivityTimeLocked(int groupId) {
+        return mDisplayGroupInfos.get(groupId).lastUserActivityTime;
+    }
+
+    long getLastUserActivityTimeNoChangeLightsLocked(int groupId) {
+        return mDisplayGroupInfos.get(groupId).lastUserActivityTimeNoChangeLights;
+    }
+
+    int getUserActivitySummaryLocked(int groupId) {
+        return mDisplayGroupInfos.get(groupId).userActivitySummary;
+    }
+
+    void setLastUserActivityTimeLocked(int groupId, long time) {
+        mDisplayGroupInfos.get(groupId).lastUserActivityTime = time;
+    }
+
+    void setLastUserActivityTimeNoChangeLightsLocked(int groupId, long time) {
+        mDisplayGroupInfos.get(groupId).lastUserActivityTimeNoChangeLights = time;
+    }
+
+    void setUserActivitySummaryLocked(int groupId, int summary) {
+        mDisplayGroupInfos.get(groupId).userActivitySummary = summary;
+    }
+
     /**
      * Interface through which an interested party may be informed of {@link DisplayGroup} events.
      */
@@ -265,6 +289,9 @@ public class DisplayGroupPowerStateMapper {
         public boolean ready;
         public long lastPowerOnTime;
         public boolean sandmanSummoned;
+        public long lastUserActivityTime;
+        public long lastUserActivityTimeNoChangeLights;
+        public int userActivitySummary;
 
         /** {@code true} if this DisplayGroup supports dreaming; otherwise {@code false}. */
         public boolean supportsSandman;

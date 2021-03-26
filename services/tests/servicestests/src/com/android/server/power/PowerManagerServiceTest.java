@@ -71,6 +71,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
 import android.view.Display;
+import android.view.DisplayInfo;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -594,6 +595,8 @@ public class PowerManagerServiceTest {
     public void testWasDeviceIdleFor_true() {
         int interval = 1000;
         createService();
+        mService.systemReady(null);
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mService.onUserActivity();
         advanceTime(interval + 1 /* just a little more */);
         assertThat(mService.wasDeviceIdleForInternal(interval)).isTrue();
@@ -603,6 +606,8 @@ public class PowerManagerServiceTest {
     public void testWasDeviceIdleFor_false() {
         int interval = 1000;
         createService();
+        mService.systemReady(null);
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mService.onUserActivity();
         assertThat(mService.wasDeviceIdleForInternal(interval)).isFalse();
     }
@@ -757,6 +762,9 @@ public class PowerManagerServiceTest {
 
     @Test
     public void testInattentiveSleep_userActivityDismissesWarning() throws Exception {
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
         setMinimumScreenOffTimeoutConfig(5);
         setAttentiveWarningDuration(1900);
         setAttentiveTimeout(2000);

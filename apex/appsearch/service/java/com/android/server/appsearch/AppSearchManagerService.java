@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.appsearch.AppSearchBatchResult;
+import android.app.appsearch.AppSearchMigrationHelper;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
@@ -31,10 +32,12 @@ import android.app.appsearch.IAppSearchResultCallback;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
+import android.app.appsearch.SetSchemaResponse;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -49,6 +52,11 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +133,7 @@ public class AppSearchManagerService extends SystemService {
                     schemasPackageAccessible.put(entry.getKey(), packageIdentifiers);
                 }
                 AppSearchImpl impl = mImplInstanceManager.getAppSearchImpl(callingUserId);
-                impl.setSchema(
+                SetSchemaResponse setSchemaResponse = impl.setSchema(
                         packageName,
                         databaseName,
                         schemas,
@@ -133,8 +141,8 @@ public class AppSearchManagerService extends SystemService {
                         schemasPackageAccessible,
                         forceOverride,
                         schemaVersion);
-                invokeCallbackOnResult(
-                        callback, AppSearchResult.newSuccessfulResult(/*result=*/ null));
+                invokeCallbackOnResult(callback,
+                        AppSearchResult.newSuccessfulResult(setSchemaResponse.getBundle()));
             } catch (Throwable t) {
                 invokeCallbackOnError(callback, t);
             } finally {
@@ -393,6 +401,98 @@ public class AppSearchManagerService extends SystemService {
                 impl.invalidateNextPageToken(nextPageToken);
             } catch (Throwable t) {
                 Log.e(TAG, "Unable to invalidate the query page token", t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void writeQueryResultsToFile(
+                @NonNull String packageName,
+                @NonNull String databaseName,
+                @NonNull ParcelFileDescriptor fileDescriptor,
+                @NonNull String queryExpression,
+                @NonNull Bundle searchSpecBundle,
+                @UserIdInt int userId,
+                @NonNull IAppSearchResultCallback callback) {
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                verifyCallingPackage(callingUid, packageName);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(callingUserId);
+                // we don't need to append the file. The file is always brand new.
+                try (DataOutputStream outputStream = new DataOutputStream(
+                        new FileOutputStream(fileDescriptor.getFileDescriptor()))) {
+                    SearchResultPage searchResultPage = impl.query(
+                            packageName,
+                            databaseName,
+                            queryExpression,
+                            new SearchSpec(searchSpecBundle));
+                    while (!searchResultPage.getResults().isEmpty()) {
+                        for (int i = 0; i < searchResultPage.getResults().size(); i++) {
+                            AppSearchMigrationHelper.writeBundleToOutputStream(
+                                    outputStream, searchResultPage.getResults().get(i)
+                                            .getGenericDocument().getBundle());
+                        }
+                        searchResultPage = impl.getNextPage(searchResultPage.getNextPageToken());
+                    }
+                }
+                invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
+            } catch (Throwable t) {
+                invokeCallbackOnError(callback, t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void putDocumentsFromFile(
+                @NonNull String packageName,
+                @NonNull String databaseName,
+                @NonNull ParcelFileDescriptor fileDescriptor,
+                @UserIdInt int userId,
+                @NonNull IAppSearchResultCallback callback) {
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                verifyCallingPackage(callingUid, packageName);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(callingUserId);
+
+                GenericDocument document;
+                ArrayList<Bundle> migrationFailureBundles = new ArrayList<>();
+                try (DataInputStream inputStream = new DataInputStream(
+                        new FileInputStream(fileDescriptor.getFileDescriptor()))) {
+                    while (true) {
+                        try {
+                            document = AppSearchMigrationHelper
+                                    .readDocumentFromInputStream(inputStream);
+                        } catch (EOFException e) {
+                            // nothing wrong, we just finish the reading.
+                            break;
+                        }
+                        try {
+                            impl.putDocument(packageName, databaseName, document, /*logger=*/ null);
+                        } catch (Throwable t) {
+                            migrationFailureBundles.add(
+                                    new SetSchemaResponse.MigrationFailure.Builder()
+                                            .setNamespace(document.getNamespace())
+                                            .setSchemaType(document.getSchemaType())
+                                            .setUri(document.getUri())
+                                            .setAppSearchResult(
+                                                    AppSearchResult.throwableToFailedResult(t))
+                                            .build().getBundle());
+                        }
+                    }
+                }
+                impl.persistToDisk();
+                invokeCallbackOnResult(callback,
+                        AppSearchResult.newSuccessfulResult(migrationFailureBundles));
+            } catch (Throwable t) {
+                invokeCallbackOnError(callback, t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }

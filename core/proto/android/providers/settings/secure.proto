@@ -123,6 +123,8 @@ message SecureSettingsProto {
         optional SettingProto gesture_silence_alerts_enabled = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto gesture_wake_enabled = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto gesture_setup_complete = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto touch_gesture_enabled = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto long_press_home_enabled = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Assist assist = 7;
 
@@ -296,6 +298,7 @@ message SecureSettingsProto {
         optional SettingProto subtype_history = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto selected_input_method_subtype = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto show_ime_with_hard_keyboard = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto default_voice_input_method = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional InputMethods input_methods = 26;
 

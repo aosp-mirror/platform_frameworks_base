@@ -38,6 +38,12 @@
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
 
+/**
+ * (Bool) Turns on the Skia GPU option "reduceOpsTaskSplitting" which improves GPU
+ * efficiency but may increase VRAM consumption. Default is false.
+ */
+#define PROPERTY_REDUCE_OPS_TASK_SPLITTING "renderthread.skia.reduceopstasksplitting"
+
 namespace android {
 
 class Bitmap;

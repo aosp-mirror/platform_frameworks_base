@@ -63,10 +63,10 @@ public class NetdEventListenerServiceTest {
 
     NetdEventListenerService mService;
     ConnectivityManager mCm;
-    final NetworkCapabilities mNcWifi = new NetworkCapabilities.Builder()
+    private static final NetworkCapabilities CAPABILITIES_WIFI = new NetworkCapabilities.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .build();
-    final NetworkCapabilities mNcCell = new NetworkCapabilities.Builder()
+    private static final NetworkCapabilities CAPABILITIES_CELL = new NetworkCapabilities.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
             .build();
 
@@ -475,7 +475,7 @@ public class NetdEventListenerServiceTest {
                 ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mCm).registerNetworkCallback(any(), networkCallback.capture());
         networkCallback.getValue().onCapabilitiesChanged(new Network(netId),
-                netId == 100 ? mNcWifi : mNcCell);
+                netId == 100 ? CAPABILITIES_WIFI : CAPABILITIES_CELL);
     }
 
     Thread connectEventAction(int netId, int error, int latencyMs, String ipAddr) {

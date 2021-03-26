@@ -53,7 +53,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
                   float s = 0.0;
                   for (float i = 0; i < 4; i += 1) {
                     float l = i * 0.25;
-                    float h = l + 0.025;
+                    float h = l + 0.005;
                     float o = abs(sin(0.1 * PI * (t + i)));
                     s += threshold(n + o, l, h);
                   }
@@ -97,7 +97,7 @@ class RippleShader internal constructor() : RuntimeShader(SHADER, false) {
                     float fadeRipple = min(fadeIn, 1.-fadeOutRipple);
                     float rippleAlpha = softRing(p, in_origin, radius, 0.5)
                         * fadeRipple * in_color.a;
-                    vec4 ripple = in_color * max(circle, rippleAlpha) * 0.4;
+                    vec4 ripple = in_color * max(circle, rippleAlpha) * 0.3;
                     return mix(ripple, vec4(sparkle), sparkle * in_sparkle_strength);
                 }"""
         private const val SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN

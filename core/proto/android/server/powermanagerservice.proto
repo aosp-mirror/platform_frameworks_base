@@ -58,6 +58,9 @@ message PowerManagerServiceDumpProto {
         optional bool is_screen_bright = 1;
         optional bool is_screen_dim = 2;
         optional bool is_screen_dream = 3;
+        optional int64 last_user_activity_time_ms = 4;
+        optional int64 last_user_activity_time_no_change_lights_ms = 5;
+        optional int32 display_group_id = 6;
     }
     // A com.android.server.power.PowerManagerService.UidState object.
     message UidStateProto {
@@ -109,7 +112,7 @@ message PowerManagerServiceDumpProto {
     // The time we decided to do next long check. (In milliseconds timestamp)
     optional int64 notify_long_next_check_ms = 19;
     // Summarizes the effect of the user activity timer.
-    optional UserActivityProto user_activity = 20;
+    repeated UserActivityProto user_activity = 20;
     // If true, instructs the display controller to wait for the proximity
     // sensor to go negative before turning the screen on.
     optional bool is_request_wait_for_negative_proximity = 21;
@@ -134,8 +137,8 @@ message PowerManagerServiceDumpProto {
     // Timestamp of the last time the device was put to sleep.
     optional int64 last_sleep_time_ms = 30;
     // Timestamp of the last call to user activity.
-    optional int64 last_user_activity_time_ms = 31;
-    optional int64 last_user_activity_time_no_change_lights_ms = 32;
+    optional int64 last_user_activity_time_ms = 31 [deprecated = true];
+    optional int64 last_user_activity_time_no_change_lights_ms = 32 [deprecated = true];
     // Timestamp of last interactive power hint.
     optional int64 last_interactive_power_hint_time_ms = 33;
     // Timestamp of the last screen brightness boost.

@@ -48,7 +48,7 @@ class FingerprintInternalEnumerateClient extends InternalEnumerateClient<ISessio
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().enumerateEnrollments(mSequentialId);
+            getFreshDaemon().enumerateEnrollments();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);

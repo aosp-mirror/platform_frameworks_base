@@ -92,7 +92,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     @Override
     protected void startHalOperation() {
         try {
-            mCancellationSignal = getFreshDaemon().authenticate(mSequentialId, mOperationId);
+            mCancellationSignal = getFreshDaemon().authenticate(mOperationId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting auth", e);
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);

@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Presubmit
@@ -117,10 +118,13 @@ public final class UpdatableFontDirTest {
         }
     }
 
+    private static final long CURRENT_TIME = 1234567890L;
+
     private File mCacheDir;
     private File mUpdatableFontFilesDir;
     private File mConfigFile;
     private List<File> mPreinstalledFontDirs;
+    private Supplier<Long> mCurrentTimeSupplier = () -> CURRENT_TIME;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Before
@@ -147,7 +151,7 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void construct() throws Exception {
-        long expectedModifiedDate = 1234567890;
+        long expectedModifiedDate = CURRENT_TIME / 2;
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
@@ -155,7 +159,7 @@ public final class UpdatableFontDirTest {
         writeConfig(config, mConfigFile);
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dirForPreparation.loadFontFileMap();
         assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedTimeMillis())
                 .isEqualTo(expectedModifiedDate);
@@ -168,6 +172,9 @@ public final class UpdatableFontDirTest {
                         + "  <font>foo.ttf</font>"
                         + "  <font>bar.ttf</font>"
                         + "</family>")));
+        // Verifies that getLastModifiedTimeMillis() returns the value of currentTimeMillis.
+        assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedTimeMillis())
+                .isEqualTo(CURRENT_TIME);
         // Four font dirs are created.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(4);
         assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedTimeMillis())
@@ -175,7 +182,7 @@ public final class UpdatableFontDirTest {
 
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).containsKey("foo.ttf");
         assertThat(parser.getRevision(dir.getFontFileMap().get("foo.ttf"))).isEqualTo(3);
@@ -199,7 +206,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
         assertThat(dir.getFontFamilyMap()).isEmpty();
@@ -211,7 +218,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dirForPreparation.loadFontFileMap();
         dirForPreparation.update(Arrays.asList(
                 newFontUpdateRequest("foo.ttf,1", GOOD_SIGNATURE),
@@ -229,7 +236,7 @@ public final class UpdatableFontDirTest {
                 dirForPreparation.getFontFileMap().get("foo.ttf").getAbsolutePath());
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
@@ -243,7 +250,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dirForPreparation.loadFontFileMap();
         dirForPreparation.update(Arrays.asList(
                 newFontUpdateRequest("foo.ttf,1", GOOD_SIGNATURE),
@@ -262,7 +269,7 @@ public final class UpdatableFontDirTest {
 
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
@@ -276,7 +283,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dirForPreparation.loadFontFileMap();
         dirForPreparation.update(Arrays.asList(
                 newFontUpdateRequest("foo.ttf,1", GOOD_SIGNATURE),
@@ -296,7 +303,7 @@ public final class UpdatableFontDirTest {
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(1), "bar.ttf"), "bar,2");
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
         // For foo.ttf, preinstalled font (revision 5) should be used.
         assertThat(dir.getFontFileMap()).doesNotContainKey("foo.ttf");
@@ -317,7 +324,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                new File("/dev/null"));
+                new File("/dev/null"), mCurrentTimeSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
         assertThat(dir.getFontFamilyMap()).isEmpty();
@@ -329,7 +336,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dirForPreparation.loadFontFileMap();
         dirForPreparation.update(Arrays.asList(
                 newFontUpdateRequest("foo.ttf,1", GOOD_SIGNATURE),
@@ -351,7 +358,7 @@ public final class UpdatableFontDirTest {
 
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
         // The state should be rolled back as a whole if one of the update requests fail.
         assertThat(dir.getFontFileMap()).containsKey("foo.ttf");
@@ -369,7 +376,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1", GOOD_SIGNATURE)));
@@ -387,7 +394,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1", GOOD_SIGNATURE)));
@@ -406,7 +413,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,2", GOOD_SIGNATURE)));
@@ -428,7 +435,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         dir.update(Collections.singletonList(newFontUpdateRequest("foo.ttf,1", GOOD_SIGNATURE)));
@@ -445,7 +452,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         dir.update(Arrays.asList(
@@ -463,7 +470,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -485,7 +492,7 @@ public final class UpdatableFontDirTest {
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"), "test.ttf,1");
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -517,7 +524,7 @@ public final class UpdatableFontDirTest {
         try {
             UpdatableFontDir dir = new UpdatableFontDir(
                     mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                    readonlyFile);
+                    readonlyFile, mCurrentTimeSupplier);
             dir.loadFontFileMap();
 
             try {
@@ -551,7 +558,7 @@ public final class UpdatableFontDirTest {
                     public long getRevision(File file) throws IOException {
                         return 0;
                     }
-                }, fakeFsverityUtil, mConfigFile);
+                }, fakeFsverityUtil, mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -580,7 +587,7 @@ public final class UpdatableFontDirTest {
                     public long getRevision(File file) throws IOException {
                         return 0;
                     }
-                }, fakeFsverityUtil, mConfigFile);
+                }, fakeFsverityUtil, mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -617,7 +624,7 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -637,7 +644,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         dir.update(Collections.singletonList(newFontUpdateRequest("foo.ttf,1", GOOD_SIGNATURE)));
@@ -660,7 +667,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         dir.update(Arrays.asList(
@@ -682,7 +689,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -703,7 +710,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
 
         try {
@@ -723,7 +730,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
         // We assume we have monospace.
         assertNamedFamilyExists(dir.getSystemFontConfig(), "monospace");
@@ -755,7 +762,7 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
-                mConfigFile);
+                mConfigFile, mCurrentTimeSupplier);
         dir.loadFontFileMap();
         assertThat(dir.getSystemFontConfig().getFontFamilies()).isNotEmpty();
         FontConfig.FontFamily firstFontFamily = dir.getSystemFontConfig().getFontFamilies().get(0);

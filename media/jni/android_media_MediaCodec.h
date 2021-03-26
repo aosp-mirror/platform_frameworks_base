@@ -164,6 +164,14 @@ struct JMediaCodec : public AHandler {
 
     void selectAudioPresentation(const int32_t presentationId, const int32_t programId);
 
+    status_t querySupportedVendorParameters(JNIEnv *env, jobject *names);
+
+    status_t describeParameter(JNIEnv *env, jstring name, jobject *desc);
+
+    status_t subscribeToVendorParameters(JNIEnv *env, jobject names);
+
+    status_t unsubscribeFromVendorParameters(JNIEnv *env, jobject names);
+
     bool hasCryptoOrDescrambler() { return mHasCryptoOrDescrambler; }
 
     const sp<ICrypto> &getCrypto() { return mCrypto; }

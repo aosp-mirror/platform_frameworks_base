@@ -470,8 +470,8 @@ public final class Settings {
      * to be shown, with the "package" scheme. That is "package:com.my.app".
      * <p>
      * Output: Nothing.
-     * @hide
      */
+    @SuppressLint("ActionValue")
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS =
             "com.android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
@@ -6291,6 +6291,20 @@ public final class Settings {
                 "selected_input_method_subtype";
 
         /**
+         * The {@link android.view.inputmethod.InputMethodInfo.InputMethodInfo#getId() ID} of the
+         * default voice input method.
+         * <p>
+         * This stores the last known default voice IME. If the related system config value changes,
+         * this is reset by InputMethodManagerService.
+         * <p>
+         * This IME is not necessarily in the enabled IME list. That state is still stored in
+         * {@link #ENABLED_INPUT_METHODS}.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_VOICE_INPUT_METHOD = "default_voice_input_method";
+
+        /**
          * Setting to record the history of input method subtype, holding the pair of ID of IME
          * and its last used subtype.
          * @hide
@@ -9162,6 +9176,22 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
 
         /**
+         * Whether the assistant can be triggered by a touch gesture.
+         *
+         * @hide
+         */
+        public static final String ASSIST_TOUCH_GESTURE_ENABLED =
+                "assist_touch_gesture_enabled";
+
+        /**
+         * Whether the assistant can be triggered by long-pressing the home button
+         *
+         * @hide
+         */
+        public static final String ASSIST_LONG_PRESS_HOME_ENABLED =
+                "assist_long_press_home_enabled";
+
+        /**
          * Control whether Trust Agents are in active unlock or extend unlock mode.
          * @hide
          */
@@ -9757,6 +9787,7 @@ public final class Settings {
          * @hide
          */
         @TestApi
+        @Readable
         public static final String ACCESSIBILITY_MAGNIFICATION_CAPABILITY =
                 "accessibility_magnification_capability";
 

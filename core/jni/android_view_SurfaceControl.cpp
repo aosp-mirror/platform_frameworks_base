@@ -1658,10 +1658,12 @@ public:
             jobject jJankData = env->NewObject(gJankDataClassInfo.clazz,
                     gJankDataClassInfo.ctor, jankData[i].frameVsyncId, jankData[i].jankType);
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);
+            env->DeleteLocalRef(jJankData);
         }
         env->CallVoidMethod(target,
                 gJankDataListenerClassInfo.onJankDataAvailable,
                 jJankDataArray);
+        env->DeleteLocalRef(jJankDataArray);
         env->DeleteLocalRef(target);
     }
 

@@ -3059,7 +3059,7 @@
     <public name="fontProviderSystemFontFamily" />
     <public name="hand_second" />
     <public name="memtagMode" />
-    <public name="nativeHeapZeroInit" />
+    <public name="nativeHeapZeroInitialized" />
     <!-- @hide @SystemApi -->
     <public name="hotwordDetectionService" />
     <public name="previewLayout" />
@@ -3093,6 +3093,8 @@
     <public name="suppressesSpellChecker" />
     <public name="usesPermissionFlags" />
     <public name="requestOptimizedExternalStorageAccess" />
+    <!-- @hide @SystemApi -->
+    <public name="playHomeTransitionSound" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">

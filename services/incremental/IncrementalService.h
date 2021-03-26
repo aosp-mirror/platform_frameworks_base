@@ -452,6 +452,8 @@ private:
                                StorageLoadingProgressListener&& progressListener);
     long getMillsSinceOldestPendingRead(StorageId storage);
 
+    void trimReservedSpaceV1(const IncFsMount& ifs);
+
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
     const std::unique_ptr<DataLoaderManagerWrapper> mDataLoaderManager;

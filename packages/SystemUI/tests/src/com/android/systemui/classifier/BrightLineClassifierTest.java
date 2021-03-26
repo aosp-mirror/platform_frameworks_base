@@ -34,7 +34,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.classifier.FalsingDataProvider.GestureCompleteListener;
+import com.android.systemui.classifier.FalsingDataProvider.GestureFinalizedListener;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -82,7 +82,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     private final FalsingClassifier.Result mFalsedResult =
             FalsingClassifier.Result.falsed(1, getClass().getSimpleName(), "");
     private final FalsingClassifier.Result mPassedResult = FalsingClassifier.Result.passed(1);
-    private GestureCompleteListener mGestureCompleteListener;
+    private GestureFinalizedListener mGestureFinalizedListener;
 
     @Before
     public void setup() {
@@ -103,13 +103,13 @@ public class BrightLineClassifierTest extends SysuiTestCase {
                 mHistoryTracker, mKeyguardStateController, false);
 
 
-        ArgumentCaptor<GestureCompleteListener> gestureCompleteListenerCaptor =
-                ArgumentCaptor.forClass(GestureCompleteListener.class);
+        ArgumentCaptor<GestureFinalizedListener> gestureCompleteListenerCaptor =
+                ArgumentCaptor.forClass(GestureFinalizedListener.class);
 
         verify(mFalsingDataProvider).addGestureCompleteListener(
                 gestureCompleteListenerCaptor.capture());
 
-        mGestureCompleteListener = gestureCompleteListenerCaptor.getValue();
+        mGestureFinalizedListener = gestureCompleteListenerCaptor.getValue();
     }
 
     @Test
@@ -211,7 +211,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
 
     @Test
     public void testHistory() {
-        mGestureCompleteListener.onGestureComplete(1000);
+        mGestureFinalizedListener.onGestureFinalized(1000);
 
         verify(mHistoryTracker).addResults(anyCollection(), eq(1000L));
     }
@@ -220,7 +220,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     public void testHistory_singleTap() {
         // When trying to classify single taps, we don't immediately add results to history.
         mBrightLineFalsingManager.isFalseTap(false, 0);
-        mGestureCompleteListener.onGestureComplete(1000);
+        mGestureFinalizedListener.onGestureFinalized(1000);
         verify(mHistoryTracker).addResults(anyCollection(), eq(1000L));
     }
 
@@ -228,9 +228,9 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     public void testHistory_multipleSingleTaps() {
         // When trying to classify single taps, we don't immediately add results to history.
         mBrightLineFalsingManager.isFalseTap(false, 0);
-        mGestureCompleteListener.onGestureComplete(1000);
+        mGestureFinalizedListener.onGestureFinalized(1000);
         mBrightLineFalsingManager.isFalseTap(false, 0);
-        mGestureCompleteListener.onGestureComplete(2000);
+        mGestureFinalizedListener.onGestureFinalized(2000);
         verify(mHistoryTracker).addResults(anyCollection(), eq(1000L));
         verify(mHistoryTracker).addResults(anyCollection(), eq(2000L));
     }
@@ -239,11 +239,11 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     public void testHistory_doubleTap() {
         // When trying to classify single taps, we don't immediately add results to history.
         mBrightLineFalsingManager.isFalseTap(false, 0);
-        mGestureCompleteListener.onGestureComplete(1000);
+        mGestureFinalizedListener.onGestureFinalized(1000);
         // Before checking for double tap, we may check for single-tap on the second gesture.
         mBrightLineFalsingManager.isFalseTap(false, 0);
         mBrightLineFalsingManager.isFalseDoubleTap();
-        mGestureCompleteListener.onGestureComplete(2000);
+        mGestureFinalizedListener.onGestureFinalized(2000);
 
         // Double tap is immediately added to history. Single tap is never added.
         verify(mHistoryTracker).addResults(anyCollection(), eq(2000L));

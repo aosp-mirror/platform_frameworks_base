@@ -46,7 +46,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -107,11 +106,14 @@ public class BrightLineFalsingManager implements FalsingManager {
         }
     };
 
-    private final FalsingDataProvider.GestureCompleteListener mGestureCompleteListener =
-            new FalsingDataProvider.GestureCompleteListener() {
+    private final FalsingDataProvider.GestureFinalizedListener mGestureFinalizedListener =
+            new FalsingDataProvider.GestureFinalizedListener() {
                 @Override
-                public void onGestureComplete(long completionTimeMs) {
+                public void onGestureFinalized(long completionTimeMs) {
                     if (mPriorResults != null) {
+                        boolean boolResult = mPriorResults.stream().anyMatch(
+                                FalsingClassifier.Result::isFalse);
+
                         mPriorResults.forEach(result -> {
                             if (result.isFalse()) {
                                 String reason = result.getReason();
@@ -121,8 +123,28 @@ public class BrightLineFalsingManager implements FalsingManager {
                             }
                         });
 
+                        if (Build.IS_ENG || Build.IS_USERDEBUG) {
+                            // Copy motion events, as the results returned by
+                            // #getRecentMotionEvents are recycled elsewhere.
+                            RECENT_SWIPES.add(new DebugSwipeRecord(
+                                    boolResult,
+                                    mPriorInteractionType,
+                                    mDataProvider.getRecentMotionEvents().stream().map(
+                                            motionEvent -> new XYDt(
+                                                    (int) motionEvent.getX(),
+                                                    (int) motionEvent.getY(),
+                                                    (int) (motionEvent.getEventTime()
+                                                            - motionEvent.getDownTime())))
+                                            .collect(Collectors.toList())));
+                            while (RECENT_SWIPES.size() > RECENT_INFO_LOG_SIZE) {
+                                RECENT_SWIPES.remove();
+                            }
+                        }
+
+
                         mHistoryTracker.addResults(mPriorResults, completionTimeMs);
                         mPriorResults = null;
+                        mPriorInteractionType = Classifier.GENERIC;
                     } else {
                         // Gestures that were not classified get treated as a false.
                         mHistoryTracker.addResults(
@@ -135,6 +157,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             };
 
     private Collection<FalsingClassifier.Result> mPriorResults;
+    private @Classifier.InteractionType int mPriorInteractionType = Classifier.GENERIC;
 
     @Inject
     public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
@@ -154,7 +177,7 @@ public class BrightLineFalsingManager implements FalsingManager {
         mTestHarness = testHarness;
 
         mDataProvider.addSessionListener(mSessionListener);
-        mDataProvider.addGestureCompleteListener(mGestureCompleteListener);
+        mDataProvider.addGestureCompleteListener(mGestureFinalizedListener);
         mHistoryTracker.addBeliefListener(mBeliefListener);
     }
 
@@ -165,50 +188,33 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
+        mPriorInteractionType = interactionType;
         if (skipFalsing()) {
             return false;
         }
 
-        boolean result;
+        final boolean booleanResult;
 
         if (!mTestHarness && !mDataProvider.isJustUnlockedWithFace() && !mDockManager.isDocked()) {
-            Stream<FalsingClassifier.Result> results =
-                    mClassifiers.stream().map(falsingClassifier ->
-                            falsingClassifier.classifyGesture(
-                                    interactionType,
-                                    mHistoryTracker.falseBelief(),
-                                    mHistoryTracker.falseConfidence()));
-            mPriorResults = new ArrayList<>();
             final boolean[] localResult = {false};
-            results.forEach(classifierResult -> {
-                localResult[0] |= classifierResult.isFalse();
-                mPriorResults.add(classifierResult);
-            });
-            result = localResult[0];
+            mPriorResults = mClassifiers.stream().map(falsingClassifier -> {
+                FalsingClassifier.Result r = falsingClassifier.classifyGesture(
+                        interactionType,
+                        mHistoryTracker.falseBelief(),
+                        mHistoryTracker.falseConfidence());
+                localResult[0] |= r.isFalse();
+
+                return r;
+            }).collect(Collectors.toList());
+            booleanResult = localResult[0];
         } else {
-            result = false;
+            booleanResult = false;
             mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(1));
         }
 
-        logDebug("False Gesture: " + result);
+        logDebug("False Gesture: " + booleanResult);
 
-        if (Build.IS_ENG || Build.IS_USERDEBUG) {
-            // Copy motion events, as the passed in list gets emptied out elsewhere in the code.
-            RECENT_SWIPES.add(new DebugSwipeRecord(
-                    result,
-                    interactionType,
-                    mDataProvider.getRecentMotionEvents().stream().map(
-                            motionEvent -> new XYDt(
-                                    (int) motionEvent.getX(),
-                                    (int) motionEvent.getY(),
-                                    (int) (motionEvent.getEventTime() - motionEvent.getDownTime())))
-                            .collect(Collectors.toList())));
-            while (RECENT_SWIPES.size() > RECENT_INFO_LOG_SIZE) {
-                RECENT_SWIPES.remove();
-            }
-        }
-
-        return result;
+        return booleanResult;
     }
 
     @Override
@@ -354,7 +360,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public void cleanup() {
         mDataProvider.removeSessionListener(mSessionListener);
-        mDataProvider.removeGestureCompleteListener(mGestureCompleteListener);
+        mDataProvider.removeGestureCompleteListener(mGestureFinalizedListener);
         mClassifiers.forEach(FalsingClassifier::cleanup);
         mFalsingBeliefListeners.clear();
         mHistoryTracker.removeBeliefListener(mBeliefListener);

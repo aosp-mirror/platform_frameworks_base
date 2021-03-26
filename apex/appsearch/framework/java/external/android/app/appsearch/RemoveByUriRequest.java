@@ -59,45 +59,13 @@ public final class RemoveByUriRequest {
      * <p>Once {@link #build} is called, the instance can no longer be used.
      */
     public static final class Builder {
-        private String mNamespace;
+        private final String mNamespace;
         private final Set<String> mUris = new ArraySet<>();
         private boolean mBuilt = false;
-
-        /**
-         * TODO(b/181887768): This method exists only for dogfooder transition and must be removed.
-         *
-         * @deprecated Please supply the namespace in {@link #Builder(String)} instead. This method
-         *     exists only for dogfooder transition and must be removed.
-         */
-        @Deprecated
-        public Builder() {
-            mNamespace = GenericDocument.DEFAULT_NAMESPACE;
-        }
 
         /** Creates a {@link RemoveByUriRequest.Builder} instance. */
         public Builder(@NonNull String namespace) {
             mNamespace = Preconditions.checkNotNull(namespace);
-        }
-
-        /**
-         * Sets the namespace to remove documents for.
-         *
-         * <p>If this is not set, it defaults to an empty string.
-         *
-         * <p>TODO(b/181887768): This method exists only for dogfooder transition and must be
-         * removed.
-         *
-         * @throws IllegalStateException if the builder has already been used.
-         * @deprecated Please supply the namespace in {@link #Builder(String)} instead. This method
-         *     exists only for dogfooder transition and must
-         */
-        @Deprecated
-        @NonNull
-        public Builder setNamespace(@NonNull String namespace) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(namespace);
-            mNamespace = namespace;
-            return this;
         }
 
         /**
