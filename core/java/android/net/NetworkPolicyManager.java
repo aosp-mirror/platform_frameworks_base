@@ -18,6 +18,7 @@ package android.net;
 
 import static android.app.ActivityManager.procStateToString;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_MASK;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 
 import android.annotation.IntDef;
@@ -203,9 +204,6 @@ public class NetworkPolicyManager {
         SUBSCRIPTION_OVERRIDE_CONGESTED
     })
     public @interface SubscriptionOverrideMask {}
-
-    /** @hide */
-    public static final int BLOCKED_METERED_REASON_MASK = 0xffff0000;
 
     /**
      * Flag to indicate that app is not exempt from any network restrictions.
