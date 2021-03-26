@@ -38,7 +38,9 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -872,6 +874,17 @@ public class ConnectivityManager {
     public static final int BLOCKED_REASON_RESTRICTED_MODE = 1 << 3;
 
     /**
+     * Flag to indicate that an app is blocked because it is subject to an always-on VPN but the VPN
+     * is not currently connected.
+     *
+     * @see DevicePolicyManager#setAlwaysOnVpnPackage(ComponentName, String, boolean)
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_REASON_LOCKDOWN_VPN = 1 << 4;
+
+    /**
      * Flag to indicate that an app is subject to Data saver restrictions that would
      * result in its metered network access being blocked.
      *
@@ -913,6 +926,14 @@ public class ConnectivityManager {
             BLOCKED_METERED_REASON_ADMIN_DISABLED,
     })
     public @interface BlockedReason {}
+
+    /**
+     * Set of blocked reasons that are only applicable on metered networks.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int BLOCKED_METERED_REASON_MASK = 0xffff0000;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private final IConnectivityManager mService;
@@ -3442,12 +3463,30 @@ public class ConnectivityManager {
          * @param blocked Whether access to the {@link Network} is blocked due to system policy.
          * @hide
          */
-        public void onAvailable(@NonNull Network network,
+        public final void onAvailable(@NonNull Network network,
                 @NonNull NetworkCapabilities networkCapabilities,
-                @NonNull LinkProperties linkProperties, boolean blocked) {
+                @NonNull LinkProperties linkProperties, @BlockedReason int blocked) {
             // Internally only this method is called when a new network is available, and
             // it calls the callback in the same way and order that older versions used
             // to call so as not to change the behavior.
+            onAvailable(network, networkCapabilities, linkProperties, blocked != 0);
+            onBlockedStatusChanged(network, blocked);
+        }
+
+        /**
+         * Legacy variant of onAvailable that takes a boolean blocked reason.
+         *
+         * This method has never been public API, but it's not final, so there may be apps that
+         * implemented it and rely on it being called. Do our best not to break them.
+         * Note: such apps will also get a second call to onBlockedStatusChanged immediately after
+         * this method is called. There does not seem to be a way to avoid this.
+         * TODO: add a compat check to move apps off this method, and eventually stop calling it.
+         *
+         * @hide
+         */
+        public void onAvailable(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities,
+                @NonNull LinkProperties linkProperties, boolean blocked) {
             onAvailable(network);
             if (!networkCapabilities.hasCapability(
                     NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED)) {
@@ -3455,7 +3494,7 @@ public class ConnectivityManager {
             }
             onCapabilitiesChanged(network, networkCapabilities);
             onLinkPropertiesChanged(network, linkProperties);
-            onBlockedStatusChanged(network, blocked);
+            // No call to onBlockedStatusChanged here. That is done by the caller.
         }
 
         /**
@@ -3619,6 +3658,26 @@ public class ConnectivityManager {
          */
         public void onBlockedStatusChanged(@NonNull Network network, boolean blocked) {}
 
+        /**
+         * Called when access to the specified network is blocked or unblocked.
+         *
+         * If a NetworkCallback object implements this method,
+         * {@link #onBlockedStatusChanged(Network, boolean)} will not be called.
+         *
+         * <p>Do NOT call {@link #getNetworkCapabilities(Network)} or
+         * {@link #getLinkProperties(Network)} or other synchronous ConnectivityManager methods in
+         * this callback as this is prone to race conditions : calling these methods while in a
+         * callback may return an outdated or even a null object.
+         *
+         * @param network The {@link Network} whose blocked status has changed.
+         * @param blocked The blocked status of this {@link Network}.
+         * @hide
+         */
+        @SystemApi(client = MODULE_LIBRARIES)
+        public void onBlockedStatusChanged(@NonNull Network network, @BlockedReason int blocked) {
+            onBlockedStatusChanged(network, blocked != 0);
+        }
+
         private NetworkRequest networkRequest;
         private final int mFlags;
     }
@@ -3733,7 +3792,7 @@ public class ConnectivityManager {
                 case CALLBACK_AVAILABLE: {
                     NetworkCapabilities cap = getObject(message, NetworkCapabilities.class);
                     LinkProperties lp = getObject(message, LinkProperties.class);
-                    callback.onAvailable(network, cap, lp, message.arg1 != 0);
+                    callback.onAvailable(network, cap, lp, message.arg1);
                     break;
                 }
                 case CALLBACK_LOSING: {
@@ -3767,8 +3826,7 @@ public class ConnectivityManager {
                     break;
                 }
                 case CALLBACK_BLK_CHANGED: {
-                    boolean blocked = message.arg1 != 0;
-                    callback.onBlockedStatusChanged(network, blocked);
+                    callback.onBlockedStatusChanged(network, message.arg1);
                 }
             }
         }
