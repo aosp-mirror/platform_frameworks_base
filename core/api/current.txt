@@ -42928,6 +42928,7 @@ package android.telephony.data {
     field public static final int PROTOCOL_NON_IP = 4; // 0x4
     field public static final int PROTOCOL_PPP = 3; // 0x3
     field public static final int PROTOCOL_UNSTRUCTURED = 5; // 0x5
+    field public static final int TYPE_BIP = 8192; // 0x2000
     field public static final int TYPE_CBS = 128; // 0x80
     field public static final int TYPE_DEFAULT = 17; // 0x11
     field public static final int TYPE_DUN = 8; // 0x8
@@ -42939,6 +42940,7 @@ package android.telephony.data {
     field public static final int TYPE_MCX = 1024; // 0x400
     field public static final int TYPE_MMS = 2; // 0x2
     field public static final int TYPE_SUPL = 4; // 0x4
+    field public static final int TYPE_VSIM = 4096; // 0x1000
     field public static final int TYPE_XCAP = 2048; // 0x800
   }
 

@@ -277,11 +277,13 @@ package android.net {
     method @NonNull public int[] getTransportTypes();
     method public boolean isPrivateDnsBroken();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
+    field public static final int NET_CAPABILITY_BIP = 31; // 0x1f
     field public static final int NET_CAPABILITY_NOT_VCN_MANAGED = 28; // 0x1c
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
     field public static final int NET_CAPABILITY_OEM_PRIVATE = 26; // 0x1a
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
     field public static final int NET_CAPABILITY_VEHICLE_INTERNAL = 27; // 0x1b
+    field public static final int NET_CAPABILITY_VSIM = 30; // 0x1e
   }
 
   public static final class NetworkCapabilities.Builder {
