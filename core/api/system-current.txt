@@ -12136,6 +12136,7 @@ package android.telephony.data {
     method public static int getApnTypeInt(@NonNull String);
     method @NonNull public static String getApnTypeString(int);
     field public static final String TYPE_ALL_STRING = "*";
+    field public static final String TYPE_BIP_STRING = "bip";
     field public static final String TYPE_CBS_STRING = "cbs";
     field public static final String TYPE_DEFAULT_STRING = "default";
     field public static final String TYPE_DUN_STRING = "dun";
@@ -12147,6 +12148,7 @@ package android.telephony.data {
     field public static final String TYPE_MCX_STRING = "mcx";
     field public static final String TYPE_MMS_STRING = "mms";
     field public static final String TYPE_SUPL_STRING = "supl";
+    field public static final String TYPE_VSIM_STRING = "vsim";
     field public static final String TYPE_XCAP_STRING = "xcap";
   }
 
