@@ -244,9 +244,11 @@ public class PhonePipMenuController implements PipMenuController {
      */
     public void showMenuWithPossibleDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
             boolean willResizeMenu, boolean showResizeHandle) {
-        // hide all visible controls including close button and etc. first, this is to ensure
-        // menu is totally invisible during the transition to eliminate unpleasant artifacts
-        fadeOutMenu();
+        if (willResizeMenu) {
+            // hide all visible controls including close button and etc. first, this is to ensure
+            // menu is totally invisible during the transition to eliminate unpleasant artifacts
+            fadeOutMenu();
+        }
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
                 willResizeMenu /* withDelay=willResizeMenu here */, showResizeHandle);
     }
