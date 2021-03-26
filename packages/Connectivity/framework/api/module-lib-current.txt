@@ -40,6 +40,50 @@ package android.net {
     field public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1; // 0x1
   }
 
+  public class ConnectivitySettingsManager {
+    method public static void clearGlobalProxy(@NonNull android.content.Context);
+    method @Nullable public static String getCaptivePortalHttpUrl(@NonNull android.content.Context);
+    method public static int getCaptivePortalMode(@NonNull android.content.Context, int);
+    method @NonNull public static java.time.Duration getConnectivityKeepPendingIntentDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method @NonNull public static android.util.Range<java.lang.Integer> getDnsResolverSampleRanges(@NonNull android.content.Context);
+    method @NonNull public static java.time.Duration getDnsResolverSampleValidityDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static int getDnsResolverSuccessThresholdPercent(@NonNull android.content.Context, int);
+    method @Nullable public static android.net.ProxyInfo getGlobalProxy(@NonNull android.content.Context);
+    method @NonNull public static java.time.Duration getMobileDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static boolean getMobileDataAlwaysOn(@NonNull android.content.Context, boolean);
+    method public static int getNetworkAvoidBadWifi(@NonNull android.content.Context);
+    method @Nullable public static String getNetworkMeteredMultipathPreference(@NonNull android.content.Context);
+    method public static int getNetworkSwitchNotificationMaximumDailyCount(@NonNull android.content.Context, int);
+    method @NonNull public static java.time.Duration getNetworkSwitchNotificationRateDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method @NonNull public static String getPrivateDnsDefaultMode(@NonNull android.content.Context);
+    method @Nullable public static String getPrivateDnsHostname(@NonNull android.content.Context);
+    method public static boolean getWifiAlwaysRequested(@NonNull android.content.Context, boolean);
+    method @NonNull public static java.time.Duration getWifiDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setCaptivePortalHttpUrl(@NonNull android.content.Context, @Nullable String);
+    method public static void setCaptivePortalMode(@NonNull android.content.Context, int);
+    method public static void setConnectivityKeepPendingIntentDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setDnsResolverSampleRanges(@NonNull android.content.Context, @NonNull android.util.Range<java.lang.Integer>);
+    method public static void setDnsResolverSampleValidityDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setDnsResolverSuccessThresholdPercent(@NonNull android.content.Context, @IntRange(from=0, to=100) int);
+    method public static void setGlobalProxy(@NonNull android.content.Context, @NonNull android.net.ProxyInfo);
+    method public static void setMobileDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setMobileDataAlwaysOn(@NonNull android.content.Context, boolean);
+    method public static void setNetworkAvoidBadWifi(@NonNull android.content.Context, int);
+    method public static void setNetworkMeteredMultipathPreference(@NonNull android.content.Context, @NonNull String);
+    method public static void setNetworkSwitchNotificationMaximumDailyCount(@NonNull android.content.Context, @IntRange(from=0) int);
+    method public static void setNetworkSwitchNotificationRateDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setPrivateDnsDefaultMode(@NonNull android.content.Context, @NonNull String);
+    method public static void setPrivateDnsHostname(@NonNull android.content.Context, @Nullable String);
+    method public static void setWifiAlwaysRequested(@NonNull android.content.Context, boolean);
+    method public static void setWifiDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
+    field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
+    field public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0; // 0x0
+    field public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1; // 0x1
+    field public static final int NETWORK_AVOID_BAD_WIFI_AVOID = 2; // 0x2
+    field public static final int NETWORK_AVOID_BAD_WIFI_IGNORE = 0; // 0x0
+    field public static final int NETWORK_AVOID_BAD_WIFI_PROMPT = 1; // 0x1
+  }
+
   public final class NetworkAgentConfig implements android.os.Parcelable {
     method @Nullable public String getSubscriberId();
     method public boolean isBypassableVpn();
