@@ -7367,6 +7367,20 @@ public class ConnectivityServiceTest {
         mMockVpn.disconnect();
     }
 
+    private class DetailedBlockedStatusCallback extends TestNetworkCallback {
+        public void expectAvailableThenValidatedCallbacks(HasNetwork n, int blockedStatus) {
+            super.expectAvailableThenValidatedCallbacks(n.getNetwork(), blockedStatus, TIMEOUT_MS);
+        }
+        public void expectBlockedStatusCallback(HasNetwork n, int blockedStatus) {
+            // This doesn't work:
+            // super.expectBlockedStatusCallback(blockedStatus, n.getNetwork());
+            super.expectBlockedStatusCallback(blockedStatus, n.getNetwork(), TIMEOUT_MS);
+        }
+        public void onBlockedStatusChanged(Network network, int blockedReasons) {
+            getHistory().add(new CallbackEntry.BlockedStatusInt(network, blockedReasons));
+        }
+    }
+
     @Test
     public void testNetworkBlockedStatus() throws Exception {
         final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
@@ -7374,11 +7388,16 @@ public class ConnectivityServiceTest {
                 .addTransportType(TRANSPORT_CELLULAR)
                 .build();
         mCm.registerNetworkCallback(cellRequest, cellNetworkCallback);
+        final DetailedBlockedStatusCallback detailedCallback = new DetailedBlockedStatusCallback();
+        mCm.registerNetworkCallback(cellRequest, detailedCallback);
+
         mockUidNetworkingBlocked();
 
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
         mCellNetworkAgent.connect(true);
         cellNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        detailedCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent,
+                BLOCKED_REASON_NONE);
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
@@ -7386,17 +7405,23 @@ public class ConnectivityServiceTest {
 
         setBlockedReasonChanged(BLOCKED_REASON_BATTERY_SAVER);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent,
+                BLOCKED_REASON_BATTERY_SAVER);
         assertNull(mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertExtraInfoFromCmBlocked(mCellNetworkAgent);
 
-        // ConnectivityService should cache it not to invoke the callback again.
+        // If blocked state does not change but blocked reason does, the boolean callback is called.
+        // TODO: investigate de-duplicating.
         setBlockedReasonChanged(BLOCKED_METERED_REASON_USER_RESTRICTED);
-        cellNetworkCallback.assertNoCallback();
+        cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent,
+                BLOCKED_METERED_REASON_USER_RESTRICTED);
 
         setBlockedReasonChanged(BLOCKED_REASON_NONE);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent, BLOCKED_REASON_NONE);
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
@@ -7404,6 +7429,8 @@ public class ConnectivityServiceTest {
 
         setBlockedReasonChanged(BLOCKED_METERED_REASON_DATA_SAVER);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent,
+                BLOCKED_METERED_REASON_DATA_SAVER);
         assertNull(mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
@@ -7413,6 +7440,8 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
         cellNetworkCallback.expectCapabilitiesWith(NET_CAPABILITY_NOT_METERED, mCellNetworkAgent);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
+        detailedCallback.expectCapabilitiesWith(NET_CAPABILITY_NOT_METERED, mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent, BLOCKED_REASON_NONE);
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
@@ -7422,6 +7451,10 @@ public class ConnectivityServiceTest {
         cellNetworkCallback.expectCapabilitiesWithout(NET_CAPABILITY_NOT_METERED,
                 mCellNetworkAgent);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        detailedCallback.expectCapabilitiesWithout(NET_CAPABILITY_NOT_METERED,
+                mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent,
+                BLOCKED_METERED_REASON_DATA_SAVER);
         assertNull(mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
@@ -7429,6 +7462,7 @@ public class ConnectivityServiceTest {
 
         setBlockedReasonChanged(BLOCKED_REASON_NONE);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent, BLOCKED_REASON_NONE);
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
@@ -7436,10 +7470,13 @@ public class ConnectivityServiceTest {
 
         setBlockedReasonChanged(BLOCKED_REASON_NONE);
         cellNetworkCallback.assertNoCallback();
+        detailedCallback.assertNoCallback();
 
         // Restrict background data. Networking is not blocked because the network is unmetered.
         setBlockedReasonChanged(BLOCKED_METERED_REASON_DATA_SAVER);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent,
+                BLOCKED_METERED_REASON_DATA_SAVER);
         assertNull(mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
@@ -7449,12 +7486,14 @@ public class ConnectivityServiceTest {
 
         setBlockedReasonChanged(BLOCKED_REASON_NONE);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
+        detailedCallback.expectBlockedStatusCallback(mCellNetworkAgent, BLOCKED_REASON_NONE);
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertExtraInfoFromCmPresent(mCellNetworkAgent);
 
         setBlockedReasonChanged(BLOCKED_REASON_NONE);
         cellNetworkCallback.assertNoCallback();
+        detailedCallback.assertNoCallback();
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
