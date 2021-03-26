@@ -3704,6 +3704,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mDnsManager.removeNetwork(nai.network);
         }
         mNetIdManager.releaseNetId(nai.network.getNetId());
+        nai.onNetworkDisconnected();
     }
 
     private boolean createNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
