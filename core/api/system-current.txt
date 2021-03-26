@@ -2483,14 +2483,6 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
   }
 
-  public final class InstallationFile {
-    method public long getLengthBytes();
-    method public int getLocation();
-    method @Nullable public byte[] getMetadata();
-    method @NonNull public String getName();
-    method @Nullable public byte[] getSignature();
-  }
-
   public final class InstantAppInfo implements android.os.Parcelable {
     ctor public InstantAppInfo(android.content.pm.ApplicationInfo, String[], String[]);
     ctor public InstantAppInfo(String, CharSequence, String[], String[]);
@@ -2585,7 +2577,6 @@ package android.content.pm {
 
   public static class PackageInstaller.Session implements java.io.Closeable {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void commitTransferred(@NonNull android.content.IntentSender);
-    method public void removeFile(int, @NonNull String);
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
@@ -9754,24 +9745,6 @@ package android.service.contentsuggestions {
     method public abstract void onProcessContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
     method public abstract void onSuggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
     field public static final String SERVICE_INTERFACE = "android.service.contentsuggestions.ContentSuggestionsService";
-  }
-
-}
-
-package android.service.dataloader {
-
-  public abstract class DataLoaderService extends android.app.Service {
-    ctor public DataLoaderService();
-    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
-  }
-
-  public static interface DataLoaderService.DataLoader {
-    method public boolean onCreate(@NonNull android.content.pm.DataLoaderParams, @NonNull android.service.dataloader.DataLoaderService.FileSystemConnector);
-    method public boolean onPrepareImage(@NonNull java.util.Collection<android.content.pm.InstallationFile>, @NonNull java.util.Collection<java.lang.String>);
-  }
-
-  public static final class DataLoaderService.FileSystemConnector {
-    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
   }
 
 }

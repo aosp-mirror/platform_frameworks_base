@@ -12090,6 +12090,14 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallSourceInfo> CREATOR;
   }
 
+  public final class InstallationFile {
+    method public long getLengthBytes();
+    method public int getLocation();
+    method @Nullable public byte[] getMetadata();
+    method @NonNull public String getName();
+    method @Nullable public byte[] getSignature();
+  }
+
   public class InstrumentationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     ctor public InstrumentationInfo();
     ctor public InstrumentationInfo(android.content.pm.InstrumentationInfo);
@@ -12328,6 +12336,7 @@ package android.content.pm {
     method @NonNull public java.io.InputStream openRead(@NonNull String) throws java.io.IOException;
     method @NonNull public java.io.OutputStream openWrite(@NonNull String, long, long) throws java.io.IOException;
     method public void removeChildSessionId(int);
+    method public void removeFile(int, @NonNull String);
     method public void removeSplit(@NonNull String) throws java.io.IOException;
     method @Deprecated public void setChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>, @Nullable byte[]) throws java.io.IOException;
     method public void setStagingProgress(float);
@@ -38286,6 +38295,25 @@ package android.service.controls.templates {
     method @NonNull public CharSequence getContentDescription();
     method public int getTemplateType();
     method public boolean isChecked();
+  }
+
+}
+
+package android.service.dataloader {
+
+  public abstract class DataLoaderService extends android.app.Service {
+    ctor public DataLoaderService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
+  }
+
+  public static interface DataLoaderService.DataLoader {
+    method public boolean onCreate(@NonNull android.content.pm.DataLoaderParams, @NonNull android.service.dataloader.DataLoaderService.FileSystemConnector);
+    method public boolean onPrepareImage(@NonNull java.util.Collection<android.content.pm.InstallationFile>, @NonNull java.util.Collection<java.lang.String>);
+  }
+
+  public static final class DataLoaderService.FileSystemConnector {
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
   }
 
 }

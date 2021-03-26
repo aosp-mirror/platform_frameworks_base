@@ -1165,7 +1165,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Adds a file to session. On commit this file will be pulled from dataLoader.
+         * Adds a file to session. On commit this file will be pulled from dataLoader {@code
+         * android.service.dataloader.DataLoaderService.DataLoader}.
          *
          * @param location target location for the file. Possible values:
          *            {@link #LOCATION_DATA_APP},
@@ -1184,7 +1185,9 @@ public class PackageInstaller {
          *                  <a href="https://source.android.com/security/apksigning/v4.html">APK Signature Scheme v4</a>
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
-         * @throws IllegalStateException if called for non-callback session
+         * @throws IllegalStateException if called for non-streaming session
+         *
+         * @see android.content.pm.InstallationFile
          */
         public void addFile(@FileLocation int location, @NonNull String name, long lengthBytes,
                 @NonNull byte[] metadata, @Nullable byte[] signature) {
@@ -1205,10 +1208,8 @@ public class PackageInstaller {
          * @param name name of a file, e.g. split.
          * @throws SecurityException if called after the session has been
          *             sealed or abandoned
-         * @throws IllegalStateException if called for non-callback session
-         * {@hide}
+         * @throws IllegalStateException if called for non-streaming session
          */
-        @SystemApi
         public void removeFile(@FileLocation int location, @NonNull String name) {
             try {
                 mSession.removeFile(location, name);
@@ -2024,6 +2025,8 @@ public class PackageInstaller {
          * Set the data loader params for the session.
          * This also switches installation into data provider mode and disallow direct writes into
          * staging folder.
+         *
+         * @see android.service.dataloader.DataLoaderService.DataLoader
          */
         public void setDataLoaderParams(@NonNull DataLoaderParams dataLoaderParams) {
             this.dataLoaderParams = dataLoaderParams;
