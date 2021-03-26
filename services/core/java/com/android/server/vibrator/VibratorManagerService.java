@@ -1540,6 +1540,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         private void addWaveformToComposition(VibrationEffect.Composition composition) {
             boolean hasAmplitudes = false;
+            boolean hasFrequencies = false;
+            boolean isContinuous = false;
             int repeat = -1;
             int delay = 0;
 
@@ -1552,35 +1554,49 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     repeat = Integer.parseInt(getNextArgRequired());
                 } else if ("-w".equals(nextOption)) {
                     delay = Integer.parseInt(getNextArgRequired());
+                } else if ("-f".equals(nextOption)) {
+                    hasFrequencies = true;
+                } else if ("-c".equals(nextOption)) {
+                    isContinuous = true;
                 }
             }
-            List<Long> durations = new ArrayList<>();
-            List<Integer> amplitudes = new ArrayList<>();
-            VibrationEffect waveform;
+            List<Integer> durations = new ArrayList<>();
+            List<Float> amplitudes = new ArrayList<>();
+            List<Float> frequencies = new ArrayList<>();
 
+            float nextAmplitude = 0;
             String nextArg;
             while ((nextArg = peekNextArg()) != null) {
                 try {
-                    durations.add(Long.parseLong(nextArg));
+                    durations.add(Integer.parseInt(nextArg));
                     getNextArgRequired(); // consume the duration
                 } catch (NumberFormatException e) {
                     // nextArg is not a duration, finish reading.
                     break;
                 }
                 if (hasAmplitudes) {
-                    amplitudes.add(Integer.parseInt(getNextArgRequired()));
+                    amplitudes.add(
+                            Float.parseFloat(getNextArgRequired()) / VibrationEffect.MAX_AMPLITUDE);
+                } else {
+                    amplitudes.add(nextAmplitude);
+                    nextAmplitude = 1 - nextAmplitude;
+                }
+                if (hasFrequencies) {
+                    frequencies.add(Float.parseFloat(getNextArgRequired()));
+                } else {
+                    frequencies.add(0f);
                 }
             }
 
-            long[] durationArray = durations.stream().mapToLong(Long::longValue).toArray();
-            if (hasAmplitudes) {
-                int[] amplitudeArray = amplitudes.stream().mapToInt(Integer::intValue).toArray();
-                waveform = VibrationEffect.createWaveform(durationArray, amplitudeArray, repeat);
-            } else {
-                waveform = VibrationEffect.createWaveform(durationArray, repeat);
+            VibrationEffect.WaveformBuilder waveform = VibrationEffect.startWaveform();
+            for (int i = 0; i < durations.size(); i++) {
+                if (isContinuous) {
+                    waveform.addRamp(amplitudes.get(i), frequencies.get(i), durations.get(i));
+                } else {
+                    waveform.addStep(amplitudes.get(i), frequencies.get(i), durations.get(i));
+                }
             }
-
-            composition.addEffect(waveform, delay);
+            composition.addEffect(waveform.build(repeat), delay);
         }
 
         private void addPrebakedToComposition(VibrationEffect.Composition composition) {
@@ -1659,7 +1675,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("    wait time in milliseconds.");
                 pw.println("    If -a is provided, the command accepts a second argument for ");
                 pw.println("    amplitude, in a scale of 1-255.");
-                pw.println("  waveform [-w delay] [-r index] [-a] (<duration> [<amplitude>])...");
+                pw.print("    waveform [-w delay] [-r index] [-a] [-f] [-c] ");
+                pw.println("(<duration> [<amplitude>] [<frequency>])...");
                 pw.println("    Vibrates for durations and amplitudes in list; ignored when ");
                 pw.println("    device is on DND (Do Not Disturb) mode; touch feedback strength ");
                 pw.println("    user setting will be used to scale amplitude.");
@@ -1667,9 +1684,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("    wait time in milliseconds.");
                 pw.println("    If -r is provided, the waveform loops back to the specified");
                 pw.println("    index (e.g. 0 loops from the beginning)");
-                pw.println("    If -a is provided, the command accepts duration-amplitude pairs;");
-                pw.println("    otherwise, it accepts durations only and alternates off/on");
-                pw.println("    Duration is in milliseconds; amplitude is a scale of 1-255.");
+                pw.println("    If -a is provided, the command expects amplitude to follow each");
+                pw.println("    duration; otherwise, it accepts durations only and alternates");
+                pw.println("    off/on");
+                pw.println("    If -f is provided, the command expects frequency to follow each");
+                pw.println("    amplitude or duration; otherwise, it uses resonant frequency");
+                pw.println("    If -c is provided, the waveform is continuous and will ramp");
+                pw.println("    between values; otherwise each entry is a fixed step.");
+                pw.println("    Duration is in milliseconds; amplitude is a scale of 1-255;");
+                pw.println("    frequency is a relative value around resonant frequency 0;");
                 pw.println("  prebaked [-w delay] [-b] <effect-id>");
                 pw.println("    Vibrates with prebaked effect; ignored when device is on DND ");
                 pw.println("    (Do Not Disturb) mode; touch feedback strength user setting ");

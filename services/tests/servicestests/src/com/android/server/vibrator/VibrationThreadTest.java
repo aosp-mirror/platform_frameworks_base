@@ -31,6 +31,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
 import android.os.CombinedVibrationEffect;
@@ -43,6 +44,7 @@ import android.os.VibrationEffect;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.platform.test.annotations.LargeTest;
@@ -416,6 +418,42 @@ public class VibrationThreadTest {
                 expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
                 mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
         assertEquals(expectedAmplitudes(100), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
+    }
+
+    @Test
+    public void vibrate_singleVibratorPwle_runsComposePwle() throws Exception {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        mVibratorProviders.get(VIBRATOR_ID).setSupportedBraking(Braking.CLAB);
+        mVibratorProviders.get(VIBRATOR_ID).setMinFrequency(100);
+        mVibratorProviders.get(VIBRATOR_ID).setResonantFrequency(150);
+        mVibratorProviders.get(VIBRATOR_ID).setFrequencyResolution(50);
+        mVibratorProviders.get(VIBRATOR_ID).setMaxAmplitudes(
+                0.5f /* 100Hz*/, 1 /* 150Hz */, 0.6f /* 200Hz */);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startWaveform()
+                .addStep(1, 10)
+                .addRamp(0, 20)
+                .addStep(0.8f, 1, 30)
+                .addRamp(0.6f, -1, 40)
+                .build();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(100L));
+        verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(
+                expectedRamp(/* amplitude= */ 1, /* frequency= */ 150, /* duration= */ 10),
+                expectedRamp(/* StartAmplitude= */ 1, /* endAmplitude= */ 0,
+                        /* startFrequency= */ 150, /* endFrequency= */ 150, /* duration= */ 20),
+                expectedRamp(/* amplitude= */ 0.6f, /* frequency= */ 200, /* duration= */ 30),
+                expectedRamp(/* StartAmplitude= */ 0.6f, /* endAmplitude= */ 0.5f,
+                        /* startFrequency= */ 200, /* endFrequency= */ 100, /* duration= */ 40)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertEquals(Arrays.asList(Braking.CLAB), mVibratorProviders.get(VIBRATOR_ID).getBraking());
     }
 
     @Test
@@ -967,6 +1005,16 @@ public class VibrationThreadTest {
 
     private VibrationEffectSegment expectedPrimitive(int primitiveId, float scale, int delay) {
         return new PrimitiveSegment(primitiveId, scale, delay);
+    }
+
+    private VibrationEffectSegment expectedRamp(float amplitude, float frequency, int duration) {
+        return expectedRamp(amplitude, amplitude, frequency, frequency, duration);
+    }
+
+    private VibrationEffectSegment expectedRamp(float startAmplitude, float endAmplitude,
+            float startFrequency, float endFrequency, int duration) {
+        return new RampSegment(startAmplitude, endAmplitude, startFrequency, endFrequency,
+                duration);
     }
 
     private List<Float> expectedAmplitudes(int... amplitudes) {

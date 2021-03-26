@@ -66,7 +66,8 @@ final class VibratorController {
             NativeWrapper nativeWrapper) {
         mNativeWrapper = nativeWrapper;
         mNativeWrapper.init(vibratorId, listener);
-        mVibratorInfo = mNativeWrapper.getInfo();
+        // TODO(b/167947076): load suggested range from config
+        mVibratorInfo = mNativeWrapper.getInfo(/* suggestedFrequencyRange= */ 100);
         Preconditions.checkNotNull(mVibratorInfo, "Failed to retrieve data for vibrator %d",
                 vibratorId);
     }
@@ -251,8 +252,17 @@ final class VibratorController {
      * @return The duration of the effect playing, or 0 if unsupported.
      */
     public long on(RampSegment[] primitives, long vibrationId) {
-        // TODO(b/167947076): forward to the HAL once APIs are introduced
-        return 0;
+        if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
+            return 0;
+        }
+        synchronized (mLock) {
+            int braking = mVibratorInfo.getDefaultBraking();
+            long duration = mNativeWrapper.composePwle(primitives, braking, vibrationId);
+            if (duration > 0) {
+                notifyVibratorOnLocked();
+            }
+            return duration;
+        }
     }
 
     /** Turns off the vibrator.This will affect the state of {@link #isVibrating()}. */
@@ -337,13 +347,21 @@ final class VibratorController {
         private static native void setAmplitude(long nativePtr, float amplitude);
         private static native long performEffect(long nativePtr, long effect, long strength,
                 long vibrationId);
+
         private static native long performComposedEffect(long nativePtr, PrimitiveSegment[] effect,
                 long vibrationId);
+
+        private static native long performPwleEffect(long nativePtr, RampSegment[] effect,
+                int braking, long vibrationId);
+
         private static native void setExternalControl(long nativePtr, boolean enabled);
+
         private static native void alwaysOnEnable(long nativePtr, long id, long effect,
                 long strength);
+
         private static native void alwaysOnDisable(long nativePtr, long id);
-        private static native VibratorInfo getInfo(long nativePtr);
+
+        private static native VibratorInfo getInfo(long nativePtr, float suggestedFrequencyRange);
 
         private long mNativePtr = 0;
 
@@ -385,9 +403,14 @@ final class VibratorController {
             return performEffect(mNativePtr, effect, strength, vibrationId);
         }
 
-        /** Turns vibrator on to perform one of the supported composed effects. */
+        /** Turns vibrator on to perform effect composed of give primitives effect. */
         public long compose(PrimitiveSegment[] primitives, long vibrationId) {
             return performComposedEffect(mNativePtr, primitives, vibrationId);
+        }
+
+        /** Turns vibrator on to perform PWLE effect composed of given primitives. */
+        public long composePwle(RampSegment[] primitives, int braking, long vibrationId) {
+            return performPwleEffect(mNativePtr, primitives, braking, vibrationId);
         }
 
         /** Enabled the device vibrator to be controlled by another service. */
@@ -406,8 +429,8 @@ final class VibratorController {
         }
 
         /** Return device vibrator metadata. */
-        public VibratorInfo getInfo() {
-            return getInfo(mNativePtr);
+        public VibratorInfo getInfo(float suggestedFrequencyRange) {
+            return getInfo(mNativePtr, suggestedFrequencyRange);
         }
     }
 }
