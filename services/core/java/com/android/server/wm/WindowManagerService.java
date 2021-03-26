@@ -1024,6 +1024,10 @@ public class WindowManagerService extends IWindowManager.Stub
     // Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead.
     private float mLetterboxBackgroundWallpaperDarkScrimAlpha;
 
+    // horizontal position of a center of the letterboxed app window. 0 corresponds to the left
+    // side of the screen and 1.0 to the right side.
+    private float mLetterboxHorizontalPositionMultiplier;
+
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
@@ -1265,6 +1269,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
         mLetterboxBackgroundWallpaperDarkScrimAlpha = context.getResources().getFloat(
                 com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
+        mLetterboxHorizontalPositionMultiplier = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier);
 
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -4051,6 +4057,38 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     int getLetterboxBackgroundWallpaperBlurRadius() {
         return mLetterboxBackgroundWallpaperBlurRadius;
+    }
+
+    /*
+     * Gets horizontal position of a center of the letterboxed app window specified
+     * in {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}
+     * or via an ADB command. 0 corresponds to the left side of the screen and 1 to the
+     * right side.
+     *
+     * <p>This value can be outside of [0, 1] range so clients need to check and default to the
+     * central position (0.5).
+     */
+    float getLetterboxHorizontalPositionMultiplier() {
+        return mLetterboxHorizontalPositionMultiplier;
+    }
+
+    /**
+     * Overrides horizontal position of a center of the letterboxed app window. If given value < 0
+     * or > 1, then it and a value of {@link
+     * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier} are ignored and
+     * central position (0.5) is used.
+     */
+    void setLetterboxHorizontalPositionMultiplier(float multiplier) {
+        mLetterboxHorizontalPositionMultiplier = multiplier;
+    }
+
+    /**
+     * Resets horizontal position of a center of the letterboxed app window to {@link
+     * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier}.
+     */
+    void resetLetterboxHorizontalPositionMultiplier() {
+        mLetterboxHorizontalPositionMultiplier = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier);
     }
 
     @Override
