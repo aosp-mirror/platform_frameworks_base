@@ -40,8 +40,7 @@ public final class CompatibilityOverrideConfig implements Parcelable {
         overrides = new HashMap<>();
         for (int i = 0; i < keyCount; i++) {
             long key = in.readLong();
-            PackageOverride override = in.readParcelable(PackageOverride.class.getClassLoader());
-            overrides.put(key, override);
+            overrides.put(key, PackageOverride.createFromParcel(in));
         }
     }
 
@@ -55,7 +54,7 @@ public final class CompatibilityOverrideConfig implements Parcelable {
         dest.writeInt(overrides.size());
         for (Long key : overrides.keySet()) {
             dest.writeLong(key);
-            dest.writeParcelable(overrides.get(key), 0);
+            overrides.get(key).writeToParcel(dest);
         }
     }
 

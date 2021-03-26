@@ -19,6 +19,7 @@ package android.hardware.display;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.Manifest;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -920,6 +921,43 @@ public final class DisplayManager {
     public void setTemporaryBrightness(int displayId, float brightness) {
         mGlobal.setTemporaryBrightness(displayId, brightness);
     }
+
+
+    /**
+     * Sets the brightness of the specified display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId the logical display id
+     * @param brightness The brightness value from 0.0f to 1.0f.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    public void setBrightness(int displayId, @FloatRange(from = 0f, to = 1f) float brightness) {
+        mGlobal.setBrightness(displayId, brightness);
+    }
+
+
+    /**
+     * Gets the brightness of the specified display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId The display of which brightness value to get from.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @FloatRange(from = 0f, to = 1f)
+    public float getBrightness(int displayId) {
+        return mGlobal.getBrightness(displayId);
+    }
+
 
     /**
      * Temporarily sets the auto brightness adjustment factor.

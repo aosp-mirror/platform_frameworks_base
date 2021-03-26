@@ -107,7 +107,7 @@ public class AppSearchPerson extends GenericDocument {
     public static class Builder extends GenericDocument.Builder<Builder> {
 
         public Builder(@NonNull final String id) {
-            super(id, SCHEMA_TYPE);
+            super(/*namespace=*/ "", id, SCHEMA_TYPE);
         }
 
         /** @hide */

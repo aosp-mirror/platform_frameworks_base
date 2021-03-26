@@ -1246,20 +1246,42 @@ public class Location implements Parcelable {
      * Returns true if the Location came from a mock provider.
      *
      * @return true if this Location came from a mock provider, false otherwise
+     * @deprecated Prefer {@link #isMock()} instead.
      */
+    @Deprecated
     public boolean isFromMockProvider() {
-        return (mFieldsMask & HAS_MOCK_PROVIDER_MASK) != 0;
+        return isMock();
     }
 
     /**
      * Flag this Location as having come from a mock provider or not.
      *
      * @param isFromMockProvider true if this Location came from a mock provider, false otherwise
+     * @deprecated Prefer {@link #setMock(boolean)} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public void setIsFromMockProvider(boolean isFromMockProvider) {
-        if (isFromMockProvider) {
+        setMock(isFromMockProvider);
+    }
+
+    /**
+     * Returns true if this location is marked as a mock location. If this location comes from the
+     * Android framework, this indicates that the location was provided by a test location provider,
+     * and thus may not be related to the actual location of the device.
+     *
+     * @see LocationManager#addTestProvider
+     */
+    public boolean isMock() {
+        return (mFieldsMask & HAS_MOCK_PROVIDER_MASK) != 0;
+    }
+
+    /**
+     * Sets whether this location is marked as a mock location.
+     */
+    public void setMock(boolean mock) {
+        if (mock) {
             mFieldsMask |= HAS_MOCK_PROVIDER_MASK;
         } else {
             mFieldsMask &= ~HAS_MOCK_PROVIDER_MASK;

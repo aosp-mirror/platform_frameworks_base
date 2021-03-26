@@ -43,12 +43,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
+import android.text.Spannable;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
+import android.view.inputmethod.BaseInputConnection;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -57,6 +60,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -145,6 +149,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Nullable
     private final LocalLog mFlushHistory;
+
+    /**
+     * If the event in the buffer is of type {@link TYPE_VIEW_TEXT_CHANGED}, this value
+     * indicates whether the event has composing span or not.
+     */
+    private final Map<AutofillId, Boolean> mLastComposingSpan = new ArrayMap<>();
 
     /**
      * Binder object used to update the session state.
@@ -335,26 +345,47 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         // Some type of events can be merged together
         boolean addEvent = true;
 
-        if (!mEvents.isEmpty() && eventType == TYPE_VIEW_TEXT_CHANGED) {
-            final ContentCaptureEvent lastEvent = mEvents.get(mEvents.size() - 1);
+        if (eventType == TYPE_VIEW_TEXT_CHANGED) {
+            // We determine whether to add or merge the current event by following criteria:
+            // 1. Don't have composing span: always add.
+            // 2. Have composing span:
+            //    2.1 either last or current text is empty: add.
+            //    2.2 last event doesn't have composing span: add.
+            // Otherwise, merge.
 
-            // We merge two consecutive text change event, unless one of them clears the text.
-            if (lastEvent.getType() == TYPE_VIEW_TEXT_CHANGED
-                    && lastEvent.getId().equals(event.getId())) {
-                boolean bothNonEmpty = !TextUtils.isEmpty(lastEvent.getText())
-                        && !TextUtils.isEmpty(event.getText());
-                boolean equalContent = TextUtils.equals(lastEvent.getText(), event.getText());
-                if (equalContent) {
-                    addEvent = false;
-                } else if (bothNonEmpty) {
-                    lastEvent.mergeEvent(event);
-                    addEvent = false;
-                }
-                if (!addEvent && sVerbose) {
-                    Log.v(TAG, "Buffering VIEW_TEXT_CHANGED event, updated text="
-                            + getSanitizedString(event.getText()));
+            final CharSequence text = event.getText();
+            final boolean textHasComposingSpan = event.getTextHasComposingSpan();
+
+            if (textHasComposingSpan && !mLastComposingSpan.isEmpty()) {
+                final Boolean lastEventHasComposingSpan = mLastComposingSpan.get(event.getId());
+                if (lastEventHasComposingSpan != null && lastEventHasComposingSpan.booleanValue()) {
+                    ContentCaptureEvent lastEvent = null;
+                    for (int index = mEvents.size() - 1; index >= 0; index--) {
+                        final ContentCaptureEvent tmpEvent = mEvents.get(index);
+                        if (event.getId().equals(tmpEvent.getId())) {
+                            lastEvent = tmpEvent;
+                            break;
+                        }
+                    }
+                    if (lastEvent != null) {
+                        final CharSequence lastText = lastEvent.getText();
+                        final boolean bothNonEmpty = !TextUtils.isEmpty(lastText)
+                                && !TextUtils.isEmpty(text);
+                        boolean equalContent = TextUtils.equals(lastText, text);
+                        if (equalContent) {
+                            addEvent = false;
+                        } else if (bothNonEmpty && lastEventHasComposingSpan) {
+                            lastEvent.mergeEvent(event);
+                            addEvent = false;
+                        }
+                        if (!addEvent && sVerbose) {
+                            Log.v(TAG, "Buffering VIEW_TEXT_CHANGED event, updated text="
+                                    + getSanitizedString(text));
+                        }
+                    }
                 }
             }
+            mLastComposingSpan.put(event.getId(), textHasComposingSpan);
         }
 
         if (!mEvents.isEmpty() && eventType == TYPE_VIEW_DISAPPEARED) {
@@ -373,6 +404,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (addEvent) {
             mEvents.add(event);
         }
+
+        // TODO: we need to change when the flush happens so that we don't flush while the
+        //  composing span hasn't changed. But we might need to keep flushing the events for the
+        //  non-editable views and views that don't have the composing state; otherwise some other
+        //  Content Capture features may be delayed.
 
         final int numberEvents = mEvents.size();
 
@@ -550,6 +586,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 ? Collections.emptyList()
                 : mEvents;
         mEvents = null;
+        mLastComposingSpan.clear();
         return new ParceledListSlice<>(events);
     }
 
@@ -677,9 +714,16 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     void notifyViewTextChanged(int sessionId, @NonNull AutofillId id, @Nullable CharSequence text) {
+        // Since the same CharSequence instance may be reused in the TextView, we need to make
+        // a copy of its content so that its value will not be changed by subsequent updates
+        // in the TextView.
+        final String eventText = text == null ? null : text.toString();
+        final boolean textHasComposingSpan =
+                text instanceof Spannable && BaseInputConnection.getComposingSpanStart(
+                        (Spannable) text) >= 0;
         mHandler.post(() -> sendEvent(
                 new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED)
-                        .setAutofillId(id).setText(text)));
+                        .setAutofillId(id).setText(eventText, textHasComposingSpan)));
     }
 
     /** Public because is also used by ViewRootImpl */

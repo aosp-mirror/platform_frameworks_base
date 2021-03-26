@@ -1881,6 +1881,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ASSIST_GESTURE_SETUP_COMPLETE,
                 SecureSettingsProto.Assist.GESTURE_SETUP_COMPLETE);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
+                SecureSettingsProto.Assist.TOUCH_GESTURE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
+                SecureSettingsProto.Assist.LONG_PRESS_HOME_ENABLED);
         p.end(assistToken);
 
         final long assistHandlesToken = p.start(SecureSettingsProto.ASSIST_HANDLES);
@@ -2150,6 +2156,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
                 SecureSettingsProto.InputMethods.SHOW_IME_WITH_HARD_KEYBOARD);
+        dumpSetting(s, p,
+                Settings.Secure.DEFAULT_VOICE_INPUT_METHOD,
+                SecureSettingsProto.InputMethods.DEFAULT_VOICE_INPUT_METHOD);
         p.end(inputMethodsToken);
 
         dumpSetting(s, p,

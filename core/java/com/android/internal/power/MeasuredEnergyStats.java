@@ -54,7 +54,9 @@ public class MeasuredEnergyStats {
     public static final int POWER_BUCKET_CPU = 3;
     public static final int POWER_BUCKET_WIFI = 4;
     public static final int POWER_BUCKET_BLUETOOTH = 5;
-    public static final int NUMBER_STANDARD_POWER_BUCKETS = 6; // Buckets above this are custom.
+    public static final int POWER_BUCKET_GNSS = 6;
+    public static final int POWER_BUCKET_MOBILE_RADIO = 7;
+    public static final int NUMBER_STANDARD_POWER_BUCKETS = 8; // Buckets above this are custom.
 
     @IntDef(prefix = {"POWER_BUCKET_"}, value = {
             POWER_BUCKET_UNKNOWN,
@@ -64,6 +66,8 @@ public class MeasuredEnergyStats {
             POWER_BUCKET_CPU,
             POWER_BUCKET_WIFI,
             POWER_BUCKET_BLUETOOTH,
+            POWER_BUCKET_GNSS,
+            POWER_BUCKET_MOBILE_RADIO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StandardPowerBucket {

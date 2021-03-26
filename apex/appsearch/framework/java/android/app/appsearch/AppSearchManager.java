@@ -147,20 +147,8 @@ public class AppSearchManager {
 
         /** Builder for {@link SearchContext} objects. */
         public static final class Builder {
-            private String mDatabaseName;
+            private final String mDatabaseName;
             private boolean mBuilt = false;
-
-            /**
-             * TODO(b/181887768): This method exists only for dogfooder transition and must be
-             * removed.
-             *
-             * @deprecated Please supply the databaseName in {@link #Builder(String)} instead. This
-             *     method exists only for dogfooder transition and must be removed.
-             */
-            @Deprecated
-            public Builder() {
-                mDatabaseName = "";
-            }
 
             /**
              * Creates a new {@link SearchContext.Builder}.
@@ -180,37 +168,6 @@ public class AppSearchManager {
                 Preconditions.checkArgument(
                         !databaseName.contains("/"), "Database name cannot contain '/'");
                 mDatabaseName = databaseName;
-            }
-
-            /**
-             * Sets the name of the database associated with {@link AppSearchSession}.
-             *
-             * <p>{@link AppSearchSession} will create or open a database under the given name.
-             *
-             * <p>Databases with different names are fully separate with distinct types, namespaces,
-             * and data.
-             *
-             * <p>Database name cannot contain {@code '/'}.
-             *
-             * <p>If not specified, defaults to the empty string.
-             *
-             * <p>TODO(b/181887768): This method exists only for dogfooder transition and must be
-             * removed.
-             *
-             * @param databaseName The name of the database.
-             * @throws IllegalArgumentException if the databaseName contains {@code '/'}.
-             * @deprecated Please supply the databaseName in {@link #Builder(String)} instead. This
-             *     method exists only for dogfooder transition and must be removed.
-             */
-            @Deprecated
-            @NonNull
-            public Builder setDatabaseName(@NonNull String databaseName) {
-                Preconditions.checkState(!mBuilt, "Builder has already been used");
-                Objects.requireNonNull(databaseName);
-                Preconditions.checkArgument(
-                        !databaseName.contains("/"), "Database name cannot contain '/'");
-                mDatabaseName = databaseName;
-                return this;
             }
 
             /** Builds a {@link SearchContext} instance. */

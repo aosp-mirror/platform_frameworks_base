@@ -283,29 +283,15 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             return mContext.getString(R.string.quick_settings_disclosure_named_vpn,
                     vpnName);
         }
+        if (hasWorkProfile && isNetworkLoggingEnabled) {
+            return mContext.getString(
+                    R.string.quick_settings_disclosure_managed_profile_network_activity);
+        }
         if (isProfileOwnerOfOrganizationOwnedDevice) {
-            if (isNetworkLoggingEnabled) {
-                if (organizationName == null) {
-                    return mContext.getString(
-                            R.string.quick_settings_disclosure_management_monitoring);
-                }
-                return mContext.getString(
-                        R.string.quick_settings_disclosure_named_management_monitoring,
-                        organizationName);
-            }
             if (workProfileOrganizationName == null) {
                 return mContext.getString(R.string.quick_settings_disclosure_management);
             }
             return mContext.getString(R.string.quick_settings_disclosure_named_management,
-                    workProfileOrganizationName);
-        }
-        if (hasWorkProfile && isNetworkLoggingEnabled) {
-            if (workProfileOrganizationName == null) {
-                return mContext.getString(
-                        R.string.quick_settings_disclosure_managed_profile_monitoring);
-            }
-            return mContext.getString(
-                    R.string.quick_settings_disclosure_named_managed_profile_monitoring,
                     workProfileOrganizationName);
         }
         return null;

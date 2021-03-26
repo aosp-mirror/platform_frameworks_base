@@ -327,6 +327,10 @@ public class CameraMetadataNative implements Parcelable {
     private static final String GPS_PROCESS = "GPS";
     private static final int FACE_LANDMARK_SIZE = 6;
 
+    private static final int MANDATORY_STREAM_CONFIGURATIONS_DEFAULT = 0;
+    private static final int MANDATORY_STREAM_CONFIGURATIONS_MAX_RESOLUTION = 1;
+    private static final int MANDATORY_STREAM_CONFIGURATIONS_CONCURRENT = 2;
+
     private static String translateLocationProviderToProcess(final String provider) {
         if (provider == null) {
             return null;
@@ -644,6 +648,15 @@ public class CameraMetadataNative implements Parcelable {
                         return (T) metadata.getStreamConfigurationMap();
                     }
                 });
+         sGetCommandMap.put(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getStreamConfigurationMapMaximumResolution();
+                    }
+                });
         sGetCommandMap.put(
                 CameraCharacteristics.SCALER_MANDATORY_STREAM_COMBINATIONS.getNativeKey(),
                         new GetCommand() {
@@ -660,6 +673,16 @@ public class CameraMetadataNative implements Parcelable {
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
                         return (T) metadata.getMandatoryConcurrentStreamCombinations();
+                    }
+                });
+
+        sGetCommandMap.put(
+                CameraCharacteristics.SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMandatoryMaximumResolutionStreamCombinations();
                     }
                 });
 
@@ -1285,12 +1308,12 @@ public class CameraMetadataNative implements Parcelable {
         return recommendedConfigurations;
     }
 
-    private boolean isBurstSupported() {
+    private boolean isCapabilitySupported(int capabilityRequested) {
         boolean ret = false;
 
         int[] capabilities = getBase(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
         for (int capability : capabilities) {
-            if (capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE) {
+            if (capabilityRequested == capability) {
                 ret = true;
                 break;
             }
@@ -1299,8 +1322,18 @@ public class CameraMetadataNative implements Parcelable {
         return ret;
     }
 
+    private boolean isUltraHighResolutionSensor() {
+        return isCapabilitySupported(
+                CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR);
+
+    }
+    private boolean isBurstSupported() {
+        return isCapabilitySupported(
+                CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE);
+    }
+
     private MandatoryStreamCombination[] getMandatoryStreamCombinationsHelper(
-            boolean getConcurrent) {
+            int mandatoryStreamsType) {
         int[] capabilities = getBase(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
         ArrayList<Integer> caps = new ArrayList<Integer>();
         caps.ensureCapacity(capabilities.length);
@@ -1309,20 +1342,25 @@ public class CameraMetadataNative implements Parcelable {
         }
         int hwLevel = getBase(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
         MandatoryStreamCombination.Builder build = new MandatoryStreamCombination.Builder(
-                mCameraId, hwLevel, mDisplaySize, caps, getStreamConfigurationMap());
+                mCameraId, hwLevel, mDisplaySize, caps, getStreamConfigurationMap(),
+                getStreamConfigurationMapMaximumResolution());
 
         List<MandatoryStreamCombination> combs = null;
-        if (getConcurrent) {
-            combs = build.getAvailableMandatoryConcurrentStreamCombinations();
-        } else {
-            combs = build.getAvailableMandatoryStreamCombinations();
+        switch (mandatoryStreamsType) {
+            case MANDATORY_STREAM_CONFIGURATIONS_CONCURRENT:
+                combs = build.getAvailableMandatoryConcurrentStreamCombinations();
+                break;
+            case MANDATORY_STREAM_CONFIGURATIONS_MAX_RESOLUTION:
+                combs = build.getAvailableMandatoryMaximumResolutionStreamCombinations();
+                break;
+            default:
+                combs = build.getAvailableMandatoryStreamCombinations();
         }
         if ((combs != null) && (!combs.isEmpty())) {
             MandatoryStreamCombination[] combArray = new MandatoryStreamCombination[combs.size()];
             combArray = combs.toArray(combArray);
             return combArray;
         }
-
         return null;
     }
 
@@ -1330,11 +1368,18 @@ public class CameraMetadataNative implements Parcelable {
         if (!mHasMandatoryConcurrentStreams) {
             return null;
         }
-        return getMandatoryStreamCombinationsHelper(true);
+        return getMandatoryStreamCombinationsHelper(MANDATORY_STREAM_CONFIGURATIONS_CONCURRENT);
+    }
+
+    private MandatoryStreamCombination[] getMandatoryMaximumResolutionStreamCombinations() {
+        if (!isUltraHighResolutionSensor()) {
+            return null;
+        }
+        return getMandatoryStreamCombinationsHelper(MANDATORY_STREAM_CONFIGURATIONS_MAX_RESOLUTION);
     }
 
     private MandatoryStreamCombination[] getMandatoryStreamCombinations() {
-        return getMandatoryStreamCombinationsHelper(false);
+        return getMandatoryStreamCombinationsHelper(MANDATORY_STREAM_CONFIGURATIONS_DEFAULT);
     }
 
     private StreamConfigurationMap getStreamConfigurationMap() {
@@ -1375,6 +1420,50 @@ public class CameraMetadataNative implements Parcelable {
                 heicMinFrameDurations, heicStallDurations,
                 highSpeedVideoConfigurations, inputOutputFormatsMap,
                 listHighResolution);
+    }
+
+    private StreamConfigurationMap getStreamConfigurationMapMaximumResolution() {
+        if (!isUltraHighResolutionSensor()) {
+            return null;
+        }
+        StreamConfiguration[] configurations = getBase(
+                CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfigurationDuration[] minFrameDurations = getBase(
+                CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfigurationDuration[] stallDurations = getBase(
+                CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfiguration[] depthConfigurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfigurationDuration[] depthMinFrameDurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfigurationDuration[] depthStallDurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfiguration[] dynamicDepthConfigurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DYNAMIC_DEPTH_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfigurationDuration[] dynamicDepthMinFrameDurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DYNAMIC_DEPTH_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfigurationDuration[] dynamicDepthStallDurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DYNAMIC_DEPTH_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfiguration[] heicConfigurations = getBase(
+                CameraCharacteristics.HEIC_AVAILABLE_HEIC_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfigurationDuration[] heicMinFrameDurations = getBase(
+                CameraCharacteristics.HEIC_AVAILABLE_HEIC_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfigurationDuration[] heicStallDurations = getBase(
+                CameraCharacteristics.HEIC_AVAILABLE_HEIC_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        HighSpeedVideoConfiguration[] highSpeedVideoConfigurations = getBase(
+                CameraCharacteristics.CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS_MAXIMUM_RESOLUTION);
+        ReprocessFormatsMap inputOutputFormatsMap = getBase(
+                CameraCharacteristics.SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP_MAXIMUM_RESOLUTION);
+        // TODO: Is this correct, burst capability shouldn't necessarily correspond to max res mode
+        boolean listHighResolution = isBurstSupported();
+        return new StreamConfigurationMap(
+                configurations, minFrameDurations, stallDurations,
+                depthConfigurations, depthMinFrameDurations, depthStallDurations,
+                dynamicDepthConfigurations, dynamicDepthMinFrameDurations,
+                dynamicDepthStallDurations, heicConfigurations,
+                heicMinFrameDurations, heicStallDurations,
+                highSpeedVideoConfigurations, inputOutputFormatsMap,
+                listHighResolution, false);
     }
 
     private <T> Integer getMaxRegions(Key<T> key) {

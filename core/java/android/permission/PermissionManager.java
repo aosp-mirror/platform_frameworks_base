@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -79,6 +80,9 @@ public final class PermissionManager {
     private static final String LOG_TAG = PermissionManager.class.getName();
 
     /** @hide */
+    public static final String LOG_TAG_TRACE_GRANTS = "PermissionGrantTrace";
+
+    /** @hide */
     public static final String KILL_APP_REASON_PERMISSIONS_REVOKED =
             "permissions revoked";
     /** @hide */
@@ -101,6 +105,8 @@ public final class PermissionManager {
     /**
      * Note: Changing this won't do anything on its own - you should also change the filtering in
      * {@link #shouldTraceGrant}.
+     *
+     * See log output for tag {@link #LOG_TAG_TRACE_GRANTS}
      *
      * @hide
      */
@@ -318,8 +324,10 @@ public final class PermissionManager {
     }
 
     /** @hide */
-    public static boolean shouldTraceGrant(String packageName, String permissionName, int userId) {
+    public static boolean shouldTraceGrant(
+            @NonNull String packageName, @NonNull String permissionName, int userId) {
         // To be modified when debugging
+        // template: if ("".equals(packageName) && "".equals(permissionName)) return true;
         return false;
     }
 
@@ -347,7 +355,8 @@ public final class PermissionManager {
             @NonNull String permissionName, @NonNull UserHandle user) {
         if (DEBUG_TRACE_GRANTS
                 && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
-            Log.i(LOG_TAG, "App " + mContext.getPackageName() + " is granting " + packageName + " "
+            Log.i(LOG_TAG_TRACE_GRANTS, "App " + mContext.getPackageName() + " is granting "
+                    + packageName + " "
                     + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
         }
         try {
@@ -851,6 +860,7 @@ public final class PermissionManager {
      *
      * @hide
      */
+    @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
     public List<PermGroupUsage> getIndicatorAppOpUsageData() {

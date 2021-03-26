@@ -113,7 +113,7 @@ public class WindowFrames {
     }
 
     /**
-     * @return true if the width or height has changed since last reported to the client.
+     * @return true if the width or height has changed since last updating resizing window.
      */
     boolean didFrameSizeChange() {
         return (mLastFrame.width() != mFrame.width()) || (mLastFrame.height() != mFrame.height());
@@ -132,6 +132,13 @@ public class WindowFrames {
         mLastForceReportingResized |= mForceReportingResized;
         mFrameSizeChanged |= didFrameSizeChange();
         return mLastForceReportingResized || mFrameSizeChanged;
+    }
+
+    /**
+     * @return true if the width or height has changed since last reported to the client.
+     */
+    boolean isFrameSizeChangeReported() {
+        return mFrameSizeChanged || didFrameSizeChange();
     }
 
     /**

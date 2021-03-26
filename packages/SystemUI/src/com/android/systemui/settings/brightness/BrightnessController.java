@@ -241,15 +241,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         public void run() {
             final float valFloat;
             final boolean inVrMode = mIsVrModeEnabled;
-            if (inVrMode) {
-                valFloat = Settings.System.getFloatForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT, mDefaultBacklightForVr,
-                        UserHandle.USER_CURRENT);
-            } else {
-                valFloat = Settings.System.getFloatForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS_FLOAT, mDefaultBacklight,
-                        UserHandle.USER_CURRENT);
-            }
+            valFloat = mDisplayManager.getBrightness(mDisplayId);
             // Value is passed as intbits, since this is what the message takes.
             final int valueAsIntBits = Float.floatToIntBits(valFloat);
             mHandler.obtainMessage(MSG_UPDATE_SLIDER, valueAsIntBits,
@@ -364,14 +356,12 @@ public class BrightnessController implements ToggleSlider.Listener {
             metric = MetricsEvent.ACTION_BRIGHTNESS_FOR_VR;
             minBacklight = mMinimumBacklightForVr;
             maxBacklight = mMaximumBacklightForVr;
-            settingToChange = Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT;
         } else {
             metric = mAutomatic
                     ? MetricsEvent.ACTION_BRIGHTNESS_AUTO
                     : MetricsEvent.ACTION_BRIGHTNESS;
             minBacklight = PowerManager.BRIGHTNESS_MIN;
             maxBacklight = PowerManager.BRIGHTNESS_MAX;
-            settingToChange = Settings.System.SCREEN_BRIGHTNESS_FLOAT;
         }
         final float valFloat = MathUtils.min(convertGammaToLinearFloat(value,
                 minBacklight, maxBacklight),
@@ -386,8 +376,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         if (!tracking) {
             AsyncTask.execute(new Runnable() {
                     public void run() {
-                        Settings.System.putFloatForUser(mContext.getContentResolver(),
-                                settingToChange, valFloat, UserHandle.USER_CURRENT);
+                        mDisplayManager.setBrightness(mDisplayId, valFloat);
                     }
                 });
         }

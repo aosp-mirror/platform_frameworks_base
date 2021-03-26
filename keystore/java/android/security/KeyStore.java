@@ -1204,6 +1204,7 @@ public class KeyStore {
      * Notify keystore that the device went off-body.
      */
     public void onDeviceOffBody() {
+        AndroidKeyStoreMaintenance.onDeviceOffBody();
         try {
             mBinder.onDeviceOffBody();
         } catch (RemoteException e) {

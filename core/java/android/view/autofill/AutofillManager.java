@@ -1921,20 +1921,20 @@ public final class AutofillManager {
             if (client == null) return; // NOTE: getClient() already logged it..
 
             final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-            final ComponentName componentName = client.autofillClientGetComponentName();
+            final ComponentName clientActivity = client.autofillClientGetComponentName();
 
             if (!mEnabledForAugmentedAutofillOnly && mOptions != null
-                    && mOptions.isAutofillDisabledLocked(componentName)) {
+                    && mOptions.isAutofillDisabledLocked(clientActivity)) {
                 if (mOptions.isAugmentedAutofillEnabled(mContext)) {
                     if (sDebug) {
-                        Log.d(TAG, "startSession(" + componentName + "): disabled by service but "
-                                + "whitelisted for augmented autofill");
+                        Log.d(TAG, "startSession(" + clientActivity + "): disabled by service but "
+                                + "allowlisted for augmented autofill");
                         flags |= FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
                     }
                 } else {
                     if (sDebug) {
-                        Log.d(TAG, "startSession(" + componentName + "): ignored because "
-                                + "disabled by service and not whitelisted for augmented autofill");
+                        Log.d(TAG, "startSession(" + clientActivity + "): ignored because "
+                                + "disabled by service and not allowlisted for augmented autofill");
                     }
                     setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE, null);
                     client.autofillClientResetableStateAvailable();
@@ -1951,7 +1951,7 @@ public final class AutofillManager {
 
             mService.startSession(client.autofillClientGetActivityToken(),
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                    mCallback != null, flags, componentName,
+                    mCallback != null, flags, clientActivity,
                     isCompatibilityModeEnabledLocked(), receiver);
             mSessionId = receiver.getIntResult();
             if (mSessionId != NO_SESSION) {
@@ -1959,7 +1959,7 @@ public final class AutofillManager {
             }
             final int extraFlags = receiver.getOptionalExtraIntResult(0);
             if ((extraFlags & RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY) != 0) {
-                if (sDebug) Log.d(TAG, "startSession(" + componentName + "): for augmented only");
+                if (sDebug) Log.d(TAG, "startSession(" + clientActivity + "): for augmented only");
                 mForAugmentedAutofillOnly = true;
             }
             client.autofillClientResetableStateAvailable();

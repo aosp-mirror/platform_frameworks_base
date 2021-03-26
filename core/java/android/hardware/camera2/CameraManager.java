@@ -507,6 +507,18 @@ public final class CameraManager {
         return new CameraExtensionCharacteristics(mContext, cameraId, chars);
     }
 
+    private Map<String, CameraCharacteristics> getPhysicalIdToCharsMap(
+            CameraCharacteristics chars) throws CameraAccessException {
+        HashMap<String, CameraCharacteristics> physicalIdsToChars =
+                new HashMap<String, CameraCharacteristics>();
+        Set<String> physicalCameraIds = chars.getPhysicalCameraIds();
+        for (String physicalCameraId : physicalCameraIds) {
+            CameraCharacteristics physicalChars = getCameraCharacteristics(physicalCameraId);
+            physicalIdsToChars.put(physicalCameraId, physicalChars);
+        }
+        return physicalIdsToChars;
+    }
+
     /**
      * Helper for opening a connection to a camera with the given ID.
      *
@@ -535,17 +547,18 @@ public final class CameraManager {
             throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
-
+        Map<String, CameraCharacteristics> physicalIdsToChars =
+                getPhysicalIdToCharsMap(characteristics);
         synchronized (mLock) {
 
             ICameraDeviceUser cameraUser = null;
-
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl =
                     new android.hardware.camera2.impl.CameraDeviceImpl(
                         cameraId,
                         callback,
                         executor,
                         characteristics,
+                        physicalIdsToChars,
                         mContext.getApplicationInfo().targetSdkVersion,
                         mContext);
 

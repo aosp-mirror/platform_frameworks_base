@@ -32,7 +32,9 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.ICancellationSignal;
+import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -45,6 +47,8 @@ import org.mockito.MockitoAnnotations;
  * Tests of {@link ScrollCaptureConnection}.
  */
 @SuppressWarnings("UnnecessaryLocalVariable")
+@Presubmit
+@SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ScrollCaptureConnectionTest {
 

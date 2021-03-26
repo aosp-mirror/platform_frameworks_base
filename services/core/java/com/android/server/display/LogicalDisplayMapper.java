@@ -433,37 +433,31 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         final int displayId = display.getDisplayIdLocked();
 
         // Get current display group data
-        final int groupId = getDisplayGroupIdFromDisplayIdLocked(displayId);
+        int groupId = getDisplayGroupIdFromDisplayIdLocked(displayId);
         final DisplayGroup oldGroup = getDisplayGroupLocked(groupId);
 
         // Get the new display group if a change is needed
         final DisplayInfo info = display.getDisplayInfoLocked();
         final boolean needsOwnDisplayGroup = (info.flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0;
         final boolean hasOwnDisplayGroup = groupId != Display.DEFAULT_DISPLAY_GROUP;
-        final boolean needsDisplayGroup = needsOwnDisplayGroup || info.type == Display.TYPE_INTERNAL
-                || info.type == Display.TYPE_EXTERNAL;
-        if (!needsDisplayGroup) {
-            if (oldGroup != null) {
-                oldGroup.removeDisplayLocked(display);
-            }
-            return;
-        }
         if (groupId == Display.INVALID_DISPLAY_GROUP
                 || hasOwnDisplayGroup != needsOwnDisplayGroup) {
+            groupId = assignDisplayGroupIdLocked(needsOwnDisplayGroup);
+        }
+
+        // Create a new group if needed
+        DisplayGroup newGroup = getDisplayGroupLocked(groupId);
+        if (newGroup == null) {
+            newGroup = new DisplayGroup(groupId);
+            mDisplayGroups.append(groupId, newGroup);
+        }
+        if (oldGroup != newGroup) {
             if (oldGroup != null) {
                 oldGroup.removeDisplayLocked(display);
             }
-
-            final int newGroupId = assignDisplayGroupIdLocked(needsOwnDisplayGroup);
-            // Create a new group if needed
-            DisplayGroup newGroup = getDisplayGroupLocked(newGroupId);
-            if (newGroup == null) {
-                newGroup = new DisplayGroup(newGroupId);
-                mDisplayGroups.append(newGroupId, newGroup);
-            }
             newGroup.addDisplayLocked(display);
-            display.updateDisplayGroupIdLocked(newGroupId);
-            Slog.i(TAG, "Setting new display group " + newGroupId + " for display "
+            display.updateDisplayGroupIdLocked(groupId);
+            Slog.i(TAG, "Setting new display group " + groupId + " for display "
                     + displayId + ", from previous group: "
                     + (oldGroup != null ? oldGroup.getGroupId() : "null"));
         }

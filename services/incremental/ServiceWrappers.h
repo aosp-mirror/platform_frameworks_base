@@ -84,6 +84,8 @@ public:
             void(std::string_view root, std::string_view backingDir,
                  std::span<std::pair<std::string_view, std::string_view>> binds)>;
 
+    using FileCallback = android::base::function_ref<bool(const Control& control, FileId fileId)>;
+
     static std::string toString(FileId fileId);
 
     virtual ~IncFsWrapper() = default;
@@ -105,14 +107,14 @@ public:
             const Control& control, std::string_view path) const = 0;
     virtual incfs::LoadingState isFileFullyLoaded(const Control& control,
                                                   std::string_view path) const = 0;
+    virtual incfs::LoadingState isFileFullyLoaded(const Control& control, FileId id) const = 0;
     virtual incfs::LoadingState isEverythingFullyLoaded(const Control& control) const = 0;
     virtual ErrorCode link(const Control& control, std::string_view from,
                            std::string_view to) const = 0;
     virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
     virtual UniqueFd openForSpecialOps(const Control& control, FileId id) const = 0;
     virtual ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const = 0;
-    virtual ErrorCode reserveSpace(const Control& control, std::string_view path,
-                                   IncFsSize size) const = 0;
+    virtual ErrorCode reserveSpace(const Control& control, FileId id, IncFsSize size) const = 0;
     virtual WaitResult waitForPendingReads(
             const Control& control, std::chrono::milliseconds timeout,
             std::vector<incfs::ReadInfo>* pendingReadsBuffer) const = 0;
@@ -120,6 +122,8 @@ public:
             const Control& control,
             const std::vector<::android::os::incremental::PerUidReadTimeouts>& perUidReadTimeouts)
             const = 0;
+    virtual ErrorCode forEachFile(const Control& control, FileCallback cb) const = 0;
+    virtual ErrorCode forEachIncompleteFile(const Control& control, FileCallback cb) const = 0;
 };
 
 class AppOpsManagerWrapper {

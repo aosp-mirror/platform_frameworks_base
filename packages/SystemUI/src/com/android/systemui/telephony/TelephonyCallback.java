@@ -28,6 +28,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+/**
+ * Class for use by {@link TelephonyListenerManager} to centralize TelephonyManager Callbacks.
+ *
+ * There are more callback interfaces defined in {@link android.telephony.TelephonyCallback} that
+ * are not currently covered. Add them here if they ever become necessary.
+ */
 class TelephonyCallback extends android.telephony.TelephonyCallback
         implements ActiveDataSubscriptionIdListener, CallStateListener, ServiceStateListener {
 

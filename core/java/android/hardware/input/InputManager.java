@@ -223,6 +223,14 @@ public final class InputManager {
     public static final long BLOCK_FLAG_SLIPPERY = android.os.IInputConstants.BLOCK_FLAG_SLIPPERY;
 
     /**
+     * Check whether apps are using MotionEvent.getRawX/Y. This is implementation-specific, and
+     * thus undefined for most 3p app usages.
+     * @hide
+     */
+    @ChangeId
+    public static final long APP_USES_RAW_INPUT_COORDS = 179274888L;
+
+    /**
      * Input Event Injection Synchronization Mode: None.
      * Never blocks.  Injection is asynchronous and is assumed always to be successful.
      * @hide
