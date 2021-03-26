@@ -99,7 +99,9 @@ public class WifiPowerCalculatorTest {
         assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
                 .isEqualTo(5577);
         assertThat(systemConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isWithin(PRECISION).of(0.645200);
+                .isWithin(PRECISION).of(1.11153);
+        assertThat(systemConsumer.getPowerConsumedByApps())
+                .isWithin(PRECISION).of(0.466333);
     }
 
     @Test
@@ -125,7 +127,9 @@ public class WifiPowerCalculatorTest {
                 .isEqualTo(5577);
         /* Same ratio as in testPowerControllerBasedModel_nonMeasured but scaled by 1_000_000uC. */
         assertThat(systemConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isWithin(PRECISION).of(0.645200 / (0.2214666 + 0.645200) * 1_000_000 / 3600000);
+                .isWithin(PRECISION).of(1.11153 / (0.2214666 + 0.645200) * 1_000_000 / 3600000);
+        assertThat(systemConsumer.getPowerConsumedByApps())
+                .isWithin(PRECISION).of(0.14946);
     }
 
     /** Sets up batterystats object with prepopulated network & timer data for Timer-model tests. */
@@ -163,7 +167,9 @@ public class WifiPowerCalculatorTest {
         assertThat(systemConsumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_WIFI))
                 .isEqualTo(2222);
         assertThat(systemConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isWithin(PRECISION).of(0.8759216);
+                .isWithin(PRECISION).of(2.575000);
+        assertThat(systemConsumer.getPowerConsumedByApps())
+                .isWithin(PRECISION).of(1.69907);
     }
 
     @Test
@@ -190,6 +196,8 @@ public class WifiPowerCalculatorTest {
                 .isEqualTo(2222);
         /* Same ratio as in testTimerBasedModel_nonMeasured but scaled by 1_000_000uC. */
         assertThat(systemConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isWithin(PRECISION).of(0.8759216 / (0.8231573 + 0.8759216) * 1_000_000 / 3600000);
+                .isWithin(PRECISION).of(2.575000 / (0.8231573 + 0.8759216) * 1_000_000 / 3600000);
+        assertThat(systemConsumer.getPowerConsumedByApps())
+                .isWithin(PRECISION).of(0.277777);
     }
 }
