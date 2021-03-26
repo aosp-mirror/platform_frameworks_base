@@ -464,6 +464,40 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    public void testStaleAppRequestSize() {
+        DisplayModeDirector director =
+                new DisplayModeDirector(mContext, mHandler, mInjector);
+        Display.Mode[] modes = new Display.Mode[] {
+                new Display.Mode(1, 1280, 720, 60),
+        };
+        Display.Mode defaultMode = modes[0];
+
+        // Inject supported modes
+        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
+        supportedModesByDisplay.put(DISPLAY_ID, modes);
+        director.injectSupportedModesByDisplay(supportedModesByDisplay);
+
+        // Inject default mode
+        SparseArray<Display.Mode> defaultModesByDisplay = new SparseArray<>();
+        defaultModesByDisplay.put(DISPLAY_ID, defaultMode);
+        director.injectDefaultModeByDisplay(defaultModesByDisplay);
+
+        // Inject votes
+        SparseArray<Vote> votes = new SparseArray<>();
+        votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(1920, 1080));
+        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE, Vote.forRefreshRates(50, 50));
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+        director.injectVotesByDisplay(votesByDisplay);
+
+        director.setShouldAlwaysRespectAppRequestedMode(true);
+
+        // We should return the only available mode
+        DesiredDisplayModeSpecs specs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(specs.baseModeId).isEqualTo(defaultMode.getModeId());
+    }
+
+    @Test
     public void testBrightnessObserverGetsUpdatedRefreshRatesForZone() {
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, /* baseModeId= */ 0);

@@ -722,6 +722,12 @@ class ShortcutUser {
             future.completeExceptionally(new RuntimeException("app search manager is null"));
             return future;
         }
+        if (!mService.mUserManagerInternal.isUserUnlockingOrUnlocked(getUserId())) {
+            // In rare cases the user might be stopped immediate after it started, in these cases
+            // any on-going session will need to be abandoned.
+            future.completeExceptionally(new RuntimeException("User " + getUserId() + " is "));
+            return future;
+        }
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
             mAppSearchManager.createSearchSession(searchContext, mExecutor, result -> {

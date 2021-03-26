@@ -118,6 +118,12 @@ public class MeasuredEnergySnapshot {
         /** The chargeUC for {@link EnergyConsumerType#DISPLAY}. */
         public long displayChargeUC = UNAVAILABLE;
 
+        /** The chargeUC for {@link EnergyConsumerType#GNSS}. */
+        public long gnssChargeUC = UNAVAILABLE;
+
+        /** The chargeUC for {@link EnergyConsumerType#MOBILE_RADIO}. */
+        public long mobileRadioChargeUC = UNAVAILABLE;
+
         /** The chargeUC for {@link EnergyConsumerType#WIFI}. */
         public long wifiChargeUC = UNAVAILABLE;
 
@@ -215,6 +221,14 @@ public class MeasuredEnergySnapshot {
 
                 case EnergyConsumerType.DISPLAY:
                     output.displayChargeUC = deltaChargeUC;
+                    break;
+
+                case EnergyConsumerType.GNSS:
+                    output.gnssChargeUC = deltaChargeUC;
+                    break;
+
+                case EnergyConsumerType.MOBILE_RADIO:
+                    output.mobileRadioChargeUC = deltaChargeUC;
                     break;
 
                 case EnergyConsumerType.WIFI:

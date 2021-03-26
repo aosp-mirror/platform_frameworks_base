@@ -16,26 +16,18 @@
 
 package com.android.systemui.wmshell;
 
-import static android.os.Process.THREAD_PRIORITY_DISPLAY;
-import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
-
-import android.animation.AnimationHandler;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.R;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.FullscreenTaskListener;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellCommandHandler;
@@ -53,13 +45,11 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
-import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
@@ -99,109 +89,8 @@ import dagger.Provides;
  * dependencies that are device/form factor SystemUI implementation specific should go into their
  * respective modules (ie. {@link WMShellModule} for handheld, {@link TvWMShellModule} for tv, etc.)
  */
-@Module
+@Module(includes = WMShellConcurrencyModule.class)
 public abstract class WMShellBaseModule {
-
-    /**
-     * Returns whether to enable a separate shell thread for the shell features.
-     */
-    private static boolean enableShellMainThread(Context context) {
-        return context.getResources().getBoolean(R.bool.config_enableShellMainThread);
-    }
-
-    //
-    // Shell Concurrency - Components used for managing threading in the Shell and SysUI
-    //
-
-    /**
-     * Provide a SysUI main-thread Executor.
-     */
-    @WMSingleton
-    @Provides
-    @Main
-    public static ShellExecutor provideSysUIMainExecutor(@Main Handler sysuiMainHandler) {
-        return new HandlerExecutor(sysuiMainHandler);
-    }
-
-    /**
-     * Shell main-thread Handler, don't use this unless really necessary (ie. need to dedupe
-     * multiple types of messages, etc.)
-     */
-    @WMSingleton
-    @Provides
-    @ShellMainThread
-    public static Handler provideShellMainHandler(Context context, @Main Handler sysuiMainHandler) {
-        if (enableShellMainThread(context)) {
-             HandlerThread mainThread = new HandlerThread("wmshell.main");
-             mainThread.start();
-             return mainThread.getThreadHandler();
-        }
-        return sysuiMainHandler;
-    }
-
-    /**
-     * Provide a Shell main-thread Executor.
-     */
-    @WMSingleton
-    @Provides
-    @ShellMainThread
-    public static ShellExecutor provideShellMainExecutor(Context context,
-            @ShellMainThread Handler mainHandler, @Main ShellExecutor sysuiMainExecutor) {
-        if (enableShellMainThread(context)) {
-            return new HandlerExecutor(mainHandler);
-        }
-        return sysuiMainExecutor;
-    }
-
-    /**
-     * Provide a Shell animation-thread Executor.
-     */
-    @WMSingleton
-    @Provides
-    @ShellAnimationThread
-    public static ShellExecutor provideShellAnimationExecutor() {
-         HandlerThread shellAnimationThread = new HandlerThread("wmshell.anim",
-                 THREAD_PRIORITY_DISPLAY);
-         shellAnimationThread.start();
-         return new HandlerExecutor(shellAnimationThread.getThreadHandler());
-    }
-
-    /**
-     * Provides a Shell splashscreen-thread Executor
-     */
-    @WMSingleton
-    @Provides
-    @ShellSplashscreenThread
-    public static ShellExecutor provideSplashScreenExecutor() {
-        HandlerThread shellSplashscreenThread = new HandlerThread("wmshell.splashscreen",
-                THREAD_PRIORITY_TOP_APP_BOOST);
-        shellSplashscreenThread.start();
-        return new HandlerExecutor(shellSplashscreenThread.getThreadHandler());
-    }
-
-    /**
-     * Provide a Shell main-thread AnimationHandler.  The AnimationHandler can be set on
-     * {@link android.animation.ValueAnimator}s and will ensure that the animation will run on
-     * the Shell main-thread with the SF vsync.
-     */
-    @WMSingleton
-    @Provides
-    @ChoreographerSfVsync
-    public static AnimationHandler provideShellMainExecutorSfVsyncAnimationHandler(
-            @ShellMainThread ShellExecutor mainExecutor) {
-        try {
-            AnimationHandler handler = new AnimationHandler();
-            mainExecutor.executeBlocking(() -> {
-                // This is called on the animation thread since it calls
-                // Choreographer.getSfInstance() which returns a thread-local Choreographer instance
-                // that uses the SF vsync
-                handler.setProvider(new SfVsyncFrameCallbackProvider());
-            });
-            return handler;
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Failed to initialize SfVsync animation handler in 1s", e);
-        }
-    }
 
     //
     // Internal common - Components used internally by multiple shell features

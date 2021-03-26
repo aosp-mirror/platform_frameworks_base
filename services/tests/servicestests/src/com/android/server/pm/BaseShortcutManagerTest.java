@@ -43,6 +43,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
+import android.app.PendingIntent;
 import android.app.Person;
 import android.app.admin.DevicePolicyManager;
 import android.app.appsearch.AppSearchBatchResult;
@@ -60,6 +61,7 @@ import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -89,6 +91,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -193,6 +196,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         public Context createContextAsUser(UserHandle user, int flags) {
             when(mMockPackageManager.getUserId()).thenReturn(user.getIdentifier());
+            return this;
+        }
+
+        @Override
+        public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
+                throws PackageManager.NameNotFoundException {
+            // ignore.
             return this;
         }
 
@@ -619,6 +629,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         boolean injectHasInteractAcrossUsersFullPermission(int callingPid, int callingUid) {
             return false;
         }
+
+        @Override
+        PendingIntent injectCreatePendingIntent(Context context, int requestCode,
+                @NonNull Intent[] intents, int flags, Bundle options, UserHandle user) {
+            return new PendingIntent(mock(IIntentSender.class));
+        }
     }
 
     protected class LauncherAppsTestable extends LauncherApps {
@@ -766,6 +782,21 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         public void invalidateNextPageToken(long nextPageToken, int userId) throws RemoteException {
 
+        }
+
+        @Override
+        public void writeQueryResultsToFile(String packageName, String databaseName,
+                ParcelFileDescriptor fileDescriptor, String queryExpression,
+                Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void putDocumentsFromFile(String packageName, String databaseName,
+                ParcelFileDescriptor fileDescriptor, int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
         }
 
         @Override

@@ -40,6 +40,7 @@
 #include <utils/Mutex.h>
 #include <thread>
 
+#include <android-base/properties.h>
 #include <ui/FatVector.h>
 
 namespace android {
@@ -251,6 +252,11 @@ void RenderThread::requireVkContext() {
 void RenderThread::initGrContextOptions(GrContextOptions& options) {
     options.fPreferExternalImagesOverES3 = true;
     options.fDisableDistanceFieldPaths = true;
+    if (android::base::GetBoolProperty(PROPERTY_REDUCE_OPS_TASK_SPLITTING, false)) {
+        options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kYes;
+    } else {
+        options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
+    }
 }
 
 void RenderThread::destroyRenderingContext() {

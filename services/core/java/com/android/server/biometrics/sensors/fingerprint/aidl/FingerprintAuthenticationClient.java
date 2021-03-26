@@ -92,7 +92,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
         UdfpsHelper.showUdfpsOverlay(getSensorId(), Utils.getUdfpsAuthReason(this),
                 mUdfpsOverlayController, this);
         try {
-            mCancellationSignal = getFreshDaemon().authenticate(mSequentialId, mOperationId);
+            mCancellationSignal = getFreshDaemon().authenticate(mOperationId);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,

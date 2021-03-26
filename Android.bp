@@ -465,6 +465,7 @@ java_library {
     static_libs: [
         "android.net.ipsec.ike.stubs.module_lib",
         "framework-appsearch.stubs.module_lib",
+        "framework-connectivity.stubs.module_lib",
         "framework-graphics.stubs.module_lib",
         "framework-media.stubs.module_lib",
         "framework-mediaprovider.stubs.module_lib",
@@ -487,6 +488,7 @@ java_library {
         "android.net.ipsec.ike.impl",
         "framework-minus-apex",
         "framework-appsearch.impl",
+        "framework-connectivity.impl",
         "framework-graphics.impl",
         "framework-mediaprovider.impl",
         "framework-permission.impl",
@@ -643,14 +645,17 @@ java_defaults {
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
-        ":framework-connectivity-sources",
         "core/java/**/*.logtags",
     ],
     // See comment on framework-atb-backward-compatibility module below
     exclude_srcs: ["core/java/android/content/pm/AndroidTestBaseUpdater.java"],
     aidl: {
         generate_get_transaction_name: true,
-        local_include_dirs: ["media/aidl"],
+        local_include_dirs: [
+            "media/aidl",
+            // TODO: move to include_dirs when migrated to packages/modules
+            "packages/Connectivity/framework/aidl-export",
+        ],
         include_dirs: ["frameworks/av/aidl"],
     },
     dxflags: [
@@ -703,8 +708,6 @@ java_library {
     apex_available: ["//apex_available:platform"],
     visibility: [
         "//frameworks/base",
-        // TODO: remove when framework-connectivity can build against API
-        "//frameworks/base/packages/Connectivity/framework",
         // TODO(b/147128803) remove the below lines
         "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
@@ -743,6 +746,7 @@ java_library {
     static_libs: [
         "app-compat-annotations",
         "framework-minus-apex",
+        "framework-connectivity.impl", // TODO(b/182859030): should be removed
         "framework-appsearch.impl", // TODO(b/146218515): should be removed
         "framework-updatable-stubs-module_libs_api",
     ],
@@ -1461,7 +1465,7 @@ java_library {
     ],
     libs: [
         "framework-annotations-lib",
-        "framework-connectivity",
+        "framework-connectivity.stubs.module_lib",
         "unsupportedappusage",
     ],
     visibility: [

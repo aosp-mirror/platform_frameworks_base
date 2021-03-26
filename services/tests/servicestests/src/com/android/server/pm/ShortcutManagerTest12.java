@@ -15,8 +15,13 @@
  */
 package com.android.server.pm;
 
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
+
+import android.app.PendingIntent;
 import android.app.appsearch.PackageIdentifier;
 import android.content.pm.AppSearchShortcutInfo;
+import android.os.RemoteException;
+import android.os.UserHandle;
 
 import java.util.Random;
 
@@ -39,6 +44,20 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
             assertTrue(mMockAppSearchManager.mSchemasPackageAccessible.get(
                     AppSearchShortcutInfo.SCHEMA_TYPE).get(0).equals(
                             new PackageIdentifier(CALLING_PACKAGE_2, cert)));
+        });
+    }
+
+    public void testGetShortcutIntents_ReturnsMutablePendingIntents() throws RemoteException {
+        setDefaultLauncher(USER_0, LAUNCHER_1);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () ->
+                assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))))
+        );
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            final PendingIntent intent = mLauncherApps.getShortcutIntent(
+                    CALLING_PACKAGE_1, "s1", null, UserHandle.SYSTEM);
+            assertNotNull(intent);
         });
     }
 }

@@ -20,6 +20,7 @@ import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_BT;
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_CPU;
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_DISPLAY;
+import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_RADIO;
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -93,6 +94,16 @@ public class BatteryExternalStatsWorkerTest {
         tempAllIds.add(btId);
         mPowerStatsInternal.incrementEnergyConsumption(btId, 34567);
 
+        final int gnssId = mPowerStatsInternal.addEnergyConsumer(EnergyConsumerType.GNSS, 0,
+                "gnss");
+        tempAllIds.add(gnssId);
+        mPowerStatsInternal.incrementEnergyConsumption(gnssId, 787878);
+
+        final int mobileRadioId = mPowerStatsInternal.addEnergyConsumer(
+                EnergyConsumerType.MOBILE_RADIO, 0, "mobile_radio");
+        tempAllIds.add(mobileRadioId);
+        mPowerStatsInternal.incrementEnergyConsumption(mobileRadioId, 62626);
+
         final int[] cpuClusterIds = new int[numCpuClusters];
         for (int i = 0; i < numCpuClusters; i++) {
             cpuClusterIds[i] = mPowerStatsInternal.addEnergyConsumer(
@@ -134,6 +145,12 @@ public class BatteryExternalStatsWorkerTest {
         // Results should only have the bluetooth energy consumer
         assertEquals(1, bluetoothResults.length);
         assertEquals(btId, bluetoothResults[0].id);
+
+        final EnergyConsumerResult[] mobileRadioResults =
+                mBatteryExternalStatsWorker.getMeasuredEnergyLocked(UPDATE_RADIO).getNow(null);
+        // Results should only have the mobile radio energy consumer
+        assertEquals(1, mobileRadioResults.length);
+        assertEquals(mobileRadioId, mobileRadioResults[0].id);
 
         final EnergyConsumerResult[] cpuResults =
                 mBatteryExternalStatsWorker.getMeasuredEnergyLocked(UPDATE_CPU).getNow(null);

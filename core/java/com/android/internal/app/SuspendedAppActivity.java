@@ -106,13 +106,17 @@ public class SuspendedAppActivity extends AlertActivity
     }
 
     private String resolveTitle() {
-        final int titleId = (mSuppliedDialogInfo != null) ? mSuppliedDialogInfo.getTitleResId()
-                : ID_NULL;
-        if (titleId != ID_NULL && mSuspendingAppResources != null) {
-            try {
-                return mSuspendingAppResources.getString(titleId);
-            } catch (Resources.NotFoundException nfe) {
-                Slog.e(TAG, "Could not resolve string resource id " + titleId);
+        if (mSuppliedDialogInfo != null) {
+            final int titleId = mSuppliedDialogInfo.getTitleResId();
+            final String title = mSuppliedDialogInfo.getTitle();
+            if (titleId != ID_NULL && mSuspendingAppResources != null) {
+                try {
+                    return mSuspendingAppResources.getString(titleId);
+                } catch (Resources.NotFoundException nfe) {
+                    Slog.e(TAG, "Could not resolve string resource id " + titleId);
+                }
+            } else if (title != null) {
+                return title;
             }
         }
         return getString(R.string.app_suspended_title);
@@ -159,13 +163,17 @@ public class SuspendedAppActivity extends AlertActivity
                 Slog.w(TAG, "Unknown neutral button action: " + mNeutralButtonAction);
                 return null;
         }
-        final int buttonTextId = (mSuppliedDialogInfo != null)
-                ? mSuppliedDialogInfo.getNeutralButtonTextResId() : ID_NULL;
-        if (buttonTextId != ID_NULL && mSuspendingAppResources != null) {
-            try {
-                return mSuspendingAppResources.getString(buttonTextId);
-            } catch (Resources.NotFoundException nfe) {
-                Slog.e(TAG, "Could not resolve string resource id " + buttonTextId);
+        if (mSuppliedDialogInfo != null) {
+            final int buttonTextId = mSuppliedDialogInfo.getNeutralButtonTextResId();
+            final String buttonText = mSuppliedDialogInfo.getNeutralButtonText();
+            if (buttonTextId != ID_NULL && mSuspendingAppResources != null) {
+                try {
+                    return mSuspendingAppResources.getString(buttonTextId);
+                } catch (Resources.NotFoundException nfe) {
+                    Slog.e(TAG, "Could not resolve string resource id " + buttonTextId);
+                }
+            } else if (buttonText != null) {
+                return buttonText;
             }
         }
         return getString(defaultButtonTextId);

@@ -287,7 +287,7 @@ public class PackageManagerSettingsTests {
 
         final SuspendDialogInfo dialogInfo1 = new SuspendDialogInfo.Builder()
                 .setIcon(0x11220001)
-                .setTitle(0x11220002)
+                .setTitle("String Title")
                 .setMessage("1st message")
                 .setNeutralButtonText(0x11220003)
                 .setNeutralButtonAction(BUTTON_ACTION_MORE_DETAILS)
@@ -296,7 +296,7 @@ public class PackageManagerSettingsTests {
                 .setIcon(0x22220001)
                 .setTitle(0x22220002)
                 .setMessage("2nd message")
-                .setNeutralButtonText(0x22220003)
+                .setNeutralButtonText("String button text")
                 .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
                 .build();
 

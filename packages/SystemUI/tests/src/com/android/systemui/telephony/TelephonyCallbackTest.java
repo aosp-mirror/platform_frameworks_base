@@ -27,7 +27,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -36,7 +35,7 @@ import org.junit.runner.RunWith;
 public class TelephonyCallbackTest extends SysuiTestCase {
 
     private TelephonyCallback mTelephonyCallback = new TelephonyCallback();
-    
+
     @Test
     public void testAddListener_ActiveDataSubscriptionIdListener() {
         assertThat(mTelephonyCallback.hasAnyListeners()).isFalse();

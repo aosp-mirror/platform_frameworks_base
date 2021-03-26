@@ -104,12 +104,12 @@ public class AppSearchImplPlatformTest {
 
         // Insert package1 document
         GenericDocument document1 =
-                new GenericDocument.Builder<>("uri", "schema1").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "schema1").build();
         mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
 
         // Insert package2 document
         GenericDocument document2 =
-                new GenericDocument.Builder<>("uri", "schema2").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "schema2").build();
         mAppSearchImpl.putDocument("package2", "database2", document2, /*logger=*/ null);
 
         // No query filters specified, global query can retrieve all documents.
@@ -122,8 +122,8 @@ public class AppSearchImplPlatformTest {
 
         // Document2 will be first since it got indexed later and has a "better", aka more recent
         // score.
-        assertThat(searchResultPage.getResults().get(0).getDocument()).isEqualTo(document2);
-        assertThat(searchResultPage.getResults().get(1).getDocument()).isEqualTo(document1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
+        assertThat(searchResultPage.getResults().get(1).getGenericDocument()).isEqualTo(document1);
     }
 
     /**
@@ -158,12 +158,12 @@ public class AppSearchImplPlatformTest {
 
         // Insert package1 document
         GenericDocument document1 =
-                new GenericDocument.Builder<>("uri", "schema1").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "schema1").build();
         mAppSearchImpl.putDocument("package1", "database1", document1, /*logger=*/ null);
 
         // Insert package2 document
         GenericDocument document2 =
-                new GenericDocument.Builder<>("uri", "schema2").setNamespace("namespace").build();
+                new GenericDocument.Builder<>("namespace", "uri", "schema2").build();
         mAppSearchImpl.putDocument("package2", "database2", document2, /*logger=*/ null);
 
         // "package1" filter specified
@@ -176,7 +176,7 @@ public class AppSearchImplPlatformTest {
                 mAppSearchImpl.globalQuery(
                         "", searchSpec, mContext.getPackageName(), mGlobalQuerierUid);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        assertThat(searchResultPage.getResults().get(0).getDocument()).isEqualTo(document1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document1);
 
         // "package2" filter specified
         searchSpec =
@@ -188,7 +188,7 @@ public class AppSearchImplPlatformTest {
                 mAppSearchImpl.globalQuery(
                         "", searchSpec, mContext.getPackageName(), mGlobalQuerierUid);
         assertThat(searchResultPage.getResults()).hasSize(1);
-        assertThat(searchResultPage.getResults().get(0).getDocument()).isEqualTo(document2);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document2);
     }
 
     @Test

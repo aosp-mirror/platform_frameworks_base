@@ -23,6 +23,7 @@ import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_COMPAT;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
 import static android.app.AlarmManager.FLAG_IDLE_UNTIL;
+import static android.app.AlarmManager.FLAG_PRIORITIZE;
 import static android.app.AlarmManager.FLAG_WAKE_FROM_IDLE;
 import static android.app.AlarmManager.INTERVAL_DAY;
 import static android.app.AlarmManager.INTERVAL_HOUR;
@@ -100,6 +101,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -221,6 +223,7 @@ public class AlarmManagerService extends SystemService {
     AlarmHandler mHandler;
     AppWakeupHistory mAppWakeupHistory;
     AppWakeupHistory mAllowWhileIdleHistory;
+    private final SparseLongArray mLastPriorityAlarmDispatch = new SparseLongArray();
     ClockReceiver mClockReceiver;
     final DeliveryTracker mDeliveryTracker = new DeliveryTracker();
     IBinder.DeathRecipient mListenerDeathRecipient;
@@ -432,6 +435,8 @@ public class AlarmManagerService extends SystemService {
 
         @VisibleForTesting
         static final String KEY_CRASH_NON_CLOCK_APPS = "crash_non_clock_apps";
+        @VisibleForTesting
+        static final String KEY_PRIORITY_ALARM_DELAY = "priority_alarm_delay";
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
@@ -469,6 +474,8 @@ public class AlarmManagerService extends SystemService {
 
         // TODO (b/171306433): Change to true by default.
         private static final boolean DEFAULT_CRASH_NON_CLOCK_APPS = false;
+
+        private static final long DEFAULT_PRIORITY_ALARM_DELAY = 9 * 60_000;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -524,6 +531,12 @@ public class AlarmManagerService extends SystemService {
          * apps and reverting to a softer failure in case of broken apps.
          */
         public boolean CRASH_NON_CLOCK_APPS = DEFAULT_CRASH_NON_CLOCK_APPS;
+
+        /**
+         * Minimum delay between two slots that an app can get for their prioritized alarms, while
+         * the device is in doze.
+         */
+        public long PRIORITY_ALARM_DELAY = DEFAULT_PRIORITY_ALARM_DELAY;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
 
@@ -661,6 +674,10 @@ public class AlarmManagerService extends SystemService {
                         case KEY_CRASH_NON_CLOCK_APPS:
                             CRASH_NON_CLOCK_APPS = properties.getBoolean(KEY_CRASH_NON_CLOCK_APPS,
                                     DEFAULT_CRASH_NON_CLOCK_APPS);
+                            break;
+                        case KEY_PRIORITY_ALARM_DELAY:
+                            PRIORITY_ALARM_DELAY = properties.getLong(KEY_PRIORITY_ALARM_DELAY,
+                                    DEFAULT_PRIORITY_ALARM_DELAY);
                             break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
@@ -807,6 +824,11 @@ public class AlarmManagerService extends SystemService {
             pw.println();
 
             pw.print(KEY_CRASH_NON_CLOCK_APPS, CRASH_NON_CLOCK_APPS);
+            pw.println();
+
+            pw.print(KEY_PRIORITY_ALARM_DELAY);
+            pw.print("=");
+            TimeUtils.formatDuration(PRIORITY_ALARM_DELAY, pw);
             pw.println();
 
             pw.decreaseIndent();
@@ -1794,6 +1816,11 @@ public class AlarmManagerService extends SystemService {
                 batterySaverPolicyElapsed = mAllowWhileIdleHistory.getNthLastWakeupForPackage(
                         alarm.sourcePackage, userId, quota) + window;
             }
+        } else if ((alarm.flags & FLAG_PRIORITIZE) != 0) {
+            final long lastDispatch = mLastPriorityAlarmDispatch.get(alarm.creatorUid, 0);
+            batterySaverPolicyElapsed = (lastDispatch == 0)
+                    ? nowElapsed
+                    : lastDispatch + mConstants.PRIORITY_ALARM_DELAY;
         } else {
             // Not allowed.
             batterySaverPolicyElapsed = nowElapsed + INDEFINITE_DELAY;
@@ -1849,6 +1876,12 @@ public class AlarmManagerService extends SystemService {
                         alarm.sourcePackage, userId, quota) + window;
                 deviceIdlePolicyTime = Math.min(whenInQuota, mPendingIdleUntil.getWhenElapsed());
             }
+        } else if ((alarm.flags & FLAG_PRIORITIZE) != 0) {
+            final long lastDispatch = mLastPriorityAlarmDispatch.get(alarm.creatorUid, 0);
+            final long whenAllowed = (lastDispatch == 0)
+                    ? nowElapsed
+                    : lastDispatch + mConstants.PRIORITY_ALARM_DELAY;
+            deviceIdlePolicyTime = Math.min(whenAllowed, mPendingIdleUntil.getWhenElapsed());
         } else {
             // Not allowed.
             deviceIdlePolicyTime = mPendingIdleUntil.getWhenElapsed();
@@ -2025,7 +2058,12 @@ public class AlarmManagerService extends SystemService {
             // make sure the caller is allowed to use the requested kind of alarm, and also
             // decide what quota and broadcast options to use.
             Bundle idleOptions = null;
-            if (exact || allowWhileIdle) {
+            if ((flags & FLAG_PRIORITIZE) != 0) {
+                getContext().enforcePermission(
+                        Manifest.permission.SCHEDULE_PRIORITIZED_ALARM,
+                        Binder.getCallingPid(), callingUid, "AlarmManager.setPrioritized");
+                flags &= ~(FLAG_ALLOW_WHILE_IDLE | FLAG_ALLOW_WHILE_IDLE_COMPAT);
+            } else if (exact || allowWhileIdle) {
                 final boolean needsPermission;
                 boolean lowerQuota;
                 if (CompatChanges.isChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION,
@@ -2107,6 +2145,7 @@ public class AlarmManagerService extends SystemService {
                 flags |= FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
                 flags &= ~FLAG_ALLOW_WHILE_IDLE;
                 flags &= ~FLAG_ALLOW_WHILE_IDLE_COMPAT;
+                flags &= ~FLAG_PRIORITIZE;
                 idleOptions = null;
             }
 
@@ -2488,6 +2527,19 @@ public class AlarmManagerService extends SystemService {
 
             pw.println("Allow while idle history:");
             mAllowWhileIdleHistory.dump(pw, nowELAPSED);
+
+            if (mLastPriorityAlarmDispatch.size() > 0) {
+                pw.println("Last priority alarm dispatches:");
+                pw.increaseIndent();
+                for (int i = 0; i < mLastPriorityAlarmDispatch.size(); i++) {
+                    pw.print("UID: ");
+                    UserHandle.formatUid(pw, mLastPriorityAlarmDispatch.keyAt(i));
+                    pw.print(": ");
+                    TimeUtils.formatDuration(mLastPriorityAlarmDispatch.valueAt(i), nowELAPSED, pw);
+                    pw.println();
+                }
+                pw.decreaseIndent();
+            }
 
             if (mLog.dump(pw, "Recent problems:")) {
                 pw.println();
@@ -3303,6 +3355,11 @@ public class AlarmManagerService extends SystemService {
                 mPendingBackgroundAlarms.removeAt(i);
             }
         }
+        for (int i = mLastPriorityAlarmDispatch.size() - 1; i >= 0; i--) {
+            if (UserHandle.getUserId(mLastPriorityAlarmDispatch.keyAt(i)) == userHandle) {
+                mLastPriorityAlarmDispatch.removeAt(i);
+            }
+        }
         if (mNextWakeFromIdle != null && whichAlarms.test(mNextWakeFromIdle)) {
             mNextWakeFromIdle = mAlarmStore.getNextWakeFromIdleAlarm();
             if (mPendingIdleUntil != null) {
@@ -4103,6 +4160,7 @@ public class AlarmManagerService extends SystemService {
             IntentFilter sdFilter = new IntentFilter();
             sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
             sdFilter.addAction(Intent.ACTION_USER_STOPPED);
+            sdFilter.addAction(Intent.ACTION_UID_REMOVED);
             getContext().registerReceiver(this, sdFilter);
         }
 
@@ -4131,6 +4189,9 @@ public class AlarmManagerService extends SystemService {
                             mAppWakeupHistory.removeForUser(userHandle);
                             mAllowWhileIdleHistory.removeForUser(userHandle);
                         }
+                        return;
+                    case Intent.ACTION_UID_REMOVED:
+                        mLastPriorityAlarmDispatch.delete(uid);
                         return;
                     case Intent.ACTION_PACKAGE_REMOVED:
                         if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -4522,17 +4583,27 @@ public class AlarmManagerService extends SystemService {
             if (inflight.isBroadcast()) {
                 notifyBroadcastAlarmPendingLocked(alarm.uid);
             }
-            if (isAllowedWhileIdleRestricted(alarm)) {
-                final boolean doze = (mPendingIdleUntil != null);
-                final boolean batterySaver = (mAppStateTracker != null
-                        && mAppStateTracker.isForceAllAppsStandbyEnabled());
-                if (doze || batterySaver) {
+            final boolean doze = (mPendingIdleUntil != null);
+            final boolean batterySaver = (mAppStateTracker != null
+                    && mAppStateTracker.isForceAllAppsStandbyEnabled());
+            if (doze || batterySaver) {
+                if (isAllowedWhileIdleRestricted(alarm)) {
                     // Record the last time this uid handled an ALLOW_WHILE_IDLE alarm while the
                     // device was in doze or battery saver.
                     mAllowWhileIdleHistory.recordAlarmForPackage(alarm.sourcePackage,
                             UserHandle.getUserId(alarm.creatorUid), nowELAPSED);
                     mAlarmStore.updateAlarmDeliveries(a -> {
                         if (a.creatorUid != alarm.creatorUid || !isAllowedWhileIdleRestricted(a)) {
+                            return false;
+                        }
+                        return (doze && adjustDeliveryTimeBasedOnDeviceIdle(a))
+                                || (batterySaver && adjustDeliveryTimeBasedOnBatterySaver(a));
+                    });
+                } else if ((alarm.flags & FLAG_PRIORITIZE) != 0) {
+                    mLastPriorityAlarmDispatch.put(alarm.creatorUid, nowELAPSED);
+                    mAlarmStore.updateAlarmDeliveries(a -> {
+                        if (a.creatorUid != alarm.creatorUid
+                                || (alarm.flags & FLAG_PRIORITIZE) == 0) {
                             return false;
                         }
                         return (doze && adjustDeliveryTimeBasedOnDeviceIdle(a))

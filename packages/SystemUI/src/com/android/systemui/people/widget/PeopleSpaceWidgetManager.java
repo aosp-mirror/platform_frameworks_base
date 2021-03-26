@@ -16,17 +16,23 @@
 
 package com.android.systemui.people.widget;
 
+import static android.Manifest.permission.READ_CONTACTS;
+import static android.app.Notification.CATEGORY_MISSED_CALL;
+import static android.app.Notification.EXTRA_PEOPLE_LIST;
+
 import static com.android.systemui.people.PeopleSpaceUtils.EMPTY_STRING;
 import static com.android.systemui.people.PeopleSpaceUtils.INVALID_USER_ID;
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
 import static com.android.systemui.people.PeopleSpaceUtils.SHORTCUT_ID;
 import static com.android.systemui.people.PeopleSpaceUtils.USER_ID;
 import static com.android.systemui.people.PeopleSpaceUtils.augmentTileFromNotification;
+import static com.android.systemui.people.PeopleSpaceUtils.getMessagingStyleMessages;
 import static com.android.systemui.people.PeopleSpaceUtils.getStoredWidgetIds;
 import static com.android.systemui.people.PeopleSpaceUtils.updateAppWidgetOptionsAndView;
 import static com.android.systemui.people.PeopleSpaceUtils.updateAppWidgetViews;
 
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.app.Person;
@@ -39,6 +45,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -54,16 +61,20 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -83,10 +94,18 @@ public class PeopleSpaceWidgetManager {
     private SharedPreferences mSharedPrefs;
     private PeopleManager mPeopleManager;
     private NotificationEntryManager mNotificationEntryManager;
+    private PackageManager mPackageManager;
     public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     @GuardedBy("mLock")
     public static Map<PeopleTileKey, PeopleSpaceWidgetProvider.TileConversationListener>
             mListeners = new HashMap<>();
+
+    @GuardedBy("mLock")
+    // Map of notification key mapped to widget IDs previously updated by the contact Uri field.
+    // This is required because on notification removal, the contact Uri field is stripped and we
+    // only have the notification key to determine which widget IDs should be updated.
+    private Map<String, Set<String>> mNotificationKeyToWidgetIdsMatchedByUri = new HashMap<>();
+    private boolean mIsForTesting;
 
     @Inject
     public PeopleSpaceWidgetManager(Context context) {
@@ -99,6 +118,7 @@ public class PeopleSpaceWidgetManager {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         mPeopleManager = mContext.getSystemService(PeopleManager.class);
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
+        mPackageManager = mContext.getPackageManager();
     }
 
     /**
@@ -108,12 +128,15 @@ public class PeopleSpaceWidgetManager {
     protected void setAppWidgetManager(
             AppWidgetManager appWidgetManager, IPeopleManager iPeopleManager,
             PeopleManager peopleManager, LauncherApps launcherApps,
-            NotificationEntryManager notificationEntryManager) {
+            NotificationEntryManager notificationEntryManager, PackageManager packageManager,
+            boolean isForTesting) {
         mAppWidgetManager = appWidgetManager;
         mIPeopleManager = iPeopleManager;
         mPeopleManager = peopleManager;
         mLauncherApps = launcherApps;
         mNotificationEntryManager = notificationEntryManager;
+        mPackageManager = packageManager;
+        mIsForTesting = isForTesting;
     }
 
     /**
@@ -222,6 +245,16 @@ public class PeopleSpaceWidgetManager {
     public void updateWidgetsWithNotificationChanged(StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction) {
         if (DEBUG) Log.d(TAG, "updateWidgetsWithNotificationChanged called");
+        if (mIsForTesting) {
+            updateWidgetsWithNotificationChangedInBackground(sbn, notificationAction);
+            return;
+        }
+        ThreadUtils.postOnBackgroundThread(
+                () -> updateWidgetsWithNotificationChangedInBackground(sbn, notificationAction));
+    }
+
+    private void updateWidgetsWithNotificationChangedInBackground(StatusBarNotification sbn,
+            PeopleSpaceUtils.NotificationAction action) {
         try {
             String sbnShortcutId = sbn.getShortcutId();
             if (sbnShortcutId == null) {
@@ -235,21 +268,173 @@ public class PeopleSpaceWidgetManager {
                 Log.d(TAG, "No app widget ids returned");
                 return;
             }
+            PeopleTileKey key = new PeopleTileKey(
+                    sbnShortcutId,
+                    sbn.getUser().getIdentifier(),
+                    sbn.getPackageName());
+            if (!key.isValid()) {
+                Log.d(TAG, "Invalid key");
+                return;
+            }
             synchronized (mLock) {
-                PeopleTileKey key = new PeopleTileKey(
-                        sbnShortcutId,
-                        UserHandle.getUserHandleForUid(sbn.getUid()).getIdentifier(),
-                        sbn.getPackageName());
-                Set<String> storedWidgetIds = getStoredWidgetIds(mSharedPrefs, key);
-                for (String widgetIdString : storedWidgetIds) {
-                    int widgetId = Integer.parseInt(widgetIdString);
-                    if (DEBUG) Log.d(TAG, "Storing notification change, key:" + sbn.getKey());
-                    updateStorageAndViewWithNotificationData(sbn, notificationAction, widgetId);
-                }
+                // First, update People Tiles associated with the Notification's package/shortcut.
+                Set<String> tilesUpdatedByKey = getStoredWidgetIds(mSharedPrefs, key);
+                updateWidgetIdsForNotificationAction(tilesUpdatedByKey, sbn, action);
+
+                // Then, update People Tiles across other packages that use the same Uri.
+                updateTilesByUri(key, sbn, action);
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e);
         }
+    }
+
+    /** Updates {@code widgetIdsToUpdate} with {@code action}. */
+    private void updateWidgetIdsForNotificationAction(Set<String> widgetIdsToUpdate,
+            StatusBarNotification sbn, PeopleSpaceUtils.NotificationAction action) {
+        for (String widgetIdString : widgetIdsToUpdate) {
+            int widgetId = Integer.parseInt(widgetIdString);
+            PeopleSpaceTile storedTile = getTileForExistingWidget(widgetId);
+            if (storedTile == null) {
+                if (DEBUG) Log.d(TAG, "Could not find stored tile for notification");
+                continue;
+            }
+            if (DEBUG) Log.d(TAG, "Storing notification change, key:" + sbn.getKey());
+            updateStorageAndViewWithNotificationData(sbn, action, widgetId,
+                    storedTile);
+        }
+    }
+
+    /**
+     * Updates tiles with matched Uris, dependent on the {@code action}.
+     *
+     * <p>If the notification was added, adds the notification based on the contact Uri within
+     * {@code sbn}.
+     * <p>If the notification was removed, removes the notification based on the in-memory map of
+     * widgets previously updated by Uri (since the contact Uri is stripped from the {@code sbn}).
+     */
+    private void updateTilesByUri(PeopleTileKey key, StatusBarNotification sbn,
+            PeopleSpaceUtils.NotificationAction action) {
+        if (action.equals(PeopleSpaceUtils.NotificationAction.POSTED)) {
+            Set<String> widgetIdsUpdatedByUri = supplementTilesByUri(sbn, action, key);
+            if (widgetIdsUpdatedByUri != null && !widgetIdsUpdatedByUri.isEmpty()) {
+                if (DEBUG) Log.d(TAG, "Added due to uri: " + widgetIdsUpdatedByUri);
+                mNotificationKeyToWidgetIdsMatchedByUri.put(sbn.getKey(), widgetIdsUpdatedByUri);
+            }
+        } else {
+            // Remove the notification on any widgets where the notification was added
+            // purely based on the Uri.
+            Set<String> widgetsPreviouslyUpdatedByUri =
+                    mNotificationKeyToWidgetIdsMatchedByUri.remove(sbn.getKey());
+            if (widgetsPreviouslyUpdatedByUri != null && !widgetsPreviouslyUpdatedByUri.isEmpty()) {
+                if (DEBUG) Log.d(TAG, "Remove due to uri: " + widgetsPreviouslyUpdatedByUri);
+                updateWidgetIdsForNotificationAction(widgetsPreviouslyUpdatedByUri, sbn,
+                        action);
+            }
+        }
+    }
+
+    /**
+     * Retrieves from storage any tiles with the same contact Uri as linked via the {@code sbn}.
+     * Supplements the tiles with the notification content only if they still have {@link
+     * android.Manifest.permission.READ_CONTACTS} permission.
+     */
+    @Nullable
+    private Set<String> supplementTilesByUri(StatusBarNotification sbn,
+            PeopleSpaceUtils.NotificationAction notificationAction, PeopleTileKey key) {
+        if (!shouldMatchNotificationByUri(sbn)) {
+            if (DEBUG) Log.d(TAG, "Should not supplement conversation");
+            return null;
+        }
+
+        // Try to get the Contact Uri from the Missed Call notification directly.
+        String contactUri = getContactUri(sbn);
+        if (contactUri == null) {
+            if (DEBUG) Log.d(TAG, "No contact uri");
+            return null;
+        }
+
+        // Supplement any tiles with the same Uri.
+        Set<String> storedWidgetIdsByUri =
+                new HashSet<>(mSharedPrefs.getStringSet(contactUri, new HashSet<>()));
+        if (storedWidgetIdsByUri.isEmpty()) {
+            if (DEBUG) Log.d(TAG, "No tiles for contact");
+            return null;
+        }
+
+        if (mPackageManager.checkPermission(READ_CONTACTS,
+                sbn.getPackageName()) != PackageManager.PERMISSION_GRANTED) {
+            if (DEBUG) Log.d(TAG, "Notifying app missing permissions");
+            return null;
+        }
+
+        Set<String> widgetIdsUpdatedByUri = new HashSet<>();
+        for (String widgetIdString : storedWidgetIdsByUri) {
+            int widgetId = Integer.parseInt(widgetIdString);
+            PeopleSpaceTile storedTile = getTileForExistingWidget(widgetId);
+            // Don't update a widget already updated.
+            if (key.equals(new PeopleTileKey(storedTile))) {
+                continue;
+            }
+            if (storedTile == null || mPackageManager.checkPermission(READ_CONTACTS,
+                    storedTile.getPackageName()) != PackageManager.PERMISSION_GRANTED) {
+                if (DEBUG) Log.d(TAG, "Cannot supplement tile: " + storedTile.getUserName());
+                continue;
+            }
+            if (DEBUG) Log.d(TAG, "Adding notification by uri: " + sbn.getKey());
+            updateStorageAndViewWithNotificationData(sbn, notificationAction,
+                    widgetId, storedTile);
+            widgetIdsUpdatedByUri.add(String.valueOf(widgetId));
+        }
+        return widgetIdsUpdatedByUri;
+    }
+
+    /**
+     * Try to retrieve a valid Uri via {@code sbn}, falling back to the {@code
+     * contactUriFromShortcut} if valid.
+     */
+    @Nullable
+    private String getContactUri(StatusBarNotification sbn) {
+        // First, try to get a Uri from the Person directly set on the Notification.
+        ArrayList<Person> people = sbn.getNotification().extras.getParcelableArrayList(
+                EXTRA_PEOPLE_LIST);
+        if (people != null && people.get(0) != null) {
+            String contactUri = people.get(0).getUri();
+            if (contactUri != null && !contactUri.isEmpty()) {
+                return contactUri;
+            }
+        }
+
+        // Then, try to get a Uri from the Person set on the Notification message.
+        List<Notification.MessagingStyle.Message> messages =
+                getMessagingStyleMessages(sbn.getNotification());
+        if (messages != null && !messages.isEmpty()) {
+            Notification.MessagingStyle.Message message = messages.get(0);
+            Person sender = message.getSenderPerson();
+            if (sender != null && sender.getUri() != null && !sender.getUri().isEmpty()) {
+                return sender.getUri();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns whether a notification should be matched to other Tiles by Uri.
+     *
+     * <p>Currently only matches missed calls.
+     */
+    private boolean shouldMatchNotificationByUri(StatusBarNotification sbn) {
+        Notification notification = sbn.getNotification();
+        if (notification == null) {
+            if (DEBUG) Log.d(TAG, "Notification is null");
+            return false;
+        }
+        if (!Objects.equals(notification.category, CATEGORY_MISSED_CALL)) {
+            if (DEBUG) Log.d(TAG, "Not missed call");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -309,16 +494,11 @@ public class PeopleSpaceWidgetManager {
     private void updateStorageAndViewWithNotificationData(
             StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction,
-            int appWidgetId) {
-        PeopleSpaceTile storedTile = getTileForExistingWidget(appWidgetId);
-        if (storedTile == null) {
-            if (DEBUG) Log.d(TAG, "Could not find stored tile to add notification to");
-            return;
-        }
+            int appWidgetId, PeopleSpaceTile storedTile) {
         if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
             if (DEBUG) Log.i(TAG, "Adding notification to storage, appWidgetId: " + appWidgetId);
             storedTile = augmentTileFromNotification(mContext, storedTile, sbn);
-        } else {
+        } else if (storedTile.getNotificationKey().equals(sbn.getKey())) {
             if (DEBUG) {
                 Log.i(TAG, "Removing notification from storage, appWidgetId: " + appWidgetId);
             }
@@ -440,7 +620,8 @@ public class PeopleSpaceWidgetManager {
         synchronized (mLock) {
             if (DEBUG) Log.d(TAG, "Add storage for : " + tile.getId());
             PeopleTileKey key = new PeopleTileKey(tile);
-            PeopleSpaceUtils.setSharedPreferencesStorageForTile(mContext, key, appWidgetId);
+            PeopleSpaceUtils.setSharedPreferencesStorageForTile(mContext, key, appWidgetId,
+                    tile.getContactUri());
         }
         try {
             if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + tile.getId());
@@ -496,6 +677,7 @@ public class PeopleSpaceWidgetManager {
             // Retrieve storage needed for widget deletion.
             PeopleTileKey key;
             Set<String> storedWidgetIdsForKey;
+            String contactUriString;
             synchronized (mLock) {
                 SharedPreferences widgetSp = mContext.getSharedPreferences(String.valueOf(widgetId),
                         Context.MODE_PRIVATE);
@@ -509,9 +691,11 @@ public class PeopleSpaceWidgetManager {
                 }
                 storedWidgetIdsForKey = new HashSet<>(
                         mSharedPrefs.getStringSet(key.toString(), new HashSet<>()));
+                contactUriString = mSharedPrefs.getString(String.valueOf(widgetId), null);
             }
             synchronized (mLock) {
-                PeopleSpaceUtils.removeSharedPreferencesStorageForTile(mContext, key, widgetId);
+                PeopleSpaceUtils.removeSharedPreferencesStorageForTile(mContext, key, widgetId,
+                        contactUriString);
             }
             // If another tile with the conversation is still stored, we need to keep the listener.
             if (DEBUG) Log.d(TAG, "Stored widget IDs: " + storedWidgetIdsForKey.toString());

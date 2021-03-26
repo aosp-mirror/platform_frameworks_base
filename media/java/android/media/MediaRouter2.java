@@ -194,6 +194,14 @@ public final class MediaRouter2 {
 
     /**
      * Starts scanning remote routes.
+     * <p>
+     * Route discovery can happen even when the {@link #startScan()} is not called.
+     * This is because the scanning could be started before by other apps.
+     * Therefore, calling this method after calling {@link #stopScan()} does not necessarily mean
+     * that the routes found before are removed and added again.
+     * <p>
+     * Use {@link RouteCallback} to get the route related events.
+     * <p>
      * Note that calling start/stopScan is applied to all system routers in the same process.
      *
      * @see #stopScan()
@@ -208,6 +216,15 @@ public final class MediaRouter2 {
 
     /**
      * Stops scanning remote routes to reduce resource consumption.
+     * <p>
+     * Route discovery can be continued even after this method is called.
+     * This is because the scanning is only turned off when all the apps stop scanning.
+     * Therefore, calling this method does not necessarily mean the routes are removed.
+     * Also, for the same reason it does not mean that {@link RouteCallback#onRoutesAdded(List)}
+     * is not called afterwards.
+     * <p>
+     * Use {@link RouteCallback} to get the route related events.
+     * <p>
      * Note that calling start/stopScan is applied to all system routers in the same process.
      *
      * @see #startScan()
@@ -296,24 +313,6 @@ public final class MediaRouter2 {
     @Nullable
     public String getClientPackageName() {
         return mClientPackageName;
-    }
-
-    /**
-     * Registers a callback to receive route related events when they change.
-     * <p>
-     * If the specified callback is already registered, its registration will be updated for the
-     * given {@link Executor executor}.
-     * <p>
-     * This will be no-op for non-system routers.
-     * @hide
-     */
-    @SystemApi
-    public void registerRouteCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull RouteCallback routeCallback) {
-        if (!isSystemRouter()) {
-            return;
-        }
-        registerRouteCallback(executor, routeCallback, RouteDiscoveryPreference.EMPTY);
     }
 
     /**

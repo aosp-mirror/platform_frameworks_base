@@ -56,7 +56,7 @@ class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getAuthenticatorId(mSequentialId);
+            getFreshDaemon().getAuthenticatorId();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }

@@ -263,6 +263,8 @@ public class DisplayModeDirector {
                 highestConsideredPriority = Vote.PRIORITY_APP_REQUEST_SIZE;
             }
 
+            // We try to find a range of priorities which define a non-empty set of allowed display
+            // modes. Each time we fail we increase the lowest priority.
             while (lowestConsideredPriority <= highestConsideredPriority) {
                 summarizeVotes(
                         votes, lowestConsideredPriority, highestConsideredPriority, primarySummary);
@@ -343,8 +345,15 @@ public class DisplayModeDirector {
             }
 
             if (baseModeId == INVALID_DISPLAY_MODE_ID) {
-                throw new IllegalStateException("Can't select a base display mode for display "
-                        + displayId + ". The votes are " + mVotesByDisplay.valueAt(displayId));
+                Slog.w(TAG, "Can't find a set of allowed modes which satisfies the votes. Falling"
+                        + " back to the default mode. Display = " + displayId + ", votes = " + votes
+                        + ", supported modes = " + Arrays.toString(modes));
+
+                float fps = defaultMode.getRefreshRate();
+                return new DesiredDisplayModeSpecs(defaultMode.getModeId(),
+                        /*allowGroupSwitching */ false,
+                        new RefreshRateRange(fps, fps),
+                        new RefreshRateRange(fps, fps));
             }
 
             if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE) {

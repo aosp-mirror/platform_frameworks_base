@@ -148,6 +148,14 @@ public final class MediaRouter2Manager {
 
     /**
      * Starts scanning remote routes.
+     * <p>
+     * Route discovery can happen even when the {@link #startScan()} is not called.
+     * This is because the scanning could be started before by other apps.
+     * Therefore, calling this method after calling {@link #stopScan()} does not necessarily mean
+     * that the routes found before are removed and added again.
+     * <p>
+     * Use {@link Callback} to get the route related events.
+     * <p>
      * @see #stopScan()
      */
     public void startScan() {
@@ -163,6 +171,15 @@ public final class MediaRouter2Manager {
 
     /**
      * Stops scanning remote routes to reduce resource consumption.
+     * <p>
+     * Route discovery can be continued even after this method is called.
+     * This is because the scanning is only turned off when all the apps stop scanning.
+     * Therefore, calling this method does not necessarily mean the routes are removed.
+     * Also, for the same reason it does not mean that {@link Callback#onRoutesAdded(List)}
+     * is not called afterwards.
+     * <p>
+     * Use {@link Callback} to get the route related events.
+     *
      * @see #startScan()
      */
     public void stopScan() {

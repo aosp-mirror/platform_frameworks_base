@@ -257,6 +257,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
 
     /**
+     * Namespace for all media related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_MEDIA = "media";
+
+    /**
      * Namespace for all media native related features.
      *
      * @hide

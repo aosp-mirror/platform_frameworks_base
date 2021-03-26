@@ -160,7 +160,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
                 features = new byte[0];
             }
 
-            mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
+            mCancellationSignal = getFreshDaemon().enroll(
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken),
                     EnrollmentType.DEFAULT, features, mPreviewSurface);
         } catch (RemoteException e) {

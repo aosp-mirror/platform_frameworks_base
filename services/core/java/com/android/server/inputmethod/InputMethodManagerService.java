@@ -4830,6 +4830,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodEnabledLocked(defaultImiId, true);
             }
         }
+
+        updateDefaultVoiceImeIfNeededLocked();
+
         // Here is not the perfect place to reset the switching controller. Ideally
         // mSwitchingController and mSettings should be able to share the same state.
         // TODO: Make sure that mSwitchingController and mSettings are sharing the
@@ -4840,6 +4843,37 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final List<InputMethodInfo> inputMethodList = new ArrayList<>(mMethodList);
         mHandler.obtainMessage(MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED,
                 mSettings.getCurrentUserId(), 0 /* unused */, inputMethodList).sendToTarget();
+    }
+
+    @GuardedBy("mMethodMap")
+    private void updateDefaultVoiceImeIfNeededLocked() {
+        final String systemSpeechRecognizer =
+                mContext.getString(com.android.internal.R.string.config_systemSpeechRecognizer);
+        final String currentDefaultVoiceImeId = mSettings.getDefaultVoiceInputMethod();
+        final InputMethodInfo newSystemVoiceIme = InputMethodUtils.chooseSystemVoiceIme(
+                mMethodMap, systemSpeechRecognizer, currentDefaultVoiceImeId);
+        if (newSystemVoiceIme == null) {
+            if (DEBUG) {
+                Slog.i(TAG, "Found no valid default Voice IME. If the user is still locked,"
+                        + " this may be expected.");
+            }
+            // Clear DEFAULT_VOICE_INPUT_METHOD when necessary.  Note that InputMethodSettings
+            // does not update the actual Secure Settings until the user is unlocked.
+            if (!TextUtils.isEmpty(currentDefaultVoiceImeId)) {
+                mSettings.putDefaultVoiceInputMethod("");
+                // We don't support disabling the voice ime when a package is removed from the
+                // config.
+            }
+            return;
+        }
+        if (TextUtils.equals(currentDefaultVoiceImeId, newSystemVoiceIme.getId())) {
+            return;
+        }
+        if (DEBUG) {
+            Slog.i(TAG, "Enabling the default Voice IME:" + newSystemVoiceIme);
+        }
+        setInputMethodEnabledLocked(newSystemVoiceIme.getId(), true);
+        mSettings.putDefaultVoiceInputMethod(newSystemVoiceIme.getId());
     }
 
     // ----------------------------------------------------------------------
