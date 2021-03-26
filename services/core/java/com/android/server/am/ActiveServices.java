@@ -70,6 +70,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
@@ -235,6 +236,12 @@ public final class ActiveServices {
     /** Mapping from uid to their foreground service AppOpCallbacks (if they have one). */
     @GuardedBy("mAm")
     private final SparseArray<AppOpCallback> mFgsAppOpCallbacks = new SparseArray<>();
+
+    /**
+     * The list of packages with the service restart backoff disabled.
+     */
+    @GuardedBy("mAm")
+    private final ArraySet<String> mRestartBackoffDisabledPackages = new ArraySet<>();
 
     /**
      * For keeping ActiveForegroundApps retaining state while the screen is off.
@@ -3272,25 +3279,32 @@ public final class ActiveServices {
                 }
             }
 
-            r.nextRestartTime = now + r.restartDelay;
+            if (isServiceRestartBackoffEnabledLocked(r.packageName)) {
+                r.nextRestartTime = now + r.restartDelay;
 
-            // Make sure that we don't end up restarting a bunch of services
-            // all at the same time.
-            boolean repeat;
-            do {
-                repeat = false;
+                // Make sure that we don't end up restarting a bunch of services
+                // all at the same time.
+                boolean repeat;
                 final long restartTimeBetween = mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN;
-                for (int i=mRestartingServices.size()-1; i>=0; i--) {
-                    ServiceRecord r2 = mRestartingServices.get(i);
-                    if (r2 != r && r.nextRestartTime >= (r2.nextRestartTime-restartTimeBetween)
-                            && r.nextRestartTime < (r2.nextRestartTime+restartTimeBetween)) {
-                        r.nextRestartTime = r2.nextRestartTime + restartTimeBetween;
-                        r.restartDelay = r.nextRestartTime - now;
-                        repeat = true;
-                        break;
+                do {
+                    repeat = false;
+                    for (int i = mRestartingServices.size() - 1; i >= 0; i--) {
+                        final ServiceRecord r2 = mRestartingServices.get(i);
+                        if (r2 != r
+                                && r.nextRestartTime >= (r2.nextRestartTime - restartTimeBetween)
+                                && r.nextRestartTime < (r2.nextRestartTime + restartTimeBetween)) {
+                            r.nextRestartTime = r2.nextRestartTime + restartTimeBetween;
+                            r.restartDelay = r.nextRestartTime - now;
+                            repeat = true;
+                            break;
+                        }
                     }
-                }
-            } while (repeat);
+                } while (repeat);
+            } else {
+                // It's been forced to ignore the restart backoff, fix the delay here.
+                r.restartDelay = mAm.mConstants.SERVICE_RESTART_DURATION;
+                r.nextRestartTime = now + r.restartDelay;
+            }
 
         } else {
             // Persistent processes are immediately restarted, so there is no
@@ -3310,15 +3324,22 @@ public final class ActiveServices {
 
         cancelForegroundNotificationLocked(r);
 
+        performScheduleRestartLocked(r, "Scheduling", reason, SystemClock.uptimeMillis());
+
+        return true;
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mAm")
+    void performScheduleRestartLocked(ServiceRecord r, @NonNull String scheduling,
+            @NonNull String reason, @UptimeMillisLong long now) {
         mAm.mHandler.removeCallbacks(r.restarter);
         mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
-        r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
-        Slog.w(TAG, "Scheduling restart of crashed service "
+        r.nextRestartTime = now + r.restartDelay;
+        Slog.w(TAG, scheduling + " restart of crashed service "
                 + r.shortInstanceName + " in " + r.restartDelay + "ms for " + reason);
         EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
                 r.userId, r.shortInstanceName, r.restartDelay);
-
-        return true;
     }
 
     final void performServiceRestartLocked(ServiceRecord r) {
@@ -3381,6 +3402,52 @@ public final class ActiveServices {
                 r.restartTracker = null;
             }
         }
+    }
+
+    /**
+     * Toggle service restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    @GuardedBy("mAm")
+    void setServiceRestartBackoffEnabledLocked(@NonNull String packageName, boolean enable,
+            @NonNull String reason) {
+        if (!enable) {
+            if (mRestartBackoffDisabledPackages.contains(packageName)) {
+                // Already disabled, do nothing.
+                return;
+            }
+            mRestartBackoffDisabledPackages.add(packageName);
+
+            final long now = SystemClock.uptimeMillis();
+            for (int i = 0, size = mRestartingServices.size(); i < size; i++) {
+                final ServiceRecord r = mRestartingServices.get(i);
+                if (TextUtils.equals(r.packageName, packageName)) {
+                    final long remaining = r.nextRestartTime - now;
+                    if (remaining > mAm.mConstants.SERVICE_RESTART_DURATION) {
+                        r.restartDelay = mAm.mConstants.SERVICE_RESTART_DURATION;
+                        r.nextRestartTime = now + r.restartDelay;
+                        performScheduleRestartLocked(r, "Rescheduling", reason, now);
+                    }
+                }
+            }
+        } else {
+            removeServiceRestartBackoffEnabledLocked(packageName);
+            // For the simplicity, we are not going to reschedule its pending restarts
+            // when we turn the backoff policy back on.
+        }
+    }
+
+    @GuardedBy("mAm")
+    private void removeServiceRestartBackoffEnabledLocked(@NonNull String packageName) {
+        mRestartBackoffDisabledPackages.remove(packageName);
+    }
+
+    /**
+     * @return {@code false} if the given package has been disable from enforcing the service
+     * restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    @GuardedBy("mAm")
+    boolean isServiceRestartBackoffEnabledLocked(@NonNull String packageName) {
+        return !mRestartBackoffDisabledPackages.contains(packageName);
     }
 
     private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
@@ -4431,6 +4498,7 @@ public final class ActiveServices {
                 mPendingBringups.removeAt(i);
             }
         }
+        removeServiceRestartBackoffEnabledLocked(packageName);
     }
 
     void cleanUpServices(int userId, ComponentName component, Intent baseIntent) {

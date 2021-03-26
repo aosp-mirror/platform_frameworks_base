@@ -8436,6 +8436,26 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Toggle service restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    void setServiceRestartBackoffEnabled(@NonNull String packageName, boolean enable,
+            @NonNull String reason) {
+        synchronized (this) {
+            mServices.setServiceRestartBackoffEnabledLocked(packageName, enable, reason);
+        }
+    }
+
+    /**
+     * @return {@code false} if the given package has been disable from enforcing the service
+     * restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    boolean isServiceRestartBackoffEnabled(@NonNull String packageName) {
+        synchronized (this) {
+            return mServices.isServiceRestartBackoffEnabledLocked(packageName);
+        }
+    }
+
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
