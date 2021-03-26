@@ -22,9 +22,9 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"הגדרות"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"תפריט"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> במצב תמונה בתוך תמונה"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולכבות את התכונה."</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולהשבית את התכונה."</string>
     <string name="pip_play" msgid="3496151081459417097">"הפעלה"</string>
-    <string name="pip_pause" msgid="690688849510295232">"השהה"</string>
+    <string name="pip_pause" msgid="690688849510295232">"השהיה"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"אפשר לדלג אל הבא"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"אפשר לדלג אל הקודם"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"שינוי גודל"</string>
