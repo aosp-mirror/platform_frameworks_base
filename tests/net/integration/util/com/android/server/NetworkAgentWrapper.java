@@ -41,6 +41,7 @@ import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
+import android.net.NetworkScore;
 import android.net.NetworkSpecifier;
 import android.net.QosFilter;
 import android.net.SocketKeepalive;
@@ -197,6 +198,11 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         protected void removeKeepalivePacketFilter(Message msg) {
             Log.i(mWrapper.mLogTag, "Remove keepalive packet filter.");
         }
+    }
+
+    public void setScore(@NonNull final NetworkScore score) {
+        mScore = score.getLegacyInt();
+        mNetworkAgent.sendNetworkScore(score);
     }
 
     public void adjustScore(int change) {

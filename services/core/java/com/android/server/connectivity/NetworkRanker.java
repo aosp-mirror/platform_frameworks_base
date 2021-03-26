@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 
 import java.util.Collection;
@@ -46,5 +47,42 @@ public class NetworkRanker {
             }
         }
         return bestNetwork;
+    }
+
+    /**
+     * Returns whether an offer has a chance to beat a champion network for a request.
+     *
+     * Offers are sent by network providers when they think they might be able to make a network
+     * with the characteristics contained in the offer. If the offer has no chance to beat
+     * the currently best network for a given request, there is no point in the provider spending
+     * power trying to find and bring up such a network.
+     *
+     * Note that having an offer up does not constitute a commitment from the provider part
+     * to be able to bring up a network with these characteristics, or a network at all for
+     * that matter. This is only used to save power by letting providers know when they can't
+     * beat a current champion.
+     *
+     * @param request The request to evaluate against.
+     * @param championScore The currently best network for this request.
+     * @param offer The offer.
+     * @return Whether the offer stands a chance to beat the champion.
+     */
+    public boolean mightBeat(@NonNull final NetworkRequest request,
+            @Nullable final FullScore championScore,
+            @NonNull final NetworkOffer offer) {
+        // If this network can't even satisfy the request then it can't beat anything, not
+        // even an absence of network. It can't satisfy it anyway.
+        if (!request.canBeSatisfiedBy(offer.caps)) return false;
+        // If there is no satisfying network, then this network can beat, because some network
+        // is always better than no network.
+        if (null == championScore) return true;
+        final int offerIntScore;
+        if (offer.caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+            // If the offer might have Internet access, then it might validate.
+            offerIntScore = offer.score.getLegacyIntAsValidated();
+        } else {
+            offerIntScore = offer.score.getLegacyInt();
+        }
+        return championScore.getLegacyInt() < offerIntScore;
     }
 }
