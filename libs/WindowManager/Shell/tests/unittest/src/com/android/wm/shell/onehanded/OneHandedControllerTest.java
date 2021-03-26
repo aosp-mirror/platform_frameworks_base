@@ -58,6 +58,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     Display mDisplay;
     DisplayLayout mDisplayLayout;
+    OneHandedAccessibilityUtil mOneHandedAccessibilityUtil;
     OneHandedController mSpiedOneHandedController;
     OneHandedTimeoutHandler mSpiedTimeoutHandler;
 
@@ -116,6 +117,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 new Rect(0, 0, mDisplayLayout.width(), mDisplayLayout.height()));
         when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(mDisplayLayout);
 
+        mOneHandedAccessibilityUtil = new OneHandedAccessibilityUtil(mContext);
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
                 mMockDisplayController,
@@ -125,6 +127,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mMockTutorialHandler,
                 mMockGestureHandler,
                 mMockSettingsUitl,
+                mOneHandedAccessibilityUtil,
                 mSpiedTimeoutHandler,
                 mMockUiEventLogger,
                 mMockOverlayManager,
@@ -139,8 +142,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         final OneHandedAnimationController animationController = new OneHandedAnimationController(
                 mContext);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
-                mContext, mDisplayLayout, animationController, mMockTutorialHandler,
-                mMockBackgroundOrganizer, mMockShellMainExecutor);
+                mContext, mDisplayLayout, mMockSettingsUitl, animationController,
+                mMockTutorialHandler, mMockBackgroundOrganizer, mMockShellMainExecutor);
 
         assertThat(displayAreaOrganizer.isInOneHanded()).isFalse();
     }
