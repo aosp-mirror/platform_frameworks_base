@@ -83,6 +83,11 @@ public class AccessibilityShortcutController {
     public static final ComponentName REDUCE_BRIGHT_COLORS_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "ReduceBrightColors");
 
+    // The component name for the sub setting of Accessibility button in Accessibility settings
+    public static final ComponentName ACCESSIBILITY_BUTTON_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "AccessibilityButton");
+
+
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)

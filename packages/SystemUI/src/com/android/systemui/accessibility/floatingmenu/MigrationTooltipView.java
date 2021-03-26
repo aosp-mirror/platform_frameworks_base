@@ -16,7 +16,12 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_BUTTON_COMPONENT_NAME;
+
 import android.content.Context;
+import android.content.Intent;
+import android.provider.Settings;
+import android.text.method.LinkMovementMethod;
 
 import com.android.systemui.R;
 
@@ -28,7 +33,19 @@ class MigrationTooltipView extends BaseTooltipView {
     MigrationTooltipView(Context context, AccessibilityFloatingMenuView anchorView) {
         super(context, anchorView);
 
-        setDescription(
-                getResources().getString(R.string.accessibility_floating_button_migration_tooltip));
+        final Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Intent.EXTRA_COMPONENT_NAME,
+                ACCESSIBILITY_BUTTON_COMPONENT_NAME.flattenToShortString());
+        final AnnotationLinkSpan.LinkInfo linkInfo = new AnnotationLinkSpan.LinkInfo(
+                AnnotationLinkSpan.LinkInfo.DEFAULT_ANNOTATION,
+                v -> {
+                    getContext().startActivity(intent);
+                    hide();
+                });
+
+        final int textResId = R.string.accessibility_floating_button_migration_tooltip;
+        setDescription(AnnotationLinkSpan.linkify(getContext().getText(textResId), linkInfo));
+        setMovementMethod(LinkMovementMethod.getInstance());
     }
 }

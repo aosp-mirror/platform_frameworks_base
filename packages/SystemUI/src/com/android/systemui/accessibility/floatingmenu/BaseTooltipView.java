@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
+import android.text.method.MovementMethod;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -148,6 +149,10 @@ class BaseTooltipView extends FrameLayout {
 
     void setDescription(CharSequence text) {
         mTextView.setText(text);
+    }
+
+    void setMovementMethod(MovementMethod movement) {
+        mTextView.setMovementMethod(movement);
     }
 
     private boolean isShowing() {
