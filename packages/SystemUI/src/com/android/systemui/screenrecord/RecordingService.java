@@ -300,7 +300,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 .setColorized(true)
                 .setColor(getResources().getColor(R.color.GM2_red_700))
                 .setOngoing(true)
-                .setShowForegroundImmediately(true)
+                .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
                 .setContentIntent(
                         PendingIntent.getService(this, REQUEST_CODE, stopIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))

@@ -5716,6 +5716,9 @@ package android.app {
     field public static final int FLAG_ONGOING_EVENT = 2; // 0x2
     field public static final int FLAG_ONLY_ALERT_ONCE = 8; // 0x8
     field @Deprecated public static final int FLAG_SHOW_LIGHTS = 1; // 0x1
+    field public static final int FOREGROUND_SERVICE_DEFAULT = 0; // 0x0
+    field public static final int FOREGROUND_SERVICE_DEFERRED = 2; // 0x2
+    field public static final int FOREGROUND_SERVICE_IMMEDIATE = 1; // 0x1
     field public static final int GROUP_ALERT_ALL = 0; // 0x0
     field public static final int GROUP_ALERT_CHILDREN = 2; // 0x2
     field public static final int GROUP_ALERT_SUMMARY = 1; // 0x1
@@ -5919,6 +5922,7 @@ package android.app {
     method @NonNull public android.app.Notification.Builder setDeleteIntent(android.app.PendingIntent);
     method @NonNull public android.app.Notification.Builder setExtras(android.os.Bundle);
     method @NonNull public android.app.Notification.Builder setFlag(int, boolean);
+    method @NonNull public android.app.Notification.Builder setForegroundServiceBehavior(int);
     method @NonNull public android.app.Notification.Builder setFullScreenIntent(android.app.PendingIntent, boolean);
     method @NonNull public android.app.Notification.Builder setGroup(String);
     method @NonNull public android.app.Notification.Builder setGroupAlertBehavior(int);
@@ -5937,7 +5941,7 @@ package android.app {
     method @NonNull public android.app.Notification.Builder setRemoteInputHistory(CharSequence[]);
     method @NonNull public android.app.Notification.Builder setSettingsText(CharSequence);
     method @NonNull public android.app.Notification.Builder setShortcutId(String);
-    method @NonNull public android.app.Notification.Builder setShowForegroundImmediately(boolean);
+    method @Deprecated @NonNull public android.app.Notification.Builder setShowForegroundImmediately(boolean);
     method @NonNull public android.app.Notification.Builder setShowWhen(boolean);
     method @NonNull public android.app.Notification.Builder setSmallIcon(@DrawableRes int);
     method @NonNull public android.app.Notification.Builder setSmallIcon(@DrawableRes int, int);
