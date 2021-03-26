@@ -48,6 +48,7 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
+import android.media.AudioFormat;
 import android.media.permission.Identity;
 import android.media.permission.PermissionUtil;
 import android.media.permission.SafeCloseable;
@@ -56,6 +57,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
@@ -66,6 +68,7 @@ import android.os.ShellCallback;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionService;
@@ -983,6 +986,8 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        //----------------- Hotword Detection/Validation APIs --------------------------------//
+
         @Override
         public void updateState(@Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory) {
@@ -1017,6 +1022,72 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     mImpl.shutdownHotwordDetectionServiceLocked();
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void startListeningFromMic(
+                AudioFormat audioFormat,
+                IMicrophoneHotwordDetectionVoiceInteractionCallback callback)
+                throws RemoteException {
+            enforceCallingPermission(Manifest.permission.RECORD_AUDIO);
+            enforceCallingPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD);
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                if (mImpl == null) {
+                    Slog.w(TAG, "startListeningFromMic without running voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.startListeningFromMicLocked(audioFormat, callback);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void startListeningFromExternalSource(
+                ParcelFileDescriptor audioStream,
+                AudioFormat audioFormat,
+                PersistableBundle options,
+                IMicrophoneHotwordDetectionVoiceInteractionCallback callback)
+                throws RemoteException {
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                if (mImpl == null) {
+                    Slog.w(TAG, "startListeningFromExternalSource without running voice"
+                            + " interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.startListeningFromExternalSourceLocked(
+                            audioStream, audioFormat, options, callback);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void stopListeningFromMic() throws RemoteException {
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                if (mImpl == null) {
+                    Slog.w(TAG, "stopListeningFromMic without running voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.stopListeningFromMicLocked();
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
