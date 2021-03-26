@@ -17,11 +17,13 @@
 package com.android.wm.shell.startingsurface;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.os.UserHandle.getUserHandleForUid;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -42,6 +44,7 @@ import com.android.internal.R;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.Quantizer;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.TransactionPool;
 
 import java.util.List;
@@ -62,6 +65,7 @@ public class SplashscreenContentDrawer {
     // also 108*108 pixels, then do not enlarge this icon if only need to show foreground icon.
     private static final float ENLARGE_FOREGROUND_ICON_THRESHOLD = (72f * 72f) / (108f * 108f);
     private final Context mContext;
+    private final IconProvider mIconProvider;
     private final int mMaxAnimatableIconDuration;
 
     private int mIconSize;
@@ -78,6 +82,7 @@ public class SplashscreenContentDrawer {
     SplashscreenContentDrawer(Context context, int maxAnimatableIconDuration,
             int iconExitAnimDuration, int appRevealAnimDuration, TransactionPool pool) {
         mContext = context;
+        mIconProvider = new IconProvider(context);
         mMaxAnimatableIconDuration = maxAnimatableIconDuration;
         mAppRevealDuration = appRevealAnimDuration;
         mIconExitDuration = iconExitAnimDuration;
@@ -141,20 +146,23 @@ public class SplashscreenContentDrawer {
         }
     }
 
-    SplashScreenView makeSplashScreenContentView(Context context, int iconRes) {
+    SplashScreenView makeSplashScreenContentView(Context context, ActivityInfo ai) {
         updateDensity();
 
         getWindowAttrs(context, mTmpAttrs);
         final StartingWindowViewBuilder builder = new StartingWindowViewBuilder();
         final int animationDuration;
-        final Drawable iconDrawable;
+        Drawable iconDrawable;
         if (mTmpAttrs.mReplaceIcon != null) {
             iconDrawable = mTmpAttrs.mReplaceIcon;
             animationDuration = Math.max(0,
                     Math.min(mTmpAttrs.mAnimationDuration, mMaxAnimatableIconDuration));
         } else {
-            iconDrawable = iconRes != 0 ? context.getDrawable(iconRes)
-                    : context.getPackageManager().getDefaultActivityIcon();
+            iconDrawable = mIconProvider.getIconForUI(
+                    ai, getUserHandleForUid(ai.applicationInfo.uid));
+            if (iconDrawable == null) {
+                iconDrawable = context.getPackageManager().getDefaultActivityIcon();
+            }
             animationDuration = 0;
         }
         final int themeBGColor = peekWindowBGColor(context);
