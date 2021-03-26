@@ -22185,10 +22185,10 @@ package android.media {
     field public static final int STATUS_USABLE_IN_FUTURE = 5; // 0x5
   }
 
-  public static class MediaDrm.LogMessage {
-    field @NonNull public final String message;
-    field public final int priority;
-    field public final long timestampMillis;
+  public static final class MediaDrm.LogMessage {
+    method @NonNull public String getMessage();
+    method public int getPriority();
+    method public long getTimestampMillis();
   }
 
   public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
