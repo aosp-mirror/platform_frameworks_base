@@ -7121,7 +7121,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // once we have a booted system.
         mInstaller.setWarnIfHeld(mLock);
 
-        PackageParser.readConfigUseRoundIcon(mContext.getResources());
+        ParsingPackageUtils.readConfigUseRoundIcon(mContext.getResources());
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
 
