@@ -68,7 +68,7 @@ import java.util.Locale;
  *                    mark and track it as such.
  */
 @SystemApi
-public class AlwaysOnHotwordDetector {
+public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     //---- States of Keyphrase availability. Return codes for onAvailabilityChanged() ----//
     /**
      * Indicates that this hotword detector is no longer valid for any recognition
@@ -459,7 +459,7 @@ public class AlwaysOnHotwordDetector {
     /**
      * Callbacks for always-on hotword detection.
      */
-    public static abstract class Callback {
+    public abstract static class Callback implements HotwordDetector.Callback {
 
         /**
          * Updates the availability state of the active keyphrase and locale on every keyphrase
@@ -547,11 +547,13 @@ public class AlwaysOnHotwordDetector {
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
             boolean supportHotwordDetectionService, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
+        super(modelManagementService, callback);
+
+        mHandler = new MyHandler();
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
         mExternalCallback = callback;
-        mHandler = new MyHandler();
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mTargetSdkVersion = targetSdkVersion;
@@ -705,6 +707,17 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
+     * Starts recognition for the associated keyphrase.
+     *
+     * @see #startRecognition(int)
+     */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    @Override
+    public boolean startRecognition() {
+        return startRecognition(0);
+    }
+
+    /**
      * Stops recognition for the associated keyphrase.
      * Caller must be the active voice interaction service via
      * Settings.Secure.VOICE_INTERACTION_SERVICE.
@@ -718,6 +731,7 @@ public class AlwaysOnHotwordDetector {
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    @Override
     public boolean stopRecognition() {
         if (DBG) Slog.d(TAG, "stopRecognition()");
         synchronized (mLock) {

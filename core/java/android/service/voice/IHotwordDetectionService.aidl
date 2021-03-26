@@ -29,10 +29,17 @@ import android.service.voice.IDspHotwordDetectionCallback;
  */
 oneway interface IHotwordDetectionService {
     void detectFromDspSource(
-    in ParcelFileDescriptor audioStream,
-    in AudioFormat audioFormat,
-    long timeoutMillis,
-    in IDspHotwordDetectionCallback callback);
+        in ParcelFileDescriptor audioStream,
+        in AudioFormat audioFormat,
+        long timeoutMillis,
+        in IDspHotwordDetectionCallback callback);
+
+    void detectFromMicrophoneSource(
+        in ParcelFileDescriptor audioStream,
+        int audioSource,
+        in AudioFormat audioFormat,
+        in PersistableBundle options,
+        in IDspHotwordDetectionCallback callback);
 
     void updateState(in PersistableBundle options, in SharedMemory sharedMemory);
 }
