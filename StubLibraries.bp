@@ -434,6 +434,7 @@ droidstubs {
         "core/java/android/os/RemoteException.java",
         "core/java/android/util/AndroidException.java",
     ],
+    libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "core_platform",
     annotations_enabled: true,
@@ -447,7 +448,7 @@ droidstubs {
 java_library_static {
     name: "hwbinder.stubs",
     sdk_version: "core_current",
-    libs: ["stub-annotations"],
+    libs: ["framework-annotations-lib"],
     srcs: [
         ":hwbinder-stubs-docs",
     ],
