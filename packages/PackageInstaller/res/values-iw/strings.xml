@@ -21,9 +21,9 @@
     <string name="done" msgid="6632441120016885253">"סיום"</string>
     <string name="cancel" msgid="1018267193425558088">"ביטול"</string>
     <string name="installing" msgid="4921993079741206516">"מתקין…"</string>
-    <string name="installing_app" msgid="1165095864863849422">"מתקין את <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"מתבצעת התקנה של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"האפליקציה הותקנה."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"האם ברצונך להתקין אפליקציה זו?"</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"להתקין את האפליקציה הזו?"</string>
     <string name="install_confirm_question_update" msgid="7942235418781274635">"האם ברצונך להתקין עדכון עבור אפליקציה קיימת זו? הנתונים הקיימים שלך לא יאבדו."</string>
     <string name="install_confirm_question_update_system" msgid="4713001702777910263">"האם ברצונך להתקין עדכון עבור אפליקציה מובנית זו? הנתונים הקיימים שלך לא יאבדו."</string>
     <string name="install_failed" msgid="5777824004474125469">"האפליקציה לא הותקנה."</string>
@@ -31,14 +31,14 @@
     <string name="install_failed_conflict" msgid="3493184212162521426">"האפליקציה לא הותקנה כי החבילה מתנגשת עם חבילה קיימת."</string>
     <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"האפליקציה לא הותקנה כי האפליקציה אינה תואמת לטאבלט."</string>
     <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"האפליקציה הזו אינה תואמת לטלוויזיה שלך."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"האפליקציה לא הותקנה כי האפליקציה אינה תואמת לטלפון."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"האפליקציה לא הותקנה כי היא לא תואמת לטלפון."</string>
     <string name="install_failed_invalid_apk" msgid="8581007676422623930">"האפליקציה לא הותקנה כי נראה שהחבילה לא תקפה."</string>
     <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"לא ניתן להתקין את <xliff:g id="APP_NAME">%1$s</xliff:g> בטאבלט שלך."</string>
     <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"לא ניתן להתקין את <xliff:g id="APP_NAME">%1$s</xliff:g> בטלוויזיה שלך."</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"לא ניתן להתקין את <xliff:g id="APP_NAME">%1$s</xliff:g> בטלפון שלך."</string>
     <string name="launch" msgid="3952550563999890101">"פתיחה"</string>
     <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"מנהל המערכת שלך לא מתיר התקנה של אפליקציות ממקורות לא ידועים"</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"למשתמש זה אין הרשאה להתקין אפליקציות שאינן מוכרות"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"למשתמש הזה אין הרשאה להתקין אפליקציות שאינן מוכרות"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"למשתמש הזה אין הרשאה להתקין אפליקציות"</string>
     <string name="ok" msgid="7871959885003339302">"אישור"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ניהול אפליקציות"</string>
@@ -52,16 +52,16 @@
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"לא ניתן היה להסיר את התקנת האפליקציה."</string>
     <string name="uninstall_application_title" msgid="4045420072401428123">"הסרת התקנה של האפליקציה"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"הסרת התקנה של עדכון"</string>
-    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> הוא חלק מהאפליקציה הבאה:"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"הפעילות <xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> היא חלק מהאפליקציה הבאה:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"האם ברצונך להסיר את ההתקנה של אפליקציה זו?"</string>
-    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"האם אתה רוצה להסיר את האפליקציה הזו עבור "<b>"כל"</b>" המשתמשים? האפליקציה והנתונים שלה יוסרו מ"<b>"כל"</b>" המשתמשים במכשיר."</string>
-    <string name="uninstall_application_text_user" msgid="498072714173920526">"האם ברצונך להסיר את התקנתה של אפליקציה זו עבור המשתמש <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"להסיר את האפליקציה הזו עבור "<b>"כל"</b>" המשתמשים? האפליקציה והנתונים שלה יוסרו עבור "<b>"כל"</b>" המשתמשים במכשיר."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"להסיר את ההתקנה של האפליקציה הזו עבור <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"האם להחליף את האפליקציה הזאת בגרסת היצרן? כל הנתונים יוסרו."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"האם להחליף את האפליקציה הזאת בגרסת היצרן? כל הנתונים יוסרו. הפעולה תשפיע על כל משתמשי המכשיר, כולל משתמשים בעלי פרופיל עבודה."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"שמירת <xliff:g id="SIZE">%1$s</xliff:g> מנתוני האפליקציה."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"התקנות בתהליכי הסרה"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"הסרות התקנה שנכשלו"</string>
-    <string name="uninstalling" msgid="8709566347688966845">"מסיר התקנה..."</string>
+    <string name="uninstalling" msgid="8709566347688966845">"בתהליך הסרת התקנה..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"מסיר את ההתקנה של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"הסרת ההתקנה הסתיימה."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"ההתקנה של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> הוסרה"</string>
