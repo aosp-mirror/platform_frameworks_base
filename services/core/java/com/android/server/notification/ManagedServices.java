@@ -287,6 +287,7 @@ abstract public class ManagedServices {
                                     && !mDefaultComponents.contains(currentComponent)) {
                                 if (approved.remove(currentComponent.flattenToString())) {
                                     disabledComponents.add(currentComponent);
+                                    clearUserSetFlagLocked(currentComponent, userId);
                                     changed = true;
                                 }
                             }
@@ -307,6 +308,12 @@ abstract public class ManagedServices {
         changes.put(false, disabledComponents);
 
         return changes;
+    }
+
+    private boolean clearUserSetFlagLocked(ComponentName component, int userId) {
+        String approvedValue = getApprovedValue(component.flattenToString());
+        ArraySet<String> userSet = mUserSetServices.get(userId);
+        return userSet != null && userSet.remove(approvedValue);
     }
 
     protected int getBindFlags() {

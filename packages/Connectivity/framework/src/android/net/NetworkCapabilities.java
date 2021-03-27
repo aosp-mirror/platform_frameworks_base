@@ -273,6 +273,8 @@ public final class NetworkCapabilities implements Parcelable {
             NET_CAPABILITY_VEHICLE_INTERNAL,
             NET_CAPABILITY_NOT_VCN_MANAGED,
             NET_CAPABILITY_ENTERPRISE,
+            NET_CAPABILITY_VSIM,
+            NET_CAPABILITY_BIP,
     })
     public @interface NetCapability { }
 
@@ -492,8 +494,22 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_ENTERPRISE = 29;
 
+    /**
+     * Indicates that this network has ability to access the carrier's Virtual Sim service.
+     * @hide
+     */
+    @SystemApi
+    public static final int NET_CAPABILITY_VSIM = 30;
+
+    /**
+     * Indicates that this network has ability to support Bearer Independent Protol.
+     * @hide
+     */
+    @SystemApi
+    public static final int NET_CAPABILITY_BIP = 31;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_ENTERPRISE;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_BIP;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -2089,6 +2105,8 @@ public final class NetworkCapabilities implements Parcelable {
             case NET_CAPABILITY_VEHICLE_INTERNAL:     return "VEHICLE_INTERNAL";
             case NET_CAPABILITY_NOT_VCN_MANAGED:      return "NOT_VCN_MANAGED";
             case NET_CAPABILITY_ENTERPRISE:           return "ENTERPRISE";
+            case NET_CAPABILITY_VSIM:                 return "VSIM";
+            case NET_CAPABILITY_BIP:                  return "BIP";
             default:                                  return Integer.toString(capability);
         }
     }

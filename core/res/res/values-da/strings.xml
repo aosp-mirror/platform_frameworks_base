@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Appen kører"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apps, der bruger batteri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Forstørrelse"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Sikkerhedspolitik for hjælpefunktioner"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruger batteri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> apps bruger batteri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Tryk for at se info om batteri- og dataforbrug"</string>
@@ -1692,7 +1691,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Brug genvej"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ombytning af farver"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korriger farve"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Reducer lysstyrken"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ekstra dæmpet belysning"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Lydstyrkeknapperne blev holdt nede. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> er aktiveret."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Lydstyrkeknapperne blev holdt nede. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> er deaktiveret."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Hold begge lydstyrkeknapper nede i tre sekunder for at bruge <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2249,8 +2248,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Beskyttelse af sensoroplysninger"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Appens ikon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Appens brandimage"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Tjek adgangsindstillingerne"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> kan se og styre din skærm. Tryk for at se mere."</string>
 </resources>

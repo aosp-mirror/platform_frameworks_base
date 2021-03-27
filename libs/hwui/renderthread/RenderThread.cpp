@@ -20,6 +20,7 @@
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
 #include "EglManager.h"
+#include "Properties.h"
 #include "Readback.h"
 #include "RenderProxy.h"
 #include "VulkanManager.h"

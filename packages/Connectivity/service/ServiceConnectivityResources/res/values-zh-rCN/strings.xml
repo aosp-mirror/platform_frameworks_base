@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,31 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"登录到WLAN网络"</string>
-    <string name="network_available_sign_in" msgid="1520342291829283114">"登录到网络"</string>
-    <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
-    <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 无法访问互联网"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"点按即可查看相关选项"</string>
-    <string name="mobile_no_internet" msgid="4014455157529909781">"此移动网络无法访问互联网"</string>
-    <string name="other_networks_no_internet" msgid="6698711684200067033">"此网络无法访问互联网"</string>
-    <string name="private_dns_broken_detailed" msgid="3709388271074611847">"无法访问私人 DNS 服务器"</string>
-    <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 的连接受限"</string>
-    <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"点按即可继续连接"</string>
-    <string name="network_switch_metered" msgid="1531869544142283384">"已切换至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="1358296010128405906">"设备会在<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>无法访问互联网时使用<xliff:g id="NEW_NETWORK">%1$s</xliff:g>（可能需要支付相应的费用）。"</string>
-    <string name="network_switch_metered_toast" msgid="501662047275723743">"已从<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>切换至<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-    <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"未知网络类型"</string>
+   -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="connectivityResourcesAppLabel" msgid="8294935652079168395">"系统网络连接资源"</string>
+    <string name="wifi_available_sign_in" msgid="5254156478006453593">"登录到WLAN网络"</string>
+    <string name="network_available_sign_in" msgid="7794369329839408792">"登录到网络"</string>
+    <!-- no translation found for network_available_sign_in_detailed (3643910593681893097) -->
+    <skip />
+    <string name="wifi_no_internet" msgid="3961697321010262514">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 无法访问互联网"</string>
+    <string name="wifi_no_internet_detailed" msgid="1229067002306296104">"点按即可查看相关选项"</string>
+    <string name="mobile_no_internet" msgid="2262524005014119639">"此移动网络无法访问互联网"</string>
+    <string name="other_networks_no_internet" msgid="8226004998719563755">"此网络无法访问互联网"</string>
+    <string name="private_dns_broken_detailed" msgid="3537567373166991809">"无法访问私人 DNS 服务器"</string>
+    <string name="network_partial_connectivity" msgid="5957065286265771273">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 的连接受限"</string>
+    <string name="network_partial_connectivity_detailed" msgid="6975752539442533034">"点按即可继续连接"</string>
+    <string name="network_switch_metered" msgid="2814798852883117872">"已切换至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="605546931076348229">"设备会在<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>无法访问互联网时使用<xliff:g id="NEW_NETWORK">%1$s</xliff:g>（可能需要支付相应的费用）。"</string>
+    <string name="network_switch_metered_toast" msgid="8831325515040986641">"已从<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>切换至<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="2255670471736226365">"移动数据"</item>
-    <item msgid="5520925862115353992">"WLAN"</item>
-    <item msgid="1055487873974272842">"蓝牙"</item>
-    <item msgid="1616528372438698248">"以太网"</item>
-    <item msgid="9177085807664964627">"VPN"</item>
+    <item msgid="5454013645032700715">"移动数据"</item>
+    <item msgid="6341719431034774569">"WLAN"</item>
+    <item msgid="5081440868800877512">"蓝牙"</item>
+    <item msgid="1160736166977503463">"以太网"</item>
+    <item msgid="7347618872551558605">"VPN"</item>
   </string-array>
+    <string name="network_switch_type_name_unknown" msgid="7826330274368951740">"未知网络类型"</string>
 </resources>

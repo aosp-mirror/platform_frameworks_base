@@ -550,6 +550,16 @@ public class Binder implements IBinder {
     public final native void markVintfStability();
 
     /**
+     * Use a VINTF-stability binder w/o VINTF requirements. Should be called
+     * on a binder before it is sent out of process.
+     *
+     * This must be called before the object is sent to another process.
+     *
+     * @hide
+     */
+    public final native void forceDowngradeToSystemStability();
+
+    /**
      * Flush any Binder commands pending in the current thread to the kernel
      * driver.  This can be
      * useful to call before performing an operation that may block for a long

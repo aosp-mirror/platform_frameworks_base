@@ -985,19 +985,27 @@ public final class MediaFormat {
 
     /**
      * A key describing the maximum Quantization Parameter allowed for encoding video.
-     * This key applies to all three video frame types (I, P, and B). This value fills
-     * in for any of the frame-specific #KEY_VIDEO_QP_I_MAX, #KEY_VIDEO_QP_P_MAX, or
-     * #KEY_VIDEO_QP_B_MAX keys that are not specified
+     * This key applies to all three video picture types (I, P, and B).
+     * The value is used directly for picture type I; a per-mime formula is used
+     * to calculate the value for the remaining picture types.
+     *
+     * This calculation can be avoided by directly specifying values for each picture type
+     * using the type-specific keys {@link #KEY_VIDEO_QP_I_MAX}, {@link #KEY_VIDEO_QP_P_MAX},
+     * and {@link #KEY_VIDEO_QP_B_MAX}.
      *
      * The associated value is an integer.
      */
     public static final String KEY_VIDEO_QP_MAX = "video-qp-max";
 
     /**
-     * A key describing the maximum Quantization Parameter allowed for encoding video.
-     * This key applies to all three video frame types (I, P, and B). This value fills
-     * in for any of the frame-specific #KEY_VIDEO_QP_I_MIN, #KEY_VIDEO_QP_P_MIN, or
-     * #KEY_VIDEO_QP_B_MIN keys that are not specified
+     * A key describing the minimum Quantization Parameter allowed for encoding video.
+     * This key applies to all three video frame types (I, P, and B).
+     * The value is used directly for picture type I; a per-mime formula is used
+     * to calculate the value for the remaining picture types.
+     *
+     * This calculation can be avoided by directly specifying values for each picture type
+     * using the type-specific keys {@link #KEY_VIDEO_QP_I_MIN}, {@link #KEY_VIDEO_QP_P_MIN},
+     * and {@link #KEY_VIDEO_QP_B_MIN}.
      *
      * The associated value is an integer.
      */

@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.util.Log;
 import android.util.MathUtils;
@@ -45,6 +46,8 @@ public final class VibratorInfo implements Parcelable {
     @Nullable
     private final SparseBooleanArray mSupportedEffects;
     @Nullable
+    private final SparseBooleanArray mSupportedBraking;
+    @Nullable
     private final SparseBooleanArray mSupportedPrimitives;
     private final float mQFactor;
     private final FrequencyMapping mFrequencyMapping;
@@ -53,17 +56,19 @@ public final class VibratorInfo implements Parcelable {
         mId = in.readInt();
         mCapabilities = in.readLong();
         mSupportedEffects = in.readSparseBooleanArray();
+        mSupportedBraking = in.readSparseBooleanArray();
         mSupportedPrimitives = in.readSparseBooleanArray();
         mQFactor = in.readFloat();
         mFrequencyMapping = in.readParcelable(VibratorInfo.class.getClassLoader());
     }
 
     /** @hide */
-    public VibratorInfo(int id, long capabilities, int[] supportedEffects,
+    public VibratorInfo(int id, long capabilities, int[] supportedEffects, int[] supportedBraking,
             int[] supportedPrimitives, float qFactor, @NonNull FrequencyMapping frequencyMapping) {
         mId = id;
         mCapabilities = capabilities;
         mSupportedEffects = toSparseBooleanArray(supportedEffects);
+        mSupportedBraking = toSparseBooleanArray(supportedBraking);
         mSupportedPrimitives = toSparseBooleanArray(supportedPrimitives);
         mQFactor = qFactor;
         mFrequencyMapping = frequencyMapping;
@@ -74,6 +79,7 @@ public final class VibratorInfo implements Parcelable {
         dest.writeInt(mId);
         dest.writeLong(mCapabilities);
         dest.writeSparseBooleanArray(mSupportedEffects);
+        dest.writeSparseBooleanArray(mSupportedBraking);
         dest.writeSparseBooleanArray(mSupportedPrimitives);
         dest.writeFloat(mQFactor);
         dest.writeParcelable(mFrequencyMapping, flags);
@@ -95,6 +101,7 @@ public final class VibratorInfo implements Parcelable {
         VibratorInfo that = (VibratorInfo) o;
         return mId == that.mId && mCapabilities == that.mCapabilities
                 && Objects.equals(mSupportedEffects, that.mSupportedEffects)
+                && Objects.equals(mSupportedBraking, that.mSupportedBraking)
                 && Objects.equals(mSupportedPrimitives, that.mSupportedPrimitives)
                 && Objects.equals(mQFactor, that.mQFactor)
                 && Objects.equals(mFrequencyMapping, that.mFrequencyMapping);
@@ -102,8 +109,8 @@ public final class VibratorInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedPrimitives,
-                mQFactor, mFrequencyMapping);
+        return Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
+                mSupportedPrimitives, mQFactor, mFrequencyMapping);
     }
 
     @Override
@@ -113,6 +120,7 @@ public final class VibratorInfo implements Parcelable {
                 + ", mCapabilities=" + Arrays.toString(getCapabilitiesNames())
                 + ", mCapabilities flags=" + Long.toBinaryString(mCapabilities)
                 + ", mSupportedEffects=" + Arrays.toString(getSupportedEffectsNames())
+                + ", mSupportedBraking=" + Arrays.toString(getSupportedBrakingNames())
                 + ", mSupportedPrimitives=" + Arrays.toString(getSupportedPrimitivesNames())
                 + ", mQFactor=" + mQFactor
                 + ", mFrequencyMapping=" + mFrequencyMapping
@@ -134,6 +142,23 @@ public final class VibratorInfo implements Parcelable {
     }
 
     /**
+     * Returns a default value to be applied to composed PWLE effects for braking.
+     *
+     * @return a supported braking value, one of android.hardware.vibrator.Braking.*
+     */
+    public int getDefaultBraking() {
+        if (mSupportedBraking != null) {
+            int size = mSupportedBraking.size();
+            for (int i = 0; i < size; i++) {
+                if (mSupportedBraking.keyAt(i) != Braking.NONE) {
+                    return mSupportedBraking.keyAt(i);
+                }
+            }
+        }
+        return Braking.NONE;
+    }
+
+    /**
      * Query whether the vibrator supports the given effect.
      *
      * @param effectId Which effects to query for.
@@ -147,7 +172,7 @@ public final class VibratorInfo implements Parcelable {
         if (mSupportedEffects == null) {
             return Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN;
         }
-        return mSupportedEffects.get(effectId, false) ? Vibrator.VIBRATION_EFFECT_SUPPORT_YES
+        return mSupportedEffects.get(effectId) ? Vibrator.VIBRATION_EFFECT_SUPPORT_YES
                 : Vibrator.VIBRATION_EFFECT_SUPPORT_NO;
     }
 
@@ -160,7 +185,7 @@ public final class VibratorInfo implements Parcelable {
     public boolean isPrimitiveSupported(
             @VibrationEffect.Composition.PrimitiveType int primitiveId) {
         return hasCapability(IVibrator.CAP_COMPOSE_EFFECTS) && mSupportedPrimitives != null
-                && mSupportedPrimitives.get(primitiveId, false);
+                && mSupportedPrimitives.get(primitiveId);
     }
 
     /**
@@ -251,11 +276,17 @@ public final class VibratorInfo implements Parcelable {
         if (hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
             names.add("COMPOSE_EFFECTS");
         }
+        if (hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
+            names.add("COMPOSE_PWLE_EFFECTS");
+        }
         if (hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
             names.add("ALWAYS_ON_CONTROL");
         }
         if (hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
             names.add("AMPLITUDE_CONTROL");
+        }
+        if (hasCapability(IVibrator.CAP_FREQUENCY_CONTROL)) {
+            names.add("FREQUENCY_CONTROL");
         }
         if (hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
             names.add("EXTERNAL_CONTROL");
@@ -273,6 +304,26 @@ public final class VibratorInfo implements Parcelable {
         String[] names = new String[mSupportedEffects.size()];
         for (int i = 0; i < mSupportedEffects.size(); i++) {
             names[i] = VibrationEffect.effectIdToString(mSupportedEffects.keyAt(i));
+        }
+        return names;
+    }
+
+    private String[] getSupportedBrakingNames() {
+        if (mSupportedBraking == null) {
+            return new String[0];
+        }
+        String[] names = new String[mSupportedBraking.size()];
+        for (int i = 0; i < mSupportedBraking.size(); i++) {
+            switch (mSupportedBraking.keyAt(i)) {
+                case Braking.NONE:
+                    names[i] = "NONE";
+                    break;
+                case Braking.CLAB:
+                    names[i] = "CLAB";
+                    break;
+                default:
+                    names[i] = Integer.toString(mSupportedBraking.keyAt(i));
+            }
         }
         return names;
     }
@@ -478,7 +529,8 @@ public final class VibratorInfo implements Parcelable {
         @Override
         public String toString() {
             return "FrequencyMapping{"
-                    + "mMinFrequency=" + mMinFrequencyHz
+                    + "mRelativeFrequencyRange=" + mRelativeFrequencyRange
+                    + ", mMinFrequency=" + mMinFrequencyHz
                     + ", mResonantFrequency=" + mResonantFrequencyHz
                     + ", mMaxFrequency="
                     + (mMinFrequencyHz + mFrequencyResolutionHz * (mMaxAmplitudes.length - 1))

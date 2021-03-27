@@ -96,7 +96,8 @@ public class BatteryUsageStatsTest {
                 .setUsageDurationMillis(
                         BatteryConsumer.TIME_COMPONENT_CPU, 10300)
                 .setUsageDurationForCustomComponentMillis(
-                        BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID, 10400);
+                        BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID, 10400)
+                .setPowerConsumedByApps(20000);
 
         return builder.build();
     }
@@ -148,6 +149,7 @@ public class BatteryUsageStatsTest {
                 assertThat(systemBatteryConsumer.getUsageDurationForCustomComponentMillis(
                         BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID)).isEqualTo(10400);
                 assertThat(systemBatteryConsumer.getConsumedPower()).isEqualTo(20300);
+                assertThat(systemBatteryConsumer.getPowerConsumedByApps()).isEqualTo(20000);
             } else {
                 fail("Unexpected drain type " + systemBatteryConsumer.getDrainType());
             }
