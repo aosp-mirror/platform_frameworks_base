@@ -391,7 +391,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"TỰ ĐỘNG"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Đảo ngược màu"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Chế độ chỉnh màu"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Cài đặt khác"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Chế độ cài đặt khác"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Xong"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Đã kết nối"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Đã kết nối, mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị cuộc trò chuyện ở đầu phần cuộc trò chuyện và dưới dạng bong bóng nổi, hiển thị ảnh hồ sơ trên màn hình khóa"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị ở đầu phần cuộc trò chuyện, dưới dạng bong bóng nổi và hiển thị ảnh hồ sơ trên màn hình khóa"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>
@@ -739,7 +739,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Đã mở điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Đã đóng điều khiển thông báo đối với <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Cho phép thông báo từ kênh này"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"Cài đặt khác"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"Chế độ cài đặt khác"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Tùy chỉnh"</string>
     <string name="notification_done" msgid="6215117625922713976">"Xong"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Hoàn tác"</string>

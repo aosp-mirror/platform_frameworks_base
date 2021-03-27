@@ -391,7 +391,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"સ્વતઃ"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"રંગોને ઉલટાવો"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"રંગ સુધારણા મોડ"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"વધુ સેટિંગ્સ"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"વધુ સેટિંગ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"થઈ ગયું"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"કનેક્ટ થયેલ"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"કનેક્ટ કરેલ, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
@@ -477,10 +477,10 @@
     <string name="user_add_user" msgid="4336657383006913022">"વપરાશકર્તા ઉમેરો"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"નવો વપરાશકર્તા"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"અતિથિ દૂર કરીએ?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ્લિકેશનો અને ડેટા કાઢી નાખવામાં આવશે."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"દૂર કરો"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ફરી સ્વાગત છે, અતિથિ!"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"શું તમે તમારું સત્ર ચાલુ કરવા માંગો છો?"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"શું તમે તમારું સત્ર ચાલુ રાખવા માંગો છો?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"શરૂ કરો"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"હા, ચાલુ રાખો"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"અતિથિ વપરાશકર્તા"</string>
@@ -490,7 +490,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"વર્તમાન વપરાશકર્તાને લૉગઆઉટ કરો"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"વપરાશકર્તાને લૉગઆઉટ કરો"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"વપરાશકર્તા સંખ્યાની મર્યાદા"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">તમે <xliff:g id="COUNT">%d</xliff:g> વપરાશકર્તા સુધી ઉમેરી શકો છો.</item>
@@ -544,7 +544,7 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA પ્રમાણપત્રો"</string>
     <string name="disable_vpn" msgid="482685974985502922">"VPN અક્ષમ કરો"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN ડિસ્કનેક્ટ કરો"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"નીતિઓ જુઓ"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"પૉલિસીઓ જુઓ"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે.\n\nતમારા IT વ્યવસ્થાપક સેટિંગ, કૉર્પોરેટ ઍક્સેસ, ઍપ, તમારા ડિવાઇસ સાથે સંકળાયેલો ડેટા અને તમારા ડિવાઇસની સ્થાન માહિતીનું નિરીક્ષણ તેમજ તેને મેનેજ કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે.\n\nતમારા IT વ્યવસ્થાપક સેટિંગ, કૉર્પોરેટ ઍક્સેસ, ઍપ, તમારા ડિવાઇસ સાથે સંકળાયેલો ડેટા અને તમારા ડિવાઇસની સ્થાન માહિતીનું નિરીક્ષણ તેમજ તેને મેનેજ કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"તમારી સંસ્થાએ આ ઉપકરણ પર પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કર્યું છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>
@@ -739,7 +739,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સૂચના નિયંત્રણો ચાલુ છે"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સૂચના નિયંત્રણો બંધ છે"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"આ ચૅનલની સૂચનાઓને મંજૂરી આપો"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"વધુ સેટિંગ્સ"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"વધુ સેટિંગ"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"કસ્ટમાઇઝ કરો"</string>
     <string name="notification_done" msgid="6215117625922713976">"થઈ ગયું"</string>
     <string name="inline_undo" msgid="9026953267645116526">"રદ કરો"</string>

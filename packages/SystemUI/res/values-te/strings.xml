@@ -372,7 +372,7 @@
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"సెట్టింగ్‌లు"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"సమయం"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"నేను"</string>
-    <string name="quick_settings_user_title" msgid="8673045967216204537">"వినియోగదారు"</string>
+    <string name="quick_settings_user_title" msgid="8673045967216204537">"యూజర్"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"కొత్త వినియోగదారు"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"కనెక్ట్ చేయబడలేదు"</string>
@@ -474,12 +474,12 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"వినియోగదారుని మార్చు, ప్రస్తుత వినియోగదారు <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"ప్రస్తుత వినియోగదారు <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"ప్రొఫైల్‌ని చూపు"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"వినియోగదారుని జోడించండి"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"యూజర్‌ను జోడించండి"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"కొత్త వినియోగదారు"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"అతిథిని తీసివేయాలా?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"గెస్ట్‌ను తీసివేయాలా?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"తీసివేయి"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"పునఃస్వాగతం, అతిథి!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
@@ -489,8 +489,8 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"వినియోగదారుని లాగ్ అవుట్ చేయండి"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ప్రస్తుత వినియోగదారును లాగ్ అవుట్ చేయండి"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"వినియోగదారుని లాగ్ అవుట్ చేయి"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"కొత్త వినియోగదారుని జోడించాలా?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం అనువర్తనాలను నవీకరించగలరు."</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"కొత్త యూజర్‌ను జోడించాలా?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"ఒక కొత్త యూజర్‌ను మీరు జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా అందరు యూజర్‌ల కోసం యాప్‌లను అప్‌డేట్ చేయగలరు."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">మీరు <xliff:g id="COUNT">%d</xliff:g> వినియోగదారుల వరకు జోడించవచ్చు.</item>
@@ -750,7 +750,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"అలర్ట్ చేయడం"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"బబుల్‌ను చూపించు"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"బబుల్స్ తీసివేయి"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"హోమ్ స్క్రీన్‌కు జోడించు"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"హోమ్ స్క్రీన్‌కు జోడించండి"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"నోటిఫికేషన్ నియంత్రణలు"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"నోటిఫికేషన్ తాత్కాలిక ఆపివేత ఎంపికలు"</string>

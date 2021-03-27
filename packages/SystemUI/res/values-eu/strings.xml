@@ -490,7 +490,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Amaitu erabiltzailearen saioa"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"AMAITU ERABILTZAILEAREN SAIOA"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Beste erabiltzaile bat gehitu?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Erabiltzaile bat gehitzen duzunean, horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Erabiltzaile bat gehitzen duzunean, erabiltzaile horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Erabiltzaile-mugara iritsi zara"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Gehienez, <xliff:g id="COUNT">%d</xliff:g> erabiltzaile gehi ditzakezu.</item>

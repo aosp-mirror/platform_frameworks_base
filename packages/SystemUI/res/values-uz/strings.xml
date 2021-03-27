@@ -476,7 +476,7 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Profilni ko‘rsatish"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Foydalanuvchi"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Yangi foydalanuvchi"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Mehmon hisobi o‘chirib tashlansinmi?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Mehmon olib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Olib tashlash"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Xush kelibsiz, mehmon!"</string>
@@ -485,7 +485,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ha, davom ettirilsin"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Mehmon foydalanuvchi"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Ilova va ma’l-ni o‘chirish u-n mehmon hisobini o‘chiring"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"MEHMON HISOBINI O‘CHIRISH"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"MEHMONNI OLIB TASHLASH"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Foydalanuvchi nomidan chiqish"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Joriy foydalanuvchini tizimdan chiqaring"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"FOYDALANUVCHI NOMIDAN CHIQISH"</string>

@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Mungkin berbunyi atau bergetar berdasarkan tetapan telefon"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Mungkin berbunyi atau bergetar berdasarkan tetapan telefon. Perbualan daripada gelembung <xliff:g id="APP_NAME">%1$s</xliff:g> secara lalai."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Memastikan anda memberikan perhatian dengan pintasan terapung ke kandungan ini."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ditunjukkan di sebelah atas bahagian perbualan, muncul sebagai gelembung terapung, memaparkan gambar profil pada skrin kunci"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ditunjukkan di sebelah atas bahagian perbualan, terpapar sebagai gelembung terapung, gambar profil dipaparkan pada skrin kunci"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Tetapan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Keutamaan"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak menyokong ciri perbualan"</string>

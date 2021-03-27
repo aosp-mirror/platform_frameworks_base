@@ -479,7 +479,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้เข้าร่วมออกไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับท่านผู้เยี่ยมชมกลับมาอีกครั้ง!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ใช่ ดำเนินการต่อ"</string>
