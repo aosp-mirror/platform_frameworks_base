@@ -275,8 +275,8 @@
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"үнсіз"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"оятқыштар ғана"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Мазаламау."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"Мазаламау\" режимі өшірілді."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\"Мазаламау\" режимі қосылды."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"Мазаламау режимі өшірілді."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"Мазаламау режимі қосылды."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="3795983516942423240">"Bluetooth өшірулі."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth қосулы."</string>
@@ -514,7 +514,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Хабарландырулар"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Әңгімелер"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Барлық дыбыссыз хабарландыруларды өшіру"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Хабарландырулар \"Мазаламау\" режимінде кідіртілді"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Хабарландырулар Мазаламау режимінде кідіртілді"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Қазір бастау"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Хабарландырулар жоқ"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"Профиль бақылануы мүмкін"</string>
@@ -814,7 +814,7 @@
     <string name="tuner_full_zen_title" msgid="5120366354224404511">"Дыбыс деңгейін басқару элементтерімен бірге көрсету"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Мазаламау"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Дыбыс деңгейі түймелерінің төте жолы"</string>
-    <string name="volume_up_silent" msgid="1035180298885717790">"Дыбысы арттырылған кезде, \"Мазаламау\" режимінен шығу"</string>
+    <string name="volume_up_silent" msgid="1035180298885717790">"Дыбысы арттырылған кезде, Мазаламау режимінен шығу"</string>
     <string name="battery" msgid="769686279459897127">"Батарея"</string>
     <string name="clock" msgid="8978017607326790204">"Сағат"</string>
     <string name="headset" msgid="4485892374984466437">"Құлақаспап жинағы"</string>
@@ -963,10 +963,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi өшірулі"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth өшірулі"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"\"Мазаламау\" режимі өшірулі"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"Мазаламау\" режимі (<xliff:g id="ID_1">%s</xliff:g>) автоматты ережесі арқылы қосылды."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\"Мазаламау\" режимі (<xliff:g id="ID_1">%s</xliff:g>) қолданбасы арқылы қосылды."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\"Мазаламау\" режимі автоматты ереже немесе қолданба арқылы қосылды."</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Мазаламау режимі өшірулі"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Мазаламау режимі (<xliff:g id="ID_1">%s</xliff:g>) автоматты ережесі арқылы қосылды."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Мазаламау режимі (<xliff:g id="ID_1">%s</xliff:g>) қолданбасы арқылы қосылды."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Мазаламау режимі автоматты ереже немесе қолданба арқылы қосылды."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> дейін"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Қалсын"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Ауыстыру"</string>
@@ -1028,7 +1028,7 @@
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Әңгімелер бөлімінің жоғарғы жағында көрсетіледі."</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Профиль суреті құлыптаулы экранда көрсетіледі."</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Қолданбалар терезесінің бергі жағынан қалқыма хабарлар түрінде көрсетіледі."</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\"Мазаламау\" режимінде көрсетіледі."</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Мазаламау режимінде көрсетіледі."</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Түсінікті"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Параметрлер"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ұлғайту терезесін қабаттастыру"</string>
