@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,31 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"Conectați-vă la rețeaua Wi-Fi"</string>
-    <string name="network_available_sign_in" msgid="1520342291829283114">"Conectați-vă la rețea"</string>
-    <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
-    <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nu are acces la internet"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Atingeți pentru opțiuni"</string>
-    <string name="mobile_no_internet" msgid="4014455157529909781">"Rețeaua mobilă nu are acces la internet"</string>
-    <string name="other_networks_no_internet" msgid="6698711684200067033">"Rețeaua nu are acces la internet"</string>
-    <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Serverul DNS privat nu poate fi accesat"</string>
-    <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> are conectivitate limitată"</string>
-    <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Atingeți pentru a vă conecta oricum"</string>
-    <string name="network_switch_metered" msgid="1531869544142283384">"S-a comutat la <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="1358296010128405906">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
-    <string name="network_switch_metered_toast" msgid="501662047275723743">"S-a comutat de la <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> la <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-    <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"un tip de rețea necunoscut"</string>
+   -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="connectivityResourcesAppLabel" msgid="8294935652079168395">"Resurse pentru conectivitatea sistemului"</string>
+    <string name="wifi_available_sign_in" msgid="5254156478006453593">"Conectați-vă la rețeaua Wi-Fi"</string>
+    <string name="network_available_sign_in" msgid="7794369329839408792">"Conectați-vă la rețea"</string>
+    <!-- no translation found for network_available_sign_in_detailed (3643910593681893097) -->
+    <skip />
+    <string name="wifi_no_internet" msgid="3961697321010262514">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nu are acces la internet"</string>
+    <string name="wifi_no_internet_detailed" msgid="1229067002306296104">"Atingeți pentru opțiuni"</string>
+    <string name="mobile_no_internet" msgid="2262524005014119639">"Rețeaua mobilă nu are acces la internet"</string>
+    <string name="other_networks_no_internet" msgid="8226004998719563755">"Rețeaua nu are acces la internet"</string>
+    <string name="private_dns_broken_detailed" msgid="3537567373166991809">"Serverul DNS privat nu poate fi accesat"</string>
+    <string name="network_partial_connectivity" msgid="5957065286265771273">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> are conectivitate limitată"</string>
+    <string name="network_partial_connectivity_detailed" msgid="6975752539442533034">"Atingeți pentru a vă conecta oricum"</string>
+    <string name="network_switch_metered" msgid="2814798852883117872">"S-a comutat la <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="605546931076348229">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
+    <string name="network_switch_metered_toast" msgid="8831325515040986641">"S-a comutat de la <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> la <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="2255670471736226365">"date mobile"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
-    <item msgid="1055487873974272842">"Bluetooth"</item>
-    <item msgid="1616528372438698248">"Ethernet"</item>
-    <item msgid="9177085807664964627">"VPN"</item>
+    <item msgid="5454013645032700715">"date mobile"</item>
+    <item msgid="6341719431034774569">"Wi-Fi"</item>
+    <item msgid="5081440868800877512">"Bluetooth"</item>
+    <item msgid="1160736166977503463">"Ethernet"</item>
+    <item msgid="7347618872551558605">"VPN"</item>
   </string-array>
+    <string name="network_switch_type_name_unknown" msgid="7826330274368951740">"un tip de rețea necunoscut"</string>
 </resources>

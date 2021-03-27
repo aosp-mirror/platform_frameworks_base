@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Հավելվածն աշխատում է"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Մարտկոցի լիցքը ծախսող հավելվածներ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Խոշորացում"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Հատուկ գործառույթների անվտանգության քաղաքականություն"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"«<xliff:g id="APP_NAME">%1$s</xliff:g>» հավելվածը ծախսում է մարտկոցի լիցքը"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> հավելված ծախսում է մարտկոցի լիցքը"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Հպեք՝ մարտկոցի և թրաֆիկի մանրամասները տեսնելու համար"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Օգտագործել դյուրանցումը"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Գունաշրջում"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Գունաշտկում"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Պայծառության նվազեցում"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Հավելյալ խամրեցում"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացավ։"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունն անջատվեց։"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"«<xliff:g id="SERVICE_NAME">%1$s</xliff:g>» ծառայությունն օգտագործելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակները"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Տվիչների գաղտնիություն"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Հավելվածի պատկերակ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Հավելվածի բրենդային պատկեր"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Ստուգեք մուտքի կարգավորումները"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ծառայությունը կարող է դիտել և կառավարել ձեր էկրանի բովանդակությունը։ Հպեք՝ մանրամասներն իմանալու համար։"</string>
 </resources>

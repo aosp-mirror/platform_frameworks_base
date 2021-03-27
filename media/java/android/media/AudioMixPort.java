@@ -46,7 +46,7 @@ public class AudioMixPort extends AudioPort {
 
     AudioMixPort(AudioHandle handle, int ioHandle, int role, String deviceName,
             List<AudioProfile> profiles, AudioGain[] gains) {
-        super(handle, role, deviceName, profiles, gains);
+        super(handle, role, deviceName, profiles, gains, null);
         mIoHandle = ioHandle;
     }
 

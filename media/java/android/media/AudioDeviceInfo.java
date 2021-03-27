@@ -519,6 +519,13 @@ public final class AudioDeviceInfo {
     }
 
     /**
+     * @return A list of {@link AudioDescriptor} supported by the audio devices.
+     */
+    public @NonNull List<AudioDescriptor> getAudioDescriptors() {
+        return mPort.audioDescriptors();
+    }
+
+    /**
      * Returns an array of supported encapsulation modes for the device.
      *
      * The array can include any of the {@code AudioTrack} encapsulation modes,

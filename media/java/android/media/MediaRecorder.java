@@ -753,6 +753,47 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
+     * Uses the settings from an AudioProfile for recording.
+     * <p>
+     * This method should be called after the video AND audio sources are set, and before
+     * setOutputFile().
+     * <p>
+     * This method can be used instead of {@link #setProfile} when using EncoderProfiles.
+     *
+     * @param profile the AudioProfile to use
+     * @see android.media.EncoderProfiles
+     * @see android.media.CamcorderProfile#getAll
+     */
+    public void setAudioProfile(@NonNull EncoderProfiles.AudioProfile profile) {
+        setAudioEncodingBitRate(profile.getBitrate());
+        setAudioChannels(profile.getChannels());
+        setAudioSamplingRate(profile.getSampleRate());
+        setAudioEncoder(profile.getCodec());
+    }
+
+    /**
+     * Uses the settings from a VideoProfile object for recording.
+     * <p>
+     * This method should be called after the video AND audio sources are set, and before
+     * setOutputFile().
+     * <p>
+     * This method can be used instead of {@link #setProfile} when using EncoderProfiles.
+     *
+     * @param profile the VideoProfile to use
+     * @see android.media.EncoderProfiles
+     * @see android.media.CamcorderProfile#getAll
+     */
+    public void setVideoProfile(@NonNull EncoderProfiles.VideoProfile profile) {
+        setVideoFrameRate(profile.getFrameRate());
+        setVideoSize(profile.getWidth(), profile.getHeight());
+        setVideoEncodingBitRate(profile.getBitrate());
+        setVideoEncoder(profile.getCodec());
+        if (profile.getProfile() > 0) {
+            setVideoEncodingProfileLevel(profile.getProfile(), 0 /* level */);
+        }
+    }
+
+    /**
      * Set video frame capture rate. This can be used to set a different video frame capture
      * rate than the recorded video's playback rate. This method also sets the recording mode
      * to time lapse. In time lapse video recording, only video is recorded. Audio related
@@ -1961,4 +2002,3 @@ public class MediaRecorder implements AudioRouting,
 
     }
 }
-

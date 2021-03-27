@@ -40,15 +40,18 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.media.AudioFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.UserHandle;
+import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
@@ -442,6 +445,52 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
         mHotwordDetectionConnection.cancelLocked();
         mHotwordDetectionConnection = null;
+    }
+
+    public void startListeningFromMicLocked(
+            AudioFormat audioFormat,
+            IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromMic");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            // TODO: callback.onError();
+            return;
+        }
+
+        mHotwordDetectionConnection.startListeningFromMic(audioFormat, callback);
+    }
+
+    public void startListeningFromExternalSourceLocked(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            @Nullable PersistableBundle options,
+            IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromExternalSource");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            // TODO: callback.onError();
+            return;
+        }
+
+        mHotwordDetectionConnection
+                .startListeningFromExternalSource(audioStream, audioFormat, options, callback);
+    }
+
+    public void stopListeningFromMicLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "stopListeningFromMic");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "stopListeningFromMic() called but connection isn't established");
+            return;
+        }
+
+        mHotwordDetectionConnection.stopListening();
     }
 
     public IRecognitionStatusCallback createSoundTriggerCallbackLocked(

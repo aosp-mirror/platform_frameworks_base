@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"應用程式正在執行"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"耗用電量的應用程式"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"放大"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"無障礙工具安全性政策"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用電量"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個應用程式正在使用電量"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"輕按即可查看電池和數據用量詳情"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快速鍵"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色彩反轉"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色彩校正"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"調低亮度"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"超暗"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量鍵。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 已開啟。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量鍵。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 已關閉。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"㩒住兩個音量鍵 3 秒就可以用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"感應器私隱"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"應用程式圖示"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"應用程式品牌形象"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"檢查存取權設定"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> 可以查看及控制您的螢幕。輕按即可查看。"</string>
 </resources>

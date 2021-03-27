@@ -55,8 +55,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -413,7 +413,7 @@ public class DexMetadataHelperTest {
             }
             final ApkLite baseApk = result.getResult();
             final PackageLite pkgLite = new PackageLite(null, baseApk.getPath(), baseApk, null,
-                    null, null, null, null, null);
+                    null, null, null, null, null, baseApk.getTargetSdkVersion());
             Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
         }
 

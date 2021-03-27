@@ -7907,7 +7907,24 @@ public class AudioService extends IAudioService.Stub
         mmi.record();
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
                 clientId, callingPackageName, flags, sdk,
-                forceFocusDuckingForAccessibility(aa, durationHint, uid));
+                forceFocusDuckingForAccessibility(aa, durationHint, uid), -1 /*testUid, ignored*/);
+    }
+
+    /** see {@link AudioManager#requestAudioFocusForTest(AudioFocusRequest, String, int, int)} */
+    public int requestAudioFocusForTest(AudioAttributes aa, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName,
+            int fakeUid, int sdk) {
+        if (!enforceQueryAudioStateForTest("focus request")) {
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+        if (callingPackageName == null || clientId == null || aa == null) {
+            final String reason = "Invalid null parameter to request audio focus";
+            Log.e(TAG, reason);
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
+        return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
+                clientId, callingPackageName, AudioManager.AUDIOFOCUS_FLAG_TEST,
+                sdk, false /*forceDuck*/, fakeUid);
     }
 
     public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa,
@@ -7924,6 +7941,15 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         mmi.record();
+        return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
+    }
+
+    /** see {@link AudioManager#abandonAudioFocusForTest(AudioFocusRequest, String)} */
+    public int abandonAudioFocusForTest(IAudioFocusDispatcher fd, String clientId,
+            AudioAttributes aa, String callingPackageName) {
+        if (!enforceQueryAudioStateForTest("focus abandon")) {
+            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+        }
         return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
     }
 
@@ -7947,6 +7973,25 @@ public class AudioService extends IAudioService.Stub
     @VisibleForTesting
     public boolean hasAudioFocusUsers() {
         return mMediaFocusControl.hasAudioFocusUsers();
+    }
+
+    /** see {@link AudioManager#getFadeOutDurationOnFocusLossMillis(AudioAttributes)} */
+    public long getFadeOutDurationOnFocusLossMillis(AudioAttributes aa) {
+        if (!enforceQueryAudioStateForTest("fade out duration")) {
+            return 0;
+        }
+        return mMediaFocusControl.getFadeOutDurationOnFocusLossMillis(aa);
+    }
+
+    private boolean enforceQueryAudioStateForTest(String mssg) {
+        if (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
+                Manifest.permission.QUERY_AUDIO_STATE)) {
+            final String reason = "Doesn't have QUERY_AUDIO_STATE permission for "
+                    + mssg + " test API";
+            Log.e(TAG, reason, new Exception());
+            return false;
+        }
+        return true;
     }
 
     //==========================================================================================

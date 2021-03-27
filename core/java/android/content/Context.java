@@ -396,7 +396,7 @@ public abstract class Context {
      *
      * @hide
      */
-    public static final int BIND_ALLOW_NETWORK_ACCESS = 0x00020000;
+    public static final int BIND_BYPASS_POWER_NETWORK_RESTRICTIONS = 0x00020000;
 
     /**
      * Flag for {@link #bindService}: allow background foreground service starts from the bound
