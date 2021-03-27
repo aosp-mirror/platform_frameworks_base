@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"일출까지"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>에 켜짐"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g>까지"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"밝기 낮추기"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC 사용 중지됨"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC 사용 설정됨"</string>
@@ -541,7 +540,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"정책 보기"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"제어 기능 보기"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>에 속한 기기입니다.\n\nIT 관리자가 설정, 기업 액세스, 앱, 기기와 연결된 데이터, 기기 위치 정보를 모니터링 및 관리할 수 있습니다.\n\n자세한 정보를 확인하려면 IT 관리자에게 문의하세요."</string>
-    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>에서 이 기기와 연결된 데이터에 액세스하고 앱을 관리하고 기기 설정을 변경할 수 있습니다.\n\n궁금한 점이 있으면 <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>에 문의하세요."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>에서 이 기기와 연결된 데이터에 액세스하고 앱을 관리하며 기기 설정을 변경할 수 있습니다.\n\n궁금한 점이 있으면 <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>에 문의하세요."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"내 조직에 속한 기기입니다.\n\nIT 관리자가 설정, 기업 액세스, 앱, 기기와 연결된 데이터, 기기 위치 정보를 모니터링 및 관리할 수 있습니다.\n\n자세한 정보를 확인하려면 IT 관리자에게 문의하세요."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"조직에서 이 기기에 인증기관을 설치했습니다. 보안 네트워크 트래픽을 모니터링 또는 수정할 수 있습니다."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"조직에서 직장 프로필에 인증기관을 설치했습니다. 보안 네트워크 트래픽을 모니터링 또는 수정할 수 있습니다."</string>
@@ -652,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"데모 모드 표시"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"이더넷"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"알람"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"준비됨"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"직장 프로필"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"비행기 모드"</string>
     <string name="add_tile" msgid="6239678623873086686">"타일 추가"</string>
