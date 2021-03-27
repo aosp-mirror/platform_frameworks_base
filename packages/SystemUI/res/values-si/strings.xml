@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"හිරු නගින තෙක්"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>ට ක්‍රියාත්මකයි"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> තෙක්"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"දීප්තිය අඩු කරන්න"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC අබලයි"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC සබලයි"</string>
