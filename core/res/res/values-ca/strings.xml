@@ -996,7 +996,7 @@
       <item quantity="other">Darrers <xliff:g id="COUNT_1">%d</xliff:g> dies</item>
       <item quantity="one">Darrer dia (<xliff:g id="COUNT_0">%d</xliff:g>)</item>
     </plurals>
-    <string name="last_month" msgid="1528906781083518683">"El mes passat"</string>
+    <string name="last_month" msgid="1528906781083518683">"Darrer mes"</string>
     <string name="older" msgid="1645159827884647400">"Més antigues"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"el <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"a les <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -2029,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> i <xliff:g id="COUNT_3">%d</xliff:g> fitxers més</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> i <xliff:g id="COUNT_1">%d</xliff:g> fitxer més</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hi ha cap recomanació de persones amb qui compartir"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hi ha cap suggeriment de persones amb qui compartir"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Llista d\'aplicacions"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aquesta aplicació no té permís de gravació, però pot capturar àudio a través d\'aquest dispositiu USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Inici"</string>
