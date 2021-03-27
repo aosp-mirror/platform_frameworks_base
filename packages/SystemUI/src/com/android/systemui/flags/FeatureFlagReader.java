@@ -44,12 +44,12 @@ import javax.inject.Inject;
  * previous example, do the following:
  *
  * {@code
- *  $ adb shell device_config put systemui flag_foo_bar_baz true
+ *  $ adb shell setprop persist.systemui.flag_foo_bar_baz 1
  * }
  *
  * Note that all storage keys begin with "flag_", even if their associated resId does not.
  *
- * Calls to this class should probably be wrapped by {@link FeatureFlags}.
+ * Calls to this class should probably be wrapped by a method in {@link FeatureFlags}.
  */
 @SysUISingleton
 public class FeatureFlagReader {

@@ -1394,15 +1394,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 while ((nextArg = peekNextArg()) != null) {
                     switch (nextArg) {
                         case "-f":
-                            getNextArgRequired(); // consume the -f argument;
+                            getNextArgRequired(); // consume "-f"
                             force = true;
                             break;
                         case "-d":
-                            getNextArgRequired(); // consume the -d argument;
+                            getNextArgRequired(); // consume "-d"
                             description = getNextArgRequired();
                             break;
                         default:
-                            // Not a common option, finish reading.
+                            // nextArg is not a common option, finish reading.
                             return;
                     }
                 }
@@ -1456,14 +1456,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         private int runMono() {
             CommonOptions commonOptions = new CommonOptions();
-            VibrationEffect effect = nextEffect();
-            if (effect == null) {
-                return 0;
-            }
-
-            CombinedVibrationEffect combinedEffect = CombinedVibrationEffect.createSynced(effect);
+            CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(nextEffect());
             VibrationAttributes attrs = createVibrationAttributes(commonOptions);
-            vibrate(Binder.getCallingUid(), SHELL_PACKAGE_NAME, combinedEffect, attrs,
+            vibrate(Binder.getCallingUid(), SHELL_PACKAGE_NAME, effect, attrs,
                     commonOptions.description, mToken);
             return 0;
         }
@@ -1474,10 +1469,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     CombinedVibrationEffect.startSynced();
             while ("-v".equals(getNextOption())) {
                 int vibratorId = Integer.parseInt(getNextArgRequired());
-                VibrationEffect effect = nextEffect();
-                if (effect != null) {
-                    combination.addVibrator(vibratorId, effect);
-                }
+                combination.addVibrator(vibratorId, nextEffect());
             }
             VibrationAttributes attrs = createVibrationAttributes(commonOptions);
             vibrate(Binder.getCallingUid(), SHELL_PACKAGE_NAME, combination.combine(), attrs,
@@ -1487,19 +1479,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         private int runSequential() {
             CommonOptions commonOptions = new CommonOptions();
-
             CombinedVibrationEffect.SequentialCombination combination =
                     CombinedVibrationEffect.startSequential();
             while ("-v".equals(getNextOption())) {
                 int vibratorId = Integer.parseInt(getNextArgRequired());
-                int delay = 0;
-                if ("-w".equals(getNextOption())) {
-                    delay = Integer.parseInt(getNextArgRequired());
-                }
-                VibrationEffect effect = nextEffect();
-                if (effect != null) {
-                    combination.addNext(vibratorId, effect, delay);
-                }
+                combination.addNext(vibratorId, nextEffect());
             }
             VibrationAttributes attrs = createVibrationAttributes(commonOptions);
             vibrate(Binder.getCallingUid(), SHELL_PACKAGE_NAME, combination.combine(), attrs,
@@ -1512,87 +1496,145 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             return 0;
         }
 
-        @Nullable
         private VibrationEffect nextEffect() {
-            String effectType = getNextArgRequired();
-            if ("oneshot".equals(effectType)) {
-                return nextOneShot();
+            VibrationEffect.Composition composition = VibrationEffect.startComposition();
+            String nextArg;
+
+            while ((nextArg = peekNextArg()) != null) {
+                if ("oneshot".equals(nextArg)) {
+                    addOneShotToComposition(composition);
+                } else if ("waveform".equals(nextArg)) {
+                    addWaveformToComposition(composition);
+                } else if ("prebaked".equals(nextArg)) {
+                    addPrebakedToComposition(composition);
+                } else if ("primitives".equals(nextArg)) {
+                    addPrimitivesToComposition(composition);
+                } else {
+                    // nextArg is not an effect, finish reading.
+                    break;
+                }
             }
-            if ("waveform".equals(effectType)) {
-                return nextWaveform();
-            }
-            if ("prebaked".equals(effectType)) {
-                return nextPrebaked();
-            }
-            if ("composed".equals(effectType)) {
-                return nextComposed();
-            }
-            return null;
+
+            return composition.compose();
         }
 
-        private VibrationEffect nextOneShot() {
-            boolean hasAmplitude = "-a".equals(getNextOption());
+        private void addOneShotToComposition(VibrationEffect.Composition composition) {
+            boolean hasAmplitude = false;
+            int delay = 0;
+
+            getNextArgRequired(); // consume "oneshot"
+            String nextOption;
+            while ((nextOption = getNextOption()) != null) {
+                if ("-a".equals(nextOption)) {
+                    hasAmplitude = true;
+                } else if ("-w".equals(nextOption)) {
+                    delay = Integer.parseInt(getNextArgRequired());
+                }
+            }
+
             long duration = Long.parseLong(getNextArgRequired());
             int amplitude = hasAmplitude ? Integer.parseInt(getNextArgRequired())
                     : VibrationEffect.DEFAULT_AMPLITUDE;
-            return VibrationEffect.createOneShot(duration, amplitude);
+            composition.addEffect(VibrationEffect.createOneShot(duration, amplitude), delay);
         }
 
-        private VibrationEffect nextWaveform() {
+        private void addWaveformToComposition(VibrationEffect.Composition composition) {
             boolean hasAmplitudes = false;
+            boolean hasFrequencies = false;
+            boolean isContinuous = false;
             int repeat = -1;
+            int delay = 0;
 
-            String nextOption = getNextOption();
-            while (nextOption != null) {
+            getNextArgRequired(); // consume "waveform"
+            String nextOption;
+            while ((nextOption = getNextOption()) != null) {
                 if ("-a".equals(nextOption)) {
                     hasAmplitudes = true;
                 } else if ("-r".equals(nextOption)) {
                     repeat = Integer.parseInt(getNextArgRequired());
+                } else if ("-w".equals(nextOption)) {
+                    delay = Integer.parseInt(getNextArgRequired());
+                } else if ("-f".equals(nextOption)) {
+                    hasFrequencies = true;
+                } else if ("-c".equals(nextOption)) {
+                    isContinuous = true;
                 }
-                nextOption = getNextOption();
             }
-            List<Long> durations = new ArrayList<>();
-            List<Integer> amplitudes = new ArrayList<>();
+            List<Integer> durations = new ArrayList<>();
+            List<Float> amplitudes = new ArrayList<>();
+            List<Float> frequencies = new ArrayList<>();
 
+            float nextAmplitude = 0;
             String nextArg;
-            while ((nextArg = peekNextArg()) != null && !"-v".equals(nextArg)) {
-                durations.add(Long.parseLong(getNextArgRequired()));
+            while ((nextArg = peekNextArg()) != null) {
+                try {
+                    durations.add(Integer.parseInt(nextArg));
+                    getNextArgRequired(); // consume the duration
+                } catch (NumberFormatException e) {
+                    // nextArg is not a duration, finish reading.
+                    break;
+                }
                 if (hasAmplitudes) {
-                    amplitudes.add(Integer.parseInt(getNextArgRequired()));
+                    amplitudes.add(
+                            Float.parseFloat(getNextArgRequired()) / VibrationEffect.MAX_AMPLITUDE);
+                } else {
+                    amplitudes.add(nextAmplitude);
+                    nextAmplitude = 1 - nextAmplitude;
+                }
+                if (hasFrequencies) {
+                    frequencies.add(Float.parseFloat(getNextArgRequired()));
+                } else {
+                    frequencies.add(0f);
                 }
             }
 
-            long[] durationArray = durations.stream().mapToLong(Long::longValue).toArray();
-            if (!hasAmplitudes) {
-                return VibrationEffect.createWaveform(durationArray, repeat);
+            VibrationEffect.WaveformBuilder waveform = VibrationEffect.startWaveform();
+            for (int i = 0; i < durations.size(); i++) {
+                if (isContinuous) {
+                    waveform.addRamp(amplitudes.get(i), frequencies.get(i), durations.get(i));
+                } else {
+                    waveform.addStep(amplitudes.get(i), frequencies.get(i), durations.get(i));
+                }
+            }
+            composition.addEffect(waveform.build(repeat), delay);
+        }
+
+        private void addPrebakedToComposition(VibrationEffect.Composition composition) {
+            boolean shouldFallback = false;
+            int delay = 0;
+
+            getNextArgRequired(); // consume "prebaked"
+            String nextOption;
+            while ((nextOption = getNextOption()) != null) {
+                if ("-b".equals(nextOption)) {
+                    shouldFallback = true;
+                } else if ("-w".equals(nextOption)) {
+                    delay = Integer.parseInt(getNextArgRequired());
+                }
             }
 
-            int[] amplitudeArray = amplitudes.stream().mapToInt(Integer::intValue).toArray();
-            return VibrationEffect.createWaveform(durationArray, amplitudeArray, repeat);
-        }
-
-        private VibrationEffect nextPrebaked() {
-            boolean shouldFallback = "-b".equals(getNextOption());
             int effectId = Integer.parseInt(getNextArgRequired());
-            return VibrationEffect.get(effectId, shouldFallback);
+            composition.addEffect(VibrationEffect.get(effectId, shouldFallback), delay);
         }
 
-        private VibrationEffect nextComposed() {
-            VibrationEffect.Composition composition = VibrationEffect.startComposition();
+        private void addPrimitivesToComposition(VibrationEffect.Composition composition) {
+            getNextArgRequired(); // consume "primitives"
             String nextArg;
             while ((nextArg = peekNextArg()) != null) {
                 int delay = 0;
                 if ("-w".equals(nextArg)) {
-                    getNextArgRequired(); // consume the -w option
+                    getNextArgRequired(); // consume "-w"
                     delay = Integer.parseInt(getNextArgRequired());
-                } else if ("-v".equals(nextArg)) {
-                    // Starting next vibrator, this composed effect if finished.
+                    nextArg = peekNextArg();
+                }
+                try {
+                    composition.addPrimitive(Integer.parseInt(nextArg), /* scale= */ 1, delay);
+                    getNextArgRequired(); // consume the primitive id
+                } catch (NumberFormatException | NullPointerException e) {
+                    // nextArg is not describing a primitive, leave it to be consumed by outer loops
                     break;
                 }
-                int primitiveId = Integer.parseInt(getNextArgRequired());
-                composition.addPrimitive(primitiveId, /* scale= */ 1f, delay);
             }
-            return composition.compose();
         }
 
         private VibrationAttributes createVibrationAttributes(CommonOptions commonOptions) {
@@ -1615,38 +1657,51 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("  list");
                 pw.println("    Prints the id of device vibrators. This does not include any ");
                 pw.println("    connected input device.");
-                pw.println("  synced [options] <effect>");
+                pw.println("  synced [options] <effect>...");
                 pw.println("    Vibrates effect on all vibrators in sync.");
-                pw.println("  combined [options] (-v <vibrator-id> <effect>)...");
+                pw.println("  combined [options] (-v <vibrator-id> <effect>...)...");
                 pw.println("    Vibrates different effects on each vibrator in sync.");
-                pw.println("  sequential [options] (-v <vibrator-id> [-w <delay>] <effect>)...");
+                pw.println("  sequential [options] (-v <vibrator-id> <effect>...)...");
                 pw.println("    Vibrates different effects on each vibrator in sequence.");
                 pw.println("  cancel");
                 pw.println("    Cancels any active vibration");
                 pw.println("");
                 pw.println("Effect commands:");
-                pw.println("  oneshot [-a] <duration> [<amplitude>]");
+                pw.println("  oneshot [-w delay] [-a] <duration> [<amplitude>]");
                 pw.println("    Vibrates for duration milliseconds; ignored when device is on ");
                 pw.println("    DND (Do Not Disturb) mode; touch feedback strength user setting ");
                 pw.println("    will be used to scale amplitude.");
+                pw.println("    If -w is provided, the effect will be played after the specified");
+                pw.println("    wait time in milliseconds.");
                 pw.println("    If -a is provided, the command accepts a second argument for ");
                 pw.println("    amplitude, in a scale of 1-255.");
-                pw.println("  waveform [-r <index>] [-a] (<duration> [<amplitude>])...");
+                pw.print("    waveform [-w delay] [-r index] [-a] [-f] [-c] ");
+                pw.println("(<duration> [<amplitude>] [<frequency>])...");
                 pw.println("    Vibrates for durations and amplitudes in list; ignored when ");
                 pw.println("    device is on DND (Do Not Disturb) mode; touch feedback strength ");
                 pw.println("    user setting will be used to scale amplitude.");
+                pw.println("    If -w is provided, the effect will be played after the specified");
+                pw.println("    wait time in milliseconds.");
                 pw.println("    If -r is provided, the waveform loops back to the specified");
                 pw.println("    index (e.g. 0 loops from the beginning)");
-                pw.println("    If -a is provided, the command accepts duration-amplitude pairs;");
-                pw.println("    otherwise, it accepts durations only and alternates off/on");
-                pw.println("    Duration is in milliseconds; amplitude is a scale of 1-255.");
-                pw.println("  prebaked [-b] <effect-id>");
+                pw.println("    If -a is provided, the command expects amplitude to follow each");
+                pw.println("    duration; otherwise, it accepts durations only and alternates");
+                pw.println("    off/on");
+                pw.println("    If -f is provided, the command expects frequency to follow each");
+                pw.println("    amplitude or duration; otherwise, it uses resonant frequency");
+                pw.println("    If -c is provided, the waveform is continuous and will ramp");
+                pw.println("    between values; otherwise each entry is a fixed step.");
+                pw.println("    Duration is in milliseconds; amplitude is a scale of 1-255;");
+                pw.println("    frequency is a relative value around resonant frequency 0;");
+                pw.println("  prebaked [-w delay] [-b] <effect-id>");
                 pw.println("    Vibrates with prebaked effect; ignored when device is on DND ");
                 pw.println("    (Do Not Disturb) mode; touch feedback strength user setting ");
                 pw.println("    will be used to scale amplitude.");
+                pw.println("    If -w is provided, the effect will be played after the specified");
+                pw.println("    wait time in milliseconds.");
                 pw.println("    If -b is provided, the prebaked fallback effect will be played if");
                 pw.println("    the device doesn't support the given effect-id.");
-                pw.println("  composed [-w <delay>] <primitive-id>...");
+                pw.println("  primitives ([-w delay] <primitive-id>)...");
                 pw.println("    Vibrates with a composed effect; ignored when device is on DND ");
                 pw.println("    (Do Not Disturb) mode; touch feedback strength user setting ");
                 pw.println("    will be used to scale primitive intensities.");

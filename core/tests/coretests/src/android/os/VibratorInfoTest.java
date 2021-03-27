@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.platform.test.annotations.Presubmit;
 import android.util.Range;
@@ -95,6 +96,16 @@ public class VibratorInfoTest {
                 .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .build();
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
+    }
+
+    @Test
+    public void testGetDefaultBraking_returnsFirstSupportedBraking() {
+        assertEquals(Braking.NONE, new InfoBuilder().build().getDefaultBraking());
+        assertEquals(Braking.CLAB,
+                new InfoBuilder()
+                        .setSupportedBraking(Braking.NONE, Braking.CLAB)
+                        .build()
+                        .getDefaultBraking());
     }
 
     @Test
@@ -318,6 +329,7 @@ public class VibratorInfoTest {
         private int mId = 0;
         private int mCapabilities = 0;
         private int[] mSupportedEffects = null;
+        private int[] mSupportedBraking = null;
         private int[] mSupportedPrimitives = null;
         private float mQFactor = Float.NaN;
         private VibratorInfo.FrequencyMapping mFrequencyMapping = EMPTY_FREQUENCY_MAPPING;
@@ -337,6 +349,11 @@ public class VibratorInfoTest {
             return this;
         }
 
+        public InfoBuilder setSupportedBraking(int... supportedBraking) {
+            mSupportedBraking = supportedBraking;
+            return this;
+        }
+
         public InfoBuilder setSupportedPrimitives(int... supportedPrimitives) {
             mSupportedPrimitives = supportedPrimitives;
             return this;
@@ -353,8 +370,8 @@ public class VibratorInfoTest {
         }
 
         public VibratorInfo build() {
-            return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedPrimitives,
-                    mQFactor, mFrequencyMapping);
+            return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
+                    mSupportedPrimitives, mQFactor, mFrequencyMapping);
         }
     }
 }

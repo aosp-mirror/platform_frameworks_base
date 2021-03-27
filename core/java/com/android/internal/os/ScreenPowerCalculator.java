@@ -66,11 +66,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
                 batteryStats, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED,
                 query.shouldForceUsePowerProfileModel());
 
-        builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE,
-                        totalPowerAndDuration.durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE,
-                        totalPowerAndDuration.powerMah);
+        double totalAppPower = 0;
 
         // Now deal with each app's UidBatteryConsumer. The results are stored in the
         // BatteryConsumer.POWER_COMPONENT_SCREEN power component, which is considered smeared,
@@ -87,11 +83,20 @@ public class ScreenPowerCalculator extends PowerCalculator {
                                 appPowerAndDuration.durationMs)
                         .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
                                 appPowerAndDuration.powerMah);
+                totalAppPower += appPowerAndDuration.powerMah;
             }
         } else {
             smearScreenBatteryDrain(uidBatteryConsumerBuilders, totalPowerAndDuration,
                     rawRealtimeUs);
+            totalAppPower = totalPowerAndDuration.powerMah;
         }
+
+        builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
+                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE,
+                        totalPowerAndDuration.durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE,
+                        Math.max(totalPowerAndDuration.powerMah, totalAppPower))
+                .setPowerConsumedByApps(totalAppPower);
     }
 
     /**

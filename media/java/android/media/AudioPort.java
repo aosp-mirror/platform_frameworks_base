@@ -86,6 +86,7 @@ public class AudioPort {
     private final int[] mChannelIndexMasks;
     private final int[] mFormats;
     private final List<AudioProfile> mProfiles;
+    private final List<AudioDescriptor> mDescriptors;
     @UnsupportedAppUsage
     private final AudioGain[] mGains;
     @UnsupportedAppUsage
@@ -107,17 +108,21 @@ public class AudioPort {
         if (mFormats != null) {
             for (int format : mFormats) {
                 mProfiles.add(new AudioProfile(
-                        format, samplingRates, channelMasks, channelIndexMasks));
+                        format, samplingRates, channelMasks, channelIndexMasks,
+                        AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE));
             }
         }
+        mDescriptors = new ArrayList<>();
     }
 
     AudioPort(AudioHandle handle, int role, String name,
-            List<AudioProfile> profiles, AudioGain[] gains) {
+              List<AudioProfile> profiles, AudioGain[] gains,
+              List<AudioDescriptor> descriptors) {
         mHandle = handle;
         mRole = role;
         mName = name;
         mProfiles = profiles;
+        mDescriptors = descriptors;
         mGains = gains;
         Set<Integer> formats = new HashSet<>();
         Set<Integer> samplingRates = new HashSet<>();
@@ -207,6 +212,13 @@ public class AudioPort {
      */
     public List<AudioProfile> profiles() {
         return mProfiles;
+    }
+
+    /**
+     * Get the list of audio descriptor
+     */
+    public List<AudioDescriptor> audioDescriptors() {
+        return mDescriptors;
     }
 
     /**

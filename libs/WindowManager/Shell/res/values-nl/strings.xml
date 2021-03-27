@@ -58,14 +58,14 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Naar rechtsonder verplaatsen"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Instellingen voor <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Bubbel sluiten"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Gesprekken niet in bubbels weergeven"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Gesprekken niet in bubbels tonen"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chatten met bubbels"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nieuwe gesprekken worden weergegeven als zwevende iconen of \'bubbels\'. Tik om een bubbel te openen. Sleep om de bubbel te verplaatsen."</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nieuwe gesprekken worden als zwevende iconen of bubbels getoond. Tik om een bubbel te openen. Sleep om een bubbel te verplaatsen."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Beheer bubbels wanneer je wilt"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tik op Beheren om bubbels van deze app uit te schakelen"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Geen recente bubbels"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Recente bubbels en gesloten bubbels worden hier weergegeven"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Recente bubbels en gesloten bubbels zie je hier"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubbel"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Beheren"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubbel gesloten."</string>

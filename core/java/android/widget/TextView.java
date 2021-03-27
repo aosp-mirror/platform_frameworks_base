@@ -13872,7 +13872,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Nullable
     @Override
-    public ViewTranslationRequest createTranslationRequest(@NonNull int[] supportedFormats) {
+    public ViewTranslationRequest onCreateTranslationRequest(@NonNull int[] supportedFormats) {
         if (supportedFormats == null || supportedFormats.length == 0) {
             // TODO(b/182433547): remove before S release
             if (UiTranslationController.DEBUG) {
@@ -13938,7 +13938,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      *
-     * Called when the content from {@link #createTranslationRequest} had been translated by the
+     * Called when the content from {@link #onCreateTranslationRequest} had been translated by the
      * TranslationService. The default implementation will replace the current
      * {@link TransformationMethod} to transform the original text to the translated text display.
      *

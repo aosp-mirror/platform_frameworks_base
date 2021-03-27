@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,31 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"Wi-Fi ජාලයට පුරනය වන්න"</string>
-    <string name="network_available_sign_in" msgid="1520342291829283114">"ජාලයට පුරනය වන්න"</string>
-    <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
-    <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> හට අන්තර්ජාල ප්‍රවේශය නැත"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"විකල්ප සඳහා තට්ටු කරන්න"</string>
-    <string name="mobile_no_internet" msgid="4014455157529909781">"ජංගම ජාලවලට අන්තර්ජාල ප්‍රවේශය නැත"</string>
-    <string name="other_networks_no_internet" msgid="6698711684200067033">"ජාලයට අන්තර්ජාල ප්‍රවේශය නැත"</string>
-    <string name="private_dns_broken_detailed" msgid="3709388271074611847">"පුද්ගලික DNS සේවාදායකයට ප්‍රවේශ වීමට නොහැකිය"</string>
-    <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> හට සීමිත සබැඳුම් හැකියාවක් ඇත"</string>
-    <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"කෙසේ වෙතත් ඉදිරියට යාමට තට්ටු කරන්න"</string>
-    <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> වෙත මාරු විය"</string>
-    <string name="network_switch_metered_detail" msgid="1358296010128405906">"උපාංගය <xliff:g id="NEW_NETWORK">%1$s</xliff:g> <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> සඳහා අන්තර්ජාල ප්‍රවේශය නැති විට භාවිත කරයි. ගාස්තු අදාළ විය හැකිය."</string>
-    <string name="network_switch_metered_toast" msgid="501662047275723743">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> සිට <xliff:g id="NEW_NETWORK">%2$s</xliff:g> වෙත මාරු විය"</string>
-    <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"නොදන්නා ජාල වර්ගයකි"</string>
+   -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="connectivityResourcesAppLabel" msgid="8294935652079168395">"පද්ධති සබැඳුම් හැකියා සම්පත්"</string>
+    <string name="wifi_available_sign_in" msgid="5254156478006453593">"Wi-Fi ජාලයට පුරනය වන්න"</string>
+    <string name="network_available_sign_in" msgid="7794369329839408792">"ජාලයට පුරනය වන්න"</string>
+    <!-- no translation found for network_available_sign_in_detailed (3643910593681893097) -->
+    <skip />
+    <string name="wifi_no_internet" msgid="3961697321010262514">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> හට අන්තර්ජාල ප්‍රවේශය නැත"</string>
+    <string name="wifi_no_internet_detailed" msgid="1229067002306296104">"විකල්ප සඳහා තට්ටු කරන්න"</string>
+    <string name="mobile_no_internet" msgid="2262524005014119639">"ජංගම ජාලවලට අන්තර්ජාල ප්‍රවේශය නැත"</string>
+    <string name="other_networks_no_internet" msgid="8226004998719563755">"ජාලයට අන්තර්ජාල ප්‍රවේශය නැත"</string>
+    <string name="private_dns_broken_detailed" msgid="3537567373166991809">"පුද්ගලික DNS සේවාදායකයට ප්‍රවේශ වීමට නොහැකිය"</string>
+    <string name="network_partial_connectivity" msgid="5957065286265771273">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> හට සීමිත සබැඳුම් හැකියාවක් ඇත"</string>
+    <string name="network_partial_connectivity_detailed" msgid="6975752539442533034">"කෙසේ වෙතත් ඉදිරියට යාමට තට්ටු කරන්න"</string>
+    <string name="network_switch_metered" msgid="2814798852883117872">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> වෙත මාරු විය"</string>
+    <string name="network_switch_metered_detail" msgid="605546931076348229">"උපාංගය <xliff:g id="NEW_NETWORK">%1$s</xliff:g> <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> සඳහා අන්තර්ජාල ප්‍රවේශය නැති විට භාවිත කරයි. ගාස්තු අදාළ විය හැකිය."</string>
+    <string name="network_switch_metered_toast" msgid="8831325515040986641">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> සිට <xliff:g id="NEW_NETWORK">%2$s</xliff:g> වෙත මාරු විය"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="2255670471736226365">"ජංගම දත්ත"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
-    <item msgid="1055487873974272842">"බ්ලූටූත්"</item>
-    <item msgid="1616528372438698248">"ඊතර්නෙට්"</item>
-    <item msgid="9177085807664964627">"VPN"</item>
+    <item msgid="5454013645032700715">"ජංගම දත්ත"</item>
+    <item msgid="6341719431034774569">"Wi-Fi"</item>
+    <item msgid="5081440868800877512">"බ්ලූටූත්"</item>
+    <item msgid="1160736166977503463">"ඊතර්නෙට්"</item>
+    <item msgid="7347618872551558605">"VPN"</item>
   </string-array>
+    <string name="network_switch_type_name_unknown" msgid="7826330274368951740">"නොදන්නා ජාල වර්ගයකි"</string>
 </resources>

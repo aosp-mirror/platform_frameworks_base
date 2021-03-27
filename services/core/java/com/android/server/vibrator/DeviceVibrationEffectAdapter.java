@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.hardware.vibrator.IVibrator;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.RampSegment;
@@ -30,25 +31,31 @@ import java.util.List;
 /** Adapts a {@link VibrationEffect} to a specific device, taking into account its capabilities. */
 final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<VibratorInfo> {
 
-    /**
-     * Adapts a sequence of {@link VibrationEffectSegment} to device's absolute frequency values
-     * and respective supported amplitudes.
-     *
-     * <p>This adapter preserves the segment count.
-     */
-    interface AmplitudeFrequencyAdapter {
-        List<VibrationEffectSegment> apply(List<VibrationEffectSegment> segments,
-                VibratorInfo info);
+    /** Adapts a sequence of {@link VibrationEffectSegment} to device's capabilities. */
+    interface SegmentsAdapter {
+
+        /**
+         * Modifies the given segments list by adding/removing segments to it based on the
+         * device capabilities specified by given {@link VibratorInfo}.
+         *
+         * @param segments    List of {@link VibrationEffectSegment} to be adapter to the device.
+         * @param repeatIndex Repeat index on the current segment list.
+         * @param info        The device vibrator info that the segments must be adapted to.
+         * @return The new repeat index on the modifies list.
+         */
+        int apply(List<VibrationEffectSegment> segments, int repeatIndex, VibratorInfo info);
     }
 
-    private final AmplitudeFrequencyAdapter mAmplitudeFrequencyAdapter;
+    private final SegmentsAdapter mAmplitudeFrequencyAdapter;
+    private final SegmentsAdapter mStepToRampAdapter;
 
     DeviceVibrationEffectAdapter() {
         this(new ClippingAmplitudeFrequencyAdapter());
     }
 
-    DeviceVibrationEffectAdapter(AmplitudeFrequencyAdapter amplitudeFrequencyAdapter) {
+    DeviceVibrationEffectAdapter(SegmentsAdapter amplitudeFrequencyAdapter) {
         mAmplitudeFrequencyAdapter = amplitudeFrequencyAdapter;
+        mStepToRampAdapter = new StepToRampAdapter();
     }
 
     @Override
@@ -58,14 +65,62 @@ final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<Vibr
         }
 
         VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
-        List<VibrationEffectSegment> mappedSegments = mAmplitudeFrequencyAdapter.apply(
-                composed.getSegments(), info);
+        List<VibrationEffectSegment> newSegments = new ArrayList<>(composed.getSegments());
+        int newRepeatIndex = composed.getRepeatIndex();
 
-        // TODO(b/167947076): add ramp to step adapter once PWLE capability is introduced
+        // Maps steps that should be handled by PWLE to ramps.
+        // This should be done before frequency is converted from relative to absolute values.
+        newRepeatIndex = mStepToRampAdapter.apply(newSegments, newRepeatIndex, info);
+
+        // Adapt amplitude and frequency values to device supported ones, converting frequency
+        // to absolute values in Hertz.
+        newRepeatIndex = mAmplitudeFrequencyAdapter.apply(newSegments, newRepeatIndex, info);
+
+        // TODO(b/167947076): add ramp to step adapter
         // TODO(b/167947076): add filter that removes unsupported primitives
         // TODO(b/167947076): add filter that replaces unsupported prebaked with fallback
 
-        return new VibrationEffect.Composed(mappedSegments, composed.getRepeatIndex());
+        return new VibrationEffect.Composed(newSegments, newRepeatIndex);
+    }
+
+    /**
+     * Adapter that converts step segments that should be handled as PWLEs to ramp segments.
+     *
+     * <p>This leves the list unchanged if the device do not have compose PWLE capability.
+     */
+    private static final class StepToRampAdapter implements SegmentsAdapter {
+        @Override
+        public int apply(List<VibrationEffectSegment> segments, int repeatIndex,
+                VibratorInfo info) {
+            if (!info.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
+                // The vibrator do not have PWLE capability, so keep the segments unchanged.
+                return repeatIndex;
+            }
+            int segmentCount = segments.size();
+            // Convert steps that require frequency control to ramps.
+            for (int i = 0; i < segmentCount; i++) {
+                VibrationEffectSegment segment = segments.get(i);
+                if ((segment instanceof StepSegment)
+                        && ((StepSegment) segment).getFrequency() != 0) {
+                    segments.set(i, apply((StepSegment) segment));
+                }
+            }
+            // Convert steps that are next to ramps to also become ramps, so they can be composed
+            // together in the same PWLE waveform.
+            for (int i = 1; i < segmentCount; i++) {
+                if (segments.get(i) instanceof RampSegment) {
+                    for (int j = i - 1; j >= 0 && (segments.get(j) instanceof StepSegment); j--) {
+                        segments.set(j, apply((StepSegment) segments.get(j)));
+                    }
+                }
+            }
+            return repeatIndex;
+        }
+
+        private RampSegment apply(StepSegment segment) {
+            return new RampSegment(segment.getAmplitude(), segment.getAmplitude(),
+                    segment.getFrequency(), segment.getFrequency(), (int) segment.getDuration());
+        }
     }
 
     /**
@@ -74,25 +129,24 @@ final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<Vibr
      *
      * <p>Devices with no frequency control will collapse all frequencies to zero and leave
      * amplitudes unchanged.
+     *
+     * <p>The frequency value returned in segments will be absolute, conveted with
+     * {@link VibratorInfo#getAbsoluteFrequency(float)}.
      */
-    private static final class ClippingAmplitudeFrequencyAdapter
-            implements AmplitudeFrequencyAdapter {
+    private static final class ClippingAmplitudeFrequencyAdapter implements SegmentsAdapter {
         @Override
-        public List<VibrationEffectSegment> apply(List<VibrationEffectSegment> segments,
+        public int apply(List<VibrationEffectSegment> segments, int repeatIndex,
                 VibratorInfo info) {
-            List<VibrationEffectSegment> result = new ArrayList<>();
             int segmentCount = segments.size();
             for (int i = 0; i < segmentCount; i++) {
                 VibrationEffectSegment segment = segments.get(i);
                 if (segment instanceof StepSegment) {
-                    result.add(apply((StepSegment) segment, info));
+                    segments.set(i, apply((StepSegment) segment, info));
                 } else if (segment instanceof RampSegment) {
-                    result.add(apply((RampSegment) segment, info));
-                } else {
-                    result.add(segment);
+                    segments.set(i, apply((RampSegment) segment, info));
                 }
             }
-            return result;
+            return repeatIndex;
         }
 
         private StepSegment apply(StepSegment segment, VibratorInfo info) {

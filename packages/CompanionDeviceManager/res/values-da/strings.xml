@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4470785958457506021">"Medfølgende enhedshåndtering"</string>
+    <string name="app_label" msgid="4470785958457506021">"Medfølgende enhedsadministrator"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Vælg den enhed (<xliff:g id="PROFILE_NAME">%1$s</xliff:g>), som skal administreres af &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"enhed"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ur"</string>

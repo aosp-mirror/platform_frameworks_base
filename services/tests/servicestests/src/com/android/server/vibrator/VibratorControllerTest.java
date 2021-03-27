@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -34,10 +35,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.content.ContextWrapper;
+import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -66,6 +69,7 @@ import org.mockito.junit.MockitoRule;
  */
 @Presubmit
 public class VibratorControllerTest {
+    private static final int VIBRATOR_ID = 0;
 
     @Rule public MockitoRule rule = MockitoJUnit.rule();
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
@@ -86,23 +90,18 @@ public class VibratorControllerTest {
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
         when(mVibratorStateListenerMock.asBinder()).thenReturn(mVibratorStateListenerBinderMock);
+        mockVibratorCapabilities(0);
     }
 
     private VibratorController createController() {
-        return new VibratorController(/* vibratorId= */ 0, mOnCompleteListenerMock,
-                mNativeWrapperMock);
-    }
-
-    private VibratorController createController(int vibratorId) {
-        return new VibratorController(vibratorId, mOnCompleteListenerMock, mNativeWrapperMock);
+        return new VibratorController(VIBRATOR_ID, mOnCompleteListenerMock, mNativeWrapperMock);
     }
 
     @Test
     public void createController_initializesNativeWrapper() {
-        int vibratorId = 13;
-        VibratorController controller = createController(vibratorId);
-        assertEquals(vibratorId, controller.getVibratorInfo().getId());
-        verify(mNativeWrapperMock).init(eq(vibratorId), notNull());
+        VibratorController controller = createController();
+        assertEquals(VIBRATOR_ID, controller.getVibratorInfo().getId());
+        verify(mNativeWrapperMock).init(eq(VIBRATOR_ID), notNull());
     }
 
     @Test
@@ -191,6 +190,7 @@ public class VibratorControllerTest {
 
     @Test
     public void on_withDuration_turnsVibratorOn() {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
         controller.on(100, 10);
 
@@ -228,20 +228,26 @@ public class VibratorControllerTest {
     }
 
     @Test
-    public void on_withComposedPwle_ignoresEffect() {
+    public void on_withComposedPwle_performsEffect() {
+        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        when(mNativeWrapperMock.composePwle(any(), anyInt(), anyLong())).thenReturn(15L);
         VibratorController controller = createController();
 
         RampSegment[] primitives = new RampSegment[]{
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
                         /* startFrequency= */ -1, /* endFrequency= */ 1, /* duration= */ 10)
         };
-        assertEquals(0L, controller.on(primitives, 12));
-        assertFalse(controller.isVibrating());
+        assertEquals(15L, controller.on(primitives, 12));
+        assertTrue(controller.isVibrating());
+
+        verify(mNativeWrapperMock).composePwle(eq(primitives), eq(Braking.NONE), eq(12L));
     }
 
     @Test
     public void off_turnsOffVibrator() {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
+
         controller.on(100, 1);
         assertTrue(controller.isVibrating());
 
@@ -253,6 +259,7 @@ public class VibratorControllerTest {
 
     @Test
     public void registerVibratorStateListener_callbacksAreTriggered() throws Exception {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
 
         controller.registerVibratorStateListener(mVibratorStateListenerMock);
@@ -271,6 +278,7 @@ public class VibratorControllerTest {
 
     @Test
     public void unregisterVibratorStateListener_callbackNotTriggeredAfter() throws Exception {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
 
         controller.registerVibratorStateListener(mVibratorStateListenerMock);
@@ -287,7 +295,11 @@ public class VibratorControllerTest {
     }
 
     private void mockVibratorCapabilities(int capabilities) {
-        when(mNativeWrapperMock.getCapabilities()).thenReturn((long) capabilities);
+        VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
+                Float.NaN, Float.NaN, Float.NaN, Float.NaN, null);
+        when(mNativeWrapperMock.getInfo(/* suggestedFrequencyRange= */ 100)).thenReturn(
+                new VibratorInfo(VIBRATOR_ID, capabilities, null, null, null, Float.NaN,
+                        frequencyMapping));
     }
 
     private PrebakedSegment createPrebaked(int effectId, int effectStrength) {

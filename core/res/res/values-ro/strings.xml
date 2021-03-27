@@ -297,8 +297,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplicația rulează"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplicațiile consumă bateria"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Mărire"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Politica de securitate privind accesibilitatea"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> folosește bateria"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicații folosesc bateria"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Atingeți pentru mai multe detalii privind bateria și utilizarea datelor"</string>
@@ -1712,7 +1711,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizați comanda rapidă"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversarea culorilor"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corecția culorii"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Reduceți luminozitatea"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Luminozitate redusă suplimentar"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S-au apăsat lung tastele de volum. S-a activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S-au apăsat lung tastele de volum. S-a dezactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Apăsați ambele butoane de volum timp de trei secunde pentru a folosi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2281,8 +2280,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Confidențialitatea privind senzorii"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Pictograma aplicației"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imaginea de branding a aplicației"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Verificați setările pentru acces"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> poată să vadă și să vă controleze ecranul. Atingeți pentru a examina."</string>
 </resources>

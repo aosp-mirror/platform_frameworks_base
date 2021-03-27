@@ -20,8 +20,10 @@ import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 
@@ -38,11 +40,11 @@ import java.util.Map;
  * interactions.
  */
 final class FakeVibratorControllerProvider {
-
     private static final int EFFECT_DURATION = 20;
 
     private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();
     private final List<VibrationEffectSegment> mEffectSegments = new ArrayList<>();
+    private final List<Integer> mBraking = new ArrayList<>();
     private final List<Float> mAmplitudes = new ArrayList<>();
     private final Handler mHandler;
     private final FakeNativeWrapper mNativeWrapper;
@@ -52,9 +54,13 @@ final class FakeVibratorControllerProvider {
 
     private int mCapabilities;
     private int[] mSupportedEffects;
+    private int[] mSupportedBraking;
     private int[] mSupportedPrimitives;
-    private float mResonantFrequency;
-    private float mQFactor;
+    private float mMinFrequency = Float.NaN;
+    private float mResonantFrequency = Float.NaN;
+    private float mFrequencyResolution = Float.NaN;
+    private float mQFactor = Float.NaN;
+    private float[] mMaxAmplitudes;
 
     private final class FakeNativeWrapper extends VibratorController.NativeWrapper {
         public int vibratorId;
@@ -74,11 +80,12 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public void on(long milliseconds, long vibrationId) {
+        public long on(long milliseconds, long vibrationId) {
             mEffectSegments.add(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
                     /* frequency= */ 0, (int) milliseconds));
             applyLatency();
             scheduleListener(milliseconds, vibrationId);
+            return milliseconds;
         }
 
         @Override
@@ -89,26 +96,6 @@ final class FakeVibratorControllerProvider {
         public void setAmplitude(float amplitude) {
             mAmplitudes.add(amplitude);
             applyLatency();
-        }
-
-        @Override
-        public int[] getSupportedEffects() {
-            return mSupportedEffects;
-        }
-
-        @Override
-        public int[] getSupportedPrimitives() {
-            return mSupportedPrimitives;
-        }
-
-        @Override
-        public float getResonantFrequency() {
-            return mResonantFrequency;
-        }
-
-        @Override
-        public float getQFactor() {
-            return mQFactor;
         }
 
         @Override
@@ -136,12 +123,20 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public void setExternalControl(boolean enabled) {
+        public long composePwle(RampSegment[] primitives, int braking, long vibrationId) {
+            long duration = 0;
+            for (RampSegment primitive : primitives) {
+                duration += primitive.getDuration();
+                mEffectSegments.add(primitive);
+            }
+            mBraking.add(braking);
+            applyLatency();
+            scheduleListener(duration, vibrationId);
+            return duration;
         }
 
         @Override
-        public long getCapabilities() {
-            return mCapabilities;
+        public void setExternalControl(boolean enabled) {
         }
 
         @Override
@@ -153,6 +148,15 @@ final class FakeVibratorControllerProvider {
         @Override
         public void alwaysOnDisable(long id) {
             mEnabledAlwaysOnEffects.remove(id);
+        }
+
+        @Override
+        public VibratorInfo getInfo(float suggestedFrequencyRange) {
+            VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
+                    mMinFrequency, mResonantFrequency, mFrequencyResolution,
+                    suggestedFrequencyRange, mMaxAmplitudes);
+            return new VibratorInfo(vibratorId, mCapabilities, mSupportedEffects, mSupportedBraking,
+                    mSupportedPrimitives, mQFactor, frequencyMapping);
         }
 
         private void applyLatency() {
@@ -214,6 +218,15 @@ final class FakeVibratorControllerProvider {
         mSupportedEffects = effects;
     }
 
+    /** Set the effects supported by the fake vibrator hardware. */
+    public void setSupportedBraking(int... braking) {
+        if (braking != null) {
+            braking = Arrays.copyOf(braking, braking.length);
+            Arrays.sort(braking);
+        }
+        mSupportedBraking = braking;
+    }
+
     /** Set the primitives supported by the fake vibrator hardware. */
     public void setSupportedPrimitives(int... primitives) {
         if (primitives != null) {
@@ -224,13 +237,28 @@ final class FakeVibratorControllerProvider {
     }
 
     /** Set the resonant frequency of the fake vibrator hardware. */
-    public void setResonantFrequency(float resonantFrequency) {
-        mResonantFrequency = resonantFrequency;
+    public void setResonantFrequency(float frequencyHz) {
+        mResonantFrequency = frequencyHz;
+    }
+
+    /** Set the minimum frequency of the fake vibrator hardware. */
+    public void setMinFrequency(float frequencyHz) {
+        mMinFrequency = frequencyHz;
+    }
+
+    /** Set the frequency resolution of the fake vibrator hardware. */
+    public void setFrequencyResolution(float frequencyHz) {
+        mFrequencyResolution = frequencyHz;
     }
 
     /** Set the Q factor of the fake vibrator hardware. */
     public void setQFactor(float qFactor) {
         mQFactor = qFactor;
+    }
+
+    /** Set the max amplitude supported for each frequency f the fake vibrator hardware. */
+    public void setMaxAmplitudes(float... maxAmplitudes) {
+        mMaxAmplitudes = maxAmplitudes;
     }
 
     /**
@@ -239,6 +267,11 @@ final class FakeVibratorControllerProvider {
      */
     public List<Float> getAmplitudes() {
         return new ArrayList<>(mAmplitudes);
+    }
+
+    /** Return the braking values passed to the compose PWLE method. */
+    public List<Integer> getBraking() {
+        return mBraking;
     }
 
     /** Return list of {@link VibrationEffectSegment} played by this controller, in order. */

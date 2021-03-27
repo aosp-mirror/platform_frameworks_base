@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_APP_START;
 
 import android.animation.Animator;
@@ -34,6 +36,8 @@ import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -59,6 +63,14 @@ public class ActivityLaunchAnimator {
     public static final long ANIMATION_DELAY_ICON_FADE_IN = ANIMATION_DURATION -
             CollapsedStatusBarFragment.FADE_IN_DURATION - CollapsedStatusBarFragment.FADE_IN_DELAY
             - 16;
+    private static final int ANIMATION_DURATION_NAV_FADE_IN = 266;
+    private static final int ANIMATION_DURATION_NAV_FADE_OUT = 133;
+    private static final long ANIMATION_DELAY_NAV_FADE_IN =
+            ANIMATION_DURATION - ANIMATION_DURATION_NAV_FADE_IN;
+    private static final Interpolator NAV_FADE_IN_INTERPOLATOR =
+            new PathInterpolator(0f, 0f, 0f, 1f);
+    private static final Interpolator NAV_FADE_OUT_INTERPOLATOR =
+            new PathInterpolator(0.2f, 0f, 1f, 1f);
     private static final long LAUNCH_TIMEOUT = 500;
     private final NotificationPanelViewController mNotificationPanel;
     private final NotificationListContainer mNotificationContainer;
@@ -208,6 +220,8 @@ public class ActivityLaunchAnimator {
                 int notificationHeight = Math.max(mSourceNotification.getActualHeight()
                         - mSourceNotification.getClipBottomAmount(), 0);
                 int notificationWidth = mSourceNotification.getWidth();
+                final RemoteAnimationTarget navigationBarTarget =
+                        getNavBarRemoteAnimationTarget(remoteAnimationNonAppTargets);
                 anim.setDuration(ANIMATION_DURATION);
                 anim.setInterpolator(Interpolators.LINEAR);
                 anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -234,6 +248,7 @@ public class ActivityLaunchAnimator {
                         applyParamsToWindow(primary);
                         applyParamsToNotification(mParams);
                         applyParamsToNotificationShade(mParams);
+                        applyNavigationBarParamsToWindow(navigationBarTarget);
                     }
                 });
                 anim.addListener(new AnimatorListenerAdapter() {
@@ -286,6 +301,18 @@ public class ActivityLaunchAnimator {
             return primary;
         }
 
+        private RemoteAnimationTarget getNavBarRemoteAnimationTarget(
+                RemoteAnimationTarget[] remoteAnimationTargets) {
+            RemoteAnimationTarget navBar = null;
+            for (RemoteAnimationTarget target : remoteAnimationTargets) {
+                if (target.windowType == TYPE_NAVIGATION_BAR) {
+                    navBar = target;
+                    break;
+                }
+            }
+            return navBar;
+        }
+
         private void setExpandAnimationRunning(boolean running) {
             mNotificationPanel.setLaunchingNotification(running);
             mSourceNotification.setExpandAnimationRunning(running);
@@ -324,6 +351,34 @@ public class ActivityLaunchAnimator {
                     .withVisibility(true)
                     .build();
             mSyncRtTransactionApplier.scheduleApply(params);
+        }
+
+        private void applyNavigationBarParamsToWindow(RemoteAnimationTarget navBarTarget) {
+            if (navBarTarget == null) {
+                return;
+            }
+
+            // calculate navigation bar fade-out progress
+            final float fadeOutProgress = mParams.getProgress(0,
+                    ANIMATION_DURATION_NAV_FADE_OUT);
+
+            // calculate navigation bar fade-in progress
+            final float fadeInProgress = mParams.getProgress(ANIMATION_DELAY_NAV_FADE_IN,
+                    ANIMATION_DURATION_NAV_FADE_OUT);
+
+            final SurfaceParams.Builder builder = new SurfaceParams.Builder(navBarTarget.leash);
+            if (fadeInProgress > 0) {
+                Matrix m = new Matrix();
+                m.postTranslate(0, (float) (mParams.top - navBarTarget.position.y));
+                mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
+                builder.withMatrix(m)
+                        .withWindowCrop(mWindowCrop)
+                        .withVisibility(true);
+                builder.withAlpha(NAV_FADE_IN_INTERPOLATOR.getInterpolation(fadeInProgress));
+            } else {
+                builder.withAlpha(1f - NAV_FADE_OUT_INTERPOLATOR.getInterpolation(fadeOutProgress));
+            }
+            mSyncRtTransactionApplier.scheduleApply(builder.build());
         }
 
         @Override
