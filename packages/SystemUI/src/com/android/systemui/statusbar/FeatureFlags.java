@@ -87,10 +87,6 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_wallet);
     }
 
-    public boolean isNavigationBarOverlayEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_navigation_bar_overlay);
-    }
-
     public boolean isPMLiteEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_pm_lite);
     }
