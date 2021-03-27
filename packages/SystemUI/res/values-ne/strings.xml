@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"सूर्योदयसम्म"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> मा सक्रिय"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> सम्म"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"चमक घटाइयोस्"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC लाई असक्षम पारिएको छ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC लाई सक्षम पारिएको छ"</string>
@@ -502,7 +501,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थित गर्नुहोस्"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"नयाँ"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"मौन"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"साइलेन्ट"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाहरू"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"वार्तालापहरू"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"सबै मौन सूचनाहरू हटाउनुहोस्"</string>
@@ -652,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"डेमो मोड देखाउनुहोस्"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"इथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"वालेट"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"तयार छ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"कार्य प्रोफाइल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"हवाइजहाज मोड"</string>
     <string name="add_tile" msgid="6239678623873086686">"टाइल थप्नुहोस्"</string>
@@ -705,19 +702,19 @@
     <string name="inline_block_button" msgid="479892866568378793">"रोक लगाउनुहोस्"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"देखाउने क्रम जारी राख्नुहोस्"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"सानो बनाउनुहोस्"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"मौन"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"साइलेन्ट"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"मौन रहनुहोस्"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"सतर्क गराउने"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"सर्तक गराइरहनुहोस्"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"सूचनाहरू निष्क्रिय पार्नुहोस्"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"यो एपका सूचनाहरू देखाउने क्रम जारी राख्ने हो?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"मौन"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"साइलेन्ट"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"पूर्वनिर्धारित"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"स्वचालित"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"न घन्टी बज्छ न त कम्पन नै हुन्छ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"न घन्टी बज्छ न त कम्पन नै हुन्छ र वार्तालाप खण्डको तलतिर देखा पर्छ"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"फोनको सेटिङका आधारमा घन्टी बज्न वा कम्पन हुन सक्छ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फोनको सेटिङका आधारमा घन्टी बज्न वा कम्पन हुन सक्छ। <xliff:g id="APP_NAME">%1$s</xliff:g> का वार्तालापहरू पूर्वनिर्धारित रूपमा बबलमा देखाइन्छन्।"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"फोनको सेटिङका आधारमा घन्टी बज्न वा भाइब्रेट हुन सक्छ"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फोनको सेटिङका आधारमा घन्टी बज्न वा भाइब्रेट हुन सक्छ। <xliff:g id="APP_NAME">%1$s</xliff:g> का वार्तालापहरू पूर्वनिर्धारित रूपमा बबलमा देखाइन्छन्।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ्लोटिङ सर्टकटमार्फत यो सामग्रीतर्फ तपाईंको ध्यान आकर्षित गर्दछ।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"सिस्टमलाई यो सूचना आउँदा ध्वनि बज्नु पर्छ वा कम्पन हुनु पर्छ भन्ने कुराको निधो गर्न दिनुहोस्"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;स्थिति:&lt;/b&gt; सूचनालाई महत्त्वपूर्ण ठानी पूर्वनिर्धारित मोडमा सेट गरिएको छ"</string>

@@ -223,9 +223,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"बैटरी का विवरण खोलें"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> प्रतिशत बैटरी बची है और आपके इस्तेमाल के हिसाब से यह <xliff:g id="TIME">%2$s</xliff:g> में खत्म हो जाएगी"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (8892191177774027364) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"बैटरी चार्ज हो रही है, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> प्रतिशत."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"सिस्टम सेटिंग."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"सूचनाएं."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"पूरी सूचनाएं देखें"</string>
@@ -414,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"सुबह तक चालू रहेगी"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> पर चालू हाेगी"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> तक चालू रहेगी"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"स्क्रीन की चमक कम करें"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"एनएफ़सी"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC बंद है"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC चालू है"</string>
@@ -654,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"डेमो मोड दिखाएं"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ईथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"वॉलेट"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"तैयार"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"वर्क प्रोफ़ाइल"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"हवाई जहाज़ मोड"</string>
     <string name="add_tile" msgid="6239678623873086686">"टाइल जोड़ें"</string>
