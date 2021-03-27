@@ -270,7 +270,8 @@ public class StartingSurfaceDrawer {
             if (splashscreenContentCompatible) {
                 win.setContentView(sView);
             } else {
-                sView = mSplashscreenContentDrawer.makeSplashScreenContentView(context, iconRes);
+                sView = mSplashscreenContentDrawer
+                        .makeSplashScreenContentView(context, activityInfo);
                 win.setContentView(sView);
                 sView.cacheRootWindow(win);
             }

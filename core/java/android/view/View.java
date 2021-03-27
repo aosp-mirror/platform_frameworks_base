@@ -151,6 +151,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
+import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationSpec.DataFormat;
 import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
@@ -30722,7 +30723,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    //TODO(b/1960696): update javadoc when dispatchRequestTranslation is ready.
     /**
      * Returns a {@link ViewTranslationRequest} which represents the content to be translated.
      *
@@ -30735,7 +30735,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The {@link AutofillId} must be set on the returned value.
      */
     @Nullable
-    public ViewTranslationRequest createTranslationRequest(
+    public ViewTranslationRequest onCreateTranslationRequest(
             @NonNull @DataFormat int[] supportedFormats) {
         return null;
     }
@@ -30769,8 +30769,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Called when the content from {@link #createTranslationRequest} had been translated by the
-     * TranslationService.
+     * Called when the content from {@link View#onCreateTranslationRequest} had been translated by
+     * the TranslationService.
      *
      * <p> The default implementation does nothing.</p>
      *
@@ -30779,6 +30779,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void onTranslationResponse(@NonNull ViewTranslationResponse response) {
         // no-op
+    }
+
+    /**
+     * Dispatch to collect the {@link ViewTranslationRequest}s for translation purpose by traversing
+     * the hierarchy when the app requests ui translation. Typically, this method should only be
+     * overridden by subclasses that provide a view hierarchy (such as {@link ViewGroup}). Other
+     * classes should override {@link View#onCreateTranslationRequest}. When requested to start the
+     * ui translation, the system will call this method to traverse the view hierarchy to call
+     * {@link View#onCreateTranslationRequest} to build {@link ViewTranslationRequest}s and create a
+     * {@link android.view.translation.Translator} to translate the requests.
+     *
+     * <p> The default implementation will call {@link View#onCreateTranslationRequest} to build
+     * {@link ViewTranslationRequest} if the view should be translated. </p>
+     *
+     * @param viewIds a map for the view's {@link AutofillId} and its virtual child ids or
+     * {@code null} if the view doesn't have virtual child that should be translated. The virtual
+     * child ids are the same virtual ids provided by ContentCapture.
+     * @param supportedFormats the supported translation formats. For now, the only possible value
+     * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
+     * @param capability a {@link TranslationCapability} that holds translation capability.
+     * information, e.g. source spec, target spec.
+     * @param requests fill in with {@link ViewTranslationRequest}s for translation purpose.
+     */
+    public void dispatchRequestTranslation(@NonNull Map<AutofillId, long[]> viewIds,
+            @NonNull @DataFormat int[] supportedFormats,
+            @Nullable TranslationCapability capability,
+            @NonNull List<ViewTranslationRequest> requests) {
+        AutofillId autofillId = getAutofillId();
+        if (viewIds.containsKey(autofillId)) {
+            ViewTranslationRequest request = null;
+            if (viewIds.get(autofillId) == null) {
+                request = onCreateTranslationRequest(supportedFormats);
+                if (request != null && request.getKeys().size() > 0) {
+                    requests.add(request);
+                }
+            } else {
+                // TODO: handle virtual view
+            }
+        }
     }
 
     /**

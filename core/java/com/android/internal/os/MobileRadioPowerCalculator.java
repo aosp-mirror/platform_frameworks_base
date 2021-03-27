@@ -42,8 +42,9 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
 
     private static class PowerAndDuration {
         public long durationMs;
-        public double powerMah;
+        public double remainingPowerMah;
         public long totalAppDurationMs;
+        public double totalAppPowerMah;
         public long signalDurationMs;
         public long noCoverageDurationMs;
     }
@@ -103,12 +104,14 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
         calculateRemaining(total, batteryStats, rawRealtimeUs,
                 query.shouldForceUsePowerProfileModel());
 
-        if (total.powerMah != 0) {
+        if (total.remainingPowerMah != 0 || total.totalAppPowerMah != 0) {
             builder.getOrCreateSystemBatteryConsumerBuilder(
                     SystemBatteryConsumer.DRAIN_TYPE_MOBILE_RADIO)
                     .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_MOBILE_RADIO,
                             total.durationMs)
-                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO, total.powerMah);
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                            total.remainingPowerMah + total.totalAppPowerMah)
+                    .setPowerConsumedByApps(total.totalAppPowerMah);
         }
     }
 
@@ -120,6 +123,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
 
         final double powerMah = calculatePower(u, powerPerPacketMah, radioActiveDurationMs,
                 shouldForceUsePowerProfileModel);
+        total.totalAppPowerMah += powerMah;
 
         app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_MOBILE_RADIO,
                 radioActiveDurationMs)
@@ -142,14 +146,14 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
 
         BatterySipper radio = new BatterySipper(BatterySipper.DrainType.CELL, null, 0);
         calculateRemaining(total, batteryStats, rawRealtimeUs, false);
-        if (total.powerMah != 0) {
+        if (total.remainingPowerMah != 0) {
             if (total.signalDurationMs != 0) {
                 radio.noCoveragePercent =
                         total.noCoverageDurationMs * 100.0 / total.signalDurationMs;
             }
             radio.mobileActive = total.durationMs;
             radio.mobileActiveCount = batteryStats.getMobileRadioActiveUnknownCount(statsType);
-            radio.mobileRadioPowerMah = total.powerMah;
+            radio.mobileRadioPowerMah = total.remainingPowerMah;
             radio.sumPower();
         }
         if (radio.totalPowerMah > 0) {
@@ -265,7 +269,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
             }
         }
         total.durationMs = radioActiveTimeMs;
-        total.powerMah = powerMah;
+        total.remainingPowerMah = powerMah;
         total.signalDurationMs = signalTimeMs;
     }
 

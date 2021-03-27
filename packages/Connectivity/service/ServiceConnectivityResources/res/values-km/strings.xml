@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,27 +13,31 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
-    <string name="network_available_sign_in" msgid="1520342291829283114">"ចូលទៅបណ្តាញ"</string>
-    <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
-    <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> មិនមាន​ការតភ្ជាប់អ៊ីនធឺណិត​ទេ"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"ប៉ះសម្រាប់ជម្រើស"</string>
-    <string name="mobile_no_internet" msgid="4014455157529909781">"បណ្ដាញ​ទូរសព្ទ​ចល័ត​មិនមានការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
-    <string name="other_networks_no_internet" msgid="6698711684200067033">"បណ្ដាញ​មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
-    <string name="private_dns_broken_detailed" msgid="3709388271074611847">"មិនអាច​ចូលប្រើ​ម៉ាស៊ីនមេ DNS ឯកជន​បានទេ"</string>
-    <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> មានការតភ្ជាប់​មានកម្រិត"</string>
-    <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"មិន​អី​ទេ ចុច​​ភ្ជាប់​ចុះ"</string>
-    <string name="network_switch_metered" msgid="1531869544142283384">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="1358296010128405906">"ឧបករណ៍​ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅ​ពេល​ដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> មិនមាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត។ អាច​គិតថ្លៃ​លើការ​ប្រើប្រាស់​ទិន្នន័យ។"</string>
-    <string name="network_switch_metered_toast" msgid="501662047275723743">"បានប្តូរពី <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ទៅ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
-    <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"ប្រភេទបណ្តាញមិនស្គាល់"</string>
+   -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="connectivityResourcesAppLabel" msgid="8294935652079168395">"ធនធាន​តភ្ជាប់​ប្រព័ន្ធ"</string>
+    <string name="wifi_available_sign_in" msgid="5254156478006453593">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
+    <string name="network_available_sign_in" msgid="7794369329839408792">"ចូលទៅបណ្តាញ"</string>
+    <!-- no translation found for network_available_sign_in_detailed (3643910593681893097) -->
+    <skip />
+    <string name="wifi_no_internet" msgid="3961697321010262514">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> មិនមាន​ការតភ្ជាប់អ៊ីនធឺណិត​ទេ"</string>
+    <string name="wifi_no_internet_detailed" msgid="1229067002306296104">"ប៉ះសម្រាប់ជម្រើស"</string>
+    <string name="mobile_no_internet" msgid="2262524005014119639">"បណ្ដាញ​ទូរសព្ទ​ចល័ត​មិនមានការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
+    <string name="other_networks_no_internet" msgid="8226004998719563755">"បណ្ដាញ​មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
+    <string name="private_dns_broken_detailed" msgid="3537567373166991809">"មិនអាច​ចូលប្រើ​ម៉ាស៊ីនមេ DNS ឯកជន​បានទេ"</string>
+    <string name="network_partial_connectivity" msgid="5957065286265771273">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> មានការតភ្ជាប់​មានកម្រិត"</string>
+    <string name="network_partial_connectivity_detailed" msgid="6975752539442533034">"មិន​អី​ទេ ចុច​​ភ្ជាប់​ចុះ"</string>
+    <string name="network_switch_metered" msgid="2814798852883117872">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="605546931076348229">"ឧបករណ៍​ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅ​ពេល​ដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> មិនមាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត។ អាច​គិតថ្លៃ​លើការ​ប្រើប្រាស់​ទិន្នន័យ។"</string>
+    <string name="network_switch_metered_toast" msgid="8831325515040986641">"បានប្តូរពី <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ទៅ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="2255670471736226365">"ទិន្នន័យ​ទូរសព្ទចល័ត"</item>
-    <item msgid="5520925862115353992">"Wi-Fi"</item>
-    <item msgid="1055487873974272842">"ប៊្លូធូស"</item>
-    <item msgid="1616528372438698248">"អ៊ីសឺរណិត"</item>
-    <item msgid="9177085807664964627">"VPN"</item>
+    <item msgid="5454013645032700715">"ទិន្នន័យ​ទូរសព្ទចល័ត"</item>
+    <item msgid="6341719431034774569">"Wi-Fi"</item>
+    <item msgid="5081440868800877512">"ប៊្លូធូស"</item>
+    <item msgid="1160736166977503463">"អ៊ីសឺរណិត"</item>
+    <item msgid="7347618872551558605">"VPN"</item>
   </string-array>
+    <string name="network_switch_type_name_unknown" msgid="7826330274368951740">"ប្រភេទបណ្តាញដែលមិនស្គាល់"</string>
 </resources>

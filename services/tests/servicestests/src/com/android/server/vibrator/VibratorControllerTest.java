@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.content.ContextWrapper;
+import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
@@ -226,15 +228,19 @@ public class VibratorControllerTest {
     }
 
     @Test
-    public void on_withComposedPwle_ignoresEffect() {
+    public void on_withComposedPwle_performsEffect() {
+        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        when(mNativeWrapperMock.composePwle(any(), anyInt(), anyLong())).thenReturn(15L);
         VibratorController controller = createController();
 
         RampSegment[] primitives = new RampSegment[]{
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
                         /* startFrequency= */ -1, /* endFrequency= */ 1, /* duration= */ 10)
         };
-        assertEquals(0L, controller.on(primitives, 12));
-        assertFalse(controller.isVibrating());
+        assertEquals(15L, controller.on(primitives, 12));
+        assertTrue(controller.isVibrating());
+
+        verify(mNativeWrapperMock).composePwle(eq(primitives), eq(Braking.NONE), eq(12L));
     }
 
     @Test
@@ -291,8 +297,8 @@ public class VibratorControllerTest {
     private void mockVibratorCapabilities(int capabilities) {
         VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
                 Float.NaN, Float.NaN, Float.NaN, Float.NaN, null);
-        when(mNativeWrapperMock.getInfo()).thenReturn(
-                new VibratorInfo(VIBRATOR_ID, capabilities, null, null, Float.NaN,
+        when(mNativeWrapperMock.getInfo(/* suggestedFrequencyRange= */ 100)).thenReturn(
+                new VibratorInfo(VIBRATOR_ID, capabilities, null, null, null, Float.NaN,
                         frequencyMapping));
     }
 

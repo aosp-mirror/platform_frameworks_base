@@ -1366,7 +1366,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DELEN"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"WEIGEREN"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Invoermethode selecteren"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Dit op het scherm weergeven terwijl het fysieke toetsenbord actief is"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Op het scherm tonen terwijl het fysieke toetsenbord actief is"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtueel toetsenbord tonen"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Fysiek toetsenbord instellen"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tik om een taal en indeling te selecteren"</string>
@@ -1580,7 +1580,7 @@
     <string name="fingerprints" msgid="148690767172613723">"Vingerafdrukken:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256-vingerafdruk"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1-vingerafdruk:"</string>
-    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Alles weergeven"</string>
+    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Alles tonen"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Een activiteit kiezen"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Delen met"</string>
     <string name="sending" msgid="206925243621664438">"Verzenden..."</string>
@@ -1689,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sneltoets gebruiken"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kleurinversie"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Kleurcorrectie"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Helderheid verlagen"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extra gedimd"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volumetoetsen ingedrukt gehouden. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> is ingeschakeld."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volumetoetsen ingedrukt gehouden. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> uitgeschakeld."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Houd beide volumetoetsen drie seconden ingedrukt om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> te gebruiken"</string>

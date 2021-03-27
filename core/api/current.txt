@@ -20147,6 +20147,14 @@ package android.media {
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
+  public class AudioDescriptor {
+    method @NonNull public byte[] getDescriptor();
+    method public int getEncapsulationType();
+    method public int getStandard();
+    field public static final int STANDARD_EDID = 1; // 0x1
+    field public static final int STANDARD_NONE = 0; // 0x0
+  }
+
   public abstract class AudioDeviceCallback {
     ctor public AudioDeviceCallback();
     method public void onAudioDevicesAdded(android.media.AudioDeviceInfo[]);
@@ -20155,6 +20163,7 @@ package android.media {
 
   public final class AudioDeviceInfo {
     method @NonNull public String getAddress();
+    method @NonNull public java.util.List<android.media.AudioDescriptor> getAudioDescriptors();
     method @NonNull public java.util.List<android.media.AudioProfile> getAudioProfiles();
     method @NonNull public int[] getChannelCounts();
     method @NonNull public int[] getChannelIndexMasks();
@@ -20617,8 +20626,11 @@ package android.media {
   public class AudioProfile {
     method @NonNull public int[] getChannelIndexMasks();
     method @NonNull public int[] getChannelMasks();
+    method public int getEncapsulationType();
     method public int getFormat();
     method @NonNull public int[] getSampleRates();
+    field public static final int AUDIO_ENCAPSULATION_TYPE_IEC61937 = 1; // 0x1
+    field public static final int AUDIO_ENCAPSULATION_TYPE_NONE = 0; // 0x0
   }
 
   public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
@@ -42927,6 +42939,7 @@ package android.telephony.data {
     field public static final int PROTOCOL_NON_IP = 4; // 0x4
     field public static final int PROTOCOL_PPP = 3; // 0x3
     field public static final int PROTOCOL_UNSTRUCTURED = 5; // 0x5
+    field public static final int TYPE_BIP = 8192; // 0x2000
     field public static final int TYPE_CBS = 128; // 0x80
     field public static final int TYPE_DEFAULT = 17; // 0x11
     field public static final int TYPE_DUN = 8; // 0x8
@@ -42938,6 +42951,7 @@ package android.telephony.data {
     field public static final int TYPE_MCX = 1024; // 0x400
     field public static final int TYPE_MMS = 2; // 0x2
     field public static final int TYPE_SUPL = 4; // 0x4
+    field public static final int TYPE_VSIM = 4096; // 0x1000
     field public static final int TYPE_XCAP = 2048; // 0x800
   }
 
@@ -48434,7 +48448,6 @@ package android.view {
     method protected int computeVerticalScrollRange();
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo();
     method public void createContextMenu(android.view.ContextMenu);
-    method @Nullable public android.view.translation.ViewTranslationRequest createTranslationRequest(@NonNull int[]);
     method @Deprecated public void destroyDrawingCache();
     method public android.view.WindowInsets dispatchApplyWindowInsets(android.view.WindowInsets);
     method public boolean dispatchCapturedPointerEvent(android.view.MotionEvent);
@@ -48460,6 +48473,7 @@ package android.view {
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public void dispatchProvideAutofillStructure(@NonNull android.view.ViewStructure, int);
     method public void dispatchProvideStructure(android.view.ViewStructure);
+    method public void dispatchRequestTranslation(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @Nullable android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method public void dispatchScrollCaptureSearch(@NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull java.util.function.Consumer<android.view.ScrollCaptureTarget>);
@@ -48755,6 +48769,7 @@ package android.view {
     method protected void onCreateContextMenu(android.view.ContextMenu);
     method protected int[] onCreateDrawableState(int);
     method public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
+    method @Nullable public android.view.translation.ViewTranslationRequest onCreateTranslationRequest(@NonNull int[]);
     method @CallSuper protected void onDetachedFromWindow();
     method protected void onDisplayHint(int);
     method public boolean onDragEvent(android.view.DragEvent);

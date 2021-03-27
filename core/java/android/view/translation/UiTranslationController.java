@@ -33,6 +33,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
@@ -46,6 +47,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
@@ -223,7 +225,6 @@ public class UiTranslationController {
         pw.print(outerPrefix); pw.print("isContainsView: "); pw.println(isContainsView);
     }
 
-
     /**
      * The method is used by {@link Translator}, it will be called when the translation is done. The
      * translation result can be get from here.
@@ -236,12 +237,30 @@ public class UiTranslationController {
         }
         final SparseArray<ViewTranslationResponse> translatedResult =
                 response.getViewTranslationResponses();
-        // TODO(b/177960696): handle virtual views. Check the result if the AutofillId is virtual
-        // AutofillId?
-        onTranslationCompleted(translatedResult);
+        final SparseArray<ViewTranslationResponse> viewsResult = new SparseArray<>();
+        final SparseArray<ViewTranslationResponse> virtualViewsResult = new SparseArray<>();
+        final List<AutofillId> viewIds = new ArrayList<>();
+        for (int i = 0; i < translatedResult.size(); i++) {
+            final ViewTranslationResponse result = translatedResult.valueAt(i);
+            final AutofillId autofillId = result.getAutofillId();
+            if (autofillId.isNonVirtual()) {
+                viewsResult.put(translatedResult.keyAt(i), result);
+                viewIds.add(autofillId);
+            } else {
+                virtualViewsResult.put(translatedResult.keyAt(i), result);
+            }
+        }
+        if (viewsResult.size() > 0) {
+            onTranslationCompleted(viewsResult, viewIds);
+        }
+        //TODO(b/177960696): call virtual views onTranslationCompleted()
     }
 
-    private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult) {
+    /**
+     * The method is used to handle the translation result for non-vertual views.
+     */
+    private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult,
+            List<AutofillId> viewIds) {
         if (!mActivity.isResumed()) {
             if (DEBUG) {
                 Log.v(TAG, "onTranslationCompleted: Activity is not resumed.");
@@ -258,8 +277,10 @@ public class UiTranslationController {
                         + "Skip to show the translated text.");
                 return;
             }
+            // Traverse tree and get views by the responsed AutofillId
+            findViewsTraversalByAutofillIds(viewIds);
             for (int i = 0; i < resultCount; i++) {
-                final ViewTranslationResponse response = translatedResult.get(i);
+                final ViewTranslationResponse response = translatedResult.valueAt(i);
                 final AutofillId autofillId = response.getAutofillId();
                 if (autofillId == null) {
                     continue;
@@ -319,44 +340,62 @@ public class UiTranslationController {
      */
     private void onUiTranslationStarted(Translator translator, List<AutofillId> views) {
         synchronized (mLock) {
-            // TODO(b/177960696): handle virtual views. Need to check the requested view list is
-            //  virtual AutofillId or not
-            findViewsAndCollectViewTranslationRequest(translator, views);
+            // Filter the request views's AutofillId
+            SparseIntArray virtualViewChildCount = getRequestVirtualViewChildCount(views);
+            Map<AutofillId, long[]> viewIds = new ArrayMap<>();
+            for (int i = 0; i < views.size(); i++) {
+                AutofillId autofillId = views.get(i);
+                if (autofillId.isNonVirtual()) {
+                    viewIds.put(autofillId, null);
+                } else {
+                    // The virtual id get from content capture is long, see getVirtualChildLongId()
+                    // e.g. 1001, 1001:2, 1002:1 -> 1001, <1,2>; 1002, <1>
+                    AutofillId virtualViewAutofillId = new AutofillId(autofillId.getViewId());
+                    long[] childs;
+                    if (viewIds.containsKey(virtualViewAutofillId)) {
+                        childs = viewIds.get(virtualViewAutofillId);
+                    } else {
+                        int childCount = virtualViewChildCount.get(autofillId.getViewId());
+                        childs = new long[childCount];
+                        viewIds.put(virtualViewAutofillId, childs);
+                    }
+                    int end = childs.length;
+                    childs[end] = autofillId.getVirtualChildLongId();
+                }
+            }
+            ArrayList<ViewTranslationRequest> requests = new ArrayList<>();
+            int[] supportedFormats = getSupportedFormatsLocked();
+            ArrayList<ViewRootImpl> roots =
+                    WindowManagerGlobal.getInstance().getRootViews(mActivity.getActivityToken());
+            mActivity.runOnUiThread(() -> {
+                // traverse the hierarchy to collect ViewTranslationRequests
+                for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
+                    View rootView = roots.get(rootNum).getView();
+                    // TODO(b/183589662): call getTranslationCapabilities() for capability
+                    rootView.dispatchRequestTranslation(viewIds, supportedFormats, /* capability */
+                            null, requests);
+                }
+                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
+                        UiTranslationController::sendTranslationRequest,
+                        UiTranslationController.this, translator, requests));
+            });
         }
     }
 
-    /**
-     * If the translation requested views are not virtual view, we need to traverse the tree to
-     * find the views and get the View's ViewTranslationRequest.
-     */
-    private void findViewsAndCollectViewTranslationRequest(Translator translator,
-            List<AutofillId> views) {
-        // Find Views collect the translation data
-        final ArrayList<ViewTranslationRequest> requests = new ArrayList<>();
-            final ArrayList<View> foundViews = new ArrayList<>();
-        findViewsTraversalByAutofillIds(views, foundViews);
-        final int[] supportedFormats = getSupportedFormatsLocked();
-        for (int i = 0; i < foundViews.size(); i++) {
-            final View view = foundViews.get(i);
-            final int currentCount = i;
-            mActivity.runOnUiThread(() -> {
-                final ViewTranslationRequest request =
-                        view.createTranslationRequest(supportedFormats);
-                // TODO(b/177960696): handle null case, the developers may want to handle the
-                //  translation, call dispatchRequestTranslation() instead.
-                if (request != null
-                        && request.getKeys().size() > 0) {
-                    requests.add(request);
+    private SparseIntArray getRequestVirtualViewChildCount(List<AutofillId> views) {
+        SparseIntArray virtualViewCount = new SparseIntArray();
+        for (int i = 0; i < views.size(); i++) {
+            AutofillId autofillId = views.get(i);
+            if (!autofillId.isNonVirtual()) {
+                int virtualViewId = autofillId.getViewId();
+                if (virtualViewCount.indexOfKey(virtualViewId) < 0) {
+                    virtualViewCount.put(virtualViewId, 1);
+                } else {
+                    virtualViewCount.put(virtualViewId, (virtualViewCount.get(virtualViewId) + 1));
                 }
-                if (currentCount == (foundViews.size() - 1)) {
-                    Log.v(TAG, "onUiTranslationStarted: collect " + requests.size()
-                            + " requests.");
-                    mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
-                            UiTranslationController::sendTranslationRequest,
-                            UiTranslationController.this, translator, requests));
-                }
-            });
+            }
         }
+        return virtualViewCount;
     }
 
     private int[] getSupportedFormatsLocked() {
@@ -364,39 +403,36 @@ public class UiTranslationController {
         return new int[] {TranslationSpec.DATA_FORMAT_TEXT};
     }
 
-    private void findViewsTraversalByAutofillIds(List<AutofillId> sourceViewIds,
-            ArrayList<View> foundViews) {
+    private void findViewsTraversalByAutofillIds(List<AutofillId> sourceViewIds) {
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(mActivity.getActivityToken());
         for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
             final View rootView = roots.get(rootNum).getView();
             if (rootView instanceof ViewGroup) {
-                findViewsTraversalByAutofillIds((ViewGroup) rootView, sourceViewIds, foundViews);
+                findViewsTraversalByAutofillIds((ViewGroup) rootView, sourceViewIds);
             } else {
-                addViewIfNeeded(sourceViewIds, rootView, foundViews);
+                addViewIfNeeded(sourceViewIds, rootView);
             }
         }
     }
 
     private void findViewsTraversalByAutofillIds(ViewGroup viewGroup,
-            List<AutofillId> sourceViewIds, ArrayList<View> foundViews) {
+            List<AutofillId> sourceViewIds) {
         final int childCount = viewGroup.getChildCount();
         for (int i = 0; i < childCount; ++i) {
             final View child = viewGroup.getChildAt(i);
             if (child instanceof ViewGroup) {
-                findViewsTraversalByAutofillIds((ViewGroup) child, sourceViewIds, foundViews);
+                findViewsTraversalByAutofillIds((ViewGroup) child, sourceViewIds);
             } else {
-                addViewIfNeeded(sourceViewIds, child, foundViews);
+                addViewIfNeeded(sourceViewIds, child);
             }
         }
     }
 
-    private void addViewIfNeeded(List<AutofillId> sourceViewIds, View view,
-            ArrayList<View> foundViews) {
+    private void addViewIfNeeded(List<AutofillId> sourceViewIds, View view) {
         final AutofillId autofillId = view.getAutofillId();
         if (sourceViewIds.contains(autofillId)) {
             mViews.put(autofillId, new WeakReference<>(view));
-            foundViews.add(view);
         }
     }
 

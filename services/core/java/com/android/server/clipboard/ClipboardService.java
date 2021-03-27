@@ -132,6 +132,18 @@ class HostClipboardMonitor implements Runnable {
         }
     }
 
+    private byte[] receiveMessage() throws IOException {
+        final int size = Integer.reverseBytes(mPipe.readInt());
+        final byte[] receivedData = new byte[size];
+        mPipe.readFully(receivedData);
+        return receivedData;
+    }
+
+    private void sendMessage(byte[] message) throws IOException {
+        mPipe.writeInt(Integer.reverseBytes(message.length));
+        mPipe.write(message);
+    }
+
     public HostClipboardMonitor(HostClipboardCallback cb) {
         mHostClipboardCallback = cb;
     }
@@ -146,10 +158,8 @@ class HostClipboardMonitor implements Runnable {
                 while ((mPipe == null) && !openPipe()) {
                     Thread.sleep(100);
                 }
-                int size = mPipe.readInt();
-                size = Integer.reverseBytes(size);
-                byte[] receivedData = new byte[size];
-                mPipe.readFully(receivedData);
+
+                final byte[] receivedData = receiveMessage();
                 mHostClipboardCallback.onHostClipboardUpdated(
                     new String(receivedData));
             } catch (IOException e) {
@@ -161,8 +171,7 @@ class HostClipboardMonitor implements Runnable {
     public void setHostClipboard(String content) {
         try {
             if (mPipe != null) {
-                mPipe.writeInt(Integer.reverseBytes(content.getBytes().length));
-                mPipe.write(content.getBytes());
+                sendMessage(content.getBytes());
             }
         } catch(IOException e) {
             Slog.e("HostClipboardMonitor",
