@@ -16,6 +16,6 @@
 -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#FFFFFF" />
+    <solid android:color="@color/privacy_circle" />
     <corners android:radius="@dimen/ongoing_appops_chip_bg_corner_radius" />
 </shape>

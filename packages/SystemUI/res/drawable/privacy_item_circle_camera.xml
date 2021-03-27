@@ -24,7 +24,7 @@
                 android:height="@dimen/ongoing_appops_dialog_circle_size"
                 android:width="@dimen/ongoing_appops_dialog_circle_size"
             />
-            <solid android:color="@color/privacy_circle_camera" />
+            <solid android:color="@color/privacy_circle" />
         </shape>
     </item>
     <item android:id="@id/icon"
