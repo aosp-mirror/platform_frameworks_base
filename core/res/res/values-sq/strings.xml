@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikacioni është në ekzekutim"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacionet që konsumojnë baterinë"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Zmadhimi"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Politika e sigurisë e qasshmërisë"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> po përdor baterinë"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikacione po përdorin baterinë"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Trokit për detaje mbi baterinë dhe përdorimin e të dhënave"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Përdor shkurtoren"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kthimi i ngjyrës"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korrigjimi i ngjyrës"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Redukto ndriçimin"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Tejet i errët"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Shtyp dhe mbaj shtypur të dy butonat e volumit për tre sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privatësia e sensorit"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikona e aplikacionit"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imazhi i vendosjes së aplikacionit të markës"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Kontrollo cilësimet e qasjes"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> mund ta shikojë dhe kontrollojë ekranin tënd. Trokit për ta rishikuar."</string>
 </resources>

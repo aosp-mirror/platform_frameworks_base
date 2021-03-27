@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.util.Slog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,6 +32,7 @@ import java.util.List;
  * {@hide}
  */
 public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable {
+    private static final String TAG = "SystemBatteryConsumer";
 
     //                           ****************
     // This list must be kept current with atoms.proto (frameworks/base/cmds/statsd/src/atoms.proto)
@@ -72,6 +74,8 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
     @DrainType
     private final int mDrainType;
 
+    private final double mPowerConsumedByAppsMah;
+
     @DrainType
     public int getDrainType() {
         return mDrainType;
@@ -80,11 +84,23 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
     private SystemBatteryConsumer(@NonNull SystemBatteryConsumer.Builder builder) {
         super(builder.mPowerComponentsBuilder.build());
         mDrainType = builder.mDrainType;
+        mPowerConsumedByAppsMah = builder.mPowerConsumedByAppsMah;
+        if (mPowerConsumedByAppsMah > getConsumedPower()) {
+            Slog.wtf(TAG,
+                    "Power attributed to apps exceeds total: drain type = " + mDrainType
+                            + " total consumed power = " + getConsumedPower()
+                            + " power consumed by apps = " + mPowerConsumedByAppsMah);
+        }
     }
 
     private SystemBatteryConsumer(Parcel in) {
         super(new PowerComponents(in));
         mDrainType = in.readInt();
+        mPowerConsumedByAppsMah = in.readDouble();
+    }
+
+    public double getPowerConsumedByApps() {
+        return mPowerConsumedByAppsMah;
     }
 
     /**
@@ -94,6 +110,7 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(mDrainType);
+        dest.writeDouble(mPowerConsumedByAppsMah);
     }
 
     public static final Creator<SystemBatteryConsumer> CREATOR =
@@ -120,12 +137,22 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
     public static final class Builder extends BaseBuilder<Builder> {
         @DrainType
         private final int mDrainType;
+        private double mPowerConsumedByAppsMah;
         private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
         Builder(int customPowerComponentCount, int customTimeComponentCount,
                 @DrainType int drainType) {
             super(customPowerComponentCount, customTimeComponentCount);
             mDrainType = drainType;
+        }
+
+        /**
+         * Sets the amount of power used by this system component that is attributed to apps.
+         * It should not exceed the total consumed power.
+         */
+        public Builder setPowerConsumedByApps(double powerConsumedByAppsMah) {
+            mPowerConsumedByAppsMah = powerConsumedByAppsMah;
+            return this;
         }
 
         /**

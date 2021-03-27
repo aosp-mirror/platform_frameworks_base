@@ -1997,7 +1997,8 @@ public final class OomAdjuster {
                         // in this case unless they explicitly request it.
                         if ((cstate.getCurCapability() & PROCESS_CAPABILITY_NETWORK) != 0) {
                             if (clientProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
-                                if ((cr.flags & Context.BIND_ALLOW_NETWORK_ACCESS) != 0) {
+                                if ((cr.flags & Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS)
+                                        != 0) {
                                     capability |= PROCESS_CAPABILITY_NETWORK;
                                 }
                             } else {

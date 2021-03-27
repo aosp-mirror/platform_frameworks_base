@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ایپ چل رہی ہے"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ایپس بیٹری خرچ کر رہی ہیں"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"میگنیفکیشن"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"ایکسیسبیلٹی سیکیورٹی کی پالیسی"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> بیٹری کا استعمال کر رہی ہے"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ایپس بیٹری کا استعمال کر رہی ہیں"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"بیٹری اور ڈیٹا استعمال کے بارے میں تفصیلات کے لیے تھپتھپائیں"</string>
@@ -346,10 +345,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"ایپ کو اسٹیٹس بار بننے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"حیثیت بار پھیلائیں/سکیڑیں"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"ایپ کو اسٹیٹس بار پھیلانے یا سکیڑنے کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for permlab_fullScreenIntent (4310888199502509104) -->
-    <skip />
-    <!-- no translation found for permdesc_fullScreenIntent (1100721419406643997) -->
-    <skip />
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"مقفل آلے پر فُل اسکرین سرگرمیوں کے بطور اطلاعات کو ڈسپلے کریں"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"ایپ کو مقفل آلے پر فُل اسکرین سرگرمیوں کے بطور اطلاعات کو ڈسپلے کرنے کی اجازت دیتا ہے"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"شارٹ کٹس انسٹال کریں"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"کسی ایپلیکیشن کو صارف کی مداخلت کے بغیر ہوم اسکرین شارٹ کٹس شامل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"شارٹ کٹس کو اَن انسٹال کریں"</string>
@@ -1692,7 +1689,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"شارٹ کٹ استعمال کریں"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"رنگوں کی تقلیب"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"رنگ کی تصحیح"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"چمک کم کریں"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (3222994553174604132) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آن ہے۔"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آف ہے۔"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> کا استعمال کرنے کے لیے 3 سیکنڈ تک والیوم کی دونوں کلیدوں کو چھوئیں اور دبائے رکھیں"</string>
@@ -2101,8 +2099,7 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"آن اسکرین ایکسیسبیلٹی شارٹ کٹ"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"آن اسکرین ایکسیسبیلٹی شارٹ کٹ منتخب کنندہ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ایکسیسبیلٹی کا شارٹ کٹ"</string>
-    <!-- no translation found for accessibility_system_action_dismiss_notification_shade (8931637495533770352) -->
-    <skip />
+    <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"اطلاعاتی شیڈ برخاست کریں"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> کی کیپشن بار۔"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> کو پابند کردہ بکٹ میں رکھ دیا گیا ہے"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2240,10 +2237,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (4657040468055863672) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (3549230303326142349) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"اپنی اسکرین کے کسی حصے کو بڑا کریں"</string>
+    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"آپ اپنی فُل اسکرین، کسی مخصوص حصے کو بڑا کر سکتے ہیں یا دونوں اختیارات کے درمیان سوئچ کر سکتے ہیں۔"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ترتیبات میں آن کریں"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"برخاست کریں"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"‏جاری رکھنے کیلئے ‎<xliff:g id="APP">%s</xliff:g>&lt;b&gt;‎‏‎‎‏‏‎&lt;b&gt;‎ کو آپ کے آلے کے مائیکروفون تک رسائی درکار ہے۔"</string>
@@ -2252,8 +2247,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"سینسر کی رازداری"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ایپلیکیشن کا آئیکن"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ایپلیکیشن کی برانڈنگ تصویر"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"رسائی کی ترتیبات چیک کریں"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> آپ کی اسکرین کو دیکھ اور کنٹرول کر سکتی ہیں۔ جائزے کے لیے تھپتھپائیں۔"</string>
 </resources>

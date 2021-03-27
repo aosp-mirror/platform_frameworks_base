@@ -88,7 +88,6 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import libcore.io.IoUtils;
 
@@ -145,7 +144,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private final PackageManagerService mPm;
     private final ApexManager mApexManager;
     private final StagingManager mStagingManager;
-    private final PermissionManagerServiceInternal mPermissionManager;
 
     private AppOpsManager mAppOps;
 
@@ -226,7 +224,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Supplier<PackageParser2> apexParserSupplier) {
         mContext = context;
         mPm = pm;
-        mPermissionManager = LocalServices.getService(PermissionManagerServiceInternal.class);
 
         mInstallThread = new HandlerThread(TAG);
         mInstallThread.start();

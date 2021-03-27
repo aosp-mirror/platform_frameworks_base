@@ -51,10 +51,8 @@ oneway interface INetworkOfferCallback {
     /**
      * Called when a network for this offer is needed to fulfill this request.
      * @param networkRequest the request to satisfy
-     * @param providerId the ID of the provider currently satisfying
-     *          this request, or NetworkProvider.ID_NONE if none.
      */
-    void onNetworkNeeded(in NetworkRequest networkRequest, int providerId);
+    void onNetworkNeeded(in NetworkRequest networkRequest);
 
     /**
      * Informs the registrant that the offer is no longer valuable to fulfill this request.
