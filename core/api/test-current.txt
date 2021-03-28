@@ -1064,6 +1064,7 @@ package android.os {
     field public static final int FIRST_ISOLATED_UID = 99000; // 0x182b8
     field public static final int LAST_APP_ZYGOTE_ISOLATED_UID = 98999; // 0x182b7
     field public static final int LAST_ISOLATED_UID = 99999; // 0x1869f
+    field public static final int NFC_UID = 1027; // 0x403
     field public static final int NUM_UIDS_PER_APP_ZYGOTE = 100; // 0x64
   }
 
