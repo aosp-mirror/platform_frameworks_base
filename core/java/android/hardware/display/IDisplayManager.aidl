@@ -68,6 +68,15 @@ interface IDisplayManager {
     // No permissions required.
     WifiDisplayStatus getWifiDisplayStatus();
 
+    // Requires WRITE_SECURE_SETTINGS permission.
+    void setUserDisabledHdrTypes(in int[] userDisabledTypes);
+
+    // Requires WRITE_SECURE_SETTINGS permission.
+    void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed);
+
+    // No permissions required.
+    boolean areUserDisabledHdrTypesAllowed();
+
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
 
