@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"సూర్యోదయం వరకు"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> కు ఆన్ అవుతుంది"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"ప్రకాశాన్ని తగ్గించండి"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC నిలిపివేయబడింది"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ప్రారంభించబడింది"</string>
@@ -515,8 +514,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ఈ పరికరాన్ని మీ తల్లి/తండ్రి మేనేజ్ చేస్తున్నారు"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ఈ పరికరం మీ సంస్థకు చెందినది, కాబట్టి అది నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"మీ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది, కాబట్టి అది నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించవచ్చు"</string>
-    <!-- no translation found for quick_settings_financed_disclosure_named_management (2307703784594859524) -->
-    <skip />
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ద్వారా అందించబడింది"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ఈ పరికరం మీ సంస్థకు చెందినది, ఇది <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది, ఇది <xliff:g id="VPN_APP">%2$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
@@ -530,8 +528,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"మీ వర్క్ ప్రొఫైల్ <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ చేయబడింది"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"<xliff:g id="VPN_APP">%1$s</xliff:g>కు మీ వ్యక్తిగత ప్రొఫైల్ కనెక్ట్ చేయబడింది"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ఈ పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g>కు కనెక్ట్ అయి ఉంది"</string>
-    <!-- no translation found for monitoring_title_financed_device (3659962357973919387) -->
-    <skip />
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ద్వారా అందించబడింది"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"పరికర నిర్వహణ"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"ప్రొఫైల్ పర్యవేక్షణ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"నెట్‌వర్క్ పర్యవేక్షణ"</string>
@@ -543,8 +540,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"విధానాలను వీక్షించండి"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"నియంత్రణలను చూడండి"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది.\n\nసెట్టింగ్‌లను, కార్పొరేట్ యాక్సెస్‌ను, యాప్‌లను, మీ పరికరానికి సంబంధించిన డేటాను, అలాగే మీ పరికరం యొక్క లొకేషన్ సమాచారాన్ని మీ IT అడ్మిన్ పర్యవేక్షించగలరు, మేనేజ్ చేయగలరు.\n\nమరింత సమాచారం కోసం, మీ IT అడ్మిన్‌ను సంప్రదించండి."</string>
-    <!-- no translation found for monitoring_financed_description_named_management (6108439201399938668) -->
-    <skip />
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>, ఈ పరికరంతో అనుబంధించబడిన డేటాను యాక్సెస్ చేయవచ్చు, యాప్‌లను మేనేజ్ చేయవచ్చు అలాగే ఈ పరికరాల సెట్టింగ్‌లను మార్చవచ్చు.\n\nమీకు ఏవైనా సందేహాలు ఉంటే, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>ను కాంటాక్ట్ చేయండి."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"ఈ పరికరం మీ సంస్థకు చెందినది.\n\nసెట్టింగ్‌లను, కార్పొరేట్ యాక్సెస్‌ను, యాప్‌లను, మీ పరికరానికి సంబంధించిన డేటాను, అలాగే మీ పరికరం యొక్క లొకేషన్ సమాచారాన్ని మీ IT అడ్మిన్ పర్యవేక్షించగలరు, మేనేజ్ చేయగలరు.\n\nమరింత సమాచారం కోసం, మీ IT అడ్మిన్‌ను సంప్రదించండి."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ఈ పరికరంలో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"మీ కార్యాలయ ప్రొఫైల్‌లో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
@@ -655,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"డెమో మోడ్ చూపు"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ఈథర్‌నెట్"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"అలారం"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"సిద్ధంగా ఉంది"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"కార్యాలయ ప్రొఫైల్‌"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ఎయిర్‌ప్లేన్ మోడ్"</string>
     <string name="add_tile" msgid="6239678623873086686">"టైల్‌ను జోడించండి"</string>
@@ -766,7 +760,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"అలర్ట్ చేయడం"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"బబుల్‌ను చూపించు"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"బబుల్స్ తీసివేయి"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"హోమ్ స్క్రీన్‌కు జోడించు"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"హోమ్ స్క్రీన్‌కు జోడించండి"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"నోటిఫికేషన్ నియంత్రణలు"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"నోటిఫికేషన్ తాత్కాలిక ఆపివేత ఎంపికలు"</string>
@@ -905,8 +899,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"శీఘ్ర సెట్టింగ్‌లను మూసివేయండి."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"అలారం సెట్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> వలె సైన్ ఇన్ చేసారు"</string>
-    <!-- no translation found for accessibility_quick_settings_choose_user_action (4554388498186576087) -->
-    <skip />
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"యూజర్‌ను ఎంపిక చేయండి"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ఇంటర్నెట్ లేదు"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"వివరాలను తెరవండి."</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> కారణంగా అందుబాటులో లేదు"</string>
@@ -1023,10 +1016,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ఫుల్ స్క్రీన్‌ను మ్యాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"స్విచ్ చేయి"</string>
-    <!-- no translation found for accessibility_floating_button_migration_tooltip (4431046858918714564) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_docking_tooltip (6814897496767461517) -->
-    <skip />
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"యాక్సెసిబిలిటీ బటన్, యాక్సెసిబిలిటీ సంజ్ఞను భర్తీ చేసింది\n\n"<annotation id="link">"సెట్టింగ్‌లను చూడండి"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"తాత్కాలికంగా దానిని దాచడానికి బటన్‌ను చివరకు తరలించండి"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"పరికరం నియంత్రణలు"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"మీ కనెక్ట్ అయిన పరికరాలకు నియంత్రణలను జోడించండి"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"పరికరం నియంత్రణలను సెటప్ చేయడం"</string>

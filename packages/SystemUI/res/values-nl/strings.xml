@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Tot zonsopgang"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Aan om <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Tot <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"Helderheid verlagen"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC is uitgeschakeld"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC is ingeschakeld"</string>
@@ -606,7 +605,7 @@
     <string name="screen_pinning_start" msgid="7483998671383371313">"App vastgezet"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App losgemaakt"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> verbergen?"</string>
-    <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Deze wordt opnieuw weergegeven zodra u de instelling weer aanzet."</string>
+    <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Deze zie je opnieuw zodra je de instelling weer aanzet."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Verbergen"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Bellen"</string>
     <string name="stream_system" msgid="7663148785370565134">"Systeem"</string>
@@ -713,9 +712,9 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Standaard"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatisch"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Geen geluid of trilling"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt lager in het gedeelte met gesprekken weergegeven"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt lager in het gedeelte met gesprekken getoond"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan overgaan of trillen op basis van de telefooninstellingen"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels getoond."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Het systeem laten bepalen of deze melding geluid moet maken of moet trillen"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; opgeschaald naar Standaard"</string>
@@ -1001,7 +1000,7 @@
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioriteitsgesprekken:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Worden bovenaan het gespreksgedeelte getoond"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tonen profielafbeelding op vergrendelscherm"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Worden als zwevende ballon weergegeven vóór apps"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Zijn als zwevende ballon zichtbaar vóór apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Onderbreken \'Niet storen\'"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Instellingen"</string>
