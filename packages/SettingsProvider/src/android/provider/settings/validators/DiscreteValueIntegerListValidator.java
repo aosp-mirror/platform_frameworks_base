@@ -37,8 +37,12 @@ class DiscreteValueIntegerListValidator extends ListValidator {
     @Override
     protected boolean isItemValid(String item) {
         for (int allowedValue : mAllowedValues) {
-            if (Integer.parseInt(item) == allowedValue) {
-                return true;
+            try {
+                if (Integer.parseInt(item) == allowedValue) {
+                    return true;
+                }
+            } catch (NumberFormatException e) {
+                return false;
             }
         }
         return false;
