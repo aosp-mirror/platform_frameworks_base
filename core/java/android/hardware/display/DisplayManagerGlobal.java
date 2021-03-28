@@ -16,7 +16,9 @@
 
 package android.hardware.display;
 
+
 import static android.hardware.display.DisplayManager.EventsMask;
+import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -503,6 +505,47 @@ public final class DisplayManagerGlobal {
     public WifiDisplayStatus getWifiDisplayStatus() {
         try {
             return mDm.getWifiDisplayStatus();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the HDR types that have been disabled by user.
+     * @param userDisabledHdrTypes the HDR types to disable. The HDR types are any of
+     */
+    public void setUserDisabledHdrTypes(@HdrType int[] userDisabledHdrTypes) {
+        try {
+            mDm.setUserDisabledHdrTypes(userDisabledHdrTypes);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets whether or not the user disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     *
+     * @param areUserDisabledHdrTypesAllowed If true, the user-disabled
+     * types are ignored and returned, if the display supports them. If
+     * false, the user-disabled types are taken into consideration and
+     * are never returned, even if the display supports them.
+     */
+    public void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed) {
+        try {
+            mDm.setAreUserDisabledHdrTypesAllowed(areUserDisabledHdrTypesAllowed);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether or not the user-disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     */
+    public boolean areUserDisabledHdrTypesAllowed() {
+        try {
+            return mDm.areUserDisabledHdrTypesAllowed();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

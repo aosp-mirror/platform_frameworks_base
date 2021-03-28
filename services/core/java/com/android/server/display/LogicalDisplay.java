@@ -102,6 +102,8 @@ final class LogicalDisplay {
     private int mRequestedColorMode;
     private boolean mRequestedMinimalPostProcessing;
 
+    private int[] mUserDisabledHdrTypes = {};
+
     private DisplayModeDirector.DesiredDisplayModeSpecs mDesiredDisplayModeSpecs =
             new DisplayModeDirector.DesiredDisplayModeSpecs();
 
@@ -367,6 +369,7 @@ final class LogicalDisplay {
                     deviceInfo.supportedColorModes,
                     deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
+            mBaseDisplayInfo.userDisabledHdrTypes = mUserDisabledHdrTypes;
             mBaseDisplayInfo.minimalPostProcessingSupported =
                     deviceInfo.allmSupported || deviceInfo.gameContentTypeSupported;
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
@@ -678,6 +681,14 @@ final class LogicalDisplay {
      */
     public void setDisplayScalingDisabledLocked(boolean disableScaling) {
         mDisplayScalingDisabled = disableScaling;
+    }
+
+    public void setUserDisabledHdrTypes(@NonNull int[] userDisabledHdrTypes) {
+        if (mUserDisabledHdrTypes != userDisabledHdrTypes) {
+            mUserDisabledHdrTypes = userDisabledHdrTypes;
+            mBaseDisplayInfo.userDisabledHdrTypes = userDisabledHdrTypes;
+            mInfo.set(null);
+        }
     }
 
     /**
