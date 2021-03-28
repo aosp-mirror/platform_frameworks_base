@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Күн чыкканга чейин"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Саат <xliff:g id="TIME">%s</xliff:g> күйөт"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> чейин"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"Экрандын жарыктыгын төмөндөтүү"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC өчүрүлгөн"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC иштетилген"</string>
@@ -652,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимин көрсөтүү"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Ойготкуч"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"Даяр"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Жумуш профили"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Учак режими"</string>
     <string name="add_tile" msgid="6239678623873086686">"Тайл кошуу"</string>
@@ -675,8 +672,8 @@
     <string name="remove_from_settings" msgid="633775561782209994">"Жөндөөлөрдөн алып салуу"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"System UI Tuner Жөндөөлөрдөн өчүрүлүп, анын бардык функциялары токтотулсунбу?"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"Колдонмо сиздин түзмөгүңүздө орнотулган эмес"</string>
-    <string name="clock_seconds" msgid="8709189470828542071">"Сааттын секунддары көрсөтүлсүн"</string>
-    <string name="clock_seconds_desc" msgid="2415312788902144817">"Абал тилкесинен сааттын секунддары көрсөтүлсүн. Батареянын кубаты көбүрөөк сарпталышы мүмкүн."</string>
+    <string name="clock_seconds" msgid="8709189470828542071">"Сааттын секунддары көрүнсүн"</string>
+    <string name="clock_seconds_desc" msgid="2415312788902144817">"Абал тилкесинен сааттын секунддары көрүнсүн. Батареянын кубаты көбүрөөк сарпталышы мүмкүн."</string>
     <string name="qs_rearrange" msgid="484816665478662911">"Ыкчам жөндөөлөрдү кайра коюу"</string>
     <string name="show_brightness" msgid="6700267491672470007">"Ыкчам жөндөөлөрдөн жарык деңгээлин көрсөтүү"</string>
     <string name="experimental" msgid="3549865454812314826">"Сынамык"</string>
@@ -685,7 +682,7 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Күйгүзүү"</string>
     <string name="show_silently" msgid="5629369640872236299">"Үнсүз көрүнөт"</string>
     <string name="block" msgid="188483833983476566">"Бардык билдирмелерди бөгөттөө"</string>
-    <string name="do_not_silence" msgid="4982217934250511227">"Үнү менен көрсөтүлсүн"</string>
+    <string name="do_not_silence" msgid="4982217934250511227">"Үнү менен көрүнсүн"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Үнү менен көрсөтүлүп бөгөттөлбөсүн"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Эскертмелерди башкаруу каражаттары"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Күйүк"</string>
@@ -825,7 +822,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Музыка"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Жылнаама"</string>
-    <string name="tuner_full_zen_title" msgid="5120366354224404511">"Үн көзөмөлдөгүчтөрү менен көрсөтүлсүн"</string>
+    <string name="tuner_full_zen_title" msgid="5120366354224404511">"Үн көзөмөлдөгүчтөрү менен көрүнсүн"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Тынчымды алба"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Үндү көзөмөлдөөчү баскычтардын кыска жолдору"</string>
     <string name="volume_up_silent" msgid="1035180298885717790">"Үн катуулатылганда \"Тынчымды алба\" режиминен чыгуу"</string>
@@ -880,8 +877,8 @@
     <item msgid="6135970080453877218">"Бул сүрөтчө көрүнбөсүн"</item>
   </string-array>
   <string-array name="battery_options">
-    <item msgid="7714004721411852551">"Ар дайым пайызы көрсөтүлсүн"</item>
-    <item msgid="3805744470661798712">"Кубаттоо учурунда пайызы көрсөтүлсүн (демейки)"</item>
+    <item msgid="7714004721411852551">"Ар дайым пайызы көрүнсүн"</item>
+    <item msgid="3805744470661798712">"Кубаттоо учурунда пайызы көрүнсүн (демейки)"</item>
     <item msgid="8619482474544321778">"Бул сүрөтчө көрүнбөсүн"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Анча маанилүү эмес билдирменин сүрөтчөлөрүн көрсөтүү"</string>

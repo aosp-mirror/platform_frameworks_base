@@ -198,6 +198,9 @@ public final class DisplayInfo implements Parcelable {
     /** The display's HDR capabilities */
     public Display.HdrCapabilities hdrCapabilities;
 
+    /** The formats disabled by user **/
+    public int[] userDisabledHdrTypes = {};
+
     /**
      * Indicates whether the display can be switched into a mode with minimal post
      * processing.
@@ -363,6 +366,7 @@ public final class DisplayInfo implements Parcelable {
                 && colorMode == other.colorMode
                 && Arrays.equals(supportedColorModes, other.supportedColorModes)
                 && Objects.equals(hdrCapabilities, other.hdrCapabilities)
+                && Arrays.equals(userDisabledHdrTypes, other.userDisabledHdrTypes)
                 && minimalPostProcessingSupported == other.minimalPostProcessingSupported
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
@@ -412,6 +416,7 @@ public final class DisplayInfo implements Parcelable {
         supportedColorModes = Arrays.copyOf(
                 other.supportedColorModes, other.supportedColorModes.length);
         hdrCapabilities = other.hdrCapabilities;
+        userDisabledHdrTypes = other.userDisabledHdrTypes;
         minimalPostProcessingSupported = other.minimalPostProcessingSupported;
         logicalDensityDpi = other.logicalDensityDpi;
         physicalXDpi = other.physicalXDpi;
@@ -478,6 +483,11 @@ public final class DisplayInfo implements Parcelable {
         brightnessMaximum = source.readFloat();
         brightnessDefault = source.readFloat();
         roundedCorners = source.readTypedObject(RoundedCorners.CREATOR);
+        int numUserDisabledFormats = source.readInt();
+        userDisabledHdrTypes = new int[numUserDisabledFormats];
+        for (int i = 0; i < numUserDisabledFormats; i++) {
+            userDisabledHdrTypes[i] = source.readInt();
+        }
     }
 
     @Override
@@ -528,6 +538,10 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(brightnessMaximum);
         dest.writeFloat(brightnessDefault);
         dest.writeTypedObject(roundedCorners, flags);
+        dest.writeInt(userDisabledHdrTypes.length);
+        for (int i = 0; i < userDisabledHdrTypes.length; i++) {
+            dest.writeInt(userDisabledHdrTypes[i]);
+        }
     }
 
     @Override
@@ -729,6 +743,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(Arrays.toString(supportedModes));
         sb.append(", hdrCapabilities ");
         sb.append(hdrCapabilities);
+        sb.append(", userDisabledHdrTypes ");
+        sb.append(Arrays.toString(userDisabledHdrTypes));
         sb.append(", minimalPostProcessingSupported ");
         sb.append(minimalPostProcessingSupported);
         sb.append(", rotation ");

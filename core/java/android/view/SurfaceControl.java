@@ -190,6 +190,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
 
+    private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
+
     private static native void nativeSetInputWindowInfo(long transactionObj, long nativeObject,
             InputWindowHandle handle);
 
@@ -2204,6 +2206,18 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Overrides HDR modes for a display device.
+     *
+     * If the caller does not have ACCESS_SURFACE_FLINGER permission, this will throw a Security
+     * Exception.
+     * @hide
+     */
+    @TestApi
+    public static void overrideHdrTypes(@NonNull IBinder displayToken, @NonNull int[] modes) {
+        nativeOverrideHdrTypes(displayToken, modes);
+    }
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage
@@ -2244,6 +2258,8 @@ public final class SurfaceControl implements Parcelable {
      *
      * @hide
      */
+    @TestApi
+    @NonNull
     public static IBinder getInternalDisplayToken() {
         final long[] physicalDisplayIds = getPhysicalDisplayIds();
         if (physicalDisplayIds.length == 0) {
