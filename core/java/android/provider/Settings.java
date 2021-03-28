@@ -14056,6 +14056,40 @@ public final class Settings {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int ZEN_MODE_ALARMS = 3;
 
+        /**
+         * A comma-separated list of HDR formats that have been disabled by the user.
+         * <p>
+         * If present, these formats will not be reported to apps, even if the display supports
+         * them. This list is treated as empty if the ARE_USER_DISABLED_HDR_FORMATS_ALLOWED setting
+         * is '1'.
+         * </p>
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String USER_DISABLED_HDR_FORMATS = "user_disabled_hdr_formats";
+
+        /**
+         * Whether or not user-disabled HDR formats are allowed.
+         * <p>
+         * The value is boolean (1 or 0). The value '1' means the user preference for disabling a
+         * format is ignored, and the disabled formats are still reported to apps (if supported
+         * by the display). The value '0' means the user-disabled formats are not reported to
+         * apps, even if the display supports them.
+         * </p><p>
+         * The list of formats disabled by the user are contained in the
+         * USER_DISABLED_HDR_FORMATS setting. This list is treated as empty when the value of
+         * this setting is '1'.
+         * </p>
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String ARE_USER_DISABLED_HDR_FORMATS_ALLOWED =
+                "are_user_disabled_hdr_formats_allowed";
+
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
             if (mode == ZEN_MODE_ALARMS) return "ZEN_MODE_ALARMS";

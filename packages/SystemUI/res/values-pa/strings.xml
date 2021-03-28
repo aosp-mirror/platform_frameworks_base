@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ਸੂਰਜ ਚੜ੍ਹਨ ਤੱਕ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਚਾਲੂ"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਤੱਕ"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"ਚਮਕ ਘਟਾਓ"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ਨੂੰ ਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
@@ -515,8 +514,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਤੁਹਾਡੇ ਮਾਂ-ਪਿਓ ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਕੋਲ ਇਸ ਡੀਵਾਈਸ ਦੀ ਮਲਕੀਅਤ ਹੈ ਅਤੇ ਇਹ ਨੈੱਟਵਰਕ ਟਰੈਫ਼ਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ਕੋਲ ਇਸ ਡੀਵਾਈਸ ਦੀ ਮਲਕੀਅਤ ਹੈ ਅਤੇ ਇਹ ਨੈੱਟਵਰਕ ਟਰੈਫ਼ਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ"</string>
-    <!-- no translation found for quick_settings_financed_disclosure_named_management (2307703784594859524) -->
-    <skip />
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ਇਹ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ਵੱਲੋਂ ਮੁਹੱਈਆ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ਇਹ ਡੀਵਾਈਸ ਤੁਹਾਡੀ ਸੰਸਥਾ ਨਾਲ ਸੰਬੰਧਿਤ ਹੈ ਅਤੇ <xliff:g id="VPN_APP">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ਇਹ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ਨਾਲ ਸੰਬੰਧਿਤ ਹੈ ਅਤੇ <xliff:g id="VPN_APP">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ਇਹ ਡੀਵਾਈਸ ਤੁਹਾਡੀ ਸੰਸਥਾ ਨਾਲ ਸੰਬੰਧਿਤ ਹੈ"</string>
@@ -530,8 +528,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"ਤੁਹਾਡਾ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ <xliff:g id="VPN_APP">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"ਤੁਹਾਡਾ ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ <xliff:g id="VPN_APP">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ਇਹ ਡੀਵਾਈਸ <xliff:g id="VPN_APP">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ"</string>
-    <!-- no translation found for monitoring_title_financed_device (3659962357973919387) -->
-    <skip />
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ਇਹ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ਵੱਲੋਂ ਮੁਹੱਈਆ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"ਪ੍ਰੋਫਾਈਲ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ਨੈੱਟਵਰਕ ਨਿਰੀਖਣ ਕਰ ਰਿਹਾ ਹੈ"</string>
@@ -543,8 +540,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ਨੀਤੀਆਂ ਦੇਖੋ"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"ਕੰਟਰੋਲ ਦੇਖੋ"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ਇਹ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ਨਾਲ ਸੰਬੰਧਿਤ ਹੈ।\n\nਤੁਹਾਡਾ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਾਂ, ਡਾਟੇ ਅਤੇ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਟਿਕਾਣਾ ਜਾਣਕਾਰੀ ਦੀ ਨਿਗਰਾਨੀ ਅਤੇ ਪ੍ਰਬੰਧਨ ਕਰ ਸਕਦਾ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <!-- no translation found for monitoring_financed_description_named_management (6108439201399938668) -->
-    <skip />
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> ਇਸ ਡੀਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਐਪਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰ ਸਕਦੀ ਹੈ ਅਤੇ ਇਸ ਡੀਵਾਈਸ ਦੀਆਂ ਸੈਟਿੰਗਾਂ ਨੂੰ ਬਦਲ ਸਕਦੀ ਹੈ।\n\nਜੇ ਤੁਹਾਡਾ ਕੋਈ ਸਵਾਲ ਹੈ, ਤਾਂ <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"ਇਹ ਡੀਵਾਈਸ ਤੁਹਾਡੀ ਸੰਸਥਾ ਨਾਲ ਸੰਬੰਧਿਤ ਹੈ।\n\nਤੁਹਾਡਾ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਾਂ, ਡਾਟੇ ਅਤੇ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਟਿਕਾਣਾ ਜਾਣਕਾਰੀ ਦੀ ਨਿਗਰਾਨੀ ਅਤੇ ਪ੍ਰਬੰਧਨ ਕਰ ਸਕਦਾ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਇੱਕ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਅਥਾਰਟੀ ਸਥਾਪਤ ਕੀਤੀ ਗਈ ਹੈ। ਤੁਹਾਡੇ ਸੁਰੱਖਿਅਤ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ ਜਾਂ ਉਸਨੂੰ ਸੋਧਿਆ ਜਾ ਸਕਦਾ ਹੈ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਇੱਕ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਅਥਾਰਟੀ ਸਥਾਪਤ ਕੀਤੀ ਗਈ ਹੈ। ਤੁਹਾਡੇ ਸੁਰੱਖਿਅਤ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ ਜਾਂ ਉਸਨੂੰ ਸੋਧਿਆ ਜਾ ਸਕਦਾ ਹੈ।"</string>
@@ -655,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ਡੈਮੋ ਮੋਡ ਦੇਖੋ"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ਈਥਰਨੈਟ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ਅਲਾਰਮ"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"ਵਾਲੇਟ"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"ਤਿਆਰ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ਹਵਾਈ-ਜਹਾਜ਼ ਮੋਡ"</string>
     <string name="add_tile" msgid="6239678623873086686">"ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
@@ -715,7 +709,7 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"ਕੀ ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"ਸ਼ਾਂਤ"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"ਸਵੈਚਲਿਤ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਹੇਠਲੇ ਪਾਸੇ ਦਿਸਦੀਆਂ ਹਨ"</string>
@@ -905,8 +899,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਨੂੰ ਬੰਦ ਕਰੋ।"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"ਅਲਾਰਮ ਸੈੱਟ ਕੀਤਾ।"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> ਵਜੋਂ ਸਾਈਨ ਇਨ ਕੀਤਾ"</string>
-    <!-- no translation found for accessibility_quick_settings_choose_user_action (4554388498186576087) -->
-    <skip />
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ਵਰਤੋਂਕਾਰ ਚੁਣੋ"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ਇੰਟਰਨੈੱਟ ਨਹੀਂ।"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"ਵੇਰਵੇ ਖੋਲ੍ਹੋ।"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g> ਦੇ ਕਾਰਨ ਅਣਉਪਲਬਧ ਹੈ"</string>
@@ -1023,10 +1016,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਵੱਡਦਰਸ਼ੀ ਕਰੋ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ਸਕ੍ਰੀਨ ਦੇ ਹਿੱਸੇ ਨੂੰ ਵੱਡਾ ਕਰੋ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ਸਵਿੱਚ"</string>
-    <!-- no translation found for accessibility_floating_button_migration_tooltip (4431046858918714564) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_docking_tooltip (6814897496767461517) -->
-    <skip />
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਬਦਲ ਦਿੱਤਾ ਗਿਆ\n\n"<annotation id="link">"ਸੈਟਿੰਗਾਂ ਦੇਖੋ"</annotation></string>
+    <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ਬਟਨ ਨੂੰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਲੁਕਾਉਣ ਲਈ ਕਿਨਾਰੇ \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ਡੀਵਾਈਸ ਕੰਟਰੋਲ"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ਆਪਣੇ ਕਨੈਕਟ ਕੀਤੇ ਡੀਵਾਈਸਾਂ ਲਈ ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ਡੀਵਾਈਸ ਕੰਟਰੋਲਾਂ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
