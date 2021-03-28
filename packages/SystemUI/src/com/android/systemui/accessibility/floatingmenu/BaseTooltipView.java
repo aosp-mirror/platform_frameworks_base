@@ -66,7 +66,6 @@ class BaseTooltipView extends FrameLayout {
     private int mArrowCornerRadius;
     private int mScreenWidth;
     private boolean mIsShowing;
-    private View mArrowView;
     private TextView mTextView;
     private final WindowManager.LayoutParams mCurrentLayoutParams;
     private final WindowManager mWindowManager;
@@ -87,12 +86,11 @@ class BaseTooltipView extends FrameLayout {
         super.onConfigurationChanged(newConfig);
 
         updateDimensions();
-
         updateTextView();
-        updateArrow();
 
         mAnchorView.onConfigurationChanged(newConfig);
         final Rect anchorViewLocation = mAnchorView.getWindowLocationOnScreen();
+        updateArrowWith(anchorViewLocation);
         updateWidthWith(anchorViewLocation);
         updateLocationWith(anchorViewLocation);
 
@@ -132,6 +130,7 @@ class BaseTooltipView extends FrameLayout {
 
         mIsShowing = true;
         final Rect anchorViewLocation = mAnchorView.getWindowLocationOnScreen();
+        updateArrowWith(anchorViewLocation);
         updateWidthWith(anchorViewLocation);
         updateLocationWith(anchorViewLocation);
 
@@ -163,9 +162,6 @@ class BaseTooltipView extends FrameLayout {
         final View contentView =
                 LayoutInflater.from(getContext()).inflate(
                         R.layout.accessibility_floating_menu_tooltip, this, false);
-
-        mArrowView = contentView.findViewById(R.id.arrow);
-        drawArrow(mArrowView);
 
         mTextView = contentView.findViewById(R.id.text);
 
@@ -220,17 +216,23 @@ class BaseTooltipView extends FrameLayout {
         gradientDrawable.setCornerRadius(mTextViewCornerRadius);
     }
 
-    private void updateArrow() {
-        final ShapeDrawable shapeDrawable = (ShapeDrawable) mArrowView.getBackground();
-        final Paint paint = shapeDrawable.getPaint();
-        paint.setPathEffect(new CornerPathEffect(mArrowCornerRadius));
+    private void updateArrowWith(Rect anchorViewLocation) {
+        final boolean isAnchorViewOnLeft = isAnchorViewOnLeft(anchorViewLocation);
+        final View arrowView = findViewById(isAnchorViewOnLeft
+                ? R.id.arrow_left
+                : R.id.arrow_right);
+        arrowView.setVisibility(VISIBLE);
+        drawArrow(arrowView, isAnchorViewOnLeft);
 
         final LinearLayout.LayoutParams layoutParams =
-                (LinearLayout.LayoutParams) mArrowView.getLayoutParams();
+                (LinearLayout.LayoutParams) arrowView.getLayoutParams();
         layoutParams.width = mArrowWidth;
         layoutParams.height = mArrowHeight;
-        layoutParams.setMargins(mArrowMargin, 0, 0, 0);
-        mArrowView.setLayoutParams(layoutParams);
+
+        final int leftMargin = isAnchorViewOnLeft ? 0 : mArrowMargin;
+        final int rightMargin = isAnchorViewOnLeft ? mArrowMargin : 0;
+        layoutParams.setMargins(leftMargin, 0, rightMargin, 0);
+        arrowView.setLayoutParams(layoutParams);
     }
 
     private void updateWidthWith(Rect anchorViewLocation) {
@@ -240,17 +242,19 @@ class BaseTooltipView extends FrameLayout {
     }
 
     private void updateLocationWith(Rect anchorViewLocation) {
-        mCurrentLayoutParams.x =
-                mScreenWidth - getWindowWidthWith(anchorViewLocation) - anchorViewLocation.width();
+        mCurrentLayoutParams.x = isAnchorViewOnLeft(anchorViewLocation)
+                ? anchorViewLocation.width()
+                : mScreenWidth - getWindowWidthWith(anchorViewLocation)
+                        - anchorViewLocation.width();
         mCurrentLayoutParams.y =
                 anchorViewLocation.centerY() - (getTextHeightWith(anchorViewLocation) / 2);
     }
 
-    private void drawArrow(View view) {
+    private void drawArrow(View view, boolean isPointingLeft) {
         final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
         final TriangleShape triangleShape =
-                TriangleShape.createHorizontal(layoutParams.width,  layoutParams.height,
-                        false);
+                TriangleShape.createHorizontal(layoutParams.width, layoutParams.height,
+                        isPointingLeft);
         final ShapeDrawable arrowDrawable = new ShapeDrawable(triangleShape);
         final Paint arrowPaint = arrowDrawable.getPaint();
         arrowPaint.setColor(Utils.getColorAttrDefaultColor(getContext(),
@@ -258,6 +262,10 @@ class BaseTooltipView extends FrameLayout {
         final CornerPathEffect effect = new CornerPathEffect(mArrowCornerRadius);
         arrowPaint.setPathEffect(effect);
         view.setBackground(arrowDrawable);
+    }
+
+    private boolean isAnchorViewOnLeft(Rect anchorViewLocation) {
+        return anchorViewLocation.left < (mScreenWidth / 2);
     }
 
     private int getTextWidthWith(Rect anchorViewLocation) {

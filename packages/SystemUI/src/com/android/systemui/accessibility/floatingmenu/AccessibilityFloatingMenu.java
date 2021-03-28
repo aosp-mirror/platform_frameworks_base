@@ -24,6 +24,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
+import static com.android.systemui.Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP;
 import static com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuView.ShapeType;
 import static com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuView.SizeType;
 
@@ -35,6 +36,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Prefs;
 
 /**
  * Contains logic for an accessibility floating menu view.
@@ -46,6 +48,7 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     private final Context mContext;
     private final AccessibilityFloatingMenuView mMenuView;
     private final MigrationTooltipView mMigrationTooltipView;
+    private final DockTooltipView mDockTooltipView;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private final ContentObserver mContentObserver =
@@ -90,6 +93,7 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
         mContext = context;
         mMenuView = menuView;
         mMigrationTooltipView = new MigrationTooltipView(mContext, mMenuView);
+        mDockTooltipView = new DockTooltipView(mContext, mMenuView);
     }
 
     @Override
@@ -109,6 +113,7 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 getOpacityValue(mContext));
         mMenuView.setSizeType(getSizeType(mContext));
         mMenuView.setShapeType(getShapeType(mContext));
+        mMenuView.setOnDragEndListener(this::showDockTooltipIfNecessary);
 
         showMigrationTooltipIfNecessary();
 
@@ -123,6 +128,7 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
 
         mMenuView.hide();
         mMigrationTooltipView.hide();
+        mDockTooltipView.hide();
 
         unregisterContentObservers();
     }
@@ -142,6 +148,21 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
         return Settings.Secure.getInt(
                 context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                 DEFAULT_MIGRATION_TOOLTIP_PROMPT_IS_DISABLED) == /* enabled */ 1;
+    }
+
+    /**
+     * Shows tooltip when user drags accessibility floating menu for the first time.
+     */
+    private void showDockTooltipIfNecessary() {
+        if (!Prefs.get(mContext).getBoolean(
+                HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP, false)) {
+            // if the menu is an oval, the user has already dragged it out, so show the tooltip.
+            if (mMenuView.isOvalShape()) {
+                mDockTooltipView.show();
+            }
+
+            Prefs.putBoolean(mContext, HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP, true);
+        }
     }
 
     private static boolean isFadeEffectEnabled(Context context) {
