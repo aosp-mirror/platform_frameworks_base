@@ -52748,11 +52748,16 @@ package android.view.translation {
   }
 
   public final class TranslationManager {
-    method public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
-    method @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
-    method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getTranslationCapabilities(int, int);
-    method @Nullable public android.app.PendingIntent getTranslationSettingsActivityIntent();
-    method public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method public void addOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Deprecated public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Nullable @WorkerThread public android.view.translation.Translator createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext);
+    method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
+    method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getOnDeviceTranslationCapabilities(int, int);
+    method @Nullable public android.app.PendingIntent getOnDeviceTranslationSettingsActivityIntent();
+    method @Deprecated @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getTranslationCapabilities(int, int);
+    method @Deprecated @Nullable public android.app.PendingIntent getTranslationSettingsActivityIntent();
+    method public void removeOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Deprecated public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
   }
 
   public final class TranslationRequest implements android.os.Parcelable {

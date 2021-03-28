@@ -121,17 +121,16 @@ public final class TranslationManager {
     }
 
     /**
-     * Create a Translator for translation.
+     * Creates an on-device Translator for natural language translation.
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
      * @param translationContext {@link TranslationContext} containing the specs for creating the
      *                                                     Translator.
-     * @return a {@link Translator} to be used for calling translation APIs.
      */
     @Nullable
     @WorkerThread
-    public Translator createTranslator(@NonNull TranslationContext translationContext) {
+    public Translator createOnDeviceTranslator(@NonNull TranslationContext translationContext) {
         Objects.requireNonNull(translationContext, "translationContext cannot be null");
 
         synchronized (mLock) {
@@ -166,8 +165,16 @@ public final class TranslationManager {
         }
     }
 
+    /** @deprecated Use {@link #createOnDeviceTranslator(TranslationContext)} */
+    @Deprecated
+    @Nullable
+    @WorkerThread
+    public Translator createTranslator(@NonNull TranslationContext translationContext) {
+        return createOnDeviceTranslator(translationContext);
+    }
+
     /**
-     * Returns a set of {@link TranslationCapability}s describing the capabilities for
+     * Returns a set of {@link TranslationCapability}s describing the capabilities for on-device
      * {@link Translator}s.
      *
      * <p>These translation capabilities contains a source and target {@link TranslationSpec}
@@ -184,7 +191,7 @@ public final class TranslationManager {
      */
     @NonNull
     @WorkerThread
-    public Set<TranslationCapability> getTranslationCapabilities(
+    public Set<TranslationCapability> getOnDeviceTranslationCapabilities(
             @TranslationSpec.DataFormat int sourceFormat,
             @TranslationSpec.DataFormat int targetFormat) {
         try {
@@ -206,8 +213,18 @@ public final class TranslationManager {
         }
     }
 
+    /** @deprecated Use {@link #getOnDeviceTranslationCapabilities(int, int)} */
+    @Deprecated
+    @NonNull
+    @WorkerThread
+    public Set<TranslationCapability> getTranslationCapabilities(
+            @TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat) {
+        return getOnDeviceTranslationCapabilities(sourceFormat, targetFormat);
+    }
+
     /**
-     * Registers a {@link PendingIntent} to listen for updates on states of
+     * Registers a {@link PendingIntent} to listen for updates on states of on-device
      * {@link TranslationCapability}s.
      *
      * <p>IMPORTANT: the pending intent must be called to start a service, or a broadcast if it is
@@ -217,7 +234,7 @@ public final class TranslationManager {
      * @param targetFormat data format for the expected translated output data.
      * @param pendingIntent the pending intent to invoke when updates are received.
      */
-    public void addTranslationCapabilityUpdateListener(
+    public void addOnDeviceTranslationCapabilityUpdateListener(
             @TranslationSpec.DataFormat int sourceFormat,
             @TranslationSpec.DataFormat int targetFormat,
             @NonNull PendingIntent pendingIntent) {
@@ -231,14 +248,26 @@ public final class TranslationManager {
     }
 
     /**
-     * Unregisters a {@link PendingIntent} to listen for updates on states of
+     * @deprecated Use {@link #addOnDeviceTranslationCapabilityUpdateListener(int, int,
+     *  PendingIntent)}
+     */
+    @Deprecated
+    public void addTranslationCapabilityUpdateListener(
+            @TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat,
+            @NonNull PendingIntent pendingIntent) {
+        addOnDeviceTranslationCapabilityUpdateListener(sourceFormat, targetFormat, pendingIntent);
+    }
+
+    /**
+     * Unregisters a {@link PendingIntent} to listen for updates on states of on-device
      * {@link TranslationCapability}s.
      *
      * @param sourceFormat data format for the input data to be translated.
      * @param targetFormat data format for the expected translated output data.
      * @param pendingIntent the pending intent to unregister
      */
-    public void removeTranslationCapabilityUpdateListener(
+    public void removeOnDeviceTranslationCapabilityUpdateListener(
             @TranslationSpec.DataFormat int sourceFormat,
             @TranslationSpec.DataFormat int targetFormat,
             @NonNull PendingIntent pendingIntent) {
@@ -262,10 +291,24 @@ public final class TranslationManager {
         }
     }
 
+    /**
+     * @deprecated Use {@link #removeOnDeviceTranslationCapabilityUpdateListener(int, int,
+     *  PendingIntent)}
+     */
+    @Deprecated
+    public void removeTranslationCapabilityUpdateListener(
+            @TranslationSpec.DataFormat int sourceFormat,
+            @TranslationSpec.DataFormat int targetFormat,
+            @NonNull PendingIntent pendingIntent) {
+        removeOnDeviceTranslationCapabilityUpdateListener(
+                sourceFormat, targetFormat, pendingIntent);
+    }
+
     //TODO: Add method to propagate updates to mTCapabilityUpdateListeners
 
     /**
-     * Returns an immutable PendingIntent which can used by apps to launch translation settings.
+     * Returns an immutable PendingIntent which can be used to launch an activity to view/edit
+     * on-device translation settings.
      *
      * @return An immutable PendingIntent or {@code null} if one of reason met:
      * <ul>
@@ -274,7 +317,7 @@ public final class TranslationManager {
      * </ul>
      **/
     @Nullable
-    public PendingIntent getTranslationSettingsActivityIntent() {
+    public PendingIntent getOnDeviceTranslationSettingsActivityIntent() {
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
         try {
             mService.getServiceSettingsActivity(resultReceiver, mContext.getUserId());
@@ -287,6 +330,13 @@ public final class TranslationManager {
             Log.e(TAG, "Fail to get translation service settings activity.");
             return null;
         }
+    }
+
+    /** @deprecated Use {@link #getOnDeviceTranslationSettingsActivityIntent()} */
+    @Deprecated
+    @Nullable
+    public PendingIntent getTranslationSettingsActivityIntent() {
+        return getOnDeviceTranslationSettingsActivityIntent();
     }
 
     void removeTranslator(int id) {
