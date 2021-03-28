@@ -749,7 +749,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"అలర్ట్ చేయడం"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"బబుల్‌ను చూపించు"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"బబుల్స్ తీసివేయి"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"హోమ్ స్క్రీన్‌కు జోడించు"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"హోమ్ స్క్రీన్‌కు జోడించండి"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"నోటిఫికేషన్ నియంత్రణలు"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"నోటిఫికేషన్ తాత్కాలిక ఆపివేత ఎంపికలు"</string>

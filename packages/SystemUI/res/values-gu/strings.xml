@@ -543,7 +543,7 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA પ્રમાણપત્રો"</string>
     <string name="disable_vpn" msgid="482685974985502922">"VPN અક્ષમ કરો"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN ડિસ્કનેક્ટ કરો"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"નીતિઓ જુઓ"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"પૉલિસીઓ જુઓ"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે.\n\nતમારા IT વ્યવસ્થાપક સેટિંગ, કૉર્પોરેટ ઍક્સેસ, ઍપ, તમારા ડિવાઇસ સાથે સંકળાયેલો ડેટા અને તમારા ડિવાઇસની સ્થાન માહિતીનું નિરીક્ષણ તેમજ તેને મેનેજ કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે.\n\nતમારા IT વ્યવસ્થાપક સેટિંગ, કૉર્પોરેટ ઍક્સેસ, ઍપ, તમારા ડિવાઇસ સાથે સંકળાયેલો ડેટા અને તમારા ડિવાઇસની સ્થાન માહિતીનું નિરીક્ષણ તેમજ તેને મેનેજ કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"તમારી સંસ્થાએ આ ઉપકરણ પર પ્રમાણપત્ર સત્તાધિકારી ઇન્સ્ટૉલ કર્યું છે. તમારા સુરક્ષિત નેટવર્ક ટ્રાફિકનું નિયમન થઈ શકે છે અથવા તેમાં ફેરફાર કરવામાં આવી શકે છે."</string>

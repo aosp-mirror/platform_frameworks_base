@@ -240,9 +240,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"बैटरी का विवरण खोलें"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> प्रतिशत बैटरी बची है और आपके इस्तेमाल के हिसाब से यह <xliff:g id="TIME">%2$s</xliff:g> में खत्म हो जाएगी"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (8892191177774027364) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"बैटरी चार्ज हो रही है, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> प्रतिशत."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"सिस्टम सेटिंग."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"सूचनाएं."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"पूरी सूचनाएं देखें"</string>
