@@ -55,6 +55,7 @@ import android.app.appsearch.IAppSearchManager;
 import android.app.appsearch.IAppSearchResultCallback;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
+import android.app.appsearch.SetSchemaResponse;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -672,7 +673,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     packageIdentifiers.add(new PackageIdentifier(entry.getValue().get(i)));
                 }
             }
-            callback.onResult(AppSearchResult.newSuccessfulResult(null));
+            final SetSchemaResponse response = new SetSchemaResponse.Builder().build();
+            callback.onResult(AppSearchResult.newSuccessfulResult(response.getBundle()));
         }
 
         @Override
