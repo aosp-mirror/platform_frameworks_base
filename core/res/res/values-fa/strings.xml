@@ -997,7 +997,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> روز قبل</item>
     </plurals>
     <string name="last_month" msgid="1528906781083518683">"ماه گذشته"</string>
-    <string name="older" msgid="1645159827884647400">"قدیمی تر"</string>
+    <string name="older" msgid="1645159827884647400">"قدیمی‌تر"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"در <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"در <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="3149809685340130039">"در <xliff:g id="YEAR">%s</xliff:g>"</string>
