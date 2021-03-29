@@ -9916,6 +9916,27 @@ package android.content {
     method @Deprecated public void setUpdateThrottle(long);
   }
 
+  public final class AttributionSource implements android.os.Parcelable {
+    method public boolean checkCallingUid();
+    method public int describeContents();
+    method public void enforceCallingUid();
+    method @Nullable public String getAttributionTag();
+    method @Nullable public android.content.AttributionSource getNext();
+    method @Nullable public String getPackageName();
+    method public int getUid();
+    method public boolean isTrusted(@NonNull android.content.Context);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.AttributionSource> CREATOR;
+  }
+
+  public static final class AttributionSource.Builder {
+    ctor public AttributionSource.Builder(int);
+    method @NonNull public android.content.AttributionSource build();
+    method @NonNull public android.content.AttributionSource.Builder setAttributionTag(@NonNull String);
+    method @NonNull public android.content.AttributionSource.Builder setNext(@NonNull android.content.AttributionSource);
+    method @NonNull public android.content.AttributionSource.Builder setPackageName(@NonNull String);
+  }
+
   public abstract class BroadcastReceiver {
     ctor public BroadcastReceiver();
     method public final void abortBroadcast();
@@ -10085,6 +10106,7 @@ package android.content {
     method public abstract int delete(@NonNull android.net.Uri, @Nullable String, @Nullable String[]);
     method public int delete(@NonNull android.net.Uri, @Nullable android.os.Bundle);
     method public void dump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
+    method @Nullable public final android.content.AttributionSource getCallingAttributionSource();
     method @Nullable public final String getCallingAttributionTag();
     method @Nullable public final String getCallingPackage();
     method @Nullable public final String getCallingPackageUnchecked();
@@ -10447,6 +10469,7 @@ package android.content {
     method public abstract android.content.Context getApplicationContext();
     method public abstract android.content.pm.ApplicationInfo getApplicationInfo();
     method public abstract android.content.res.AssetManager getAssets();
+    method @NonNull public android.content.AttributionSource getAttributionSource();
     method @Nullable public String getAttributionTag();
     method public abstract java.io.File getCacheDir();
     method public abstract ClassLoader getClassLoader();
@@ -10652,8 +10675,7 @@ package android.content {
 
   public final class ContextParams {
     method @Nullable public String getAttributionTag();
-    method @Nullable public String getReceiverAttributionTag();
-    method @Nullable public String getReceiverPackage();
+    method @Nullable public android.content.AttributionSource getNextAttributionSource();
   }
 
   public static final class ContextParams.Builder {
@@ -10661,7 +10683,7 @@ package android.content {
     ctor public ContextParams.Builder(@NonNull android.content.ContextParams);
     method @NonNull public android.content.ContextParams build();
     method @NonNull public android.content.ContextParams.Builder setAttributionTag(@Nullable String);
-    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@Nullable String, @Nullable String);
+    method @NonNull public android.content.ContextParams.Builder setNextAttributionSource(@NonNull android.content.AttributionSource);
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -39090,6 +39112,7 @@ package android.speech {
     method public void bufferReceived(byte[]) throws android.os.RemoteException;
     method public void endOfSpeech() throws android.os.RemoteException;
     method public void error(int) throws android.os.RemoteException;
+    method @NonNull public android.content.AttributionSource getCallingAttributionSource();
     method public int getCallingUid();
     method public void partialResults(android.os.Bundle) throws android.os.RemoteException;
     method public void readyForSpeech(android.os.Bundle) throws android.os.RemoteException;

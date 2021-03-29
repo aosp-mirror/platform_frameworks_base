@@ -18,12 +18,12 @@ package com.android.server.speech;
 
 import static com.android.internal.infra.AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.speech.IRecognitionListener;
@@ -40,24 +40,12 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
     private static final String TAG = RemoteSpeechRecognitionService.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private static final String APP_OP_MESSAGE = "Recording audio for speech recognition";
-    private static final String RECORD_AUDIO_APP_OP =
-            AppOpsManager.permissionToOp(android.Manifest.permission.RECORD_AUDIO);
-
     private final Object mLock = new Object();
 
     private boolean mConnected = false;
 
     @Nullable
     private IRecognitionListener mListener;
-
-    @Nullable
-    @GuardedBy("mLock")
-    private String mPackageName;
-
-    @Nullable
-    @GuardedBy("mLock")
-    private String mFeatureId;
 
     @Nullable
     @GuardedBy("mLock")
@@ -72,7 +60,6 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
     private boolean mRecordingInProgress = false;
 
     private final int mCallingUid;
-    private final AppOpsManager mAppOpsManager;
     private final ComponentName mComponentName;
 
     RemoteSpeechRecognitionService(
@@ -87,7 +74,6 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
                 IRecognitionService.Stub::asInterface);
 
         mCallingUid = callingUid;
-        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mComponentName = serviceName;
 
         if (DEBUG) {
@@ -99,11 +85,12 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         return mComponentName;
     }
 
-    void startListening(Intent recognizerIntent, IRecognitionListener listener, String packageName,
-            String featureId) {
+    void startListening(Intent recognizerIntent, IRecognitionListener listener,
+            @NonNull AttributionSource attributionSource) {
         if (DEBUG) {
             Slog.i(TAG, String.format("#startListening for package: %s, feature=%s, callingUid=%d",
-                    packageName, featureId, mCallingUid));
+                    attributionSource.getPackageName(), attributionSource.getAttributionTag(),
+                    mCallingUid));
         }
 
         if (listener == null) {
@@ -123,10 +110,6 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
                 return;
             }
 
-            if (startProxyOp(packageName, featureId) != AppOpsManager.MODE_ALLOWED) {
-                tryRespondWithError(listener, SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
-                return;
-            }
             mSessionInProgress = true;
             mRecordingInProgress = true;
 
@@ -141,23 +124,18 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
                     resetStateLocked();
                 }
             });
-            mPackageName = packageName;
-            mFeatureId = featureId;
 
             run(service ->
                     service.startListening(
                             recognizerIntent,
                             mDelegatingListener,
-                            packageName,
-                            featureId,
-                            mCallingUid));
+                            attributionSource));
         }
     }
 
-    void stopListening(
-            IRecognitionListener listener, String packageName, String featureId) {
+    void stopListening(IRecognitionListener listener) {
         if (DEBUG) {
-            Slog.i(TAG, "#stopListening for package: " + packageName + ", feature=" + featureId);
+            Slog.i(TAG, "#stopListening");
         }
 
         if (!mConnected) {
@@ -184,19 +162,13 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
             }
             mRecordingInProgress = false;
 
-            finishProxyOp(packageName, featureId);
-
-            run(service -> service.stopListening(mDelegatingListener, packageName, featureId));
+            run(service -> service.stopListening(mDelegatingListener));
         }
     }
 
-    void cancel(
-            IRecognitionListener listener,
-            String packageName,
-            String featureId,
-            boolean isShutdown) {
+    void cancel(IRecognitionListener listener, boolean isShutdown) {
         if (DEBUG) {
-            Slog.i(TAG, "#cancel for package: " + packageName + ", feature=" + featureId);
+            Slog.i(TAG, "#cancel");
         }
 
         if (!mConnected) {
@@ -220,11 +192,8 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
             // Temporary reference to allow for resetting the hard link mDelegatingListener to null.
             IRecognitionListener delegatingListener = mDelegatingListener;
 
-            run(service -> service.cancel(delegatingListener, packageName, featureId, isShutdown));
+            run(service -> service.cancel(delegatingListener, isShutdown));
 
-            if (mRecordingInProgress) {
-                finishProxyOp(packageName, featureId);
-            }
             mRecordingInProgress = false;
             mSessionInProgress = false;
 
@@ -249,7 +218,7 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
             }
         }
 
-        cancel(mListener, mPackageName, mFeatureId, true /* isShutdown */);
+        cancel(mListener, true /* isShutdown */);
     }
 
     @Override // from ServiceConnector.Impl
@@ -286,38 +255,10 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
     }
 
     private void resetStateLocked() {
-        if (mRecordingInProgress && mPackageName != null) {
-            finishProxyOp(mPackageName, mFeatureId);
-        }
-
         mListener = null;
         mDelegatingListener = null;
         mSessionInProgress = false;
         mRecordingInProgress = false;
-    }
-
-    private int startProxyOp(String packageName, String featureId) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mAppOpsManager.startProxyOp(
-                    RECORD_AUDIO_APP_OP,
-                    mCallingUid,
-                    packageName,
-                    featureId,
-                    APP_OP_MESSAGE);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    private void finishProxyOp(String packageName, String featureId) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            mAppOpsManager.finishProxyOp(
-                    RECORD_AUDIO_APP_OP, mCallingUid, packageName, featureId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     private static void tryRespondWithError(IRecognitionListener listener, int errorCode) {

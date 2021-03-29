@@ -1313,7 +1313,7 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_recordBackgroundAudio"
         android:description="@string/permdesc_recordBackgroundAudio"
-        android:protectionLevel="internal" />
+        android:protectionLevel="internal|role" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for activity recognition                        -->
@@ -1405,7 +1405,7 @@
             android:permissionGroup="android.permission-group.UNDEFINED"
             android:label="@string/permlab_backgroundCamera"
             android:description="@string/permdesc_backgroundCamera"
-            android:protectionLevel="internal" />
+            android:protectionLevel="internal|role" />
 
     <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
            system only camera devices.
