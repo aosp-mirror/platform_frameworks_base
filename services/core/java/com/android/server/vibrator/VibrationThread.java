@@ -255,9 +255,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     @Nullable
     private SingleVibratorStep nextVibrateStep(long startTime, VibratorController controller,
             VibrationEffect.Composed effect, int segmentIndex, long vibratorOffTimeout) {
-        // Some steps should only start after the vibrator has finished the previous vibration, so
-        // make sure we take the latest between both timings.
-        long latestStartTime = Math.max(startTime, vibratorOffTimeout);
         if (segmentIndex >= effect.getSegments().size()) {
             segmentIndex = effect.getRepeatIndex();
         }
@@ -272,15 +269,14 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
         if (segment instanceof PrebakedSegment) {
-            return new PerformStep(latestStartTime, controller, effect, segmentIndex,
-                    vibratorOffTimeout);
+            return new PerformStep(startTime, controller, effect, segmentIndex, vibratorOffTimeout);
         }
         if (segment instanceof PrimitiveSegment) {
-            return new ComposePrimitivesStep(latestStartTime, controller, effect, segmentIndex,
+            return new ComposePrimitivesStep(startTime, controller, effect, segmentIndex,
                     vibratorOffTimeout);
         }
         if (segment instanceof RampSegment) {
-            return new ComposePwleStep(latestStartTime, controller, effect, segmentIndex,
+            return new ComposePwleStep(startTime, controller, effect, segmentIndex,
                     vibratorOffTimeout);
         }
         return new AmplitudeStep(startTime, controller, effect, segmentIndex, vibratorOffTimeout);
@@ -572,7 +568,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         private long startVibrating(SingleVibratorStep step, List<Step> nextSteps) {
             nextSteps.addAll(step.play());
-            long stepDuration = step.getOnResult();
+            long stepDuration = step.getVibratorOnDuration();
             if (stepDuration < 0) {
                 // Step failed, so return negative duration to propagate failure.
                 return stepDuration;
@@ -649,14 +645,13 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         /**
-         * Return the result a call to {@link VibratorController#on} method triggered by
-         * {@link #play()}.
+         * Return the duration the vibrator was turned on when this step was played.
          *
          * @return A positive duration that the vibrator was turned on for by this step;
-         * Zero if the segment is not supported or vibrator was never turned on;
-         * A negative value if the vibrator call has failed.
+         * Zero if the segment is not supported, the step was not played yet or vibrator was never
+         * turned on by this step; A negative value if the vibrator call has failed.
          */
-        public long getOnResult() {
+        public long getVibratorOnDuration() {
             return mVibratorOnResult;
         }
 
@@ -690,7 +685,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         /**
          * Return the {@link #nextVibrateStep} with same start and off timings calculated from
-         * {@link #getOnResult()}, jumping all played segments.
+         * {@link #getVibratorOnDuration()}, jumping all played segments.
          *
          * <p>This method has same behavior as {@link #skipToNextSteps(int)} when the vibrator
          * result is non-positive, meaning the vibrator has either ignored or failed to turn on.
@@ -730,7 +725,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         PerformStep(long startTime, VibratorController controller,
                 VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
-            super(startTime, controller, effect, index, vibratorOffTimeout);
+            // This step should wait for the last vibration to finish (with the timeout) and for the
+            // intended step start time (to respect the effect delays).
+            super(Math.max(startTime, vibratorOffTimeout), controller, effect, index,
+                    vibratorOffTimeout);
         }
 
         @Override
@@ -765,7 +763,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     List<Step> fallbackResult = fallbackStep.play();
                     // Update the result with the fallback result so this step is seamlessly
                     // replaced by the fallback to any outer application of this.
-                    mVibratorOnResult = fallbackStep.getOnResult();
+                    mVibratorOnResult = fallbackStep.getVibratorOnDuration();
                     return fallbackResult;
                 }
 
@@ -802,7 +800,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         ComposePrimitivesStep(long startTime, VibratorController controller,
                 VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
-            super(startTime, controller, effect, index, vibratorOffTimeout);
+            // This step should wait for the last vibration to finish (with the timeout) and for the
+            // intended step start time (to respect the effect delays).
+            super(Math.max(startTime, vibratorOffTimeout), controller, effect, index,
+                    vibratorOffTimeout);
         }
 
         @Override
@@ -851,7 +852,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         ComposePwleStep(long startTime, VibratorController controller,
                 VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
-            super(startTime, controller, effect, index, vibratorOffTimeout);
+            // This step should wait for the last vibration to finish (with the timeout) and for the
+            // intended step start time (to respect the effect delays).
+            super(Math.max(startTime, vibratorOffTimeout), controller, effect, index,
+                    vibratorOffTimeout);
         }
 
         @Override
@@ -924,6 +928,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
         AmplitudeStep(long startTime, VibratorController controller,
                 VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
+            // This step has a fixed startTime coming from the timings of the waveform it's playing.
             super(startTime, controller, effect, index, vibratorOffTimeout);
             mNextOffTime = vibratorOffTimeout;
         }
