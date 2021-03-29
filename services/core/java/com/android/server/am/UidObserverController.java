@@ -147,6 +147,9 @@ public class UidObserverController {
         if ((currentChange & UidRecord.CHANGE_GONE) != 0) {
             currentChange &= ~(UidRecord.CHANGE_ACTIVE | UidRecord.CHANGE_CACHED);
         }
+        if ((pendingChange & UidRecord.CHANGE_CAPABILITY) != 0) {
+            currentChange |= UidRecord.CHANGE_CAPABILITY;
+        }
         return currentChange;
     }
 
@@ -285,12 +288,9 @@ public class UidObserverController {
                         reg.mLastProcStates.delete(item.uid);
                     }
                 } else {
+                    boolean doReport = false;
                     if ((reg.mWhich & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
-                        if (DEBUG_UID_OBSERVERS) {
-                            Slog.i(TAG_UID_OBSERVERS, "UID CHANGED uid=" + item.uid
-                                    + ": " + item.procState + ": " + item.capability);
-                        }
-                        boolean doReport = true;
+                        doReport = true;
                         if (reg.mCutpoint >= ActivityManager.MIN_PROCESS_STATE) {
                             final int lastState = reg.mLastProcStates.get(item.uid,
                                     ActivityManager.PROCESS_STATE_UNKNOWN);
@@ -302,13 +302,20 @@ public class UidObserverController {
                                 doReport = item.procState != PROCESS_STATE_NONEXISTENT;
                             }
                         }
-                        if (doReport) {
-                            if (reg.mLastProcStates != null) {
-                                reg.mLastProcStates.put(item.uid, item.procState);
-                            }
-                            observer.onUidStateChanged(item.uid, item.procState,
-                                    item.procStateSeq, item.capability);
+                    }
+                    if ((reg.mWhich & ActivityManager.UID_OBSERVER_CAPABILITY) != 0) {
+                        doReport |= (change & UidRecord.CHANGE_CAPABILITY) != 0;
+                    }
+                    if (doReport) {
+                        if (DEBUG_UID_OBSERVERS) {
+                            Slog.i(TAG_UID_OBSERVERS, "UID CHANGED uid=" + item.uid
+                                    + ": " + item.procState + ": " + item.capability);
                         }
+                        if (reg.mLastProcStates != null) {
+                            reg.mLastProcStates.put(item.uid, item.procState);
+                        }
+                        observer.onUidStateChanged(item.uid, item.procState,
+                                item.procStateSeq, item.capability);
                     }
                 }
                 final int duration = (int) (SystemClock.uptimeMillis() - start);
@@ -428,12 +435,14 @@ public class UidObserverController {
                 ActivityManager.UID_OBSERVER_ACTIVE,
                 ActivityManager.UID_OBSERVER_GONE,
                 ActivityManager.UID_OBSERVER_PROCSTATE,
+                ActivityManager.UID_OBSERVER_CAPABILITY,
         };
         private static final int[] PROTO_ENUMS = new int[]{
                 ActivityManagerProto.UID_OBSERVER_FLAG_IDLE,
                 ActivityManagerProto.UID_OBSERVER_FLAG_ACTIVE,
                 ActivityManagerProto.UID_OBSERVER_FLAG_GONE,
                 ActivityManagerProto.UID_OBSERVER_FLAG_PROCSTATE,
+                ActivityManagerProto.UID_OBSERVER_FLAG_CAPABILITY,
         };
 
         UidObserverRegistration(int uid, @NonNull String pkg, int which, int cutpoint) {
@@ -461,6 +470,9 @@ public class UidObserverController {
             }
             if ((mWhich & ActivityManager.UID_OBSERVER_GONE) != 0) {
                 pw.print(" GONE");
+            }
+            if ((mWhich & ActivityManager.UID_OBSERVER_CAPABILITY) != 0) {
+                pw.print(" CAP");
             }
             if ((mWhich & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
                 pw.print(" STATE");

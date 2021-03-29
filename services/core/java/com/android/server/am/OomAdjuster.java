@@ -1328,6 +1328,9 @@ public final class OomAdjuster {
                         || uidRec.getSetProcState() == PROCESS_STATE_NONEXISTENT) {
                     uidChange |= isCached ? UidRecord.CHANGE_CACHED : UidRecord.CHANGE_UNCACHED;
                 }
+                if (uidRec.getSetCapability() != uidRec.getCurCapability()) {
+                    uidChange |= UidRecord.CHANGE_CAPABILITY;
+                }
                 uidRec.setSetProcState(uidRec.getCurProcState());
                 uidRec.setSetCapability(uidRec.getCurCapability());
                 uidRec.setSetAllowListed(uidRec.isCurAllowListed());
