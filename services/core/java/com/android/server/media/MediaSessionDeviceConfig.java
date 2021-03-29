@@ -46,6 +46,18 @@ class MediaSessionDeviceConfig {
     private static volatile long sMediaSessionCallbackFgsAllowlistDurationMs =
             DEFAULT_MEDIA_SESSION_CALLBACK_FGS_ALLOWLIST_DURATION_MS;
 
+    /**
+     * Denotes the duration for which an app receiving a media session callback and the FGS started
+     * there can be temporarily allowed to have while-in-use permissions such as
+     * location/camera/microphone for a duration of time.
+     */
+    private static final String KEY_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS =
+            "media_session_callback_fgs_while_in_use_temp_allow_duration_ms";
+    private static final long DEFAULT_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS
+            = 10_000;
+    private static volatile long sMediaSessionCallbackFgsWhileInUseTempAllowDurationMs =
+            DEFAULT_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS;
+
     private static void refresh(DeviceConfig.Properties properties) {
         final Set<String> keys = properties.getKeyset();
         properties.getKeyset().forEach(key -> {
@@ -58,6 +70,9 @@ class MediaSessionDeviceConfig {
                     sMediaSessionCallbackFgsAllowlistDurationMs = properties.getLong(key,
                             DEFAULT_MEDIA_SESSION_CALLBACK_FGS_ALLOWLIST_DURATION_MS);
                     break;
+                case KEY_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS:
+                    sMediaSessionCallbackFgsWhileInUseTempAllowDurationMs = properties.getLong(key,
+                            DEFAULT_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS);
             }
         });
     }
@@ -86,6 +101,15 @@ class MediaSessionDeviceConfig {
         return sMediaSessionCallbackFgsAllowlistDurationMs;
     }
 
+    /**
+     * Return the duration for which an app receiving a media session callback and the FGS started
+     * there can be temporarily allowed to have while-in-use permissions such as
+     * location/camera/micrphone.
+     */
+    public static long getMediaSessionCallbackFgsWhileInUseTempAllowDurationMs() {
+        return sMediaSessionCallbackFgsWhileInUseTempAllowDurationMs;
+    }
+
     public static void dump(PrintWriter pw, String prefix) {
         pw.println("Media session config:");
         final String dumpFormat = prefix + "  %s: [cur: %s, def: %s]";
@@ -97,5 +121,9 @@ class MediaSessionDeviceConfig {
                 KEY_MEDIA_SESSION_CALLBACK_FGS_ALLOWLIST_DURATION_MS,
                 sMediaSessionCallbackFgsAllowlistDurationMs,
                 DEFAULT_MEDIA_SESSION_CALLBACK_FGS_ALLOWLIST_DURATION_MS));
+        pw.println(TextUtils.formatSimple(dumpFormat,
+                KEY_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS,
+                sMediaSessionCallbackFgsWhileInUseTempAllowDurationMs,
+                DEFAULT_MEDIA_SESSION_CALLBACK_FGS_WHILE_IN_USE_TEMP_ALLOW_DURATION_MS));
     }
 }

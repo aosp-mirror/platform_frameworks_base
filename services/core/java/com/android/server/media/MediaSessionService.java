@@ -552,15 +552,30 @@ public class MediaSessionService extends SystemService implements Monitor {
         final long token = Binder.clearCallingIdentity();
         try {
             enforcePackageName(callingPackage, callingUid);
-            if (targetUid != callingUid && mActivityManagerLocal.canStartForegroundService(
-                    callingPid, callingUid, callingPackage)) {
-                final Context userContext = mContext.createContextAsUser(
-                        UserHandle.of(UserHandle.getUserId(targetUid)), /* flags= */ 0);
-                final PowerExemptionManager powerExemptionManager = userContext.getSystemService(
-                        PowerExemptionManager.class);
-                powerExemptionManager.addToTemporaryAllowList(targetPackage,
-                        PowerExemptionManager.REASON_MEDIA_SESSION_CALLBACK, reason,
-                        MediaSessionDeviceConfig.getMediaSessionCallbackFgsAllowlistDurationMs());
+            if (targetUid != callingUid) {
+                Log.d(TAG, "tempAllowlistTargetPkgIfPossible callingPackage:"
+                        + callingPackage + " targetPackage:" + targetPackage
+                        + " reason:" + reason);
+                boolean canAllowWhileInUse = mActivityManagerLocal
+                        .canAllowWhileInUsePermissionInFgs(callingPid, callingUid, callingPackage);
+                boolean canStartFgs = canAllowWhileInUse
+                        || mActivityManagerLocal.canStartForegroundService(callingPid, callingUid,
+                        callingPackage);
+                if (canAllowWhileInUse) {
+                    mActivityManagerLocal.tempAllowWhileInUsePermissionInFgs(targetUid,
+                            MediaSessionDeviceConfig
+                                    .getMediaSessionCallbackFgsWhileInUseTempAllowDurationMs());
+                }
+                if (canStartFgs) {
+                    final Context userContext = mContext.createContextAsUser(
+                            UserHandle.of(UserHandle.getUserId(targetUid)), /* flags= */ 0);
+                    final PowerExemptionManager powerExemptionManager =
+                            userContext.getSystemService(
+                                    PowerExemptionManager.class);
+                    powerExemptionManager.addToTemporaryAllowList(targetPackage,
+                            PowerExemptionManager.REASON_MEDIA_SESSION_CALLBACK, reason,
+                            MediaSessionDeviceConfig.getMediaSessionCallbackFgsAllowlistDurationMs());
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(token);

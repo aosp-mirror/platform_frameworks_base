@@ -1253,13 +1253,13 @@ final class ProcessStateRecord {
         if (mAllowStartFgs == REASON_DENIED) {
             // uid is on DeviceIdleController's user/system allowlist
             // or AMS's FgsStartTempAllowList.
-            FgsStartTempAllowList.TempFgsAllowListEntry entry =
+            ActivityManagerService.FgsTempAllowListItem item =
                     mService.isAllowlistedForFgsStartLOSP(mApp.info.uid);
-            if (entry != null) {
-                if (entry == ActivityManagerService.FAKE_TEMP_ALLOWLIST_ENTRY) {
+            if (item != null) {
+                if (item == ActivityManagerService.FAKE_TEMP_ALLOW_LIST_ITEM) {
                     mAllowStartFgs = REASON_SYSTEM_ALLOW_LISTED;
                 } else {
-                    mAllowStartFgs = entry.mReasonCode;
+                    mAllowStartFgs = item.mReasonCode;
                 }
             }
         }

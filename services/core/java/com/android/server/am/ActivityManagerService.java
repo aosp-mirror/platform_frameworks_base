@@ -49,7 +49,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALLOW_LISTED;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
@@ -258,6 +258,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.PowerManager;
@@ -1201,15 +1202,45 @@ public class ActivityManagerService extends IActivityManager.Stub
     @CompositeRWLock({"this", "mProcLock"})
     final PendingTempAllowlists mPendingTempAllowlist = new PendingTempAllowlists(this);
 
+    public static final class FgsTempAllowListItem {
+        final long mDuration;
+        final @PowerExemptionManager.ReasonCode int mReasonCode;
+        final String mReason;
+        final int mCallingUid;
+
+        FgsTempAllowListItem(long duration, @PowerExemptionManager.ReasonCode int reasonCode,
+                String reason, int callingUid) {
+            mDuration = duration;
+            mReasonCode = reasonCode;
+            mReason = reason;
+            mCallingUid = callingUid;
+        }
+
+        void dump(PrintWriter pw) {
+            pw.print(" duration=" + mDuration +
+                    " callingUid=" + UserHandle.formatUid(mCallingUid) +
+                    " reasonCode=" + PowerExemptionManager.reasonCodeToString(mReasonCode) +
+                    " reason=" + mReason);
+        }
+    }
+
     /**
      * The temp-allowlist that is allowed to start FGS from background.
      */
     @CompositeRWLock({"this", "mProcLock"})
-    final FgsStartTempAllowList mFgsStartTempAllowList = new FgsStartTempAllowList();
+    final FgsTempAllowList<Integer, FgsTempAllowListItem> mFgsStartTempAllowList =
+            new FgsTempAllowList();
 
-    static final FgsStartTempAllowList.TempFgsAllowListEntry FAKE_TEMP_ALLOWLIST_ENTRY = new
-            FgsStartTempAllowList.TempFgsAllowListEntry(Long.MAX_VALUE, Long.MAX_VALUE,
-            REASON_SYSTEM_ALLOW_LISTED, "", INVALID_UID);
+    static final FgsTempAllowListItem FAKE_TEMP_ALLOW_LIST_ITEM = new FgsTempAllowListItem(
+            Long.MAX_VALUE, REASON_SYSTEM_ALLOW_LISTED, "", INVALID_UID);
+
+    /*
+     * List of uids that are allowed to have while-in-use permission when FGS is started from
+     * background.
+     */
+    private final FgsTempAllowList<Integer, String> mFgsWhileInUseTempAllowList =
+            new FgsTempAllowList();
+
     /**
      * Information about and control over application operations
      */
@@ -5563,11 +5594,12 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Nullable
     @GuardedBy(anyOf = {"this", "mProcLock"})
-    FgsStartTempAllowList.TempFgsAllowListEntry isAllowlistedForFgsStartLOSP(int uid) {
+    FgsTempAllowListItem isAllowlistedForFgsStartLOSP(int uid) {
         if (Arrays.binarySearch(mDeviceIdleExceptIdleAllowlist, UserHandle.getAppId(uid)) >= 0) {
-            return FAKE_TEMP_ALLOWLIST_ENTRY;
+            return FAKE_TEMP_ALLOW_LIST_ITEM;
         }
-        return mFgsStartTempAllowList.getAllowedDurationAndReason(uid);
+        final Pair<Long, FgsTempAllowListItem> entry = mFgsStartTempAllowList.get(uid);
+        return entry == null ? null : entry.second;
     }
 
     /**
@@ -9263,7 +9295,24 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             pw.println("  mFgsStartTempAllowList:");
-            mFgsStartTempAllowList.dump(pw);
+            final long currentTimeNow = System.currentTimeMillis();
+            final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
+            final Set<Integer> uids = mFgsStartTempAllowList.keySet();
+            for (Integer uid : uids) {
+                final Pair<Long, FgsTempAllowListItem> entry = mFgsStartTempAllowList.get(uid);
+                if (entry == null) {
+                    continue;
+                }
+                pw.print("    " + UserHandle.formatUid(uid) + ": ");
+                entry.second.dump(pw); pw.println();
+                pw.print("ms expiration=");
+                // Convert entry.mExpirationTime, which is an elapsed time since boot,
+                // to a time since epoch (i.e. System.currentTimeMillis()-based time.)
+                final long expirationInCurrentTime =
+                        currentTimeNow - elapsedRealtimeNow + entry.first;
+                TimeUtils.dumpTimeWithDelta(pw, expirationInCurrentTime, currentTimeNow);
+                pw.println();
+            }
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
@@ -14539,7 +14588,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUiHandler.obtainMessage(PUSH_TEMP_ALLOWLIST_UI_MSG).sendToTarget();
 
             if (type == TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
-                mFgsStartTempAllowList.add(targetUid, duration, reasonCode, reason, callingUid);
+                mFgsStartTempAllowList.add(targetUid, duration,
+                        new FgsTempAllowListItem(duration, reasonCode, reason, callingUid));
             }
         }
     }
@@ -15212,8 +15262,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mDeviceIdleTempAllowlist = appids;
                     if (adding) {
                         if (type == TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
-                            mFgsStartTempAllowList.add(changingUid, durationMs, reasonCode, reason,
-                                    callingUid);
+                            mFgsStartTempAllowList.add(changingUid, durationMs,
+                                    new FgsTempAllowListItem(durationMs, reasonCode, reason,
+                                    callingUid));
                         }
                     }
                     setAppIdTempAllowlistStateLSP(changingUid, adding);
@@ -16030,6 +16081,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean canStartForegroundService(int pid, int uid, @NonNull String packageName) {
             synchronized (ActivityManagerService.this) {
                 return mServices.canStartForegroundServiceLocked(pid, uid, packageName);
+            }
+        }
+
+        @Override
+        public void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs) {
+            mFgsWhileInUseTempAllowList.add(uid, durationMs, "");
+        }
+
+        @Override
+        public boolean isTempAllowlistedForFgsWhileInUse(int uid) {
+            return mFgsWhileInUseTempAllowList.isAllowed(uid);
+        }
+
+        @Override
+        public boolean canAllowWhileInUsePermissionInFgs(int pid, int uid,
+                @NonNull String packageName) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.canAllowWhileInUsePermissionInFgsLocked(pid, uid, packageName);
             }
         }
     }

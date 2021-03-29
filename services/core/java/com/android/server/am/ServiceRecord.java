@@ -179,7 +179,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // Debug info why mAllowStartForeground is allowed or denied.
     String mInfoAllowStartForeground;
     // Debug info if mAllowStartForeground is allowed because of a temp-allowlist.
-    FgsStartTempAllowList.TempFgsAllowListEntry mInfoTempFgsAllowListReason;
+    ActivityManagerService.FgsTempAllowListItem mInfoTempFgsAllowListReason;
     // Is the same mInfoAllowStartForeground string has been logged before? Used for dedup.
     boolean mLoggedInfoAllowStartForeground;
     // The number of times Service.startForeground() is called;
