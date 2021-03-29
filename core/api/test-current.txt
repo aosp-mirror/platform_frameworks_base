@@ -1142,6 +1142,7 @@ package android.hardware.display {
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public int getRefreshRateSwitchingType();
+    method @NonNull public int[] getUserDisabledHdrTypes();
     method public boolean isMinimalPostProcessingRequested(int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAreUserDisabledHdrTypesAllowed(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public void setRefreshRateSwitchingType(int);
@@ -2597,6 +2598,7 @@ package android.view {
   }
 
   public final class Display {
+    method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method public int getType();
     method public boolean hasAccess(int);
