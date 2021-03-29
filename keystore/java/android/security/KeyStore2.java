@@ -125,6 +125,8 @@ public class KeyStore2 {
         }
     }
 
+    private static final String KEYSTORE2_SERVICE_NAME =
+            "android.system.keystore2.IKeystoreService/default";
 
     private KeyStore2() {
         mBinder = null;
@@ -137,7 +139,7 @@ public class KeyStore2 {
     private synchronized IKeystoreService getService(boolean retryLookup) {
         if (mBinder == null || retryLookup) {
             mBinder = IKeystoreService.Stub.asInterface(ServiceManager
-                    .getService("android.system.keystore2"));
+                    .getService(KEYSTORE2_SERVICE_NAME));
         }
         return mBinder;
     }
