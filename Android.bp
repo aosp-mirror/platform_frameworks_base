@@ -424,6 +424,7 @@ filegroup {
         ":libbluetooth-binder-aidl",
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
+        ":packagemanager_aidl",
         ":libupdate_engine_aidl",
         ":resourcemanager_aidl",
         ":storaged_aidl",
