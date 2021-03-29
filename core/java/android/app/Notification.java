@@ -3698,7 +3698,6 @@ public class Notification implements Parcelable
         private int mTextColorsAreForBackground = COLOR_INVALID;
         private int mPrimaryTextColor = COLOR_INVALID;
         private int mSecondaryTextColor = COLOR_INVALID;
-        private boolean mRebuildStyledRemoteViews;
 
         private boolean mTintActionButtons;
         private boolean mTintWithThemeAccent;
@@ -5729,8 +5728,7 @@ public class Notification implements Parcelable
         }
 
         private boolean useExistingRemoteView() {
-            return mStyle == null || (!mStyle.displayCustomViewInline()
-                    && !mRebuildStyledRemoteViews);
+            return mStyle == null || !mStyle.displayCustomViewInline();
         }
 
         /**
@@ -6616,18 +6614,6 @@ public class Notification implements Parcelable
             int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
             return targetSdkVersion > Build.VERSION_CODES.M
                     && targetSdkVersion < Build.VERSION_CODES.O;
-        }
-
-        /**
-         * Forces all styled remoteViews to be built from scratch and not use any cached
-         * RemoteViews.
-         * This is needed for legacy apps that are baking in their remoteviews into the
-         * notification.
-         *
-         * @hide
-         */
-        public void setRebuildStyledRemoteViews(boolean rebuild) {
-            mRebuildStyledRemoteViews = rebuild;
         }
 
         /**
@@ -8279,27 +8265,6 @@ public class Notification implements Parcelable
             return true;
         }
 
-        private CharSequence createConversationTitleFromMessages() {
-            ArraySet<CharSequence> names = new ArraySet<>();
-            for (int i = 0; i < mMessages.size(); i++) {
-                Message m = mMessages.get(i);
-                Person sender = m.getSenderPerson();
-                if (sender != null) {
-                    names.add(sender.getName());
-                }
-            }
-            SpannableStringBuilder title = new SpannableStringBuilder();
-            int size = names.size();
-            for (int i = 0; i < size; i++) {
-                CharSequence name = names.valueAt(i);
-                if (!TextUtils.isEmpty(title)) {
-                    title.append(", ");
-                }
-                title.append(BidiFormatter.getInstance().unicodeWrap(name));
-            }
-            return title;
-        }
-
         /**
          * @hide
          */
@@ -8311,11 +8276,6 @@ public class Notification implements Parcelable
                 remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
             }
             return remoteViews;
-        }
-
-        private static TextAppearanceSpan makeFontColorSpan(int color) {
-            return new TextAppearanceSpan(null, 0, 0,
-                    ColorStateList.valueOf(color), null);
         }
 
         public static final class Message {
@@ -9778,23 +9738,6 @@ public class Notification implements Parcelable
             }
             // Comparison done for all custom RemoteViews, independent of style
             return false;
-        }
-
-        private RemoteViews buildIntoRemoteView(RemoteViews template, RemoteViews customContent,
-                boolean headerless) {
-            if (customContent != null) {
-                // Need to clone customContent before adding, because otherwise it can no longer be
-                // parceled independently of remoteViews.
-                customContent = customContent.clone();
-                customContent.overrideTextColors(mBuilder.getPrimaryTextColor(mBuilder.mParams));
-                if (headerless) {
-                    template.removeFromParent(R.id.notification_top_line);
-                }
-                template.removeAllViews(R.id.notification_main_column);
-                template.addView(R.id.notification_main_column, customContent);
-                template.addFlags(RemoteViews.FLAG_REAPPLY_DISALLOWED);
-            }
-            return template;
         }
     }
 
