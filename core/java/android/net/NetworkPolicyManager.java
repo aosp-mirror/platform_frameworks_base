@@ -18,8 +18,6 @@ package android.net;
 
 import static android.app.ActivityManager.procStateToString;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
-import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_MASK;
-import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -784,36 +782,6 @@ public class NetworkPolicyManager {
     /** @hide */
     public static String resolveNetworkId(String ssid) {
         return WifiInfo.sanitizeSsid(ssid);
-    }
-
-    /**
-     * Returns whether network access of an UID is blocked or not based on {@code blockedReasons}
-     * corresponding to it.
-     *
-     * {@code blockedReasons} would be a bitwise {@code OR} combination of the
-     * {@code BLOCKED_REASON_*} and/or {@code BLOCKED_METERED_REASON_*} constants.
-     *
-     * @param blockedReasons Value indicating the reasons for why the network access of an UID is
-     *                       blocked. If the value is equal to
-     *                       {@link ConnectivityManager#BLOCKED_REASON_NONE}, then
-     *                       it indicates that an app's network access is not blocked.
-     * @param meteredNetwork Value indicating whether the network is metered or not.
-     * @return Whether network access is blocked or not.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static boolean isUidBlocked(int blockedReasons, boolean meteredNetwork) {
-        if (blockedReasons == BLOCKED_REASON_NONE) {
-            return false;
-        }
-        final int blockedOnAllNetworksReason = (blockedReasons & ~BLOCKED_METERED_REASON_MASK);
-        if (blockedOnAllNetworksReason != BLOCKED_REASON_NONE) {
-            return true;
-        }
-        if (meteredNetwork) {
-            return blockedReasons != BLOCKED_REASON_NONE;
-        }
-        return false;
     }
 
     /**
