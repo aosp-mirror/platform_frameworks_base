@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
@@ -92,7 +91,6 @@ public class DomainVerificationService extends SystemService
      * commands.
      */
     @ChangeId
-    @Disabled
     private static final long SETTINGS_API_V2 = 178111421;
 
     /**
