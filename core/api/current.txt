@@ -867,6 +867,7 @@ package android {
     field public static final int keycode = 16842949; // 0x10100c5
     field public static final int killAfterRestore = 16843420; // 0x101029c
     field public static final int knownCerts = 16844330; // 0x101062a
+    field public static final int lStar = 16844359; // 0x1010647
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
     field @Deprecated public static final int labelTextSize = 16843317; // 0x1010235
@@ -13178,6 +13179,7 @@ package android.content.res {
     method public boolean isStateful();
     method @NonNull public static android.content.res.ColorStateList valueOf(@ColorInt int);
     method @NonNull public android.content.res.ColorStateList withAlpha(int);
+    method @NonNull public android.content.res.ColorStateList withLStar(float);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.res.ColorStateList> CREATOR;
   }
