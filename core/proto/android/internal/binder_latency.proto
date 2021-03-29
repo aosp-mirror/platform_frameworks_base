@@ -34,6 +34,7 @@ message Dims {
     UNKNOWN_PROCESS_SOURCE = 0;
     SYSTEM_SERVER = 1;
     TELEPHONY = 2;
+    BLUETOOTH = 3;
   }
 
   enum ServiceClassName {
@@ -74,4 +75,19 @@ message ApiStats {
   // Stores the count of samples for each bucket. The number of buckets and
   // their sizes are controlled server side with a flag.
   repeated int32 buckets = 3;
+
+  // Params for histogram buckets.
+  // The number of buckets in the histogram. Store this value separately
+  // as the tail of empty buckets is truncated when stored in the proto to
+  // conserve space. Thus it is not possible to infer this value from there.
+  optional int32 bucket_count = 4;
+
+  // The size (upper bound) of the first bucket (used to avoid creating an
+  // excessive amount of small buckets). E.g. for first_bucket_size of 5, the
+  // first bucket will be [0, 5) and the second will be [5, 5 * scaleFactor).
+  optional int32 first_bucket_size = 5;
+
+  // The rate in which each consecutive bucket increases (before rounding).
+  // Implemented in: com.android.internal.os.BinderLatencyBuckets.
+  optional float scale_factor = 6;
 }
