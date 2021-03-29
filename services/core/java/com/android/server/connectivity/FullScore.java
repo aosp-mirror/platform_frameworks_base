@@ -193,14 +193,14 @@ public class FullScore {
     // telephony factory, so that it depends on the carrier. For now this is handled by
     // connectivity for backward compatibility.
     public FullScore mixInScore(@NonNull final NetworkCapabilities caps,
-            @NonNull final NetworkAgentConfig config, final boolean avoidBadWiFi) {
+            @NonNull final NetworkAgentConfig config, final boolean yieldToBadWifi) {
         return withPolicies(mLegacyInt, mPolicies, mKeepConnectedReason,
                 caps.hasCapability(NET_CAPABILITY_VALIDATED),
                 caps.hasTransport(TRANSPORT_VPN),
                 caps.hasCapability(NET_CAPABILITY_NOT_METERED),
                 config.explicitlySelected,
                 config.acceptUnvalidated,
-                avoidBadWiFi);
+                yieldToBadWifi);
     }
 
     // TODO : this shouldn't manage bad wifi avoidance – instead this should be done by the
