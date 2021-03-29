@@ -265,18 +265,9 @@ public final class PinnerService extends SystemService {
      * Handler for on start pinning message
      */
     private void handlePinOnStart() {
-        final String bootImage = SystemProperties.get("dalvik.vm.boot-image", "");
-        String[] filesToPin = null;
-        if (bootImage.endsWith("boot-image.prof")) {
-            // Use the files listed for that specific boot image.
-            // TODO: find a better way to know we're using the JIT zygote configuration.
-            filesToPin = mContext.getResources().getStringArray(
-                  com.android.internal.R.array.config_jitzygoteBootImagePinnerServiceFiles);
-        } else {
-            // Files to pin come from the overlay and can be specified per-device config
-            filesToPin = mContext.getResources().getStringArray(
-                  com.android.internal.R.array.config_defaultPinnerServiceFiles);
-        }
+        // Files to pin come from the overlay and can be specified per-device config
+        String[] filesToPin = mContext.getResources().getStringArray(
+            com.android.internal.R.array.config_defaultPinnerServiceFiles);
         // Continue trying to pin each file even if we fail to pin some of them
         for (String fileToPin : filesToPin) {
             PinnedFile pf = pinFile(fileToPin,
@@ -286,9 +277,31 @@ public final class PinnerService extends SystemService {
                 Slog.e(TAG, "Failed to pin file = " + fileToPin);
                 continue;
             }
-
             synchronized (this) {
                 mPinnedFiles.add(pf);
+            }
+            if (fileToPin.endsWith(".jar") | fileToPin.endsWith(".apk")) {
+                // Check whether the runtime has compilation artifacts to pin.
+                String arch = VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]);
+                String[] files = null;
+                try {
+                    files = DexFile.getDexFileOutputPaths(fileToPin, arch);
+                } catch (IOException ioe) { }
+                if (files == null) {
+                    continue;
+                }
+                for (String file : files) {
+                    PinnedFile df = pinFile(file,
+                                            Integer.MAX_VALUE,
+                                            /*attemptPinIntrospection=*/false);
+                    if (df == null) {
+                        Slog.i(TAG, "Failed to pin ART file = " + file);
+                        continue;
+                    }
+                    synchronized (this) {
+                        mPinnedFiles.add(df);
+                    }
+                }
             }
         }
     }
