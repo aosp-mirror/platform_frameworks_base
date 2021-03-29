@@ -40284,6 +40284,7 @@ package android.telecom {
     field public static final int DURATION_MEDIUM = 2; // 0x2
     field public static final int DURATION_SHORT = 1; // 0x1
     field public static final int DURATION_VERY_SHORT = 0; // 0x0
+    field public static final long ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION = 157233955L; // 0x95f3323L
     field public static final String EXTRA_CALL_BACK_NUMBER = "android.telecom.extra.CALL_BACK_NUMBER";
     field public static final String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecom.extra.CALL_DISCONNECT_CAUSE";
     field public static final String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecom.extra.CALL_DISCONNECT_MESSAGE";
@@ -41890,7 +41891,7 @@ package android.telephony {
     method @Deprecated public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallDisconnectCauseChanged(int, int);
     method @Deprecated public void onCallForwardingIndicatorChanged(boolean);
-    method @Deprecated public void onCallStateChanged(int, String);
+    method @Deprecated @RequiresPermission(value=android.Manifest.permission.READ_PHONE_STATE, conditional=true) public void onCallStateChanged(int, String);
     method @Deprecated public void onCellInfoChanged(java.util.List<android.telephony.CellInfo>);
     method @Deprecated public void onCellLocationChanged(android.telephony.CellLocation);
     method @Deprecated public void onDataActivity(int);
@@ -42436,7 +42437,7 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.CallStateListener {
-    method public void onCallStateChanged(int);
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onCallStateChanged(int);
   }
 
   public static interface TelephonyCallback.CarrierNetworkListener {
@@ -42526,7 +42527,8 @@ package android.telephony {
     method public int getActiveModemCount();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCallComposerStatus();
-    method public int getCallState();
+    method @Deprecated @RequiresPermission(value=android.Manifest.permission.READ_PHONE_STATE, conditional=true) public int getCallState();
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getCallStateForSubscription();
     method public int getCardIdForDefaultEuicc();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) @WorkerThread public android.os.PersistableBundle getCarrierConfig();
     method public int getCarrierIdFromSimMccMnc();

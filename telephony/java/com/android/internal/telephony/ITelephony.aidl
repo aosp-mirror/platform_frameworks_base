@@ -298,9 +298,9 @@ interface ITelephony {
     int getCallState();
 
     /**
-     * Returns the call state for a slot.
+     * Returns the call state for a specific subscriiption.
      */
-    int getCallStateForSlot(int slotIndex);
+    int getCallStateForSubscription(int subId, String callingPackage, String featureId);
 
     /**
      * Replaced by getDataActivityForSubId.

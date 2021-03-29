@@ -5725,9 +5725,20 @@ public class TelephonyManager {
      * Note: The call state returned via this method may differ from what is reported by
      * {@link PhoneStateListener#onCallStateChanged(int, String)}, as that callback only considers
      * Telephony (mobile) calls.
+     * <p>
+     * Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} for applications
+     * targeting API level 31+.
      *
      * @return the current call state.
+     * @deprecated Use {@link #getCallStateForSubscription} to retrieve the call state for a
+     * specific telephony subscription (which allows carrier privileged apps),
+     * {@link TelephonyCallback.CallStateListener} for real-time call state updates, or
+     * {@link TelecomManager#isInCall()}, which supplies an aggregate "in call" state for the entire
+     * device.
      */
+    @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
+    @Deprecated
     public @CallState int getCallState() {
         if (mContext != null) {
             TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
@@ -5739,19 +5750,48 @@ public class TelephonyManager {
     }
 
     /**
+     * Retrieve the call state for a specific subscription that was specified when this
+     * TelephonyManager instance was created.
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or that the calling
+     * application has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * @see TelephonyManager#createForSubscriptionId(int)
+     * @see TelephonyManager#createForPhoneAccountHandle(PhoneAccountHandle)
+     * @return The call state of the subscription associated with this TelephonyManager instance.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public @CallState int getCallStateForSubscription() {
+        return getCallState(getSubId());
+    }
+
+    /**
      * Returns the Telephony call state for calls on a specific subscription.
      * <p>
      * Note: This method considers ONLY telephony/mobile calls, where {@link #getCallState()}
      * considers the state of calls from other {@link android.telecom.ConnectionService}
      * implementations.
+     * <p>
+     * Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} for applications
+     * targeting API level 31+ or that the calling application has carrier privileges
+     * (see {@link #hasCarrierPrivileges()}).
      *
      * @param subId the subscription to check call state for.
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
     public @CallState int getCallState(int subId) {
-        int phoneId = SubscriptionManager.getPhoneId(subId);
-        return getCallStateForSlot(phoneId);
+        ITelephony telephony = getITelephony();
+        if (telephony == null) {
+            return CALL_STATE_IDLE;
+        }
+        try {
+            return telephony.getCallStateForSubscription(subId, mContext.getPackageName(),
+                    mContext.getAttributionTag());
+        } catch (RemoteException e) {
+            return CALL_STATE_IDLE;
+        }
     }
 
     /**
@@ -5768,22 +5808,28 @@ public class TelephonyManager {
      * Note: This method considers ONLY telephony/mobile calls, where {@link #getCallState()}
      * considers the state of calls from other {@link android.telecom.ConnectionService}
      * implementations.
+     * <p>
+     * Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} for applications
+     * targeting API level 31+ or that the calling application has carrier privileges
+     * (see {@link #hasCarrierPrivileges()}).
      *
      * @param slotIndex the SIM slot index to check call state for.
      * @hide
      */
+    @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
     public @CallState int getCallStateForSlot(int slotIndex) {
         try {
+            int[] subId = SubscriptionManager.getSubId(slotIndex);
             ITelephony telephony = getITelephony();
-            if (telephony == null)
+            if (telephony == null || subId == null || subId.length  == 0) {
                 return CALL_STATE_IDLE;
-            return telephony.getCallStateForSlot(slotIndex);
-        } catch (RemoteException ex) {
+            }
+            return telephony.getCallStateForSubscription(subId[0], mContext.getPackageName(),
+                    mContext.getAttributionTag());
+        } catch (RemoteException | NullPointerException ex) {
             // the phone process is restarting.
             return CALL_STATE_IDLE;
-        } catch (NullPointerException ex) {
-          // the phone process is restarting.
-          return CALL_STATE_IDLE;
         }
     }
 
