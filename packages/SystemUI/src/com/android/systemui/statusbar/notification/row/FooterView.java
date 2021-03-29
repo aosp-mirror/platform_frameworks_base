@@ -93,6 +93,13 @@ public class FooterView extends StackScrollerDecorView {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        mDismissButton.setBackground(
+                getResources().getDrawable(R.drawable.notif_footer_btn_background));
+        mDismissButton.setTextColor(getResources().getColor(R.color.notif_pill_text));
+        mManageButton.setBackground(
+                getResources().getDrawable(R.drawable.notif_footer_btn_background));
+        mManageButton.setTextColor(getResources().getColor(R.color.notif_pill_text));
+        mManageButton = findViewById(R.id.manage_text);
         mDismissButton.setText(R.string.clear_all_notifications_text);
         mDismissButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
