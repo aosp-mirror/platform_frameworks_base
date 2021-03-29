@@ -24,6 +24,7 @@ import android.nfc.Tag;
 import android.nfc.TechListParcel;
 import android.nfc.IAppCallback;
 import android.nfc.INfcAdapterExtras;
+import android.nfc.INfcControllerAlwaysOnStateCallback;
 import android.nfc.INfcTag;
 import android.nfc.INfcCardEmulation;
 import android.nfc.INfcFCardEmulation;
@@ -75,4 +76,6 @@ interface INfcAdapter
     boolean setControllerAlwaysOn(boolean value);
     boolean isControllerAlwaysOn();
     boolean isControllerAlwaysOnSupported();
+    void registerControllerAlwaysOnStateCallback(in INfcControllerAlwaysOnStateCallback callback);
+    void unregisterControllerAlwaysOnStateCallback(in INfcControllerAlwaysOnStateCallback callback);
 }
