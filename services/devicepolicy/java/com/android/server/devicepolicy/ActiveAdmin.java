@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_DISABLED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
@@ -69,6 +70,8 @@ class ActiveAdmin {
             "disable-bt-contacts-sharing";
     private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
     private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
+    private static final String TAG_NEARBY_NOTIFICATION_STREAMING_POLICY =
+            "nearby-notification-streaming-policy";
     private static final String TAG_REQUIRE_AUTO_TIME = "require_auto_time";
     private static final String TAG_FORCE_EPHEMERAL_USERS = "force_ephemeral_users";
     private static final String TAG_IS_NETWORK_LOGGING_ENABLED = "is_network_logging_enabled";
@@ -158,6 +161,9 @@ class ActiveAdmin {
 
     @DevicePolicyManager.PasswordComplexity
     int mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
+
+    @DevicePolicyManager.NearbyStreamingPolicy
+    int mNearbyNotificationStreamingPolicy = NEARBY_STREAMING_DISABLED;
 
     @Nullable
     FactoryResetProtectionPolicy mFactoryResetProtectionPolicy = null;
@@ -549,6 +555,10 @@ class ActiveAdmin {
         if (mPasswordComplexity != PASSWORD_COMPLEXITY_NONE) {
             writeAttributeValueToXml(out, TAG_PASSWORD_COMPLEXITY, mPasswordComplexity);
         }
+        if (mNearbyNotificationStreamingPolicy != NEARBY_STREAMING_DISABLED) {
+            writeAttributeValueToXml(out, TAG_NEARBY_NOTIFICATION_STREAMING_POLICY,
+                    mNearbyNotificationStreamingPolicy);
+        }
         if (!TextUtils.isEmpty(mOrganizationId)) {
             writeTextToXml(out, TAG_ORGANIZATION_ID, mOrganizationId);
         }
@@ -794,6 +804,8 @@ class ActiveAdmin {
                 mCommonCriteriaMode = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PASSWORD_COMPLEXITY.equals(tag)) {
                 mPasswordComplexity = parser.getAttributeInt(null, ATTR_VALUE);
+            } else if (TAG_NEARBY_NOTIFICATION_STREAMING_POLICY.equals(tag)) {
+                mNearbyNotificationStreamingPolicy = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_ORGANIZATION_ID.equals(tag)) {
                 type = parser.next();
                 if (type == TypedXmlPullParser.TEXT) {
@@ -1153,6 +1165,9 @@ class ActiveAdmin {
 
         pw.print("mPasswordComplexity=");
         pw.println(mPasswordComplexity);
+
+        pw.print("mNearbyNotificationStreamingPolicy=");
+        pw.println(mNearbyNotificationStreamingPolicy);
 
         if (!TextUtils.isEmpty(mOrganizationId)) {
             pw.print("mOrganizationId=");
