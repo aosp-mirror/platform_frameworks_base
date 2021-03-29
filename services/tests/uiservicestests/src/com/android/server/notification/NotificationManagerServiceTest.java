@@ -3284,7 +3284,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb = new Notification.Builder(mContext,
                 mTestNotificationChannel.getId())
                 .setContentTitle("foo")
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .setFlag(Notification.FLAG_CAN_COLORIZE, true)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,

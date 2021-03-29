@@ -3701,7 +3701,6 @@ public class Notification implements Parcelable
         private boolean mRebuildStyledRemoteViews;
 
         private boolean mTintActionButtons;
-        private boolean mTintWithThemeAccent;
         private boolean mInNightMode;
 
         /**
@@ -3737,7 +3736,6 @@ public class Notification implements Parcelable
             mContext = context;
             Resources res = mContext.getResources();
             mTintActionButtons = res.getBoolean(R.bool.config_tintNotificationActionButtons);
-            mTintWithThemeAccent = res.getBoolean(R.bool.config_tintNotificationsWithTheme);
 
             if (res.getBoolean(R.bool.config_enableNightMode)) {
                 Configuration currentConfig = res.getConfiguration();
@@ -5132,15 +5130,21 @@ public class Notification implements Parcelable
                     || mSecondaryTextColor == COLOR_INVALID
                     || mTextColorsAreForBackground != backgroundColor) {
                 mTextColorsAreForBackground = backgroundColor;
-                mPrimaryTextColor = ContrastColorUtil.resolvePrimaryColor(mContext,
+                int defaultPrimaryTextColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                         backgroundColor, mInNightMode);
-                mSecondaryTextColor = ContrastColorUtil.resolveSecondaryColor(mContext,
+                int defaultSecondaryTextColor = ContrastColorUtil.resolveSecondaryColor(mContext,
                         backgroundColor, mInNightMode);
-                if (backgroundColor != COLOR_DEFAULT && isColorized(p)) {
+                boolean colorized = backgroundColor != COLOR_DEFAULT;
+                if (colorized) {
                     mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                            mPrimaryTextColor, backgroundColor, 4.5);
+                            defaultPrimaryTextColor, backgroundColor, 4.5);
                     mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                            mSecondaryTextColor, backgroundColor, 4.5);
+                            defaultSecondaryTextColor, backgroundColor, 4.5);
+                } else {
+                    mPrimaryTextColor = obtainThemeColor(R.attr.textColorPrimary,
+                            defaultPrimaryTextColor);
+                    mSecondaryTextColor = obtainThemeColor(R.attr.textColorSecondary,
+                            defaultSecondaryTextColor);
                 }
             }
         }
@@ -5167,11 +5171,9 @@ public class Notification implements Parcelable
                 contentView.setProgressBar(R.id.progress, max, progress, ind);
                 contentView.setProgressBackgroundTintList(R.id.progress,
                         mContext.getColorStateList(R.color.notification_progress_background_color));
-                if (mTintWithThemeAccent || getRawColor(p) != COLOR_DEFAULT) {
-                    ColorStateList progressTint = ColorStateList.valueOf(getAccentColor(p));
-                    contentView.setProgressTintList(R.id.progress, progressTint);
-                    contentView.setProgressIndeterminateTintList(R.id.progress, progressTint);
-                }
+                ColorStateList progressTint = ColorStateList.valueOf(getAccentColor(p));
+                contentView.setProgressTintList(R.id.progress, progressTint);
+                contentView.setProgressIndeterminateTintList(R.id.progress, progressTint);
                 return true;
             } else {
                 contentView.setViewVisibility(R.id.progress, View.GONE);
@@ -6002,8 +6004,7 @@ public class Notification implements Parcelable
                     background = outResultColor[0].getDefaultColor();
                     textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                             background, mInNightMode);
-                } else if (mTintActionButtons && !mInNightMode
-                        && getRawColor(p) != COLOR_DEFAULT && !isColorized(p)) {
+                } else if (mTintActionButtons && !mInNightMode && !isColorized(p)) {
                     textColor = getAccentColor(p);
                 } else {
                     textColor = getPrimaryTextColor(p);
@@ -6181,7 +6182,7 @@ public class Notification implements Parcelable
          * is the primary text color, otherwise it's the contrast-adjusted app-provided color.
          */
         private @ColorInt int getSmallIconColor(StandardTemplateParams p) {
-            return isColorized(p) ? getPrimaryTextColor(p) : getContrastColor(p);
+            return getContrastColor(p);
         }
 
         /**
@@ -6193,11 +6194,9 @@ public class Notification implements Parcelable
             if (isColorized(p)) {
                 return getPrimaryTextColor(p);
             }
-            if (mTintWithThemeAccent) {
-                int color = obtainThemeColor(R.attr.colorAccent, COLOR_INVALID);
-                if (color != COLOR_INVALID) {
-                    return color;
-                }
+            int color = obtainThemeColor(R.attr.colorAccent, COLOR_INVALID);
+            if (color != COLOR_INVALID) {
+                return color;
             }
             return getContrastColor(p);
         }
@@ -6207,7 +6206,7 @@ public class Notification implements Parcelable
          * color when colorized, or when not using theme color tints.
          */
         private @ColorInt int getProtectionColor(StandardTemplateParams p) {
-            if (mTintWithThemeAccent && !isColorized(p)) {
+            if (!isColorized(p)) {
                 int color = obtainThemeColor(R.attr.colorBackgroundFloating, COLOR_INVALID);
                 if (color != COLOR_INVALID) {
                     return color;
@@ -6226,12 +6225,10 @@ public class Notification implements Parcelable
             if (isColorized(p)) {
                 return getPrimaryTextColor(p);
             }
-            if (mTintWithThemeAccent) {
-                int color = obtainThemeColor(com.android.internal.R.attr.colorAccentTertiary,
-                        COLOR_INVALID);
-                if (color != COLOR_INVALID) {
-                    return color;
-                }
+            int color = obtainThemeColor(com.android.internal.R.attr.colorAccentTertiary,
+                    COLOR_INVALID);
+            if (color != COLOR_INVALID) {
+                return color;
             }
             return getContrastColor(p);
         }
@@ -6261,6 +6258,9 @@ public class Notification implements Parcelable
          * Gets the contrast-adjusted version of the color provided by the app.
          */
         private @ColorInt int getContrastColor(StandardTemplateParams p) {
+            if (isColorized(p)) {
+                return getPrimaryTextColor(p);
+            }
             int rawColor = getRawColor(p);
             if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
@@ -6271,9 +6271,10 @@ public class Notification implements Parcelable
             int background = getDefaultBackgroundColor();
             if (rawColor == COLOR_DEFAULT) {
                 ensureColors(p);
-                color = ContrastColorUtil.resolveDefaultColor(mContext, background, mInNightMode);
-                if (mTintWithThemeAccent) {
-                    color = obtainThemeColor(R.attr.colorAccent, color);
+                color = obtainThemeColor(R.attr.colorAccent, COLOR_INVALID);
+                if (color == COLOR_INVALID) {
+                    color = ContrastColorUtil.resolveDefaultColor(mContext, background,
+                            mInNightMode);
                 }
             } else {
                 color = ContrastColorUtil.resolveContrastColor(mContext, rawColor,
@@ -6294,11 +6295,6 @@ public class Notification implements Parcelable
          * @param p the template params to inflate this with
          */
         private @ColorInt int getRawColor(StandardTemplateParams p) {
-            // When notifications are theme-tinted, the raw color is only used for the icon, so go
-            // ahead and keep that color instead of changing the color for minimized notifs.
-            if (p.mReduceHighlights && !mTintWithThemeAccent) {
-                return COLOR_DEFAULT;
-            }
             return mN.color;
         }
 
@@ -6405,6 +6401,7 @@ public class Notification implements Parcelable
                                 + " notification: " + mN.mShortcutId
                                 + " vs bubble: " + mN.mBubbleMetadata.getShortcutId());
             }
+            validateColorizedHasColor();
 
             // first, add any extras from the calling code
             if (mUserExtras != null) {
@@ -6458,6 +6455,21 @@ public class Notification implements Parcelable
             return mN;
         }
 
+        // This code is executed on behalf of other apps' notifications, sometimes even by 3p apps,
+        // a use case that is not supported by the Compat Framework library.
+        @SuppressWarnings("AndroidFrameworkCompatChange")
+        private void validateColorizedHasColor() {
+            if (mN.color == COLOR_DEFAULT && mN.extras.getBoolean(EXTRA_COLORIZED)) {
+                if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
+                    throw new IllegalArgumentException(
+                            "Colorized notifications must set a color (other than COLOR_DEFAULT).");
+                } else {
+                    Log.w(TAG, "Colorized notifications must set a color (other than "
+                            + "COLOR_DEFAULT).  This is required for apps targeting S.");
+                }
+            }
+        }
+
         /**
          * Returns the color for the given Theme.DeviceDefault.DayNight attribute, or
          * defValue if that could not be completed
@@ -6470,13 +6482,9 @@ public class Notification implements Parcelable
             }
             theme = new ContextThemeWrapper(mContext, R.style.Theme_DeviceDefault_DayNight)
                     .getTheme();
-            TypedArray ta = theme.obtainStyledAttributes(new int[]{attrRes});
-            if (ta == null) {
-                return defaultColor;
+            try (TypedArray ta = theme.obtainStyledAttributes(new int[]{attrRes})) {
+                return ta.getColor(0, defaultColor);
             }
-            int background = ta.getColor(0, defaultColor);
-            ta.recycle();
-            return background;
         }
 
         /**
@@ -6590,11 +6598,7 @@ public class Notification implements Parcelable
          * which must be resolved by the caller before being used.
          */
         private @ColorInt int getUnresolvedBackgroundColor(StandardTemplateParams p) {
-            if (isColorized(p)) {
-                return getRawColor(p);
-            } else {
-                return COLOR_DEFAULT;
-            }
+            return isColorized(p) ? getRawColor(p) : COLOR_DEFAULT;
         }
 
         /**
@@ -6768,7 +6772,7 @@ public class Notification implements Parcelable
      * @hide
      */
     public boolean isColorized() {
-        return extras.getBoolean(EXTRA_COLORIZED)
+        return color != COLOR_DEFAULT && extras.getBoolean(EXTRA_COLORIZED)
                 && (hasColorizedPermission() || isForegroundService());
     }
 

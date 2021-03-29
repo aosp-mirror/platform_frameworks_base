@@ -1890,7 +1890,6 @@
   <java-symbol type="bool" name="config_notificationHeaderClickableForExpand" />
   <java-symbol type="bool" name="config_enableNightMode" />
   <java-symbol type="bool" name="config_tintNotificationActionButtons" />
-  <java-symbol type="bool" name="config_tintNotificationsWithTheme" />
   <java-symbol type="bool" name="config_dozeAfterScreenOffByDefault" />
   <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
