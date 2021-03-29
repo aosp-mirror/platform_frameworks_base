@@ -158,7 +158,7 @@ java_library_static {
         "android.hardware.power.stats-V1-java",
         "android.hidl.manager-V1.2-java",
         "capture_state_listener-aidl-java",
-        "dnsresolver_aidl_interface-V7-java",
+        "dnsresolver_aidl_interface-V8-java",
         "icu4j_calendar_astronomer",
         "netd-client",
         "overlayable_policy_aidl-java",
