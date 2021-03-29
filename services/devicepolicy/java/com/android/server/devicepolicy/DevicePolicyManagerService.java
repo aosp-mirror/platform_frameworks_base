@@ -7509,6 +7509,42 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    @Override
+    public void setNearbyAppStreamingPolicy(int policy) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            if (admin.mNearbyAppStreamingPolicy != policy) {
+                admin.mNearbyAppStreamingPolicy = policy;
+                saveSettingsLocked(caller.getUserId());
+            }
+        }
+    }
+
+    @Override
+    public int getNearbyAppStreamingPolicy() {
+        if (!mHasFeature) {
+            return NEARBY_STREAMING_DISABLED;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller)
+                    || isProfileOwner(caller)
+                    || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            return admin.mNearbyAppStreamingPolicy;
+        }
+    }
+
     /**
      * Set whether auto time is required by the specified admin (must be device or profile owner).
      */
