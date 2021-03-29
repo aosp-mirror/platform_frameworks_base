@@ -20,6 +20,7 @@ import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.TimestampedValue;
@@ -67,6 +68,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class ExternalTimeSuggestion implements Parcelable {
 
     public static final @NonNull Creator<ExternalTimeSuggestion> CREATOR =
@@ -129,7 +131,6 @@ public final class ExternalTimeSuggestion implements Parcelable {
 
     /**
      * Returns information that can be useful for debugging / logging. See {@link #addDebugInfo}.
-     * {@hide}
      */
     @NonNull
     public List<String> getDebugInfo() {
