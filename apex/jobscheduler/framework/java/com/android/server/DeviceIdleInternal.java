@@ -17,9 +17,9 @@
 package com.android.server;
 
 import android.annotation.Nullable;
-import android.os.PowerWhitelistManager;
-import android.os.PowerWhitelistManager.ReasonCode;
-import android.os.PowerWhitelistManager.TempAllowListType;
+import android.os.PowerExemptionManager;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
 
 import com.android.server.deviceidle.IDeviceIdleConstraint;
 
@@ -35,7 +35,7 @@ public interface DeviceIdleInternal {
 
     /**
      * Same as {@link #addPowerSaveTempWhitelistApp(int, String, long, int, boolean, int, String)}
-     * with {@link PowerWhitelistManager#TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED}.
+     * with {@link PowerExemptionManager#TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED}.
      */
     void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
             long durationMs, int userId, boolean sync, @ReasonCode int reasonCode,
