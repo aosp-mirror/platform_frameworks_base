@@ -1849,8 +1849,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 synchronized (mLock) {
                     final Permission perm =
                             mRegistry.getPermission(splitPerm.getSplitPermission());
-                    return perm != null && perm.getType() != Permission.TYPE_CONFIG
-                            && !perm.isRuntime();
+                    return perm != null && !perm.isRuntime();
                 }
             }
         }
