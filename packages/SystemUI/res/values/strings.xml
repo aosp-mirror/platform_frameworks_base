@@ -1857,13 +1857,13 @@
     <string name="notification_channel_summary_automatic_demoted">&lt;b>Status:&lt;/b> Ranked Lower</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
-    <string name="notification_channel_summary_priority">Shows at top of conversation section, appears as floating bubble, displays profile picture on lock screen</string>
+    <string name="notification_channel_summary_priority">Always shown at the top of your notifications, even when Priority mode is on</string>
 
     <!--[CHAR LIMIT=30] Linkable text to Settings app -->
     <string name="notification_conversation_channel_settings">Settings</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level -->
-    <string name="notification_priority_title">Priority</string>
+    <string name="notification_priority_title">Priority conversations</string>
 
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
@@ -2631,14 +2631,14 @@
     <string name="priority_onboarding_title">Conversation set to priority</string>
     <!--  Text explaining that the following actions are the behaviors of priority conversations.
     E.g. priority conversations will show at the top of the conversation section [CHAR LIMIT=75]  -->
-    <string name="priority_onboarding_behavior">Priority conversations will:</string>
-    <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=75]  -->
-    <string name="priority_onboarding_show_at_top_text">Show at top of conversation section</string>
-    <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=75]  -->
-    <string name="priority_onboarding_show_avatar_text">Show profile picture on lock screen</string>
-    <!--  Text explaining that priority conversations will appear as a bubble [CHAR LIMIT=75]  -->
-    <string name="priority_onboarding_appear_as_bubble_text">Appear as a floating bubble on top of apps</string>
-    <!--  Text explaining that priority conversations can interrupt DnD settings [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_behavior">Priority conversations</string>
+    <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=120]  -->
+    <string name="priority_onboarding_show_at_top_text">These conversations are shown at the top of your list and can always reach you when Priority mode is on</string>
+    <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=120]  -->
+    <string name="priority_onboarding_show_avatar_text">Profile pictures are shown on the lock screen</string>
+    <!--  Text explaining that priority conversations will appear as a bubble [CHAR LIMIT=120]  -->
+    <string name="priority_onboarding_appear_as_bubble_text">You can easily find these conversations in bubbles on your Home screen</string>
+    <!--  Text explaining that priority conversations can interrupt DnD settings [CHAR LIMIT=120]  -->
     <string name="priority_onboarding_ignores_dnd_text">Interrupt Do Not Disturb</string>
     <!--  Title for the affirmative button [CHAR LIMIT=50]  -->
     <string name="priority_onboarding_done_button_title">Got it</string>
@@ -2845,14 +2845,24 @@
     <string name="over_timestamp">Over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
     <!-- Status text on the Conversation widget for a birthday today [CHAR LIMIT=20] -->
     <string name="birthday_status">Birthday</string>
+    <!-- Content description text on the Conversation widget for a birthday today [CHAR LIMIT=150] -->
+    <string name="birthday_status_content_description">It\’s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s birthday</string>
     <!-- Status text on the Conversation widget for an upcoming birthday [CHAR LIMIT=20] -->
     <string name="upcoming_birthday_status">Birthday soon</string>
+    <!-- Content description text on the Conversation widget for an upcoming birthday [CHAR LIMIT=150] -->
+    <string name="upcoming_birthday_status_content_description">It\’s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s birthday soon</string>
     <!-- Status text on the Conversation widget for an anniversary [CHAR LIMIT=20] -->
     <string name="anniversary_status">Anniversary</string>
+    <!-- Content description text on the Conversation widget for an anniversary [CHAR LIMIT=150] -->
+    <string name="anniversary_status_content_description">It\’s <xliff:g id="name" example="Anna">%1$s</xliff:g>\’s anniversary</string>
     <!-- Status text on the Conversation widget for sharing location [CHAR LIMIT=20] -->
     <string name="location_status">Sharing location</string>
+    <!-- Content description text on the Conversation widget for sharing location [CHAR LIMIT=150] -->
+    <string name="location_status_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> is sharing location</string>
     <!-- Status text on the Conversation widget for a new story posted [CHAR LIMIT=20] -->
     <string name="new_story_status">New story</string>
+    <!-- Content description text on the Conversation widget for a new story posted on social channels, usually a photograph. [CHAR LIMIT=150] -->
+    <string name="new_story_status_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> shared a new story</string>
     <!-- Status text on the Conversation widget for watching a video [CHAR LIMIT=20] -->
     <string name="video_status">Watching</string>
     <!-- Status text on the Conversation widget for listening to audio [CHAR LIMIT=20] -->
@@ -2863,6 +2873,8 @@
     <string name="empty_user_name">Friends</string>
     <!-- Empty status shown before user has selected a friend for their Conversation widget [CHAR LIMIT=20] -->
     <string name="empty_status">Let’s chat tonight!</string>
+    <!-- Empty status shown temporarily before we've been able to load the conversation for their Conversation widget after reboots [CHAR LIMIT=40] -->
+    <string name="status_before_loading">Content will show up soon</string>
     <!-- Default text for missed call notifications on their Conversation widget [CHAR LIMIT=20] -->
     <string name="missed_call">Missed call</string>
     <!-- Text when a Notification may have more messages than the number indicated [CHAR LIMIT=5] -->
@@ -2871,6 +2883,10 @@
     <string name="people_tile_description">See recent messages, missed calls, and status updates</string>
     <!-- Title text displayed for the Conversation widget [CHAR LIMIT=50] -->
     <string name="people_tile_title">Conversation</string>
+    <!-- Content description text on the Conversation widget when a person has sent a new text message [CHAR LIMIT=150] -->
+    <string name="new_notification_text_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent a message</string>
+    <!-- Content description text on the Conversation widget when a person has sent a new image message [CHAR LIMIT=150] -->
+    <string name="new_notification_image_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent an image</string>
 
     <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->
