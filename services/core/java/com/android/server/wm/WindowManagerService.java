@@ -8626,6 +8626,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return mDisplayHashController.verifyDisplayHash(displayHash);
     }
 
+    @Override
+    public void setDisplayHashThrottlingEnabled(boolean enable) {
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "setDisplayHashThrottle()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+        mDisplayHashController.setDisplayHashThrottlingEnabled(enable);
+    }
+
     void generateDisplayHash(Session session, IWindow window, Rect boundsInWindow,
             String hashAlgorithm, RemoteCallback callback) {
         final SurfaceControl displaySurfaceControl;
@@ -8634,6 +8642,13 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowState win = windowForClientLocked(session, window, false);
             if (win == null) {
                 Slog.w(TAG, "Failed to generate DisplayHash. Invalid window");
+                mDisplayHashController.sendDisplayHashError(callback,
+                        DISPLAY_HASH_ERROR_MISSING_WINDOW);
+                return;
+            }
+
+            if (win.mActivityRecord == null || !win.mActivityRecord.isState(
+                    Task.ActivityState.RESUMED)) {
                 mDisplayHashController.sendDisplayHashError(callback,
                         DISPLAY_HASH_ERROR_MISSING_WINDOW);
                 return;
@@ -8669,8 +8684,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         .setUid(uid)
                         .setSourceCrop(boundsInDisplay);
 
-        mDisplayHashController.generateDisplayHash(args, boundsInWindow,
-                hashAlgorithm, callback);
+        mDisplayHashController.generateDisplayHash(args, boundsInWindow, hashAlgorithm, uid,
+                callback);
     }
 
     boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
