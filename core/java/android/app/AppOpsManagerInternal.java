@@ -18,12 +18,17 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.AttributionSource;
+import android.os.IBinder;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.TriFunction;
 
 /**
  * App ops service local interface.
@@ -76,6 +81,55 @@ public abstract class AppOpsManagerInternal {
                 @Nullable String message, boolean shouldCollectMessage,
                 @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
                         Integer> superImpl);
+
+        /**
+         * Allows overriding note proxy operation behavior.
+         *
+         * @param code The op code to note.
+         * @param attributionSource The permission identity of the caller.
+         * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
+         * @param message The message in the async noted op
+         * @param shouldCollectMessage whether to collect messages
+         * @param skipProxyOperation Whether to skip the proxy portion of the operation
+         * @param superImpl The super implementation.
+         * @return The app op note result.
+         */
+        int noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean shouldCollectAsyncNotedOp, @Nullable String message,
+                boolean shouldCollectMessage, boolean skipProxyOperation,
+                @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
+                        Boolean, Integer> superImpl);
+
+        /**
+         * Allows overriding start proxy operation behavior.
+         *
+         * @param code The op code to start.
+         * @param attributionSource The permission identity of the caller.
+         * @param startIfModeDefault Whether to start the op of the mode is default.
+         * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
+         * @param message The message in the async noted op
+         * @param shouldCollectMessage whether to collect messages
+         * @param skipProxyOperation Whether to skip the proxy portion of the operation
+         * @param superImpl The super implementation.
+         * @return The app op note result.
+         */
+        int startProxyOperation(IBinder token, int code,
+                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                boolean skipProxyOperation, @NonNull OctFunction<IBinder, Integer,
+                        AttributionSource, Boolean, Boolean, String, Boolean, Boolean,
+                        Integer> superImpl);
+
+        /**
+         * Allows overriding finish proxy op.
+         *
+         * @param clientId Client state token.
+         * @param code The op code to finish.
+         * @param attributionSource The permission identity of the caller.
+         */
+        void finishProxyOperation(IBinder clientId, int code,
+                @NonNull AttributionSource attributionSource,
+                @NonNull TriFunction<IBinder, Integer, AttributionSource, Void> superImpl);
     }
 
     /**

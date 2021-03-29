@@ -745,7 +745,6 @@ public final class BluetoothAdapter {
      * Use {@link #getDefaultAdapter} to get the BluetoothAdapter instance.
      */
     BluetoothAdapter(IBluetoothManager managerService) {
-
         if (managerService == null) {
             throw new IllegalArgumentException("bluetooth manager service is null");
         }
