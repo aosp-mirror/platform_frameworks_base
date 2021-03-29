@@ -77,6 +77,9 @@ interface IDisplayManager {
     // No permissions required.
     boolean areUserDisabledHdrTypesAllowed();
 
+    // No permissions required.
+    int[] getUserDisabledHdrTypes();
+
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
     void requestColorMode(int displayId, int colorMode);
 
