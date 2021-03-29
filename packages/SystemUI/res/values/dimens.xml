@@ -1421,4 +1421,15 @@
      For devices with sensors on the back of the device, this corresponds to the location on the
      screen directly in front of the sensor. -->
     <dimen name="physical_fingerprint_sensor_center_screen_location_y">610px</dimen>
+
+    <!-- Wallet activity screen specs -->
+    <dimen name="wallet_icon_size">36sp</dimen>
+    <dimen name="card_margin">16dp</dimen>
+    <dimen name="card_carousel_dot_offset">24dp</dimen>
+    <dimen name="card_carousel_dot_unselected_radius">2dp</dimen>
+    <dimen name="card_carousel_dot_selected_radius">3dp</dimen>
+    <dimen name="card_carousel_dot_margin">4dp</dimen>
+    <dimen name="min_wallet_empty_height">208dp</dimen>
+    <dimen name="wallet_card_border_width">1dp</dimen>
+    <dimen name="wallet_empty_state_corner_radius">24dp</dimen>
 </resources>
