@@ -1733,10 +1733,20 @@ package android.app.time {
     field public static final int CAPABILITY_POSSESSED = 40; // 0x28
   }
 
+  public final class ExternalTimeSuggestion implements android.os.Parcelable {
+    ctor public ExternalTimeSuggestion(long, long);
+    method public void addDebugInfo(@NonNull java.lang.String...);
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getDebugInfo();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.ExternalTimeSuggestion> CREATOR;
+  }
+
   public final class TimeManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void addTimeZoneDetectorListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeZoneCapabilitiesAndConfig getTimeZoneCapabilitiesAndConfig();
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void removeTimeZoneDetectorListener(@NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
+    method @RequiresPermission(android.Manifest.permission.SUGGEST_EXTERNAL_TIME) public void suggestExternalTime(@NonNull android.app.time.ExternalTimeSuggestion);
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean updateTimeZoneConfiguration(@NonNull android.app.time.TimeZoneConfiguration);
   }
 
