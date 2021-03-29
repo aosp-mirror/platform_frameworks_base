@@ -703,6 +703,10 @@ public class PhoneStateListener {
      * calling {@link TelephonyManager#getCallState()} from within this callback may return a
      * different state than the callback reports.
      *
+     * Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} for applications
+     * targeting API level 31+.
+     *
      * @param state call state
      * @param phoneNumber call phone number. If application does not have
      * {@link android.Manifest.permission#READ_CALL_LOG READ_CALL_LOG} permission or carrier
@@ -712,6 +716,7 @@ public class PhoneStateListener {
      * @deprecated Use {@link TelephonyCallback.CallStateListener} instead.
      */
     @Deprecated
+    @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
     public void onCallStateChanged(@CallState int state, String phoneNumber) {
         // default implementation empty
     }

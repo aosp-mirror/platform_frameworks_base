@@ -195,9 +195,16 @@ interface ITelecomService {
 
     /**
      * @see TelecomServiceImpl#getCallState
+     * Note: only kept around to not break app compat, however this will throw a SecurityException
+     * on API 31+.
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     int getCallState();
+
+    /**
+     * @see TelecomServiceImpl#getCallState
+     */
+    int getCallStateUsingPackage(String callingPackage, String callingFeatureId);
 
     /**
      * @see TelecomServiceImpl#endCall
