@@ -10373,6 +10373,7 @@ package android.service.voice {
   public abstract static class AlwaysOnHotwordDetector.Callback implements android.service.voice.HotwordDetector.Callback {
     ctor public AlwaysOnHotwordDetector.Callback();
     method public abstract void onAvailabilityChanged(int);
+    method public void onHotwordDetectionServiceInitialized(int);
     method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
   }
 
@@ -10420,7 +10421,11 @@ package android.service.voice {
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
-    method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
+    method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
+    field public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_1 = 1; // 0x1
+    field public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_2 = 2; // 0x2
+    field public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
+    field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
     field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
   }
 
@@ -10442,6 +10447,7 @@ package android.service.voice {
   public static interface HotwordDetector.Callback {
     method public void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
     method public void onError();
+    method public void onHotwordDetectionServiceInitialized(int);
     method public void onRecognitionPaused();
     method public void onRecognitionResumed();
     method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
