@@ -93,7 +93,7 @@ final class HotwordDetectionConnection {
 
     HotwordDetectionConnection(Object lock, Context context, ComponentName serviceName,
             int userId, boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
+            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
         mLock = lock;
         mContext = context;
         mDetectionComponentName = serviceName;
@@ -111,7 +111,7 @@ final class HotwordDetectionConnection {
                     mBound = connected;
                     if (connected) {
                         try {
-                            service.updateState(options, sharedMemory);
+                            service.updateState(options, sharedMemory, callback);
                         } catch (RemoteException e) {
                             // TODO: (b/181842909) Report an error to voice interactor
                             Slog.w(TAG, "Failed to updateState for HotwordDetectionService", e);
@@ -146,7 +146,7 @@ final class HotwordDetectionConnection {
 
     void updateStateLocked(PersistableBundle options, SharedMemory sharedMemory) {
         mRemoteHotwordDetectionService.run(
-                service -> service.updateState(options, sharedMemory));
+                service -> service.updateState(options, sharedMemory, null /* callback */));
     }
 
     void startListeningFromMic(
