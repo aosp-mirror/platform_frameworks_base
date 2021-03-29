@@ -132,11 +132,11 @@ public class RankingHelperTest extends UiServiceTestCase {
         when(testContentProvider.getIContentProvider()).thenReturn(mTestIContentProvider);
         contentResolver.addProvider(TEST_AUTHORITY, testContentProvider);
 
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(SOUND_URI)))
+        when(mTestIContentProvider.canonicalize(any(), eq(SOUND_URI)))
                 .thenReturn(CANONICAL_SOUND_URI);
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.canonicalize(any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(CANONICAL_SOUND_URI);
-        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(SOUND_URI);
 
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,

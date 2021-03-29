@@ -44,6 +44,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.content.AttributionSource;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -1097,6 +1098,48 @@ public final class PermissionManager {
             @Nullable String callingFeatureId, int pid, int uid) {
         return mLegacyPermissionManager.checkDeviceIdentifierAccess(packageName, message,
                 callingFeatureId, pid, uid);
+    }
+
+    /**
+     * Registers an attribution source with the OS. An app can only register an attribution
+     * source for itself. Once an attribution source has been registered another app can
+     * check whether this registration exists and thus trust the payload in the source
+     * object. This is important for permission checking and specifically for app op blaming
+     * since a malicious app should not be able to force the OS to blame another app
+     * that doesn't participate in an attribution chain.
+     *
+     * @param source The attribution source to register.
+     *
+     * @see #isRegisteredAttributionSource(AttributionSource)
+     *
+     * @hide
+     */
+    public @NonNull AttributionSource registerAttributionSource(@NonNull AttributionSource source) {
+        try {
+            return mPermissionManager.registerAttributionSource(source);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether an attribution source is registered.
+     *
+     * @param source The attribution source to check.
+     * @return Whether this is a registered source.
+     *
+     * @see #registerAttributionSource(AttributionSource)
+     *
+     * @hide
+     */
+    public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
+        try {
+            return mPermissionManager.isRegisteredAttributionSource(source);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /* @hide */

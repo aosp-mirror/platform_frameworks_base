@@ -75,7 +75,7 @@ public final class SpeechRecognitionManagerService extends
     @Override
     protected SpeechRecognitionManagerServiceImpl newServiceLocked(
             @UserIdInt int resolvedUserId, boolean disabled) {
-        return new SpeechRecognitionManagerServiceImpl(this, mLock, resolvedUserId, disabled);
+        return new SpeechRecognitionManagerServiceImpl(this, mLock, resolvedUserId);
     }
 
     final class SpeechRecognitionManagerServiceStub extends IRecognitionServiceManager.Stub {

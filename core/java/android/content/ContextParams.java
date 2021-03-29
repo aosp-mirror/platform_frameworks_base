@@ -19,7 +19,6 @@ package android.content;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 
 import java.util.Collections;
@@ -38,36 +37,26 @@ import java.util.Set;
  * is an arbitrary string your app specifies for the purposes of tracking permission
  * accesses from a given portion of your app; against another package and optionally
  * its attribution tag if you are accessing the data on behalf of another app and
- * you will be passing that data to this app. Both attributions are not mutually
- * exclusive.
- *
- * <p>For example if you have a feature "foo" in your app which accesses
- * permissions on behalf of app "foo.bar.baz" with feature "bar" you need to
- * create a context like this:
- *
- * <pre class="prettyprint">
- * context.createContext(new ContextParams.Builder()
- *     .setAttributionTag("foo")
- *     .setReceiverPackage("foo.bar.baz", "bar")
- *     .build())
- * </pre>
+ * you will be passing that data to this app, recursively. Both attributions are
+ * not mutually exclusive.
  *
  * @see Context#createContext(ContextParams)
+ * @see AttributionSource
  */
 public final class ContextParams {
-    private final String mAttributionTag;
-    private final String mReceiverPackage;
-    private final String mReceiverAttributionTag;
-    private final Set<String> mRenouncedPermissions;
+    private final @Nullable String mAttributionTag;
+    private final @Nullable AttributionSource mNext;
+    private final @NonNull Set<String> mRenouncedPermissions;
 
     /** {@hide} */
     public static final ContextParams EMPTY = new ContextParams.Builder().build();
 
-    private ContextParams(@NonNull ContextParams.Builder builder) {
-        mAttributionTag = builder.mAttributionTag;
-        mReceiverPackage = builder.mReceiverPackage;
-        mReceiverAttributionTag = builder.mReceiverAttributionTag;
-        mRenouncedPermissions = builder.mRenouncedPermissions;
+    private ContextParams(@Nullable String attributionTag,
+            @Nullable AttributionSource next,
+            @NonNull Set<String> renouncedPermissions) {
+        mAttributionTag = attributionTag;
+        mNext = next;
+        mRenouncedPermissions = renouncedPermissions;
     }
 
     /**
@@ -79,45 +68,35 @@ public final class ContextParams {
     }
 
     /**
-     * @return The receiving package.
-     */
-    @Nullable
-    public String getReceiverPackage() {
-        return mReceiverPackage;
-    }
-
-    /**
-     * @return The receiving package's attribution tag.
-     */
-    @Nullable
-    public String getReceiverAttributionTag() {
-        return mReceiverAttributionTag;
-    }
-
-    /**
      * @return The set of permissions to treat as renounced.
      * @hide
      */
     @SystemApi
-    @SuppressLint("NullableCollection")
     @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
-    public @Nullable Set<String> getRenouncedPermissions() {
+    public @NonNull Set<String> getRenouncedPermissions() {
         return mRenouncedPermissions;
     }
 
     /** @hide */
     public boolean isRenouncedPermission(@NonNull String permission) {
-        return mRenouncedPermissions != null && mRenouncedPermissions.contains(permission);
+        return mRenouncedPermissions.contains(permission);
+    }
+
+    /**
+     * @return The receiving attribution source.
+     */
+    @Nullable
+    public AttributionSource getNextAttributionSource() {
+        return mNext;
     }
 
     /**
      * Builder for creating a {@link ContextParams}.
      */
     public static final class Builder {
-        private String mAttributionTag;
-        private String mReceiverPackage;
-        private String mReceiverAttributionTag;
-        private Set<String> mRenouncedPermissions;
+        private @Nullable String mAttributionTag;
+        private @NonNull Set<String> mRenouncedPermissions = Collections.emptySet();
+        private @Nullable AttributionSource mNext;
 
         /**
          * Create a new builder.
@@ -145,9 +124,8 @@ public final class ContextParams {
         public Builder(@NonNull ContextParams params) {
             Objects.requireNonNull(params);
             mAttributionTag = params.mAttributionTag;
-            mReceiverPackage = params.mReceiverPackage;
-            mReceiverAttributionTag = params.mReceiverAttributionTag;
             mRenouncedPermissions = params.mRenouncedPermissions;
+            mNext = params.mNext;
         }
 
         /**
@@ -163,18 +141,16 @@ public final class ContextParams {
         }
 
         /**
-         * Sets the package and its optional attribution tag that would be receiving
-         * the permission protected data.
+         * Sets the attribution source for the app on whose behalf you are doing the work.
          *
-         * @param packageName The package name receiving the permission protected data.
-         * @param attributionTag An attribution tag of the receiving package.
+         * @param next The permission identity of the receiving app.
          * @return This builder.
+         *
+         * @see AttributionSource
          */
         @NonNull
-        public Builder setReceiverPackage(@Nullable String packageName,
-                @Nullable String attributionTag) {
-            mReceiverPackage = packageName;
-            mReceiverAttributionTag = attributionTag;
+        public Builder setNextAttributionSource(@NonNull AttributionSource next) {
+            mNext = Objects.requireNonNull(next);
             return this;
         }
 
@@ -194,19 +170,16 @@ public final class ContextParams {
          * permissions are supported by this mechanism.
          *
          * @param renouncedPermissions The set of permissions to treat as
-         *            renounced.
+         *            renounced, which is as if not granted.
          * @return This builder.
          * @hide
          */
         @SystemApi
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
         public @NonNull Builder setRenouncedPermissions(
-                @Nullable Set<String> renouncedPermissions) {
-            if (renouncedPermissions != null) {
-                mRenouncedPermissions = Collections.unmodifiableSet(renouncedPermissions);
-            } else {
-                mRenouncedPermissions = null;
-            }
+                @NonNull Set<String> renouncedPermissions) {
+            mRenouncedPermissions = Collections.unmodifiableSet(
+                    Objects.requireNonNull(renouncedPermissions));
             return this;
         }
 
@@ -217,7 +190,8 @@ public final class ContextParams {
          */
         @NonNull
         public ContextParams build() {
-            return new ContextParams(this);
+            return new ContextParams(mAttributionTag, mNext,
+                    mRenouncedPermissions);
         }
     }
 }
