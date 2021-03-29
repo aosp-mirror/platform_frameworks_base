@@ -191,18 +191,14 @@ class ManifestExtractor {
                          const ConfigDescription& config = DefaultConfig()) {
       if (table) {
         for (auto& package : table->packages) {
-          if (package->id && package->id.value() == res_id.package_id()) {
             for (auto& type : package->types) {
-              if (type->id && type->id.value() == res_id.type_id()) {
-                for (auto& entry : type->entries) {
-                  if (entry->id && entry->id.value() == res_id.entry_id()) {
-                    if (auto value = BestConfigValue(entry.get(), config)) {
-                      return value;
-                    }
+              for (auto& entry : type->entries) {
+                if (entry->id && entry->id.value() == res_id.id) {
+                  if (auto value = BestConfigValue(entry.get(), config)) {
+                    return value;
                   }
                 }
               }
-            }
           }
         }
       }
