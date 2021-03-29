@@ -1774,19 +1774,6 @@ public class DevicePolicyManager {
             = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
 
     /**
-     * Broadcast action to notify ManagedProvisioning that
-     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has changed.
-     * @hide
-     * @deprecated No longer needed as ManagedProvisioning no longer handles
-     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction changing.
-     */
-    // TODO(b/177221010): Remove when Managed Provisioning no longer depend on it.
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
-    public static final String ACTION_DATA_SHARING_RESTRICTION_CHANGED =
-            "android.app.action.DATA_SHARING_RESTRICTION_CHANGED";
-
-    /**
      * Broadcast action from ManagedProvisioning to notify that the latest change to
      * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has been successfully
      * applied (cross profile intent filters updated). Only usesd for CTS tests.
