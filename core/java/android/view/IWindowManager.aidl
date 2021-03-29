@@ -786,29 +786,60 @@ interface IWindowManager
      void setDisplayHashThrottlingEnabled(boolean enable);
 
     /**
-     * Registers a listener for a {@link android.window.WindowContext} to handle configuration
-     * changes from the server side.
+     * Attaches a {@link android.window.WindowContext} to the DisplayArea specified by {@code type},
+     * {@code displayId} and {@code options}.
      * <p>
      * Note that this API should be invoked after calling
      * {@link android.window.WindowTokenClient#attachContext(Context)}
-     * </p>
+     * </p><p>
+     * Generally, this API is used for initializing a {@link android.window.WindowContext}
+     * before obtaining a valid {@link com.android.server.wm.WindowToken}. A WindowToken is usually
+     * generated when calling {@link android.view.WindowManager#addView(View, LayoutParams)}, or
+     * obtained from {@link android.view.WindowManager.LayoutParams#token}.
+     * </p><p>
+     * In some cases, the WindowToken is passed from the server side because it is managed by the
+     * system server. {@link #attachWindowContextToWindowToken(IBinder, IBinder)} could be used in
+     * this case to attach the WindowContext to the WindowToken.</p>
      *
-     * @param clientToken the window context's token
+     * @param clientToken {@link android.window.WindowContext#getWindowContextToken()
+     * the WindowContext's token}
      * @param type Window type of the window context
      * @param displayId The display associated with the window context
      * @param options A bundle used to pass window-related options and choose the right DisplayArea
      *
-     * @return {@code true} if the listener was registered successfully.
+     * @return {@code true} if the WindowContext is attached to the DisplayArea successfully.
      */
-    boolean registerWindowContextListener(IBinder clientToken, int type, int displayId,
+    boolean attachWindowContextToDisplayArea(IBinder clientToken, int type, int displayId,
             in Bundle options);
 
     /**
-     * Unregisters a listener which registered with {@link #registerWindowContextListener()}.
+     * Attaches a {@link android.window.WindowContext} to a {@code WindowToken}.
+     * <p>
+     * This API is used when we hold a valid WindowToken and want to associate with the token and
+     * receive its configuration updates.
+     * </p><p>
+     * Note that this API should be invoked after calling
+     * {@link android.window.WindowTokenClient#attachContext(Context)}
+     * </p>
+     *
+     * @param clientToken {@link android.window.WindowContext#getWindowContextToken()
+     * the WindowContext's token}
+     * @param token the WindowToken to attach
+     *
+     * @throws IllegalArgumentException if the {@code clientToken} have not been attached to
+     * the server or the WindowContext's type doesn't match WindowToken {@code token}'s type.
+     *
+     * @see #attachWindowContextToDisplayArea(IBinder, int, int, Bundle)
+     */
+    void attachWindowContextToWindowToken(IBinder clientToken, IBinder token);
+
+    /**
+     * Detaches {@link android.window.WindowContext} from the window manager node it's currently
+     * attached to. It is no-op if the WindowContext is not attached to a window manager node.
      *
      * @param clientToken the window context's token
      */
-    void unregisterWindowContextListener(IBinder clientToken);
+    void detachWindowContextFromWindowContainer(IBinder clientToken);
 
     /**
      * Registers a listener, which is to be called whenever cross-window blur is enabled/disabled.

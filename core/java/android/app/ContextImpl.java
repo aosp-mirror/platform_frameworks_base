@@ -2641,9 +2641,8 @@ class ContextImpl extends Context {
         //         WindowContext's resources.
         windowTokenClient.attachContext(windowContext);
 
-        // Step 5. Register the window context's token to the server side to associate with a
-        //         window manager node.
-        windowContext.registerWithServer();
+        // Step 5. Associate the WindowContext's token to a DisplayArea.
+        windowContext.attachToDisplayArea();
 
         return windowContext;
     }
