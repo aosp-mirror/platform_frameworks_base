@@ -26,6 +26,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
 
+import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
@@ -238,8 +239,12 @@ interface IVoiceInteractionManagerService {
      * @param sharedMemory The unrestricted data blob to provide to the
      * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
+     * @param callback Use this to report {@link HotwordDetectionService} status.
      */
-    void updateState(in PersistableBundle options, in SharedMemory sharedMemory);
+    void updateState(
+            in PersistableBundle options,
+            in SharedMemory sharedMemory,
+            in IHotwordRecognitionStatusCallback callback);
 
     /**
      * Requests to shutdown hotword detection service.

@@ -67,7 +67,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
         mHandler = new Handler(Looper.getMainLooper());
 
         try {
-            mManagerService.updateState(options, sharedMemory);
+            mManagerService.updateState(options, sharedMemory, null /* callback */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
