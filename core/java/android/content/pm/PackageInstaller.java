@@ -1987,6 +1987,14 @@ public class PackageInstaller {
         }
 
         /**
+         * @hide
+         */
+        @TestApi
+        public void setInstallFlagAllowTest() {
+            installFlags |= PackageManager.INSTALL_ALLOW_TEST;
+        }
+
+        /**
          * Set the installer package for the app.
          *
          * By default this is the app that created the {@link PackageInstaller} object.
