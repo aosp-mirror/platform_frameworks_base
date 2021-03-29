@@ -44,6 +44,7 @@ import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -101,6 +102,12 @@ public abstract class WMShellBaseModule {
     static DisplayController provideDisplayController(Context context,
             IWindowManager wmService, @ShellMainThread ShellExecutor mainExecutor) {
         return new DisplayController(context, wmService, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static DisplayLayout provideDisplayLayout() {
+        return new DisplayLayout();
     }
 
     @WMSingleton
@@ -233,11 +240,13 @@ public abstract class WMShellBaseModule {
     @Provides
     static Optional<OneHandedController> provideOneHandedController(Context context,
             WindowManager windowManager, DisplayController displayController,
-            TaskStackListenerImpl taskStackListener, UiEventLogger uiEventLogger,
+            DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
+            UiEventLogger uiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return Optional.ofNullable(OneHandedController.create(context, windowManager,
-                displayController, taskStackListener, uiEventLogger, mainExecutor, mainHandler));
+                displayController, displayLayout, taskStackListener, uiEventLogger, mainExecutor,
+                mainHandler));
     }
 
     //
