@@ -2035,39 +2035,34 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final boolean hasWarning = policy.warningBytes != LIMIT_DISABLED;
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
-            if (hasLimit || policy.metered) {
-                final long quotaBytes;
-                if (hasLimit && policy.hasCycle()) {
-                    final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
-                            .cycleIterator(policy).next();
-                    final long start = cycle.first.toInstant().toEpochMilli();
-                    final long end = cycle.second.toInstant().toEpochMilli();
-                    final long totalBytes = getTotalBytes(policy.template, start, end);
+            long limitBytes = Long.MAX_VALUE;
+            if (hasLimit && policy.hasCycle()) {
+                final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
+                        .cycleIterator(policy).next();
+                final long start = cycle.first.toInstant().toEpochMilli();
+                final long end = cycle.second.toInstant().toEpochMilli();
+                final long totalBytes = getTotalBytes(policy.template, start, end);
 
-                    if (policy.lastLimitSnooze >= start) {
-                        // snoozing past quota, but we still need to restrict apps,
-                        // so push really high quota.
-                        quotaBytes = Long.MAX_VALUE;
-                    } else {
-                        // remaining "quota" bytes are based on total usage in
-                        // current cycle. kernel doesn't like 0-byte rules, so we
-                        // set 1-byte quota and disable the radio later.
-                        quotaBytes = Math.max(1, policy.limitBytes - totalBytes);
-                    }
-                } else {
-                    // metered network, but no policy limit; we still need to
-                    // restrict apps, so push really high quota.
-                    quotaBytes = Long.MAX_VALUE;
+                if (policy.lastLimitSnooze < start) {
+                    // remaining "quota" bytes are based on total usage in
+                    // current cycle. kernel doesn't like 0-byte rules, so we
+                    // set 1-byte quota and disable the radio later.
+                    limitBytes = Math.max(1, policy.limitBytes - totalBytes);
                 }
+            }
 
+            if (hasLimit || policy.metered) {
                 if (matchingIfaces.size() > 1) {
                     // TODO: switch to shared quota once NMS supports
                     Slog.w(TAG, "shared quota unsupported; generating rule for each iface");
                 }
 
+                // Set the interface limit. For interfaces which has no cycle, or metered with
+                // no policy limit, or snoozed limit notification; we still need to put iptables
+                // rule hooks to restrict apps for data saver, so push really high quota.
                 for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
                     final String iface = matchingIfaces.valueAt(j);
-                    setInterfaceQuotaAsync(iface, quotaBytes);
+                    setInterfaceQuotaAsync(iface, limitBytes);
                     newMeteredIfaces.add(iface);
                 }
             }
