@@ -642,7 +642,7 @@ import java.util.function.Consumer;
  *     protected void onCreate(Bundle savedInstanceState) {
  *         super.onCreate(savedInstanceState);
  *
- *         SharedPreferences mPrefs = getSharedPreferences();
+ *         mPrefs = getSharedPreferences(getLocalClassName(), MODE_PRIVATE);
  *         mCurViewMode = mPrefs.getInt("view_mode", DAY_VIEW_MODE);
  *     }
  *
