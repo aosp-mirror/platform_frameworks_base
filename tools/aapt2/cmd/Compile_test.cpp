@@ -217,6 +217,7 @@ static void AssertTranslations(CommandTestFixture *ctf, std::string file_name,
   }, compiled_files_dir, &diag));
 
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+  ASSERT_NE(apk, nullptr);
 
   ResourceTable* table = apk->GetResourceTable();
   ASSERT_NE(table, nullptr);

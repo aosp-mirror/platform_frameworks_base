@@ -47,6 +47,8 @@ TEST_F(LinkTest, RemoveRawXmlStrings) {
   // Load the binary xml tree
   android::ResXMLTree tree;
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+  ASSERT_THAT(apk, Ne(nullptr));
+
   std::unique_ptr<io::IData> data = OpenFileAsData(apk.get(), "res/xml/test.xml");
   ASSERT_THAT(data, Ne(nullptr));
   AssertLoadXml(apk.get(), data.get(), &tree);
@@ -73,6 +75,8 @@ TEST_F(LinkTest, KeepRawXmlStrings) {
   // Load the binary xml tree
   android::ResXMLTree tree;
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+  ASSERT_THAT(apk, Ne(nullptr));
+
   std::unique_ptr<io::IData> data = OpenFileAsData(apk.get(), "res/xml/test.xml");
   ASSERT_THAT(data, Ne(nullptr));
   AssertLoadXml(apk.get(), data.get(), &tree);
@@ -208,6 +212,8 @@ TEST_F(LinkTest, OverlayStyles) {
   ASSERT_TRUE(Link(link_args, compiled_files_dir, &diag));
 
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+  ASSERT_THAT(apk, Ne(nullptr));
+
   const Style* actual_style = test::GetValue<Style>(
       apk->GetResourceTable(), std::string(kDefaultPackageName) + ":style/MyStyle");
   ASSERT_NE(actual_style, nullptr);
@@ -250,6 +256,8 @@ TEST_F(LinkTest, OverrideStylesInsteadOfOverlaying) {
   ASSERT_TRUE(Link(link_args, compiled_files_dir, &diag));
 
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+  ASSERT_THAT(apk, Ne(nullptr));
+
   const Style* actual_style = test::GetValue<Style>(
       apk->GetResourceTable(), std::string(kDefaultPackageName) + ":style/MyStyle");
   ASSERT_NE(actual_style, nullptr);
