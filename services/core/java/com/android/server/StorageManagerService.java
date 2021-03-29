@@ -249,6 +249,8 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
             mStorageManagerService.mCurrentUserId = to.getUserIdentifier();
+            // To reset public volume mounts
+            mStorageManagerService.onUserSwitching(mStorageManagerService.mCurrentUserId);
         }
 
         @Override
@@ -1215,6 +1217,28 @@ class StorageManagerService extends IStorageManager.Stub
         PackageMonitor monitor = mPackageMonitorsForUser.remove(userId);
         if (monitor != null) {
             monitor.unregister();
+        }
+    }
+
+    private void onUserSwitching(int userId) {
+        boolean reset = false;
+        List<VolumeInfo> volumesToRemount = new ArrayList<>();
+        synchronized (mLock) {
+            for (int i = 0; i < mVolumes.size(); i++) {
+                final VolumeInfo vol = mVolumes.valueAt(i);
+                if (!vol.isPrimary() && vol.isMountedWritable() && vol.isVisible()
+                        && vol.getMountUserId() != mCurrentUserId) {
+                    // If there's a visible secondary volume mounted,
+                    // we need to update the currentUserId and remount
+                    vol.mountUserId = mCurrentUserId;
+                    volumesToRemount.add(vol);
+                }
+            }
+        }
+
+        for (VolumeInfo vol : volumesToRemount) {
+            mHandler.obtainMessage(H_VOLUME_UNMOUNT, vol).sendToTarget();
+            mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
         }
     }
 
