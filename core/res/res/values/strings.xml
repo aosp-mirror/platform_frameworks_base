@@ -5928,7 +5928,7 @@ ul.</string>
     <!-- Notification title to prompt the user that new magnification feature is available. [CHAR LIMIT=50] -->
     <string name="window_magnification_prompt_title">New magnification settings</string>
     <!-- Notification content to prompt the user that new magnification feature is available. [CHAR LIMIT=NONE] -->
-    <string name="window_magnification_prompt_content">You can now magnify part of your screen.</string>
+    <string name="window_magnification_prompt_content">You can now magnify part of your screen</string>
     <!-- Notification action to bring the user to magnification settings page. [CHAR LIMIT=50] -->
     <string name="turn_on_magnification_settings_action">Turn on in Settings</string>
     <!-- Notification action to dismiss. [CHAR LIMIT=50] -->
