@@ -27,10 +27,8 @@ import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.INetworkPolicyListener;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.Looper;
@@ -86,7 +84,6 @@ public final class ConnectivityController extends RestrictingController implemen
     private static final long MIN_STATS_UPDATE_INTERVAL_MS = 30_000L;
 
     private final ConnectivityManager mConnManager;
-    private final NetworkPolicyManager mNetPolicyManager;
     private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
 
     /** List of tracked jobs keyed by source UID. */
@@ -170,8 +167,6 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     private final List<UidStats> mSortedStats = new ArrayList<>();
 
-    private static final int MSG_DATA_SAVER_TOGGLED = 0;
-    private static final int MSG_UID_RULES_CHANGES = 1;
     private static final int MSG_REEVALUATE_JOBS = 2;
 
     private final Handler mHandler;
@@ -181,15 +176,12 @@ public final class ConnectivityController extends RestrictingController implemen
         mHandler = new CcHandler(mContext.getMainLooper());
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
-        mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
         mNetPolicyManagerInternal = LocalServices.getService(NetworkPolicyManagerInternal.class);
 
         // We're interested in all network changes; internally we match these
         // network changes against the active network for each UID with jobs.
         final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
         mConnManager.registerNetworkCallback(request, mNetworkCallback);
-
-        mNetPolicyManager.registerListener(mNetPolicyListener);
     }
 
     @GuardedBy("mLock")
@@ -907,24 +899,6 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     };
 
-    private final INetworkPolicyListener mNetPolicyListener = new NetworkPolicyManager.Listener() {
-        @Override
-        public void onRestrictBackgroundChanged(boolean restrictBackground) {
-            if (DEBUG) {
-                Slog.v(TAG, "onRestrictBackgroundChanged: " + restrictBackground);
-            }
-            mHandler.obtainMessage(MSG_DATA_SAVER_TOGGLED).sendToTarget();
-        }
-
-        @Override
-        public void onUidRulesChanged(int uid, int uidRules) {
-            if (DEBUG) {
-                Slog.v(TAG, "onUidRulesChanged: " + uid);
-            }
-            mHandler.obtainMessage(MSG_UID_RULES_CHANGES, uid, 0).sendToTarget();
-        }
-    };
-
     private class CcHandler extends Handler {
         CcHandler(Looper looper) {
             super(looper);
@@ -934,12 +908,6 @@ public final class ConnectivityController extends RestrictingController implemen
         public void handleMessage(Message msg) {
             synchronized (mLock) {
                 switch (msg.what) {
-                    case MSG_DATA_SAVER_TOGGLED:
-                        updateTrackedJobs(-1, null);
-                        break;
-                    case MSG_UID_RULES_CHANGES:
-                        updateTrackedJobs(msg.arg1, null);
-                        break;
                     case MSG_REEVALUATE_JOBS:
                         updateTrackedJobs(-1, null);
                         break;
