@@ -58,8 +58,8 @@ package android {
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
-    field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
-    field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
+    field public static final int config_systemAutomotiveCluster;
+    field public static final int config_systemAutomotiveProjection;
     field public static final int config_systemGallery = 17039399; // 0x1040027
   }
 
