@@ -24,6 +24,7 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkIdentity.SUBTYPE_COMBINED;
 import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
@@ -65,6 +66,7 @@ import static android.provider.Settings.Global.NETSTATS_UID_TAG_BUCKET_DURATION;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_DELETE_AGE;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -100,7 +102,9 @@ import android.net.NetworkStateSnapshot;
 import android.net.NetworkStats;
 import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
+import android.net.NetworkSpecifier;
 import android.net.NetworkTemplate;
+import android.net.TelephonyNetworkSpecifier;
 import android.net.TrafficStats;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
@@ -1320,8 +1324,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                             ident.getSubType(), ident.getSubscriberId(), ident.getNetworkId(),
                             ident.getRoaming(), true /* metered */,
                             true /* onDefaultNetwork */, ident.getOemManaged());
-                    findOrCreateNetworkIdentitySet(mActiveIfaces, IFACE_VT).add(vtIdent);
-                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, IFACE_VT).add(vtIdent);
+                    final String ifaceVt = IFACE_VT + getSubIdForMobile(snapshot);
+                    findOrCreateNetworkIdentitySet(mActiveIfaces, ifaceVt).add(vtIdent);
+                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, ifaceVt).add(vtIdent);
                 }
 
                 if (isMobile) {
@@ -1375,6 +1380,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         mMobileIfaces = mobileIfaces.toArray(new String[mobileIfaces.size()]);
+    }
+
+    private static int getSubIdForMobile(@NonNull NetworkStateSnapshot state) {
+        if (!state.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            throw new IllegalArgumentException("Mobile state need capability TRANSPORT_CELLULAR");
+        }
+
+        final NetworkSpecifier spec = state.networkCapabilities.getNetworkSpecifier();
+        if (spec instanceof TelephonyNetworkSpecifier) {
+             return ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
+        } else {
+            Slog.wtf(TAG, "getSubIdForState invalid NetworkSpecifier");
+            return INVALID_SUBSCRIPTION_ID;
+        }
     }
 
     /**
