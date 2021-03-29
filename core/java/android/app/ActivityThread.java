@@ -4385,11 +4385,12 @@ public final class ActivityThread extends ClientTransactionHandler
         try {
             if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
 
-            ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
             Application app = packageInfo.makeApplication(false, mInstrumentation);
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
             service = packageInfo.getAppFactory()
                     .instantiateService(cl, data.info.name, data.intent);
+            final ContextImpl context = ContextImpl.getImpl(service
+                    .createServiceBaseContext(this, packageInfo));
             // Service resources must be initialized with the same loaders as the application
             // context.
             context.getResources().addLoaders(
