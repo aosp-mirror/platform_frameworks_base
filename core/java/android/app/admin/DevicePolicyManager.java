@@ -1675,6 +1675,29 @@ public class DevicePolicyManager {
     })
     public @interface PasswordComplexity {}
 
+    /** Indicates that nearby streaming is disabled. */
+    public static final int NEARBY_STREAMING_DISABLED = 0;
+
+    /** Indicates that nearby streaming is enabled. */
+    public static final int NEARBY_STREAMING_ENABLED = 1;
+
+    /**
+     * Indicates that nearby streaming is enabled only to devices offering a comparable level of
+     * security, with the same authenticated managed account.
+     */
+    public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 2;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"NEARBY_STREAMING_"}, value = {
+        NEARBY_STREAMING_DISABLED,
+        NEARBY_STREAMING_ENABLED,
+        NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY,
+    })
+    public @interface NearbyStreamingPolicy {}
+
     /**
      * Activity action: have the user enter a new password for the parent profile.
      * If the intent is launched from within a managed profile, this will trigger
@@ -7160,6 +7183,41 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Called by a device/profile owner to set nearby notification streaming policy. Notification
+     * streaming is sending notification data from pre-installed apps to nearby devices.
+     *
+     * @param policy One of the {@code NearbyStreamingPolicy} constants.
+     * @throws SecurityException if caller is not a device or profile owner
+     */
+    public void setNearbyNotificationStreamingPolicy(@NearbyStreamingPolicy int policy) {
+        throwIfParentInstance("setNearbyNotificationStreamingPolicy");
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.setNearbyNotificationStreamingPolicy(policy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current runtime nearby notification streaming policy set by the device or profile
+     * owner. The default is {@link #NEARBY_STREAMING_DISABLED}.
+     */
+    public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy() {
+        throwIfParentInstance("getNearbyNotificationStreamingPolicy");
+        if (mService == null) {
+            return NEARBY_STREAMING_DISABLED;
+        }
+        try {
+            return mService.getNearbyNotificationStreamingPolicy();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
