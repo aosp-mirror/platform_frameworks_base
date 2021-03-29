@@ -26,10 +26,12 @@ import android.widget.Switch;
 import androidx.annotation.DrawableRes;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
@@ -55,7 +57,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
     /**
      * @return icon for the QS tile
      */
-    public abstract @DrawableRes int getIconRes();
+    public abstract @DrawableRes int getIconRes(boolean isBlocked);
 
     protected SensorPrivacyToggleTile(QSHost host,
             @Background Looper backgroundLooper,
@@ -97,10 +99,15 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
         boolean isBlocked = arg == null ? mSensorPrivacyController.isSensorBlocked(getSensorId())
                 : (boolean) arg;
 
-        state.icon = ResourceIcon.get(getIconRes());
-        state.state = isBlocked ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.value = isBlocked;
+        state.icon = ResourceIcon.get(getIconRes(isBlocked));
+        state.state = isBlocked ? Tile.STATE_INACTIVE : Tile.STATE_ACTIVE;
+        state.value = !isBlocked;
         state.label = getTileLabel();
+        if (isBlocked) {
+            state.secondaryLabel = mContext.getString(R.string.quick_settings_camera_mic_blocked);
+        } else {
+            state.secondaryLabel = mContext.getString(R.string.quick_settings_camera_mic_available);
+        }
         state.handlesLongClick = false;
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
@@ -114,6 +121,11 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
     @Override
     public Intent getLongClickIntent() {
         return null;
+    }
+
+    @Override
+    public DetailAdapter getDetailAdapter() {
+        return super.getDetailAdapter();
     }
 
     @Override

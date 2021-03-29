@@ -826,9 +826,13 @@
     <!-- QuickSettings: Location (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_location_off_label">Location Off</string>
     <!-- QuickSettings: Camera [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_camera_label">Block Camera</string>
+    <string name="quick_settings_camera_label">Camera access</string>
     <!-- QuickSettings: Microphone [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_mic_label">Mute Microphone</string>
+    <string name="quick_settings_mic_label">Mic access</string>
+    <!-- QuickSettings: Camera or microphone access is allowed [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_camera_mic_available">Available</string>
+    <!-- QuickSettings: Camera or microphone access is blocked [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_camera_mic_blocked">Blocked</string>
     <!-- QuickSettings: Media device [CHAR LIMIT=NONE] -->
     <string name="quick_settings_media_device_label">Media device</string>
     <!-- QuickSettings: RSSI [CHAR LIMIT=NONE] -->
@@ -975,10 +979,19 @@
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="quick_settings_screen_record_stop">Stop</string>
 
+    <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
+    <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_camera_dialog_title">Unblock device camera?</string>
+    <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title">Unblock device camera and microphone?</string>
+
     <!--- Content of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
-    <string name="sensor_privacy_start_use_mic_dialog_content">To continue, &lt;b&gt;<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; needs access to your device microphone.</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content">This unblocks access for all apps and services allowed to use your microphone.</string>
     <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
-    <string name="sensor_privacy_start_use_camera_dialog_content">To continue, &lt;b&gt;<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; needs access to your device’s camera.</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera.</string>
+    <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content">This unblocks access for all apps and services allowed to use your camera or microphone.</string>
 
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_remote_device">Device</string>

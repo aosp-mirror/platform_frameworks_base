@@ -73,6 +73,13 @@ public final class SensorPrivacyManager {
             + ".extra.sensor";
 
     /**
+     * An extra indicating if all sensors are affected
+     * @hide
+     */
+    public static final String EXTRA_ALL_SENSORS = SensorPrivacyManager.class.getName()
+            + ".extra.all_sensors";
+
+    /**
      * Individual sensors not listed in {@link Sensors}
      * @hide
      */

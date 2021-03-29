@@ -67,12 +67,16 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
                 .hasSystemFeature(FEATURE_MICROPHONE_TOGGLE)
                 && whitelistIpcs(() -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 "mic_toggle_enabled",
-                false));
+                true));
     }
 
     @Override
-    public @DrawableRes int getIconRes() {
-        return com.android.internal.R.drawable.ic_mic_blocked;
+    public @DrawableRes int getIconRes(boolean isBlocked) {
+        if (isBlocked) {
+            return com.android.internal.R.drawable.ic_mic_blocked;
+        } else {
+            return com.android.internal.R.drawable.ic_mic_allowed;
+        }
     }
 
     @Override

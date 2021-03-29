@@ -62,6 +62,11 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     }
 
     @Override
+    public void suppressSensorPrivacyReminders(String packageName, boolean suppress) {
+        mSensorPrivacyManager.suppressSensorPrivacyReminders(packageName, suppress);
+    }
+
+    @Override
     public void addCallback(@NonNull Callback listener) {
         mCallbacks.add(listener);
     }

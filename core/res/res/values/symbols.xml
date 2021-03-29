@@ -4207,8 +4207,11 @@
 
   <java-symbol type="drawable" name="ic_camera_blocked" />
   <java-symbol type="drawable" name="ic_mic_blocked" />
-  <java-symbol type="string" name="sensor_privacy_start_use_mic_notification_content" />
-  <java-symbol type="string" name="sensor_privacy_start_use_camera_notification_content" />
+  <java-symbol type="drawable" name="ic_camera_allowed" />
+  <java-symbol type="drawable" name="ic_mic_allowed" />
+  <java-symbol type="string" name="sensor_privacy_start_use_mic_notification_content_title" />
+  <java-symbol type="string" name="sensor_privacy_start_use_camera_notification_content_title" />
+  <java-symbol type="string" name="sensor_privacy_start_use_notification_content_text" />
   <java-symbol type="string" name="sensor_privacy_start_use_dialog_turn_on_button" />
   <java-symbol type="string" name="sensor_privacy_notification_channel_label" />
 

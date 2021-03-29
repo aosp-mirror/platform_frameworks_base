@@ -63,6 +63,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.service.SensorPrivacyServiceDumpProto;
 import android.service.SensorPrivacyUserProto;
@@ -368,10 +369,10 @@ public final class SensorPrivacyService extends SystemService {
 
             if (sensor == MICROPHONE) {
                 iconRes = R.drawable.ic_mic_blocked;
-                messageRes = R.string.sensor_privacy_start_use_mic_notification_content;
+                messageRes = R.string.sensor_privacy_start_use_mic_notification_content_title;
             } else {
                 iconRes = R.drawable.ic_camera_blocked;
-                messageRes = R.string.sensor_privacy_start_use_camera_notification_content;
+                messageRes = R.string.sensor_privacy_start_use_camera_notification_content_title;
             }
 
             NotificationManager notificationManager =
@@ -390,10 +391,11 @@ public final class SensorPrivacyService extends SystemService {
             Icon icon = Icon.createWithResource(getUiContext().getResources(), iconRes);
             notificationManager.notify(sensor,
                     new Notification.Builder(mContext, SENSOR_PRIVACY_CHANNEL_ID)
-                            .setContentTitle(Html.fromHtml(getUiContext().getString(messageRes,
+                            .setContentTitle(getUiContext().getString(messageRes))
+                            .setContentText(Html.fromHtml(getUiContext().getString(
+                                    R.string.sensor_privacy_start_use_notification_content_text,
                                     packageLabel),0))
                             .setSmallIcon(icon)
-                            .setLargeIcon(icon)
                             .addAction(new Notification.Action.Builder(icon,
                                     getUiContext().getString(
                                             R.string.sensor_privacy_start_use_dialog_turn_on_button),
@@ -405,6 +407,10 @@ public final class SensorPrivacyService extends SystemService {
                                             PendingIntent.FLAG_IMMUTABLE
                                                     | PendingIntent.FLAG_UPDATE_CURRENT))
                                     .build())
+                            .setContentIntent(PendingIntent.getActivity(mContext, sensor,
+                                    new Intent(Settings.ACTION_PRIVACY_SETTINGS),
+                                    PendingIntent.FLAG_IMMUTABLE
+                                            | PendingIntent.FLAG_UPDATE_CURRENT))
                             .build());
         }
 

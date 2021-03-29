@@ -5930,12 +5930,14 @@ ul.</string>
     <!-- Notification action to dismiss. [CHAR LIMIT=50] -->
     <string name="dismiss_action">Dismiss</string>
 
-    <!--- Content of notification triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
-    <string name="sensor_privacy_start_use_mic_notification_content">To continue, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; needs access to your device microphone.</string>
+    <!--- Title of notification triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_notification_content_title">Unblock device microphone</string>
+    <!--- Title of notification triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_camera_notification_content_title">Unblock device camera</string>
     <!--- Content of notification triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
-    <string name="sensor_privacy_start_use_camera_notification_content">To continue, &lt;b&gt;<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; needs access to your device’s camera.</string>
+    <string name="sensor_privacy_start_use_notification_content_text">For &lt;b&gt;<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; and all apps and services</string>
     <!--- Action button in the dialog triggered if a sensor (e.g. microphone or camera) is disabled but an app tried to access it. [CHAR LIMIT=60] -->
-    <string name="sensor_privacy_start_use_dialog_turn_on_button">Turn on</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button">Unblock</string>
     <!--- Label for notification channel for all sensor privacy related notifications. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_notification_channel_label">Sensor Privacy</string>
 

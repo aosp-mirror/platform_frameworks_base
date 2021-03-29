@@ -66,12 +66,16 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
         return getHost().getContext().getPackageManager().hasSystemFeature(FEATURE_CAMERA_TOGGLE)
                 && whitelistIpcs(() -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 "camera_toggle_enabled",
-                false));
+                true));
     }
 
     @Override
-    public @DrawableRes int getIconRes() {
-        return com.android.internal.R.drawable.ic_camera_blocked;
+    public @DrawableRes int getIconRes(boolean isBlocked) {
+        if (isBlocked) {
+            return com.android.internal.R.drawable.ic_camera_blocked;
+        } else {
+            return com.android.internal.R.drawable.ic_camera_allowed;
+        }
     }
 
     @Override
