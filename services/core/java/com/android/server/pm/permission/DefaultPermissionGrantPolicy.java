@@ -278,7 +278,7 @@ final class DefaultPermissionGrantPolicy {
             try {
                 return mContext.getPackageManager().getPermissionInfo(permissionName, 0);
             } catch (NameNotFoundException e) {
-                Slog.e(TAG, "Permission not found: " + permissionName);
+                Slog.w(TAG, "Permission not found: " + permissionName);
                 return null;
             }
         }
