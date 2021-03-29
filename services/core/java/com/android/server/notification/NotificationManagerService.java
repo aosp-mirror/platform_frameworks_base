@@ -3619,34 +3619,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void deleteConversationNotificationChannels(String pkg, int uid,
-                String conversationId) {
-            checkCallerIsSystem();
-            List<NotificationChannel> channels =
-                    mPreferencesHelper.getNotificationChannelsByConversationId(
-                            pkg, uid, conversationId);
-            if (!channels.isEmpty()) {
-                // Preflight for fg service notifications in these channels:  do nothing
-                // unless they're all eligible
-                final int appUserId = UserHandle.getUserId(uid);
-                for (NotificationChannel nc : channels) {
-                    final String channelId = nc.getId();
-                    mAmi.stopForegroundServicesForChannel(pkg, appUserId, channelId);
-                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, nc.getId(), 0, 0, true,
-                            appUserId, REASON_CHANNEL_REMOVED, null);
-                    mPreferencesHelper.deleteNotificationChannel(pkg, uid, channelId);
-                    mListeners.notifyNotificationChannelChanged(pkg,
-                            UserHandle.getUserHandleForUid(uid),
-                            mPreferencesHelper.getNotificationChannel(
-                                    pkg, uid, channelId, true),
-                            NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
-                }
-                handleSavePolicyFile();
-            }
-        }
-
-
-        @Override
         public NotificationChannelGroup getNotificationChannelGroup(String pkg, String groupId) {
             checkCallerIsSystemOrSameApp(pkg);
             return mPreferencesHelper.getNotificationChannelGroupWithChannels(
