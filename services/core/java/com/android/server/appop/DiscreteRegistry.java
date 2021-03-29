@@ -89,6 +89,10 @@ final class DiscreteRegistry {
     private static final String PROPERTY_DISCRETE_HISTORY_CUTOFF = "discrete_history_cutoff_millis";
     private static final String PROPERTY_DISCRETE_HISTORY_QUANTIZATION =
             "discrete_history_quantization_millis";
+    private static final String PROPERTY_DISCRETE_FLAGS = "discrete_history_op_flags";
+    private static final String PROPERTY_DISCRETE_OPS_LIST = "discrete_history_ops_cslist";
+    private static final String DEFAULT_DISCRETE_OPS = OP_CAMERA + "," + OP_RECORD_AUDIO + ","
+            + OP_FINE_LOCATION + "," + OP_COARSE_LOCATION;
     private static final long DEFAULT_DISCRETE_HISTORY_CUTOFF = Duration.ofHours(24).toMillis();
     private static final long MAXIMUM_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(30).toMillis();
     private static final long DEFAULT_DISCRETE_HISTORY_QUANTIZATION =
@@ -96,6 +100,9 @@ final class DiscreteRegistry {
 
     private static long sDiscreteHistoryCutoff;
     private static long sDiscreteHistoryQuantization;
+    private static int[] sDiscreteOps;
+    private static int sDiscreteFlags;
+
 
     private static final String TAG_HISTORY = "h";
     private static final String ATTR_VERSION = "v";
@@ -155,6 +162,10 @@ final class DiscreteRegistry {
                 PROPERTY_DISCRETE_HISTORY_CUTOFF, DEFAULT_DISCRETE_HISTORY_CUTOFF);
         sDiscreteHistoryQuantization = DeviceConfig.getLong(DeviceConfig.NAMESPACE_PRIVACY,
                 PROPERTY_DISCRETE_HISTORY_QUANTIZATION, DEFAULT_DISCRETE_HISTORY_QUANTIZATION);
+        sDiscreteFlags = DeviceConfig.getInt(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_DISCRETE_FLAGS, OP_FLAGS_DISCRETE);
+        sDiscreteOps = parseOpsList(DeviceConfig.getString(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_DISCRETE_OPS_LIST, DEFAULT_DISCRETE_OPS));
     }
 
     private void setDiscreteHistoryParameters(DeviceConfig.Properties p) {
@@ -173,6 +184,13 @@ final class DiscreteRegistry {
                 sDiscreteHistoryQuantization = max(DEFAULT_DISCRETE_HISTORY_QUANTIZATION,
                         sDiscreteHistoryQuantization);
             }
+        }
+        if (p.getKeyset().contains(PROPERTY_DISCRETE_FLAGS)) {
+            sDiscreteFlags = p.getInt(PROPERTY_DISCRETE_FLAGS, OP_FLAGS_DISCRETE);
+        }
+        if (p.getKeyset().contains(PROPERTY_DISCRETE_OPS_LIST)) {
+            sDiscreteOps = parseOpsList(p.getString(PROPERTY_DISCRETE_OPS_LIST,
+                    DEFAULT_DISCRETE_OPS));
         }
     }
 
@@ -323,28 +341,13 @@ final class DiscreteRegistry {
     }
 
     public static boolean isDiscreteOp(int op, int uid, @AppOpsManager.OpFlags int flags) {
-        if (!isDiscreteOp(op)) {
+        if (!ArrayUtils.contains(sDiscreteOps, op)) {
             return false;
         }
-        if (!isDiscreteUid(uid)) {
-            return false;
-        }
-        if ((flags & (OP_FLAGS_DISCRETE)) == 0) {
-            return false;
-        }
-        return true;
-    }
-
-    static boolean isDiscreteOp(int op) {
-        if (op != OP_CAMERA && op != OP_RECORD_AUDIO && op != OP_FINE_LOCATION
-                && op != OP_COARSE_LOCATION) {
-            return false;
-        }
-        return true;
-    }
-
-    static boolean isDiscreteUid(int uid) {
         if (uid < Process.FIRST_APPLICATION_UID) {
+            return false;
+        }
+        if ((flags & (sDiscreteFlags)) == 0) {
             return false;
         }
         return true;
@@ -874,6 +877,26 @@ final class DiscreteRegistry {
             out.attributeInt(null, ATTR_UID_STATE, mUidState);
             out.attributeInt(null, ATTR_FLAGS, mOpFlag);
         }
+    }
+
+    private static int[] parseOpsList(String opsList) {
+        String[] strArr;
+        if (opsList.isEmpty()) {
+            strArr = new String[0];
+        } else {
+            strArr = opsList.split(",");
+        }
+        int nOps = strArr.length;
+        int[] result = new int[nOps];
+        try {
+            for (int i = 0; i < nOps; i++) {
+                result[i] = Integer.parseInt(strArr[i]);
+            }
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Failed to parse Discrete ops list: " + e.getMessage());
+            return parseOpsList(DEFAULT_DISCRETE_OPS);
+        }
+        return result;
     }
 
     private static List<DiscreteOpEvent> stableListMerge(List<DiscreteOpEvent> a,
