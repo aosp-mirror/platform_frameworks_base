@@ -61,6 +61,7 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.ServiceState;
@@ -163,6 +164,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private PowerManager mPowerManager;
     @Mock
     private TelephonyListenerManager mTelephonyListenerManager;
     @Mock
@@ -926,7 +929,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBroadcastDispatcher, mDumpManager,
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
-                    mAuthController, mTelephonyListenerManager, mFeatureFlags);
+                    mAuthController, mTelephonyListenerManager, mPowerManager, mFeatureFlags);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 
