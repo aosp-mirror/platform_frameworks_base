@@ -1,0 +1,77 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.internal.os;
+
+option java_outer_classname = "BinderLatencyProto";
+
+/**
+ * RepeatedApiStats proto from atoms.proto, duplicated here so that it's
+ * accessible in the build.
+ * Must be kept in sync with the version in atoms.proto.
+ */
+
+message RepeatedApiStats {
+  repeated ApiStats api_stats = 1;
+}
+
+message Dims {
+  enum ProcessSource {
+    UNKNOWN_PROCESS_SOURCE = 0;
+    SYSTEM_SERVER = 1;
+    TELEPHONY = 2;
+  }
+
+  enum ServiceClassName {
+    UNKNOWN_CLASS = 0;
+  }
+  enum ServiceMethodName {
+    UNKNOWN_METHOD = 0;
+  }
+
+  // Required.
+  optional ProcessSource process_source = 1;
+
+  // The class name of the API making the call to Binder. Enum value
+  // is preferred as uses much less data to store.
+  // This field does not contain PII.
+  oneof service_class {
+    ServiceClassName service_class_name_as_enum = 2;
+    string service_class_name = 3;
+  }
+
+  // Method name of the API call. It can also be a transaction code if we
+  // cannot resolve it to a name. See Binder#getTransactionName. Enum value
+  // is preferred as uses much less data to store.
+  // This field does not contain PII.
+  oneof service_method {
+    ServiceMethodName service_method_name_as_enum = 4;
+    string service_method_name = 5;
+  }
+}
+
+message ApiStats {
+  // required.
+  optional Dims dims = 1;
+
+  // Indicates the first bucket that had any data. Allows omitting any empty
+  // buckets at the start of the bucket list and thus save on data size.
+  optional int32 first_bucket_index = 2;
+  // Stores the count of samples for each bucket. The number of buckets and
+  // their sizes are controlled server side with a flag.
+  repeated int32 buckets = 3;
+}
