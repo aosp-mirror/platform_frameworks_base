@@ -7881,8 +7881,10 @@ package android.app.blob {
   public static class BlobStoreManager.Session implements java.io.Closeable {
     method public void abandon() throws java.io.IOException;
     method public void allowPackageAccess(@NonNull String, @NonNull byte[]) throws java.io.IOException;
+    method public void allowPackagesWithLocationPermission(@NonNull String) throws java.io.IOException;
     method public void allowPublicAccess() throws java.io.IOException;
     method public void allowSameSignatureAccess() throws java.io.IOException;
+    method public boolean arePackagesWithLocationPermissionAllowed(@NonNull String) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public void commit(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws java.io.IOException;
     method public long getSize() throws java.io.IOException;

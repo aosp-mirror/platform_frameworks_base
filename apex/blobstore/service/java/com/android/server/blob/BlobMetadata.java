@@ -229,7 +229,8 @@ class BlobMetadata {
         return getBlobFile().length();
     }
 
-    boolean isAccessAllowedForCaller(@NonNull String callingPackage, int callingUid) {
+    boolean isAccessAllowedForCaller(@NonNull String callingPackage, int callingUid,
+            @Nullable String attributionTag) {
         // Don't allow the blob to be accessed after it's expiry time has passed.
         if (getBlobHandle().isExpired()) {
             return false;
@@ -254,7 +255,7 @@ class BlobMetadata {
                 // Check if the caller is allowed access as per the access mode specified
                 // by the committer.
                 if (committer.blobAccessMode.isAccessAllowedForCaller(mContext,
-                        callingPackage, committer.packageName)) {
+                        callingPackage, committer.packageName, callingUid, attributionTag)) {
                     return true;
                 }
             }

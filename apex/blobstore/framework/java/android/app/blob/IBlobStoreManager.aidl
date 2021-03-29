@@ -25,12 +25,13 @@ import android.os.RemoteCallback;
 interface IBlobStoreManager {
     long createSession(in BlobHandle handle, in String packageName);
     IBlobStoreSession openSession(long sessionId, in String packageName);
-    ParcelFileDescriptor openBlob(in BlobHandle handle, in String packageName);
+    ParcelFileDescriptor openBlob(in BlobHandle handle, in String packageName,
+           in String attributionTag);
     void abandonSession(long sessionId, in String packageName);
 
     void acquireLease(in BlobHandle handle, int descriptionResId, in CharSequence description,
-            long leaseTimeoutMillis, in String packageName);
-    void releaseLease(in BlobHandle handle, in String packageName);
+            long leaseTimeoutMillis, in String packageName, in String attributionTag);
+    void releaseLease(in BlobHandle handle, in String packageName, in String attributionTag);
     long getRemainingLeaseQuotaBytes(String packageName);
 
     void waitForIdle(in RemoteCallback callback);
@@ -39,5 +40,6 @@ interface IBlobStoreManager {
     void deleteBlob(long blobId);
 
     List<BlobHandle> getLeasedBlobs(in String packageName);
-    LeaseInfo getLeaseInfo(in BlobHandle blobHandle, in String packageName);
+    LeaseInfo getLeaseInfo(in BlobHandle blobHandle, in String packageName,
+            in String attributionTag);
 }
