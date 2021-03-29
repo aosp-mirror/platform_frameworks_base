@@ -1348,9 +1348,20 @@ public final class PowerManagerService extends SystemService
         updatePowerStateLocked();
     }
 
-    private void acquireWakeLockInternal(IBinder lock, int flags, String tag, String packageName,
-            WorkSource ws, String historyTag, int uid, int pid) {
+    private void acquireWakeLockInternal(IBinder lock, int displayId, int flags, String tag,
+            String packageName, WorkSource ws, String historyTag, int uid, int pid) {
         synchronized (mLock) {
+            if (displayId != Display.INVALID_DISPLAY) {
+                final DisplayInfo displayInfo =
+                        mSystemReady ? mDisplayManagerInternal.getDisplayInfo(displayId) : null;
+                if (displayInfo == null) {
+                    Slog.wtf(TAG, "Tried to acquire wake lock for invalid display: " + displayId);
+                    return;
+                } else if (!displayInfo.hasAccess(uid)) {
+                    throw new SecurityException("Caller does not have access to display");
+                }
+            }
+
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "acquireWakeLockInternal: lock=" + Objects.hashCode(lock)
                         + ", flags=0x" + Integer.toHexString(flags)
@@ -1377,8 +1388,8 @@ public final class PowerManagerService extends SystemService
                     mUidState.put(uid, state);
                 }
                 state.mNumWakeLocks++;
-                wakeLock = new WakeLock(lock, flags, tag, packageName, ws, historyTag, uid, pid,
-                        state);
+                wakeLock = new WakeLock(lock, displayId, flags, tag, packageName, ws, historyTag,
+                        uid, pid, state);
                 try {
                     lock.linkToDeath(wakeLock, 0);
                 } catch (RemoteException ex) {
@@ -2047,6 +2058,11 @@ public final class PowerManagerService extends SystemService
         return mWakefulnessRaw;
     }
 
+    @VisibleForTesting
+    int getWakefulnessLocked(int groupId) {
+        return mDisplayGroupPowerStateMapper.getWakefulnessLocked(groupId);
+    }
+
     /**
      * Logs the time the device would have spent awake before user activity timeout,
      * had the system not been told the user was inactive.
@@ -2293,7 +2309,9 @@ public final class PowerManagerService extends SystemService
      */
     @SuppressWarnings("deprecation")
     private void updateWakeLockSummaryLocked(int dirty) {
-        if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_WAKEFULNESS)) != 0) {
+        if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_WAKEFULNESS | DIRTY_DISPLAY_GROUP_WAKEFULNESS))
+                != 0) {
+
             mWakeLockSummary = 0;
 
             final int numProfiles = mProfilePowerState.size();
@@ -2301,11 +2319,28 @@ public final class PowerManagerService extends SystemService
                 mProfilePowerState.valueAt(i).mWakeLockSummary = 0;
             }
 
+            for (int groupId : mDisplayGroupPowerStateMapper.getDisplayGroupIdsLocked()) {
+                mDisplayGroupPowerStateMapper.setWakeLockSummaryLocked(groupId, 0);
+            }
+
+            int invalidGroupWakeLockSummary = 0;
             final int numWakeLocks = mWakeLocks.size();
             for (int i = 0; i < numWakeLocks; i++) {
                 final WakeLock wakeLock = mWakeLocks.get(i);
                 final int wakeLockFlags = getWakeLockSummaryFlags(wakeLock);
                 mWakeLockSummary |= wakeLockFlags;
+
+                final int groupId = wakeLock.getDisplayGroupId();
+                if (groupId != Display.INVALID_DISPLAY_GROUP) {
+                    int wakeLockSummary = mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(
+                            groupId);
+                    wakeLockSummary |= wakeLockFlags;
+                    mDisplayGroupPowerStateMapper.setWakeLockSummaryLocked(groupId,
+                            wakeLockSummary);
+                } else {
+                    invalidGroupWakeLockSummary |= wakeLockFlags;
+                }
+
                 for (int j = 0; j < numProfiles; j++) {
                     final ProfilePowerState profile = mProfilePowerState.valueAt(j);
                     if (wakeLockAffectsUser(wakeLock, profile.mUserId)) {
@@ -2314,10 +2349,21 @@ public final class PowerManagerService extends SystemService
                 }
             }
 
-            mWakeLockSummary = adjustWakeLockSummaryLocked(mWakeLockSummary);
+            for (int groupId : mDisplayGroupPowerStateMapper.getDisplayGroupIdsLocked()) {
+                final int wakeLockSummary = adjustWakeLockSummaryLocked(
+                        mDisplayGroupPowerStateMapper.getWakefulnessLocked(groupId),
+                        invalidGroupWakeLockSummary
+                                | mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(groupId));
+                mDisplayGroupPowerStateMapper.setWakeLockSummaryLocked(groupId, wakeLockSummary);
+            }
+
+            mWakeLockSummary = adjustWakeLockSummaryLocked(getWakefulnessLocked(),
+                    mWakeLockSummary);
+
             for (int i = 0; i < numProfiles; i++) {
                 final ProfilePowerState profile = mProfilePowerState.valueAt(i);
-                profile.mWakeLockSummary = adjustWakeLockSummaryLocked(profile.mWakeLockSummary);
+                profile.mWakeLockSummary = adjustWakeLockSummaryLocked(getWakefulnessLocked(),
+                        profile.mWakeLockSummary);
             }
 
             if (DEBUG_SPEW) {
@@ -2328,25 +2374,25 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private int adjustWakeLockSummaryLocked(int wakeLockSummary) {
+    private static int adjustWakeLockSummaryLocked(int wakefulness, int wakeLockSummary) {
         // Cancel wake locks that make no sense based on the current state.
-        if (getWakefulnessLocked() != WAKEFULNESS_DOZING) {
+        if (wakefulness != WAKEFULNESS_DOZING) {
             wakeLockSummary &= ~(WAKE_LOCK_DOZE | WAKE_LOCK_DRAW);
         }
-        if (getWakefulnessLocked() == WAKEFULNESS_ASLEEP
+        if (wakefulness == WAKEFULNESS_ASLEEP
                 || (wakeLockSummary & WAKE_LOCK_DOZE) != 0) {
             wakeLockSummary &= ~(WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
                     | WAKE_LOCK_BUTTON_BRIGHT);
-            if (getWakefulnessLocked() == WAKEFULNESS_ASLEEP) {
+            if (wakefulness == WAKEFULNESS_ASLEEP) {
                 wakeLockSummary &= ~WAKE_LOCK_PROXIMITY_SCREEN_OFF;
             }
         }
 
         // Infer implied wake locks where necessary based on the current state.
         if ((wakeLockSummary & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM)) != 0) {
-            if (getWakefulnessLocked() == WAKEFULNESS_AWAKE) {
+            if (wakefulness == WAKEFULNESS_AWAKE) {
                 wakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_STAY_AWAKE;
-            } else if (getWakefulnessLocked() == WAKEFULNESS_DREAMING) {
+            } else if (wakefulness == WAKEFULNESS_DREAMING) {
                 wakeLockSummary |= WAKE_LOCK_CPU;
             }
         }
@@ -2531,7 +2577,8 @@ public final class PowerManagerService extends SystemService
                 }
 
                 if ((groupUserActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0
-                        && (mWakeLockSummary & WAKE_LOCK_STAY_AWAKE) == 0) {
+                        && (mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(groupId)
+                        & WAKE_LOCK_STAY_AWAKE) == 0) {
                     groupNextTimeout = mAttentionDetector.updateUserActivity(groupNextTimeout,
                             screenDimDuration);
                 }
@@ -2831,7 +2878,8 @@ public final class PowerManagerService extends SystemService
     private boolean isBeingKeptAwakeLocked(int groupId) {
         return mStayOn
                 || mProximityPositive
-                || (mWakeLockSummary & WAKE_LOCK_STAY_AWAKE) != 0
+                || (mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(groupId)
+                & WAKE_LOCK_STAY_AWAKE) != 0
                 || (mDisplayGroupPowerStateMapper.getUserActivitySummaryLocked(groupId) & (
                 USER_ACTIVITY_SCREEN_BRIGHT | USER_ACTIVITY_SCREEN_DIM)) != 0
                 || mScreenBrightnessBoostInProgress;
@@ -3101,8 +3149,8 @@ public final class PowerManagerService extends SystemService
 
                 if (displayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
                     displayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
-                    if ((mWakeLockSummary & WAKE_LOCK_DRAW) != 0
-                            && !mDrawWakeLockOverrideFromSidekick) {
+                    if ((mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(groupId)
+                            & WAKE_LOCK_DRAW) != 0 && !mDrawWakeLockOverrideFromSidekick) {
                         if (displayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND) {
                             displayPowerRequest.dozeScreenState = Display.STATE_DOZE;
                         }
@@ -3128,7 +3176,8 @@ public final class PowerManagerService extends SystemService
                             + ", mWakefulness="
                             + PowerManagerInternal.wakefulnessToString(
                             mDisplayGroupPowerStateMapper.getWakefulnessLocked(groupId))
-                            + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary)
+                            + ", mWakeLockSummary=0x" + Integer.toHexString(
+                            mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(groupId))
                             + ", mUserActivitySummary=0x" + Integer.toHexString(
                             mDisplayGroupPowerStateMapper.getUserActivitySummaryLocked(groupId))
                             + ", mBootCompleted=" + mBootCompleted
@@ -3193,10 +3242,11 @@ public final class PowerManagerService extends SystemService
     @VisibleForTesting
     int getDesiredScreenPolicyLocked(int groupId) {
         final int wakefulness = mDisplayGroupPowerStateMapper.getWakefulnessLocked(groupId);
+        final int wakeLockSummary = mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(groupId);
         if (wakefulness == WAKEFULNESS_ASLEEP || sQuiescent) {
             return DisplayPowerRequest.POLICY_OFF;
         } else if (wakefulness == WAKEFULNESS_DOZING) {
-            if ((mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
+            if ((wakeLockSummary & WAKE_LOCK_DOZE) != 0) {
                 return DisplayPowerRequest.POLICY_DOZE;
             }
             if (mDozeAfterScreenOff) {
@@ -3213,7 +3263,7 @@ public final class PowerManagerService extends SystemService
             return DisplayPowerRequest.POLICY_VR;
         }
 
-        if ((mWakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
+        if ((wakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
                 || !mBootCompleted
                 || (mDisplayGroupPowerStateMapper.getUserActivitySummaryLocked(groupId)
                 & USER_ACTIVITY_SCREEN_BRIGHT) != 0
@@ -3292,7 +3342,9 @@ public final class PowerManagerService extends SystemService
     };
 
     private boolean shouldUseProximitySensorLocked() {
-        return !mIsVrModeEnabled && (mWakeLockSummary & WAKE_LOCK_PROXIMITY_SCREEN_OFF) != 0;
+        // Use default display group for proximity sensor.
+        return !mIsVrModeEnabled && (mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(
+                Display.DEFAULT_DISPLAY_GROUP) & WAKE_LOCK_PROXIMITY_SCREEN_OFF) != 0;
     }
 
     /**
@@ -4248,6 +4300,8 @@ public final class PowerManagerService extends SystemService
                 pw.println("  lastUserActivityTimeNoChangeLights=" + TimeUtils.formatUptime(
                         mDisplayGroupPowerStateMapper.getLastUserActivityTimeNoChangeLightsLocked(
                                 id)));
+                pw.println("  mWakeLockSummary=0x" + Integer.toHexString(
+                        mDisplayGroupPowerStateMapper.getWakeLockSummaryLocked(id)));
             }
 
             wcd = mWirelessChargerDetector;
@@ -4738,6 +4792,7 @@ public final class PowerManagerService extends SystemService
      */
     /* package */ final class WakeLock implements IBinder.DeathRecipient {
         public final IBinder mLock;
+        public final int mDisplayId;
         public int mFlags;
         public String mTag;
         public final String mPackageName;
@@ -4751,10 +4806,11 @@ public final class PowerManagerService extends SystemService
         public boolean mNotifiedLong;
         public boolean mDisabled;
 
-        public WakeLock(IBinder lock, int flags, String tag, String packageName,
+        public WakeLock(IBinder lock, int displayId, int flags, String tag, String packageName,
                 WorkSource workSource, String historyTag, int ownerUid, int ownerPid,
                 UidState uidState) {
             mLock = lock;
+            mDisplayId = displayId;
             mFlags = flags;
             mTag = tag;
             mPackageName = packageName;
@@ -4805,6 +4861,15 @@ public final class PowerManagerService extends SystemService
 
         public void updateWorkSource(WorkSource workSource) {
             mWorkSource = copyWorkSource(workSource);
+        }
+
+        public int getDisplayGroupId() {
+            if (!mSystemReady || mDisplayId == Display.INVALID_DISPLAY) {
+                return Display.INVALID_DISPLAY_GROUP;
+            }
+
+            final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
+            return displayInfo == null ? Display.INVALID_DISPLAY_GROUP : displayInfo.displayGroupId;
         }
 
         @Override
@@ -4996,11 +5061,11 @@ public final class PowerManagerService extends SystemService
 
         @Override // Binder call
         public void acquireWakeLockWithUid(IBinder lock, int flags, String tag,
-                String packageName, int uid) {
+                String packageName, int uid, int displayId) {
             if (uid < 0) {
                 uid = Binder.getCallingUid();
             }
-            acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid), null);
+            acquireWakeLock(lock, flags, tag, packageName, new WorkSource(uid), null, displayId);
         }
 
         @Override // Binder call
@@ -5035,7 +5100,7 @@ public final class PowerManagerService extends SystemService
 
         @Override // Binder call
         public void acquireWakeLock(IBinder lock, int flags, String tag, String packageName,
-                WorkSource ws, String historyTag) {
+                WorkSource ws, String historyTag, int displayId) {
             if (lock == null) {
                 throw new IllegalArgumentException("lock must not be null");
             }
@@ -5060,7 +5125,8 @@ public final class PowerManagerService extends SystemService
             final int pid = Binder.getCallingPid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                acquireWakeLockInternal(lock, flags, tag, packageName, ws, historyTag, uid, pid);
+                acquireWakeLockInternal(lock, displayId, flags, tag, packageName, ws, historyTag,
+                        uid, pid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -5069,7 +5135,7 @@ public final class PowerManagerService extends SystemService
         @Override // Binder call
         public void acquireWakeLockAsync(IBinder lock, int flags, String tag, String packageName,
                 WorkSource ws, String historyTag) {
-            acquireWakeLock(lock, flags, tag, packageName, ws, historyTag);
+            acquireWakeLock(lock, flags, tag, packageName, ws, historyTag, Display.INVALID_DISPLAY);
         }
 
         @Override // Binder call
