@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.app.smartspace.SmartspaceTarget
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -82,6 +83,10 @@ class MediaDataFilter @Inject constructor(
         }
     }
 
+    override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
+        listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data) }
+    }
+
     override fun onMediaDataRemoved(key: String) {
         allEntries.remove(key)
         userEntries.remove(key)?.let {
@@ -90,6 +95,10 @@ class MediaDataFilter @Inject constructor(
                 it.onMediaDataRemoved(key)
             }
         }
+    }
+
+    override fun onSmartspaceMediaDataRemoved(key: String) {
+        listeners.forEach { it.onSmartspaceMediaDataRemoved(key) }
     }
 
     @VisibleForTesting

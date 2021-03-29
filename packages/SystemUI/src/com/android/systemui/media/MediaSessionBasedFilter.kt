@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.content.Context
 import android.media.session.MediaController
@@ -134,11 +135,23 @@ class MediaSessionBasedFilter @Inject constructor(
         }
     }
 
+    override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
+        backgroundExecutor.execute {
+            dispatchSmartspaceMediaDataLoaded(key, data)
+        }
+    }
+
     override fun onMediaDataRemoved(key: String) {
         // Queue on background thread to ensure ordering of loaded and removed events is maintained.
         backgroundExecutor.execute {
             keyedTokens.remove(key)
             dispatchMediaDataRemoved(key)
+        }
+    }
+
+    override fun onSmartspaceMediaDataRemoved(key: String) {
+        backgroundExecutor.execute {
+            dispatchSmartspaceMediaDataRemoved(key)
         }
     }
 
@@ -151,6 +164,18 @@ class MediaSessionBasedFilter @Inject constructor(
     private fun dispatchMediaDataRemoved(key: String) {
         foregroundExecutor.execute {
             listeners.toSet().forEach { it.onMediaDataRemoved(key) }
+        }
+    }
+
+    private fun dispatchSmartspaceMediaDataLoaded(key: String, info: SmartspaceTarget) {
+        foregroundExecutor.execute {
+            listeners.toSet().forEach { it.onSmartspaceMediaDataLoaded(key, info) }
+        }
+    }
+
+    private fun dispatchSmartspaceMediaDataRemoved(key: String) {
+        foregroundExecutor.execute {
+            listeners.toSet().forEach { it.onSmartspaceMediaDataRemoved(key) }
         }
     }
 
