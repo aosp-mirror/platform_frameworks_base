@@ -146,7 +146,7 @@ public final class NetworkScore implements Parcelable {
      *
      * @hide
      */
-    // TODO : @SystemApi
+    @SystemApi
     public boolean isTransportPrimary() {
         return hasPolicy(POLICY_TRANSPORT_PRIMARY);
     }
@@ -163,7 +163,7 @@ public final class NetworkScore implements Parcelable {
      *
      * @hide
      */
-    // TODO : @SystemApi
+    @SystemApi
     public boolean isExiting() {
         return hasPolicy(POLICY_EXITING);
     }
@@ -256,7 +256,7 @@ public final class NetworkScore implements Parcelable {
          * @return this builder
          * @hide
          */
-        // TODO : @SystemApi
+        @SystemApi
         @NonNull
         public Builder setTransportPrimary(final boolean val) {
             if (val) {
@@ -281,7 +281,7 @@ public final class NetworkScore implements Parcelable {
          * @return this builder
          * @hide
          */
-        // TODO : @SystemApi
+        @SystemApi
         @NonNull
         public Builder setExiting(final boolean val) {
             if (val) {
