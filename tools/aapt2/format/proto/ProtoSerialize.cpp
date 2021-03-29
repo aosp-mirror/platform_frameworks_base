@@ -345,28 +345,29 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
   pb_fingerprint->set_version(util::GetToolFingerprint());
 
   std::vector<Overlayable*> overlayables;
-  for (const std::unique_ptr<ResourceTablePackage>& package : table.packages) {
+  auto table_view = table.GetPartitionedView();
+  for (const auto& package : table_view.packages) {
     pb::Package* pb_package = out_table->add_package();
-    if (package->id) {
-      pb_package->mutable_package_id()->set_id(package->id.value());
+    if (package.id) {
+      pb_package->mutable_package_id()->set_id(package.id.value());
     }
-    pb_package->set_package_name(package->name);
+    pb_package->set_package_name(package.name);
 
-    for (const std::unique_ptr<ResourceTableType>& type : package->types) {
+    for (const auto& type : package.types) {
       pb::Type* pb_type = pb_package->add_type();
-      if (type->id) {
-        pb_type->mutable_type_id()->set_id(type->id.value());
+      if (type.id) {
+        pb_type->mutable_type_id()->set_id(type.id.value());
       }
-      pb_type->set_name(to_string(type->type).to_string());
+      pb_type->set_name(to_string(type.type).to_string());
 
       // hardcoded string uses characters which make it an invalid resource name
       static const char* obfuscated_resource_name = "0_resource_name_obfuscated";
-      for (const std::unique_ptr<ResourceEntry>& entry : type->entries) {
+      for (const auto& entry : type.entries) {
         pb::Entry* pb_entry = pb_type->add_entry();
         if (entry->id) {
-          pb_entry->mutable_entry_id()->set_id(entry->id.value());
+          pb_entry->mutable_entry_id()->set_id(entry->id.value().entry_id());
         }
-        ResourceName resource_name({}, type->type, entry->name);
+        ResourceName resource_name({}, type.type, entry->name);
         if (options.collapse_key_stringpool &&
             options.name_collapse_exemptions.find(resource_name) ==
             options.name_collapse_exemptions.end()) {
