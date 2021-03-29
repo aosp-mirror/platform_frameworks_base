@@ -253,6 +253,14 @@ package android.app {
     method public void offsetBeginAndEndTime(long);
   }
 
+  public class BroadcastOptions {
+    ctor public BroadcastOptions(@NonNull android.os.Bundle);
+    method public long getTemporaryAppAllowlistDuration();
+    method @Nullable public String getTemporaryAppAllowlistReason();
+    method public int getTemporaryAppAllowlistReasonCode();
+    method public int getTemporaryAppAllowlistType();
+  }
+
   public class DownloadManager {
     field public static final String COLUMN_MEDIASTORE_URI = "mediastore_uri";
   }
