@@ -531,9 +531,13 @@ public class DozeTriggers implements DozeMachine.Part {
         Assert.isMainThread();
         mDozeHost.extendPulse(reason);
 
+        // we can't determine the dozing state if we're currently transitioning
+        final DozeMachine.State dozeState =
+                mMachine.isExecutingTransition() ? null : mMachine.getState();
+
         // When already pulsing we're allowed to show the wallpaper directly without
         // requesting a new pulse.
-        if (mMachine.getState() == DozeMachine.State.DOZE_PULSING
+        if (dozeState == DozeMachine.State.DOZE_PULSING
                 && reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
             mMachine.requestState(DozeMachine.State.DOZE_PULSING_BRIGHT);
             return;
@@ -541,8 +545,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
         if (mPulsePending || !mAllowPulseTriggers || !canPulse()) {
             if (mAllowPulseTriggers) {
-                mDozeLog.tracePulseDropped(mPulsePending, mMachine.getState(),
-                        mDozeHost.isPulsingBlocked());
+                mDozeLog.tracePulseDropped(mPulsePending, dozeState, mDozeHost.isPulsingBlocked());
             }
             runIfNotNull(onPulseSuppressedListener);
             return;
