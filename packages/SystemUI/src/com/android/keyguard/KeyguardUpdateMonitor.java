@@ -1294,16 +1294,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private final FingerprintManager.AuthenticationCallback mFingerprintAuthenticationCallback
             = new AuthenticationCallback() {
-
         @Override
         public void onAuthenticationFailed() {
             handleFingerprintAuthFailed();
+            mAuthController.onCancelAodInterrupt();
         }
 
         @Override
         public void onAuthenticationSucceeded(AuthenticationResult result) {
             Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
             handleFingerprintAuthenticated(result.getUserId(), result.isStrongBiometric());
+            mAuthController.onCancelAodInterrupt();
             Trace.endSection();
         }
 
@@ -1315,6 +1316,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onAuthenticationError(int errMsgId, CharSequence errString) {
             handleFingerprintError(errMsgId, errString.toString());
+            mAuthController.onCancelAodInterrupt();
         }
 
         @Override

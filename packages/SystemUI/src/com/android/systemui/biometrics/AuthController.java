@@ -290,7 +290,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
      * called when authentication either succeeds or fails. Failing to cancel the scan will leave
      * the screen in high brightness mode.
      */
-    private void onCancelAodInterrupt() {
+    public void onCancelAodInterrupt() {
         if (mUdfpsController == null) {
             return;
         }
@@ -397,10 +397,14 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         showDialog(args, skipAnimation, null /* savedState */);
     }
 
+    /**
+     * Only called via BiometricService for the biometric prompt. Will not be called for
+     * authentication directly requested through FingerprintManager. For
+     * example, KeyguardUpdateMonitor has its own {@link FingerprintManager.AuthenticationCallback}.
+     */
     @Override
     public void onBiometricAuthenticated() {
         mCurrentDialog.onAuthenticationSucceeded();
-        onCancelAodInterrupt();
     }
 
     @Override
@@ -428,6 +432,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     }
 
+    /**
+     * Only called via BiometricService for the biometric prompt. Will not be called for
+     * authentication directly requested through FingerprintManager. For
+     * example, KeyguardUpdateMonitor has its own {@link FingerprintManager.AuthenticationCallback}.
+     */
     @Override
     public void onBiometricError(int modality, int error, int vendorCode) {
         if (DEBUG) {
@@ -455,7 +464,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             if (DEBUG) Log.d(TAG, "onBiometricError, hard error: " + errorMessage);
             mCurrentDialog.onError(errorMessage);
         }
-        onCancelAodInterrupt();
     }
 
     @Override

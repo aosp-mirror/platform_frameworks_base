@@ -518,6 +518,46 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testFingerprintCancelAodInterrupt_onAuthenticationFailed() {
+        // GIVEN on keyguard and listening for fingerprint authentication
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        ArgumentCaptor<FingerprintManager.AuthenticationCallback> fingerprintCallbackCaptor =
+                ArgumentCaptor.forClass(FingerprintManager.AuthenticationCallback.class);
+        verify(mFingerprintManager).authenticate(any(), any(), fingerprintCallbackCaptor.capture(),
+                any(), anyInt(), anyInt());
+        FingerprintManager.AuthenticationCallback authCallback =
+                fingerprintCallbackCaptor.getValue();
+
+        // WHEN authentication fails
+        authCallback.onAuthenticationFailed();
+
+        // THEN aod interrupt is cancelled
+        verify(mAuthController).onCancelAodInterrupt();
+    }
+
+    @Test
+    public void testFingerprintCancelAodInterrupt_onAuthenticationError() {
+        // GIVEN on keyguard and listening for fingerprint authentication
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        ArgumentCaptor<FingerprintManager.AuthenticationCallback> fingerprintCallbackCaptor =
+                ArgumentCaptor.forClass(FingerprintManager.AuthenticationCallback.class);
+        verify(mFingerprintManager).authenticate(any(), any(), fingerprintCallbackCaptor.capture(),
+                any(), anyInt(), anyInt());
+        FingerprintManager.AuthenticationCallback authCallback =
+                fingerprintCallbackCaptor.getValue();
+
+        // WHEN authentication errors
+        authCallback.onAuthenticationError(0, "");
+
+        // THEN aod interrupt is cancelled
+        verify(mAuthController).onCancelAodInterrupt();
+    }
+
+    @Test
     public void skipsAuthentication_whenStatusBarShadeLocked() {
         mStatusBarStateListener.onStateChanged(StatusBarState.SHADE_LOCKED);
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
