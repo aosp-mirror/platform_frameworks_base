@@ -21,6 +21,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
+
 import android.annotation.CallSuper;
 import android.app.ActivityManager;
 import android.graphics.Point;
@@ -33,7 +35,6 @@ import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 
@@ -76,6 +77,14 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
 
+    int getChildCount() {
+        return mChildrenTaskInfo.size();
+    }
+
+    boolean containsTask(int taskId) {
+        return mChildrenTaskInfo.contains(taskId);
+    }
+
     @Override
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
@@ -83,17 +92,22 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
             mCallbacks.onRootTaskAppeared();
+            sendStatusChanged();
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             final int taskId = taskInfo.taskId;
             mChildrenLeashes.put(taskId, leash);
             mChildrenTaskInfo.put(taskId, taskInfo);
             updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
             mCallbacks.onChildTaskStatusChanged(taskId, true /* present */, taskInfo.isVisible);
+            if (ENABLE_SHELL_TRANSITIONS) {
+                // Status is managed/synchronized by the transition lifecycle.
+                return;
+            }
+            sendStatusChanged();
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
-        sendStatusChanged();
     }
 
     @Override
@@ -103,13 +117,19 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
-            updateChildTaskSurface(
-                    taskInfo, mChildrenLeashes.get(taskInfo.taskId), false /* firstAppeared */);
             mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
                     taskInfo.isVisible);
+            if (!ENABLE_SHELL_TRANSITIONS) {
+                updateChildTaskSurface(
+                        taskInfo, mChildrenLeashes.get(taskInfo.taskId), false /* firstAppeared */);
+            }
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
+        }
+        if (ENABLE_SHELL_TRANSITIONS) {
+            // Status is managed/synchronized by the transition lifecycle.
+            return;
         }
         sendStatusChanged();
     }
@@ -124,8 +144,12 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         } else if (mChildrenTaskInfo.contains(taskId)) {
             mChildrenTaskInfo.remove(taskId);
             mChildrenLeashes.remove(taskId);
-            sendStatusChanged();
             mCallbacks.onChildTaskStatusChanged(taskId, false /* present */, taskInfo.isVisible);
+            if (ENABLE_SHELL_TRANSITIONS) {
+                // Status is managed/synchronized by the transition lifecycle.
+                return;
+            }
+            sendStatusChanged();
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -166,7 +190,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         mSyncQueue.runInSync(t -> {
             t.setWindowCrop(leash, null);
             t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
-            if (firstAppeared && !Transitions.ENABLE_SHELL_TRANSITIONS) {
+            if (firstAppeared && !ENABLE_SHELL_TRANSITIONS) {
                 t.setAlpha(leash, 1f);
                 t.setMatrix(leash, 1, 0, 0, 1);
                 t.show(leash);

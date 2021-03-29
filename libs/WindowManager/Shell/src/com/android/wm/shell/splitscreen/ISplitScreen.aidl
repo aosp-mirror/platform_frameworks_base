@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.window.IRemoteTransition;
 
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
 
@@ -74,4 +75,11 @@ interface ISplitScreen {
      */
     oneway void startIntent(in PendingIntent intent, in Intent fillInIntent, int stage,
             int position, in Bundle options) = 9;
+
+    /**
+     * Starts tasks simultaneously in one transition. The first task in the list will be in the
+     * main-stage and on the left/top.
+     */
+    oneway void startTasks(int mainTaskId, in Bundle mainOptions, int sideTaskId,
+            in Bundle sideOptions, int sidePosition, in IRemoteTransition remoteTransition) = 10;
 }
