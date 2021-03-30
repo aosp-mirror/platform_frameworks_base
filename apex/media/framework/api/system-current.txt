@@ -25,7 +25,9 @@ package android.media {
   }
 
   public static final class MediaTranscodeManager.TranscodingSession {
+    method public void addClientUid(int);
     method public void cancel();
+    method @NonNull public java.util.List<java.lang.Integer> getClientUids();
     method public int getErrorCode();
     method @IntRange(from=0, to=100) public int getProgress();
     method public int getResult();
