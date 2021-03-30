@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import java.io.PrintWriter;
 import java.util.Set;
 
-class MediaSessionConfig {
+class MediaSessionDeviceConfig {
     /**
      * Denotes the duration for which a media button receiver will be exempted from
      * FGS-from-BG restriction and so will be allowed to start an FGS even if it is in the
