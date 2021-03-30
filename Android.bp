@@ -226,6 +226,9 @@ filegroup {
         "media/java/**/*.java",
         "media/java/**/*.aidl",
     ],
+    exclude_srcs: [
+        ":framework-media-tv-tunerresourcemanager-sources-aidl",
+    ],
     path: "media/java",
 }
 
