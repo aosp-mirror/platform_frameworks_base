@@ -18,13 +18,13 @@ package android.provider;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
-import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract.Path;
 
@@ -93,14 +93,12 @@ public class TestDocumentsProvider extends DocumentsProvider {
     }
 
     @Override
-    protected int enforceReadPermissionInner(Uri uri, String callingPkg,
-            @Nullable String callingFeatureId, IBinder callerToken) {
+    protected int enforceReadPermissionInner(Uri uri, AttributionSource attributionSource) {
         return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
-    protected int enforceWritePermissionInner(Uri uri, String callingPkg,
-            @Nullable String callingFeatureId, IBinder callerToken) {
+    protected int enforceWritePermissionInner(Uri uri, AttributionSource attributionSource) {
         return AppOpsManager.MODE_ALLOWED;
     }
 

@@ -26,10 +26,12 @@ interface IBlobStoreSession {
     void allowPackageAccess(in String packageName, in byte[] certificate);
     void allowSameSignatureAccess();
     void allowPublicAccess();
+    void allowPackagesWithLocationPermission(in String permissionName);
 
     boolean isPackageAccessAllowed(in String packageName, in byte[] certificate);
     boolean isSameSignatureAccessAllowed();
     boolean isPublicAccessAllowed();
+    boolean arePackagesWithLocationPermissionAllowed(in String permissionName);
 
     long getSize();
     void close();

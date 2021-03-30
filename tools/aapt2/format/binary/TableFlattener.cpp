@@ -59,35 +59,35 @@ static void strcpy16_htod(uint16_t* dst, size_t len, const StringPiece16& src) {
   dst[i] = 0;
 }
 
-static bool cmp_style_entries(const Style::Entry& a, const Style::Entry& b) {
-  if (a.key.id) {
-    if (b.key.id) {
-      return cmp_ids_dynamic_after_framework(a.key.id.value(), b.key.id.value());
+static bool cmp_style_entries(const Style::Entry* a, const Style::Entry* b) {
+  if (a->key.id) {
+    if (b->key.id) {
+      return cmp_ids_dynamic_after_framework(a->key.id.value(), b->key.id.value());
     }
     return true;
-  } else if (!b.key.id) {
-    return a.key.name.value() < b.key.name.value();
+  } else if (!b->key.id) {
+    return a->key.name.value() < b->key.name.value();
   }
   return false;
 }
 
 struct FlatEntry {
-  ResourceEntry* entry;
-  Value* value;
+  const ResourceEntry* entry;
+  const Value* value;
 
   // The entry string pool index to the entry's name.
   uint32_t entry_key;
 };
 
-class MapFlattenVisitor : public ValueVisitor {
+class MapFlattenVisitor : public ConstValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using ConstValueVisitor::Visit;
 
   MapFlattenVisitor(ResTable_entry_ext* out_entry, BigBuffer* buffer)
       : out_entry_(out_entry), buffer_(buffer) {
   }
 
-  void Visit(Attribute* attr) override {
+  void Visit(const Attribute* attr) override {
     {
       Reference key = Reference(ResourceId(ResTable_map::ATTR_TYPE));
       BinaryPrimitive val(Res_value::TYPE_INT_DEC, attr->type_mask);
@@ -106,13 +106,13 @@ class MapFlattenVisitor : public ValueVisitor {
       FlattenEntry(&key, &val);
     }
 
-    for (Attribute::Symbol& s : attr->symbols) {
+    for (const Attribute::Symbol& s : attr->symbols) {
       BinaryPrimitive val(s.type, s.value);
       FlattenEntry(&s.symbol, &val);
     }
   }
 
-  void Visit(Style* style) override {
+  void Visit(const Style* style) override {
     if (style->parent) {
       const Reference& parent_ref = style->parent.value();
       CHECK(bool(parent_ref.id)) << "parent has no ID";
@@ -120,21 +120,26 @@ class MapFlattenVisitor : public ValueVisitor {
     }
 
     // Sort the style.
-    std::sort(style->entries.begin(), style->entries.end(), cmp_style_entries);
+    std::vector<const Style::Entry*> sorted_entries;
+    for (const auto& entry : style->entries) {
+      sorted_entries.emplace_back(&entry);
+    }
 
-    for (Style::Entry& entry : style->entries) {
-      FlattenEntry(&entry.key, entry.value.get());
+    std::sort(sorted_entries.begin(), sorted_entries.end(), cmp_style_entries);
+
+    for (const Style::Entry* entry : sorted_entries) {
+      FlattenEntry(&entry->key, entry->value.get());
     }
   }
 
-  void Visit(Styleable* styleable) override {
+  void Visit(const Styleable* styleable) override {
     for (auto& attr_ref : styleable->entries) {
       BinaryPrimitive val(Res_value{});
       FlattenEntry(&attr_ref, &val);
     }
   }
 
-  void Visit(Array* array) override {
+  void Visit(const Array* array) override {
     const size_t count = array->elements.size();
     for (size_t i = 0; i < count; i++) {
       Reference key(android::ResTable_map::ATTR_MIN + i);
@@ -142,7 +147,7 @@ class MapFlattenVisitor : public ValueVisitor {
     }
   }
 
-  void Visit(Plural* plural) override {
+  void Visit(const Plural* plural) override {
     const size_t count = plural->values.size();
     for (size_t i = 0; i < count; i++) {
       if (!plural->values[i]) {
@@ -196,16 +201,16 @@ class MapFlattenVisitor : public ValueVisitor {
  private:
   DISALLOW_COPY_AND_ASSIGN(MapFlattenVisitor);
 
-  void FlattenKey(Reference* key, ResTable_map* out_entry) {
+  void FlattenKey(const Reference* key, ResTable_map* out_entry) {
     CHECK(bool(key->id)) << "key has no ID";
     out_entry->name.ident = util::HostToDevice32(key->id.value().id);
   }
 
-  void FlattenValue(Item* value, ResTable_map* out_entry) {
+  void FlattenValue(const Item* value, ResTable_map* out_entry) {
     CHECK(value->Flatten(&out_entry->value)) << "flatten failed";
   }
 
-  void FlattenEntry(Reference* key, Item* value) {
+  void FlattenEntry(const Reference* key, Item* value) {
     ResTable_map* out_entry = buffer_->NextBlock<ResTable_map>();
     FlattenKey(key, out_entry);
     FlattenValue(value, out_entry);
@@ -226,7 +231,7 @@ struct OverlayableChunk {
 
 class PackageFlattener {
  public:
-  PackageFlattener(IAaptContext* context, ResourceTablePackage* package,
+  PackageFlattener(IAaptContext* context, const ResourceTablePackageView& package,
                    const std::map<size_t, std::string>* shared_libs, bool use_sparse_entries,
                    bool collapse_key_stringpool,
                    const std::set<ResourceName>& name_collapse_exemptions)
@@ -243,20 +248,20 @@ class PackageFlattener {
     TRACE_CALL();
     ChunkWriter pkg_writer(buffer);
     ResTable_package* pkg_header = pkg_writer.StartChunk<ResTable_package>(RES_TABLE_PACKAGE_TYPE);
-    pkg_header->id = util::HostToDevice32(package_->id.value());
+    pkg_header->id = util::HostToDevice32(package_.id.value());
 
     // AAPT truncated the package name, so do the same.
     // Shared libraries require full package names, so don't truncate theirs.
     if (context_->GetPackageType() != PackageType::kApp &&
-        package_->name.size() >= arraysize(pkg_header->name)) {
-      diag_->Error(DiagMessage() << "package name '" << package_->name
+        package_.name.size() >= arraysize(pkg_header->name)) {
+      diag_->Error(DiagMessage() << "package name '" << package_.name
                                  << "' is too long. "
                                     "Shared libraries cannot have truncated package names");
       return false;
     }
 
     // Copy the package name in device endianness.
-    strcpy16_htod(pkg_header->name, arraysize(pkg_header->name), util::Utf8ToUtf16(package_->name));
+    strcpy16_htod(pkg_header->name, arraysize(pkg_header->name), util::Utf8ToUtf16(package_.name));
 
     // Serialize the types. We do this now so that our type and key strings
     // are populated. We write those first.
@@ -273,7 +278,7 @@ class PackageFlattener {
     buffer->AppendBuffer(std::move(type_buffer));
 
     // If there are libraries (or if the package ID is 0x00), encode a library chunk.
-    if (package_->id.value() == 0x00 || !shared_libs_->empty()) {
+    if (package_.id.value() == 0x00 || !shared_libs_->empty()) {
       FlattenLibrarySpec(buffer);
     }
 
@@ -315,7 +320,7 @@ class PackageFlattener {
   }
 
   bool FlattenValue(FlatEntry* entry, BigBuffer* buffer) {
-    if (Item* item = ValueCast<Item>(entry->value)) {
+    if (const Item* item = ValueCast<Item>(entry->value)) {
       WriteEntry<ResTable_entry, true>(entry, buffer);
       Res_value* outValue = buffer->NextBlock<Res_value>();
       CHECK(item->Flatten(outValue)) << "flatten failed";
@@ -329,7 +334,7 @@ class PackageFlattener {
     return true;
   }
 
-  bool FlattenConfig(const ResourceTableType* type, const ConfigDescription& config,
+  bool FlattenConfig(const ResourceTableTypeView& type, const ConfigDescription& config,
                      const size_t num_total_entries, std::vector<FlatEntry>* entries,
                      BigBuffer* buffer) {
     CHECK(num_total_entries != 0);
@@ -337,7 +342,7 @@ class PackageFlattener {
 
     ChunkWriter type_writer(buffer);
     ResTable_type* type_header = type_writer.StartChunk<ResTable_type>(RES_TABLE_TYPE_TYPE);
-    type_header->id = type->id.value();
+    type_header->id = type.id.value();
     type_header->config = config;
     type_header->config.swapHtoD();
 
@@ -346,12 +351,12 @@ class PackageFlattener {
 
     BigBuffer values_buffer(512);
     for (FlatEntry& flat_entry : *entries) {
-      CHECK(static_cast<size_t>(flat_entry.entry->id.value()) < num_total_entries);
-      offsets[flat_entry.entry->id.value()] = values_buffer.size();
+      CHECK(static_cast<size_t>(flat_entry.entry->id.value().entry_id()) < num_total_entries);
+      offsets[flat_entry.entry->id.value().entry_id()] = values_buffer.size();
       if (!FlattenValue(&flat_entry, &values_buffer)) {
         diag_->Error(DiagMessage()
                      << "failed to flatten resource '"
-                     << ResourceNameRef(package_->name, type->type, flat_entry.entry->name)
+                     << ResourceNameRef(package_.name, type.type, flat_entry.entry->name)
                      << "' for configuration '" << config << "'");
         return false;
       }
@@ -399,55 +404,27 @@ class PackageFlattener {
     return true;
   }
 
-  std::vector<ResourceTableType*> CollectAndSortTypes() {
-    std::vector<ResourceTableType*> sorted_types;
-    for (auto& type : package_->types) {
-      if (type->type == ResourceType::kStyleable) {
-        // Styleables aren't real Resource Types, they are represented in the
-        // R.java file.
-        continue;
-      }
-
-      CHECK(bool(type->id)) << "type must have an ID set";
-
-      sorted_types.push_back(type.get());
-    }
-    std::sort(sorted_types.begin(), sorted_types.end(), cmp_ids<ResourceTableType>);
-    return sorted_types;
-  }
-
-  std::vector<ResourceEntry*> CollectAndSortEntries(ResourceTableType* type) {
-    // Sort the entries by entry ID.
-    std::vector<ResourceEntry*> sorted_entries;
-    for (auto& entry : type->entries) {
-      CHECK(bool(entry->id)) << "entry must have an ID set";
-      sorted_entries.push_back(entry.get());
-    }
-    std::sort(sorted_entries.begin(), sorted_entries.end(), cmp_ids<ResourceEntry>);
-    return sorted_entries;
-  }
-
   bool FlattenOverlayable(BigBuffer* buffer) {
     std::set<ResourceId> seen_ids;
     std::map<std::string, OverlayableChunk> overlayable_chunks;
 
-    CHECK(bool(package_->id)) << "package must have an ID set when flattening <overlayable>";
-    for (auto& type : package_->types) {
-      CHECK(bool(type->id)) << "type must have an ID set when flattening <overlayable>";
-      for (auto& entry : type->entries) {
-        CHECK(bool(type->id)) << "entry must have an ID set when flattening <overlayable>";
+    CHECK(bool(package_.id)) << "package must have an ID set when flattening <overlayable>";
+    for (auto& type : package_.types) {
+      CHECK(bool(type.id)) << "type must have an ID set when flattening <overlayable>";
+      for (auto& entry : type.entries) {
+        CHECK(bool(type.id)) << "entry must have an ID set when flattening <overlayable>";
         if (!entry->overlayable_item) {
           continue;
         }
 
-        OverlayableItem& item = entry->overlayable_item.value();
+        const OverlayableItem& item = entry->overlayable_item.value();
 
         // Resource ids should only appear once in the resource table
-        ResourceId id = android::make_resid(package_->id.value(), type->id.value(),
-                                            entry->id.value());
+        ResourceId id =
+            android::make_resid(package_.id.value(), type.id.value(), entry->id.value().entry_id());
         CHECK(seen_ids.find(id) == seen_ids.end())
             << "multiple overlayable definitions found for resource "
-            << ResourceName(package_->name, type->type, entry->name).to_string();
+            << ResourceName(package_.name, type.type, entry->name).to_string();
         seen_ids.insert(id);
 
         // Find the overlayable chunk with the specified name
@@ -542,14 +519,14 @@ class PackageFlattener {
     return true;
   }
 
-  bool FlattenTypeSpec(ResourceTableType* type, std::vector<ResourceEntry*>* sorted_entries,
-                       BigBuffer* buffer) {
+  bool FlattenTypeSpec(const ResourceTableTypeView& type,
+                       const std::vector<const ResourceEntry*>& sorted_entries, BigBuffer* buffer) {
     ChunkWriter type_spec_writer(buffer);
     ResTable_typeSpec* spec_header =
         type_spec_writer.StartChunk<ResTable_typeSpec>(RES_TABLE_TYPE_SPEC_TYPE);
-    spec_header->id = type->id.value();
+    spec_header->id = type.id.value();
 
-    if (sorted_entries->empty()) {
+    if (sorted_entries.empty()) {
       type_spec_writer.Finish();
       return true;
     }
@@ -557,7 +534,7 @@ class PackageFlattener {
     // We can't just take the size of the vector. There may be holes in the
     // entry ID space.
     // Since the entries are sorted by ID, the last one will be the biggest.
-    const size_t num_entries = sorted_entries->back()->id.value() + 1;
+    const size_t num_entries = sorted_entries.back()->id.value().entry_id() + 1;
 
     spec_header->entryCount = util::HostToDevice32(num_entries);
 
@@ -565,21 +542,19 @@ class PackageFlattener {
     // show for which configuration axis the resource changes.
     uint32_t* config_masks = type_spec_writer.NextBlock<uint32_t>(num_entries);
 
-    const size_t actual_num_entries = sorted_entries->size();
-    for (size_t entryIndex = 0; entryIndex < actual_num_entries; entryIndex++) {
-      ResourceEntry* entry = sorted_entries->at(entryIndex);
+    for (const ResourceEntry* entry : sorted_entries) {
+      const uint16_t entry_id = entry->id.value().entry_id();
 
       // Populate the config masks for this entry.
       if (entry->visibility.level == Visibility::Level::kPublic) {
-        config_masks[entry->id.value()] |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
+        config_masks[entry_id] |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
       }
 
       const size_t config_count = entry->values.size();
       for (size_t i = 0; i < config_count; i++) {
         const ConfigDescription& config = entry->values[i]->config;
         for (size_t j = i + 1; j < config_count; j++) {
-          config_masks[entry->id.value()] |=
-              util::HostToDevice32(config.diff(entry->values[j]->config));
+          config_masks[entry_id] |= util::HostToDevice32(config.diff(entry->values[j]->config));
         }
       }
     }
@@ -590,32 +565,31 @@ class PackageFlattener {
   bool FlattenTypes(BigBuffer* buffer) {
     // Sort the types by their IDs. They will be inserted into the StringPool in
     // this order.
-    std::vector<ResourceTableType*> sorted_types = CollectAndSortTypes();
 
     size_t expected_type_id = 1;
-    for (ResourceTableType* type : sorted_types) {
+    for (const ResourceTableTypeView& type : package_.types) {
+      if (type.type == ResourceType::kStyleable) {
+        // Styleables aren't real Resource Types, they are represented in the R.java file.
+        continue;
+      }
+
       // If there is a gap in the type IDs, fill in the StringPool
       // with empty values until we reach the ID we expect.
-      while (type->id.value() > expected_type_id) {
+      while (type.id.value() > expected_type_id) {
         std::stringstream type_name;
         type_name << "?" << expected_type_id;
         type_pool_.MakeRef(type_name.str());
         expected_type_id++;
       }
       expected_type_id++;
-      type_pool_.MakeRef(to_string(type->type));
+      type_pool_.MakeRef(to_string(type.type));
 
-      std::vector<ResourceEntry*> sorted_entries = CollectAndSortEntries(type);
-      if (sorted_entries.empty()) {
-        continue;
-      }
-
-      if (!FlattenTypeSpec(type, &sorted_entries, buffer)) {
+      if (!FlattenTypeSpec(type, type.entries, buffer)) {
         return false;
       }
 
       // Since the entries are sorted by ID, the last ID will be the largest.
-      const size_t num_entries = sorted_entries.back()->id.value() + 1;
+      const size_t num_entries = type.entries.back()->id.value().entry_id() + 1;
 
       // The binary resource table lists resource entries for each
       // configuration.
@@ -628,9 +602,9 @@ class PackageFlattener {
       // hardcoded string uses characters which make it an invalid resource name
       const std::string obfuscated_resource_name = "0_resource_name_obfuscated";
 
-      for (ResourceEntry* entry : sorted_entries) {
+      for (const ResourceEntry* entry : type.entries) {
         uint32_t local_key_index;
-        ResourceName resource_name({}, type->type, entry->name);
+        ResourceName resource_name({}, type.type, entry->name);
         if (!collapse_key_stringpool_ ||
             name_collapse_exemptions_.find(resource_name) != name_collapse_exemptions_.end()) {
           local_key_index = (uint32_t)key_pool_.MakeRef(entry->name).index();
@@ -660,17 +634,17 @@ class PackageFlattener {
     ResTable_lib_header* lib_header =
         lib_writer.StartChunk<ResTable_lib_header>(RES_TABLE_LIBRARY_TYPE);
 
-    const size_t num_entries = (package_->id.value() == 0x00 ? 1 : 0) + shared_libs_->size();
+    const size_t num_entries = (package_.id.value() == 0x00 ? 1 : 0) + shared_libs_->size();
     CHECK(num_entries > 0);
 
     lib_header->count = util::HostToDevice32(num_entries);
 
     ResTable_lib_entry* lib_entry = buffer->NextBlock<ResTable_lib_entry>(num_entries);
-    if (package_->id.value() == 0x00) {
+    if (package_.id.value() == 0x00) {
       // Add this package
       lib_entry->packageId = util::HostToDevice32(0x00);
       strcpy16_htod(lib_entry->packageName, arraysize(lib_entry->packageName),
-                    util::Utf8ToUtf16(package_->name));
+                    util::Utf8ToUtf16(package_.name));
       ++lib_entry;
     }
 
@@ -685,7 +659,7 @@ class PackageFlattener {
 
   IAaptContext* context_;
   IDiagnostics* diag_;
-  ResourceTablePackage* package_;
+  const ResourceTablePackageView package_;
   const std::map<size_t, std::string>* shared_libs_;
   bool use_sparse_entries_;
   StringPool type_pool_;
@@ -709,9 +683,10 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
   });
 
   // Write the ResTable header.
+  const auto& table_view = table->GetPartitionedView();
   ChunkWriter table_writer(buffer_);
   ResTable_header* table_header = table_writer.StartChunk<ResTable_header>(RES_TABLE_TYPE);
-  table_header->packageCount = util::HostToDevice32(table->packages.size());
+  table_header->packageCount = util::HostToDevice32(table_view.packages.size());
 
   // Flatten the values string pool.
   StringPool::FlattenUtf8(table_writer.buffer(), table->string_pool,
@@ -720,24 +695,25 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
   BigBuffer package_buffer(1024);
 
   // Flatten each package.
-  for (auto& package : table->packages) {
+  for (auto& package : table_view.packages) {
     if (context->GetPackageType() == PackageType::kApp) {
       // Write a self mapping entry for this package if the ID is non-standard (0x7f).
-      const uint8_t package_id = package->id.value();
+      CHECK((bool)package.id) << "Resource ids have not been assigned before flattening the table";
+      const uint8_t package_id = package.id.value();
       if (package_id != kFrameworkPackageId && package_id != kAppPackageId) {
-        auto result = table->included_packages_.insert({package_id, package->name});
-        if (!result.second && result.first->second != package->name) {
+        auto result = table->included_packages_.insert({package_id, package.name});
+        if (!result.second && result.first->second != package.name) {
           // A mapping for this package ID already exists, and is a different package. Error!
           context->GetDiagnostics()->Error(
               DiagMessage() << android::base::StringPrintf(
                   "can't map package ID %02x to '%s'. Already mapped to '%s'", package_id,
-                  package->name.c_str(), result.first->second.c_str()));
+                  package.name.c_str(), result.first->second.c_str()));
           return false;
         }
       }
     }
 
-    PackageFlattener flattener(context, package.get(), &table->included_packages_,
+    PackageFlattener flattener(context, package, &table->included_packages_,
                                options_.use_sparse_entries, options_.collapse_key_stringpool,
                                options_.name_collapse_exemptions);
     if (!flattener.FlattenPackage(&package_buffer)) {

@@ -6972,51 +6972,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void deleteConversationNotificationChannels() throws Exception {
-        NotificationChannel messagesParent =
-                new NotificationChannel("messages", "messages", IMPORTANCE_HIGH);
-        Parcel msgParcel = Parcel.obtain();
-        messagesParent.writeToParcel(msgParcel, 0);
-        msgParcel.setDataPosition(0);
-
-        NotificationChannel callsParent =
-                new NotificationChannel("calls", "calls", IMPORTANCE_HIGH);
-        Parcel callParcel = Parcel.obtain();
-        callsParent.writeToParcel(callParcel, 0);
-        callParcel.setDataPosition(0);
-
-        mBinderService.createNotificationChannels(PKG, new ParceledListSlice(Arrays.asList(
-                messagesParent, callsParent)));
-
-        String conversationId = "friend";
-
-        mBinderService.createConversationNotificationChannelForPackage(
-                PKG, mUid, NotificationChannel.CREATOR.createFromParcel(msgParcel),
-                conversationId);
-        mBinderService.createConversationNotificationChannelForPackage(
-                PKG, mUid, NotificationChannel.CREATOR.createFromParcel(callParcel),
-                conversationId);
-
-        NotificationChannel messagesChild = mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, messagesParent.getId(), false, conversationId);
-        NotificationChannel callsChild = mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, callsParent.getId(), false, conversationId);
-
-        assertEquals(messagesParent.getId(), messagesChild.getParentChannelId());
-        assertEquals(conversationId, messagesChild.getConversationId());
-
-        assertEquals(callsParent.getId(), callsChild.getParentChannelId());
-        assertEquals(conversationId, callsChild.getConversationId());
-
-        mBinderService.deleteConversationNotificationChannels(PKG, mUid, conversationId);
-
-        assertNull(mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, messagesParent.getId(), false, conversationId));
-        assertNull(mBinderService.getConversationNotificationChannel(
-                PKG, 0, PKG, callsParent.getId(), false, conversationId));
-    }
-
-    @Test
     public void testCorrectCategory_systemOn_appCannotTurnOff() {
         int requested = 0;
         int system = PRIORITY_CATEGORY_CALLS | PRIORITY_CATEGORY_CONVERSATIONS;

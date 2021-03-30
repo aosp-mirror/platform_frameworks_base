@@ -31,6 +31,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -238,29 +239,90 @@ public class UiTranslationController {
         final SparseArray<ViewTranslationResponse> translatedResult =
                 response.getViewTranslationResponses();
         final SparseArray<ViewTranslationResponse> viewsResult = new SparseArray<>();
-        final SparseArray<ViewTranslationResponse> virtualViewsResult = new SparseArray<>();
-        final List<AutofillId> viewIds = new ArrayList<>();
+        final SparseArray<LongSparseArray<ViewTranslationResponse>> virtualViewsResult =
+                new SparseArray<>();
+        // TODO: use another structure to prevent autoboxing?
+        final List<Integer> viewIds = new ArrayList<>();
+
         for (int i = 0; i < translatedResult.size(); i++) {
             final ViewTranslationResponse result = translatedResult.valueAt(i);
             final AutofillId autofillId = result.getAutofillId();
+            if (!viewIds.contains(autofillId.getViewId())) {
+                viewIds.add(autofillId.getViewId());
+            }
             if (autofillId.isNonVirtual()) {
                 viewsResult.put(translatedResult.keyAt(i), result);
-                viewIds.add(autofillId);
             } else {
-                virtualViewsResult.put(translatedResult.keyAt(i), result);
+                final boolean isVirtualViewAdded =
+                        virtualViewsResult.indexOfKey(autofillId.getViewId()) > 0;
+                final LongSparseArray<ViewTranslationResponse> childIds =
+                        isVirtualViewAdded ? virtualViewsResult.get(autofillId.getViewId())
+                                : new LongSparseArray<>();
+                childIds.put(autofillId.getVirtualChildLongId(), result);
+                if (!isVirtualViewAdded) {
+                    virtualViewsResult.put(autofillId.getViewId(), childIds);
+                }
             }
         }
+        // Traverse tree and get views by the responsed AutofillId
+        findViewsTraversalByAutofillIds(viewIds);
+
         if (viewsResult.size() > 0) {
-            onTranslationCompleted(viewsResult, viewIds);
+            onTranslationCompleted(viewsResult);
         }
-        //TODO(b/177960696): call virtual views onTranslationCompleted()
+        if (virtualViewsResult.size() > 0) {
+            onVirtualViewTranslationCompleted(virtualViewsResult);
+        }
+    }
+
+    /**
+     * The method is used to handle the translation result for the vertual views.
+     */
+    private void onVirtualViewTranslationCompleted(
+            SparseArray<LongSparseArray<ViewTranslationResponse>> translatedResult) {
+        if (!mActivity.isResumed()) {
+            if (DEBUG) {
+                Log.v(TAG, "onTranslationCompleted: Activity is not resumed.");
+            }
+            return;
+        }
+        synchronized (mLock) {
+            if (mCurrentState == STATE_UI_TRANSLATION_FINISHED) {
+                Log.w(TAG, "onTranslationCompleted: the translation state is finished now. "
+                        + "Skip to show the translated text.");
+                return;
+            }
+            for (int i = 0; i < translatedResult.size(); i++) {
+                final AutofillId autofillId = new AutofillId(translatedResult.keyAt(i));
+                final View view = mViews.get(autofillId).get();
+                if (view == null) {
+                    Log.w(TAG, "onTranslationCompleted: the view for autofill id " + autofillId
+                            + " may be gone.");
+                    continue;
+                }
+                final LongSparseArray<ViewTranslationResponse> virtualChildResponse =
+                        translatedResult.valueAt(i);
+                mActivity.runOnUiThread(() -> {
+                    if (view.getViewTranslationCallback() == null) {
+                        if (DEBUG) {
+                            Log.d(TAG, view + " doesn't support showing translation because of "
+                                    + "null ViewTranslationCallback.");
+                        }
+                        return;
+                    }
+                    view.onTranslationResponse(virtualChildResponse);
+                    if (view.getViewTranslationCallback() != null) {
+                        view.getViewTranslationCallback().onShowTranslation(view);
+                    }
+                });
+            }
+        }
     }
 
     /**
      * The method is used to handle the translation result for non-vertual views.
      */
-    private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult,
-            List<AutofillId> viewIds) {
+    private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult) {
         if (!mActivity.isResumed()) {
             if (DEBUG) {
                 Log.v(TAG, "onTranslationCompleted: Activity is not resumed.");
@@ -277,8 +339,6 @@ public class UiTranslationController {
                         + "Skip to show the translated text.");
                 return;
             }
-            // Traverse tree and get views by the responsed AutofillId
-            findViewsTraversalByAutofillIds(viewIds);
             for (int i = 0; i < resultCount; i++) {
                 final ViewTranslationResponse response = translatedResult.valueAt(i);
                 final AutofillId autofillId = response.getAutofillId();
@@ -300,7 +360,9 @@ public class UiTranslationController {
                         return;
                     }
                     view.onTranslationResponse(response);
-                    view.getViewTranslationCallback().onShowTranslation(view);
+                    if (view.getViewTranslationCallback() != null) {
+                        view.getViewTranslationCallback().onShowTranslation(view);
+                    }
                 });
             }
         }
@@ -359,7 +421,7 @@ public class UiTranslationController {
                         childs = new long[childCount];
                         viewIds.put(virtualViewAutofillId, childs);
                     }
-                    int end = childs.length;
+                    int end = childs.length - 1;
                     childs[end] = autofillId.getVirtualChildLongId();
                 }
             }
@@ -403,7 +465,7 @@ public class UiTranslationController {
         return new int[] {TranslationSpec.DATA_FORMAT_TEXT};
     }
 
-    private void findViewsTraversalByAutofillIds(List<AutofillId> sourceViewIds) {
+    private void findViewsTraversalByAutofillIds(List<Integer> sourceViewIds) {
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(mActivity.getActivityToken());
         for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
@@ -417,7 +479,7 @@ public class UiTranslationController {
     }
 
     private void findViewsTraversalByAutofillIds(ViewGroup viewGroup,
-            List<AutofillId> sourceViewIds) {
+            List<Integer> sourceViewIds) {
         final int childCount = viewGroup.getChildCount();
         for (int i = 0; i < childCount; ++i) {
             final View child = viewGroup.getChildAt(i);
@@ -429,9 +491,9 @@ public class UiTranslationController {
         }
     }
 
-    private void addViewIfNeeded(List<AutofillId> sourceViewIds, View view) {
+    private void addViewIfNeeded(List<Integer> sourceViewIds, View view) {
         final AutofillId autofillId = view.getAutofillId();
-        if (sourceViewIds.contains(autofillId)) {
+        if (sourceViewIds.contains(autofillId.getViewId()) && !mViews.containsKey(autofillId)) {
             mViews.put(autofillId, new WeakReference<>(view));
         }
     }

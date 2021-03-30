@@ -71,6 +71,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.content.AttributionSource;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -86,6 +87,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -207,37 +209,35 @@ public class PreferencesHelperTest extends UiServiceTestCase {
             throw new UnsupportedOperationException("unimplemented mock method");
         });
         doAnswer(invocation -> {
-            String callingPkg = invocation.getArgument(0);
-            String featureId = invocation.getArgument(1);
-            Uri uri = invocation.getArgument(2);
-            RemoteCallback cb = invocation.getArgument(3);
+            AttributionSource attributionSource = invocation.getArgument(0);
+            Uri uri = invocation.getArgument(1);
+            RemoteCallback cb = invocation.getArgument(2);
             IContentProvider mock = (IContentProvider) (invocation.getMock());
             AsyncTask.SERIAL_EXECUTOR.execute(() -> {
                 final Bundle bundle = new Bundle();
                 try {
                     bundle.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
-                            mock.canonicalize(callingPkg, featureId, uri));
+                            mock.canonicalize(attributionSource, uri));
                 } catch (RemoteException e) { /* consume */ }
                 cb.sendResult(bundle);
             });
             return null;
-        }).when(mTestIContentProvider).canonicalizeAsync(any(), any(), any(), any());
+        }).when(mTestIContentProvider).canonicalizeAsync(any(), any(), any());
         doAnswer(invocation -> {
-            String callingPkg = invocation.getArgument(0);
-            String featureId = invocation.getArgument(1);
-            Uri uri = invocation.getArgument(2);
-            RemoteCallback cb = invocation.getArgument(3);
+            AttributionSource attributionSource = invocation.getArgument(0);
+            Uri uri = invocation.getArgument(1);
+            RemoteCallback cb = invocation.getArgument(2);
             IContentProvider mock = (IContentProvider) (invocation.getMock());
             AsyncTask.SERIAL_EXECUTOR.execute(() -> {
                 final Bundle bundle = new Bundle();
                 try {
                     bundle.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
-                            mock.uncanonicalize(callingPkg, featureId, uri));
+                            mock.uncanonicalize(attributionSource, uri));
                 } catch (RemoteException e) { /* consume */ }
                 cb.sendResult(bundle);
             });
             return null;
-        }).when(mTestIContentProvider).uncanonicalizeAsync(any(), any(), any(), any());
+        }).when(mTestIContentProvider).uncanonicalizeAsync(any(), any(), any());
         doAnswer(invocation -> {
             Uri uri = invocation.getArgument(0);
             RemoteCallback cb = invocation.getArgument(1);
@@ -256,11 +256,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         contentResolver.addProvider(TEST_AUTHORITY, testContentProvider);
 
         doReturn(CANONICAL_SOUND_URI)
-                .when(mTestIContentProvider).canonicalize(any(), any(), eq(SOUND_URI));
+                .when(mTestIContentProvider).canonicalize(any(), eq(SOUND_URI));
         doReturn(CANONICAL_SOUND_URI)
-                .when(mTestIContentProvider).canonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+                .when(mTestIContentProvider).canonicalize(any(), eq(CANONICAL_SOUND_URI));
         doReturn(SOUND_URI)
-                .when(mTestIContentProvider).uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+                .when(mTestIContentProvider).uncanonicalize(any(), eq(CANONICAL_SOUND_URI));
 
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
@@ -594,7 +594,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         // Testing that in restore we are given the canonical version
         loadStreamXml(baos, true, UserHandle.USER_SYSTEM);
-        verify(mTestIContentProvider).uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+        verify(mTestIContentProvider).uncanonicalize(any(), eq(CANONICAL_SOUND_URI));
     }
 
     @Test
@@ -605,12 +605,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .appendQueryParameter("canonical", "1")
                 .build();
         doReturn(canonicalBasedOnLocal)
-                .when(mTestIContentProvider).canonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+                .when(mTestIContentProvider).canonicalize(any(), eq(CANONICAL_SOUND_URI));
         doReturn(localUri)
-                .when(mTestIContentProvider).uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+                .when(mTestIContentProvider).uncanonicalize(any(), eq(CANONICAL_SOUND_URI));
         doReturn(localUri)
-                .when(mTestIContentProvider).uncanonicalize(any(), any(),
-                eq(canonicalBasedOnLocal));
+                .when(mTestIContentProvider).uncanonicalize(any(), eq(canonicalBasedOnLocal));
 
         NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_LOW);
@@ -630,9 +629,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testRestoreXml_withNonExistentCanonicalizedSoundUri() throws Exception {
         Thread.sleep(3000);
         doReturn(null)
-                .when(mTestIContentProvider).canonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+                .when(mTestIContentProvider).canonicalize(any(), eq(CANONICAL_SOUND_URI));
         doReturn(null)
-                .when(mTestIContentProvider).uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+                .when(mTestIContentProvider).uncanonicalize(any(), eq(CANONICAL_SOUND_URI));
 
         NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_LOW);
@@ -657,7 +656,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testRestoreXml_withUncanonicalizedNonLocalSoundUri() throws Exception {
         // Not a local uncanonicalized uri, simulating that it fails to exist locally
         doReturn(null)
-                .when(mTestIContentProvider).canonicalize(any(), any(), eq(SOUND_URI));
+                .when(mTestIContentProvider).canonicalize(any(), eq(SOUND_URI));
         String id = "id";
         String backupWithUncanonicalizedSoundUri = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
