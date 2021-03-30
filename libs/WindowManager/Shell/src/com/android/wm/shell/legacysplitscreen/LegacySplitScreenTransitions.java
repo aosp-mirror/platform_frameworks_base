@@ -47,7 +47,7 @@ import com.android.wm.shell.transition.Transitions;
 import java.util.ArrayList;
 
 /** Plays transition animations for split-screen */
-public class SplitScreenTransitions implements Transitions.TransitionHandler {
+public class LegacySplitScreenTransitions implements Transitions.TransitionHandler {
     private static final String TAG = "SplitScreenTransitions";
 
     public static final int TRANSIT_SPLIT_DISMISS_SNAP = TRANSIT_FIRST_CUSTOM + 10;
@@ -68,7 +68,7 @@ public class SplitScreenTransitions implements Transitions.TransitionHandler {
     private Transitions.TransitionFinishCallback mFinishCallback = null;
     private SurfaceControl.Transaction mFinishTransaction;
 
-    SplitScreenTransitions(@NonNull TransactionPool pool, @NonNull Transitions transitions,
+    LegacySplitScreenTransitions(@NonNull TransactionPool pool, @NonNull Transitions transitions,
             @NonNull LegacySplitScreenController splitScreen,
             @NonNull LegacySplitScreenTaskListener listener) {
         mTransactionPool = pool;
