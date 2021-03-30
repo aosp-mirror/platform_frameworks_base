@@ -40,15 +40,17 @@ class SideStage extends StageTaskListener {
     void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
             WindowContainerTransaction wct) {
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setHidden(rootToken, false)
-                .setBounds(rootToken, rootBounds)
+        wct.setBounds(rootToken, rootBounds)
                 .reparent(task.token, rootToken, true /* onTop*/)
                 // Moving the root task to top after the child tasks were repareted , or the root
                 // task cannot be visible and focused.
-                .reorder(rootToken, true);
+                .reorder(rootToken, true /* onTop */);
     }
 
     boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
+        // No matter if the root task is empty or not, moving the root to bottom because it no
+        // longer preserves visible child task.
+        wct.reorder(mRootTaskInfo.token, false /* onTop */);
         if (mChildrenTaskInfo.size() == 0) return false;
         wct.reparentTasks(
                 mRootTaskInfo.token,
@@ -62,10 +64,7 @@ class SideStage extends StageTaskListener {
     boolean removeTask(int taskId, WindowContainerToken newParent, WindowContainerTransaction wct) {
         final ActivityManager.RunningTaskInfo task = mChildrenTaskInfo.get(taskId);
         if (task == null) return false;
-
-        wct.setHidden(mRootTaskInfo.token, true)
-                .reorder(mRootTaskInfo.token, false)
-                .reparent(task.token, newParent, false /* onTop */);
+        wct.reparent(task.token, newParent, false /* onTop */);
         return true;
     }
 }
