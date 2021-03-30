@@ -35,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -118,11 +119,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mUiEventLogger = uiEventLogger;
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
         mDecoration = new TileItemDecoration(context);
-        mMarginDecoration = new MarginTileDecoration();
+        mMarginDecoration = new MarginTileDecoration(!useHorizontalTiles);
         mMinNumTiles = context.getResources().getInteger(R.integer.quick_settings_min_num_tiles);
         mNumColumns = context.getResources().getInteger(NUM_COLUMNS_ID);
         mAccessibilityDelegate = new TileAdapterDelegate();
         mUseHorizontalTiles = useHorizontalTiles;
+        mSizeLookup.setSpanIndexCacheEnabled(true);
     }
 
     @Override
@@ -708,6 +710,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     private static class MarginTileDecoration extends ItemDecoration {
         private int mHalfMargin;
+        private final boolean mUseOutsideMargins;
+
+        private MarginTileDecoration(boolean useOutsideMargins) {
+            mUseOutsideMargins = useOutsideMargins;
+        }
 
         public void setHalfMargin(int halfMargin) {
             mHalfMargin = halfMargin;
@@ -716,11 +723,30 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         @Override
         public void getItemOffsets(@NonNull Rect outRect, @NonNull View view,
                 @NonNull RecyclerView parent, @NonNull State state) {
+            if (parent.getLayoutManager() == null) return;
+
+            GridLayoutManager lm = ((GridLayoutManager) parent.getLayoutManager());
+            SpanSizeLookup span = lm.getSpanSizeLookup();
+            ViewHolder holder = parent.getChildViewHolder(view);
+            int column = span.getSpanIndex(holder.getLayoutPosition(), lm.getSpanCount());
+
             if (view instanceof TextView) {
                 super.getItemOffsets(outRect, view, parent, state);
             } else {
-                outRect.left = mHalfMargin;
-                outRect.right = mHalfMargin;
+                if (mUseOutsideMargins || (column != 0 && column != lm.getSpanCount() - 1)) {
+                    // Using outside margins or in a column that's not leftmost or rightmost
+                    // (half of the margin between columns).
+                    outRect.left = mHalfMargin;
+                    outRect.right = mHalfMargin;
+                } else if (column == 0) {
+                    // Leftmost column when not using side margins. Should only have margin on the
+                    // right.
+                    outRect.right = mHalfMargin;
+                } else {
+                    // Rightmost column when not using side margins. Should only have margin on the
+                    // left.
+                    outRect.left = mHalfMargin;
+                }
             }
         }
     }
