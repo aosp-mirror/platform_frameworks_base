@@ -14744,7 +14744,7 @@ package android.webkit {
     method public default boolean onCheckIsTextEditor();
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
-    method @Nullable public default void onCreateTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
+    method public default void onCreateTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
     method public void onDetachedFromWindow();
     method public boolean onDragEvent(android.view.DragEvent);
     method public void onDraw(android.graphics.Canvas);
