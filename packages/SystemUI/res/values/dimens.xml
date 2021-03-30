@@ -1396,4 +1396,19 @@
     <dimen name="rounded_slider_track_width">8dp</dimen>
     <!-- rounded_slider_track_width / 2 -->
     <dimen name="rounded_slider_track_corner_radius">4dp</dimen>
+
+    <!-- Location on the screen of the center of the physical power button. This is a reasonable
+    default that should be overridden by device-specific overlays. -->
+    <dimen name="physical_power_button_center_screen_location_y">620px</dimen>
+
+    <!-- Location on the screen of the center of the physical volume up/down buttons. This is a
+    reasonable default that should be overridden by device-specific overlays. -->
+    <dimen name="physical_volume_up_button_center_screen_location_y">950px</dimen>
+    <dimen name="physical_volume_down_button_center_screen_location_y">1150px</dimen>
+
+    <!-- Location on the screen of the center of the fingerprint sensor. For devices with under
+     display fingerprint sensors, this directly corresponds to the fingerprint sensor's location.
+     For devices with sensors on the back of the device, this corresponds to the location on the
+     screen directly in front of the sensor. -->
+    <dimen name="physical_fingerprint_sensor_center_screen_location_y">610px</dimen>
 </resources>

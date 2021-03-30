@@ -2964,7 +2964,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         mPowerButtonReveal = new PowerButtonReveal(mContext.getResources().getDimensionPixelSize(
-                R.dimen.global_actions_top_padding));
+                com.android.systemui.R.dimen.physical_power_button_center_screen_location_y));
     }
 
     // Visibility reporting
