@@ -26,11 +26,11 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.startRotation
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
-import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -91,8 +91,8 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun appLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
-            coversExactly(startingBounds, fixedApp.defaultWindowName)
-            coversAtMost(startingBounds, pipApp.defaultWindowName)
+            visibleRegion(fixedApp.defaultWindowName).coversExactly(startingBounds)
+            visibleRegion(pipApp.defaultWindowName).coversAtMost(startingBounds)
         }
     }
 
@@ -100,8 +100,8 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun appLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {
-            coversExactly(endingBounds, fixedApp.defaultWindowName)
-            coversAtMost(endingBounds, pipApp.defaultWindowName)
+            visibleRegion(fixedApp.defaultWindowName).coversExactly(endingBounds)
+            visibleRegion(pipApp.defaultWindowName).coversAtMost(endingBounds)
         }
     }
 

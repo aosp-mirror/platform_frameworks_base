@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.close
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -87,13 +88,13 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.statusBarLayerIsAlwaysVisible()
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun statusBarLayerRotatesScales() {
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
