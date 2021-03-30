@@ -63,7 +63,7 @@ class PipMovesInAllApps(testSpec: FlickerTestParameter) : PipTransition(testSpec
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
-            coversAtMost(displayBounds, pipApp.defaultWindowName)
+            visibleRegion(pipApp.defaultWindowName).coversAtMost(displayBounds)
         }
     }
 
