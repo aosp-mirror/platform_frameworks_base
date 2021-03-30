@@ -1033,6 +1033,27 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     /**
+     * Verify that finish request for the last activity in a task will request a shell transition
+     * with that task as a trigger.
+     */
+    @Test
+    public void testFinishActivityIfPossible_lastInTaskRequestsTransitionWithTrigger() {
+        // Set-up mock shell transitions
+        final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
+                mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
+        mAtm.getTransitionController().registerTransitionPlayer(testPlayer);
+
+        final ActivityRecord activity = createActivityWithTask();
+        activity.finishing = false;
+        activity.mVisibleRequested = true;
+        activity.setState(RESUMED, "test");
+        activity.finishIfPossible("test", false /* oomAdj */);
+
+        verify(activity).setVisibility(eq(false));
+        assertEquals(activity.getTask().mTaskId, testPlayer.mLastRequest.getTriggerTask().taskId);
+    }
+
+    /**
      * Verify that complete finish request for non-finishing activity is invalid.
      */
     @Test(expected = IllegalArgumentException.class)
