@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -67,7 +68,7 @@ class PipMovesInAllApps(testSpec: FlickerTestParameter) : PipTransition(testSpec
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 184050344)
     @Test
     fun pipWindowMovesUp() = testSpec.assertWmEnd {
         val initialState = this.trace?.first()?.wmState
