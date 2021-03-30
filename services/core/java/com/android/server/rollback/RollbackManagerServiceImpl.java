@@ -615,7 +615,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 if (session == null || session.isStagedSessionFailed()) {
                     iter.remove();
                     deleteRollback(rollback,
-                            "Session " + session.getSessionId() + " not existed or failed");
+                            "Session " + rollback.getStagedSessionId() + " not existed or failed");
                     continue;
                 }
 
