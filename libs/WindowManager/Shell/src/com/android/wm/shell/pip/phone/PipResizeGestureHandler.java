@@ -117,6 +117,7 @@ public class PipResizeGestureHandler {
     private InputEventReceiver mInputEventReceiver;
 
     private int mCtrlType;
+    private int mOhmOffset;
 
     public PipResizeGestureHandler(Context context, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
@@ -520,7 +521,7 @@ public class PipResizeGestureHandler {
     private void onDragCornerResize(MotionEvent ev) {
         int action = ev.getActionMasked();
         float x = ev.getX();
-        float y = ev.getY();
+        float y = ev.getY() - mOhmOffset;
         if (action == MotionEvent.ACTION_DOWN) {
             final Rect currentPipBounds = mPipBoundsState.getBounds();
             mLastResizeBounds.setEmpty();
@@ -637,6 +638,10 @@ public class PipResizeGestureHandler {
         mMinSize.set(minX, minY);
     }
 
+    void setOhmOffset(int offset) {
+        mOhmOffset = offset;
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
@@ -645,6 +650,7 @@ public class PipResizeGestureHandler {
         pw.println(innerPrefix + "mIsEnabled=" + mIsEnabled);
         pw.println(innerPrefix + "mEnablePinchResize=" + mEnablePinchResize);
         pw.println(innerPrefix + "mThresholdCrossed=" + mThresholdCrossed);
+        pw.println(innerPrefix + "mOhmOffset=" + mOhmOffset);
     }
 
     class PipResizeInputEventReceiver extends BatchedInputEventReceiver {
