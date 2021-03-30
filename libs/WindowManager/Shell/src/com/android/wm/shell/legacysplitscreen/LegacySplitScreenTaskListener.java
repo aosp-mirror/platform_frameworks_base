@@ -67,7 +67,7 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     final SurfaceSession mSurfaceSession = new SurfaceSession();
 
-    private final SplitScreenTransitions mSplitTransitions;
+    private final LegacySplitScreenTransitions mSplitTransitions;
 
     LegacySplitScreenTaskListener(LegacySplitScreenController splitScreenController,
                     ShellTaskOrganizer shellTaskOrganizer,
@@ -75,7 +75,7 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
                     SyncTransactionQueue syncQueue) {
         mSplitScreenController = splitScreenController;
         mTaskOrganizer = shellTaskOrganizer;
-        mSplitTransitions = new SplitScreenTransitions(splitScreenController.mTransactionPool,
+        mSplitTransitions = new LegacySplitScreenTransitions(splitScreenController.mTransactionPool,
                 transitions, mSplitScreenController, this);
         transitions.addHandler(mSplitTransitions);
         mSyncQueue = syncQueue;
@@ -112,7 +112,7 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
         return mTaskOrganizer;
     }
 
-    SplitScreenTransitions getSplitTransitions() {
+    LegacySplitScreenTransitions getSplitTransitions() {
         return mSplitTransitions;
     }
 
