@@ -746,11 +746,14 @@ public class JobSchedulerService extends com.android.server.SystemService
                                             Slog.d(TAG, "Removing jobs for package " + pkgName
                                                     + " in user " + userId);
                                         }
-                                        // By the time we get here, the process should have already
-                                        // been stopped, so the app wouldn't get the stop reason,
-                                        // so just put USER instead of UNINSTALL or DISABLED.
-                                        cancelJobsForPackageAndUid(pkgName, pkgUid,
-                                                JobParameters.STOP_REASON_USER, "app disabled");
+                                        synchronized (mLock) {
+                                            // By the time we get here, the process should have
+                                            // already been stopped, so the app wouldn't get the
+                                            // stop reason, so just put USER instead of UNINSTALL
+                                            // or DISABLED.
+                                            cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
+                                                    JobParameters.STOP_REASON_USER, "app disabled");
+                                        }
                                     }
                                 } catch (RemoteException|IllegalArgumentException e) {
                                     /*
@@ -791,9 +794,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // By the time we get here, the process should have already
                     // been stopped, so the app wouldn't get the stop reason,
                     // so just put USER instead of UNINSTALL or DISABLED.
-                    cancelJobsForPackageAndUid(pkgName, uidRemoved,
-                            JobParameters.STOP_REASON_USER, "app uninstalled");
                     synchronized (mLock) {
+                        cancelJobsForPackageAndUidLocked(pkgName, uidRemoved,
+                                JobParameters.STOP_REASON_USER, "app uninstalled");
                         for (int c = 0; c < mControllers.size(); ++c) {
                             mControllers.get(c).onAppRemovedLocked(pkgName, pkgUid);
                         }
@@ -812,8 +815,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (DEBUG) {
                     Slog.d(TAG, "Removing jobs for user: " + userId);
                 }
-                cancelJobsForUser(userId);
                 synchronized (mLock) {
+                    cancelJobsForUserLocked(userId);
                     for (int c = 0; c < mControllers.size(); ++c) {
                         mControllers.get(c).onUserRemovedLocked(userId);
                     }
@@ -844,8 +847,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (DEBUG) {
                         Slog.d(TAG, "Removing jobs for pkg " + pkgName + " at uid " + pkgUid);
                     }
-                    cancelJobsForPackageAndUid(pkgName, pkgUid,
-                            JobParameters.STOP_REASON_USER, "app force stopped");
+                    synchronized (mLock) {
+                        cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
+                                JobParameters.STOP_REASON_USER, "app force stopped");
+                    }
                 }
             }
         }
@@ -1106,16 +1111,14 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    void cancelJobsForUser(int userHandle) {
-        synchronized (mLock) {
-            final List<JobStatus> jobsForUser = mJobs.getJobsByUser(userHandle);
-            for (int i=0; i<jobsForUser.size(); i++) {
-                JobStatus toRemove = jobsForUser.get(i);
-                // By the time we get here, the process should have already been stopped, so the
-                // app wouldn't get the stop reason, so just put USER instead of UNINSTALL.
-                cancelJobImplLocked(toRemove, null, JobParameters.STOP_REASON_USER,
-                        "user removed");
-            }
+    private void cancelJobsForUserLocked(int userHandle) {
+        final List<JobStatus> jobsForUser = mJobs.getJobsByUser(userHandle);
+        for (int i = 0; i < jobsForUser.size(); i++) {
+            JobStatus toRemove = jobsForUser.get(i);
+            // By the time we get here, the process should have already been stopped, so the
+            // app wouldn't get the stop reason, so just put USER instead of UNINSTALL.
+            cancelJobImplLocked(toRemove, null, JobParameters.STOP_REASON_USER,
+                    "user removed");
         }
     }
 
@@ -1126,19 +1129,17 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    void cancelJobsForPackageAndUid(String pkgName, int uid, @JobParameters.StopReason int reason,
-            String debugReason) {
+    private void cancelJobsForPackageAndUidLocked(String pkgName, int uid,
+            @JobParameters.StopReason int reason, String debugReason) {
         if ("android".equals(pkgName)) {
             Slog.wtfStack(TAG, "Can't cancel all jobs for system package");
             return;
         }
-        synchronized (mLock) {
-            final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
-            for (int i = jobsForUid.size() - 1; i >= 0; i--) {
-                final JobStatus job = jobsForUid.get(i);
-                if (job.getSourcePackageName().equals(pkgName)) {
-                    cancelJobImplLocked(job, null, reason, debugReason);
-                }
+        final List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
+        for (int i = jobsForUid.size() - 1; i >= 0; i--) {
+            final JobStatus job = jobsForUid.get(i);
+            if (job.getSourcePackageName().equals(pkgName)) {
+                cancelJobImplLocked(job, null, reason, debugReason);
             }
         }
     }
