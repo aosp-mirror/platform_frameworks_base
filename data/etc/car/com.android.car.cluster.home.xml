@@ -16,6 +16,8 @@
   -->
 <permissions>
     <privapp-permissions package="com.android.car.cluster.home">
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.car.permission.ACCESS_PRIVATE_DISPLAY_ID"/>
         <permission name="android.car.permission.CAR_INSTRUMENT_CLUSTER_CONTROL"/>
     </privapp-permissions>
 </permissions>
