@@ -66,22 +66,13 @@ final class OnTranslationResultCallbackWrapper implements
         }
     }
 
+    /**
+     * @deprecated use {@link #onTranslationSuccess} with error response instead.
+     */
     @Override
+    @Deprecated
     public void onError() {
-        assertNotCalled();
-        if (mCalled.getAndSet(true)) {
-            throw new IllegalStateException("Already called");
-        }
-
-        try {
-            mCallback.onError();
-        } catch (RemoteException e) {
-            if (e instanceof DeadObjectException) {
-                Log.w(TAG, "Process is dead, ignore.");
-                return;
-            }
-            throw e.rethrowAsRuntimeException();
-        }
+        // no-op.
     }
 
     private void assertNotCalled() {

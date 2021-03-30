@@ -10323,7 +10323,7 @@ package android.service.translation {
   }
 
   public static interface TranslationService.OnTranslationResultCallback {
-    method public void onError();
+    method @Deprecated public void onError();
     method public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
   }
 

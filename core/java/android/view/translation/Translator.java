@@ -329,24 +329,5 @@ public class Translator {
                 }
             }
         }
-
-        @Override
-        public void onError() throws RemoteException {
-            final Consumer<TranslationResponse>  callback = mCallback.get();
-            final Runnable runnable = () -> callback.accept(
-                    new TranslationResponse.Builder(
-                            TranslationResponse.TRANSLATION_STATUS_UNKNOWN_ERROR)
-                            .build());
-
-            if (callback != null) {
-                final Executor executor = mExecutor.get();
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    executor.execute(runnable);
-                } finally {
-                    restoreCallingIdentity(token);
-                }
-            }
-        }
     }
 }
