@@ -8213,9 +8213,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // 11. Free storage service cache
             StorageManagerInternal smInternal =
                     mInjector.getLocalService(StorageManagerInternal.class);
-            // TODO(b/170481432): Decide what value of bytes needs to be sent instead of
-            // sending the bytes parameter of freeStorage
-            smInternal.freeCache(volumeUuid, bytes);
+            long freeBytesRequired = bytes - file.getUsableSpace();
+            if (freeBytesRequired > 0) {
+                smInternal.freeCache(volumeUuid, freeBytesRequired);
+            }
             if (file.getUsableSpace() >= bytes) return;
         } else {
             try {
