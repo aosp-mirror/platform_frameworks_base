@@ -44,6 +44,7 @@ public class UsageProgressBarPreference extends Preference {
 
     private CharSequence mUsageSummary;
     private CharSequence mTotalSummary;
+    private CharSequence mBottomSummary;
     private ImageView mCustomImageView;
     private int mPercent = -1;
 
@@ -101,6 +102,15 @@ public class UsageProgressBarPreference extends Preference {
         notifyChanged();
     }
 
+    /** Set bottom summary. */
+    public void setBottomSummary(CharSequence bottomSummary) {
+        if (TextUtils.equals(mBottomSummary, bottomSummary)) {
+            return;
+        }
+        mBottomSummary = bottomSummary;
+        notifyChanged();
+    }
+
     /** Set percentage of the progress bar. */
     public void setPercent(long usage, long total) {
         if (total == 0L || usage >  total) {
@@ -145,6 +155,14 @@ public class UsageProgressBarPreference extends Preference {
         final TextView totalSummary = (TextView) holder.findViewById(R.id.total_summary);
         if (mTotalSummary != null) {
             totalSummary.setText(mTotalSummary);
+        }
+
+        final TextView bottomSummary = (TextView) holder.findViewById(R.id.bottom_summary);
+        if (TextUtils.isEmpty(mBottomSummary)) {
+            bottomSummary.setVisibility(View.GONE);
+        } else {
+            bottomSummary.setVisibility(View.VISIBLE);
+            bottomSummary.setText(mBottomSummary);
         }
 
         final ProgressBar progressBar = (ProgressBar) holder.findViewById(android.R.id.progress);
