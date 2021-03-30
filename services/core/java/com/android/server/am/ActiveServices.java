@@ -24,6 +24,8 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
+import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
+import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
 import static android.os.PowerWhitelistManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerWhitelistManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
@@ -5769,6 +5771,17 @@ public final class ActiveServices {
                     UserHandle.getUserId(callingUid), callingUid);
             if (isCompanionApp) {
                 ret = REASON_COMPANION_DEVICE_MANAGER;
+            }
+        }
+
+        if (ret == REASON_DENIED) {
+            final AppOpsManager appOpsManager = mAm.getAppOpsManager();
+            if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, callingUid,
+                    callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                ret = REASON_OP_ACTIVATE_VPN;
+            } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
+                    callingUid, callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                ret = REASON_OP_ACTIVATE_PLATFORM_VPN;
             }
         }
 
