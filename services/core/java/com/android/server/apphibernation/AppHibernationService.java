@@ -362,6 +362,7 @@ public final class AppHibernationService extends SystemService {
             UserLevelState pkgState) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
         pkgState.hibernated = false;
+        pkgState.lastUnhibernatedMs = System.currentTimeMillis();
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
@@ -383,6 +384,7 @@ public final class AppHibernationService extends SystemService {
     private void unhibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackageGlobally");
         state.hibernated = false;
+        state.lastUnhibernatedMs = System.currentTimeMillis();
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
