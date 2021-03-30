@@ -150,12 +150,12 @@ public class QSTileImplTest extends SysuiTestCase {
 
     @Test
     public void testClick_falsing() {
-        mFalsingManager.setFalseRobustTap(true);
+        mFalsingManager.setFalseTap(true);
         mTile.click();
         mTestableLooper.processAllMessages();
         assertThat(mTile.mClicked).isFalse();
 
-        mFalsingManager.setFalseRobustTap(false);
+        mFalsingManager.setFalseTap(false);
         mTile.click();
         mTestableLooper.processAllMessages();
         assertThat(mTile.mClicked).isTrue();

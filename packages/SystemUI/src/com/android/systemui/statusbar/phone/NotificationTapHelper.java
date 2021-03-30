@@ -64,7 +64,7 @@ public class NotificationTapHelper {
                 mTrackTouch = event.getY() <= maxTouchableHeight;
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (mTrackTouch && mFalsingManager.isFalseTap(false, 0)) {
+                if (mTrackTouch && !mFalsingManager.isSimpleTap()) {
                     makeInactive();
                     mTrackTouch = false;
                 }
@@ -78,10 +78,10 @@ public class NotificationTapHelper {
 
                 // 1) See if we have confidence that we can activate after a single tap.
                 // 2) Else, see if it looks like a tap at all and check for a double-tap.
-                if (!mFalsingManager.isFalseTap(true, 0)) {
+                if (!mFalsingManager.isFalseTap(FalsingManager.NO_PENALTY)) {
                     makeInactive();
                     return mDoubleTapListener.onDoubleTap();
-                } else if (!mFalsingManager.isFalseTap(false, 0)) {
+                } else if (mFalsingManager.isSimpleTap()) {
                     if (mSlideBackListener != null && mSlideBackListener.onSlideBack()) {
                         return true;
                     }

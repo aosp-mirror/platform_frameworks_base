@@ -276,7 +276,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_CLICK, 0, getMetricsSpec(),
                 getInstanceId());
         mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
-        if (!mFalsingManager.isFalseTap(true, 0.1)) {
+        if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             mHandler.sendEmptyMessage(H.CLICK);
         }
     }
