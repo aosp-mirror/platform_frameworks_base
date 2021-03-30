@@ -234,7 +234,7 @@ public class InsetsControllerTest {
         InsetsSourceControl ime = controls[2];
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained();
+            mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained(true);
             // since there is no focused view, forcefully make IME visible.
             mController.show(Type.ime(), true /* fromIme */);
             mController.show(Type.all());
@@ -260,7 +260,7 @@ public class InsetsControllerTest {
         InsetsSourceControl ime = createControl(ITYPE_IME);
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained();
+            mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained(true);
             mController.show(Type.ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
