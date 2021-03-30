@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"സൂര്യോദയം വരെ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>-ന്"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> വരെ"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"തെളിച്ചം കുറയ്ക്കുക"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC പ്രവർത്തനക്ഷമമാക്കി"</string>
@@ -652,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ഡെമോ മോഡ് കാണിക്കുക"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ഇതർനെറ്റ്"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"അലാറം"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"തയ്യാറാണ്"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ഫ്ലൈറ്റ് മോഡ്"</string>
     <string name="add_tile" msgid="6239678623873086686">"ടൈൽ ചേർക്കുക"</string>
@@ -716,7 +713,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"സ്വയമേവ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ശബ്ദമോ വൈബ്രേഷനോ ഇല്ല"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ശബ്‌ദമോ വൈബ്രേഷനോ ഇല്ല, സംഭാഷണ വിഭാഗത്തിന് താഴെയായി ദൃശ്യമാകും"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ് ചെയ്‌തേക്കാം അല്ലെങ്കിൽ വൈബ്രേറ്റ് ചെയ്‌തേക്കാം"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ്/വൈബ്രേറ്റ് ചെയ്യും"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ് ചെയ്‌തേക്കാം അല്ലെങ്കിൽ വൈബ്രേറ്റ് ചെയ്‌തേക്കാം. <xliff:g id="APP_NAME">%1$s</xliff:g>-ൽ നിന്നുള്ള സംഭാഷണങ്ങൾ ഡിഫോൾട്ടായി ബബ്ൾ ആവുന്നു."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ഈ ഉള്ളടക്കത്തിലേക്ക് ഒരു ഫ്ലോട്ടിംഗ് കുറുക്കുവഴി ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ നിലനിർത്തുന്നു."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ഈ അറിയിപ്പ് വരുമ്പോൾ ശബ്‌ദിക്കുകയാണോ വൈബ്രേറ്റ് ചെയ്യുകയാണോ വേണ്ടതെന്ന് നിർണ്ണയിക്കാൻ സിസ്‌റ്റത്തെ അനുവദിക്കുക"</string>
