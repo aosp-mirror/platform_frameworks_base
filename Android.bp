@@ -850,10 +850,14 @@ filegroup {
     srcs: [
         "core/java/android/annotation/AnyThread.java",
         "core/java/android/annotation/AppIdInt.java",
-        "core/java/android/annotation/CallSuper.java",
+        "core/java/android/annotation/BytesLong.java",
         "core/java/android/annotation/CallbackExecutor.java",
+        "core/java/android/annotation/CallSuper.java",
         "core/java/android/annotation/CheckResult.java",
         "core/java/android/annotation/CurrentTimeMillisLong.java",
+        "core/java/android/annotation/CurrentTimeSecondsLong.java",
+        "core/java/android/annotation/DrawableRes.java",
+        "core/java/android/annotation/DurationMillisLong.java",
         "core/java/android/annotation/Hide.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
@@ -871,8 +875,8 @@ filegroup {
         "core/java/android/annotation/UserIdInt.java",
         "core/java/android/annotation/WorkerThread.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
-        "core/java/com/android/internal/annotations/VisibleForTesting.java",
         "core/java/com/android/internal/annotations/Immutable.java",
+        "core/java/com/android/internal/annotations/VisibleForTesting.java",
     ],
 }
 
@@ -886,7 +890,6 @@ filegroup {
     name: "framework-ike-shared-srcs",
     visibility: ["//packages/modules/IPsec"],
     srcs: [
-        "core/java/android/annotation/StringDef.java",
         "core/java/android/net/annotations/PolicyDirection.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IState.java",
@@ -1357,28 +1360,6 @@ python_binary_host {
     ],
     libs: [
         "fontTools",
-    ],
-}
-
-filegroup {
-    name: "framework-media-annotation-srcs",
-    srcs: [
-        ":framework-annotations",
-        "core/java/android/annotation/CallbackExecutor.java",
-        "core/java/android/annotation/CallSuper.java",
-        "core/java/android/annotation/DrawableRes.java",
-        "core/java/android/annotation/LongDef.java",
-        "core/java/android/annotation/StringDef.java",
-    ],
-}
-
-filegroup {
-    name: "framework-mediaprovider-annotation-sources",
-    srcs: [
-        ":framework-annotations",
-        "core/java/android/annotation/BytesLong.java",
-        "core/java/android/annotation/CurrentTimeSecondsLong.java",
-        "core/java/android/annotation/DurationMillisLong.java",
     ],
 }
 
