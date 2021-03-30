@@ -100,7 +100,8 @@ public class UiTranslationController {
      */
     public void updateUiTranslationState(@UiTranslationState int state, TranslationSpec sourceSpec,
             TranslationSpec destSpec, List<AutofillId> views) {
-        if (!mActivity.isResumed()) {
+        if (!mActivity.isResumed() && (state == STATE_UI_TRANSLATION_STARTED
+                || state == STATE_UI_TRANSLATION_RESUMED)) {
             return;
         }
         Log.i(TAG, "updateUiTranslationState state: " + stateToString(state)
