@@ -5025,7 +5025,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Cancel the existing exit animation for the next enter animation.
             if (isAnimating()) {
                 cancelAnimation();
-                destroySurfaceUnchecked();
             }
             mAnimatingExit = false;
         }
