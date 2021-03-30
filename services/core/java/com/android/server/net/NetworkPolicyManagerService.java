@@ -423,8 +423,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_LIMIT_REACHED = 5;
     private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
     private static final int MSG_ADVISE_PERSIST_THRESHOLD = 7;
-    private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
-    private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
+    private static final int MSG_UPDATE_INTERFACE_QUOTAS = 10;
+    private static final int MSG_REMOVE_INTERFACE_QUOTAS = 11;
     private static final int MSG_POLICIES_CHANGED = 13;
     private static final int MSG_RESET_FIREWALL_RULES_BY_UID = 15;
     private static final int MSG_SUBSCRIPTION_OVERRIDE = 16;
@@ -2036,33 +2036,44 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final boolean hasWarning = policy.warningBytes != LIMIT_DISABLED;
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
             long limitBytes = Long.MAX_VALUE;
-            if (hasLimit && policy.hasCycle()) {
+            long warningBytes = Long.MAX_VALUE;
+            if ((hasLimit || hasWarning) && policy.hasCycle()) {
                 final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
                         .cycleIterator(policy).next();
                 final long start = cycle.first.toInstant().toEpochMilli();
                 final long end = cycle.second.toInstant().toEpochMilli();
                 final long totalBytes = getTotalBytes(policy.template, start, end);
 
-                if (policy.lastLimitSnooze < start) {
+                // If the limit notification is not snoozed, the limit quota needs to be calculated.
+                if (hasLimit && policy.lastLimitSnooze < start) {
                     // remaining "quota" bytes are based on total usage in
                     // current cycle. kernel doesn't like 0-byte rules, so we
                     // set 1-byte quota and disable the radio later.
                     limitBytes = Math.max(1, policy.limitBytes - totalBytes);
                 }
+
+                // If the warning notification was snoozed by user, or the service already knows
+                // it is over warning bytes, doesn't need to calculate warning bytes.
+                if (hasWarning && policy.lastWarningSnooze < start
+                        && !policy.isOverWarning(totalBytes)) {
+                    warningBytes = Math.max(1, policy.warningBytes - totalBytes);
+                }
             }
 
-            if (hasLimit || policy.metered) {
+            if (hasWarning || hasLimit || policy.metered) {
                 if (matchingIfaces.size() > 1) {
                     // TODO: switch to shared quota once NMS supports
                     Slog.w(TAG, "shared quota unsupported; generating rule for each iface");
                 }
 
-                // Set the interface limit. For interfaces which has no cycle, or metered with
-                // no policy limit, or snoozed limit notification; we still need to put iptables
-                // rule hooks to restrict apps for data saver, so push really high quota.
+                // Set the interface warning and limit. For interfaces which has no cycle,
+                // or metered with no policy quotas, or snoozed notification; we still need to put
+                // iptables rule hooks to restrict apps for data saver, so push really high quota.
+                // TODO: Push NetworkStatsProvider.QUOTA_UNLIMITED instead of Long.MAX_VALUE to
+                //  providers.
                 for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
                     final String iface = matchingIfaces.valueAt(j);
-                    setInterfaceQuotaAsync(iface, limitBytes);
+                    setInterfaceQuotasAsync(iface, warningBytes, limitBytes);
                     newMeteredIfaces.add(iface);
                 }
             }
@@ -2085,7 +2096,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
                     final String iface = matchingIfaces.valueAt(j);
                     if (!newMeteredIfaces.contains(iface)) {
-                        setInterfaceQuotaAsync(iface, Long.MAX_VALUE);
+                        setInterfaceQuotasAsync(iface, Long.MAX_VALUE, Long.MAX_VALUE);
                         newMeteredIfaces.add(iface);
                     }
                 }
@@ -2097,7 +2108,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int i = mMeteredIfaces.size() - 1; i >= 0; i--) {
                 final String iface = mMeteredIfaces.valueAt(i);
                 if (!newMeteredIfaces.contains(iface)) {
-                    removeInterfaceQuotaAsync(iface);
+                    removeInterfaceQuotasAsync(iface);
                 }
             }
             mMeteredIfaces = newMeteredIfaces;
@@ -5038,19 +5049,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mNetworkStats.advisePersistThreshold(persistThreshold);
                     return true;
                 }
-                case MSG_UPDATE_INTERFACE_QUOTA: {
-                    final String iface = (String) msg.obj;
-                    // int params need to be stitched back into a long
-                    final long quota = ((long) msg.arg1 << 32) | (msg.arg2 & 0xFFFFFFFFL);
-                    removeInterfaceQuota(iface);
-                    setInterfaceQuota(iface, quota);
-                    mNetworkStats.setStatsProviderLimitAsync(iface, quota);
+                case MSG_UPDATE_INTERFACE_QUOTAS: {
+                    final IfaceQuotas val = (IfaceQuotas) msg.obj;
+                    // TODO: Consider set a new limit before removing the original one.
+                    removeInterfaceLimit(val.iface);
+                    setInterfaceLimit(val.iface, val.limit);
+                    mNetworkStats.setStatsProviderWarningAndLimitAsync(val.iface, val.warning,
+                            val.limit);
                     return true;
                 }
-                case MSG_REMOVE_INTERFACE_QUOTA: {
+                case MSG_REMOVE_INTERFACE_QUOTAS: {
                     final String iface = (String) msg.obj;
-                    removeInterfaceQuota(iface);
-                    mNetworkStats.setStatsProviderLimitAsync(iface, QUOTA_UNLIMITED);
+                    removeInterfaceLimit(iface);
+                    mNetworkStats.setStatsProviderWarningAndLimitAsync(iface, QUOTA_UNLIMITED,
+                            QUOTA_UNLIMITED);
                     return true;
                 }
                 case MSG_RESET_FIREWALL_RULES_BY_UID: {
@@ -5198,15 +5210,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private void setInterfaceQuotaAsync(String iface, long quotaBytes) {
-        // long quotaBytes split up into two ints to fit in message
-        mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTA, (int) (quotaBytes >> 32),
-                (int) (quotaBytes & 0xFFFFFFFF), iface).sendToTarget();
+    private static final class IfaceQuotas {
+        @NonNull public final String iface;
+        // Warning and limit bytes of interface qutoas, could be QUOTA_UNLIMITED or Long.MAX_VALUE
+        // if not set. 0 is not acceptable since kernel doesn't like 0-byte rules.
+        public final long warning;
+        public final long limit;
+
+        private IfaceQuotas(@NonNull String iface, long warning, long limit) {
+            this.iface = iface;
+            this.warning = warning;
+            this.limit = limit;
+        }
     }
 
-    private void setInterfaceQuota(String iface, long quotaBytes) {
+    private void setInterfaceQuotasAsync(@NonNull String iface,
+            long warningBytes, long limitBytes) {
+        mHandler.obtainMessage(MSG_UPDATE_INTERFACE_QUOTAS,
+                new IfaceQuotas(iface, warningBytes, limitBytes)).sendToTarget();
+    }
+
+    private void setInterfaceLimit(String iface, long limitBytes) {
         try {
-            mNetworkManager.setInterfaceQuota(iface, quotaBytes);
+            // For legacy design the data warning is covered by global alert, where the
+            // kernel will notify upper layer for a small amount of change of traffic
+            // statistics. Thus, passing warning is not needed.
+            mNetworkManager.setInterfaceQuota(iface, limitBytes);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting interface quota", e);
         } catch (RemoteException e) {
@@ -5214,11 +5243,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private void removeInterfaceQuotaAsync(String iface) {
-        mHandler.obtainMessage(MSG_REMOVE_INTERFACE_QUOTA, iface).sendToTarget();
+    private void removeInterfaceQuotasAsync(String iface) {
+        mHandler.obtainMessage(MSG_REMOVE_INTERFACE_QUOTAS, iface).sendToTarget();
     }
 
-    private void removeInterfaceQuota(String iface) {
+    private void removeInterfaceLimit(String iface) {
         try {
             mNetworkManager.removeInterfaceQuota(iface);
         } catch (IllegalStateException e) {
