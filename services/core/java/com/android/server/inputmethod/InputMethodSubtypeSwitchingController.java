@@ -181,7 +181,7 @@ final class InputMethodSubtypeSwitchingController {
         }
 
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
-                boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
+                boolean includeAuxiliarySubtypes, boolean isScreenLocked, boolean forImeMenu) {
             final ArrayList<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
             if (imis.isEmpty()) {
                 return Collections.emptyList();
@@ -196,6 +196,9 @@ final class InputMethodSubtypeSwitchingController {
             final int numImes = imis.size();
             for (int i = 0; i < numImes; ++i) {
                 final InputMethodInfo imi = imis.get(i);
+                if (forImeMenu && !imi.showInInputMethodPicker()) {
+                    continue;
+                }
                 final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList =
                         mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
                 final ArraySet<String> enabledSubtypeSet = new ArraySet<>();
@@ -513,7 +516,8 @@ final class InputMethodSubtypeSwitchingController {
         mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
         mController = ControllerImpl.createFrom(mController,
                 mSubtypeList.getSortedInputMethodAndSubtypeList(
-                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */));
+                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
+                        false /* forImeMenu */));
     }
 
     public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme, InputMethodInfo imi,
@@ -527,10 +531,10 @@ final class InputMethodSubtypeSwitchingController {
         return mController.getNextInputMethod(onlyCurrentIme, imi, subtype);
     }
 
-    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListLocked(
+    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListForImeMenuLocked(
             boolean includingAuxiliarySubtypes, boolean isScreenLocked) {
         return mSubtypeList.getSortedInputMethodAndSubtypeList(
-                includingAuxiliarySubtypes, isScreenLocked);
+                includingAuxiliarySubtypes, isScreenLocked, true /* forImeMenu */);
     }
 
     public void dump(final Printer pw) {

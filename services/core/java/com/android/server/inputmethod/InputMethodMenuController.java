@@ -100,7 +100,8 @@ public class InputMethodMenuController {
 
         synchronized (mMethodMap) {
             final List<ImeSubtypeListItem> imList = mSwitchingController
-                    .getSortedInputMethodAndSubtypeListLocked(showAuxSubtypes, isScreenLocked);
+                    .getSortedInputMethodAndSubtypeListForImeMenuLocked(
+                            showAuxSubtypes, isScreenLocked);
             if (imList.isEmpty()) {
                 return;
             }

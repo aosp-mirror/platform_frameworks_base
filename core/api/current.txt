@@ -1296,6 +1296,7 @@ package android {
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
     field public static final int showForAllUsers = 16844015; // 0x10104ef
+    field public static final int showInInputMethodPicker = 16844361; // 0x1010649
     field public static final int showMetadataInPreview = 16844079; // 0x101052f
     field @Deprecated public static final int showOnLockScreen = 16843721; // 0x10103c9
     field public static final int showSilent = 16843259; // 0x10101fb
