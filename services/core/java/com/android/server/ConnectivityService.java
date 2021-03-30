@@ -318,6 +318,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // The maximum number of network request allowed per uid before an exception is thrown.
     private static final int MAX_NETWORK_REQUESTS_PER_UID = 100;
 
+    // The maximum number of network request allowed for system UIDs before an exception is thrown.
+    private static final int MAX_NETWORK_REQUESTS_PER_SYSTEM_UID = 250;
+
     @VisibleForTesting
     protected int mLingerDelayMs;  // Can't be final, or test subclass constructors can't change it.
     @VisibleForTesting
@@ -333,6 +336,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     protected final PermissionMonitor mPermissionMonitor;
 
     private final PerUidCounter mNetworkRequestCounter;
+    private final PerUidCounter mSystemNetworkRequestCounter;
 
     private volatile boolean mLockdownEnabled;
 
@@ -1201,6 +1205,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mContext = Objects.requireNonNull(context, "missing Context");
         mResources = deps.getResources(mContext);
         mNetworkRequestCounter = new PerUidCounter(MAX_NETWORK_REQUESTS_PER_UID);
+        mSystemNetworkRequestCounter = new PerUidCounter(MAX_NETWORK_REQUESTS_PER_SYSTEM_UID);
 
         mMetricsLog = logger;
         mNetworkRanker = new NetworkRanker();
@@ -4029,7 +4034,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        mNetworkRequestCounter.decrementCount(nri.mUid);
+        decrementRequestCount(nri);
         mNetworkRequestInfoLogs.log("RELEASE " + nri);
 
         if (null != nri.getActiveRequest()) {
@@ -4138,6 +4143,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
+    }
+
+    private PerUidCounter getRequestCounter(NetworkRequestInfo nri) {
+        return checkAnyPermissionOf(
+                nri.mPid, nri.mUid, NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+                ? mSystemNetworkRequestCounter : mNetworkRequestCounter;
+    }
+
+    private void incrementRequestCountOrThrow(NetworkRequestInfo nri) {
+        getRequestCounter(nri).incrementCountOrThrow(nri.mUid);
+    }
+
+    private void decrementRequestCount(NetworkRequestInfo nri) {
+        getRequestCounter(nri).decrementCount(nri.mUid);
     }
 
     @Override
@@ -5488,7 +5507,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mPid = getCallingPid();
             mUid = mDeps.getCallingUid();
             mAsUid = asUid;
-            mNetworkRequestCounter.incrementCountOrThrow(mUid);
+            incrementRequestCountOrThrow(this);
             /**
              * Location sensitive data not included in pending intent. Only included in
              * {@link NetworkCallback}.
@@ -5520,7 +5539,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mUid = mDeps.getCallingUid();
             mAsUid = asUid;
             mPendingIntent = null;
-            mNetworkRequestCounter.incrementCountOrThrow(mUid);
+            incrementRequestCountOrThrow(this);
             mCallbackFlags = callbackFlags;
             mCallingAttributionTag = callingAttributionTag;
 
@@ -5563,7 +5582,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mUid = nri.mUid;
             mAsUid = nri.mAsUid;
             mPendingIntent = nri.mPendingIntent;
-            mNetworkRequestCounter.incrementCountOrThrow(mUid);
+            incrementRequestCountOrThrow(this);
             mCallbackFlags = nri.mCallbackFlags;
             mCallingAttributionTag = nri.mCallingAttributionTag;
         }
@@ -8748,7 +8767,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Decrement the reference count for this NetworkRequestInfo. The reference count is
             // incremented when the NetworkRequestInfo is created as part of
             // enforceRequestCountLimit().
-            mNetworkRequestCounter.decrementCount(nri.mUid);
+            decrementRequestCount(nri);
             return;
         }
 
@@ -8814,7 +8833,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Decrement the reference count for this NetworkRequestInfo. The reference count is
         // incremented when the NetworkRequestInfo is created as part of
         // enforceRequestCountLimit().
-        mNetworkRequestCounter.decrementCount(nri.mUid);
+        decrementRequestCount(nri);
 
         iCb.unlinkToDeath(cbInfo, 0);
     }
