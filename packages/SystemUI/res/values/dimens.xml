@@ -818,7 +818,7 @@
     <!-- Size of user icon + frame in the qs user picker (incl. frame) -->
     <dimen name="qs_framed_avatar_size">54dp</dimen>
     <!-- Size of user icon + frame in the keyguard user picker (incl. frame) -->
-    <dimen name="kg_framed_avatar_size">48dp</dimen>
+    <dimen name="kg_framed_avatar_size">32dp</dimen>
 
     <!-- Margin on the left side of the carrier text on Keyguard -->
     <dimen name="keyguard_carrier_text_margin">16dp</dimen>
