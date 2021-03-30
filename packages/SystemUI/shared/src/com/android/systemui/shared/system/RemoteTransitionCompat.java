@@ -32,6 +32,7 @@ import android.view.IRecentsAnimationController;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
@@ -138,9 +139,9 @@ public class RemoteTransitionCompat implements Parcelable {
         }
 
         @Override public void setFinishTaskBounds(int taskId, Rect destinationBounds,
-                Rect windowCrop, float[] float9) {
+                PictureInPictureSurfaceTransaction finishTransaction) {
             if (mWrapped != null) {
-                mWrapped.setFinishTaskBounds(taskId, destinationBounds, windowCrop, float9);
+                mWrapped.setFinishTaskBounds(taskId, destinationBounds, finishTransaction);
             }
         }
 
