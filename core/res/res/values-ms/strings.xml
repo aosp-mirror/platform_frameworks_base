@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Apl berjalan"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apl yang menggunakan bateri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Pembesaran"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Dasar keselamatan kebolehaksesan"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang menggunakan bateri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> apl sedang menggunakan bateri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Ketik untuk mendapatkan butiran tentang penggunaan kuasa bateri dan data"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"akses aktiviti fizikal anda"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ambil gambar dan rakam video"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Peranti Bluetooth yang Berdekatan"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"temukan dan sambung kepada peranti Bluetooth yang berdekatan"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Log panggilan"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"baca dan tulis log panggilan telefon"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Membenarkan apl melihat konfigurasi Bluetooth pada tablet dan untuk membuat serta menerima sambungan dengan peranti yang dipasangkan."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Membenarkan apl melihat konfigurasi Bluetooth pada peranti Android TV anda dan membuat serta menerima sambungan dengan peranti yang digandingkan."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Membenarkan apl melihat konfigurasi Bluetooth pada telefon dan membuat serta menerima sambungan dengan peranti yang dipasangkan."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"temukan dan gandingkan peranti Bluetooth yang berdekatan"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Membenarkan apl menemukan dan berganding dengan peranti Bluetooth yang berdekatan"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"sambung kepada peranti Bluetooth yang digandingkan"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Membenarkan apl untuk menyambung kepada peranti Bluetooth yang digandingkan"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maklumat Perkhidmatan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>
@@ -567,18 +574,28 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ralat semasa membuat pengesahan"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gunakan kunci skrin"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Masukkan bukti kelayakan peranti anda untuk meneruskan"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Cap jari separa dikesan. Sila cuba lagi."</string>
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses cap jari. Sila cuba lagi."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Penderia cap jari kotor. Sila bersihkan dan cuba lagi."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Jari digerakkan terlalu cepat. Sila cuba lagi."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu perlahan. Sila cuba lagi."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Cap jari disahkan"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Wajah disahkan"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Wajah disahkan, sila tekan sahkan"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Perkakasan cap jari tidak tersedia."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Cap jari tidak dapat disimpan. Sila alih keluar cap jari sedia ada."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Sudah tamat masa untuk cap jari. Cuba lagi"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Pengendalian cap jari dibatalkan."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Pengendalian cap jari dibatalkan oleh pengguna."</string>
@@ -603,6 +620,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Wajah buka kunci"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Daftarkan semula wajah anda"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Untuk meningkatkan pengecaman, sila daftarkan semula wajah anda"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gagal menangkap data wajah dgn tepat. Cuba lagi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Terlalu terang. Cuba pencahayaan yang lebih lembut."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Cuba pencahayaan yang lebih cerah."</string>
@@ -1006,6 +1031,12 @@
     <string name="copied" msgid="4675902854553014676">"Disalin"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ditampalkan daripada <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ditampalkan daripada papan keratan"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"Lagi"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2110,20 +2141,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kerja"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Paparan peribadi"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Paparan kerja"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Tidak dapat berkongsi kandungan ini dengan apl kerja"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Pentadbir IT anda tidak membenarkan anda berkongsi kandungan ini dengan apl dalam profil kerja anda"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Tidak boleh membuka kandungan ini menggunakan apl kerja"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Pentadbir IT anda tidak membenarkan anda membuka kandungan ini menggunakan apl dalam profil kerja anda"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Tidak boleh berkongsi kandungan ini dengan apl peribadi"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Pentadbir IT anda tidak membenarkan anda berkongsi kandungan ini dengan apl dalam profil peribadi anda"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Tidak boleh membuka kandungan ini dengan apl peribadi"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Pentadbir IT anda tidak membenarkan anda membuka kandungan ini menggunakan apl dalam profil peribadi anda"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profil kerja dijeda"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Hidupkan"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Tiada apl kerja yang boleh menyokong kandungan ini"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Tiada apl kerja yang boleh membuka kandungan ini"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Tiada apl peribadi yang boleh menyokong kandungan ini"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Tiada apl peribadi yang boleh membuka kandungan ini"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN buka kunci rangkaian SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN buka kunci subset rangkaian SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN buka kunci korporat SIM"</string>
@@ -2236,8 +2278,10 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Besarkan sebahagian skrin anda"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Kini anda boleh membesarkan skrin penuh, kawasan tertentu atau beralih antara kedua-dua pilihan."</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
+    <skip />
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Hidupkan dalam Tetapan"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Tolak"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Untuk meneruskan proses, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; memerlukan akses kepada mikrofon peranti anda."</string>
