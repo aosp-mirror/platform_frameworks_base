@@ -76,7 +76,7 @@ public final class ConnectivityController extends RestrictingController implemen
             || Log.isLoggable(TAG, Log.DEBUG);
 
     // The networking stack has a hard limit so we can't make this configurable.
-    private static final int MAX_NETWORK_CALLBACKS = 50;
+    private static final int MAX_NETWORK_CALLBACKS = 125;
     /**
      * Minimum amount of time that should have elapsed before we'll update a {@link UidStats}
      * instance.
