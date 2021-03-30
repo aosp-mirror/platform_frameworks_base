@@ -131,6 +131,7 @@ public class Process {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @TestApi
     public static final int NFC_UID = 1027;
 
     /**
