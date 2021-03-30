@@ -1291,9 +1291,14 @@ public class NotificationContentView extends FrameLayout {
                     }
                 }
             }
-
-            if (existing != null && entry.getSbn().getNotification().isColorized()) {
-                existing.overrideBackgroundTintColor(entry.getSbn().getNotification().color);
+            if (existing != null) {
+                if (entry.getSbn().getNotification().isColorized()) {
+                    existing.setBackgroundTintColor(
+                            entry.getSbn().getNotification().color, true);
+                } else {
+                    existing.setBackgroundTintColor(
+                            entry.getRow().getCurrentBackgroundTint(), false);
+                }
             }
             return existing;
         }

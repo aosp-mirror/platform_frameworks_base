@@ -83,6 +83,12 @@ public class PowerExemptionManager {
     }
 
     /**
+     * Does not place the app on any temporary allow list. Nullifies the previous call to
+     * {@link android.app.BroadcastOptions#setTemporaryAppAllowlist(long, int, int, String)}.
+     * Note: this will not remove the receiver app from the temp allow list.
+     */
+    public static final int TEMPORARY_ALLOW_LIST_TYPE_NONE = -1;
+    /**
      * Allow the temp allow list behavior, plus allow foreground service start from background.
      */
     public static final int TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0;
@@ -96,6 +102,7 @@ public class PowerExemptionManager {
      * @hide
      */
     @IntDef(flag = true, prefix = { "TEMPORARY_ALLOW_LIST_TYPE_" }, value = {
+            TEMPORARY_ALLOW_LIST_TYPE_NONE,
             TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
             TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
     })

@@ -132,6 +132,12 @@ interface IDevicePolicyManager {
     void setScreenCaptureDisabled(in ComponentName who, boolean disabled, boolean parent);
     boolean getScreenCaptureDisabled(in ComponentName who, int userHandle, boolean parent);
 
+    void setNearbyNotificationStreamingPolicy(int policy);
+    int getNearbyNotificationStreamingPolicy();
+
+    void setNearbyAppStreamingPolicy(int policy);
+    int getNearbyAppStreamingPolicy();
+
     void setKeyguardDisabledFeatures(in ComponentName who, int which, boolean parent);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
 

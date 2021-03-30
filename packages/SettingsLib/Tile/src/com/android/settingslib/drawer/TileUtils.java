@@ -555,7 +555,7 @@ public class TileUtils {
             bundle.putString(META_DATA_PREFERENCE_KEYHINT, key);
         }
         try {
-            return provider.call(context.getPackageName(), context.getAttributionTag(),
+            return provider.call(context.getAttributionSource(),
                     uri.getAuthority(), method, uri.toString(), bundle);
         } catch (RemoteException e) {
             return null;

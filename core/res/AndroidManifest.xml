@@ -1313,7 +1313,7 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_recordBackgroundAudio"
         android:description="@string/permdesc_recordBackgroundAudio"
-        android:protectionLevel="internal" />
+        android:protectionLevel="internal|role" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for activity recognition                        -->
@@ -1405,7 +1405,7 @@
             android:permissionGroup="android.permission-group.UNDEFINED"
             android:label="@string/permlab_backgroundCamera"
             android:description="@string/permdesc_backgroundCamera"
-            android:protectionLevel="internal" />
+            android:protectionLevel="internal|role" />
 
     <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
            system only camera devices.
@@ -5681,6 +5681,12 @@
          temporarily renounce a set of otherwise granted permissions. -->
     <permission android:name="android.permission.RENOUNCE_PERMISSIONS"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to read nearby streaming policy. The policy allows the device
+         to stream its notifications and apps to nearby devices.
+         @hide -->
+    <permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY"
+        android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows the holder to set the source of the data when setting a clip on the
          clipboard.

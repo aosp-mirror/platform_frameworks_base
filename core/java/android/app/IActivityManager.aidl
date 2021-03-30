@@ -475,8 +475,6 @@ interface IActivityManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isTopOfTask(in IBinder token);
     void bootAnimationComplete();
-    int checkPermissionWithToken(in String permission, int pid, int uid,
-            in IBinder callerToken);
     @UnsupportedAppUsage
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);

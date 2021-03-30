@@ -867,6 +867,7 @@ package android {
     field public static final int keycode = 16842949; // 0x10100c5
     field public static final int killAfterRestore = 16843420; // 0x101029c
     field public static final int knownCerts = 16844330; // 0x101062a
+    field public static final int lStar = 16844359; // 0x1010647
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
     field @Deprecated public static final int labelTextSize = 16843317; // 0x1010235
@@ -7133,6 +7134,8 @@ package android.app.admin {
     method public int getMaximumFailedPasswordsForWipe(@Nullable android.content.ComponentName);
     method public long getMaximumTimeToLock(@Nullable android.content.ComponentName);
     method @NonNull public java.util.List<java.lang.String> getMeteredDataDisabledPackages(@NonNull android.content.ComponentName);
+    method public int getNearbyAppStreamingPolicy();
+    method public int getNearbyNotificationStreamingPolicy();
     method @Deprecated @ColorInt public int getOrganizationColor(@NonNull android.content.ComponentName);
     method @Nullable public CharSequence getOrganizationName(@NonNull android.content.ComponentName);
     method public java.util.List<android.telephony.data.ApnSetting> getOverrideApns(@NonNull android.content.ComponentName);
@@ -7276,6 +7279,8 @@ package android.app.admin {
     method public void setMaximumFailedPasswordsForWipe(@NonNull android.content.ComponentName, int);
     method public void setMaximumTimeToLock(@NonNull android.content.ComponentName, long);
     method @NonNull public java.util.List<java.lang.String> setMeteredDataDisabledPackages(@NonNull android.content.ComponentName, @NonNull java.util.List<java.lang.String>);
+    method public void setNearbyAppStreamingPolicy(int);
+    method public void setNearbyNotificationStreamingPolicy(int);
     method public void setNetworkLoggingEnabled(@Nullable android.content.ComponentName, boolean);
     method @Deprecated public void setOrganizationColor(@NonNull android.content.ComponentName, int);
     method public void setOrganizationId(@NonNull String);
@@ -7444,6 +7449,9 @@ package android.app.admin {
     field public static final int LOCK_TASK_FEATURE_SYSTEM_INFO = 1; // 0x1
     field public static final int MAKE_USER_EPHEMERAL = 2; // 0x2
     field public static final String MIME_TYPE_PROVISIONING_NFC = "application/com.android.managedprovisioning";
+    field public static final int NEARBY_STREAMING_DISABLED = 0; // 0x0
+    field public static final int NEARBY_STREAMING_ENABLED = 1; // 0x1
+    field public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 2; // 0x2
     field public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1; // 0x1
     field public static final int PASSWORD_COMPLEXITY_HIGH = 327680; // 0x50000
     field public static final int PASSWORD_COMPLEXITY_LOW = 65536; // 0x10000
@@ -7873,8 +7881,10 @@ package android.app.blob {
   public static class BlobStoreManager.Session implements java.io.Closeable {
     method public void abandon() throws java.io.IOException;
     method public void allowPackageAccess(@NonNull String, @NonNull byte[]) throws java.io.IOException;
+    method public void allowPackagesWithLocationPermission(@NonNull String) throws java.io.IOException;
     method public void allowPublicAccess() throws java.io.IOException;
     method public void allowSameSignatureAccess() throws java.io.IOException;
+    method public boolean arePackagesWithLocationPermissionAllowed(@NonNull String) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public void commit(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws java.io.IOException;
     method public long getSize() throws java.io.IOException;
@@ -9906,6 +9916,27 @@ package android.content {
     method @Deprecated public void setUpdateThrottle(long);
   }
 
+  public final class AttributionSource implements android.os.Parcelable {
+    method public boolean checkCallingUid();
+    method public int describeContents();
+    method public void enforceCallingUid();
+    method @Nullable public String getAttributionTag();
+    method @Nullable public android.content.AttributionSource getNext();
+    method @Nullable public String getPackageName();
+    method public int getUid();
+    method public boolean isTrusted(@NonNull android.content.Context);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.AttributionSource> CREATOR;
+  }
+
+  public static final class AttributionSource.Builder {
+    ctor public AttributionSource.Builder(int);
+    method @NonNull public android.content.AttributionSource build();
+    method @NonNull public android.content.AttributionSource.Builder setAttributionTag(@NonNull String);
+    method @NonNull public android.content.AttributionSource.Builder setNext(@NonNull android.content.AttributionSource);
+    method @NonNull public android.content.AttributionSource.Builder setPackageName(@NonNull String);
+  }
+
   public abstract class BroadcastReceiver {
     ctor public BroadcastReceiver();
     method public final void abortBroadcast();
@@ -10075,6 +10106,7 @@ package android.content {
     method public abstract int delete(@NonNull android.net.Uri, @Nullable String, @Nullable String[]);
     method public int delete(@NonNull android.net.Uri, @Nullable android.os.Bundle);
     method public void dump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
+    method @Nullable public final android.content.AttributionSource getCallingAttributionSource();
     method @Nullable public final String getCallingAttributionTag();
     method @Nullable public final String getCallingPackage();
     method @Nullable public final String getCallingPackageUnchecked();
@@ -10437,6 +10469,7 @@ package android.content {
     method public abstract android.content.Context getApplicationContext();
     method public abstract android.content.pm.ApplicationInfo getApplicationInfo();
     method public abstract android.content.res.AssetManager getAssets();
+    method @NonNull public android.content.AttributionSource getAttributionSource();
     method @Nullable public String getAttributionTag();
     method public abstract java.io.File getCacheDir();
     method public abstract ClassLoader getClassLoader();
@@ -10642,8 +10675,7 @@ package android.content {
 
   public final class ContextParams {
     method @Nullable public String getAttributionTag();
-    method @Nullable public String getReceiverAttributionTag();
-    method @Nullable public String getReceiverPackage();
+    method @Nullable public android.content.AttributionSource getNextAttributionSource();
   }
 
   public static final class ContextParams.Builder {
@@ -10651,7 +10683,7 @@ package android.content {
     ctor public ContextParams.Builder(@NonNull android.content.ContextParams);
     method @NonNull public android.content.ContextParams build();
     method @NonNull public android.content.ContextParams.Builder setAttributionTag(@Nullable String);
-    method @NonNull public android.content.ContextParams.Builder setReceiverPackage(@Nullable String, @Nullable String);
+    method @NonNull public android.content.ContextParams.Builder setNextAttributionSource(@NonNull android.content.AttributionSource);
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -13178,6 +13210,7 @@ package android.content.res {
     method public boolean isStateful();
     method @NonNull public static android.content.res.ColorStateList valueOf(@ColorInt int);
     method @NonNull public android.content.res.ColorStateList withAlpha(int);
+    method @NonNull public android.content.res.ColorStateList withLStar(float);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.res.ColorStateList> CREATOR;
   }
@@ -39080,6 +39113,7 @@ package android.speech {
     method public void bufferReceived(byte[]) throws android.os.RemoteException;
     method public void endOfSpeech() throws android.os.RemoteException;
     method public void error(int) throws android.os.RemoteException;
+    method @NonNull public android.content.AttributionSource getCallingAttributionSource();
     method public int getCallingUid();
     method public void partialResults(android.os.Bundle) throws android.os.RemoteException;
     method public void readyForSpeech(android.os.Bundle) throws android.os.RemoteException;
@@ -40273,6 +40307,7 @@ package android.telecom {
     field public static final int DURATION_MEDIUM = 2; // 0x2
     field public static final int DURATION_SHORT = 1; // 0x1
     field public static final int DURATION_VERY_SHORT = 0; // 0x0
+    field public static final long ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION = 157233955L; // 0x95f3323L
     field public static final String EXTRA_CALL_BACK_NUMBER = "android.telecom.extra.CALL_BACK_NUMBER";
     field public static final String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecom.extra.CALL_DISCONNECT_CAUSE";
     field public static final String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecom.extra.CALL_DISCONNECT_MESSAGE";
@@ -41879,7 +41914,7 @@ package android.telephony {
     method @Deprecated public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallDisconnectCauseChanged(int, int);
     method @Deprecated public void onCallForwardingIndicatorChanged(boolean);
-    method @Deprecated public void onCallStateChanged(int, String);
+    method @Deprecated @RequiresPermission(value=android.Manifest.permission.READ_PHONE_STATE, conditional=true) public void onCallStateChanged(int, String);
     method @Deprecated public void onCellInfoChanged(java.util.List<android.telephony.CellInfo>);
     method @Deprecated public void onCellLocationChanged(android.telephony.CellLocation);
     method @Deprecated public void onDataActivity(int);
@@ -42425,7 +42460,7 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.CallStateListener {
-    method public void onCallStateChanged(int);
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onCallStateChanged(int);
   }
 
   public static interface TelephonyCallback.CarrierNetworkListener {
@@ -42515,7 +42550,8 @@ package android.telephony {
     method public int getActiveModemCount();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCallComposerStatus();
-    method public int getCallState();
+    method @Deprecated @RequiresPermission(value=android.Manifest.permission.READ_PHONE_STATE, conditional=true) public int getCallState();
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getCallStateForSubscription();
     method public int getCardIdForDefaultEuicc();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) @WorkerThread public android.os.PersistableBundle getCarrierConfig();
     method public int getCarrierIdFromSimMccMnc();
@@ -48771,6 +48807,7 @@ package android.view {
     method protected int[] onCreateDrawableState(int);
     method public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
     method @Nullable public android.view.translation.ViewTranslationRequest onCreateTranslationRequest(@NonNull int[]);
+    method public void onCreateTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
     method @CallSuper protected void onDetachedFromWindow();
     method protected void onDisplayHint(int);
     method public boolean onDragEvent(android.view.DragEvent);
@@ -48816,6 +48853,7 @@ package android.view {
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public void onTranslationResponse(@NonNull android.view.translation.ViewTranslationResponse);
+    method public void onTranslationResponse(@NonNull android.util.LongSparseArray<android.view.translation.ViewTranslationResponse>);
     method @CallSuper public void onVisibilityAggregated(boolean);
     method protected void onVisibilityChanged(@NonNull android.view.View, int);
     method public void onWindowFocusChanged(boolean);

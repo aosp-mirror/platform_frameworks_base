@@ -19,6 +19,7 @@ package com.android.externalstorage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.usage.StorageStatsManager;
+import android.content.AttributionSource;
 import android.content.ContentResolver;
 import android.content.UriPermission;
 import android.database.Cursor;
@@ -28,7 +29,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.IBinder;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.DiskInfo;
@@ -141,17 +141,17 @@ public class ExternalStorageProvider extends FileSystemProvider {
     }
 
     @Override
-    protected int enforceReadPermissionInner(Uri uri, String callingPkg,
-            @Nullable String featureId, IBinder callerToken) throws SecurityException {
+    protected int enforceReadPermissionInner(Uri uri,
+            @NonNull AttributionSource attributionSource) throws SecurityException {
         enforceShellRestrictions();
-        return super.enforceReadPermissionInner(uri, callingPkg, featureId, callerToken);
+        return super.enforceReadPermissionInner(uri, attributionSource);
     }
 
     @Override
-    protected int enforceWritePermissionInner(Uri uri, String callingPkg,
-            @Nullable String featureId, IBinder callerToken) throws SecurityException {
+    protected int enforceWritePermissionInner(Uri uri,
+            @NonNull AttributionSource attributionSource) throws SecurityException {
         enforceShellRestrictions();
-        return super.enforceWritePermissionInner(uri, callingPkg, featureId, callerToken);
+        return super.enforceWritePermissionInner(uri, attributionSource);
     }
 
     public void updateVolumes() {
