@@ -9539,4 +9539,10 @@
     <attr name="iconfactoryBadgeSize" format="dimension"/>
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
+
+    <declare-styleable name="DisplayHasherService">
+        <!-- The throttle duration for display hash requests
+             @hide @SystemApi -->
+        <attr name="throttleDurationMillis" format="integer" />
+    </declare-styleable>
 </resources>
