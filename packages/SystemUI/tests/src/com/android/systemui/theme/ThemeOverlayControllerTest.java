@@ -26,6 +26,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -49,8 +51,10 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -86,24 +90,29 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     @Mock
     private UserManager mUserManager;
     @Mock
-    private KeyguardStateController mKeyguardStateController;
+    private UserTracker mUserTracker;
     @Mock
     private DumpManager mDumpManager;
+    @Mock
+    private DeviceProvisionedController mDeviceProvisionedController;
     @Mock
     private FeatureFlags mFeatureFlags;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiver;
     @Captor
     private ArgumentCaptor<WallpaperManager.OnColorsChangedListener> mColorsListener;
+    @Captor
+    private ArgumentCaptor<DeviceProvisionedListener> mDeviceProvisionedListener;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mFeatureFlags.isMonetEnabled()).thenReturn(true);
+        when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
         mThemeOverlayController = new ThemeOverlayController(null /* context */,
                 mBroadcastDispatcher, mBgHandler, mMainExecutor, mBgExecutor, mThemeOverlayApplier,
-                mSecureSettings, mWallpaperManager, mUserManager, mKeyguardStateController,
-                mDumpManager, mFeatureFlags) {
+                mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
+                mUserTracker, mDumpManager, mFeatureFlags) {
             @Nullable
             @Override
             protected FabricatedOverlay getOverlay(int color, int type) {
@@ -120,6 +129,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         verify(mBroadcastDispatcher).registerReceiver(mBroadcastReceiver.capture(), any(),
                 eq(mMainExecutor), any());
         verify(mDumpManager).registerDumpable(any(), any());
+        verify(mDeviceProvisionedController).addCallback(mDeviceProvisionedListener.capture());
     }
 
     @Test
@@ -188,6 +198,22 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         // Assert that we received the colors that we were expecting
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
                 .isEqualTo(new OverlayIdentifier("override.package.name"));
+    }
+
+    @Test
+    public void onWallpaperColorsChanged_defersUntilSetupIsCompleted() {
+        reset(mDeviceProvisionedController);
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+
+        verify(mThemeOverlayApplier, never())
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+
+        when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
+        mDeviceProvisionedListener.getValue().onUserSetupChanged();
+
+        verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
 
     @Test
