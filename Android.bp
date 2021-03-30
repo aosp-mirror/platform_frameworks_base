@@ -1344,6 +1344,7 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
 filegroup {
     name: "framework-non-updatable-stub-sources",
     srcs: [
+        ":framework-mime-sources", // mimemap builds separately but has no separate droidstubs.
         ":framework-non-updatable-sources",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
