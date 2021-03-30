@@ -946,6 +946,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 || direction == TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
         // Animate with a cross-fade if enabled and seamless resize is disables by the app.
         final boolean animateCrossFadeResize = mayAnimateFinishResize
+                && mPictureInPictureParams != null
                 && !mPictureInPictureParams.isSeamlessResizeEnabled();
         if (animateCrossFadeResize) {
             // Take a snapshot of the PIP task and hide it. We'll show it and fade it out after
