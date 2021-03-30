@@ -255,7 +255,7 @@
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobiele data altijd actief"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardwareversnelling voor tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-apparaten zonder naam tonen"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Absoluut volume uitschakelen"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Absoluut volume uitzetten"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche aanzetten"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth-AVRCP-versie"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth-AVRCP-versie selecteren"</string>
@@ -342,7 +342,7 @@
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Hardwarelayer-upd. tonen"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hardwarelagen knipperen groen bij updates"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Foutopsporing GPU-overbelasting"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"HW-overlays uitschakelen"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"HW-overlays uitzetten"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"GPU altijd gebruiken voor schermcompositing"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Kleurruimte simuleren"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL-sporen aanzetten"</string>
