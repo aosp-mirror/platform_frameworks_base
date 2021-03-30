@@ -959,10 +959,10 @@ public class BaseInputConnection implements InputConnection {
         }
         final ClipData clip = new ClipData(inputContentInfo.getDescription(),
                 new ClipData.Item(inputContentInfo.getContentUri()));
-        final ContentInfo payload =
-                new ContentInfo.Builder(clip, SOURCE_INPUT_METHOD)
+        final ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_INPUT_METHOD)
                 .setLinkUri(inputContentInfo.getLinkUri())
                 .setExtras(opts)
+                .setInputContentInfo(inputContentInfo)
                 .build();
         return mTargetView.performReceiveContent(payload) == null;
     }
