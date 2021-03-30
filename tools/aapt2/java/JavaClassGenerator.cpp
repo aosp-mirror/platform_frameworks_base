@@ -460,7 +460,8 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
 
   const std::string field_name = TransformToFieldName(name.entry);
   if (out_class_def != nullptr) {
-    auto resource_member = util::make_unique<ResourceMember>(field_name, real_id);
+    auto resource_member =
+        util::make_unique<ResourceMember>(field_name, real_id, entry.visibility.staged_api);
 
     // Build the comments and annotations for this entry.
     AnnotationProcessor* processor = resource_member->GetCommentBuilder();
