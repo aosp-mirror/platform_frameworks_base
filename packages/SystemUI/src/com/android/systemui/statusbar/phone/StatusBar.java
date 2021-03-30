@@ -683,6 +683,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             new FalsingManager.FalsingBeliefListener() {
                 @Override
                 public void onFalse() {
+                    // Hides quick settings.
+                    mNotificationPanelViewController.resetViews(true);
+                    // Hides bouncer and quick-quick settings.
                     mStatusBarKeyguardViewManager.reset(true);
                 }
             };
