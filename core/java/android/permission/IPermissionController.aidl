@@ -48,4 +48,10 @@ oneway interface IPermissionController {
     void getPrivilegesDescriptionStringForProfile(
             in String deviceProfileName,
             in AndroidFuture<String> callback);
+    void getPlatformPermissionsForGroup(
+            in String permissionGroupName,
+            in AndroidFuture<List<String>> callback);
+    void getGroupOfPlatformPermission(
+            in String permissionName,
+            in AndroidFuture<String> callback);
 }
