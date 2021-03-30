@@ -226,7 +226,7 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mOpPackageName;
     private final @NonNull ContextParams mParams;
-    private @NonNull AttributionSource mAttributionSource;
+    private final @NonNull AttributionSource mAttributionSource;
 
     private final @NonNull ResourcesManager mResourcesManager;
     @UnsupportedAppUsage
@@ -3074,25 +3074,26 @@ class ContextImpl extends Context {
 
         mOpPackageName = overrideOpPackageName != null ? overrideOpPackageName : opPackageName;
         mParams = Objects.requireNonNull(params);
-        initializeAttributionSource(attributionTag, nextAttributionSource);
+        mAttributionSource = createAttributionSource(attributionTag, nextAttributionSource);
         mContentResolver = new ApplicationContentResolver(this, mainThread);
     }
 
-    private void initializeAttributionSource(@Nullable String attributionTag,
+    private @NonNull AttributionSource createAttributionSource(@Nullable String attributionTag,
             @Nullable AttributionSource nextAttributionSource) {
-        mAttributionSource = new AttributionSource(Process.myUid(), mOpPackageName,
+        AttributionSource attributionSource = new AttributionSource(Process.myUid(), mOpPackageName,
                 attributionTag, nextAttributionSource);
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
         if (nextAttributionSource != null) {
             // If an app happened to stub the internal OS for testing the registration method
             // can return null. In this case we keep the current untrusted attribution source.
-            final AttributionSource attributionSource = getSystemService(PermissionManager.class)
-                    .registerAttributionSource(mAttributionSource);
-            if (attributionSource != null) {
-                mAttributionSource = attributionSource;
+            final AttributionSource registeredAttributionSource = getSystemService(
+                    PermissionManager.class).registerAttributionSource(attributionSource);
+            if (registeredAttributionSource != null) {
+                return registeredAttributionSource;
             }
         }
+        return attributionSource;
     }
 
     void setResources(Resources r) {
