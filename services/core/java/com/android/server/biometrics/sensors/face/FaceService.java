@@ -167,12 +167,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 String opPackageName) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
-            final List<FaceSensorPropertiesInternal> properties =
-                    FaceService.this.getSensorProperties();
-
-            Slog.d(TAG, "Retrieved sensor properties for: " + opPackageName
-                    + ", sensors: " + properties.size());
-            return properties;
+            return FaceService.this.getSensorProperties();
         }
 
         @Override // Binder call

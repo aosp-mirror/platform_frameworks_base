@@ -146,12 +146,7 @@ public class FingerprintService extends SystemService implements BiometricServic
                 Utils.checkPermission(getContext(), TEST_BIOMETRIC);
             }
 
-            final List<FingerprintSensorPropertiesInternal> properties =
-                    FingerprintService.this.getSensorProperties();
-
-            Slog.d(TAG, "Retrieved sensor properties for: " + opPackageName
-                    + ", sensors: " + properties.size());
-            return properties;
+            return FingerprintService.this.getSensorProperties();
         }
 
         @Override
