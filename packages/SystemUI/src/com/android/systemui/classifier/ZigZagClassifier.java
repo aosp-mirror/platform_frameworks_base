@@ -20,6 +20,7 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHT
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_X_SECONDARY_DEVIANCE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_Y_PRIMARY_DEVIANCE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_Y_SECONDARY_DEVIANCE;
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
 
 import android.graphics.Point;
 import android.provider.DeviceConfig;
@@ -87,6 +88,10 @@ class ZigZagClassifier extends FalsingClassifier {
     Result calculateFalsingResult(
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
+        if (interactionType == BRIGHTNESS_SLIDER) {
+            return Result.passed(0);
+        }
+
         List<MotionEvent> motionEvents = getRecentMotionEvents();
         // Rotate horizontal gestures to be horizontal between their first and last point.
         // Rotate vertical gestures to be vertical between their first and last point.
