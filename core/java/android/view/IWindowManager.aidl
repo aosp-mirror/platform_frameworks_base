@@ -777,6 +777,15 @@ interface IWindowManager
     VerifiedDisplayHash verifyDisplayHash(in DisplayHash displayHash);
 
     /**
+     * Call to enable or disable the throttling when generating a display hash. This should only be
+     * used for testing. Throttling is enabled by default.
+     *
+     * Must be called from a process that has {@link android.Manifest.permission#READ_FRAME_BUFFER}
+     * permission.
+     */
+     void setDisplayHashThrottlingEnabled(boolean enable);
+
+    /**
      * Registers a listener for a {@link android.window.WindowContext} to handle configuration
      * changes from the server side.
      * <p>

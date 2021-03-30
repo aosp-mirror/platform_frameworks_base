@@ -321,6 +321,7 @@ package android {
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
     field public static final int sdkVersion = 16844304; // 0x1010610
     field public static final int supportsAmbientMode = 16844173; // 0x101058d
+    field public static final int throttleDurationMillis = 16844360; // 0x1010648
     field public static final int userRestriction = 16844164; // 0x1010584
   }
 
@@ -9795,6 +9796,7 @@ package android.service.displayhash {
     method @NonNull public abstract java.util.Map<java.lang.String,android.service.displayhash.DisplayHashParams> onGetDisplayHashAlgorithms();
     method @Nullable public abstract android.view.displayhash.VerifiedDisplayHash onVerifyDisplayHash(@NonNull byte[], @NonNull android.view.displayhash.DisplayHash);
     field public static final String SERVICE_INTERFACE = "android.service.displayhash.DisplayHasherService";
+    field public static final String SERVICE_META_DATA = "android.displayhash.display_hasher_service";
   }
 
 }

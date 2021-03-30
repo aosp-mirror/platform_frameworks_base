@@ -2882,6 +2882,14 @@ package android.view.contentcapture {
 
 }
 
+package android.view.displayhash {
+
+  public final class DisplayHashManager {
+    method @RequiresPermission("android.permission.READ_FRAME_BUFFER") public void setDisplayHashThrottlingEnabled(boolean);
+  }
+
+}
+
 package android.view.inputmethod {
 
   public final class InlineSuggestion implements android.os.Parcelable {
