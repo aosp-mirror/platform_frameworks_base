@@ -766,15 +766,18 @@ public class BiometricService extends SystemService {
         public long[] getAuthenticatorIds(int callingUserId) {
             checkInternalPermission();
 
-            final List<Long> ids = new ArrayList<>();
+            final List<Long> authenticatorIds = new ArrayList<>();
             for (BiometricSensor sensor : mSensors) {
                 try {
-                    final long id = sensor.impl.getAuthenticatorId(callingUserId);
-                    if (Utils.isAtLeastStrength(sensor.getCurrentStrength(),
-                            Authenticators.BIOMETRIC_STRONG) && id != 0) {
-                        ids.add(id);
+                    final boolean hasEnrollments = sensor.impl.hasEnrolledTemplates(callingUserId,
+                            getContext().getOpPackageName());
+                    final long authenticatorId = sensor.impl.getAuthenticatorId(callingUserId);
+                    if (hasEnrollments && Utils.isAtLeastStrength(sensor.getCurrentStrength(),
+                            Authenticators.BIOMETRIC_STRONG)) {
+                        authenticatorIds.add(authenticatorId);
                     } else {
-                        Slog.d(TAG, "Sensor " + sensor + ", sensorId " + id
+                        Slog.d(TAG, "Sensor " + sensor + ", sensorId " + sensor.id
+                                + ", hasEnrollments: " + hasEnrollments
                                 + " cannot participate in Keystore operations");
                     }
                 } catch (RemoteException e) {
@@ -782,9 +785,9 @@ public class BiometricService extends SystemService {
                 }
             }
 
-            long[] result = new long[ids.size()];
-            for (int i = 0; i < ids.size(); i++) {
-                result[i] = ids.get(i);
+            long[] result = new long[authenticatorIds.size()];
+            for (int i = 0; i < authenticatorIds.size(); i++) {
+                result[i] = authenticatorIds.get(i);
             }
             return result;
         }
