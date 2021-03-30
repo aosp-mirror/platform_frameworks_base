@@ -1882,6 +1882,12 @@
         android:label="@string/permlab_preferredPaymentInfo"
         android:protectionLevel="normal" />
 
+    <!-- @SystemApi Allows access to set NFC controller always on states.
+         <p>Protection level: signature|privileged
+         @hide -->
+    <permission android:name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an internal user to use privileged SecureElement APIs.
          Applications holding this permission can access OMAPI reset system API
          and bypass OMAPI AccessControlEnforcer.
