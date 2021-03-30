@@ -290,25 +290,6 @@ public class UnderlyingNetworkTracker {
         maybeNotifyCallback();
     }
 
-    private void handleNetworkSuspended(@NonNull Network network, boolean isSuspended) {
-        mVcnContext.ensureRunningOnLooperThread();
-
-        if (!isSameNetwork(mRecordInProgress, network)) {
-            Slog.wtf(TAG, "Invalid update to isSuspended");
-            return;
-        }
-
-        final NetworkCapabilities newCaps =
-                new NetworkCapabilities(mRecordInProgress.getNetworkCapabilities());
-        if (isSuspended) {
-            newCaps.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED);
-        } else {
-            newCaps.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED);
-        }
-
-        handleCapabilitiesChanged(network, newCaps);
-    }
-
     private void handlePropertiesChanged(
             @NonNull Network network, @NonNull LinkProperties linkProperties) {
         mVcnContext.ensureRunningOnLooperThread();
@@ -366,17 +347,8 @@ public class UnderlyingNetworkTracker {
         @Override
         public void onCapabilitiesChanged(
                 @NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+            if (networkCapabilities.equals(mRecordInProgress.getNetworkCapabilities())) return;
             handleCapabilitiesChanged(network, networkCapabilities);
-        }
-
-        @Override
-        public void onNetworkSuspended(@NonNull Network network) {
-            handleNetworkSuspended(network, true /* isSuspended */);
-        }
-
-        @Override
-        public void onNetworkResumed(@NonNull Network network) {
-            handleNetworkSuspended(network, false /* isSuspended */);
         }
 
         @Override
