@@ -128,6 +128,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.service.notification.ZenModeConfig;
@@ -1092,6 +1093,33 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    private void updateVibratorInfos() {
+        VibratorManager vibratorManager = mContext.getSystemService(VibratorManager.class);
+        if (vibratorManager == null) {
+            Slog.e(TAG, "Vibrator manager is not found");
+            return;
+        }
+        int[] vibratorIds = vibratorManager.getVibratorIds();
+        if (vibratorIds.length == 0) {
+            Slog.d(TAG, "No vibrator found");
+            return;
+        }
+        List<Vibrator> vibrators = new ArrayList<>(vibratorIds.length);
+        for (int id : vibratorIds) {
+            Vibrator vibrator = vibratorManager.getVibrator(id);
+            if (vibrator != null) {
+                vibrators.add(vibrator);
+            } else {
+                Slog.w(TAG, "Vibrator(" + id + ") is not found");
+            }
+        }
+        if (vibrators.isEmpty()) {
+            Slog.w(TAG, "Cannot find any available vibrator");
+            return;
+        }
+        AudioSystem.setVibratorInfos(vibrators);
+    }
+
     public void onSystemReady() {
         mSystemReady = true;
         scheduleLoadSoundEffects();
@@ -1149,6 +1177,8 @@ public class AudioService extends IAudioService.Stub
         setMicMuteFromSwitchInput();
 
         initMinStreamVolumeWithoutModifyAudioSettings();
+
+        updateVibratorInfos();
     }
 
     RoleObserver mRoleObserver;
@@ -1341,6 +1371,9 @@ public class AudioService extends IAudioService.Stub
 
         setMicrophoneMuteNoCallerCheck(getCurrentUserId()); // will also update the mic mute cache
         setMicMuteFromSwitchInput();
+
+        // Restore vibrator info
+        updateVibratorInfos();
     }
 
     private void onReinitVolumes(@NonNull String caller) {
