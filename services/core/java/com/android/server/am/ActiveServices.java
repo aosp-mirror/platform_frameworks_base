@@ -131,6 +131,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
@@ -223,6 +224,11 @@ public final class ActiveServices {
      * List of services for which display of the FGS notification has been deferred.
      */
     final ArrayList<ServiceRecord> mPendingFgsNotifications = new ArrayList<>();
+
+    /**
+     * Uptime at which a given uid becomes eliglible again for FGS notification deferral
+     */
+    final SparseLongArray mFgsDeferralEligible = new SparseLongArray();
 
     /**
      * Map of services that are asked to be brought up (start/binding) but not ready to.
@@ -1965,11 +1971,30 @@ public final class ActiveServices {
         }
     }
 
+    private boolean withinFgsDeferRateLimit(final int uid, final long now) {
+        final long eligible = mFgsDeferralEligible.get(uid, 0L);
+        if (DEBUG_FOREGROUND_SERVICE) {
+            if (now < eligible) {
+                Slog.d(TAG_SERVICE, "FGS transition for uid " + uid
+                        + " within rate limit, showing immediately");
+            }
+        }
+        return now < eligible;
+    }
+
     // TODO: remove as part of fixing b/173627642
     @SuppressWarnings("AndroidFrameworkCompatChange")
     private void postFgsNotificationLocked(ServiceRecord r) {
+        final int uid = r.appInfo.uid;
+        final long now = SystemClock.uptimeMillis();
         final boolean isLegacyApp = (r.appInfo.targetSdkVersion < Build.VERSION_CODES.S);
-        boolean showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled;
+
+        boolean showNow = withinFgsDeferRateLimit(uid, now);
+        if (!showNow) {
+            final boolean showLegacyNow = isLegacyApp
+                    && mAm.mConstants.mFlagFgsNotificationDeferralApiGated;
+            showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled || showLegacyNow;
+        }
         if (!showNow) {
             // Legacy apps' FGS notifications are not deferred unless the relevant
             // DeviceConfig element has been set
@@ -2014,8 +2039,6 @@ public final class ActiveServices {
         }
 
         // schedule the actual notification post
-        final int uid = r.appInfo.uid;
-        final long now = SystemClock.uptimeMillis();
         long when = now + mAm.mConstants.mFgsNotificationDeferralInterval;
         // If there are already deferred FGS notifications for this app,
         // inherit that deferred-show timestamp
@@ -2033,6 +2056,9 @@ public final class ActiveServices {
                 when = Math.min(when, pending.fgDisplayTime);
             }
         }
+
+        final long nextEligible = when + mAm.mConstants.mFgsNotificationDeferralExclusionTime;
+        mFgsDeferralEligible.put(uid, nextEligible);
         r.fgDisplayTime = when;
         mPendingFgsNotifications.add(r);
         if (DEBUG_FOREGROUND_SERVICE) {
