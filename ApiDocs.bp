@@ -59,7 +59,6 @@ stubs_defaults {
     name: "framework-doc-stubs-default",
     srcs: [
         ":framework-non-updatable-stub-sources",
-        ":framework-mime-sources",
         ":framework-updatable-sources",
         "test-base/src/**/*.java",
         ":art.module.public.api{.public.stubs.source}",
