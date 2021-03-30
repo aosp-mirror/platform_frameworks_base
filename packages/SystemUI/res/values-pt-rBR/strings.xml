@@ -476,16 +476,16 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Adicionar usuário"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo usuário"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover convidado?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Remover visitante?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Remover"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo, convidado."</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Você voltou, visitante!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Quer continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
-    <string name="guest_notification_title" msgid="4434456703930764167">"Usuário convidado"</string>
-    <string name="guest_notification_text" msgid="4202692942089571351">"Para excluir apps e dados, remova o usuário convidado"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"REMOVER CONVIDADO"</string>
+    <string name="guest_notification_title" msgid="4434456703930764167">"Usuário visitante"</string>
+    <string name="guest_notification_text" msgid="4202692942089571351">"Para excluir apps e dados, remova o usuário visitante"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"REMOVER VISITANTE"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Desconectar usuário"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Desconectar usuário atual"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"DESCONECTAR USUÁRIO"</string>

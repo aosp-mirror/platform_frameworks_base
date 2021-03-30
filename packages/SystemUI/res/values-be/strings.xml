@@ -494,7 +494,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Выканаць выхад бягучага карыстальніка"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ВЫКАНАЦЬ ВЫХАД КАРЫСТАЛЬНІКА"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Дадаць новага карыстальніка?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Пасля стварэння профіля яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Пасля стварэння профілю яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Дасягнуты ліміт карыстальнікаў"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Можна дадаць <xliff:g id="COUNT">%d</xliff:g> карыстальніка.</item>

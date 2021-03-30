@@ -968,7 +968,7 @@
     <string name="save_password_never" msgid="6776808375903410659">"Katu"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Hauna idhini ya kufungua ukurasa huu."</string>
     <string name="text_copied" msgid="2531420577879738860">"Maandishi yamenakiliwa kwenye ubao wa kunakili."</string>
-    <string name="copied" msgid="4675902854553014676">"Imenakiliwa"</string>
+    <string name="copied" msgid="4675902854553014676">"Umenakili"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Zaidi"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menyu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Ili ubadilishe kati ya vipengele, telezesha vidole vitatu juu na ushikilie."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ukuzaji"</string>
     <string name="user_switched" msgid="7249833311585228097">"Mtumiaji wa sasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Inabadili kwenda <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Inaenda kwa <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Inamwondoa <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Mmiliki"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Hitilafu"</string>
