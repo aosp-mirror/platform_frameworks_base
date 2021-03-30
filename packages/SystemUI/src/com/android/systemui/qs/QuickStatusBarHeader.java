@@ -370,19 +370,19 @@ public class QuickStatusBarHeader extends FrameLayout {
             QuickQSPanelController quickQSPanelController) {
         mContentMarginStart = marginStart;
         mContentMarginEnd = marginEnd;
-        for (int i = 0; i < getChildCount(); i++) {
-            View view = getChildAt(i);
-            if (view == mHeaderQsPanel) {
-                // QS panel doesn't lays out some of its content full width
-                quickQSPanelController.setContentMargins(marginStart, marginEnd);
-            } else {
-                MarginLayoutParams lp = (MarginLayoutParams) view.getLayoutParams();
-                lp.setMarginStart(marginStart);
-                lp.setMarginEnd(marginEnd);
-                view.setLayoutParams(lp);
-            }
-        }
+        // The clock and QQS are not direct children, but the container should be just a wrapper to
+        // be able to move them together. So we set the margins to the actual views.
+        quickQSPanelController.setContentMargins(0, 0);
+        setContentMargins(mDatePrivacyView, marginStart, marginEnd);
+        setContentMargins(mClockIconsView, marginStart, marginEnd);
         updateHeadersPadding();
+    }
+
+    private void setContentMargins(View view, int marginStart, int marginEnd) {
+        MarginLayoutParams lp = (MarginLayoutParams) view.getLayoutParams();
+        lp.setMarginStart(marginStart);
+        lp.setMarginEnd(marginEnd);
+        view.setLayoutParams(lp);
     }
 
     /**
