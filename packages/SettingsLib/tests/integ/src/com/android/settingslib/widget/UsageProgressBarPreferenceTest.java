@@ -92,6 +92,28 @@ public class UsageProgressBarPreferenceTest {
     }
 
     @Test
+    public void setBottomSummary_getCorrectSummary() {
+        final String expectedText = "Should last until about 7:45 PM";
+        mUsageProgressBarPreference.setBottomSummary(expectedText);
+
+        mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
+
+        final TextView bottomSummary = (TextView) mViewHolder.findViewById(R.id.bottom_summary);
+        assertThat(bottomSummary.getText()).isEqualTo(expectedText);
+        assertThat(bottomSummary.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void setBottomSummary_emptyText_isGone() {
+        mUsageProgressBarPreference.setBottomSummary(null);
+
+        mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
+
+        final TextView bottomSummary = (TextView) mViewHolder.findViewById(R.id.bottom_summary);
+        assertThat(bottomSummary.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
     public void setPercent_getCorrectProgress() {
         mUsageProgressBarPreference.setPercent(31, 80);
 
