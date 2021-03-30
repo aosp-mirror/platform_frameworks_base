@@ -74,7 +74,7 @@ public final class BatteryUsageStats implements Parcelable {
         for (int i = 0; i < systemBatteryConsumerCount; i++) {
             final SystemBatteryConsumer consumer =
                     builder.mSystemBatteryConsumerBuilders.valueAt(i).build();
-            totalPower += consumer.getConsumedPower();
+            totalPower += consumer.getConsumedPower() - consumer.getPowerConsumedByApps();
             mSystemBatteryConsumers.add(consumer);
         }
 
