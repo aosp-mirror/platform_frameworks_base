@@ -640,7 +640,7 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void persistToDisk(@UserIdInt int userId) {
-            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
