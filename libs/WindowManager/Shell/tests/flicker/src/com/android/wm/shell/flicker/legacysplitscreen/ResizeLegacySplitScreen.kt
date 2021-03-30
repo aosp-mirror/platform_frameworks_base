@@ -183,8 +183,8 @@ class ResizeLegacySplitScreen(
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
-            this.coversExactly(topAppBounds, "SimpleActivity")
-                .coversExactly(bottomAppBounds, "ImeActivity")
+            visibleRegion("SimpleActivity").coversExactly(topAppBounds)
+            visibleRegion("ImeActivity").coversExactly(bottomAppBounds)
         }
     }
 
@@ -203,8 +203,8 @@ class ResizeLegacySplitScreen(
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
 
-            this.coversExactly(topAppBounds, sSimpleActivity)
-                .coversExactly(bottomAppBounds, sImeActivity)
+            visibleRegion(sSimpleActivity).coversExactly(topAppBounds)
+            visibleRegion(sImeActivity).coversExactly(bottomAppBounds)
         }
     }
 
