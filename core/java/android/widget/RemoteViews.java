@@ -6342,6 +6342,9 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Set the ID of the top-level view of the XML layout.
      *
+     * The view's ID is changed right after inflation, before it gets added to its parent. The ID
+     * of a given view can never change after the initial inflation.
+     *
      * Set to {@link View#NO_ID} to reset and simply keep the id defined in the XML layout.
      *
      * @throws UnsupportedOperationException if the method is called on a RemoteViews defined in
