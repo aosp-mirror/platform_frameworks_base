@@ -3173,8 +3173,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int[] gids = (flags & PackageManager.GET_GIDS) == 0 ? EMPTY_INT_ARRAY
                         : mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
                 // Compute granted permissions only if package has requested permissions
-                final Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
-                        ? Collections.emptySet()
+                final Set<String> permissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
+                        || ArrayUtils.isEmpty(p.getRequestedPermissions())) ? Collections.emptySet()
                         : mPermissionManager.getGrantedPermissions(ps.name, userId);
 
                 PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
