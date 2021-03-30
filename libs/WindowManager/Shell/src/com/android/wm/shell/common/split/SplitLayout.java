@@ -27,9 +27,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 
@@ -75,7 +76,7 @@ public class SplitLayout {
         mDividerSize = mDividerWindowWidth - mDividerInsets * 2;
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
-        mDividerSnapAlgorithm = getSnapAlgorithm(context.getResources(), mRootBounds);
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
         resetDividerPosition();
     }
 
@@ -114,7 +115,7 @@ public class SplitLayout {
         mContext = mContext.createConfigurationContext(configuration);
         mSplitWindowManager.setConfiguration(configuration);
         mRootBounds.set(rootBounds);
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext.getResources(), mRootBounds);
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
         resetDividerPosition();
 
         // Don't inflate divider bar if it is not initialized.
@@ -217,15 +218,15 @@ public class SplitLayout {
         return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
 
-    private DividerSnapAlgorithm getSnapAlgorithm(Resources resources, Rect rootBounds) {
+    private DividerSnapAlgorithm getSnapAlgorithm(Context context, Rect rootBounds) {
         final boolean isLandscape = isLandscape(rootBounds);
         return new DividerSnapAlgorithm(
-                resources,
+                context.getResources(),
                 rootBounds.width(),
                 rootBounds.height(),
                 mDividerSize,
                 !isLandscape,
-                new Rect() /* insets */,
+                getDisplayInsets(context),
                 isLandscape ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
     }
 
@@ -248,6 +249,15 @@ public class SplitLayout {
             }
         });
         animator.start();
+    }
+
+    private static Rect getDisplayInsets(Context context) {
+        return context.getSystemService(WindowManager.class)
+                .getMaximumWindowMetrics()
+                .getWindowInsets()
+                .getInsets(WindowInsets.Type.navigationBars()
+                        | WindowInsets.Type.statusBars()
+                        | WindowInsets.Type.displayCutout()).toRect();
     }
 
     private static boolean isLandscape(Rect bounds) {
