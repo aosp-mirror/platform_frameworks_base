@@ -2013,6 +2013,10 @@ public final class OomAdjuster {
                         }
                         String adjType = null;
                         if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
+                            // Similar to BIND_WAIVE_PRIORITY, keep it unfrozen.
+                            if (clientAdj < ProcessList.CACHED_APP_MIN_ADJ) {
+                                app.mOptRecord.setShouldNotFreeze(true);
+                            }
                             // Not doing bind OOM management, so treat
                             // this guy more like a started service.
                             if (state.hasShownUi() && !state.getCachedIsHomeProcess()) {

@@ -42,6 +42,7 @@ android_test {
         "androidx.test.ext.truth",
         "androidx.test.runner",
         "androidx.test.rules",
+        "cts-wm-util",
         "platform-compat-test-rules",
         "mockito-target-minus-junit4",
         "platform-test-annotations",
