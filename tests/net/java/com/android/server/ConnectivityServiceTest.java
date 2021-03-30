@@ -3162,7 +3162,6 @@ public class ConnectivityServiceTest {
         // Skipping VALIDATED and CAPTIVE_PORTAL as they're disallowed.
     }
 
-    @Ignore("Refactoring in progress b/184028345")
     @Test
     public void testRegisterIgnoringScore() throws Exception {
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);

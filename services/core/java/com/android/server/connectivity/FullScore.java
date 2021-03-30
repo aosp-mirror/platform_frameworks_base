@@ -86,9 +86,14 @@ public class FullScore {
     /** @hide */
     public static final int POLICY_IS_UNMETERED = 59;
 
+    // This network is invincible. This is useful for offers until there is an API to listen
+    // to requests.
+    /** @hide */
+    public static final int POLICY_IS_INVINCIBLE = 58;
+
     // To help iterate when printing
     @VisibleForTesting
-    static final int MIN_CS_MANAGED_POLICY = POLICY_IS_UNMETERED;
+    static final int MIN_CS_MANAGED_POLICY = POLICY_IS_INVINCIBLE;
     @VisibleForTesting
     static final int MAX_CS_MANAGED_POLICY = POLICY_IS_VALIDATED;
 
@@ -109,6 +114,7 @@ public class FullScore {
             case POLICY_YIELD_TO_BAD_WIFI: return "YIELD_TO_BAD_WIFI";
             case POLICY_TRANSPORT_PRIMARY: return "TRANSPORT_PRIMARY";
             case POLICY_EXITING: return "EXITING";
+            case POLICY_IS_INVINCIBLE: return "INVINCIBLE";
         }
         throw new IllegalArgumentException("Unknown policy : " + policy);
     }
@@ -147,7 +153,8 @@ public class FullScore {
                 caps.hasCapability(NET_CAPABILITY_NOT_METERED),
                 config.explicitlySelected,
                 config.acceptUnvalidated,
-                yieldToBadWiFi);
+                yieldToBadWiFi,
+                false /* invincible */); // only prospective scores can be invincible
     }
 
     /**
@@ -178,8 +185,12 @@ public class FullScore {
         final boolean acceptUnvalidated = false;
         // Don't assume clinging to bad wifi
         final boolean yieldToBadWiFi = false;
+        // A prospective score is invincible if the legacy int in the filter is over the maximum
+        // score.
+        final boolean invincible = score.getLegacyInt() > NetworkRanker.LEGACY_INT_MAX;
         return withPolicies(score.getLegacyInt(), score.getPolicies(), KEEP_CONNECTED_NONE,
-                mayValidate, vpn, unmetered, everUserSelected, acceptUnvalidated, yieldToBadWiFi);
+                mayValidate, vpn, unmetered, everUserSelected, acceptUnvalidated, yieldToBadWiFi,
+                invincible);
     }
 
     /**
@@ -200,7 +211,8 @@ public class FullScore {
                 caps.hasCapability(NET_CAPABILITY_NOT_METERED),
                 config.explicitlySelected,
                 config.acceptUnvalidated,
-                yieldToBadWifi);
+                yieldToBadWifi,
+                false /* invincible */); // only prospective scores can be invincible
     }
 
     // TODO : this shouldn't manage bad wifi avoidance – instead this should be done by the
@@ -214,14 +226,16 @@ public class FullScore {
             final boolean isUnmetered,
             final boolean everUserSelected,
             final boolean acceptUnvalidated,
-            final boolean yieldToBadWiFi) {
+            final boolean yieldToBadWiFi,
+            final boolean invincible) {
         return new FullScore(legacyInt, (externalPolicies & EXTERNAL_POLICIES_MASK)
                 | (isValidated       ? 1L << POLICY_IS_VALIDATED : 0)
                 | (isVpn             ? 1L << POLICY_IS_VPN : 0)
                 | (isUnmetered       ? 1L << POLICY_IS_UNMETERED : 0)
                 | (everUserSelected  ? 1L << POLICY_EVER_USER_SELECTED : 0)
                 | (acceptUnvalidated ? 1L << POLICY_ACCEPT_UNVALIDATED : 0)
-                | (yieldToBadWiFi    ? 1L << POLICY_YIELD_TO_BAD_WIFI : 0),
+                | (yieldToBadWiFi    ? 1L << POLICY_YIELD_TO_BAD_WIFI : 0)
+                | (invincible        ? 1L << POLICY_IS_INVINCIBLE : 0),
                 keepConnectedReason);
     }
 

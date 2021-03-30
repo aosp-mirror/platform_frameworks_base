@@ -26,6 +26,7 @@ import static android.net.NetworkScore.POLICY_YIELD_TO_BAD_WIFI;
 
 import static com.android.server.connectivity.FullScore.POLICY_ACCEPT_UNVALIDATED;
 import static com.android.server.connectivity.FullScore.POLICY_EVER_USER_SELECTED;
+import static com.android.server.connectivity.FullScore.POLICY_IS_INVINCIBLE;
 import static com.android.server.connectivity.FullScore.POLICY_IS_VALIDATED;
 import static com.android.server.connectivity.FullScore.POLICY_IS_VPN;
 
@@ -46,6 +47,10 @@ import java.util.function.Predicate;
  * A class that knows how to find the best network matching a request out of a list of networks.
  */
 public class NetworkRanker {
+    // Historically the legacy ints have been 0~100 in principle (though the highest score in
+    // AOSP has always been 90). This is relied on by VPNs that send a legacy score of 101.
+    public static final int LEGACY_INT_MAX = 100;
+
     /**
      * A class that can be scored against other scoreables.
      */
@@ -71,7 +76,6 @@ public class NetworkRanker {
         }
         return matches;
     }
-
 
     /**
      * Find the best network satisfying this request among the list of passed networks.
@@ -133,6 +137,12 @@ public class NetworkRanker {
         //    made.
         // 4. if none remain, the criterion did not help discriminate so keep them all. As an
         //    optimization, skip creating a new array and go on to the next criterion.
+
+        // If a network is invincible, use it.
+        partitionInto(candidates, nai -> nai.getScore().hasPolicy(POLICY_IS_INVINCIBLE),
+                accepted, rejected);
+        if (accepted.size() == 1) return accepted.get(0);
+        if (accepted.size() > 0 && rejected.size() > 0) candidates = new ArrayList<>(accepted);
 
         // If there is a connected VPN, use it.
         partitionInto(candidates, nai -> nai.getScore().hasPolicy(POLICY_IS_VPN),
