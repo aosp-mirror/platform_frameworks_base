@@ -1149,38 +1149,6 @@ aidl_interface {
     },
 }
 
-// TODO(b/77285514): remove this once the last few hidl interfaces have been
-// updated to use hwbinder.stubs.
-java_library {
-    name: "hwbinder",
-    sdk_version: "core_platform",
-
-    srcs: [
-        "core/java/android/os/HidlSupport.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/android/os/HidlMemory.java",
-        "core/java/android/os/HwBinder.java",
-        "core/java/android/os/HwBlob.java",
-        "core/java/android/os/HwParcel.java",
-        "core/java/android/os/IHwBinder.java",
-        "core/java/android/os/IHwInterface.java",
-        "core/java/android/os/DeadObjectException.java",
-        "core/java/android/os/DeadSystemException.java",
-        "core/java/android/os/NativeHandle.java",
-        "core/java/android/os/RemoteException.java",
-        "core/java/android/util/AndroidException.java",
-    ],
-    libs: ["unsupportedappusage"],
-
-    dxflags: ["--core-library"],
-    installable: false,
-}
-
 python_defaults {
     name: "base_default",
     version: {
