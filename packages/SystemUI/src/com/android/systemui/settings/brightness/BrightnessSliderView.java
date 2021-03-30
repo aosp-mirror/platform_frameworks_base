@@ -31,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 
 /**
@@ -54,6 +55,7 @@ public class BrightnessSliderView extends FrameLayout {
     private TextView mLabel;
     private final CharSequence mText;
     private DispatchTouchEventListener mListener;
+    private Gefingerpoken mOnInterceptListener;
 
     public BrightnessSliderView(Context context) {
         this(context, null);
@@ -103,6 +105,15 @@ public class BrightnessSliderView extends FrameLayout {
             mListener.onDispatchTouchEvent(ev);
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        // We prevent disallowing on this view, but bubble it up to our parents.
+        // We need interception to handle falsing.
+        if (mParent != null) {
+            mParent.requestDisallowInterceptTouchEvent(disallowIntercept);
+        }
     }
 
     /**
@@ -193,6 +204,18 @@ public class BrightnessSliderView extends FrameLayout {
      */
     public int getValue() {
         return mSlider.getProgress();
+    }
+
+    public void setOnInterceptListener(Gefingerpoken onInterceptListener) {
+        mOnInterceptListener = onInterceptListener;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mOnInterceptListener != null) {
+            return mOnInterceptListener.onInterceptTouchEvent(ev);
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     /**
