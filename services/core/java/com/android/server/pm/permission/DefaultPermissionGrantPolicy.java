@@ -737,10 +737,9 @@ final class DefaultPermissionGrantPolicy {
                 grantPermissionsToSystemPackage(pm, packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
-                        ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS,
-                        ACTIVITY_RECOGNITION_PERMISSIONS);
+                        ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
         }
         if (locationExtraPackageNames != null) {
