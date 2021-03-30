@@ -307,6 +307,22 @@ interface IAppSearchManager {
         in IAppSearchResultCallback callback);
 
     /**
+     * Gets the storage info.
+     *
+     * @param packageName The name of the package to get the storage info for.
+     * @param databaseName The databaseName to get the storage info for.
+     * @param userId Id of the calling user
+     * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+     *     {@link AppSearchResult}&lt;{@link Bundle}&gt;, where the value is a
+     *     {@link StorageInfo}.
+     */
+    void getStorageInfo(
+        in String packageName,
+        in String databaseName,
+        in int userId,
+        in IAppSearchResultCallback callback);
+
+    /**
      * Persists all update/delete requests to the disk.
      *
      * @param userId Id of the calling user
