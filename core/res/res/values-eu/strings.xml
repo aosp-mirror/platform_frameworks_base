@@ -1203,7 +1203,7 @@
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> abian da"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Sakatu jokora itzultzeko"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Aukeratu joko bat"</string>
-    <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Funtzionamendu hobea izateko, joko hauetako bat baino ezin da egon irekita aldi berean."</string>
+    <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Errendimendu hobea izateko, joko hauetako bat baino ezin da egon irekita aldi berean."</string>
     <string name="old_app_action" msgid="725331621042848590">"Itzuli <xliff:g id="OLD_APP">%1$s</xliff:g> aplikaziora"</string>
     <string name="new_app_action" msgid="547772182913269801">"Ireki <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"Gorde gabe itxiko da <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
@@ -1315,7 +1315,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Proba-materialeko modua gaitu da"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Proba-materialaren modua desgaitzeko, berrezarri jatorrizko datuak."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serie-kontsola gaituta"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Funtzionamenduari eragiten dio. Desgaitzeko, joan abiarazlera."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Errendimenduari eragiten dio. Desgaitzeko, joan abiarazlera."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Likidoa edo zikinkeriak daude USB atakan"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB ataka automatikoki desgaitu da. Informazio gehiago lortzeko, sakatu hau."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Erabiltzeko moduan dago USB ataka"</string>
