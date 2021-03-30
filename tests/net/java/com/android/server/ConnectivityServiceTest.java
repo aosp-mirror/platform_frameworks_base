@@ -717,6 +717,9 @@ public class ConnectivityServiceTest {
         private int mProbesSucceeded;
         private String mNmValidationRedirectUrl = null;
         private boolean mNmProvNotificationRequested = false;
+        private Runnable mCreatedCallback;
+        private Runnable mUnwantedCallback;
+        private Runnable mDisconnectedCallback;
 
         private final ConditionVariable mNetworkStatusReceived = new ConditionVariable();
         // Contains the redirectUrl from networkStatus(). Before reading, wait for
@@ -770,6 +773,24 @@ public class ConnectivityServiceTest {
                 public void networkStatus(int status, String redirectUrl) {
                     mRedirectUrl = redirectUrl;
                     mNetworkStatusReceived.open();
+                }
+
+                @Override
+                public void onNetworkCreated() {
+                    super.onNetworkCreated();
+                    if (mCreatedCallback != null) mCreatedCallback.run();
+                }
+
+                @Override
+                public void onNetworkUnwanted() {
+                    super.onNetworkUnwanted();
+                    if (mUnwantedCallback != null) mUnwantedCallback.run();
+                }
+
+                @Override
+                public void onNetworkDestroyed() {
+                    super.onNetworkDestroyed();
+                    if (mDisconnectedCallback != null) mDisconnectedCallback.run();
                 }
             };
 
@@ -971,6 +992,18 @@ public class ConnectivityServiceTest {
             p.detectionMethod = DATA_STALL_DETECTION_METHOD;
             p.timestampMillis = DATA_STALL_TIMESTAMP;
             mNmCallbacks.notifyDataStallSuspected(p);
+        }
+
+        public void setCreatedCallback(Runnable r) {
+            mCreatedCallback = r;
+        }
+
+        public void setUnwantedCallback(Runnable r) {
+            mUnwantedCallback = r;
+        }
+
+        public void setDisconnectedCallback(Runnable r) {
+            mDisconnectedCallback = r;
         }
     }
 
@@ -2798,6 +2831,94 @@ public class ConnectivityServiceTest {
 
         // Clean up.
         mCm.unregisterNetworkCallback(defaultCallback);
+        mCm.unregisterNetworkCallback(callback);
+    }
+
+    @Test
+    public void testNetworkAgentCallbacks() throws Exception {
+        // Keeps track of the order of events that happen in this test.
+        final LinkedBlockingQueue<String> eventOrder = new LinkedBlockingQueue<>();
+
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        final AtomicReference<Network> wifiNetwork = new AtomicReference<>();
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+
+        // Expectations for state when various callbacks fire. These expectations run on the handler
+        // thread and not on the test thread because they need to prevent the handler thread from
+        // advancing while they examine state.
+
+        // 1. When onCreated fires, netd has been told to create the network.
+        mWiFiNetworkAgent.setCreatedCallback(() -> {
+            eventOrder.offer("onNetworkCreated");
+            wifiNetwork.set(mWiFiNetworkAgent.getNetwork());
+            assertNotNull(wifiNetwork.get());
+            try {
+                verify(mMockNetd).networkCreatePhysical(wifiNetwork.get().getNetId(),
+                        INetd.PERMISSION_NONE);
+            } catch (RemoteException impossible) {
+                fail();
+            }
+        });
+
+        // 2. onNetworkUnwanted isn't precisely ordered with respect to any particular events. Just
+        //    check that it is fired at some point after disconnect.
+        mWiFiNetworkAgent.setUnwantedCallback(() -> eventOrder.offer("onNetworkUnwanted"));
+
+        // 3. While the teardown timer is running, connectivity APIs report the network is gone, but
+        //    netd has not yet been told to destroy it.
+        final Runnable duringTeardown = () -> {
+            eventOrder.offer("timePasses");
+            assertNull(mCm.getLinkProperties(wifiNetwork.get()));
+            try {
+                verify(mMockNetd, never()).networkDestroy(wifiNetwork.get().getNetId());
+            } catch (RemoteException impossible) {
+                fail();
+            }
+        };
+
+        // 4. After onNetworkDisconnected is called, connectivity APIs report the network is gone,
+        // and netd has been told to destroy it.
+        mWiFiNetworkAgent.setDisconnectedCallback(() -> {
+            eventOrder.offer("onNetworkDisconnected");
+            assertNull(mCm.getLinkProperties(wifiNetwork.get()));
+            try {
+                verify(mMockNetd).networkDestroy(wifiNetwork.get().getNetId());
+            } catch (RemoteException impossible) {
+                fail();
+            }
+        });
+
+        // Connect a network, and file a request for it after it has come up, to ensure the nascent
+        // timer is cleared and the test does not have to wait for it. Filing the request after the
+        // network has come up is necessary because ConnectivityService does not appear to clear the
+        // nascent timer if the first request satisfied by the network was filed before the network
+        // connected.
+        // TODO: fix this bug, file the request before connecting, and remove the waitForIdle.
+        mWiFiNetworkAgent.connectWithoutInternet();
+        waitForIdle();
+        mCm.requestNetwork(request, callback);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+
+        // Set teardown delay and make sure CS has processed it.
+        mWiFiNetworkAgent.getNetworkAgent().setTeardownDelayMs(300);
+        waitForIdle();
+
+        // Post the duringTeardown lambda to the handler so it fires while teardown is in progress.
+        // The delay must be long enough it will run after the unregisterNetworkCallback has torn
+        // down the network and started the teardown timer, and short enough that the lambda is
+        // scheduled to run before the teardown timer.
+        final Handler h = new Handler(mCsHandlerThread.getLooper());
+        h.postDelayed(duringTeardown, 150);
+
+        // Disconnect the network and check that events happened in the right order.
+        mCm.unregisterNetworkCallback(callback);
+        assertEquals("onNetworkCreated", eventOrder.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertEquals("onNetworkUnwanted", eventOrder.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertEquals("timePasses", eventOrder.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertEquals("onNetworkDisconnected", eventOrder.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
         mCm.unregisterNetworkCallback(callback);
     }
 
