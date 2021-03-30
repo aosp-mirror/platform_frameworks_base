@@ -50,6 +50,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -83,8 +84,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     private final AppOpsManager mAppOps;
     private final AudioManager mAudioManager;
     private final LocationManager mLocationManager;
-    private final PackageManager mPackageManager;
     private final IndividualSensorPrivacyController mSensorPrivacyController;
+    private final SystemClock mClock;
 
     // mLocationProviderPackages are cached and updated only occasionally
     private static final long LOCATION_PROVIDER_UPDATE_FREQUENCY_MS = 30000;
@@ -126,7 +127,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             PermissionFlagsCache cache,
             AudioManager audioManager,
             IndividualSensorPrivacyController sensorPrivacyController,
-            BroadcastDispatcher dispatcher
+            BroadcastDispatcher dispatcher,
+            SystemClock clock
     ) {
         mDispatcher = dispatcher;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
@@ -142,8 +144,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
                 || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
         mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
         mLocationManager = context.getSystemService(LocationManager.class);
-        mPackageManager = context.getPackageManager();
         mContext = context;
+        mClock = clock;
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -252,7 +254,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         synchronized (mActiveItems) {
             AppOpItem item = getAppOpItemLocked(mActiveItems, code, uid, packageName);
             if (item == null && active) {
-                item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
+                item = new AppOpItem(code, uid, packageName, mClock.elapsedRealtime());
                 if (code == AppOpsManager.OP_RECORD_AUDIO) {
                     item.setDisabled(isAnyRecordingPausedLocked(uid));
                 } else if (code == AppOpsManager.OP_CAMERA) {
@@ -294,7 +296,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         synchronized (mNotedItems) {
             item = getAppOpItemLocked(mNotedItems, code, uid, packageName);
             if (item == null) {
-                item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
+                item = new AppOpItem(code, uid, packageName, mClock.elapsedRealtime());
                 mNotedItems.add(item);
                 if (DEBUG) Log.w(TAG, "Added item: " + item.toString());
                 createdNew = true;
