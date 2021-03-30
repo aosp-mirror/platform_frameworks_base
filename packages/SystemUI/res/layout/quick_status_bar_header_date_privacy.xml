@@ -17,33 +17,35 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/quick_status_bar_system_icons"
+    android:id="@+id/quick_status_bar_date_privacy"
     android:layout_width="match_parent"
     android:layout_height="@*android:dimen/quick_qs_offset_height"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:gravity="center"
+    android:layout_gravity="top"
     android:orientation="horizontal"
     android:clickable="true"
-    android:paddingTop="@dimen/status_bar_padding_top" >
+    android:paddingTop="@dimen/status_bar_padding_top"
+    android:minHeight="48dp">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:minHeight="48dp"
         android:layout_weight="1"
         android:orientation="horizontal"
         android:gravity="center_vertical|start" >
 
-    <com.android.systemui.statusbar.policy.Clock
-        android:id="@+id/clock"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:minWidth="48dp"
-        android:gravity="center_vertical|start"
-        android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
-        android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
-        android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.StatusBar.Clock" />
+        <com.android.systemui.statusbar.policy.DateView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:gravity="center_vertical"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.QS.Status"
+            systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
     </LinearLayout>
 
     <android.widget.Space
@@ -56,6 +58,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:minHeight="48dp"
         android:layout_weight="1"
         android:orientation="horizontal"
         android:gravity="center_vertical|end" >

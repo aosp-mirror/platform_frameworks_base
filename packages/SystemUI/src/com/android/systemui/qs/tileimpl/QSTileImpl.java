@@ -56,7 +56,6 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.Prefs;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -67,7 +66,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.logging.QSLogger;
 
 import java.io.FileDescriptor;
@@ -300,11 +298,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 getInstanceId());
         mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
         mHandler.sendEmptyMessage(H.LONG_CLICK);
-
-        Prefs.putInt(
-                mContext,
-                Prefs.Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
-                QuickStatusBarHeader.MAX_TOOLTIP_SHOWN_COUNT);
     }
 
     public LogMaker populate(LogMaker logMaker) {
