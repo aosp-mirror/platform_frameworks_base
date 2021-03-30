@@ -36,6 +36,7 @@ import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.FaceServiceReceiver;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
@@ -394,10 +395,29 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 final IFaceServiceReceiver receiver, final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
+            final FaceServiceReceiver internalReceiver = new FaceServiceReceiver() {
+                int sensorsFinishedRemoving = 0;
+                final int numSensors = getSensorPropertiesInternal(
+                        getContext().getOpPackageName()).size();
+                @Override
+                public void onRemoved(Face face, int remaining) throws RemoteException {
+                    if (remaining == 0) {
+                        sensorsFinishedRemoving++;
+                        Slog.d(TAG, "sensorsFinishedRemoving: " + sensorsFinishedRemoving
+                                + ", numSensors: " + numSensors);
+                        if (sensorsFinishedRemoving == numSensors) {
+                            receiver.onRemoved(null, 0 /* remaining */);
+                        }
+                    }
+                }
+            };
+
+            // This effectively iterates through all sensors, but has to do so by finding all
+            // sensors under each provider.
             for (ServiceProvider provider : mServiceProviders) {
                 List<FaceSensorPropertiesInternal> props = provider.getSensorProperties();
                 for (FaceSensorPropertiesInternal prop : props) {
-                    provider.scheduleRemoveAll(prop.sensorId, token, userId, receiver,
+                    provider.scheduleRemoveAll(prop.sensorId, token, userId, internalReceiver,
                             opPackageName);
                 }
             }
