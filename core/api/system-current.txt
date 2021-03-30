@@ -10418,9 +10418,10 @@ package android.service.voice {
     method public int describeContents();
     method public int getByteOffset();
     method public int getConfidenceLevel();
-    method @NonNull public android.os.Bundle getExtras();
-    method @Nullable public String getHotwordPhrase();
+    method @NonNull public android.os.PersistableBundle getExtras();
+    method public int getHotwordPhraseId();
     method public static int getMaxBundleSize();
+    method public static int getMaxHotwordPhraseId();
     method public static int getMaxScore();
     method public int getPersonalizedScore();
     method public int getScore();
@@ -10434,8 +10435,8 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult build();
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setByteOffset(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
-    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.Bundle);
-    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhrase(@NonNull String);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhraseId(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
   }
