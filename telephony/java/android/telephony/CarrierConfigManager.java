@@ -4902,6 +4902,15 @@ public class CarrierConfigManager {
     public static final String KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL =
             "display_call_strength_indicator_bool";
 
+    /**
+     * Determine whether or not to display no data notification when data setup is permanently
+     * failed.
+     *
+     * @hide
+     */
+    public static final String KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL =
+            "display_no_data_notification_on_permanent_failure_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -5478,6 +5487,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HIDE_NO_CALLING_INDICATOR_ON_DATA_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL, true);
         sDefaults.putString(KEY_CARRIER_PROVISIONING_APP_STRING, "");
+        sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
     }
 
     /**
