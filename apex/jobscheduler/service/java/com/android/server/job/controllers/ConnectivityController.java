@@ -226,9 +226,22 @@ public final class ConnectivityController extends RestrictingController implemen
                 jobs.remove(jobStatus);
             }
             UidStats us = mUidStats.get(jobStatus.getSourceUid());
-            us.numReadyWithConnectivity--;
-            if (jobStatus.madeActive != 0) {
-                us.numRunning--;
+            if (us == null) {
+                // This shouldn't be happening. We create a UidStats object for the app when the
+                // first job is scheduled in maybeStartTrackingJobLocked() and only ever drop the
+                // object if the app is uninstalled or the user is removed. That means that if we
+                // end up in this situation, onAppRemovedLocked() or onUserRemovedLocked() was
+                // called before maybeStopTrackingJobLocked(), which is the reverse order of what
+                // JobSchedulerService does (JSS calls maybeStopTrackingJobLocked() for all jobs
+                // before calling onAppRemovedLocked() or onUserRemovedLocked()).
+                Slog.wtfStack(TAG,
+                        "UidStats was null after job for " + jobStatus.getSourcePackageName()
+                                + " was registered");
+            } else {
+                us.numReadyWithConnectivity--;
+                if (jobStatus.madeActive != 0) {
+                    us.numRunning--;
+                }
             }
             maybeRevokeStandbyExceptionLocked(jobStatus);
             maybeAdjustRegisteredCallbacksLocked();
@@ -773,22 +786,22 @@ public final class ConnectivityController extends RestrictingController implemen
      * @param filterNetwork only update jobs that would use this
      *                      {@link Network}, or {@code null} to update all tracked jobs.
      */
-    private void updateTrackedJobs(int filterUid, Network filterNetwork) {
-        synchronized (mLock) {
-            boolean changed = false;
-            if (filterUid == -1) {
-                for (int i = mTrackedJobs.size() - 1; i >= 0; i--) {
-                    changed |= updateTrackedJobsLocked(mTrackedJobs.valueAt(i), filterNetwork);
-                }
-            } else {
-                changed = updateTrackedJobsLocked(mTrackedJobs.get(filterUid), filterNetwork);
+    @GuardedBy("mLock")
+    private void updateTrackedJobsLocked(int filterUid, Network filterNetwork) {
+        boolean changed = false;
+        if (filterUid == -1) {
+            for (int i = mTrackedJobs.size() - 1; i >= 0; i--) {
+                changed |= updateTrackedJobsLocked(mTrackedJobs.valueAt(i), filterNetwork);
             }
-            if (changed) {
-                mStateChangedListener.onControllerStateChanged();
-            }
+        } else {
+            changed = updateTrackedJobsLocked(mTrackedJobs.get(filterUid), filterNetwork);
+        }
+        if (changed) {
+            mStateChangedListener.onControllerStateChanged();
         }
     }
 
+    @GuardedBy("mLock")
     private boolean updateTrackedJobsLocked(ArraySet<JobStatus> jobs, Network filterNetwork) {
         if (jobs == null || jobs.size() == 0) {
             return false;
@@ -875,9 +888,9 @@ public final class ConnectivityController extends RestrictingController implemen
             }
             synchronized (mLock) {
                 mAvailableNetworks.put(network, capabilities);
+                updateTrackedJobsLocked(-1, network);
+                maybeAdjustRegisteredCallbacksLocked();
             }
-            updateTrackedJobs(-1, network);
-            maybeAdjustRegisteredCallbacksLocked();
         }
 
         @Override
@@ -893,9 +906,9 @@ public final class ConnectivityController extends RestrictingController implemen
                         callback.mDefaultNetwork = null;
                     }
                 }
+                updateTrackedJobsLocked(-1, network);
+                maybeAdjustRegisteredCallbacksLocked();
             }
-            updateTrackedJobs(-1, network);
-            maybeAdjustRegisteredCallbacksLocked();
         }
     };
 
@@ -909,7 +922,7 @@ public final class ConnectivityController extends RestrictingController implemen
             synchronized (mLock) {
                 switch (msg.what) {
                     case MSG_REEVALUATE_JOBS:
-                        updateTrackedJobs(-1, null);
+                        updateTrackedJobsLocked(-1, null);
                         break;
                 }
             }
@@ -949,8 +962,8 @@ public final class ConnectivityController extends RestrictingController implemen
             synchronized (mLock) {
                 mDefaultNetwork = network;
                 mBlocked = blocked;
+                updateTrackedJobsLocked(mUid, network);
             }
-            updateTrackedJobs(mUid, network);
         }
 
         // Network transitions have some complicated behavior that JS doesn't handle very well.
@@ -993,8 +1006,8 @@ public final class ConnectivityController extends RestrictingController implemen
                 if (Objects.equals(mDefaultNetwork, network)) {
                     mDefaultNetwork = null;
                 }
+                updateTrackedJobsLocked(mUid, network);
             }
-            updateTrackedJobs(mUid, network);
         }
 
         private void dumpLocked(IndentingPrintWriter pw) {
