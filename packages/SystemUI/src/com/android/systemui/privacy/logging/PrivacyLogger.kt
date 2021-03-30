@@ -22,10 +22,13 @@ import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogMessage
 import com.android.systemui.log.dagger.PrivacyLog
 import com.android.systemui.privacy.PrivacyDialog
+import com.android.systemui.privacy.PrivacyItem
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 private const val TAG = "PrivacyLog"
-
+private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
 class PrivacyLogger @Inject constructor(
     @PrivacyLog private val buffer: LogBuffer
 ) {
@@ -41,31 +44,29 @@ class PrivacyLogger @Inject constructor(
         })
     }
 
-    fun logUpdatedPrivacyItemsList(listAsString: String) {
+    fun logRetrievedPrivacyItemsList(list: List<PrivacyItem>) {
         log(LogLevel.INFO, {
-            str1 = listAsString
+            str1 = listToString(list)
         }, {
-            "Updated list: $str1"
+            "Retrieved list to process: $str1"
         })
     }
 
-    fun startIndicatorsHold(time: Long) {
+    fun logPrivacyItemsToHold(list: List<PrivacyItem>) {
         log(LogLevel.DEBUG, {
-            int1 = time.toInt() / 1000
+            str1 = listToString(list)
         }, {
-            "Starting privacy indicators hold for $int1 seconds"
+            "Holding items: $str1"
         })
     }
 
-    fun cancelIndicatorsHold() {
-        log(LogLevel.VERBOSE, {}, {
-            "Cancel privacy indicators hold"
-        })
-    }
-
-    fun finishIndicatorsHold() {
-        log(LogLevel.DEBUG, {}, {
-            "Finish privacy indicators hold"
+    fun logPrivacyItemsUpdateScheduled(delay: Long) {
+        log(LogLevel.INFO, {
+            val scheduledFor = System.currentTimeMillis() + delay
+            val formattedTimestamp = DATE_FORMAT.format(scheduledFor)
+            str1 = formattedTimestamp
+        }, {
+            "Updating items scheduled for $str1"
         })
     }
 
@@ -128,6 +129,10 @@ class PrivacyLogger @Inject constructor(
         }, {
             "Start settings activity from dialog for packageName=$str1, userId=$int1 "
         })
+    }
+
+    private fun listToString(list: List<PrivacyItem>): String {
+        return list.joinToString(separator = ", ", transform = PrivacyItem::log)
     }
 
     private inline fun log(
