@@ -2315,7 +2315,7 @@ package android.content {
   }
 
   public static final class ContextParams.Builder {
-    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.ContextParams.Builder setRenouncedPermissions(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.ContextParams.Builder setRenouncedPermissions(@Nullable java.util.Set<java.lang.String>);
   }
 
   public class ContextWrapper extends android.content.Context {
