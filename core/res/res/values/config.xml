@@ -4838,4 +4838,7 @@
     <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuHandled_default">false</bool>
     <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed">true</bool>
     <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default">true</bool>
+
+    <!-- Whether app hibernation deletes OAT artifact files as part of global hibernation. -->
+    <bool name="config_hibernationDeletesOatArtifactsEnabled">true</bool>
 </resources>
