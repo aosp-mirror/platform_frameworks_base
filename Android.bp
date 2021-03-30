@@ -1341,6 +1341,18 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--api-lint-ignore-prefix junit. " +
     "--api-lint-ignore-prefix org. "
 
+filegroup {
+    name: "framework-non-updatable-stub-sources",
+    srcs: [
+        ":framework-non-updatable-sources",
+        ":opt-telephony-srcs",
+        ":opt-net-voip-srcs",
+        "core/java/**/*.logtags",
+        "**/package.html",
+    ],
+    visibility: ["//visibility:private"],
+}
+
 build = [
     "StubLibraries.bp",
     "ApiDocs.bp",
