@@ -1100,7 +1100,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case LONG_PRESS_POWER_ASSISTANT:
                 mPowerKeyHandled = true;
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, false,
+                performHapticFeedback(HapticFeedbackConstants.ASSISTANT_BUTTON, false,
                         "Power - Long Press - Go To Assistant");
                 final int powerKeyDeviceId = Integer.MIN_VALUE;
                 launchAssistAction(null, powerKeyDeviceId, eventTime);
@@ -5073,6 +5073,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.SAFE_MODE_ENABLED:
                 pattern = mSafeModeEnabledVibePattern;
                 break;
+
+            case HapticFeedbackConstants.ASSISTANT_BUTTON:
+                if (mVibrator.areAllPrimitivesSupported(
+                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)) {
+                    // quiet ramp, short pause, then sharp tick
+                    return VibrationEffect.startComposition()
+                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE, 0.25f)
+                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1f, 50)
+                            .compose();
+                }
+                // fallback for devices without composition support
+                return VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
 
             default:
                 return null;
