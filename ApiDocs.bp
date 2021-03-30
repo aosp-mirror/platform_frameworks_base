@@ -70,6 +70,7 @@ stubs_defaults {
         ":i18n.module.public.api{.public.stubs.source}",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
+        "**/package.html",
     ],
     libs: framework_docs_only_libs,
     create_doc_stubs: true,
