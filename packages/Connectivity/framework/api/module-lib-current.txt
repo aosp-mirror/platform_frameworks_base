@@ -120,6 +120,7 @@ package android.net {
   }
 
   public class NetworkRequest implements android.os.Parcelable {
+    method @NonNull public int[] getUnwantedCapabilities();
     method public boolean hasUnwantedCapability(int);
   }
 
