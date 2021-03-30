@@ -58,7 +58,6 @@ public class WindowOrientationListenerTest {
     private com.android.server.wm.WindowOrientationListener mWindowOrientationListener;
     private int mFinalizedRotation;
     private boolean mRotationResolverEnabled;
-    private boolean mCanUseRotationResolver;
     private SensorEvent mFakeSensorEvent;
     private Sensor mFakeSensor;
 
@@ -66,7 +65,6 @@ public class WindowOrientationListenerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mRotationResolverEnabled = true;
-        mCanUseRotationResolver = true;
 
         mFakeRotationResolverInternal = new TestableRotationResolver();
         doReturn(mMockSensorManager).when(mMockContext).getSystemService(Context.SENSOR_SERVICE);
@@ -86,16 +84,6 @@ public class WindowOrientationListenerTest {
         mWindowOrientationListener.mOrientationJudge.onSensorChanged(mFakeSensorEvent);
 
         assertThat(mFinalizedRotation).isEqualTo(Surface.ROTATION_90);
-    }
-
-    @Test
-    public void testOnSensorChanged_cannotUseRotationResolver_useSensorResult() {
-        mCanUseRotationResolver = false;
-
-        mWindowOrientationListener.mOrientationJudge.onSensorChanged(mFakeSensorEvent);
-
-        assertThat(mFinalizedRotation).isEqualTo(Surface.ROTATION_90);
-
     }
 
     @Test
@@ -136,11 +124,6 @@ public class WindowOrientationListenerTest {
         @Override
         public void onProposedRotationChanged(int rotation) {
             mFinalizedRotation = rotation;
-        }
-
-        @Override
-        public boolean canUseRotationResolver() {
-            return mCanUseRotationResolver;
         }
 
         @Override
