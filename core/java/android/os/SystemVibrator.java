@@ -256,6 +256,15 @@ public class SystemVibrator extends Vibrator {
         mVibratorManager.cancel();
     }
 
+    @Override
+    public void cancel(int usageFilter) {
+        if (mVibratorManager == null) {
+            Log.w(TAG, "Failed to cancel vibrate; no vibrator manager.");
+            return;
+        }
+        mVibratorManager.cancel(usageFilter);
+    }
+
     /**
      * Tries to unregister individual {@link android.os.Vibrator.OnVibratorStateChangedListener}
      * that were left registered to vibrators after failures to register them to all vibrators.
