@@ -47,5 +47,5 @@ oneway interface INetworkAgent {
     void onQosFilterCallbackRegistered(int qosCallbackId, in QosFilterParcelable filterParcel);
     void onQosCallbackUnregistered(int qosCallbackId);
     void onNetworkCreated();
-    void onNetworkDisconnected();
+    void onNetworkDestroyed();
 }
