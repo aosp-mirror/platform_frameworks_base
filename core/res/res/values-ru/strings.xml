@@ -1168,10 +1168,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Открыть с помощью приложения:"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Открыть с помощью приложения \"%1$s\""</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Открыть"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Открывать ссылки вида <xliff:g id="HOST">%1$s</xliff:g> с помощью:"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Открывать ссылки <xliff:g id="HOST">%1$s</xliff:g> с помощью:"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Открывать ссылки с помощью:"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Открывать ссылки в браузере <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Открывать ссылки вида <xliff:g id="HOST">%1$s</xliff:g> в браузере <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Открывать ссылки <xliff:g id="HOST">%1$s</xliff:g> в браузере <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Открыть доступ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Редактировать с помощью приложения \"%1$s\""</string>

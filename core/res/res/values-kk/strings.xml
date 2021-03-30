@@ -1793,7 +1793,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Әкімші жойған"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батарея жұмысының ұзақтығын арттыру үшін Батареяны үнемдеу режимі:\n\n•қараңғы тақырыпты іске қосады;\n•фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді не шектейді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Батарея ұзағырақ жұмыс істеуі үшін, Battery Saver:\n\n• қараңғы тақырыпты қосады;\n•фондық жұмысты, кейбір визуалды әсерлерді және \"Ok Google\" сияқты басқа функцияларды өшіреді не шектейді."</string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Батарея ұзағырақ жұмыс істеуі үшін, Батареяны үнемдеу режимі:\n\n• қараңғы тақырыпты қосады;\n•фондық жұмысты, кейбір визуалды әсерлерді және \"Ok Google\" сияқты басқа функцияларды өшіреді не шектейді."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге және алуға жол бермейді. Ашық тұрған қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
@@ -1999,9 +1999,9 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"экранда басқа қолданбалардың үстінен көрсету"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея заряды азаюы мүмкін"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Battery Saver іске қосылды"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Батареяны үнемдеу режимі іске қосылды"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батареяны үнемдеу режимі"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Battery Saver өшірілді"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнемдеу режимі өшірілді"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефонның заряды жеткілікті. Функцияларға енді шектеу қойылмайды."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Планшеттің заряды жеткілікті. Функцияларға енді шектеу қойылмайды."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Құрылғының заряды жеткілікті. Функцияларға енді шектеу қойылмайды."</string>

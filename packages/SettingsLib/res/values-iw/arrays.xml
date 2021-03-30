@@ -37,12 +37,12 @@
   <string-array name="wifi_status_with_ssid">
     <item msgid="5969842512724979061"></item>
     <item msgid="1818677602615822316">"מתבצעת סריקה..."</item>
-    <item msgid="8339720953594087771">"מתחבר אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="8339720953594087771">"מתבצעת התחברות אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="3028983857109369308">"מתבצע אימות מול <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
     <item msgid="4287401332778341890">"‏המערכת משיגה כתובת IP מ-<xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="1043944043827424501">"מחובר אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"בהשעיה"</item>
-    <item msgid="1175040558087735707">"מתנתק מרשת <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="1175040558087735707">"מתבצעת התנתקות מרשת <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="699832486578171722">"מנותק"</item>
     <item msgid="522383512264986901">"נכשל"</item>
     <item msgid="3602596701217484364">"חסומה"</item>
@@ -56,7 +56,7 @@
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"‏אני לעולם לא רוצה להשתמש בבדיקת HDCP"</item>
     <item msgid="8254225038262324761">"‏שימוש בבדיקת HDCP עבור תוכן DRM בלבד"</item>
-    <item msgid="6421717003037072581">"‏תמיד השתמש בבדיקת HDCP"</item>
+    <item msgid="6421717003037072581">"‏אני רוצה להשתמש תמיד בבדיקת HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"מושבת"</item>
@@ -133,7 +133,7 @@
     <item msgid="927546067692441494">"סטריאו"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"השתמש בבחירת המערכת (ברירת המחדל)"</item>
+    <item msgid="1997302811102880485">"שימוש בבחירת המערכת (ברירת המחדל)"</item>
     <item msgid="8005696114958453588">"מונו"</item>
     <item msgid="1333279807604675720">"סטריאו"</item>
   </string-array>
