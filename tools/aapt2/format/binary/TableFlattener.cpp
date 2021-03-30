@@ -546,8 +546,12 @@ class PackageFlattener {
       const uint16_t entry_id = entry->id.value().entry_id();
 
       // Populate the config masks for this entry.
+      uint32_t& entry_config_masks = config_masks[entry_id];
       if (entry->visibility.level == Visibility::Level::kPublic) {
-        config_masks[entry_id] |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
+        entry_config_masks |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
+      }
+      if (entry->visibility.staged_api) {
+        entry_config_masks |= util::HostToDevice32(ResTable_typeSpec::SPEC_STAGED_API);
       }
 
       const size_t config_count = entry->values.size();

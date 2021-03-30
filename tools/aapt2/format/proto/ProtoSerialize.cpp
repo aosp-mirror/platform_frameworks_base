@@ -378,6 +378,7 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
 
         // Write the Visibility struct.
         pb::Visibility* pb_visibility = pb_entry->mutable_visibility();
+        pb_visibility->set_staged_api(entry->visibility.staged_api);
         pb_visibility->set_level(SerializeVisibilityToPb(entry->visibility.level));
         if (source_pool != nullptr) {
           SerializeSourceToPb(entry->visibility.source, source_pool.get(),
