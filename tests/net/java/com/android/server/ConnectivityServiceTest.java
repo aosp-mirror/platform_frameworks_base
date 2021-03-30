@@ -31,6 +31,7 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN;
 import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_MASK;
 import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
 import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
@@ -1181,10 +1182,12 @@ public class ConnectivityServiceTest {
             if (mAgentRegistered) throw new IllegalStateException("already registered");
             updateState(NetworkInfo.DetailedState.CONNECTING, "registerAgent");
             mConfig = new VpnConfig();
+            mConfig.session = "MySession12345";
             setUids(uids);
             if (!isAlwaysMetered) mNetworkCapabilities.addCapability(NET_CAPABILITY_NOT_METERED);
             mInterface = VPN_IFNAME;
-            mNetworkCapabilities.setTransportInfo(new VpnTransportInfo(getActiveVpnType()));
+            mNetworkCapabilities.setTransportInfo(new VpnTransportInfo(getActiveVpnType(),
+                    mConfig.session));
             mMockNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN, lp,
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
@@ -1361,8 +1364,19 @@ public class ConnectivityServiceTest {
     }
 
     private void mockUidNetworkingBlocked() {
-        doAnswer(i -> NetworkPolicyManager.isUidBlocked(mBlockedReasons, i.getArgument(1))
+        doAnswer(i -> isUidBlocked(mBlockedReasons, i.getArgument(1))
         ).when(mNetworkPolicyManager).isUidNetworkingBlocked(anyInt(), anyBoolean());
+    }
+
+    private boolean isUidBlocked(int blockedReasons, boolean meteredNetwork) {
+        final int blockedOnAllNetworksReason = (blockedReasons & ~BLOCKED_METERED_REASON_MASK);
+        if (blockedOnAllNetworksReason != BLOCKED_REASON_NONE) {
+            return true;
+        }
+        if (meteredNetwork) {
+            return blockedReasons != BLOCKED_REASON_NONE;
+        }
+        return false;
     }
 
     private void setBlockedReasonChanged(int blockedReasons) {

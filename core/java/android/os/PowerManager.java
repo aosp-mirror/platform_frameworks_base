@@ -36,6 +36,7 @@ import android.sysprop.InitProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 
 import com.android.internal.util.Preconditions;
 
@@ -1143,8 +1144,7 @@ public final class PowerManager {
      * wake lock, and {@link WakeLock#release release()} when you are done.
      * </p><p>
      * {@samplecode
-     * PowerManager pm = (PowerManager)mContext.getSystemService(
-     *                                          Context.POWER_SERVICE);
+     * PowerManager pm = mContext.getSystemService(PowerManager.class);
      * PowerManager.WakeLock wl = pm.newWakeLock(
      *                                      PowerManager.SCREEN_DIM_WAKE_LOCK
      *                                      | PowerManager.ON_AFTER_RELEASE,
@@ -1162,6 +1162,8 @@ public final class PowerManager {
      * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead.
      * This window flag will be correctly managed by the platform
      * as the user moves between applications and doesn't require a special permission.
+     * Additionally using the flag will keep only the appropriate screen on in a
+     * multi-display scenario while using a wake lock will keep every screen powered on.
      * </p>
      *
      * <p>
@@ -1179,7 +1181,7 @@ public final class PowerManager {
      * can be transformed by java optimizer and obfuscator tools.
      * <li>avoid wrapping the tag or a prefix to avoid collision with wake lock
      * tags from the platform (e.g. *alarm*).
-     * <li>never include personnally identifiable information for privacy
+     * <li>never include personally identifiable information for privacy
      * reasons.
      * </ul>
      * </p>
@@ -1200,7 +1202,27 @@ public final class PowerManager {
      */
     public WakeLock newWakeLock(int levelAndFlags, String tag) {
         validateWakeLockParameters(levelAndFlags, tag);
-        return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName());
+        return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName(),
+                Display.INVALID_DISPLAY);
+    }
+
+    /**
+     * Creates a new wake lock with the specified level and flags.
+     * <p>
+     * The wakelock will only apply to the {@link com.android.server.display.DisplayGroup} of the
+     * provided {@code displayId}. If {@code displayId} is {@link Display#INVALID_DISPLAY} then it
+     * will apply to all {@link com.android.server.display.DisplayGroup DisplayGroups}.
+     *
+     * @param levelAndFlags Combination of wake lock level and flag values defining
+     * the requested behavior of the WakeLock.
+     * @param tag Your class name (or other tag) for debugging purposes.
+     * @param displayId The display id to which this wake lock is tied.
+     *
+     * @hide
+     */
+    public WakeLock newWakeLock(int levelAndFlags, String tag, int displayId) {
+        validateWakeLockParameters(levelAndFlags, tag);
+        return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName(), displayId);
     }
 
     /** @hide */
@@ -2603,19 +2625,17 @@ public final class PowerManager {
         private WorkSource mWorkSource;
         private String mHistoryTag;
         private final String mTraceName;
+        private final int mDisplayId;
 
-        private final Runnable mReleaser = new Runnable() {
-            public void run() {
-                release(RELEASE_FLAG_TIMEOUT);
-            }
-        };
+        private final Runnable mReleaser = () -> release(RELEASE_FLAG_TIMEOUT);
 
-        WakeLock(int flags, String tag, String packageName) {
+        WakeLock(int flags, String tag, String packageName, int displayId) {
             mFlags = flags;
             mTag = tag;
             mPackageName = packageName;
             mToken = new Binder();
             mTraceName = "WakeLock (" + mTag + ")";
+            mDisplayId = displayId;
         }
 
         @Override
@@ -2696,7 +2716,7 @@ public final class PowerManager {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, mTraceName, 0);
                 try {
                     mService.acquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource,
-                            mHistoryTag);
+                            mHistoryTag, mDisplayId);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }

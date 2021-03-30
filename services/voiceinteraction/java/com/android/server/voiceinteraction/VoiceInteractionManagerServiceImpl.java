@@ -405,7 +405,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     }
 
     public void updateStateLocked(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
+            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
         if (DEBUG) {
             Slog.d(TAG, "updateStateLocked");
         }
@@ -427,7 +427,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
-                    options, sharedMemory);
+                    options, sharedMemory, callback);
         } else {
             mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }

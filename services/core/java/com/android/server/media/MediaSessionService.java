@@ -117,13 +117,6 @@ public class MediaSessionService extends SystemService implements Monitor {
      */
     private static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
 
-    /**
-     * Denotes the duration during which an app receiving a media session callback will be
-     * exempted from FGS-from-BG restriction and so will be allowed to start an FGS even if it is
-     * in the background state while it receives a media session callback.
-     */
-    private static final long FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS = 10_000;
-
     private final Context mContext;
     private final SessionManagerImpl mSessionManagerImpl;
     private final MessageHandler mHandler = new MessageHandler();
@@ -243,6 +236,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                 mCommunicationManager = mContext.getSystemService(MediaCommunicationManager.class);
                 mCommunicationManager.registerSessionCallback(new HandlerExecutor(mHandler),
                         mSession2TokenCallback);
+                break;
+            case PHASE_ACTIVITY_MANAGER_READY:
+                MediaSessionDeviceConfig.initialize(mContext);
                 break;
         }
     }
@@ -564,7 +560,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         PowerExemptionManager.class);
                 powerExemptionManager.addToTemporaryAllowList(targetPackage,
                         PowerExemptionManager.REASON_MEDIA_SESSION_CALLBACK, reason,
-                        FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS);
+                        MediaSessionDeviceConfig.getMediaSessionCallbackFgsAllowlistDurationMs());
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1979,6 +1975,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 mAudioPlayerStateMonitor.dump(mContext, pw, "");
             }
+            MediaSessionDeviceConfig.dump(pw, "");
         }
 
         /**
@@ -2262,7 +2259,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 boolean sent = mediaButtonReceiverHolder.send(
                         mContext, keyEvent, callingPackageName,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1, mKeyEventReceiver,
-                        mHandler);
+                        mHandler,
+                        MediaSessionDeviceConfig.getMediaButtonReceiverFgsAllowlistDurationMs());
                 if (sent) {
                     String pkgName = mediaButtonReceiverHolder.getPackageName();
                     for (FullUserRecord.OnMediaKeyEventDispatchedListenerRecord cr

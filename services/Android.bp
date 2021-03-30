@@ -9,7 +9,10 @@ package {
 
 filegroup {
     name: "services-main-sources",
-    srcs: ["java/**/*.java"],
+    srcs: [
+        "java/**/*.java",
+        "java/**/package.html",
+    ],
     path: "java",
     visibility: ["//visibility:private"],
 }
@@ -19,6 +22,7 @@ filegroup {
     srcs: [
         ":services.core-sources",
         ":services.core-sources-am-wm",
+        "core/java/com/android/server/am/package.html",
         ":services.accessibility-sources",
         ":services.appprediction-sources",
         ":services.appwidget-sources",
@@ -114,6 +118,7 @@ java_library {
     libs: [
         "android.hidl.manager-V1.0-java",
         "framework-tethering.stubs.module_lib",
+        "service-art.stubs.system_server",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)

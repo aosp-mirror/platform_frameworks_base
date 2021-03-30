@@ -33,6 +33,7 @@ import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaResponse;
+import android.app.appsearch.StorageInfo;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
@@ -602,6 +603,34 @@ public class AppSearchManagerService extends SystemService {
                         queryExpression,
                         new SearchSpec(searchSpecBundle));
                 invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
+            } catch (Throwable t) {
+                invokeCallbackOnError(callback, t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void getStorageInfo(
+                @NonNull String packageName,
+                @NonNull String databaseName,
+                @UserIdInt int userId,
+                @NonNull IAppSearchResultCallback callback) {
+            Preconditions.checkNotNull(packageName);
+            Preconditions.checkNotNull(databaseName);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                verifyUserUnlocked(callingUserId);
+                verifyCallingPackage(callingUid, packageName);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(callingUserId);
+                StorageInfo storageInfo = impl.getStorageInfoForDatabase(packageName, databaseName);
+                Bundle storageInfoBundle = storageInfo.getBundle();
+                invokeCallbackOnResult(
+                        callback, AppSearchResult.newSuccessfulResult(storageInfoBundle));
             } catch (Throwable t) {
                 invokeCallbackOnError(callback, t);
             } finally {

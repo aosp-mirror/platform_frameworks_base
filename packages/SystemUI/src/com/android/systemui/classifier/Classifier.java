@@ -37,6 +37,7 @@ public abstract class Classifier {
     public static final int GENERIC = 7;
     public static final int BOUNCER_UNLOCK = 8;
     public static final int PULSE_EXPAND = 9;
+    public static final int BRIGHTNESS_SLIDER = 10;
 
     @IntDef({
             QUICK_SETTINGS,
@@ -48,7 +49,8 @@ public abstract class Classifier {
             RIGHT_AFFORDANCE,
             GENERIC,
             BOUNCER_UNLOCK,
-            PULSE_EXPAND
+            PULSE_EXPAND,
+            BRIGHTNESS_SLIDER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InteractionType {}

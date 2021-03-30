@@ -142,13 +142,14 @@ public final class JobStatus {
      * (Atom #21)
      * * CONSTRAINT_BACKGROUND_NOT_RESTRICTED can be inferred with BatterySaverModeStateChanged
      * (Atom #20)
+     * * CONSTRAINT_STORAGE_NOT_LOW can be inferred with LowStorageStateChanged (Atom #130)
      */
     private static final int STATSD_CONSTRAINTS_TO_LOG = CONSTRAINT_CONTENT_TRIGGER
             | CONSTRAINT_DEADLINE
             | CONSTRAINT_IDLE
-            | CONSTRAINT_STORAGE_NOT_LOW
             | CONSTRAINT_TIMING_DELAY
-            | CONSTRAINT_WITHIN_QUOTA;
+            | CONSTRAINT_WITHIN_QUOTA
+            | CONSTRAINT_WITHIN_EXPEDITED_QUOTA;
 
     // TODO(b/129954980)
     private static final boolean STATS_LOG_ENABLED = false;

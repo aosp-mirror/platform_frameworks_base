@@ -37,10 +37,13 @@ import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.util.Log;
 
+import com.android.internal.app.IHotwordRecognitionStatusCallback;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
+import java.util.function.IntConsumer;
 
 /**
  * Implemented by an application that wants to offer detection for hotword. The system will
@@ -53,6 +56,39 @@ public abstract class HotwordDetectionService extends Service {
     private static final String TAG = "HotwordDetectionService";
     // TODO (b/177502877): Set the Debug flag to false before shipping.
     private static final boolean DBG = true;
+
+    private static final long UPDATE_TIMEOUT_MILLIS = 5000;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "INITIALIZATION_STATUS_" }, value = {
+            INITIALIZATION_STATUS_SUCCESS,
+            INITIALIZATION_STATUS_CUSTOM_ERROR_1,
+            INITIALIZATION_STATUS_CUSTOM_ERROR_2,
+            INITIALIZATION_STATUS_UNKNOWN,
+    })
+    public @interface InitializationStatus {}
+
+    /**
+     * Indicates that the updated status is successful.
+     */
+    public static final int INITIALIZATION_STATUS_SUCCESS = 0;
+
+    /**
+     * Indicates that the updated status is failure for some application specific reasons.
+     */
+    public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_1 = 1;
+
+    /**
+     * Indicates that the updated status is failure for some application specific reasons.
+     */
+    public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_2 = 2;
+
+    /**
+     * Indicates that the callback wasn’t invoked within the timeout.
+     * This is used by system.
+     */
+    public static final int INITIALIZATION_STATUS_UNKNOWN = 100;
 
     /**
      * Source for the given audio stream.
@@ -104,15 +140,16 @@ public abstract class HotwordDetectionService extends Service {
         }
 
         @Override
-        public void updateState(PersistableBundle options, SharedMemory sharedMemory)
-                throws RemoteException {
+        public void updateState(PersistableBundle options, SharedMemory sharedMemory,
+                IHotwordRecognitionStatusCallback callback) throws RemoteException {
             if (DBG) {
                 Log.d(TAG, "#updateState");
             }
-            mHandler.sendMessage(obtainMessage(HotwordDetectionService::onUpdateState,
+            mHandler.sendMessage(obtainMessage(HotwordDetectionService::onUpdateStateInternal,
                     HotwordDetectionService.this,
                     options,
-                    sharedMemory));
+                    sharedMemory,
+                    callback));
         }
 
         @Override
@@ -207,12 +244,20 @@ public abstract class HotwordDetectionService extends Service {
      * @param sharedMemory The unrestricted data blob to provide to the
      * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
+     * @param callbackTimeoutMillis Timeout in milliseconds for the operation to invoke the
+     * statusCallback.
+     * @param statusCallback Use this to return the updated result. This is non-null only when the
+     * {@link HotwordDetectionService} is being initialized; and it is null if the state is updated
+     * after that.
      *
      * @hide
      */
     @SystemApi
-    public void onUpdateState(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
+    public void onUpdateState(
+            @Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory,
+            @DurationMillisLong long callbackTimeoutMillis,
+            @Nullable @InitializationStatus IntConsumer statusCallback) {
         // TODO: Handle the unimplemented case by throwing?
     }
 
@@ -266,6 +311,23 @@ public abstract class HotwordDetectionService extends Service {
             @NonNull Callback callback) {
         // TODO: Add a helpful error message.
         throw new UnsupportedOperationException();
+    }
+
+    private void onUpdateStateInternal(@Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
+        // TODO (b/183684347): Implement timeout case.
+        IntConsumer intConsumer = null;
+        if (callback != null) {
+            intConsumer =
+                    value -> {
+                        try {
+                            callback.onStatusReported(value);
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    };
+        }
+        onUpdateState(options, sharedMemory, UPDATE_TIMEOUT_MILLIS, intConsumer);
     }
 
     /**

@@ -322,7 +322,9 @@ public final class JobServiceContext implements ServiceConnection {
                     job.hasDeadlineConstraint(),
                     job.hasIdleConstraint(),
                     job.hasConnectivityConstraint(),
-                    job.hasContentTriggerConstraint());
+                    job.hasContentTriggerConstraint(),
+                    job.isRequestedExpeditedJob(),
+                    job.shouldTreatAsExpeditedJob());
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
@@ -904,7 +906,9 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.hasDeadlineConstraint(),
                 completedJob.hasIdleConstraint(),
                 completedJob.hasConnectivityConstraint(),
-                completedJob.hasContentTriggerConstraint());
+                completedJob.hasContentTriggerConstraint(),
+                completedJob.isRequestedExpeditedJob(),
+                completedJob.startedAsExpeditedJob);
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
                     legacyStopReason);

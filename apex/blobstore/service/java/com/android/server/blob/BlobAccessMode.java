@@ -15,18 +15,29 @@
  */
 package com.android.server.blob;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.app.blob.XmlTags.ATTR_CERTIFICATE;
 import static android.app.blob.XmlTags.ATTR_PACKAGE;
 import static android.app.blob.XmlTags.ATTR_TYPE;
+import static android.app.blob.XmlTags.ATTR_VALUE;
 import static android.app.blob.XmlTags.TAG_ALLOWED_PACKAGE;
+import static android.app.blob.XmlTags.TAG_ALLOWED_PERMISSION;
+
+import static com.android.server.blob.BlobStoreConfig.TAG;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.UserHandle;
+import android.permission.PermissionManager;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.DebugUtils;
+import android.util.Slog;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
@@ -53,20 +64,26 @@ class BlobAccessMode {
             ACCESS_TYPE_PUBLIC,
             ACCESS_TYPE_SAME_SIGNATURE,
             ACCESS_TYPE_ALLOWLIST,
+            ACCESS_TYPE_LOCATION_PERMISSION,
     })
     @interface AccessType {}
     public static final int ACCESS_TYPE_PRIVATE = 1 << 0;
     public static final int ACCESS_TYPE_PUBLIC = 1 << 1;
     public static final int ACCESS_TYPE_SAME_SIGNATURE = 1 << 2;
     public static final int ACCESS_TYPE_ALLOWLIST = 1 << 3;
+    public static final int ACCESS_TYPE_LOCATION_PERMISSION = 1 << 4;
 
     private int mAccessType = ACCESS_TYPE_PRIVATE;
 
     private final ArraySet<PackageIdentifier> mAllowedPackages = new ArraySet<>();
+    private final ArraySet<String> mAllowedPermissions = new ArraySet<>();
 
     void allow(BlobAccessMode other) {
         if ((other.mAccessType & ACCESS_TYPE_ALLOWLIST) != 0) {
             mAllowedPackages.addAll(other.mAllowedPackages);
+        }
+        if ((other.mAccessType & ACCESS_TYPE_LOCATION_PERMISSION) != 0) {
+            mAllowedPermissions.addAll(other.mAllowedPermissions);
         }
         mAccessType |= other.mAccessType;
     }
@@ -84,6 +101,11 @@ class BlobAccessMode {
         mAllowedPackages.add(PackageIdentifier.create(packageName, certificate));
     }
 
+    void allowPackagesWithLocationPermission(@NonNull String permissionName) {
+        mAccessType |= ACCESS_TYPE_LOCATION_PERMISSION;
+        mAllowedPermissions.add(permissionName);
+    }
+
     boolean isPublicAccessAllowed() {
         return (mAccessType & ACCESS_TYPE_PUBLIC) != 0;
     }
@@ -99,8 +121,15 @@ class BlobAccessMode {
         return mAllowedPackages.contains(PackageIdentifier.create(packageName, certificate));
     }
 
-    boolean isAccessAllowedForCaller(Context context,
-            @NonNull String callingPackage, @NonNull String committerPackage) {
+    boolean arePackagesWithLocationPermissionAllowed(@NonNull String permissionName) {
+        if ((mAccessType & ACCESS_TYPE_LOCATION_PERMISSION) == 0) {
+            return false;
+        }
+        return mAllowedPermissions.contains(permissionName);
+    }
+
+    boolean isAccessAllowedForCaller(Context context, @NonNull String callingPackage,
+            @NonNull String committerPackage, int callingUid, @Nullable String attributionTag) {
         if ((mAccessType & ACCESS_TYPE_PUBLIC) != 0) {
             return true;
         }
@@ -124,7 +153,35 @@ class BlobAccessMode {
             }
         }
 
+        if ((mAccessType & ACCESS_TYPE_LOCATION_PERMISSION) != 0) {
+            final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+            for (int i = 0; i < mAllowedPermissions.size(); ++i) {
+                final String permission = mAllowedPermissions.valueAt(i);
+                if (PermissionManager.checkPackageNamePermission(permission, callingPackage,
+                        UserHandle.getUserId(callingUid)) != PackageManager.PERMISSION_GRANTED) {
+                    continue;
+                }
+                // TODO: Add appropriate message
+                if (appOpsManager.noteOpNoThrow(getAppOp(permission), callingUid, callingPackage,
+                        attributionTag, null /* message */) == AppOpsManager.MODE_ALLOWED) {
+                    return true;
+                }
+            }
+        }
+
         return false;
+    }
+
+    private static String getAppOp(String permission) {
+        switch (permission) {
+            case ACCESS_FINE_LOCATION:
+                return AppOpsManager.OPSTR_FINE_LOCATION;
+            case ACCESS_COARSE_LOCATION:
+                return AppOpsManager.OPSTR_COARSE_LOCATION;
+            default:
+                Slog.w(TAG, "Unknown permission found: " + permission);
+                return null;
+        }
     }
 
     int getAccessType() {
@@ -148,6 +205,16 @@ class BlobAccessMode {
             }
             fout.decreaseIndent();
         }
+        fout.print("Allowed permissions:");
+        if (mAllowedPermissions.isEmpty()) {
+            fout.println(" (Empty)");
+        } else {
+            fout.increaseIndent();
+            for (int i = 0, count = mAllowedPermissions.size(); i < count; ++i) {
+                fout.println(mAllowedPermissions.valueAt(i).toString());
+            }
+            fout.decreaseIndent();
+        }
     }
 
     void writeToXml(@NonNull XmlSerializer out) throws IOException {
@@ -158,6 +225,12 @@ class BlobAccessMode {
             XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, packageIdentifier.packageName);
             XmlUtils.writeByteArrayAttribute(out, ATTR_CERTIFICATE, packageIdentifier.certificate);
             out.endTag(null, TAG_ALLOWED_PACKAGE);
+        }
+        for (int i = 0, count = mAllowedPermissions.size(); i < count; ++i) {
+            out.startTag(null, TAG_ALLOWED_PERMISSION);
+            final String permission = mAllowedPermissions.valueAt(i);
+            XmlUtils.writeStringAttribute(out, ATTR_VALUE, permission);
+            out.endTag(null, TAG_ALLOWED_PERMISSION);
         }
     }
 
@@ -175,6 +248,10 @@ class BlobAccessMode {
                 final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
                 final byte[] certificate = XmlUtils.readByteArrayAttribute(in, ATTR_CERTIFICATE);
                 blobAccessMode.allowPackageAccess(packageName, certificate);
+            }
+            if (TAG_ALLOWED_PERMISSION.equals(in.getName())) {
+                final String permission = XmlUtils.readStringAttribute(in, ATTR_VALUE);
+                blobAccessMode.allowPackagesWithLocationPermission(permission);
             }
         }
         return blobAccessMode;

@@ -197,9 +197,9 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
   std::unique_ptr<SymbolTable::Symbol> symbol = util::make_unique<SymbolTable::Symbol>();
   symbol->is_public = (sr.entry->visibility.level == Visibility::Level::kPublic);
 
-  if (sr.package->id && sr.type->id && sr.entry->id) {
-    symbol->id = ResourceId(sr.package->id.value(), sr.type->id.value(), sr.entry->id.value());
-    symbol->is_dynamic = (sr.package->id.value() == 0);
+  if (sr.entry->id) {
+    symbol->id = sr.entry->id.value();
+    symbol->is_dynamic = (sr.entry->id.value().package_id() == 0);
   }
 
   if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {

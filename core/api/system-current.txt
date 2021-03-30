@@ -596,7 +596,7 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOps(@NonNull String);
+    method @Nullable public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOps(@Nullable String);
     method @NonNull public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOpsAt(@IntRange(from=0) int);
     method @IntRange(from=0) public int getAttributedOpsCount();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
@@ -1733,10 +1733,20 @@ package android.app.time {
     field public static final int CAPABILITY_POSSESSED = 40; // 0x28
   }
 
+  public final class ExternalTimeSuggestion implements android.os.Parcelable {
+    ctor public ExternalTimeSuggestion(long, long);
+    method public void addDebugInfo(@NonNull java.lang.String...);
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getDebugInfo();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.time.ExternalTimeSuggestion> CREATOR;
+  }
+
   public final class TimeManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void addTimeZoneDetectorListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public android.app.time.TimeZoneCapabilitiesAndConfig getTimeZoneCapabilitiesAndConfig();
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public void removeTimeZoneDetectorListener(@NonNull android.app.time.TimeManager.TimeZoneDetectorListener);
+    method @RequiresPermission(android.Manifest.permission.SUGGEST_EXTERNAL_TIME) public void suggestExternalTime(@NonNull android.app.time.ExternalTimeSuggestion);
     method @RequiresPermission(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION) public boolean updateTimeZoneConfiguration(@NonNull android.app.time.TimeZoneConfiguration);
   }
 
@@ -2217,6 +2227,14 @@ package android.content {
     method @NonNull public java.io.File getDeviceProtectedDataDirForUser(@NonNull android.os.UserHandle);
   }
 
+  public final class AttributionSource implements android.os.Parcelable {
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public java.util.Set<java.lang.String> getRenouncedPermissions();
+  }
+
+  public static final class AttributionSource.Builder {
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.AttributionSource.Builder setRenouncedPermissions(@NonNull java.util.Set<java.lang.String>);
+  }
+
   public abstract class BroadcastReceiver {
     method @NonNull public final android.os.UserHandle getSendingUser();
   }
@@ -2291,11 +2309,11 @@ package android.content {
   }
 
   public final class ContextParams {
-    method @Nullable @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public java.util.Set<java.lang.String> getRenouncedPermissions();
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public java.util.Set<java.lang.String> getRenouncedPermissions();
   }
 
   public static final class ContextParams.Builder {
-    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.ContextParams.Builder setRenouncedPermissions(@Nullable java.util.Set<java.lang.String>);
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.ContextParams.Builder setRenouncedPermissions(@NonNull java.util.Set<java.lang.String>);
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -8318,6 +8336,7 @@ package android.os {
     field public static final int REASON_UNKNOWN = 0; // 0x0
     field public static final int TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0; // 0x0
     field public static final int TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1; // 0x1
+    field public static final int TEMPORARY_ALLOW_LIST_TYPE_NONE = -1; // 0xffffffff
   }
 
   public final class PowerManager {
@@ -10373,6 +10392,7 @@ package android.service.voice {
   public abstract static class AlwaysOnHotwordDetector.Callback implements android.service.voice.HotwordDetector.Callback {
     ctor public AlwaysOnHotwordDetector.Callback();
     method public abstract void onAvailabilityChanged(int);
+    method public void onHotwordDetectionServiceInitialized(int);
     method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
   }
 
@@ -10420,7 +10440,11 @@ package android.service.voice {
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
-    method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
+    method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
+    field public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_1 = 1; // 0x1
+    field public static final int INITIALIZATION_STATUS_CUSTOM_ERROR_2 = 2; // 0x2
+    field public static final int INITIALIZATION_STATUS_SUCCESS = 0; // 0x0
+    field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
     field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
   }
 
@@ -10442,6 +10466,7 @@ package android.service.voice {
   public static interface HotwordDetector.Callback {
     method public void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
     method public void onError();
+    method public void onHotwordDetectionServiceInitialized(int);
     method public void onRecognitionPaused();
     method public void onRecognitionResumed();
     method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
@@ -10862,7 +10887,7 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccount> getAllPhoneAccounts();
     method public int getAllPhoneAccountsCount();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
-    method public int getCallState();
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}, conditional=true) public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCurrentTtyMode();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDefaultDialerPackage(@NonNull android.os.UserHandle);
@@ -14720,6 +14745,7 @@ package android.webkit {
     method public default boolean onCheckIsTextEditor();
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
+    method @Nullable public default void onCreateTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
     method public void onDetachedFromWindow();
     method public boolean onDragEvent(android.view.DragEvent);
     method public void onDraw(android.graphics.Canvas);
@@ -14744,6 +14770,7 @@ package android.webkit {
     method public void onStartTemporaryDetach();
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
+    method public default void onTranslationResponse(@NonNull android.util.LongSparseArray<android.view.translation.ViewTranslationResponse>);
     method public void onVisibilityChanged(android.view.View, int);
     method public void onWindowFocusChanged(boolean);
     method public void onWindowVisibilityChanged(int);

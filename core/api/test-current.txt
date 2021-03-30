@@ -220,6 +220,7 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void rebootHistory(long);
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void reloadNonHistoricalState();
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void resetHistoryParameters();
+    method @RequiresPermission("android.permission.MANAGE_APPOPS") public void resetPackageOpsNoHistory(@NonNull String);
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void setHistoryParameters(int, long, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(int, int, String, int);
     method public static int strOpToOp(@NonNull String);
@@ -250,6 +251,14 @@ package android.app {
     method public void increaseAccessDuration(int, int, @NonNull String, @Nullable String, int, int, long);
     method public void increaseRejectCount(int, int, @NonNull String, @Nullable String, int, int, long);
     method public void offsetBeginAndEndTime(long);
+  }
+
+  public class BroadcastOptions {
+    ctor public BroadcastOptions(@NonNull android.os.Bundle);
+    method public long getTemporaryAppAllowlistDuration();
+    method @Nullable public String getTemporaryAppAllowlistReason();
+    method public int getTemporaryAppAllowlistReasonCode();
+    method public int getTemporaryAppAllowlistType();
   }
 
   public class DownloadManager {
@@ -653,6 +662,11 @@ package android.bluetooth {
 }
 
 package android.content {
+
+  public final class AttributionSource implements android.os.Parcelable {
+    ctor public AttributionSource(int, @Nullable String, @Nullable String);
+    ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable android.content.AttributionSource);
+  }
 
   public final class AutofillOptions implements android.os.Parcelable {
     ctor public AutofillOptions(int, boolean);
