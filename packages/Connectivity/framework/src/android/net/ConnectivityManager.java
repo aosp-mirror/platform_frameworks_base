@@ -1192,7 +1192,8 @@ public class ConnectivityManager {
      *
      * @return a {@link Network} object for the current default network for the
      *         given UID or {@code null} if no default network is currently active
-     * TODO: b/183465229 Cleanup getActiveNetworkForUid once b/165835257 is fixed
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     @Nullable
