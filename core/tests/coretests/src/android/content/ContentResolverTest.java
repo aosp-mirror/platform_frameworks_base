@@ -86,7 +86,7 @@ public class ContentResolverTest {
 
         final AssetFileDescriptor afd = new AssetFileDescriptor(
                 new ParcelFileDescriptor(mImage.getFileDescriptor()), 0, mSize, null);
-        when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any(), any())).thenReturn(
+        when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any())).thenReturn(
                 afd);
     }
 

@@ -542,8 +542,8 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
 
     // Create an ID if there is one (static libraries don't need one).
     ResourceId id;
-    if (package.id && type.id && entry->id) {
-      id = ResourceId(package.id.value(), type.id.value(), entry->id.value());
+    if (entry->id) {
+      id = entry->id.value();
     }
 
     // We need to make sure we hide the fact that we are generating kAttrPrivate attributes.

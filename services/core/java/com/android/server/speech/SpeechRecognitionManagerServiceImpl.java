@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -35,8 +36,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractPerUserSystemService;
-
-import com.google.android.collect.Sets;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +59,7 @@ final class SpeechRecognitionManagerServiceImpl extends
 
     SpeechRecognitionManagerServiceImpl(
             @NonNull SpeechRecognitionManagerService master,
-            @NonNull Object lock, @UserIdInt int userId, boolean disabled) {
+            @NonNull Object lock, @UserIdInt int userId) {
         super(master, lock, userId);
     }
 
@@ -108,10 +107,6 @@ final class SpeechRecognitionManagerServiceImpl extends
         }
 
         final int creatorCallingUid = Binder.getCallingUid();
-        Set<String> creatorPackageNames =
-                Sets.newArraySet(
-                        getContext().getPackageManager().getPackagesForUid(creatorCallingUid));
-
         RemoteSpeechRecognitionService service = createService(creatorCallingUid, serviceComponent);
 
         if (service == null) {
@@ -127,6 +122,7 @@ final class SpeechRecognitionManagerServiceImpl extends
         } catch (RemoteException e) {
             // RemoteException == binder already died, schedule disconnect anyway.
             handleClientDeath(creatorCallingUid, service, true /* invoke #cancel */);
+            return;
         }
 
         service.connect().thenAccept(binderService -> {
@@ -137,41 +133,24 @@ final class SpeechRecognitionManagerServiceImpl extends
                         public void startListening(
                                 Intent recognizerIntent,
                                 IRecognitionListener listener,
-                                String packageName,
-                                String featureId,
-                                int callingUid) throws RemoteException {
-                            verifyCallerIdentity(
-                                    creatorCallingUid, packageName, creatorPackageNames, listener);
-                            if (callingUid != creatorCallingUid) {
-                                listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
-                                return;
-                            }
-
-                            service.startListening(
-                                    recognizerIntent, listener, packageName, featureId);
+                                @NonNull AttributionSource attributionSource)
+                                        throws RemoteException {
+                            attributionSource.enforceCallingUid();
+                            service.startListening(recognizerIntent, listener, attributionSource);
                         }
 
                         @Override
                         public void stopListening(
-                                IRecognitionListener listener,
-                                String packageName,
-                                String featureId) throws RemoteException {
-                            verifyCallerIdentity(
-                                    creatorCallingUid, packageName, creatorPackageNames, listener);
-
-                            service.stopListening(listener, packageName, featureId);
+                                IRecognitionListener listener) throws RemoteException {
+                            service.stopListening(listener);
                         }
 
                         @Override
                         public void cancel(
                                 IRecognitionListener listener,
-                                String packageName,
-                                String featureId,
                                 boolean isShutdown) throws RemoteException {
-                            verifyCallerIdentity(
-                                    creatorCallingUid, packageName, creatorPackageNames, listener);
 
-                            service.cancel(listener, packageName, featureId, isShutdown);
+                            service.cancel(listener, isShutdown);
 
                             if (isShutdown) {
                                 handleClientDeath(
@@ -190,17 +169,6 @@ final class SpeechRecognitionManagerServiceImpl extends
                 tryRespondWithError(callback, SpeechRecognizer.ERROR_CLIENT);
             }
         });
-    }
-
-    private void verifyCallerIdentity(
-            int creatorCallingUid,
-            String packageName,
-            Set<String> creatorPackageNames,
-            IRecognitionListener listener) throws RemoteException {
-        if (creatorCallingUid != Binder.getCallingUid()
-                || !creatorPackageNames.contains(packageName)) {
-            listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
-        }
     }
 
     private void handleClientDeath(

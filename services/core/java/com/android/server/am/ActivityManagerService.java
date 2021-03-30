@@ -188,6 +188,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -254,11 +255,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
-import android.os.PowerWhitelistManager.ReasonCode;
-import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -340,7 +341,11 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.DisplayThread;
@@ -367,6 +372,7 @@ import com.android.server.graphics.fonts.FontManagerInternal;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.os.NativeTombstoneManager;
 import com.android.server.pm.Installer;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
@@ -1121,24 +1127,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ContentProviderHelper mCpHelper;
 
     CoreSettingsObserver mCoreSettingsObserver;
-
-    /**
-     * Thread-local storage used to carry caller permissions over through
-     * indirect content-provider access.
-     */
-    private class Identity {
-        public final IBinder token;
-        public final int pid;
-        public final int uid;
-
-        Identity(IBinder _token, int _pid, int _uid) {
-            token = _token;
-            pid = _pid;
-            uid = _uid;
-        }
-    }
-
-    private static final ThreadLocal<Identity> sCallerIdentity = new ThreadLocal<Identity>();
 
     /**
      * All information we have collected about the runtime performance of
@@ -5344,26 +5332,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return checkComponentPermission(permission, pid, uid, -1, true);
     }
 
-    @Override
-    public int checkPermissionWithToken(String permission, int pid, int uid, IBinder callerToken) {
-        if (permission == null) {
-            return PackageManager.PERMISSION_DENIED;
-        }
-
-        // We might be performing an operation on behalf of an indirect binder
-        // invocation, e.g. via {@link #openContentUri}.  Check and adjust the
-        // client identity accordingly before proceeding.
-        Identity tlsIdentity = sCallerIdentity.get();
-        if (tlsIdentity != null && tlsIdentity.token == callerToken) {
-            Slog.d(TAG, "checkComponentPermission() adjusting {pid,uid} to {"
-                    + tlsIdentity.pid + "," + tlsIdentity.uid + "}");
-            uid = tlsIdentity.uid;
-            pid = tlsIdentity.pid;
-        }
-
-        return checkComponentPermission(permission, pid, uid, -1, true);
-    }
-
     /**
      * Binder IPC calls go through the public entry point.
      * This can be called with or without the global lock held.
@@ -5617,14 +5585,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     public int checkUriPermission(Uri uri, int pid, int uid,
             final int modeFlags, int userId, IBinder callerToken) {
         enforceNotIsolatedCaller("checkUriPermission");
-
-        // Another redirected-binder-call permissions check as in
-        // {@link checkPermissionWithToken}.
-        Identity tlsIdentity = sCallerIdentity.get();
-        if (tlsIdentity != null && tlsIdentity.token == callerToken) {
-            uid = tlsIdentity.uid;
-            pid = tlsIdentity.pid;
-        }
 
         // Our own process gets to do everything.
         if (pid == MY_PID) {
@@ -6159,23 +6119,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.getCallingUid(), "*opencontent*", userId);
         ParcelFileDescriptor pfd = null;
         if (cph != null) {
-            // We record the binder invoker's uid in thread-local storage before
-            // going to the content provider to open the file.  Later, in the code
-            // that handles all permissions checks, we look for this uid and use
-            // that rather than the Activity Manager's own uid.  The effect is that
-            // we do the check against the caller's permissions even though it looks
-            // to the content provider like the Activity Manager itself is making
-            // the request.
-            Binder token = new Binder();
-            sCallerIdentity.set(new Identity(
-                    token, Binder.getCallingPid(), Binder.getCallingUid()));
             try {
-                pfd = cph.provider.openFile(null, null, uri, "r", null, token);
+                // This method is exposed to the VNDK and to avoid changing its
+                // signature we just use the first package in the UID. For shared
+                // UIDs we may blame the wrong app but that is Okay as they are
+                // in the same security/privacy sandbox.
+                final AndroidPackage androidPackage = mPackageManagerInt
+                        .getPackage(Binder.getCallingUid());
+                if (androidPackage == null) {
+                    return null;
+                }
+                final AttributionSource attributionSource = new AttributionSource(
+                        Binder.getCallingUid(), androidPackage.getPackageName(), null);
+                pfd = cph.provider.openFile(attributionSource, uri, "r", null);
             } catch (FileNotFoundException e) {
                 // do nothing; pfd will be returned null
             } finally {
-                // Ensure that whatever happens, we clean up the identity state
-                sCallerIdentity.remove();
                 // Ensure we're done with the provider.
                 mCpHelper.removeContentProviderExternalUnchecked(name, null, userId);
             }
@@ -16637,6 +16596,74 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return superImpl.apply(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
                     message, shouldCollectMessage);
+        }
+
+        @Override
+        public int noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean shouldCollectAsyncNotedOp, @Nullable String message,
+                boolean shouldCollectMessage, boolean skiProxyOperation,
+                @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
+                                Boolean, Integer> superImpl) {
+            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
+                        attributionSource.getUid()), Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(code, new AttributionSource(shellUid,
+                            "com.android.shell", attributionSource.getAttributionTag(),
+                            attributionSource.getNext()),
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            skiProxyOperation);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, attributionSource, shouldCollectAsyncNotedOp,
+                    message, shouldCollectMessage, skiProxyOperation);
+        }
+
+        @Override
+        public int startProxyOperation(IBinder token, int code,
+                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                boolean skipProsyOperation, @NonNull OctFunction<IBinder, Integer,
+                        AttributionSource, Boolean, Boolean, String, Boolean, Boolean,
+                        Integer> superImpl) {
+            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
+                        attributionSource.getUid()), Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(token, code, new AttributionSource(shellUid,
+                                    "com.android.shell", attributionSource.getAttributionTag(),
+                                    attributionSource.getNext()), startIfModeDefault,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            skipProsyOperation);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(token, code, attributionSource, startIfModeDefault,
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProsyOperation);
+        }
+
+        @Override
+        public void finishProxyOperation(IBinder clientId, int code,
+                @NonNull AttributionSource attributionSource,
+                @NonNull TriFunction<IBinder, Integer, AttributionSource, Void> superImpl) {
+            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
+                        attributionSource.getUid()), Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    superImpl.apply(clientId, code, new AttributionSource(shellUid,
+                            "com.android.shell", attributionSource.getAttributionTag(),
+                            attributionSource.getNext()));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            superImpl.apply(clientId, code, attributionSource);
         }
 
         private boolean isTargetOp(int code) {

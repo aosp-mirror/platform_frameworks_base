@@ -16,21 +16,19 @@
 
 package com.android.wm.shell.onehanded;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.view.Surface;
 import android.view.ViewConfiguration;
-import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 
@@ -44,24 +42,20 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     OneHandedGestureHandler mGestureHandler;
-    @Mock
-    DisplayController mMockDisplayController;
+    DisplayLayout mDisplayLayout;
     @Mock
     DisplayLayout mMockDisplayLayout;
     @Mock
     ShellExecutor mMockShellMainExecutor;
-    @Mock
-    WindowContainerTransaction mMockWct;
 
     @Before
     public void setUp() {
         final int mockNavBarHeight = 100;
         MockitoAnnotations.initMocks(this);
-        mGestureHandler = new OneHandedGestureHandler(mContext, mWindowManager,
-                mMockDisplayController, ViewConfiguration.get(mTestContext),
-                mMockShellMainExecutor);
+        mDisplayLayout = new DisplayLayout(mContext, mContext.getDisplay());
+        mGestureHandler = new OneHandedGestureHandler(mContext, mDisplayLayout,
+                ViewConfiguration.get(mTestContext), mMockShellMainExecutor);
         when(mMockDisplayLayout.navBarFrameHeight()).thenReturn(mockNavBarHeight);
-        when(mMockDisplayController.getDisplayLayout(anyInt())).thenReturn(mMockDisplayLayout);
     }
 
     @Test
@@ -81,7 +75,7 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testOneHandedDisabled_shouldDisposeInputChannel() {
-        mGestureHandler.onOneHandedEnabled(false);
+        mGestureHandler.onGestureEnabled(false);
 
         assertThat(mGestureHandler.mInputMonitor).isNull();
         assertThat(mGestureHandler.mInputEventReceiver).isNull();
@@ -89,7 +83,7 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testChangeNavBarToNon3Button_shouldDisposeInputChannel() {
-        mGestureHandler.onOneHandedEnabled(true);
+        mGestureHandler.onGestureEnabled(true);
         mGestureHandler.onThreeButtonModeEnabled(false);
 
         assertThat(mGestureHandler.mInputMonitor).isNull();
@@ -98,11 +92,38 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testOnlyHandleGestureInPortraitMode() {
-        mGestureHandler.onOneHandedEnabled(true);
-        mGestureHandler.onRotateDisplay(DEFAULT_DISPLAY, Surface.ROTATION_0, Surface.ROTATION_90,
-                mMockWct);
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_90);
+        mGestureHandler.onGestureEnabled(true);
+        mGestureHandler.onRotateDisplay(mDisplayLayout);
 
         assertThat(mGestureHandler.mInputMonitor).isNull();
         assertThat(mGestureHandler.mInputEventReceiver).isNull();
+    }
+
+    @Test
+    public void testRotation90ShouldNotRegisterEventReceiver() throws InterruptedException {
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_90);
+        mGestureHandler.onGestureEnabled(true);
+        mGestureHandler.onRotateDisplay(mDisplayLayout);
+
+        verify(mMockShellMainExecutor, never()).executeBlocking(any());
+    }
+
+    @Test
+    public void testRotation180ShouldNotRegisterEventReceiver() throws InterruptedException {
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_180);
+        mGestureHandler.onGestureEnabled(true);
+        mGestureHandler.onRotateDisplay(mDisplayLayout);
+
+        verify(mMockShellMainExecutor, never()).executeBlocking(any());
+    }
+
+    @Test
+    public void testRotation270ShouldNotRegisterEventReceiver() throws InterruptedException {
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_270);
+        mGestureHandler.onGestureEnabled(true);
+        mGestureHandler.onRotateDisplay(mDisplayLayout);
+
+        verify(mMockShellMainExecutor, never()).executeBlocking(any());
     }
 }

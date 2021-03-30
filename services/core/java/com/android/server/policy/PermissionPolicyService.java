@@ -578,7 +578,7 @@ public final class PermissionPolicyService extends SystemService {
         private final @NonNull AppOpsManager mAppOpsManager;
         private final @NonNull AppOpsManagerInternal mAppOpsManagerInternal;
 
-        private final @NonNull ArrayMap<String, PermissionInfo> mRuntimePermissionInfos;
+        private final @NonNull ArrayMap<String, PermissionInfo> mRuntimeAndTheirBgPermissionInfos;
 
         /**
          * All ops that need to be flipped to allow.
@@ -618,7 +618,7 @@ public final class PermissionPolicyService extends SystemService {
             mAppOpsManager = context.getSystemService(AppOpsManager.class);
             mAppOpsManagerInternal = LocalServices.getService(AppOpsManagerInternal.class);
 
-            mRuntimePermissionInfos = new ArrayMap<>();
+            mRuntimeAndTheirBgPermissionInfos = new ArrayMap<>();
             PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
                     PermissionManagerServiceInternal.class);
             List<PermissionInfo> permissionInfos =
@@ -627,7 +627,30 @@ public final class PermissionPolicyService extends SystemService {
             int permissionInfosSize = permissionInfos.size();
             for (int i = 0; i < permissionInfosSize; i++) {
                 PermissionInfo permissionInfo = permissionInfos.get(i);
-                mRuntimePermissionInfos.put(permissionInfo.name, permissionInfo);
+                mRuntimeAndTheirBgPermissionInfos.put(permissionInfo.name, permissionInfo);
+                // Make sure we scoop up all background permissions as they may not be runtime
+                if (permissionInfo.backgroundPermission != null) {
+                    String backgroundNonRuntimePermission = permissionInfo.backgroundPermission;
+                    for (int j = 0; j < permissionInfosSize; j++) {
+                        PermissionInfo bgPermissionCandidate = permissionInfos.get(j);
+                        if (permissionInfo.backgroundPermission.equals(
+                                bgPermissionCandidate.name)) {
+                            backgroundNonRuntimePermission = null;
+                            break;
+                        }
+                    }
+                    if (backgroundNonRuntimePermission != null) {
+                        try {
+                            PermissionInfo backgroundPermissionInfo = mPackageManager
+                                    .getPermissionInfo(backgroundNonRuntimePermission, 0);
+                            mRuntimeAndTheirBgPermissionInfos.put(backgroundPermissionInfo.name,
+                                    backgroundPermissionInfo);
+                        } catch (NameNotFoundException e) {
+                            Slog.w(LOG_TAG, "Unknown background permission: "
+                                    + backgroundNonRuntimePermission);
+                        }
+                    }
+                }
             }
         }
 
@@ -691,7 +714,7 @@ public final class PermissionPolicyService extends SystemService {
          */
         private void addAppOps(@NonNull PackageInfo packageInfo, @NonNull AndroidPackage pkg,
                 @NonNull String permissionName) {
-            PermissionInfo permissionInfo = mRuntimePermissionInfos.get(permissionName);
+            PermissionInfo permissionInfo = mRuntimeAndTheirBgPermissionInfos.get(permissionName);
             if (permissionInfo == null) {
                 return;
             }
@@ -726,7 +749,7 @@ public final class PermissionPolicyService extends SystemService {
             boolean shouldGrantAppOp = shouldGrantAppOp(packageInfo, pkg, permissionInfo);
             if (shouldGrantAppOp) {
                 if (permissionInfo.backgroundPermission != null) {
-                    PermissionInfo backgroundPermissionInfo = mRuntimePermissionInfos.get(
+                    PermissionInfo backgroundPermissionInfo = mRuntimeAndTheirBgPermissionInfos.get(
                             permissionInfo.backgroundPermission);
                     boolean shouldGrantBackgroundAppOp = backgroundPermissionInfo != null
                             && shouldGrantAppOp(packageInfo, pkg, backgroundPermissionInfo);

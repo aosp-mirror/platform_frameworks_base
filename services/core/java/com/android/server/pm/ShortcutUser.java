@@ -333,10 +333,7 @@ class ShortcutUser {
 
         if (!shortcutPackage.rescanPackageIfNeeded(isNewApp, forceRescan)) {
             if (isNewApp) {
-                final ShortcutPackage sp = mPackages.remove(packageName);
-                if (sp != null) {
-                    sp.removeShortcuts();
-                }
+                mPackages.remove(packageName);
             }
         }
     }

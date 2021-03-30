@@ -69,8 +69,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private float mContentTranslation;
     protected boolean mLastInSection;
     protected boolean mFirstInSection;
-    private float mOutlineRadius;
-    private float mParentWidth;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -81,7 +79,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private void initDimens() {
         mContentShift = getResources().getDimensionPixelSize(
                 R.dimen.shelf_transform_content_shift);
-        mOutlineRadius = getResources().getDimensionPixelSize(R.dimen.notification_corner_radius);
     }
 
     @Override
@@ -153,9 +150,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (getParent() != null) {
-            mParentWidth = ((View) getParent()).getWidth();
-        }
         updateClipping();
     }
 
@@ -442,15 +436,11 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     protected void updateClipping() {
         if (mClipToActualHeight && shouldClipToActualHeight()) {
-            final int top = getClipTopAmount();
-            final int bottom = Math.max(Math.max(getActualHeight() + getExtraBottomPadding()
+            int top = getClipTopAmount();
+            int bottom = Math.max(Math.max(getActualHeight() + getExtraBottomPadding()
                     - mClipBottomAmount, top), mMinimumHeightForClipping);
-            // Extend left/right clip bounds beyond the notification by the
-            // 1) space between the notification and edge of screen
-            // 2) corner radius (so we do not see any rounding as the notification goes off screen)
-            final int left = (int) (-getRelativeStartPadding(this) - mOutlineRadius);
-            final int right = (int) (mParentWidth + mOutlineRadius);
-            mClipRect.set(left, top, right, bottom);
+            int halfExtraWidth = (int) (mExtraWidthForClipping / 2.0f);
+            mClipRect.set(-halfExtraWidth, top, getWidth() + halfExtraWidth, bottom);
             setClipBounds(mClipRect);
         } else {
             setClipBounds(null);

@@ -19,6 +19,8 @@
     <!-- Recommended minimum clickable element dimension -->
     <dimen name="min_clickable_item_size">48dp</dimen>
 
+    <dimen name="remote_input_view_text_stroke">3dp</dimen>
+
     <!-- Amount to offset bottom of notification peek window from top of status bar. -->
     <dimen name="peek_window_y_offset">-12dp</dimen>
 

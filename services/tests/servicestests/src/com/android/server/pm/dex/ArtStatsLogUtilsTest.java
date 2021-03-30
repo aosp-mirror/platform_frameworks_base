@@ -22,6 +22,7 @@ import com.android.internal.art.ArtStatsLog;
 import com.android.server.pm.dex.ArtStatsLogUtils.ArtStatsLogger;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,6 +50,9 @@ public final class ArtStatsLogUtilsTest {
     private static final String COMPILER_FILTER = "space-profile";
     private static final String PROFILE_DEX_METADATA = "primary.prof";
     private static final String VDEX_DEX_METADATA = "primary.vdex";
+    private static final String INSTRUCTION_SET = "arm64";
+    private static final String BASE_APK = "base.apk";
+    private static final String SPLIT_APK = "split.apk";
     private static final byte[] DEX_CONTENT = "dexData".getBytes();
     private static final int COMPILATION_REASON = 1;
     private static final int RESULT_CODE = 222;
@@ -97,17 +101,18 @@ public final class ArtStatsLogUtilsTest {
             ArtStatsLogUtils.writeStatsLog(
                     mockLogger,
                     SESSION_ID,
-                    apk.toString(),
                     COMPILER_FILTER,
                     UID,
                     COMPILE_TIME,
                     dexMetadataPath.toString(),
                     COMPILATION_REASON,
-                    RESULT_CODE);
+                    RESULT_CODE,
+                    ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
+                    INSTRUCTION_SET);
 
             // Assert
             verifyWrites(ArtStatsLog.
-                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_PROFILE_AND_VDEX);
+                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_PROFILE_AND_VDEX);
         } finally {
             deleteSliently(dexMetadataPath);
             deleteSliently(apk);
@@ -127,17 +132,18 @@ public final class ArtStatsLogUtilsTest {
             ArtStatsLogUtils.writeStatsLog(
                     mockLogger,
                     SESSION_ID,
-                    apk.toString(),
                     COMPILER_FILTER,
                     UID,
                     COMPILE_TIME,
                     dexMetadataPath.toString(),
                     COMPILATION_REASON,
-                    RESULT_CODE);
+                    RESULT_CODE,
+                    ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
+                    INSTRUCTION_SET);
 
             // Assert
             verifyWrites(ArtStatsLog.
-                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_PROFILE);
+                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_PROFILE);
         } finally {
             deleteSliently(dexMetadataPath);
             deleteSliently(apk);
@@ -157,17 +163,18 @@ public final class ArtStatsLogUtilsTest {
             ArtStatsLogUtils.writeStatsLog(
                     mockLogger,
                     SESSION_ID,
-                    apk.toString(),
                     COMPILER_FILTER,
                     UID,
                     COMPILE_TIME,
                     dexMetadataPath.toString(),
                     COMPILATION_REASON,
-                    RESULT_CODE);
+                    RESULT_CODE,
+                    ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
+                    INSTRUCTION_SET);
 
             // Assert
             verifyWrites(ArtStatsLog.
-                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_VDEX);
+                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_VDEX);
         } finally {
             deleteSliently(dexMetadataPath);
             deleteSliently(apk);
@@ -185,17 +192,18 @@ public final class ArtStatsLogUtilsTest {
             ArtStatsLogUtils.writeStatsLog(
                     mockLogger,
                     SESSION_ID,
-                    apk.toString(),
                     COMPILER_FILTER,
                     UID,
                     COMPILE_TIME,
                     /*dexMetadataPath=*/ null,
                     COMPILATION_REASON,
-                    RESULT_CODE);
+                    RESULT_CODE,
+                    ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
+                    INSTRUCTION_SET);
 
             // Assert
             verifyWrites(ArtStatsLog.
-                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_NONE);
+                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_NONE);
         } finally {
             deleteSliently(apk);
         }
@@ -214,21 +222,33 @@ public final class ArtStatsLogUtilsTest {
             ArtStatsLogUtils.writeStatsLog(
                     mockLogger,
                     SESSION_ID,
-                    apk.toString(),
                     COMPILER_FILTER,
                     UID,
                     COMPILE_TIME,
                     dexMetadataPath.toString(),
                     COMPILATION_REASON,
-                    RESULT_CODE);
+                    RESULT_CODE,
+                    ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
+                    INSTRUCTION_SET);
 
             // Assert
             verifyWrites(ArtStatsLog.
-                ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_UNKNOWN);
+                    ART_DATUM_REPORTED__DEX_METADATA_TYPE__ART_DEX_METADATA_TYPE_UNKNOWN);
         } finally {
             deleteSliently(dexMetadataPath);
             deleteSliently(apk);
         }
+    }
+
+    @Test
+    public void testGetApkType() {
+        // Act
+        int result1 = ArtStatsLogUtils.getApkType(BASE_APK);
+        int result2 = ArtStatsLogUtils.getApkType(SPLIT_APK);
+
+        // Assert
+        Assert.assertEquals(result1, ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE);
+        Assert.assertEquals(result2, ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_SPLIT);
     }
 
     private void verifyWrites(int dexMetadataType) {
@@ -239,7 +259,9 @@ public final class ArtStatsLogUtilsTest {
                 COMPILER_FILTER,
                 ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_RESULT_CODE,
                 RESULT_CODE,
-                dexMetadataType);
+                dexMetadataType,
+                ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
+                INSTRUCTION_SET);
         inorder.verify(mockLogger).write(
                 SESSION_ID,
                 UID,
@@ -247,7 +269,9 @@ public final class ArtStatsLogUtilsTest {
                 COMPILER_FILTER,
                 ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME,
                 COMPILE_TIME,
-                dexMetadataType);
+                dexMetadataType,
+                ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
+                INSTRUCTION_SET);
     }
 
     private Path zipFiles(String suffix, Path... files) throws IOException {

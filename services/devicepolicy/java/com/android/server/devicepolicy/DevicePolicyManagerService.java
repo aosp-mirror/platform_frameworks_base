@@ -63,6 +63,7 @@ import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLE
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_DISABLED;
 import static android.app.admin.DevicePolicyManager.NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.OPERATION_SAFETY_REASON_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
@@ -7470,6 +7471,78 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.w(LOG_TAG, "Unable to notify WindowManager.", e);
             }
         });
+    }
+
+    @Override
+    public void setNearbyNotificationStreamingPolicy(int policy) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            if (admin.mNearbyNotificationStreamingPolicy != policy) {
+                admin.mNearbyNotificationStreamingPolicy = policy;
+                saveSettingsLocked(caller.getUserId());
+            }
+        }
+    }
+
+    @Override
+    public int getNearbyNotificationStreamingPolicy() {
+        if (!mHasFeature) {
+            return NEARBY_STREAMING_DISABLED;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller)
+                    || isProfileOwner(caller)
+                    || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            return admin.mNearbyNotificationStreamingPolicy;
+        }
+    }
+
+    @Override
+    public void setNearbyAppStreamingPolicy(int policy) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            if (admin.mNearbyAppStreamingPolicy != policy) {
+                admin.mNearbyAppStreamingPolicy = policy;
+                saveSettingsLocked(caller.getUserId());
+            }
+        }
+    }
+
+    @Override
+    public int getNearbyAppStreamingPolicy() {
+        if (!mHasFeature) {
+            return NEARBY_STREAMING_DISABLED;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller)
+                    || isProfileOwner(caller)
+                    || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            return admin.mNearbyAppStreamingPolicy;
+        }
     }
 
     /**

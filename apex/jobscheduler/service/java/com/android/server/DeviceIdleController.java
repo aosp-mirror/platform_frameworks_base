@@ -16,9 +16,9 @@
 
 package com.android.server;
 
-import static android.os.PowerWhitelistManager.REASON_SHELL;
-import static android.os.PowerWhitelistManager.REASON_UNKNOWN;
-import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerExemptionManager.REASON_SHELL;
+import static android.os.PowerExemptionManager.REASON_UNKNOWN;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Process.INVALID_UID;
 
 import android.Manifest;
@@ -58,11 +58,11 @@ import android.os.Handler;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
-import android.os.PowerWhitelistManager.ReasonCode;
-import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -1947,7 +1947,7 @@ public class DeviceIdleController extends SystemService
                 long durationMs, int userId, boolean sync, @ReasonCode int reasonCode,
                 @Nullable String reason) {
             addPowerSaveTempAllowlistAppInternal(callingUid, packageName, durationMs,
-                    TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                     userId, sync, reasonCode, reason);
         }
 
@@ -2706,7 +2706,7 @@ public class DeviceIdleController extends SystemService
         final long token = Binder.clearCallingIdentity();
         try {
             addPowerSaveTempAllowlistAppInternal(callingUid,
-                    packageName, duration, TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    packageName, duration, TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                     userId, true, reasonCode, reason);
         } finally {
             Binder.restoreCallingIdentity(token);

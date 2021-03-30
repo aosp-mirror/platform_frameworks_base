@@ -44,6 +44,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.telecom.TelecomManager;
 import android.telephony.Annotation;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SrvccState;
@@ -214,6 +215,18 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         public boolean isRegistrationLimitEnabledInPlatformCompat(int uid) {
             return Binder.withCleanCallingIdentity(() -> CompatChanges.isChangeEnabled(
                     TelephonyCallback.PHONE_STATE_LISTENER_LIMIT_CHANGE_ID, uid));
+        }
+
+        /**
+         * See {@link TelecomManager#ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION} for more
+         * information.
+         * @noinspection ConstantConditions
+         */
+        public boolean isCallStateReadPhoneStateEnforcedInPlatformCompat(String packageName,
+                UserHandle userHandle) {
+            return Binder.withCleanCallingIdentity(() -> CompatChanges.isChangeEnabled(
+                    TelecomManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION, packageName,
+                    userHandle));
         }
     }
 
@@ -2944,6 +2957,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
                     mContext, subId, callingPackage, callingFeatureId, message)) {
                 isPermissionCheckSuccessful = false;
+            }
+        }
+
+        // Only check READ_PHONE_STATE for CALL_STATE_CHANGED for API 31+.
+        if (mConfigurationProvider.isCallStateReadPhoneStateEnforcedInPlatformCompat(callingPackage,
+                Binder.getCallingUserHandle())) {
+            if (events.contains(TelephonyCallback.EVENT_LEGACY_CALL_STATE_CHANGED)
+                    || events.contains(TelephonyCallback.EVENT_CALL_STATE_CHANGED)) {
+                if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
+                        mContext, subId, callingPackage, callingFeatureId, message)) {
+                    throw new SecurityException("CALL_STATE_CHANGED event requires "
+                            + "READ_PHONE_STATE");
+                }
             }
         }
 

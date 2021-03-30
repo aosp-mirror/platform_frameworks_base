@@ -1060,6 +1060,12 @@ public class ContextWrapper extends Context {
         return mBase.createAttributionContext(attributionTag);
     }
 
+    @NonNull
+    @Override
+    public AttributionSource getAttributionSource() {
+        return mBase.getAttributionSource();
+    }
+
     @Override
     public boolean isRestricted() {
         return mBase.isRestricted();
