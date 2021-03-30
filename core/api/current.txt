@@ -51550,6 +51550,7 @@ package android.view.displayhash {
     field public static final int DISPLAY_HASH_ERROR_INVALID_HASH_ALGORITHM = -5; // 0xfffffffb
     field public static final int DISPLAY_HASH_ERROR_MISSING_WINDOW = -3; // 0xfffffffd
     field public static final int DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN = -4; // 0xfffffffc
+    field public static final int DISPLAY_HASH_ERROR_TOO_MANY_REQUESTS = -6; // 0xfffffffa
     field public static final int DISPLAY_HASH_ERROR_UNKNOWN = -1; // 0xffffffff
   }
 
