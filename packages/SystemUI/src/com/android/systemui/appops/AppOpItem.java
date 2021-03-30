@@ -24,15 +24,15 @@ public class AppOpItem {
     private int mCode;
     private int mUid;
     private String mPackageName;
-    private long mTimeStarted;
+    private long mTimeStartedElapsed;
     private StringBuilder mState;
     private boolean mIsDisabled;
 
-    public AppOpItem(int code, int uid, String packageName, long timeStarted) {
+    public AppOpItem(int code, int uid, String packageName, long timeStartedElapsed) {
         this.mCode = code;
         this.mUid = uid;
         this.mPackageName = packageName;
-        this.mTimeStarted = timeStarted;
+        this.mTimeStartedElapsed = timeStartedElapsed;
         mState = new StringBuilder()
                 .append("AppOpItem(")
                 .append("Op code=").append(code).append(", ")
@@ -53,8 +53,8 @@ public class AppOpItem {
         return mPackageName;
     }
 
-    public long getTimeStarted() {
-        return mTimeStarted;
+    public long getTimeStartedElapsed() {
+        return mTimeStartedElapsed;
     }
 
     public void setDisabled(boolean misDisabled) {
