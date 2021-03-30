@@ -3482,8 +3482,8 @@ public class SubscriptionManager {
      * @param subscriptionId the unique Subscription ID in database
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDeviceToDeviceStatusSharingPreference(
-            @DeviceToDeviceStatusSharingPreference int sharing, int subscriptionId) {
+    public void setDeviceToDeviceStatusSharingPreference(int subscriptionId,
+            @DeviceToDeviceStatusSharingPreference int sharing) {
         if (VDBG) {
             logd("[setDeviceToDeviceStatusSharing] + sharing: " + sharing + " subId: "
                     + subscriptionId);
@@ -3514,8 +3514,8 @@ public class SubscriptionManager {
      * @param subscriptionId The unique Subscription ID in database
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDeviceToDeviceStatusSharingContacts(@NonNull List<Uri> contacts,
-            int subscriptionId) {
+    public void setDeviceToDeviceStatusSharingContacts(int subscriptionId,
+            @NonNull List<Uri> contacts) {
         String contactString = serializeUriLists(contacts);
         if (VDBG) {
             logd("[setDeviceToDeviceStatusSharingContacts] + contacts: " + contactString
