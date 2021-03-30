@@ -190,7 +190,7 @@ public class AppStandbyController
                     ONE_HOUR,
                     ONE_HOUR,
                     2 * ONE_HOUR,
-                    4 * ONE_DAY
+                    4 * ONE_HOUR
             };
 
     private static final int[] THRESHOLD_BUCKETS = {

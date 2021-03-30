@@ -18,11 +18,15 @@ package com.android.internal.app;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.media.AudioFormat;
 import android.media.permission.Identity;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
 
+import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
@@ -32,6 +36,7 @@ import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 
 interface IVoiceInteractionManagerService {
     void showSession(in Bundle sessionArgs, int flags);
@@ -228,17 +233,33 @@ interface IVoiceInteractionManagerService {
     /**
      * Set configuration and pass read-only data to hotword detection service.
      *
-     * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
-     * contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob provided by the
-     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
+     * @param callback Use this to report {@link HotwordDetectionService} status.
      */
-    void setHotwordDetectionServiceConfig(in Bundle options, in SharedMemory sharedMemory);
+    void updateState(
+            in PersistableBundle options,
+            in SharedMemory sharedMemory,
+            in IHotwordRecognitionStatusCallback callback);
 
     /**
      * Requests to shutdown hotword detection service.
      */
     void shutdownHotwordDetectionService();
+
+    void startListeningFromMic(
+        in AudioFormat audioFormat,
+        in IMicrophoneHotwordDetectionVoiceInteractionCallback callback);
+
+    void stopListeningFromMic();
+
+    void startListeningFromExternalSource(
+        in ParcelFileDescriptor audioStream,
+        in AudioFormat audioFormat,
+        in PersistableBundle options,
+        in IMicrophoneHotwordDetectionVoiceInteractionCallback callback);
 }

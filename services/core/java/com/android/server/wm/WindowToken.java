@@ -54,6 +54,7 @@ import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.WindowContext;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
@@ -109,7 +110,7 @@ class WindowToken extends WindowContainer<WindowState> {
     private FixedRotationTransformState mFixedRotationTransformState;
 
     /**
-     * When set to {@code true}, this window token is created from {@link android.app.WindowContext}
+     * When set to {@code true}, this window token is created from {@link WindowContext}
      */
     private final boolean mFromClientToken;
 
@@ -758,11 +759,15 @@ class WindowToken extends WindowContainer<WindowState> {
 
     /** @see WindowState#freezeInsetsState() */
     void setInsetsFrozen(boolean freeze) {
-        if (freeze) {
-            forAllWindows(WindowState::freezeInsetsState, true /* traverseTopToBottom */);
-        } else {
-            forAllWindows(WindowState::clearFrozenInsetsState, true /* traverseTopToBottom */);
-        }
+        forAllWindows(w -> {
+            if (w.mToken == this) {
+                if (freeze) {
+                    w.freezeInsetsState();
+                } else {
+                    w.clearFrozenInsetsState();
+                }
+            }
+        },  true /* traverseTopToBottom */);
     }
 
     @Override

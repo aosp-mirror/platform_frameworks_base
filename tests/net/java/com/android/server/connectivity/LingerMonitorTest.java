@@ -32,6 +32,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityResources;
 import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.LinkProperties;
@@ -47,10 +48,11 @@ import android.text.format.DateUtils;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.R;
+import com.android.connectivity.resources.R;
 import com.android.server.ConnectivityService;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,8 +86,14 @@ public class LingerMonitorTest {
         MockitoAnnotations.initMocks(this);
         when(mCtx.getResources()).thenReturn(mResources);
         when(mCtx.getPackageName()).thenReturn("com.android.server.connectivity");
+        ConnectivityResources.setResourcesContextForTest(mCtx);
 
         mMonitor = new TestableLingerMonitor(mCtx, mNotifier, HIGH_DAILY_LIMIT, HIGH_RATE_LIMIT);
+    }
+
+    @After
+    public void tearDown() {
+        ConnectivityResources.setResourcesContextForTest(null);
     }
 
     @Test

@@ -26,7 +26,8 @@ import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.util.Log;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * The ICapabilityExchangeEventListener wrapper class to store the listener which is registered by
@@ -84,7 +85,7 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
      * request to the framework.
      */
     public void onRemoteCapabilityRequest(@NonNull Uri contactUri,
-            @NonNull List<String> remoteCapabilities, @NonNull OptionsRequestCallback callback)
+            @NonNull Set<String> remoteCapabilities, @NonNull OptionsRequestCallback callback)
             throws ImsException {
         ICapabilityExchangeEventListener listener = mListenerBinder;
         if (listener == null) {
@@ -114,7 +115,8 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
         };
 
         try {
-            listener.onRemoteCapabilityRequest(contactUri, remoteCapabilities, internalCallback);
+            listener.onRemoteCapabilityRequest(contactUri, new ArrayList<>(remoteCapabilities),
+                    internalCallback);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote capability request exception: " + e);
             throw new ImsException("Remote is not available",

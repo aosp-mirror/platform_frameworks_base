@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ ~ Copyright (C) 2020 The Android Open Source Project
+ ~
+ ~ Licensed under the Apache License, Version 2.0 (the "License");
+ ~ you may not use this file except in compliance with the License.
+ ~ You may obtain a copy of the License at
+ ~
+ ~      http://www.apache.org/licenses/LICENSE-2.0
+ ~
+ ~ Unless required by applicable law or agreed to in writing, software
+ ~ distributed under the License is distributed on an "AS IS" BASIS,
+ ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ~ See the License for the specific language governing permissions and
+ ~ limitations under the License.
+ -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:background="@drawable/people_space_tile_view_card"
+        android:id="@+id/item"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="top"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+
+            <ImageView
+                android:gravity="start"
+                android:id="@+id/person_icon"
+                android:layout_marginStart="-2dp"
+                android:layout_marginTop="-2dp"
+                android:layout_width="52dp"
+                android:layout_height="52dp" />
+
+            <ImageView
+                android:id="@+id/availability"
+                android:layout_marginStart="-2dp"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/circle_green_10dp" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:gravity="top|start"
+                android:paddingStart="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/subtext"
+                    android:text="@string/empty_user_name"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp"
+                    android:paddingBottom="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
+
+                <ImageView
+                    android:id="@+id/image"
+                    android:gravity="center"
+                    android:background="@drawable/people_space_content_background"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:id="@+id/text_content"
+                    android:text="@string/empty_status"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="12sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:singleLine="false"
+                    android:ellipsize="end" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:gravity="bottom"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToOutline="true">
+            <TextView
+                android:id="@+id/name"
+                android:gravity="center_vertical"
+                android:layout_weight="1"
+                android:text="@string/empty_user_name"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="14sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/messages_count"
+                android:gravity="end"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textColor="?android:attr/textColorPrimary"
+                android:background="@drawable/people_space_messages_count_background"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                />
+            <ImageView
+                android:id="@+id/predefined_icon"
+                android:gravity="end|center_vertical"
+                android:paddingStart="6dp"
+                android:layout_width="24dp"
+                android:layout_height="18dp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+

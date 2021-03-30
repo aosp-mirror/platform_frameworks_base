@@ -17,7 +17,6 @@
 package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
-import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
@@ -465,7 +464,7 @@ public class Vpn {
                 .addTransportType(NetworkCapabilities.TRANSPORT_VPN)
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
-                .setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE))
+                .setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE, null))
                 .build();
 
         loadAlwaysOnPackage();
@@ -529,7 +528,7 @@ public class Vpn {
     private void resetNetworkCapabilities() {
         mNetworkCapabilities = new NetworkCapabilities.Builder(mNetworkCapabilities)
                 .setUids(null)
-                .setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE))
+                .setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE, null))
                 .build();
     }
 
@@ -1129,17 +1128,19 @@ public class Vpn {
     }
 
     /**
-     * Return netId of current running VPN network.
+     * Return Network of current running VPN network.
      *
-     * @return a netId if there is a running VPN network or NETID_UNSET if there is no running VPN
+     * @return a Network if there is a running VPN network or null if there is no running VPN
      *         network or network is null.
      */
-    public synchronized int getNetId() {
+    @VisibleForTesting
+    @Nullable
+    public synchronized Network getNetwork() {
         final NetworkAgent agent = mNetworkAgent;
-        if (null == agent) return NETID_UNSET;
+        if (null == agent) return null;
         final Network network = agent.getNetwork();
-        if (null == network) return NETID_UNSET;
-        return network.getNetId();
+        if (null == network) return null;
+        return network;
     }
 
     private LinkProperties makeLinkProperties() {
@@ -1249,15 +1250,16 @@ public class Vpn {
         mLegacyState = LegacyVpnInfo.STATE_CONNECTING;
         updateState(DetailedState.CONNECTING, "agentConnect");
 
-        NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig.Builder().build();
-        networkAgentConfig.allowBypass = mConfig.allowBypass && !mLockdown;
+        final NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig.Builder()
+                .setBypassableVpn(mConfig.allowBypass && !mLockdown)
+                .build();
 
         capsBuilder.setOwnerUid(mOwnerUID);
         capsBuilder.setAdministratorUids(new int[] {mOwnerUID});
         capsBuilder.setUids(createUserAndRestrictedProfilesRanges(mUserId,
                 mConfig.allowedApplications, mConfig.disallowedApplications));
 
-        capsBuilder.setTransportInfo(new VpnTransportInfo(getActiveVpnType()));
+        capsBuilder.setTransportInfo(new VpnTransportInfo(getActiveVpnType(), mConfig.session));
 
         // Only apps targeting Q and above can explicitly declare themselves as metered.
         // These VPNs are assumed metered unless they state otherwise.
@@ -1288,7 +1290,6 @@ public class Vpn {
         });
         mNetworkAgent.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
                 ? Arrays.asList(mConfig.underlyingNetworks) : null);
-        mNetworkInfo.setIsAvailable(true);
         updateState(DetailedState.CONNECTED, "agentConnect");
     }
 
@@ -1860,22 +1861,13 @@ public class Vpn {
     /**
      * Updates underlying network set.
      */
-    public synchronized boolean setUnderlyingNetworks(Network[] networks) {
+    public synchronized boolean setUnderlyingNetworks(@Nullable Network[] networks) {
         if (!isCallerEstablishedOwnerLocked()) {
             return false;
         }
-        if (networks == null) {
-            mConfig.underlyingNetworks = null;
-        } else {
-            mConfig.underlyingNetworks = new Network[networks.length];
-            for (int i = 0; i < networks.length; ++i) {
-                if (networks[i] == null) {
-                    mConfig.underlyingNetworks[i] = null;
-                } else {
-                    mConfig.underlyingNetworks[i] = new Network(networks[i].getNetId());
-                }
-            }
-        }
+        // Make defensive copy since the content of array might be altered by the caller.
+        mConfig.underlyingNetworks =
+                (networks != null) ? Arrays.copyOf(networks, networks.length) : null;
         mNetworkAgent.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
                 ? Arrays.asList(mConfig.underlyingNetworks) : null);
         return true;

@@ -27,9 +27,11 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
 import android.os.CombinedVibrationEffect;
@@ -40,6 +42,11 @@ import android.os.SystemClock;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.test.TestLooper;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
+import android.os.vibrator.StepSegment;
+import android.os.vibrator.VibrationEffectSegment;
 import android.platform.test.annotations.LargeTest;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
@@ -61,6 +68,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Tests for {@link VibrationThread}.
@@ -142,8 +150,8 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedOneShot(10)),
-                mVibratorProviders.get(VIBRATOR_ID).getEffects());
-        assertEquals(Arrays.asList(100), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertEquals(expectedAmplitudes(100), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
     }
 
     @Test
@@ -161,7 +169,7 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedOneShot(10)),
-                mVibratorProviders.get(VIBRATOR_ID).getEffects());
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
         assertTrue(mVibratorProviders.get(VIBRATOR_ID).getAmplitudes().isEmpty());
     }
 
@@ -183,8 +191,9 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedOneShot(15)),
-                mVibratorProviders.get(VIBRATOR_ID).getEffects());
-        assertEquals(Arrays.asList(1, 2, 3), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertEquals(expectedAmplitudes(1, 2, 3),
+                mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
     }
 
     @Test
@@ -213,12 +222,12 @@ public class VibrationThreadTest {
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
-        List<Integer> playedAmplitudes = fakeVibrator.getAmplitudes();
-        assertFalse(fakeVibrator.getEffects().isEmpty());
+        List<Float> playedAmplitudes = fakeVibrator.getAmplitudes();
+        assertFalse(fakeVibrator.getEffectSegments().isEmpty());
         assertFalse(playedAmplitudes.isEmpty());
 
         for (int i = 0; i < playedAmplitudes.size(); i++) {
-            assertEquals(amplitudes[i % amplitudes.length], playedAmplitudes.get(i).intValue());
+            assertEquals(amplitudes[i % amplitudes.length] / 255f, playedAmplitudes.get(i), 1e-5);
         }
     }
 
@@ -292,7 +301,7 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_THUD)),
-                mVibratorProviders.get(VIBRATOR_ID).getEffects());
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
     }
 
     @Test
@@ -302,9 +311,10 @@ public class VibrationThreadTest {
 
         long vibrationId = 1;
         VibrationEffect fallback = VibrationEffect.createOneShot(10, 100);
-        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
-                VibrationEffect.EFFECT_STRENGTH_STRONG, fallback);
-        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        Vibration vibration = createVibration(vibrationId, CombinedVibrationEffect.createSynced(
+                VibrationEffect.get(VibrationEffect.EFFECT_CLICK)));
+        vibration.addFallback(VibrationEffect.EFFECT_CLICK, fallback);
+        VibrationThread thread = startThreadAndDispatcher(vibration);
         waitForCompletion(thread);
 
         verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(10L));
@@ -314,8 +324,8 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedOneShot(10)),
-                mVibratorProviders.get(VIBRATOR_ID).getEffects());
-        assertEquals(Arrays.asList(100), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertEquals(expectedAmplitudes(100), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
     }
 
     @Test
@@ -331,7 +341,7 @@ public class VibrationThreadTest {
         verify(mControllerCallbacks, never()).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
                 eq(Vibration.Status.IGNORED_UNSUPPORTED));
-        assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffects().isEmpty());
+        assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments().isEmpty());
     }
 
     @Test
@@ -351,7 +361,10 @@ public class VibrationThreadTest {
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
-        assertEquals(Arrays.asList(effect), mVibratorProviders.get(VIBRATOR_ID).getEffects());
+        assertEquals(Arrays.asList(
+                expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0),
+                expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f, 0)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
     }
 
     @Test
@@ -368,7 +381,79 @@ public class VibrationThreadTest {
         verify(mControllerCallbacks, never()).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
                 eq(Vibration.Status.IGNORED_UNSUPPORTED));
-        assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffects().isEmpty());
+        assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments().isEmpty());
+    }
+
+    @Test
+    public void vibrate_singleVibratorComposedEffects_runsDifferentVibrations() throws Exception {
+        mVibratorProviders.get(VIBRATOR_ID).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        mVibratorProviders.get(VIBRATOR_ID).setSupportedPrimitives(
+                VibrationEffect.Composition.PRIMITIVE_CLICK,
+                VibrationEffect.Composition.PRIMITIVE_TICK);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS,
+                IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addEffect(VibrationEffect.createOneShot(10, 100))
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK), 10)
+                .compose();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        // Use first duration the vibrator is turned on since we cannot estimate the clicks.
+        verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(10L));
+        verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks, times(4)).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(
+                expectedOneShot(10),
+                expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0),
+                expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f, 0),
+                expectedPrebaked(VibrationEffect.EFFECT_CLICK),
+                expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertEquals(expectedAmplitudes(100), mVibratorProviders.get(VIBRATOR_ID).getAmplitudes());
+    }
+
+    @Test
+    public void vibrate_singleVibratorPwle_runsComposePwle() throws Exception {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        mVibratorProviders.get(VIBRATOR_ID).setSupportedBraking(Braking.CLAB);
+        mVibratorProviders.get(VIBRATOR_ID).setMinFrequency(100);
+        mVibratorProviders.get(VIBRATOR_ID).setResonantFrequency(150);
+        mVibratorProviders.get(VIBRATOR_ID).setFrequencyResolution(50);
+        mVibratorProviders.get(VIBRATOR_ID).setMaxAmplitudes(
+                0.5f /* 100Hz*/, 1 /* 150Hz */, 0.6f /* 200Hz */);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startWaveform()
+                .addStep(1, 10)
+                .addRamp(0, 20)
+                .addStep(0.8f, 1, 30)
+                .addRamp(0.6f, -1, 40)
+                .build();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), eq(100L));
+        verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+        assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(
+                expectedRamp(/* amplitude= */ 1, /* frequency= */ 150, /* duration= */ 10),
+                expectedRamp(/* StartAmplitude= */ 1, /* endAmplitude= */ 0,
+                        /* startFrequency= */ 150, /* endFrequency= */ 150, /* duration= */ 20),
+                expectedRamp(/* amplitude= */ 0.6f, /* frequency= */ 200, /* duration= */ 30),
+                expectedRamp(/* StartAmplitude= */ 0.6f, /* endAmplitude= */ 0.5f,
+                        /* startFrequency= */ 200, /* endFrequency= */ 100, /* duration= */ 40)),
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
+        assertEquals(Arrays.asList(Braking.CLAB), mVibratorProviders.get(VIBRATOR_ID).getBraking());
     }
 
     @Test
@@ -428,7 +513,7 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_TICK)),
-                mVibratorProviders.get(VIBRATOR_ID).getEffects());
+                mVibratorProviders.get(VIBRATOR_ID).getEffectSegments());
     }
 
     @Test
@@ -454,10 +539,10 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(2).isVibrating());
         assertFalse(thread.getVibrators().get(3).isVibrating());
 
-        VibrationEffect expected = expectedPrebaked(VibrationEffect.EFFECT_CLICK);
-        assertEquals(Arrays.asList(expected), mVibratorProviders.get(1).getEffects());
-        assertEquals(Arrays.asList(expected), mVibratorProviders.get(2).getEffects());
-        assertEquals(Arrays.asList(expected), mVibratorProviders.get(3).getEffects());
+        VibrationEffectSegment expected = expectedPrebaked(VibrationEffect.EFFECT_CLICK);
+        assertEquals(Arrays.asList(expected), mVibratorProviders.get(1).getEffectSegments());
+        assertEquals(Arrays.asList(expected), mVibratorProviders.get(2).getEffectSegments());
+        assertEquals(Arrays.asList(expected), mVibratorProviders.get(3).getEffectSegments());
     }
 
     @Test
@@ -495,12 +580,16 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(4).isVibrating());
 
         assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
-                mVibratorProviders.get(1).getEffects());
-        assertEquals(Arrays.asList(expectedOneShot(10)), mVibratorProviders.get(2).getEffects());
-        assertEquals(Arrays.asList(100), mVibratorProviders.get(2).getAmplitudes());
-        assertEquals(Arrays.asList(expectedOneShot(20)), mVibratorProviders.get(3).getEffects());
-        assertEquals(Arrays.asList(1, 2), mVibratorProviders.get(3).getAmplitudes());
-        assertEquals(Arrays.asList(composed), mVibratorProviders.get(4).getEffects());
+                mVibratorProviders.get(1).getEffectSegments());
+        assertEquals(Arrays.asList(expectedOneShot(10)),
+                mVibratorProviders.get(2).getEffectSegments());
+        assertEquals(expectedAmplitudes(100), mVibratorProviders.get(2).getAmplitudes());
+        assertEquals(Arrays.asList(expectedOneShot(20)),
+                mVibratorProviders.get(3).getEffectSegments());
+        assertEquals(expectedAmplitudes(1, 2), mVibratorProviders.get(3).getAmplitudes());
+        assertEquals(Arrays.asList(
+                expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0)),
+                mVibratorProviders.get(4).getEffectSegments());
     }
 
     @Test
@@ -540,11 +629,14 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(2).isVibrating());
         assertFalse(thread.getVibrators().get(3).isVibrating());
 
-        assertEquals(Arrays.asList(expectedOneShot(10)), mVibratorProviders.get(1).getEffects());
-        assertEquals(Arrays.asList(100), mVibratorProviders.get(1).getAmplitudes());
-        assertEquals(Arrays.asList(composed), mVibratorProviders.get(2).getEffects());
+        assertEquals(Arrays.asList(expectedOneShot(10)),
+                mVibratorProviders.get(1).getEffectSegments());
+        assertEquals(expectedAmplitudes(100), mVibratorProviders.get(1).getAmplitudes());
+        assertEquals(Arrays.asList(
+                expectedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0)),
+                mVibratorProviders.get(2).getEffectSegments());
         assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
-                mVibratorProviders.get(3).getEffects());
+                mVibratorProviders.get(3).getEffectSegments());
     }
 
     @Test
@@ -563,8 +655,9 @@ public class VibrationThreadTest {
         CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(composed);
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
 
-        assertTrue(waitUntil(t -> !mVibratorProviders.get(1).getEffects().isEmpty()
-                && !mVibratorProviders.get(2).getEffects().isEmpty(), thread, TEST_TIMEOUT_MILLIS));
+        assertTrue(waitUntil(t -> !mVibratorProviders.get(1).getEffectSegments().isEmpty()
+                        && !mVibratorProviders.get(2).getEffectSegments().isEmpty(), thread,
+                TEST_TIMEOUT_MILLIS));
         thread.syncedVibrationComplete();
         waitForCompletion(thread);
 
@@ -574,8 +667,10 @@ public class VibrationThreadTest {
         verify(mThreadCallbacks, never()).cancelSyncedVibration();
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
 
-        assertEquals(Arrays.asList(composed), mVibratorProviders.get(1).getEffects());
-        assertEquals(Arrays.asList(composed), mVibratorProviders.get(2).getEffects());
+        VibrationEffectSegment expected = expectedPrimitive(
+                VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 100);
+        assertEquals(Arrays.asList(expected), mVibratorProviders.get(1).getEffectSegments());
+        assertEquals(Arrays.asList(expected), mVibratorProviders.get(2).getEffectSegments());
     }
 
     @Test
@@ -634,10 +729,12 @@ public class VibrationThreadTest {
         verify(mThreadCallbacks, never()).triggerSyncedVibration(eq(vibrationId));
         verify(mThreadCallbacks, never()).cancelSyncedVibration();
 
-        assertEquals(Arrays.asList(expectedOneShot(10)), mVibratorProviders.get(1).getEffects());
-        assertEquals(Arrays.asList(100), mVibratorProviders.get(1).getAmplitudes());
-        assertEquals(Arrays.asList(expectedOneShot(5)), mVibratorProviders.get(2).getEffects());
-        assertEquals(Arrays.asList(200), mVibratorProviders.get(2).getAmplitudes());
+        assertEquals(Arrays.asList(expectedOneShot(10)),
+                mVibratorProviders.get(1).getEffectSegments());
+        assertEquals(expectedAmplitudes(100), mVibratorProviders.get(1).getAmplitudes());
+        assertEquals(Arrays.asList(expectedOneShot(5)),
+                mVibratorProviders.get(2).getEffectSegments());
+        assertEquals(expectedAmplitudes(200), mVibratorProviders.get(2).getAmplitudes());
     }
 
     @Test
@@ -704,12 +801,15 @@ public class VibrationThreadTest {
         assertFalse(thread.getVibrators().get(2).isVibrating());
         assertFalse(thread.getVibrators().get(3).isVibrating());
 
-        assertEquals(Arrays.asList(expectedOneShot(25)), mVibratorProviders.get(1).getEffects());
-        assertEquals(Arrays.asList(expectedOneShot(80)), mVibratorProviders.get(2).getEffects());
-        assertEquals(Arrays.asList(expectedOneShot(60)), mVibratorProviders.get(3).getEffects());
-        assertEquals(Arrays.asList(1, 2, 3), mVibratorProviders.get(1).getAmplitudes());
-        assertEquals(Arrays.asList(4, 5), mVibratorProviders.get(2).getAmplitudes());
-        assertEquals(Arrays.asList(6), mVibratorProviders.get(3).getAmplitudes());
+        assertEquals(Arrays.asList(expectedOneShot(25)),
+                mVibratorProviders.get(1).getEffectSegments());
+        assertEquals(Arrays.asList(expectedOneShot(80)),
+                mVibratorProviders.get(2).getEffectSegments());
+        assertEquals(Arrays.asList(expectedOneShot(60)),
+                mVibratorProviders.get(3).getEffectSegments());
+        assertEquals(expectedAmplitudes(1, 2, 3), mVibratorProviders.get(1).getAmplitudes());
+        assertEquals(expectedAmplitudes(4, 5), mVibratorProviders.get(2).getAmplitudes());
+        assertEquals(expectedAmplitudes(6), mVibratorProviders.get(3).getAmplitudes());
     }
 
     @LargeTest
@@ -826,7 +926,7 @@ public class VibrationThreadTest {
         verify(mVibrationToken).linkToDeath(same(thread), eq(0));
         verify(mVibrationToken).unlinkToDeath(same(thread), eq(0));
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
-        assertFalse(mVibratorProviders.get(VIBRATOR_ID).getEffects().isEmpty());
+        assertFalse(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments().isEmpty());
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
     }
 
@@ -843,12 +943,16 @@ public class VibrationThreadTest {
 
     private VibrationThread startThreadAndDispatcher(long vibrationId,
             CombinedVibrationEffect effect) {
-        VibrationThread thread = new VibrationThread(createVibration(vibrationId, effect),
-                createVibratorControllers(), mWakeLock, mIBatteryStatsMock, mThreadCallbacks);
+        return startThreadAndDispatcher(createVibration(vibrationId, effect));
+    }
+
+    private VibrationThread startThreadAndDispatcher(Vibration vib) {
+        VibrationThread thread = new VibrationThread(vib, createVibratorControllers(), mWakeLock,
+                mIBatteryStatsMock, mThreadCallbacks);
         doAnswer(answer -> {
             thread.vibratorComplete(answer.getArgument(0));
             return null;
-        }).when(mControllerCallbacks).onComplete(anyInt(), eq(vibrationId));
+        }).when(mControllerCallbacks).onComplete(anyInt(), eq(vib.id));
         mTestLooper.startAutoDispatch();
         thread.start();
         return thread;
@@ -891,12 +995,31 @@ public class VibrationThreadTest {
         return array;
     }
 
-    private VibrationEffect expectedOneShot(long millis) {
-        return VibrationEffect.createOneShot(millis, VibrationEffect.DEFAULT_AMPLITUDE);
+    private VibrationEffectSegment expectedOneShot(long millis) {
+        return new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, /* frequency= */ 0, (int) millis);
     }
 
-    private VibrationEffect expectedPrebaked(int effectId) {
-        return new VibrationEffect.Prebaked(effectId, false,
-                VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+    private VibrationEffectSegment expectedPrebaked(int effectId) {
+        return new PrebakedSegment(effectId, false, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+    }
+
+    private VibrationEffectSegment expectedPrimitive(int primitiveId, float scale, int delay) {
+        return new PrimitiveSegment(primitiveId, scale, delay);
+    }
+
+    private VibrationEffectSegment expectedRamp(float amplitude, float frequency, int duration) {
+        return expectedRamp(amplitude, amplitude, frequency, frequency, duration);
+    }
+
+    private VibrationEffectSegment expectedRamp(float startAmplitude, float endAmplitude,
+            float startFrequency, float endFrequency, int duration) {
+        return new RampSegment(startAmplitude, endAmplitude, startFrequency, endFrequency,
+                duration);
+    }
+
+    private List<Float> expectedAmplitudes(int... amplitudes) {
+        return Arrays.stream(amplitudes)
+                .mapToObj(amplitude -> amplitude / 255f)
+                .collect(Collectors.toList());
     }
 }

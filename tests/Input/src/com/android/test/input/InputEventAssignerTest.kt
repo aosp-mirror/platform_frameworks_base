@@ -87,7 +87,7 @@ class InputEventAssignerTest {
         assertEquals(down.id, eventId)
 
         // Now send CALLBACK_INPUT to the assigner. It should provide the latest motion event
-        assigner.onChoreographerCallback()
+        assigner.notifyFrameProcessed()
         eventId = assigner.processEvent(move3)
         assertEquals(move3.id, eventId)
         eventId = assigner.processEvent(move4)
@@ -122,7 +122,7 @@ class InputEventAssignerTest {
         eventId = assigner.processEvent(up)
         // DOWN is only sticky for Motions, not for keys
         assertEquals(up.id, eventId)
-        assigner.onChoreographerCallback()
+        assigner.notifyFrameProcessed()
         val down2 = createKeyEvent(KeyEvent.ACTION_DOWN, 22)
         eventId = assigner.processEvent(down2)
         assertEquals(down2.id, eventId)

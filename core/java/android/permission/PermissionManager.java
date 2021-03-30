@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -43,6 +44,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.content.AttributionSource;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -79,6 +81,9 @@ public final class PermissionManager {
     private static final String LOG_TAG = PermissionManager.class.getName();
 
     /** @hide */
+    public static final String LOG_TAG_TRACE_GRANTS = "PermissionGrantTrace";
+
+    /** @hide */
     public static final String KILL_APP_REASON_PERMISSIONS_REVOKED =
             "permissions revoked";
     /** @hide */
@@ -101,6 +106,8 @@ public final class PermissionManager {
     /**
      * Note: Changing this won't do anything on its own - you should also change the filtering in
      * {@link #shouldTraceGrant}.
+     *
+     * See log output for tag {@link #LOG_TAG_TRACE_GRANTS}
      *
      * @hide
      */
@@ -318,8 +325,10 @@ public final class PermissionManager {
     }
 
     /** @hide */
-    public static boolean shouldTraceGrant(String packageName, String permissionName, int userId) {
+    public static boolean shouldTraceGrant(
+            @NonNull String packageName, @NonNull String permissionName, int userId) {
         // To be modified when debugging
+        // template: if ("".equals(packageName) && "".equals(permissionName)) return true;
         return false;
     }
 
@@ -347,7 +356,8 @@ public final class PermissionManager {
             @NonNull String permissionName, @NonNull UserHandle user) {
         if (DEBUG_TRACE_GRANTS
                 && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
-            Log.i(LOG_TAG, "App " + mContext.getPackageName() + " is granting " + packageName + " "
+            Log.i(LOG_TAG_TRACE_GRANTS, "App " + mContext.getPackageName() + " is granting "
+                    + packageName + " "
                     + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
         }
         try {
@@ -851,6 +861,7 @@ public final class PermissionManager {
      *
      * @hide
      */
+    @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
     public List<PermGroupUsage> getIndicatorAppOpUsageData() {
@@ -1087,6 +1098,48 @@ public final class PermissionManager {
             @Nullable String callingFeatureId, int pid, int uid) {
         return mLegacyPermissionManager.checkDeviceIdentifierAccess(packageName, message,
                 callingFeatureId, pid, uid);
+    }
+
+    /**
+     * Registers an attribution source with the OS. An app can only register an attribution
+     * source for itself. Once an attribution source has been registered another app can
+     * check whether this registration exists and thus trust the payload in the source
+     * object. This is important for permission checking and specifically for app op blaming
+     * since a malicious app should not be able to force the OS to blame another app
+     * that doesn't participate in an attribution chain.
+     *
+     * @param source The attribution source to register.
+     *
+     * @see #isRegisteredAttributionSource(AttributionSource)
+     *
+     * @hide
+     */
+    public @NonNull AttributionSource registerAttributionSource(@NonNull AttributionSource source) {
+        try {
+            return mPermissionManager.registerAttributionSource(source);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether an attribution source is registered.
+     *
+     * @param source The attribution source to check.
+     * @return Whether this is a registered source.
+     *
+     * @see #registerAttributionSource(AttributionSource)
+     *
+     * @hide
+     */
+    public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
+        try {
+            return mPermissionManager.isRegisteredAttributionSource(source);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /* @hide */

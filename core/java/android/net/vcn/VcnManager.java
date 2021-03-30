@@ -154,7 +154,7 @@ public class VcnManager {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
 
         try {
-            mService.clearVcnConfig(subscriptionGroup);
+            mService.clearVcnConfig(subscriptionGroup, mContext.getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw new IOException(e);
         } catch (RemoteException e) {
@@ -439,7 +439,7 @@ public class VcnManager {
          * @param statusCode the code for the status change encountered by this {@link
          *     VcnStatusCallback}'s subscription group.
          */
-        public abstract void onVcnStatusChanged(@VcnStatusCode int statusCode);
+        public abstract void onStatusChanged(@VcnStatusCode int statusCode);
 
         /**
          * Invoked when a VCN Gateway Connection corresponding to this callback's subscription group
@@ -476,7 +476,7 @@ public class VcnManager {
      * and there is a VCN active for its specified subscription group (this may happen after the
      * callback is registered).
      *
-     * <p>{@link VcnStatusCallback#onVcnStatusChanged(int)} will be invoked on registration with the
+     * <p>{@link VcnStatusCallback#onStatusChanged(int)} will be invoked on registration with the
      * current status for the specified subscription group's VCN. If the registrant is not
      * privileged for this subscription group, {@link #VCN_STATUS_CODE_NOT_CONFIGURED} will be
      * returned.
@@ -580,7 +580,7 @@ public class VcnManager {
         @Override
         public void onVcnStatusChanged(@VcnStatusCode int statusCode) {
             Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(() -> mCallback.onVcnStatusChanged(statusCode)));
+                    () -> mExecutor.execute(() -> mCallback.onStatusChanged(statusCode)));
         }
 
         // TODO(b/180521637): use ServiceSpecificException for safer Exception 'parceling'

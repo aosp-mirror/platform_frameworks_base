@@ -45,7 +45,7 @@ class FingerprintRevokeChallengeClient extends RevokeChallengeClient<ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().revokeChallenge(mSequentialId, mChallenge);
+            getFreshDaemon().revokeChallenge(mChallenge);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to revokeChallenge", e);
         }

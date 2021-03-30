@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
@@ -77,25 +76,23 @@ public class WifiStatusTracker {
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build();
     private final NetworkCallback mNetworkCallback =
             new NetworkCallback(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
-        @Override
-        public void onAvailable(
-                Network network, NetworkCapabilities networkCapabilities,
-                LinkProperties linkProperties, boolean blocked) {
-            boolean isVcnOverWifi =
-                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                            && (Utils.tryGetWifiInfoForVcn(networkCapabilities) != null);
-            boolean isWifi =
-                    networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
-            if (isVcnOverWifi || isWifi) {
-                mNetworks.add(network.getNetId());
-            }
-        }
-
         // Note: onCapabilitiesChanged is guaranteed to be called "immediately" after onAvailable
         // and onLinkPropertiesChanged.
         @Override
         public void onCapabilitiesChanged(
                 Network network, NetworkCapabilities networkCapabilities) {
+            if (!mNetworks.contains(network.getNetId())) {
+                // New network
+                boolean isVcnOverWifi =
+                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                                && (Utils.tryGetWifiInfoForVcn(networkCapabilities) != null);
+                boolean isWifi =
+                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+                if (isVcnOverWifi || isWifi) {
+                    mNetworks.add(network.getNetId());
+                }
+            }
+
             WifiInfo wifiInfo = null;
             if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
                 wifiInfo = Utils.tryGetWifiInfoForVcn(networkCapabilities);

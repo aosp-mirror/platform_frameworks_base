@@ -2124,6 +2124,52 @@ public class StorageManager {
         }
     }
 
+
+    /** @hide */
+    @IntDef(prefix = { "MOUNT_MODE_" }, value = {
+            MOUNT_MODE_EXTERNAL_NONE,
+            MOUNT_MODE_EXTERNAL_DEFAULT,
+            MOUNT_MODE_EXTERNAL_INSTALLER,
+            MOUNT_MODE_EXTERNAL_PASS_THROUGH,
+            MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE
+    })
+    /** @hide */
+    public @interface MountMode {}
+
+    /**
+     * No external storage should be mounted.
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
+    /**
+     * Default external storage should be mounted.
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_DEFAULT = IVold.REMOUNT_MODE_DEFAULT;
+    /**
+     * Mount mode for package installers which should give them access to
+     * all obb dirs in addition to their package sandboxes
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_INSTALLER = IVold.REMOUNT_MODE_INSTALLER;
+    /**
+     * The lower file system should be bind mounted directly on external storage
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_PASS_THROUGH = IVold.REMOUNT_MODE_PASS_THROUGH;
+
+    /**
+     * Use the regular scoped storage filesystem, but Android/ should be writable.
+     * Used to support the applications hosting DownloadManager and the MTP server.
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE =
+            IVold.REMOUNT_MODE_ANDROID_WRITABLE;
     /**
      * Flag indicating that a disk space allocation request should operate in an
      * aggressive mode. This flag should only be rarely used in situations that
@@ -2295,6 +2341,28 @@ public class StorageManager {
                     mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the External Storage mount mode corresponding to the given uid and packageName.
+     * These mount modes specify different views and access levels for
+     * different apps on external storage.
+     *
+     * @params uid UID of the application
+     * @params packageName name of the package
+     * @return {@code MountMode} for the given uid and packageName.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE)
+    @SystemApi
+    @MountMode
+    public int getExternalStorageMountMode(int uid, @NonNull String packageName) {
+        try {
+            return mStorageManager.getExternalStorageMountMode(uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2728,12 +2796,20 @@ public class StorageManager {
     }
 
     /**
+     * Reason to provide if app IO is blocked/resumed for unknown reasons
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int APP_IO_BLOCKED_REASON_UNKNOWN = 0;
+
+    /**
      * Reason to provide if app IO is blocked/resumed because of transcoding
      *
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 0;
+    public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 1;
 
     /**
      * Constants for use with
@@ -2744,7 +2820,8 @@ public class StorageManager {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "APP_IO_BLOCKED_REASON_" }, value = {
-            APP_IO_BLOCKED_REASON_TRANSCODING
+                APP_IO_BLOCKED_REASON_TRANSCODING,
+                APP_IO_BLOCKED_REASON_UNKNOWN,
     })
     public @interface AppIoBlockedReason {}
 
@@ -2798,6 +2875,30 @@ public class StorageManager {
         Objects.requireNonNull(volumeUuid);
         try {
             mStorageManager.notifyAppIoResumed(convert(volumeUuid), uid, tid, reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check if {@code uid} with {@code tid} is blocked on IO for {@code reason}.
+     *
+     * This requires {@link ExternalStorageService} the
+     * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE} permission.
+     *
+     * @param volumeUuid the UUID of the storage volume to check IO blocked status
+     * @param uid the UID of the app to check IO blocked status
+     * @param tid the tid of the app to check IO blocked status
+     * @param reason the reason to check IO blocked status for
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isAppIoBlocked(@NonNull UUID volumeUuid, int uid, int tid,
+            @AppIoBlockedReason int reason) {
+        Objects.requireNonNull(volumeUuid);
+        try {
+            return mStorageManager.isAppIoBlocked(convert(volumeUuid), uid, tid, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

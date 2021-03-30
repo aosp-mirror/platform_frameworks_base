@@ -107,6 +107,7 @@ import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.LayoutDirection;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.Pair;
 import android.util.Pools.SynchronizedPool;
@@ -151,6 +152,9 @@ import android.view.inputmethod.InputConnection;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
+import android.view.translation.TranslationCapability;
+import android.view.translation.TranslationSpec.DataFormat;
+import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
@@ -5252,6 +5256,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @Nullable
     private String[] mOnReceiveContentMimeTypes;
+
+    @Nullable
+    private ViewTranslationCallback mViewTranslationCallback;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -26136,9 +26143,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>The sound effect will only be played if sound effects are enabled by the user, and
      * {@link #isSoundEffectsEnabled()} is true.
      *
-     * @param soundConstant One of the constants defined in {@link SoundEffectConstants}
+     * @param soundConstant One of the constants defined in {@link SoundEffectConstants}.
      */
-    public void playSoundEffect(int soundConstant) {
+    public void playSoundEffect(@SoundEffectConstants.SoundEffect int soundConstant) {
         if (mAttachInfo == null || mAttachInfo.mRootCallbacks == null || !isSoundEffectsEnabled()) {
             return;
         }
@@ -26794,8 +26801,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (permissions != null) {
                 permissions.takeTransient();
             }
-            final ContentInfo payload = new ContentInfo.Builder(
-                    event.getClipData(), SOURCE_DRAG_AND_DROP).build();
+            final ContentInfo payload =
+                    new ContentInfo.Builder(event.getClipData(), SOURCE_DRAG_AND_DROP)
+                            .setDragAndDropPermissions(permissions)
+                            .build();
             ContentInfo remainingPayload = performReceiveContent(payload);
             // Return true unless none of the payload was consumed.
             return remainingPayload != payload;
@@ -30718,71 +30727,141 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns a {@link ViewTranslationRequest} to the {@link onStartUiTranslation} which represents
-     * the content to be translated.
+     * Returns a {@link ViewTranslationRequest} which represents the content to be translated.
      *
-     * <p>The default implementation does nothing and return null.</p>
+     * <p>The default implementation does nothing and returns null.</p>
      *
-     * @hide
-     *
-     * @return the {@link ViewTranslationRequest} which contains the information to be translated.
+     * @param supportedFormats the supported translation formats. For now, the only possible value
+     * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
+     * @return the {@link ViewTranslationRequest} which contains the information to be translated or
+     * {@code null} if this View doesn't support translation.
+     * The {@link AutofillId} must be set on the returned value.
      */
     @Nullable
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public ViewTranslationRequest onCreateTranslationRequest() {
+    public ViewTranslationRequest onCreateTranslationRequest(
+            @NonNull @DataFormat int[] supportedFormats) {
         return null;
     }
 
     /**
-     * Called when the user wants to show the original text instead of the translated text.
+     * Returns a {@link ViewTranslationRequest} list which represents the content to be translated
+     * in the virtual view. This is called if this view returned a virtual view structure
+     * from {@link #onProvideContentCaptureStructure} and the system determined that those virtual
+     * views were relevant for translation.
      *
-     * @hide
+     * <p>The default implementation does nothing.</p>
      *
-     * <p> The default implementation does nothing.
+     * @param virtualChildIds the virtual child ids which represents the child views in the virtual
+     * view.
+     * @param supportedFormats the supported translation formats. For now, the only possible value
+     * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
+     * @param requestsCollector a {@link ViewTranslationRequest} collector that will be called
+     * multiple times to collect the information to be translated in the virtual view. One
+     * {@link ViewTranslationRequest} per virtual child. The {@link ViewTranslationRequest} must
+     * contains the {@link AutofillId} corresponding to the virtualChildIds.
      */
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onPauseUiTranslation() {
+    @SuppressLint("NullableCollection")
+    public void onCreateTranslationRequests(@NonNull long[] virtualChildIds,
+            @NonNull @DataFormat int[] supportedFormats,
+            @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
         // no-op
     }
 
     /**
-     * User can switch back to show the original text, this method called when the user wants to
-     * re-show the translated text again.
+     * Returns a {@link ViewTranslationCallback} that is used to display/hide the translated
+     * information. If the View supports displaying translated content, it should implement
+     * {@link ViewTranslationCallback}.
      *
-     * @hide
+     * <p>The default implementation returns null if developers don't set the customized
+     * {@link ViewTranslationCallback} by {@link #setViewTranslationCallback} </p>
+     *
+     * @return a {@link ViewTranslationCallback} that is used to control how to display the
+     * translated information or {@code null} if this View doesn't support translation.
+     */
+    @Nullable
+    public ViewTranslationCallback getViewTranslationCallback() {
+        return mViewTranslationCallback;
+    }
+
+    /**
+     * Sets a {@link ViewTranslationCallback} that is used to display/hide the translated
+     * information. Developers can provide the customized implementation for show/hide translated
+     * information.
+     *
+     * @param callback a {@link ViewTranslationCallback} that is used to control how to display the
+     * translated information
+     */
+    public void setViewTranslationCallback(@NonNull ViewTranslationCallback callback) {
+        mViewTranslationCallback = callback;
+    }
+
+    /**
+     * Called when the content from {@link View#onCreateTranslationRequest} had been translated by
+     * the TranslationService.
      *
      * <p> The default implementation does nothing.</p>
+     *
+     * @param response a {@link ViewTranslationResponse} that contains the translated information
+     * which can be shown in the view.
      */
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onRestoreUiTranslation() {
+    public void onTranslationResponse(@NonNull ViewTranslationResponse response) {
         // no-op
     }
 
     /**
-     * Called when the user finish the Ui translation and no longer to show the translated text.
-     *
-     * @hide
+     * Called when the content from {@link View#onCreateTranslationRequest} had been translated by
+     * the TranslationService.
      *
      * <p> The default implementation does nothing.</p>
+     *
+     * @param response a {@link ViewTranslationResponse} SparseArray for the request that send by
+     * {@link View#onCreateTranslationRequests} that contains the translated information which can
+     * be shown in the view. The key of SparseArray is
+     * the virtual child ids.
      */
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onFinishUiTranslation() {
+    public void onTranslationResponse(@NonNull LongSparseArray<ViewTranslationResponse> response) {
         // no-op
     }
 
     /**
-     * Called when the request from {@link onStartUiTranslation} is completed by the translation
-     * service so that the translation result can be shown.
+     * Dispatch to collect the {@link ViewTranslationRequest}s for translation purpose by traversing
+     * the hierarchy when the app requests ui translation. Typically, this method should only be
+     * overridden by subclasses that provide a view hierarchy (such as {@link ViewGroup}). Other
+     * classes should override {@link View#onCreateTranslationRequest}. When requested to start the
+     * ui translation, the system will call this method to traverse the view hierarchy to call
+     * {@link View#onCreateTranslationRequest} to build {@link ViewTranslationRequest}s and create a
+     * {@link android.view.translation.Translator} to translate the requests. All the
+     * {@link ViewTranslationRequest}s will be added when the traversal is done.
      *
-     * @hide
+     * <p> The default implementation will call {@link View#onCreateTranslationRequest} to build
+     * {@link ViewTranslationRequest} if the view should be translated. </p>
      *
-     * <p> The default implementation does nothing.</p>
-     *
-     * @param response the translated information which can be shown in the view.
+     * @param viewIds a map for the view's {@link AutofillId} and its virtual child ids or
+     * {@code null} if the view doesn't have virtual child that should be translated. The virtual
+     * child ids are the same virtual ids provided by ContentCapture.
+     * @param supportedFormats the supported translation formats. For now, the only possible value
+     * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
+     * @param capability a {@link TranslationCapability} that holds translation capability.
+     * information, e.g. source spec, target spec.
+     * @param requests fill in with {@link ViewTranslationRequest}s for translation purpose.
      */
-    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onTranslationComplete(@NonNull ViewTranslationResponse response) {
-        // no-op
+    public void dispatchRequestTranslation(@NonNull Map<AutofillId, long[]> viewIds,
+            @NonNull @DataFormat int[] supportedFormats,
+            @Nullable TranslationCapability capability,
+            @NonNull List<ViewTranslationRequest> requests) {
+        AutofillId autofillId = getAutofillId();
+        if (viewIds.containsKey(autofillId)) {
+            if (viewIds.get(autofillId) == null) {
+                ViewTranslationRequest request = onCreateTranslationRequest(supportedFormats);
+                if (request != null && request.getKeys().size() > 0) {
+                    requests.add(request);
+                }
+            } else {
+                onCreateTranslationRequests(viewIds.get(autofillId), supportedFormats, request -> {
+                    requests.add(request);
+                });
+            }
+        }
     }
 
     /**

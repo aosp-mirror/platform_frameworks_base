@@ -25,6 +25,7 @@ import android.widget.SeekBar
 import androidx.test.filters.SmallTest
 import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.statusbar.policy.BrightnessMirrorController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
@@ -75,6 +76,7 @@ class BrightnessSliderTest : SysuiTestCase() {
     private lateinit var checkedChangeCaptor: ArgumentCaptor<CompoundButton.OnCheckedChangeListener>
     @Mock
     private lateinit var compoundButton: CompoundButton
+    private var mFalsingManager: FalsingManagerFake = FalsingManagerFake()
 
     private lateinit var mController: BrightnessSlider
 
@@ -85,7 +87,7 @@ class BrightnessSliderTest : SysuiTestCase() {
         whenever(mirrorController.toggleSlider).thenReturn(mirror)
         whenever(motionEvent.copy()).thenReturn(motionEvent)
 
-        mController = BrightnessSlider(rootView, brightnessSliderView, true)
+        mController = BrightnessSlider(rootView, brightnessSliderView, true, mFalsingManager)
         mController.init()
         mController.setOnChangedListener(listener)
     }
@@ -160,7 +162,8 @@ class BrightnessSliderTest : SysuiTestCase() {
 
     @Test
     fun testSettingMirrorWhenNotUseMirrorIsNoOp() {
-        val otherController = BrightnessSlider(rootView, brightnessSliderView, false)
+        val otherController = BrightnessSlider(
+                rootView, brightnessSliderView, false, mFalsingManager)
         otherController.init()
 
         otherController.setMirrorControllerAndMirror(mirrorController)

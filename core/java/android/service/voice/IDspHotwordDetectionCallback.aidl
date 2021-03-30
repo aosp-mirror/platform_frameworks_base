@@ -16,19 +16,25 @@
 
 package android.service.voice;
 
+import android.service.voice.HotwordDetectedResult;
+import android.service.voice.HotwordRejectedResult;
+
 /**
  * Callback for returning the detected result from the HotwordDetectionService.
  *
  * @hide
  */
+// TODO: Rename this.
 oneway interface IDspHotwordDetectionCallback {
+
     /**
      * Called when the detected result is valid.
      */
-    void onDetected();
+    void onDetected(
+        in HotwordDetectedResult hotwordDetectedResult);
 
     /**
-     * Called when the detected result is invalid.
+     * Sends {@code result} to the HotwordDetector.
      */
-    void onRejected();
+    void onRejected(in HotwordRejectedResult result);
 }

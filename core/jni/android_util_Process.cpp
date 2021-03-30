@@ -52,6 +52,7 @@
 #include <string.h>
 #include <sys/epoll.h>
 #include <sys/errno.h>
+#include <sys/pidfd.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
@@ -1316,14 +1317,8 @@ void android_os_Process_removeAllProcessGroups(JNIEnv* env, jobject clazz)
     return removeAllProcessGroups();
 }
 
-// Wrapper function to the syscall pidfd_open, which creates a file
-// descriptor that refers to the process whose PID is specified in pid.
-static inline int sys_pidfd_open(pid_t pid, unsigned int flags) {
-    return syscall(__NR_pidfd_open, pid, flags);
-}
-
 static jint android_os_Process_nativePidFdOpen(JNIEnv* env, jobject, jint pid, jint flags) {
-    int fd = sys_pidfd_open(pid, flags);
+    int fd = pidfd_open(pid, flags);
     if (fd < 0) {
         jniThrowErrnoException(env, "nativePidFdOpen", errno);
         return -1;

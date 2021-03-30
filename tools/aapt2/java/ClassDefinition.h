@@ -59,8 +59,9 @@ class ClassMember {
 template <typename T>
 class PrimitiveMember : public ClassMember {
  public:
-  PrimitiveMember(const android::StringPiece& name, const T& val)
-      : name_(name.to_string()), val_(val) {}
+  PrimitiveMember(const android::StringPiece& name, const T& val, bool staged_api = false)
+      : name_(name.to_string()), val_(val), staged_api_(staged_api) {
+  }
 
   bool empty() const override {
     return false;
@@ -77,7 +78,7 @@ class PrimitiveMember : public ClassMember {
     ClassMember::Print(final, printer, strip_api_annotations);
 
     printer->Print("public static ");
-    if (final) {
+    if (final && !staged_api_) {
       printer->Print("final ");
     }
     printer->Print("int ").Print(name_).Print("=").Print(to_string(val_)).Print(";");
@@ -88,14 +89,16 @@ class PrimitiveMember : public ClassMember {
 
   std::string name_;
   T val_;
+  bool staged_api_;
 };
 
 // Specialization for strings so they get the right type and are quoted with "".
 template <>
 class PrimitiveMember<std::string> : public ClassMember {
  public:
-  PrimitiveMember(const android::StringPiece& name, const std::string& val)
-      : name_(name.to_string()), val_(val) {}
+  PrimitiveMember(const android::StringPiece& name, const std::string& val, bool staged_api = false)
+      : name_(name.to_string()), val_(val) {
+  }
 
   bool empty() const override {
     return false;

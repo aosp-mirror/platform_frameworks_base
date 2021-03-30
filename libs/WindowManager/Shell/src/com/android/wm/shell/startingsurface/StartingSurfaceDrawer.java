@@ -126,6 +126,7 @@ public class StartingSurfaceDrawer {
             labelRes = app.labelRes;
         }
 
+        final int taskId = taskInfo.taskId;
         Context context = mContext;
         // replace with the default theme if the application didn't set
         final int theme = windowInfo.splashScreenThemeResId != 0
@@ -153,6 +154,7 @@ public class StartingSurfaceDrawer {
             } catch (PackageManager.NameNotFoundException e) {
                 Slog.w(TAG, "Failed creating package context with package name "
                         + activityInfo.packageName + " for user " + taskInfo.userId, e);
+                return;
             }
         }
 
@@ -167,25 +169,27 @@ public class StartingSurfaceDrawer {
             final TypedArray typedArray = overrideContext.obtainStyledAttributes(
                     com.android.internal.R.styleable.Window);
             final int resId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
-            if (resId != 0 && overrideContext.getDrawable(resId) != null) {
-                // We want to use the windowBackground for the override context if it is
-                // available, otherwise we use the default one to make sure a themed starting
-                // window is displayed for the app.
-                if (DEBUG_SPLASH_SCREEN) {
-                    Slog.d(TAG, "addSplashScreen: apply overrideConfig"
-                            + taskConfig + " to starting window resId=" + resId);
+            try {
+                if (resId != 0 && overrideContext.getDrawable(resId) != null) {
+                    // We want to use the windowBackground for the override context if it is
+                    // available, otherwise we use the default one to make sure a themed starting
+                    // window is displayed for the app.
+                    if (DEBUG_SPLASH_SCREEN) {
+                        Slog.d(TAG, "addSplashScreen: apply overrideConfig"
+                                + taskConfig + " to starting window resId=" + resId);
+                    }
+                    context = overrideContext;
                 }
-                context = overrideContext;
+            } catch (Resources.NotFoundException e) {
+                Slog.w(TAG, "failed creating starting window for overrideConfig at taskId: "
+                        + taskId, e);
+                return;
             }
             typedArray.recycle();
         }
 
         int windowFlags = 0;
-        final boolean enableHardAccelerated =
-                (activityInfo.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0;
-        if (enableHardAccelerated) {
-            windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        }
+        windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
         final boolean[] showWallpaper = new boolean[1];
         final int[] splashscreenContentResId = new int[1];
@@ -246,8 +250,6 @@ public class StartingSurfaceDrawer {
         params.packageName = activityInfo.packageName;
         params.windowAnimations = win.getWindowStyle().getResourceId(
                 com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
-        params.privateFlags |=
-                WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
         params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         // Setting as trusted overlay to let touches pass through. This is safe because this
         // window is controlled by the system.
@@ -264,24 +266,34 @@ public class StartingSurfaceDrawer {
         params.setTitle("Splash Screen " + activityInfo.packageName);
 
         // TODO(b/173975965) tracking performance
-        final int taskId = taskInfo.taskId;
         SplashScreenView sView = null;
         try {
-            sView = mSplashscreenContentDrawer.makeSplashScreenContentView(context, iconRes,
-                            splashscreenContentResId[0]);
             final View view = win.getDecorView();
             final WindowManager wm = mContext.getSystemService(WindowManager.class);
-            if (postAddWindow(taskId, appToken, view, wm, params)) {
+            // splash screen content will be deprecated after S.
+            sView = SplashscreenContentDrawer.makeSplashscreenContent(
+                    context, splashscreenContentResId[0]);
+            final boolean splashscreenContentCompatible = sView != null;
+            if (splashscreenContentCompatible) {
+                win.setContentView(sView);
+            } else {
+                sView = mSplashscreenContentDrawer
+                        .makeSplashScreenContentView(context, activityInfo);
                 win.setContentView(sView);
                 sView.cacheRootWindow(win);
             }
+            postAddWindow(taskId, appToken, view, wm, params);
         } catch (RuntimeException e) {
             // don't crash if something else bad happens, for example a
             // failure loading resources because we are loading from an app
             // on external storage that has been unmounted.
-            Slog.w(TAG, " failed creating starting window", e);
+            Slog.w(TAG, " failed creating starting window at taskId: " + taskId, e);
+            sView = null;
         } finally {
-            setSplashScreenRecord(taskId, sView);
+            final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
+            if (record != null) {
+                record.setSplashScreenView(sView);
+            }
         }
     }
 
@@ -328,7 +340,7 @@ public class StartingSurfaceDrawer {
         ActivityTaskManager.getInstance().onSplashScreenViewCopyFinished(taskId, parcelable);
     }
 
-    protected boolean postAddWindow(int taskId, IBinder appToken, View view, WindowManager wm,
+    protected void postAddWindow(int taskId, IBinder appToken, View view, WindowManager wm,
             WindowManager.LayoutParams params) {
         boolean shouldSaveView = true;
         try {
@@ -349,20 +361,12 @@ public class StartingSurfaceDrawer {
             removeWindowNoAnimate(taskId);
             saveSplashScreenRecord(taskId, view);
         }
-        return shouldSaveView;
     }
 
     private void saveSplashScreenRecord(int taskId, View view) {
         final StartingWindowRecord tView = new StartingWindowRecord(view,
                 null/* TaskSnapshotWindow */);
         mStartingWindowRecords.put(taskId, tView);
-    }
-
-    private void setSplashScreenRecord(int taskId, SplashScreenView splashScreenView) {
-        final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
-        if (record != null) {
-            record.setSplashScreenView(splashScreenView);
-        }
     }
 
     private void removeWindowNoAnimate(int taskId) {

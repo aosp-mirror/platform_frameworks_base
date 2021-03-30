@@ -27,7 +27,13 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
 import android.os.WorkSource;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
+import android.os.vibrator.StepSegment;
+import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -87,6 +93,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private final WorkSource mWorkSource = new WorkSource();
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
+    private final VibrationEffectModifier<VibratorInfo> mDeviceEffectAdapter =
+            new DeviceVibrationEffectAdapter();
     private final Vibration mVibration;
     private final VibrationCallbacks mCallbacks;
     private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
@@ -244,32 +252,38 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
     }
 
-    /**
-     * Get the duration the vibrator will be on for given {@code waveform}, starting at {@code
-     * startIndex} until the next time it's vibrating amplitude is zero.
-     */
-    private static long getVibratorOnDuration(VibrationEffect.Waveform waveform, int startIndex) {
-        long[] timings = waveform.getTimings();
-        int[] amplitudes = waveform.getAmplitudes();
-        int repeatIndex = waveform.getRepeatIndex();
-        int i = startIndex;
-        long timing = 0;
-        while (timings[i] == 0 || amplitudes[i] != 0) {
-            timing += timings[i++];
-            if (i >= timings.length) {
-                if (repeatIndex >= 0) {
-                    i = repeatIndex;
-                    // prevent infinite loop
-                    repeatIndex = -1;
-                } else {
-                    break;
-                }
-            }
-            if (i == startIndex) {
-                return 1000;
+    @Nullable
+    private SingleVibratorStep nextVibrateStep(long startTime, VibratorController controller,
+            VibrationEffect.Composed effect, int segmentIndex, long vibratorOffTimeout) {
+        // Some steps should only start after the vibrator has finished the previous vibration, so
+        // make sure we take the latest between both timings.
+        long latestStartTime = Math.max(startTime, vibratorOffTimeout);
+        if (segmentIndex >= effect.getSegments().size()) {
+            segmentIndex = effect.getRepeatIndex();
+        }
+        if (segmentIndex < 0) {
+            if (vibratorOffTimeout > SystemClock.uptimeMillis()) {
+                // No more segments to play, last step is to wait for the vibrator to complete
+                return new OffStep(vibratorOffTimeout, controller);
+            } else {
+                return null;
             }
         }
-        return timing;
+
+        VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
+        if (segment instanceof PrebakedSegment) {
+            return new PerformStep(latestStartTime, controller, effect, segmentIndex,
+                    vibratorOffTimeout);
+        }
+        if (segment instanceof PrimitiveSegment) {
+            return new ComposePrimitivesStep(latestStartTime, controller, effect, segmentIndex,
+                    vibratorOffTimeout);
+        }
+        if (segment instanceof RampSegment) {
+            return new ComposePwleStep(latestStartTime, controller, effect, segmentIndex,
+                    vibratorOffTimeout);
+        }
+        return new AmplitudeStep(startTime, controller, effect, segmentIndex, vibratorOffTimeout);
     }
 
     private static CombinedVibrationEffect.Sequential toSequential(CombinedVibrationEffect effect) {
@@ -437,8 +451,13 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 duration = startVibrating(effectMapping, nextSteps);
                 noteVibratorOn(duration);
             } finally {
-                // If this step triggered any vibrator then add a finish step to wait for all
+                if (duration < 0) {
+                    // Something failed while playing this step so stop playing this sequence.
+                    return EMPTY_STEP_LIST;
+                }
+                // It least one vibrator was started then add a finish step to wait for all
                 // active vibrators to finish their individual steps before going to the next.
+                // Otherwise this step was ignored so just go to the next one.
                 Step nextStep = duration > 0 ? new FinishVibrateStep(this) : nextStep();
                 if (nextStep != null) {
                     nextSteps.add(nextStep);
@@ -494,11 +513,13 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 return 0;
             }
 
-            VibratorOnStep[] steps = new VibratorOnStep[vibratorCount];
+            SingleVibratorStep[] steps = new SingleVibratorStep[vibratorCount];
             long vibrationStartTime = SystemClock.uptimeMillis();
             for (int i = 0; i < vibratorCount; i++) {
-                steps[i] = new VibratorOnStep(vibrationStartTime,
-                        mVibrators.get(effectMapping.vibratorIdAt(i)), effectMapping.effectAt(i));
+                steps[i] = nextVibrateStep(vibrationStartTime,
+                        mVibrators.get(effectMapping.vibratorIdAt(i)),
+                        effectMapping.effectAt(i),
+                        /* segmentIndex= */ 0, /* vibratorOffTimeout= */ 0);
             }
 
             if (steps.length == 1) {
@@ -512,35 +533,52 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             synchronized (mLock) {
                 boolean hasPrepared = false;
                 boolean hasTriggered = false;
+                long maxDuration = 0;
                 try {
                     hasPrepared = mCallbacks.prepareSyncedVibration(
                             effectMapping.getRequiredSyncCapabilities(),
                             effectMapping.getVibratorIds());
 
-                    long duration = 0;
-                    for (VibratorOnStep step : steps) {
-                        duration = Math.max(duration, startVibrating(step, nextSteps));
+                    for (SingleVibratorStep step : steps) {
+                        long duration = startVibrating(step, nextSteps);
+                        if (duration < 0) {
+                            // One vibrator has failed, fail this entire sync attempt.
+                            return maxDuration = -1;
+                        }
+                        maxDuration = Math.max(maxDuration, duration);
                     }
 
                     // Check if sync was prepared and if any step was accepted by a vibrator,
                     // otherwise there is nothing to trigger here.
-                    if (hasPrepared && duration > 0) {
+                    if (hasPrepared && maxDuration > 0) {
                         hasTriggered = mCallbacks.triggerSyncedVibration(mVibration.id);
                     }
-                    return duration;
+                    return maxDuration;
                 } finally {
                     if (hasPrepared && !hasTriggered) {
                         // Trigger has failed or all steps were ignored by the vibrators.
                         mCallbacks.cancelSyncedVibration();
-                        return 0;
+                        nextSteps.clear();
+                    } else if (maxDuration < 0) {
+                        // Some vibrator failed without being prepared so other vibrators might be
+                        // active. Cancel and remove every pending step from output list.
+                        for (int i = nextSteps.size() - 1; i >= 0; i--) {
+                            nextSteps.remove(i).cancel();
+                        }
                     }
                 }
             }
         }
 
-        private long startVibrating(VibratorOnStep step, List<Step> nextSteps) {
+        private long startVibrating(SingleVibratorStep step, List<Step> nextSteps) {
             nextSteps.addAll(step.play());
-            return step.getDuration();
+            long stepDuration = step.getOnResult();
+            if (stepDuration < 0) {
+                // Step failed, so return negative duration to propagate failure.
+                return stepDuration;
+            }
+            // Return the longest estimation for the entire effect.
+            return Math.max(stepDuration, step.effect.getDuration());
         }
     }
 
@@ -580,90 +618,274 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     }
 
     /**
-     * Represent a step turn the vibrator on.
-     *
-     * <p>No other calls to the vibrator is made from this step, so this can be played in between
-     * calls to 'prepare' and 'trigger' for synchronized vibrations.
+     * Represent a step on a single vibrator that plays one or more segments from a
+     * {@link VibrationEffect.Composed} effect.
      */
-    private final class VibratorOnStep extends Step {
+    private abstract class SingleVibratorStep extends Step {
         public final VibratorController controller;
-        public final VibrationEffect effect;
-        private long mDuration;
+        public final VibrationEffect.Composed effect;
+        public final int segmentIndex;
+        public final long vibratorOffTimeout;
 
-        VibratorOnStep(long startTime, VibratorController controller, VibrationEffect effect) {
+        long mVibratorOnResult;
+
+        /**
+         * @param startTime          The time to schedule this step in the {@link StepQueue}.
+         * @param controller         The vibrator that is playing the effect.
+         * @param effect             The effect being played in this step.
+         * @param index              The index of the next segment to be played by this step
+         * @param vibratorOffTimeout The time the vibrator is expected to complete any previous
+         *                           vibration and turn off. This is used to allow this step to be
+         *                           anticipated when the completion callback is triggered, and can
+         *                           be used play effects back-to-back.
+         */
+        SingleVibratorStep(long startTime, VibratorController controller,
+                VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
             super(startTime);
             this.controller = controller;
             this.effect = effect;
+            this.segmentIndex = index;
+            this.vibratorOffTimeout = vibratorOffTimeout;
         }
 
         /**
-         * Return the duration, in millis, of this effect. Repeating waveforms return {@link
-         * Long#MAX_VALUE}. Zero or negative values indicate the vibrator has ignored this effect.
+         * Return the result a call to {@link VibratorController#on} method triggered by
+         * {@link #play()}.
+         *
+         * @return A positive duration that the vibrator was turned on for by this step;
+         * Zero if the segment is not supported or vibrator was never turned on;
+         * A negative value if the vibrator call has failed.
          */
-        public long getDuration() {
-            return mDuration;
+        public long getOnResult() {
+            return mVibratorOnResult;
+        }
+
+        @Override
+        public boolean shouldPlayWhenVibratorComplete(int vibratorId) {
+            // Only anticipate this step if a timeout was set to wait for the vibration to complete,
+            // otherwise we are waiting for the correct time to play the next step.
+            return (controller.getVibratorInfo().getId() == vibratorId)
+                    && (vibratorOffTimeout > SystemClock.uptimeMillis());
+        }
+
+        @Override
+        public void cancel() {
+            if (vibratorOffTimeout > SystemClock.uptimeMillis()) {
+                // Vibrator might be running from previous steps, so turn it off while canceling.
+                stopVibrating();
+            }
+        }
+
+        void stopVibrating() {
+            if (DEBUG) {
+                Slog.d(TAG, "Turning off vibrator " + controller.getVibratorInfo().getId());
+            }
+            controller.off();
+        }
+
+        /** Return the {@link #nextVibrateStep} with same timings, only jumping the segments. */
+        public List<Step> skipToNextSteps(int segmentsSkipped) {
+            return nextSteps(startTime, vibratorOffTimeout, segmentsSkipped);
+        }
+
+        /**
+         * Return the {@link #nextVibrateStep} with same start and off timings calculated from
+         * {@link #getOnResult()}, jumping all played segments.
+         *
+         * <p>This method has same behavior as {@link #skipToNextSteps(int)} when the vibrator
+         * result is non-positive, meaning the vibrator has either ignored or failed to turn on.
+         */
+        public List<Step> nextSteps(int segmentsPlayed) {
+            if (mVibratorOnResult <= 0) {
+                // Vibration was not started, so just skip the played segments and keep timings.
+                return skipToNextSteps(segmentsPlayed);
+            }
+            long nextVibratorOffTimeout =
+                    SystemClock.uptimeMillis() + mVibratorOnResult + CALLBACKS_EXTRA_TIMEOUT;
+            return nextSteps(nextVibratorOffTimeout, nextVibratorOffTimeout, segmentsPlayed);
+        }
+
+        /**
+         * Return the {@link #nextVibrateStep} with given start and off timings, which might be
+         * calculated independently, jumping all played segments.
+         *
+         * <p>This should be used when the vibrator on/off state is not responsible for the steps
+         * execution timings, e.g. while playing the vibrator amplitudes.
+         */
+        public List<Step> nextSteps(long nextStartTime, long vibratorOffTimeout,
+                int segmentsPlayed) {
+            Step nextStep = nextVibrateStep(nextStartTime, controller, effect,
+                    segmentIndex + segmentsPlayed, vibratorOffTimeout);
+            return nextStep == null ? EMPTY_STEP_LIST : Arrays.asList(nextStep);
+        }
+    }
+
+    /**
+     * Represent a step turn the vibrator on with a single prebaked effect.
+     *
+     * <p>This step automatically falls back by replacing the prebaked segment with
+     * {@link VibrationSettings#getFallbackEffect(int)}, if available.
+     */
+    private final class PerformStep extends SingleVibratorStep {
+
+        PerformStep(long startTime, VibratorController controller,
+                VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
+            super(startTime, controller, effect, index, vibratorOffTimeout);
         }
 
         @Override
         public List<Step> play() {
-            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorOnStep");
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "PerformStep");
             try {
-                if (DEBUG) {
-                    Slog.d(TAG, "Turning on vibrator " + controller.getVibratorInfo().getId());
+                VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
+                if (!(segment instanceof PrebakedSegment)) {
+                    Slog.w(TAG, "Ignoring wrong segment for a PerformStep: " + segment);
+                    return skipToNextSteps(/* segmentsSkipped= */ 1);
                 }
-                List<Step> nextSteps = new ArrayList<>();
-                mDuration = startVibrating(effect, nextSteps);
-                return nextSteps;
+
+                PrebakedSegment prebaked = (PrebakedSegment) segment;
+                if (DEBUG) {
+                    Slog.d(TAG, "Perform " + VibrationEffect.effectIdToString(
+                            prebaked.getEffectId()) + " on vibrator "
+                            + controller.getVibratorInfo().getId());
+                }
+
+                VibrationEffect fallback = mVibration.getFallback(prebaked.getEffectId());
+                mVibratorOnResult = controller.on(prebaked, mVibration.id);
+
+                if (mVibratorOnResult == 0 && prebaked.shouldFallback()
+                        && (fallback instanceof VibrationEffect.Composed)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Playing fallback for effect "
+                                + VibrationEffect.effectIdToString(prebaked.getEffectId()));
+                    }
+                    SingleVibratorStep fallbackStep = nextVibrateStep(startTime, controller,
+                            replaceCurrentSegment((VibrationEffect.Composed) fallback),
+                            segmentIndex, vibratorOffTimeout);
+                    List<Step> fallbackResult = fallbackStep.play();
+                    // Update the result with the fallback result so this step is seamlessly
+                    // replaced by the fallback to any outer application of this.
+                    mVibratorOnResult = fallbackStep.getOnResult();
+                    return fallbackResult;
+                }
+
+                return nextSteps(/* segmentsPlayed= */ 1);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
         }
 
-        private long startVibrating(VibrationEffect effect, List<Step> nextSteps) {
-            final long duration;
-            final long now = SystemClock.uptimeMillis();
-            if (effect instanceof VibrationEffect.OneShot) {
-                VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
-                duration = oneShot.getDuration();
-                // Do NOT set amplitude here. This might be called between prepareSynced and
-                // triggerSynced, so the vibrator is not actually turned on here.
-                // The next steps will handle the amplitude after the vibrator has turned on.
-                controller.on(duration, mVibration.id);
-                nextSteps.add(new VibratorAmplitudeStep(now, controller, oneShot,
-                        now + duration + CALLBACKS_EXTRA_TIMEOUT));
-            } else if (effect instanceof VibrationEffect.Waveform) {
-                VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
-                // Return the full duration of this waveform effect.
-                duration = waveform.getDuration();
-                long onDuration = getVibratorOnDuration(waveform, 0);
-                if (onDuration > 0) {
-                    // Do NOT set amplitude here. This might be called between prepareSynced and
-                    // triggerSynced, so the vibrator is not actually turned on here.
-                    // The next steps will handle the amplitudes after the vibrator has turned on.
-                    controller.on(onDuration, mVibration.id);
-                }
-                long offTime = onDuration > 0 ? now + onDuration + CALLBACKS_EXTRA_TIMEOUT : now;
-                nextSteps.add(new VibratorAmplitudeStep(now, controller, waveform, offTime));
-            } else if (effect instanceof VibrationEffect.Prebaked) {
-                VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) effect;
-                duration = controller.on(prebaked, mVibration.id);
-                if (duration > 0) {
-                    nextSteps.add(new VibratorOffStep(now + duration + CALLBACKS_EXTRA_TIMEOUT,
-                            controller));
-                } else if (prebaked.getFallbackEffect() != null) {
-                    return startVibrating(prebaked.getFallbackEffect(), nextSteps);
-                }
-            } else if (effect instanceof VibrationEffect.Composed) {
-                VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
-                duration = controller.on(composed, mVibration.id);
-                if (duration > 0) {
-                    nextSteps.add(new VibratorOffStep(now + duration + CALLBACKS_EXTRA_TIMEOUT,
-                            controller));
-                }
-            } else {
-                duration = 0;
+        /**
+         * Replace segment at {@link #segmentIndex} in {@link #effect} with given fallback segments.
+         *
+         * @return a copy of {@link #effect} with replaced segment.
+         */
+        private VibrationEffect.Composed replaceCurrentSegment(VibrationEffect.Composed fallback) {
+            List<VibrationEffectSegment> newSegments = new ArrayList<>(effect.getSegments());
+            int newRepeatIndex = effect.getRepeatIndex();
+            newSegments.remove(segmentIndex);
+            newSegments.addAll(segmentIndex, fallback.getSegments());
+            if (segmentIndex < effect.getRepeatIndex()) {
+                newRepeatIndex += fallback.getSegments().size();
             }
-            return duration;
+            return new VibrationEffect.Composed(newSegments, newRepeatIndex);
+        }
+    }
+
+    /**
+     * Represent a step turn the vibrator on using a composition of primitives.
+     *
+     * <p>This step will use the maximum supported number of consecutive segments of type
+     * {@link PrimitiveSegment} starting at the current index.
+     */
+    private final class ComposePrimitivesStep extends SingleVibratorStep {
+
+        ComposePrimitivesStep(long startTime, VibratorController controller,
+                VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
+            super(startTime, controller, effect, index, vibratorOffTimeout);
+        }
+
+        @Override
+        public List<Step> play() {
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "ComposePrimitivesStep");
+            try {
+                int segmentCount = effect.getSegments().size();
+                List<PrimitiveSegment> primitives = new ArrayList<>();
+                for (int i = segmentIndex; i < segmentCount; i++) {
+                    VibrationEffectSegment segment = effect.getSegments().get(i);
+                    if (segment instanceof PrimitiveSegment) {
+                        primitives.add((PrimitiveSegment) segment);
+                    } else {
+                        break;
+                    }
+                }
+
+                if (primitives.isEmpty()) {
+                    Slog.w(TAG, "Ignoring wrong segment for a ComposePrimitivesStep: "
+                            + effect.getSegments().get(segmentIndex));
+                    return skipToNextSteps(/* segmentsSkipped= */ 1);
+                }
+
+                if (DEBUG) {
+                    Slog.d(TAG, "Compose " + primitives + " primitives on vibrator "
+                            + controller.getVibratorInfo().getId());
+                }
+                mVibratorOnResult = controller.on(
+                        primitives.toArray(new PrimitiveSegment[primitives.size()]),
+                        mVibration.id);
+
+                return nextSteps(/* segmentsPlayed= */ primitives.size());
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
+        }
+    }
+
+    /**
+     * Represent a step turn the vibrator on using a composition of PWLE segments.
+     *
+     * <p>This step will use the maximum supported number of consecutive segments of type
+     * {@link StepSegment} or {@link RampSegment} starting at the current index.
+     */
+    private final class ComposePwleStep extends SingleVibratorStep {
+
+        ComposePwleStep(long startTime, VibratorController controller,
+                VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
+            super(startTime, controller, effect, index, vibratorOffTimeout);
+        }
+
+        @Override
+        public List<Step> play() {
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "ComposePwleStep");
+            try {
+                int segmentCount = effect.getSegments().size();
+                List<RampSegment> pwles = new ArrayList<>();
+                for (int i = segmentIndex; i < segmentCount; i++) {
+                    VibrationEffectSegment segment = effect.getSegments().get(i);
+                    if (segment instanceof RampSegment) {
+                        pwles.add((RampSegment) segment);
+                    } else {
+                        break;
+                    }
+                }
+
+                if (pwles.isEmpty()) {
+                    Slog.w(TAG, "Ignoring wrong segment for a ComposePwleStep: "
+                            + effect.getSegments().get(segmentIndex));
+                    return skipToNextSteps(/* segmentsSkipped= */ 1);
+                }
+
+                if (DEBUG) {
+                    Slog.d(TAG, "Compose " + pwles + " PWLEs on vibrator "
+                            + controller.getVibratorInfo().getId());
+                }
+                mVibratorOnResult = controller.on(pwles.toArray(new RampSegment[pwles.size()]),
+                        mVibration.id);
+
+                return nextSteps(/* segmentsPlayed= */ pwles.size());
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
         }
     }
 
@@ -673,22 +895,15 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
      * <p>This runs after a timeout on the expected time the vibrator should have finished playing,
      * and can anticipated by vibrator complete callbacks.
      */
-    private final class VibratorOffStep extends Step {
-        public final VibratorController controller;
+    private final class OffStep extends SingleVibratorStep {
 
-        VibratorOffStep(long startTime, VibratorController controller) {
-            super(startTime);
-            this.controller = controller;
-        }
-
-        @Override
-        public boolean shouldPlayWhenVibratorComplete(int vibratorId) {
-            return controller.getVibratorInfo().getId() == vibratorId;
+        OffStep(long startTime, VibratorController controller) {
+            super(startTime, controller, /* effect= */ null, /* index= */ -1, startTime);
         }
 
         @Override
         public List<Step> play() {
-            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorOffStep");
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "OffStep");
             try {
                 stopVibrating();
                 return EMPTY_STEP_LIST;
@@ -696,117 +911,91 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
         }
-
-        @Override
-        public void cancel() {
-            stopVibrating();
-        }
-
-        private void stopVibrating() {
-            if (DEBUG) {
-                Slog.d(TAG, "Turning off vibrator " + controller.getVibratorInfo().getId());
-            }
-            controller.off();
-        }
     }
 
-    /** Represents a step to change the amplitude of the vibrator. */
-    private final class VibratorAmplitudeStep extends Step {
-        public final VibratorController controller;
-        public final VibrationEffect.Waveform waveform;
-        public final int currentIndex;
-        public final long expectedVibratorStopTime;
+    /**
+     * Represents a step to turn the vibrator on and change its amplitude.
+     *
+     * <p>This step ignores vibration completion callbacks and control the vibrator on/off state
+     * and amplitude to simulate waveforms represented by a sequence of {@link StepSegment}.
+     */
+    private final class AmplitudeStep extends SingleVibratorStep {
+        private long mNextOffTime;
 
-        private long mNextVibratorStopTime;
-
-        VibratorAmplitudeStep(long startTime, VibratorController controller,
-                VibrationEffect.OneShot oneShot, long expectedVibratorStopTime) {
-            this(startTime, controller,
-                    (VibrationEffect.Waveform) VibrationEffect.createWaveform(
-                            new long[]{oneShot.getDuration()}, new int[]{oneShot.getAmplitude()},
-                            /* repeat= */ -1),
-                    expectedVibratorStopTime);
-        }
-
-        VibratorAmplitudeStep(long startTime, VibratorController controller,
-                VibrationEffect.Waveform waveform, long expectedVibratorStopTime) {
-            this(startTime, controller, waveform, /* index= */ 0, expectedVibratorStopTime);
-        }
-
-        VibratorAmplitudeStep(long startTime, VibratorController controller,
-                VibrationEffect.Waveform waveform, int index, long expectedVibratorStopTime) {
-            super(startTime);
-            this.controller = controller;
-            this.waveform = waveform;
-            this.currentIndex = index;
-            this.expectedVibratorStopTime = expectedVibratorStopTime;
-            mNextVibratorStopTime = expectedVibratorStopTime;
+        AmplitudeStep(long startTime, VibratorController controller,
+                VibrationEffect.Composed effect, int index, long vibratorOffTimeout) {
+            super(startTime, controller, effect, index, vibratorOffTimeout);
+            mNextOffTime = vibratorOffTimeout;
         }
 
         @Override
         public boolean shouldPlayWhenVibratorComplete(int vibratorId) {
             if (controller.getVibratorInfo().getId() == vibratorId) {
-                mNextVibratorStopTime = SystemClock.uptimeMillis();
+                mNextOffTime = SystemClock.uptimeMillis();
             }
+            // Timings are tightly controlled here, so never anticipate when vibrator is complete.
             return false;
         }
 
         @Override
         public List<Step> play() {
-            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorAmplitudeStep");
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "AmplitudeStep");
             try {
                 if (DEBUG) {
                     long latency = SystemClock.uptimeMillis() - startTime;
                     Slog.d(TAG, "Running amplitude step with " + latency + "ms latency.");
                 }
-                if (waveform.getTimings()[currentIndex] == 0) {
+
+                VibrationEffectSegment segment = effect.getSegments().get(segmentIndex);
+                if (!(segment instanceof StepSegment)) {
+                    Slog.w(TAG, "Ignoring wrong segment for a AmplitudeStep: " + segment);
+                    return skipToNextSteps(/* segmentsSkipped= */ 1);
+                }
+
+                StepSegment stepSegment = (StepSegment) segment;
+                if (stepSegment.getDuration() == 0) {
                     // Skip waveform entries with zero timing.
-                    return nextSteps();
+                    return skipToNextSteps(/* segmentsSkipped= */ 1);
                 }
-                int amplitude = waveform.getAmplitudes()[currentIndex];
+
+                long now = SystemClock.uptimeMillis();
+                float amplitude = stepSegment.getAmplitude();
                 if (amplitude == 0) {
-                    stopVibrating();
-                    return nextSteps();
-                }
-                if (startTime >= mNextVibratorStopTime) {
-                    // Vibrator has stopped. Turn vibrator back on for the duration of another
-                    // cycle before setting the amplitude.
-                    long onDuration = getVibratorOnDuration(waveform, currentIndex);
-                    if (onDuration > 0) {
-                        startVibrating(onDuration);
-                        mNextVibratorStopTime =
-                                SystemClock.uptimeMillis() + onDuration + CALLBACKS_EXTRA_TIMEOUT;
+                    if (mNextOffTime > now) {
+                        // Amplitude cannot be set to zero, so stop the vibrator.
+                        stopVibrating();
+                        mNextOffTime = now;
                     }
+                } else {
+                    if (startTime >= mNextOffTime) {
+                        // Vibrator has stopped. Turn vibrator back on for the duration of another
+                        // cycle before setting the amplitude.
+                        long onDuration = getVibratorOnDuration(effect, segmentIndex);
+                        if (onDuration > 0) {
+                            mVibratorOnResult = startVibrating(onDuration);
+                            mNextOffTime = now + onDuration + CALLBACKS_EXTRA_TIMEOUT;
+                        }
+                    }
+                    changeAmplitude(amplitude);
                 }
-                changeAmplitude(amplitude);
-                return nextSteps();
+
+                // Use original startTime to avoid propagating latencies to the waveform.
+                long nextStartTime = startTime + segment.getDuration();
+                return nextSteps(nextStartTime, mNextOffTime, /* segmentsPlayed= */ 1);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
         }
 
-        @Override
-        public void cancel() {
-            stopVibrating();
-        }
-
-        private void stopVibrating() {
-            if (DEBUG) {
-                Slog.d(TAG, "Turning off vibrator " + controller.getVibratorInfo().getId());
-            }
-            controller.off();
-            mNextVibratorStopTime = SystemClock.uptimeMillis();
-        }
-
-        private void startVibrating(long duration) {
+        private long startVibrating(long duration) {
             if (DEBUG) {
                 Slog.d(TAG, "Turning on vibrator " + controller.getVibratorInfo().getId() + " for "
                         + duration + "ms");
             }
-            controller.on(duration, mVibration.id);
+            return controller.on(duration, mVibration.id);
         }
 
-        private void changeAmplitude(int amplitude) {
+        private void changeAmplitude(float amplitude) {
             if (DEBUG) {
                 Slog.d(TAG, "Amplitude changed on vibrator " + controller.getVibratorInfo().getId()
                         + " to " + amplitude);
@@ -814,18 +1003,35 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             controller.setAmplitude(amplitude);
         }
 
-        @NonNull
-        private List<Step> nextSteps() {
-            long nextStartTime = startTime + waveform.getTimings()[currentIndex];
-            int nextIndex = currentIndex + 1;
-            if (nextIndex >= waveform.getTimings().length) {
-                nextIndex = waveform.getRepeatIndex();
+        /**
+         * Get the duration the vibrator will be on for a waveform, starting at {@code startIndex}
+         * until the next time it's vibrating amplitude is zero or a different type of segment is
+         * found.
+         */
+        private long getVibratorOnDuration(VibrationEffect.Composed effect, int startIndex) {
+            List<VibrationEffectSegment> segments = effect.getSegments();
+            int segmentCount = segments.size();
+            int repeatIndex = effect.getRepeatIndex();
+            int i = startIndex;
+            long timing = 0;
+            while (i < segmentCount) {
+                VibrationEffectSegment segment = segments.get(i);
+                if (!(segment instanceof StepSegment)
+                        || ((StepSegment) segment).getAmplitude() == 0) {
+                    break;
+                }
+                timing += segment.getDuration();
+                i++;
+                if (i == segmentCount && repeatIndex >= 0) {
+                    i = repeatIndex;
+                    // prevent infinite loop
+                    repeatIndex = -1;
+                }
+                if (i == startIndex) {
+                    return 1000;
+                }
             }
-            if (nextIndex < 0) {
-                return Arrays.asList(new VibratorOffStep(nextStartTime, controller));
-            }
-            return Arrays.asList(new VibratorAmplitudeStep(nextStartTime, controller, waveform,
-                    nextIndex, mNextVibratorStopTime));
+            return timing;
         }
     }
 
@@ -836,7 +1042,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
      * play all of the effects in sync.
      */
     private final class DeviceEffectMap {
-        private final SparseArray<VibrationEffect> mVibratorEffects;
+        private final SparseArray<VibrationEffect.Composed> mVibratorEffects;
         private final int[] mVibratorIds;
         private final long mRequiredSyncCapabilities;
 
@@ -845,8 +1051,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             mVibratorIds = new int[mVibrators.size()];
             for (int i = 0; i < mVibrators.size(); i++) {
                 int vibratorId = mVibrators.keyAt(i);
-                mVibratorEffects.put(vibratorId, mono.getEffect());
-                mVibratorIds[i] = vibratorId;
+                VibratorInfo vibratorInfo = mVibrators.valueAt(i).getVibratorInfo();
+                VibrationEffect effect = mDeviceEffectAdapter.apply(mono.getEffect(), vibratorInfo);
+                if (effect instanceof VibrationEffect.Composed) {
+                    mVibratorEffects.put(vibratorId, (VibrationEffect.Composed) effect);
+                    mVibratorIds[i] = vibratorId;
+                }
             }
             mRequiredSyncCapabilities = calculateRequiredSyncCapabilities(mVibratorEffects);
         }
@@ -857,7 +1067,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             for (int i = 0; i < stereoEffects.size(); i++) {
                 int vibratorId = stereoEffects.keyAt(i);
                 if (mVibrators.contains(vibratorId)) {
-                    mVibratorEffects.put(vibratorId, stereoEffects.valueAt(i));
+                    VibratorInfo vibratorInfo = mVibrators.valueAt(i).getVibratorInfo();
+                    VibrationEffect effect = mDeviceEffectAdapter.apply(
+                            stereoEffects.valueAt(i), vibratorInfo);
+                    if (effect instanceof VibrationEffect.Composed) {
+                        mVibratorEffects.put(vibratorId, (VibrationEffect.Composed) effect);
+                    }
                 }
             }
             mVibratorIds = new int[mVibratorEffects.size()];
@@ -895,7 +1110,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
 
         /** Return the {@link VibrationEffect} at given index. */
-        public VibrationEffect effectAt(int index) {
+        public VibrationEffect.Composed effectAt(int index) {
             return mVibratorEffects.valueAt(index);
         }
 
@@ -906,16 +1121,16 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
          * @return {@link IVibratorManager#CAP_SYNC} together with all required
          * IVibratorManager.CAP_PREPARE_* and IVibratorManager.CAP_MIXED_TRIGGER_* capabilities.
          */
-        private long calculateRequiredSyncCapabilities(SparseArray<VibrationEffect> effects) {
+        private long calculateRequiredSyncCapabilities(
+                SparseArray<VibrationEffect.Composed> effects) {
             long prepareCap = 0;
             for (int i = 0; i < effects.size(); i++) {
-                VibrationEffect effect = effects.valueAt(i);
-                if (effect instanceof VibrationEffect.OneShot
-                        || effect instanceof VibrationEffect.Waveform) {
+                VibrationEffectSegment firstSegment = effects.valueAt(i).getSegments().get(0);
+                if (firstSegment instanceof StepSegment) {
                     prepareCap |= IVibratorManager.CAP_PREPARE_ON;
-                } else if (effect instanceof VibrationEffect.Prebaked) {
+                } else if (firstSegment instanceof PrebakedSegment) {
                     prepareCap |= IVibratorManager.CAP_PREPARE_PERFORM;
-                } else if (effect instanceof VibrationEffect.Composed) {
+                } else if (firstSegment instanceof PrimitiveSegment) {
                     prepareCap |= IVibratorManager.CAP_PREPARE_COMPOSE;
                 }
             }

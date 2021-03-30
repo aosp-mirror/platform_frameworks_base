@@ -143,6 +143,9 @@ public final class ContentCaptureEvent implements Parcelable {
     private @Nullable ContentCaptureContext mClientContext;
     private @Nullable Insets mInsets;
 
+    /** Only used in the main Content Capture session, no need to parcel */
+    private boolean mTextHasComposingSpan;
+
     /** @hide */
     public ContentCaptureEvent(int sessionId, int type, long eventTime) {
         mSessionId = sessionId;
@@ -243,9 +246,19 @@ public final class ContentCaptureEvent implements Parcelable {
 
     /** @hide */
     @NonNull
-    public ContentCaptureEvent setText(@Nullable CharSequence text) {
+    public ContentCaptureEvent setText(@Nullable CharSequence text, boolean hasComposingSpan) {
         mText = text;
+        mTextHasComposingSpan = hasComposingSpan;
         return this;
+    }
+
+    /**
+     * The value is not parcelled, become false after parcelled.
+     * @hide
+     */
+    @NonNull
+    public boolean getTextHasComposingSpan() {
+        return mTextHasComposingSpan;
     }
 
     /** @hide */
@@ -361,7 +374,7 @@ public final class ContentCaptureEvent implements Parcelable {
             throw new IllegalArgumentException("mergeEvent(): got "
                     + "TYPE_VIEW_DISAPPEARED event with neither id or ids: " + event);
         } else if (eventType == TYPE_VIEW_TEXT_CHANGED) {
-            setText(event.getText());
+            setText(event.getText(), event.getTextHasComposingSpan());
         } else {
             Log.e(TAG, "mergeEvent(" + getTypeAsString(eventType)
                     + ") does not support this event type.");
@@ -479,7 +492,7 @@ public final class ContentCaptureEvent implements Parcelable {
             if (node != null) {
                 event.setViewNode(node);
             }
-            event.setText(parcel.readCharSequence());
+            event.setText(parcel.readCharSequence(), false);
             if (type == TYPE_SESSION_STARTED || type == TYPE_SESSION_FINISHED) {
                 event.setParentSessionId(parcel.readInt());
             }

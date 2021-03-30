@@ -104,8 +104,8 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
-import com.android.server.pm.verify.domain.DomainVerificationShell;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationShell;
 
 import dalvik.system.DexFile;
 
@@ -561,7 +561,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 }
                 final ApkLite apkLite = apkLiteResult.getResult();
                 final PackageLite pkgLite = new PackageLite(null, apkLite.getPath(), apkLite, null,
-                        null, null, null, null, null);
+                        null, null, null, null, null, apkLite.getTargetSdkVersion());
                 sessionSize += PackageHelper.calculateInstalledSize(pkgLite,
                         params.sessionParams.abiOverride, fd.getFileDescriptor());
             } catch (IOException e) {
@@ -2251,8 +2251,8 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
-        final String packageName = getNextArg();
-        if (packageName == null) {
+        final List<String> packageNames = getRemainingArgs();
+        if (packageNames.isEmpty()) {
             pw.println("Error: package name not specified");
             return 1;
         }
@@ -2270,12 +2270,15 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             final int translatedUserId =
                     translateUserId(userId, UserHandle.USER_NULL, "runSuspend");
-            mInterface.setPackagesSuspendedAsUser(new String[]{packageName}, suspendedState,
-                    ((appExtras.size() > 0) ? appExtras : null),
+            mInterface.setPackagesSuspendedAsUser(packageNames.toArray(new String[] {}),
+                    suspendedState, ((appExtras.size() > 0) ? appExtras : null),
                     ((launcherExtras.size() > 0) ? launcherExtras : null),
                     info, callingPackage, translatedUserId);
-            pw.println("Package " + packageName + " new suspended state: "
-                    + mInterface.isPackageSuspendedForUser(packageName, translatedUserId));
+            for (int i = 0; i < packageNames.size(); i++) {
+                final String packageName = packageNames.get(i);
+                pw.println("Package " + packageName + " new suspended state: "
+                        + mInterface.isPackageSuspendedForUser(packageName, translatedUserId));
+            }
             return 0;
         } catch (RemoteException | IllegalArgumentException e) {
             pw.println(e.toString());
@@ -3643,11 +3646,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  hide [--user USER_ID] PACKAGE_OR_COMPONENT");
         pw.println("  unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
         pw.println("");
-        pw.println("  suspend [--user USER_ID] TARGET-PACKAGE");
-        pw.println("    Suspends the specified package (as user).");
+        pw.println("  suspend [--user USER_ID] PACKAGE [PACKAGE...]");
+        pw.println("    Suspends the specified package(s) (as user).");
         pw.println("");
-        pw.println("  unsuspend [--user USER_ID] TARGET-PACKAGE");
-        pw.println("    Unsuspends the specified package (as user).");
+        pw.println("  unsuspend [--user USER_ID] PACKAGE [PACKAGE...]");
+        pw.println("    Unsuspends the specified package(s) (as user).");
         pw.println("");
         pw.println("  grant [--user USER_ID] PACKAGE PERMISSION");
         pw.println("  revoke [--user USER_ID] PACKAGE PERMISSION");

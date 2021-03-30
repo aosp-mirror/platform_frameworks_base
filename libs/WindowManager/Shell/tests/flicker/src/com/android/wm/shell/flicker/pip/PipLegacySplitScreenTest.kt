@@ -116,8 +116,8 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppLayersVisible() {
         testSpec.assertLayersEnd {
-            coversAtMost(displayBounds, testApp.defaultWindowName)
-            coversAtMost(displayBounds, imeApp.defaultWindowName)
+            visibleRegion(testApp.defaultWindowName).coversAtMost(displayBounds)
+            visibleRegion(imeApp.defaultWindowName).coversAtMost(displayBounds)
         }
     }
 

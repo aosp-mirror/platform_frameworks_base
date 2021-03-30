@@ -511,7 +511,6 @@ public final class InputMethodManager {
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
     static final int MSG_REPORT_FULLSCREEN_MODE = 10;
-    static final int MSG_APPLY_IME_VISIBILITY = 20;
     static final int MSG_UPDATE_ACTIVITY_VIEW_TO_SCREEN_MATRIX = 30;
 
     private static boolean isAutofillUIShowing(View servedView) {
@@ -985,17 +984,6 @@ public final class InputMethodManager {
                     }
                     return;
                 }
-                case MSG_APPLY_IME_VISIBILITY: {
-                    synchronized (mH) {
-                        if (mImeInsetsConsumer != null) {
-                            ImeTracing.getInstance().triggerClientDump(
-                                    "ImeInsetsSourceConsumer#applyImeVisibility",
-                                    InputMethodManager.this, null /* icProto */);
-                            mImeInsetsConsumer.applyImeVisibility(msg.arg1 != 0);
-                        }
-                    }
-                    return;
-                }
                 case MSG_UPDATE_ACTIVITY_VIEW_TO_SCREEN_MATRIX: {
                     final float[] matrixValues = (float[]) msg.obj;
                     final int bindSequence = msg.arg1;
@@ -1086,12 +1074,6 @@ public final class InputMethodManager {
         @Override
         public void reportFullscreenMode(boolean fullscreen) {
             mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
-                    .sendToTarget();
-        }
-
-        @Override
-        public void applyImeVisibility(boolean setVisible) {
-            mH.obtainMessage(MSG_APPLY_IME_VISIBILITY, setVisible ? 1 : 0, 0)
                     .sendToTarget();
         }
 
@@ -2035,10 +2017,12 @@ public final class InputMethodManager {
             }
             mServedInputConnectionWrapper = servedContext;
 
-            try {
-                if (DEBUG) Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
+            if (DEBUG) {
+                Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
                         + ic + " tba=" + tba + " startInputFlags="
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
+            }
+            try {
                 final Completable.InputBindResult value = Completable.createInputBindResult();
                 mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
@@ -2046,37 +2030,37 @@ public final class InputMethodManager {
                         view.getContext().getApplicationInfo().targetSdkVersion,
                         ResultCallbacks.of(value));
                 res = Completable.getResult(value);
-                if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
-                if (res == null) {
-                    Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
-                            + " null. startInputReason="
-                            + InputMethodDebug.startInputReasonToString(startInputReason)
-                            + " editorInfo=" + tba
-                            + " startInputFlags="
-                            + InputMethodDebug.startInputFlagsToString(startInputFlags));
-                    return false;
-                }
-                mActivityViewToScreenMatrix = res.getActivityViewToScreenMatrix();
-                mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
-                if (res.id != null) {
-                    setInputChannelLocked(res.channel);
-                    mBindSequence = res.sequence;
-                    mCurMethod = res.method; // for @UnsupportedAppUsage
-                    mCurrentInputMethodSession = InputMethodSessionWrapper.createOrNull(res.method);
-                    mCurId = res.id;
-                } else if (res.channel != null && res.channel != mCurChannel) {
-                    res.channel.dispose();
-                }
-                switch (res.result) {
-                    case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
-                        mRestartOnNextWindowFocus = true;
-                        break;
-                }
-                if (mCurrentInputMethodSession != null && mCompletions != null) {
-                    mCurrentInputMethodSession.displayCompletions(mCompletions);
-                }
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
+                throw e.rethrowFromSystemServer();
+            }
+            if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
+            if (res == null) {
+                Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
+                        + " null. startInputReason="
+                        + InputMethodDebug.startInputReasonToString(startInputReason)
+                        + " editorInfo=" + tba
+                        + " startInputFlags="
+                        + InputMethodDebug.startInputFlagsToString(startInputFlags));
+                return false;
+            }
+            mActivityViewToScreenMatrix = res.getActivityViewToScreenMatrix();
+            mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
+            if (res.id != null) {
+                setInputChannelLocked(res.channel);
+                mBindSequence = res.sequence;
+                mCurMethod = res.method; // for @UnsupportedAppUsage
+                mCurrentInputMethodSession = InputMethodSessionWrapper.createOrNull(res.method);
+                mCurId = res.id;
+            } else if (res.channel != null && res.channel != mCurChannel) {
+                res.channel.dispose();
+            }
+            switch (res.result) {
+                case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
+                    mRestartOnNextWindowFocus = true;
+                    break;
+            }
+            if (mCurrentInputMethodSession != null && mCompletions != null) {
+                mCurrentInputMethodSession.displayCompletions(mCompletions);
             }
         }
 

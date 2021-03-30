@@ -17,6 +17,7 @@
 package android.media.metrics;
 
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.os.Bundle;
 
 /**
@@ -24,7 +25,7 @@ import android.os.Bundle;
  */
 public abstract class Event {
     final long mTimeSinceCreatedMillis;
-    Bundle mExtras;
+    Bundle mMetricsBundle = new Bundle();
 
     // hide default constructor
     /* package */ Event() {
@@ -38,7 +39,7 @@ public abstract class Event {
 
     /* package */ Event(long timeSinceCreatedMillis, Bundle extras) {
         mTimeSinceCreatedMillis = timeSinceCreatedMillis;
-        mExtras = extras;
+        mMetricsBundle = extras;
     }
 
     /**
@@ -50,8 +51,12 @@ public abstract class Event {
         return mTimeSinceCreatedMillis;
     }
 
-    /** @hide */
-    public Bundle getExtras() {
-        return mExtras;
+    /**
+     * Gets metrics-related information that is not supported by dedicated methods.
+     * <p>It is intended to be used for backwards compatibility by the metrics infrastructure.
+     */
+    @NonNull
+    public Bundle getMetricsBundle() {
+        return mMetricsBundle;
     }
 }

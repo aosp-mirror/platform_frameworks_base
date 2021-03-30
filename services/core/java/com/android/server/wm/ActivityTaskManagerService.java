@@ -215,7 +215,6 @@ import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -251,6 +250,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
 import com.android.server.am.AppTimeTracker;
+import com.android.server.am.AssistDataRequester;
 import com.android.server.am.BaseErrorDialog;
 import com.android.server.am.PendingIntentController;
 import com.android.server.am.PendingIntentRecord;
@@ -933,7 +933,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return getUserManager().hasUserRestriction(restriction, userId);
     }
 
-    boolean hasSystemAlertWindowPermission(int callingUid, int callingPid, String callingPackage) {
+    boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
+            String callingPackage) {
         final int mode = getAppOpsManager().noteOpNoThrow(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
                 callingUid, callingPackage, /* featureId */ null, "");
         if (mode == AppOpsManager.MODE_DEFAULT) {
@@ -2827,10 +2828,45 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public boolean requestAssistContextExtras(int requestType, IAssistDataReceiver receiver,
-            Bundle receiverExtras, IBinder activityToken, boolean focused, boolean newSessionId) {
+            Bundle receiverExtras, IBinder activityToken, boolean checkActivityIsTop,
+            boolean newSessionId) {
         return enqueueAssistContext(requestType, null, null, receiver, receiverExtras,
-                activityToken, focused, newSessionId, UserHandle.getCallingUserId(), null,
-                PENDING_ASSIST_EXTRAS_LONG_TIMEOUT, 0) != null;
+                activityToken, checkActivityIsTop, newSessionId, UserHandle.getCallingUserId(),
+                null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT, 0) != null;
+    }
+
+    @Override
+    public boolean requestAssistDataForTask(IAssistDataReceiver receiver, int taskId,
+            String callingPackageName) {
+        mAmInternal.enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
+                "requestAssistDataForTask()");
+        final long callingId = Binder.clearCallingIdentity();
+        LocalService.ActivityTokens tokens = null;
+        try {
+            tokens = mInternal.getTopActivityForTask(taskId);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+        if (tokens == null) {
+            Log.e(TAG, "Could not find activity for task " + taskId);
+            return false;
+        }
+
+        final AssistDataReceiverProxy proxy =
+                new AssistDataReceiverProxy(receiver, callingPackageName);
+        Object lock = new Object();
+        AssistDataRequester requester = new AssistDataRequester(mContext, mWindowManager,
+                getAppOpsManager(), proxy, lock, AppOpsManager.OP_ASSIST_STRUCTURE,
+                AppOpsManager.OP_NONE);
+
+        List<IBinder> topActivityToken = new ArrayList<>();
+        topActivityToken.add(tokens.getActivityToken());
+        requester.requestAssistData(topActivityToken, true /* fetchData */,
+                false /* fetchScreenshot */, true /* allowFetchData */,
+                false /* allowFetchScreenshot*/, true /* ignoreFocusCheck */,
+                Binder.getCallingUid(), callingPackageName);
+
+        return true;
     }
 
     @Override
@@ -2844,7 +2880,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public Bundle getAssistContextExtras(int requestType) {
         PendingAssistExtras pae = enqueueAssistContext(requestType, null, null, null,
-                null, null, true /* focused */, true /* newSessionId */,
+                null, null, true /* checkActivityIsTop */, true /* newSessionId */,
                 UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT, 0);
         if (pae == null) {
             return null;
@@ -3047,8 +3083,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
             IAssistDataReceiver receiver, Bundle receiverExtras, IBinder activityToken,
-            boolean focused, boolean newSessionId, int userHandle, Bundle args, long timeout,
-            int flags) {
+            boolean checkActivityIsTop, boolean newSessionId, int userHandle, Bundle args,
+            long timeout, int flags) {
         mAmInternal.enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "enqueueAssistContext()");
 
@@ -3064,7 +3100,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Slog.w(TAG, "getAssistContextExtras failed: no process for " + activity);
                 return null;
             }
-            if (focused) {
+            if (checkActivityIsTop) {
                 if (activityToken != null) {
                     ActivityRecord caller = ActivityRecord.forTokenLocked(activityToken);
                     if (activity != caller) {
@@ -5075,7 +5111,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public List<Pair<IBinder, Integer>> getTopVisibleActivities() {
+        public List<ActivityAssistInfo> getTopVisibleActivities() {
             synchronized (mGlobalLock) {
                 return mRootWindowContainer.getTopVisibleActivities();
             }
@@ -6369,6 +6405,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 return new PackageConfigurationUpdaterImpl(Binder.getCallingPid());
             }
+        }
+
+        @Override
+        public boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
+                String callingPackage) {
+            return ActivityTaskManagerService.this.hasSystemAlertWindowPermission(callingUid,
+                    callingPid, callingPackage);
         }
     }
 

@@ -32,7 +32,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.voice.IVoiceInteractionSession;
-import android.util.Pair;
 import android.util.proto.ProtoOutputStream;
 import android.window.TaskSnapshot;
 
@@ -166,7 +165,7 @@ public abstract class ActivityTaskManagerInternal {
      * Returns the top activity from each of the currently visible root tasks, and the related task
      * id. The first entry will be the focused activity.
      */
-    public abstract List<Pair<IBinder, Integer>> getTopVisibleActivities();
+    public abstract List<ActivityAssistInfo> getTopVisibleActivities();
 
     /**
      * Returns whether {@code uid} has any resumed activity.
@@ -607,4 +606,10 @@ public abstract class ActivityTaskManagerInternal {
          */
         void commit() throws RemoteException;
     }
+
+    /**
+     * A utility method to check AppOps and PackageManager for SYSTEM_ALERT_WINDOW permission.
+     */
+    public abstract boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
+            String callingPackage);
 }

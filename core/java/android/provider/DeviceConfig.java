@@ -108,6 +108,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_APP_HIBERNATION = "app_hibernation";
 
     /**
+     * Namespace for all AppSearch related features.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_APPSEARCH = "appsearch";
+
+    /**
      * Namespace for app standby configurations.
      *
      * @hide
@@ -250,6 +257,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_JOB_SCHEDULER = "jobscheduler";
 
     /**
+     * Namespace for all media related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_MEDIA = "media";
+
+    /**
      * Namespace for all media native related features.
      *
      * @hide
@@ -358,6 +373,38 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SETTINGS_STATS = "settings_stats";
 
     /**
+     * Namespace for all statsd java features that can be applied immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_JAVA = "statsd_java";
+
+    /**
+     * Namespace for all statsd java features that are applied on boot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_JAVA_BOOT = "statsd_java_boot";
+
+    /**
+     * Namespace for all statsd native features that can be applied immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_NATIVE = "statsd_native";
+
+    /**
+     * Namespace for all statsd native features that are applied on boot.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STATSD_NATIVE_BOOT = "statsd_native_boot";
+
+    /**
      * Namespace for storage-related features.
      *
      * @deprecated Replace storage namespace with storage_native_boot.
@@ -456,7 +503,8 @@ public final class DeviceConfig {
      */
     @NonNull
     private static final List<String> PUBLIC_NAMESPACES =
-            Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME);
+            Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME, NAMESPACE_STATSD_JAVA,
+                    NAMESPACE_STATSD_JAVA_BOOT);
     /**
      * Privacy related properties definitions.
      *
@@ -503,38 +551,6 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_CONNECTIVITY_THERMAL_POWER_MANAGER =
             "connectivity_thermal_power_manager";
-
-    /**
-     * Namespace for all statsd java features that can be applied immediately.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String NAMESPACE_STATSD_JAVA = "statsd_java";
-
-    /**
-     * Namespace for all statsd java features that are applied on boot.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String NAMESPACE_STATSD_JAVA_BOOT = "statsd_java_boot";
-
-    /**
-     * Namespace for all statsd native features that can be applied immediately.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String NAMESPACE_STATSD_NATIVE = "statsd_native";
-
-    /**
-     * Namespace for all statsd native features that are applied on boot.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String NAMESPACE_STATSD_NATIVE_BOOT = "statsd_native_boot";
 
     /**
      * Namespace for configuration related features.
@@ -646,7 +662,7 @@ public final class DeviceConfig {
      * @param name      The name of the property to look up.
      * @param defaultValue The value to return if the property does not exist or has no non-null
      *                     value.
-     * @return the corresponding value, or defaultValue if none exists.
+     * @return the correspondfing value, or defaultValue if none exists.
      * @hide
      */
     @SystemApi

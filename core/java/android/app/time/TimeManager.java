@@ -262,9 +262,8 @@ public final class TimeManager {
      * HAL. This time <em>may</em> be used to set the device system clock, depending on the device
      * configuration and user settings. This method call is processed asynchronously.
      * See {@link ExternalTimeSuggestion} for more details.
-     * {@hide}
      */
-    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    @RequiresPermission(android.Manifest.permission.SUGGEST_EXTERNAL_TIME)
     public void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestExternalTime called: " + timeSuggestion);

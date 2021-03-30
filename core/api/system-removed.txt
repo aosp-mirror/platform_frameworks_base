@@ -48,6 +48,14 @@ package android.app.prediction {
 
 }
 
+package android.bluetooth {
+
+  public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
+  }
+
+}
+
 package android.content {
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -177,6 +185,17 @@ package android.telephony.data {
 
   public final class DataCallResponse implements android.os.Parcelable {
     ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, int);
+  }
+
+}
+
+package android.view.translation {
+
+  public final class UiTranslationManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, int);
   }
 
 }

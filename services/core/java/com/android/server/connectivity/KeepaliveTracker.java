@@ -26,6 +26,7 @@ import static android.net.SocketKeepalive.ERROR_INVALID_INTERVAL;
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 import static android.net.SocketKeepalive.ERROR_INVALID_NETWORK;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
+import static android.net.SocketKeepalive.ERROR_NO_SUCH_SLOT;
 import static android.net.SocketKeepalive.ERROR_STOP_REASON_UNINITIALIZED;
 import static android.net.SocketKeepalive.ERROR_UNSUPPORTED;
 import static android.net.SocketKeepalive.MAX_INTERVAL_SEC;
@@ -36,6 +37,7 @@ import static android.net.SocketKeepalive.SUCCESS;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.net.ConnectivityResources;
 import android.net.ISocketKeepaliveCallback;
 import android.net.InetAddresses;
 import android.net.InvalidPacketException;
@@ -56,7 +58,7 @@ import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
 
-import com.android.internal.R;
+import com.android.connectivity.resources.R;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.net.module.util.HexDump;
 import com.android.net.module.util.IpUtils;
@@ -111,10 +113,19 @@ public class KeepaliveTracker {
         mTcpController = new TcpKeepaliveController(handler);
         mContext = context;
         mSupportedKeepalives = KeepaliveUtils.getSupportedKeepalives(mContext);
-        mReservedPrivilegedSlots = mContext.getResources().getInteger(
-                R.integer.config_reservedPrivilegedKeepaliveSlots);
-        mAllowedUnprivilegedSlotsForUid = mContext.getResources().getInteger(
-                R.integer.config_allowedUnprivilegedKeepalivePerUid);
+
+        // TODO (b/183076074): stop reading legacy resources after migrating overlays
+        final int legacyReservedSlots = mContext.getResources().getInteger(
+                mContext.getResources().getIdentifier(
+                        "config_reservedPrivilegedKeepaliveSlots", "integer", "android"));
+        final int legacyAllowedSlots = mContext.getResources().getInteger(
+                mContext.getResources().getIdentifier(
+                        "config_allowedUnprivilegedKeepalivePerUid", "integer", "android"));
+        final ConnectivityResources res = new ConnectivityResources(mContext);
+        mReservedPrivilegedSlots = Math.min(legacyReservedSlots, res.get().getInteger(
+                R.integer.config_reservedPrivilegedKeepaliveSlots));
+        mAllowedUnprivilegedSlotsForUid = Math.min(legacyAllowedSlots, res.get().getInteger(
+                R.integer.config_allowedUnprivilegedKeepalivePerUid));
     }
 
     /**
@@ -518,6 +529,8 @@ public class KeepaliveTracker {
             }
         } else if (reason == ERROR_STOP_REASON_UNINITIALIZED) {
             throw new IllegalStateException("Unexpected stop reason: " + reason);
+        } else if (reason == ERROR_NO_SUCH_SLOT) {
+            throw new IllegalStateException("No such slot: " + reason);
         } else {
             notifyErrorCallback(ki.mCallback, reason);
         }

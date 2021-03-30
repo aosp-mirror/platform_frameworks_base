@@ -8,3 +8,5 @@ per-file Intent.java = patb@google.com
 per-file AutofillOptions* = file:/core/java/android/service/autofill/OWNERS
 per-file ContentCaptureOptions* = file:/core/java/android/service/contentcapture/OWNERS
 per-file LocusId* = file:/core/java/android/service/contentcapture/OWNERS
+per-file ComponentCallbacksController = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ComponentCallbacksController = charlesccchen@google.com

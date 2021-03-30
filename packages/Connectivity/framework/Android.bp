@@ -26,6 +26,7 @@ package {
 java_library {
     name: "framework-connectivity-protos",
     sdk_version: "module_current",
+    min_sdk_version: "30",
     proto: {
         type: "nano",
     },
@@ -34,7 +35,6 @@ java_library {
         ":framework-javastream-protos",
     ],
     apex_available: [
-        "//apex_available:platform",
         "com.android.tethering",
     ],
     jarjar_rules: "jarjar-rules-proto.txt",
@@ -81,11 +81,13 @@ filegroup {
 
 java_sdk_library {
     name: "framework-connectivity",
-    api_only: true,
+    sdk_version: "module_current",
+    min_sdk_version: "30",
     defaults: ["framework-module-defaults"],
     installable: true,
     srcs: [
         ":framework-connectivity-sources",
+        ":net-utils-framework-common-srcs",
     ],
     aidl: {
         include_dirs: [
@@ -97,10 +99,33 @@ java_sdk_library {
             "frameworks/native/aidl/binder", // For PersistableBundle.aidl
         ],
     },
+    impl_only_libs: [
+        // TODO (b/183097033) remove once module_current includes core_platform
+        "stable.core.platform.api.stubs",
+        "framework-tethering.stubs.module_lib",
+        "framework-wifi.stubs.module_lib",
+        "net-utils-device-common",
+    ],
     libs: [
         "unsupportedappusage",
     ],
+    static_libs: [
+        "framework-connectivity-protos",
+    ],
+    jarjar_rules: "jarjar-rules.txt",
     permitted_packages: ["android.net"],
+    impl_library_visibility: [
+        "//packages/modules/Connectivity/Tethering/apex",
+        // In preparation for future move
+        "//packages/modules/Connectivity/apex",
+        "//packages/modules/Connectivity/service",
+        "//frameworks/base/packages/Connectivity/service",
+        "//frameworks/base",
+        "//packages/modules/Connectivity/Tethering/tests/unit",
+    ],
+    apex_available: [
+        "com.android.tethering",
+    ],
 }
 
 cc_defaults {
@@ -109,13 +134,15 @@ cc_defaults {
         "-Wall",
         "-Werror",
         "-Wno-unused-parameter",
+        // Don't warn about S API usage even with
+        // min_sdk 30: the library is only loaded
+        // on S+ devices
+        "-Wno-unguarded-availability",
         "-Wthread-safety",
     ],
     shared_libs: [
-        "libbase",
         "liblog",
         "libnativehelper",
-        "libnetd_client",
     ],
     header_libs: [
         "dnsproxyd_protocol_headers",
@@ -128,6 +155,7 @@ cc_library_static {
     srcs: [
         "jni/android_net_NetworkUtils.cpp",
     ],
+    shared_libs: ["libandroid_net"],
     apex_available: [
         "//apex_available:platform",
         "com.android.tethering",
@@ -136,42 +164,15 @@ cc_library_static {
 
 cc_library_shared {
     name: "libframework-connectivity-jni",
+    min_sdk_version: "30",
     defaults: ["libframework-connectivity-defaults"],
     srcs: [
+        "jni/android_net_NetworkUtils.cpp",
         "jni/onload.cpp",
     ],
-    static_libs: ["libconnectivityframeworkutils"],
+    shared_libs: ["libandroid"],
+    stl: "libc++_static",
     apex_available: [
-        "//apex_available:platform",
         "com.android.tethering",
     ],
-}
-
-java_library {
-    name: "framework-connectivity.impl",
-    sdk_version: "module_current",
-    srcs: [
-        ":framework-connectivity-sources",
-    ],
-    aidl: {
-        include_dirs: [
-            "frameworks/base/core/java", // For framework parcelables
-            "frameworks/native/aidl/binder", // For PersistableBundle.aidl
-        ],
-    },
-    libs: [
-        // TODO (b/183097033) remove once module_current includes core_current
-        "stable.core.platform.api.stubs",
-        "framework-tethering",
-        "framework-wifi",
-        "unsupportedappusage",
-    ],
-    static_libs: [
-        "framework-connectivity-protos",
-        "net-utils-device-common",
-    ],
-    jarjar_rules: "jarjar-rules.txt",
-    apex_available: ["com.android.tethering"],
-    installable: true,
-    permitted_packages: ["android.net"],
 }

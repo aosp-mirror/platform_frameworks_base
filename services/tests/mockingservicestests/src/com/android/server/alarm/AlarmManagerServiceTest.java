@@ -21,6 +21,7 @@ import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_COMPAT;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
 import static android.app.AlarmManager.FLAG_IDLE_UNTIL;
+import static android.app.AlarmManager.FLAG_PRIORITIZE;
 import static android.app.AlarmManager.FLAG_STANDALONE;
 import static android.app.AlarmManager.FLAG_WAKE_FROM_IDLE;
 import static android.app.AlarmManager.RTC;
@@ -62,6 +63,7 @@ import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_INT
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_WINDOW;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_PRIORITY_ALARM_DELAY;
 import static com.android.server.alarm.AlarmManagerService.FREQUENT_INDEX;
 import static com.android.server.alarm.AlarmManagerService.INDEFINITE_DELAY;
 import static com.android.server.alarm.AlarmManagerService.IS_WAKEUP_MASK;
@@ -443,6 +445,12 @@ public class AlarmManagerServiceTest {
                 TEST_CALLING_UID);
     }
 
+    private void setPrioritizedAlarm(int type, long triggerTime, IAlarmListener listener) {
+        mService.setImpl(type, triggerTime, WINDOW_EXACT, 0, null, listener, "test",
+                FLAG_STANDALONE | FLAG_PRIORITIZE, null, null, TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE, null);
+    }
+
     private void setAllowWhileIdleAlarm(int type, long triggerTime, PendingIntent pi,
             boolean unrestricted) {
         final int flags = unrestricted ? FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED : FLAG_ALLOW_WHILE_IDLE;
@@ -579,6 +587,7 @@ public class AlarmManagerServiceTest {
         setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION, 40);
         setDeviceConfigLong(KEY_LISTENER_TIMEOUT, 45);
         setDeviceConfigLong(KEY_MIN_WINDOW, 50);
+        setDeviceConfigLong(KEY_PRIORITY_ALARM_DELAY, 55);
         assertEquals(5, mService.mConstants.MIN_FUTURITY);
         assertEquals(10, mService.mConstants.MIN_INTERVAL);
         assertEquals(15, mService.mConstants.MAX_INTERVAL);
@@ -589,6 +598,7 @@ public class AlarmManagerServiceTest {
         assertEquals(40, mService.mConstants.ALLOW_WHILE_IDLE_WHITELIST_DURATION);
         assertEquals(45, mService.mConstants.LISTENER_TIMEOUT);
         assertEquals(50, mService.mConstants.MIN_WINDOW);
+        assertEquals(55, mService.mConstants.PRIORITY_ALARM_DELAY);
     }
 
     @Test
@@ -1583,6 +1593,89 @@ public class AlarmManagerServiceTest {
 
         testQuotasNoDeferral(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
                 getNewMockPendingIntent(), false), quota, mAllowWhileIdleWindow);
+    }
+
+    @Test
+    public void prioritizedAlarmsInBatterySaver() throws Exception {
+        when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
+        when(mAppStateTracker.isForceAllAppsStandbyEnabled()).thenReturn(true);
+        final long minDelay = 5;
+        setDeviceConfigLong(KEY_PRIORITY_ALARM_DELAY, minDelay);
+
+        final long firstTrigger = mNowElapsedTest + 4;
+        final AtomicInteger alarmsFired = new AtomicInteger(0);
+        final int numAlarms = 10;
+        for (int i = 0; i < numAlarms; i++) {
+            setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
+                    new IAlarmListener.Stub() {
+                        @Override
+                        public void doAlarm(IAlarmCompleteListener callback)
+                                throws RemoteException {
+                            alarmsFired.incrementAndGet();
+                        }
+                    });
+        }
+        assertEquals(firstTrigger, mTestTimer.getElapsed());
+        mNowElapsedTest = firstTrigger;
+        mTestTimer.expire();
+        while (alarmsFired.get() < numAlarms) {
+            assertEquals(mNowElapsedTest + minDelay, mTestTimer.getElapsed());
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+        assertEquals(numAlarms, alarmsFired.get());
+    }
+
+    @Test
+    public void prioritizedAlarmsInDeviceIdle() throws Exception {
+        doReturn(0).when(mService).fuzzForDuration(anyLong());
+
+        final long minDelay = 5;
+        setDeviceConfigLong(KEY_PRIORITY_ALARM_DELAY, minDelay);
+
+        final long idleUntil = mNowElapsedTest + 1000;
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, idleUntil, getNewMockPendingIntent());
+        assertNotNull(mService.mPendingIdleUntil);
+
+        final long firstTrigger = mNowElapsedTest + 4;
+        final AtomicInteger alarmsFired = new AtomicInteger(0);
+        final int numAlarms = 10;
+        for (int i = 0; i < numAlarms; i++) {
+            setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
+                    new IAlarmListener.Stub() {
+                        @Override
+                        public void doAlarm(IAlarmCompleteListener callback)
+                                throws RemoteException {
+                            alarmsFired.incrementAndGet();
+                        }
+                    });
+        }
+        assertEquals(firstTrigger, mTestTimer.getElapsed());
+        mNowElapsedTest = firstTrigger;
+        mTestTimer.expire();
+        while (alarmsFired.get() < numAlarms) {
+            assertEquals(mNowElapsedTest + minDelay, mTestTimer.getElapsed());
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+        assertEquals(numAlarms, alarmsFired.get());
+
+        setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, idleUntil - 3, new IAlarmListener.Stub() {
+            @Override
+            public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
+            }
+        });
+        setPrioritizedAlarm(ELAPSED_REALTIME_WAKEUP, idleUntil - 2, new IAlarmListener.Stub() {
+            @Override
+            public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
+            }
+        });
+        assertEquals(idleUntil - 3, mTestTimer.getElapsed());
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+
+        assertEquals(idleUntil, mTestTimer.getElapsed());
     }
 
     @Test

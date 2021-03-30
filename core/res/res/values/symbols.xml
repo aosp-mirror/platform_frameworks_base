@@ -200,12 +200,7 @@
   <java-symbol type="id" name="action2" />
   <java-symbol type="id" name="action3" />
   <java-symbol type="id" name="action4" />
-  <java-symbol type="id" name="notification_media_seekbar_container" />
   <java-symbol type="id" name="notification_media_content" />
-  <java-symbol type="id" name="notification_media_progress" />
-  <java-symbol type="id" name="notification_media_progress_bar" />
-  <java-symbol type="id" name="notification_media_elapsed_time" />
-  <java-symbol type="id" name="notification_media_total_time" />
   <java-symbol type="id" name="big_picture" />
   <java-symbol type="id" name="big_text" />
   <java-symbol type="id" name="chronometer" />
@@ -436,6 +431,7 @@
   <java-symbol type="integer" name="config_extraFreeKbytesAbsolute" />
   <java-symbol type="integer" name="config_immersive_mode_confirmation_panic" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />
+  <java-symbol type="bool" name="config_longPressOnPowerForAssistantSettingAvailable" />
   <java-symbol type="integer" name="config_veryLongPressOnPowerBehavior" />
   <java-symbol type="integer" name="config_veryLongPressTimeout" />
   <java-symbol type="integer" name="config_longPressOnBackBehavior" />
@@ -525,7 +521,6 @@
   <java-symbol type="dimen" name="notification_top_pad_narrow" />
   <java-symbol type="dimen" name="notification_top_pad_large_text" />
   <java-symbol type="dimen" name="notification_top_pad_large_text_narrow" />
-  <java-symbol type="dimen" name="notification_large_icon_circle_padding" />
   <java-symbol type="dimen" name="notification_badge_size" />
   <java-symbol type="dimen" name="immersive_mode_cling_width" />
   <java-symbol type="dimen" name="accessibility_magnification_indicator_width" />
@@ -560,6 +555,9 @@
   <java-symbol type="string" name="paste_as_plain_text" />
   <java-symbol type="string" name="pasted_from_app" />
   <java-symbol type="string" name="pasted_from_clipboard" />
+  <java-symbol type="string" name="pasted_text" />
+  <java-symbol type="string" name="pasted_image" />
+  <java-symbol type="string" name="pasted_content" />
   <java-symbol type="string" name="replace" />
   <java-symbol type="string" name="undo" />
   <java-symbol type="string" name="redo" />
@@ -1564,7 +1562,6 @@
   <java-symbol type="layout" name="immersive_mode_cling" />
   <java-symbol type="layout" name="user_switching_dialog" />
   <java-symbol type="layout" name="common_tab_settings" />
-  <java-symbol type="layout" name="notification_material_media_seekbar" />
   <java-symbol type="layout" name="resolver_list_per_profile" />
   <java-symbol type="layout" name="chooser_list_per_profile" />
   <java-symbol type="layout" name="resolver_empty_states" />
@@ -1719,8 +1716,6 @@
   <java-symbol type="dimen" name="status_bar_height" />
   <java-symbol type="dimen" name="display_cutout_touchable_region_size" />
   <java-symbol type="dimen" name="quick_qs_offset_height" />
-  <java-symbol type="dimen" name="quick_qs_total_height" />
-  <java-symbol type="dimen" name="quick_qs_total_height_with_media" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
   <java-symbol type="drawable" name="ic_jog_dial_unlock" />
@@ -2921,6 +2916,7 @@
   <java-symbol type="drawable" name="ic_expand_bundle" />
   <java-symbol type="drawable" name="ic_collapse_bundle" />
   <java-symbol type="dimen" name="notification_header_shrink_min_width" />
+  <java-symbol type="dimen" name="notification_header_shrink_hide_width" />
   <java-symbol type="dimen" name="notification_content_margin_start" />
   <java-symbol type="dimen" name="notification_content_margin_end" />
   <java-symbol type="dimen" name="notification_heading_margin_end" />
@@ -3010,7 +3006,6 @@
   <java-symbol type="string" name="new_sms_notification_content" />
 
   <java-symbol type="dimen" name="media_notification_expanded_image_margin_bottom" />
-  <java-symbol type="dimen" name="notification_content_image_margin_end" />
 
   <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />
 
@@ -3018,8 +3013,6 @@
   <java-symbol type="layout" name="notification_template_material_messaging" />
 
   <java-symbol type="id" name="aerr_wait" />
-
-  <java-symbol type="id" name="notification_content_container" />
 
   <java-symbol type="plurals" name="duration_minutes_shortest" />
   <java-symbol type="plurals" name="duration_hours_shortest" />
@@ -3138,7 +3131,6 @@
 
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
 
-  <java-symbol type="dimen" name="notification_media_image_margin_end" />
   <java-symbol type="id" name="notification_action_list_margin_target" />
   <java-symbol type="dimen" name="notification_action_disabled_alpha" />
   <java-symbol type="id" name="tag_margin_end_when_icon_visible" />
@@ -3154,7 +3146,6 @@
   <java-symbol type="bool" name="config_pinnerCameraApp" />
   <java-symbol type="bool" name="config_pinnerHomeApp" />
   <java-symbol type="bool" name="config_pinnerAssistantApp" />
-  <java-symbol type="array" name="config_jitzygoteBootImagePinnerServiceFiles" />
 
   <java-symbol type="string" name="config_doubleTouchGestureEnableFile" />
 
@@ -3461,17 +3452,14 @@
 
   <java-symbol type="dimen" name="notification_big_picture_max_height"/>
   <java-symbol type="dimen" name="notification_big_picture_max_width"/>
-  <java-symbol type="dimen" name="notification_media_image_max_width"/>
-  <java-symbol type="dimen" name="notification_media_image_max_height"/>
   <java-symbol type="dimen" name="notification_right_icon_size"/>
+  <java-symbol type="dimen" name="notification_right_icon_content_margin"/>
   <java-symbol type="dimen" name="notification_actions_icon_drawable_size"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_height"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_width"/>
 
   <java-symbol type="dimen" name="notification_big_picture_max_height_low_ram"/>
   <java-symbol type="dimen" name="notification_big_picture_max_width_low_ram"/>
-  <java-symbol type="dimen" name="notification_media_image_max_width_low_ram"/>
-  <java-symbol type="dimen" name="notification_media_image_max_height_low_ram"/>
   <java-symbol type="dimen" name="notification_right_icon_size_low_ram"/>
   <java-symbol type="dimen" name="notification_grayscale_icon_max_size"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_height_low_ram"/>
@@ -3545,6 +3533,7 @@
   <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="notification_channel_accessibility_magnification" />
   <java-symbol type="string" name="notification_channel_accessibility_security_policy" />
+  <java-symbol type="string" name="config_companionProviderPackage" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultOnDeviceSpeechRecognitionService" />
   <java-symbol type="string" name="config_defaultTextClassifierPackage" />
@@ -3967,6 +3956,7 @@
   <java-symbol type="layout" name="chooser_action_button" />
   <java-symbol type="dimen" name="chooser_action_button_icon_size" />
   <java-symbol type="string" name="config_defaultNearbySharingComponent" />
+  <java-symbol type="bool" name="config_disable_all_cb_messages" />
   <java-symbol type="drawable" name="ic_close" />
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
@@ -4103,19 +4093,14 @@
   <java-symbol type="id" name="resolver_empty_state_container" />
   <java-symbol type="id" name="button_bar_container" />
   <java-symbol type="id" name="title_container" />
-  <java-symbol type="string" name="resolver_cant_share_with_work_apps" />
+  <java-symbol type="string" name="resolver_cross_profile_blocked" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps_explanation" />
-  <java-symbol type="string" name="resolver_cant_share_with_personal_apps" />
   <java-symbol type="string" name="resolver_cant_share_with_personal_apps_explanation" />
-  <java-symbol type="string" name="resolver_cant_access_work_apps" />
   <java-symbol type="string" name="resolver_cant_access_work_apps_explanation" />
-  <java-symbol type="string" name="resolver_cant_access_personal_apps" />
   <java-symbol type="string" name="resolver_cant_access_personal_apps_explanation" />
   <java-symbol type="string" name="resolver_turn_on_work_apps" />
-  <java-symbol type="string" name="resolver_no_work_apps_available_share" />
-  <java-symbol type="string" name="resolver_no_work_apps_available_resolve" />
-  <java-symbol type="string" name="resolver_no_personal_apps_available_share" />
-  <java-symbol type="string" name="resolver_no_personal_apps_available_resolve" />
+  <java-symbol type="string" name="resolver_no_work_apps_available" />
+  <java-symbol type="string" name="resolver_no_personal_apps_available" />
   <java-symbol type="string" name="resolver_switch_on_work" />
   <java-symbol type="drawable" name="ic_work_apps_off" />
   <java-symbol type="drawable" name="ic_sharing_disabled" />
@@ -4231,6 +4216,10 @@
   <java-symbol type="bool" name="config_voice_data_sms_auto_fallback" />
 
   <java-symbol type="bool" name="config_enableOneHandedKeyguard" />
+
+  <java-symbol type="attr" name="colorAccentPrimary" />
+  <java-symbol type="attr" name="colorAccentSecondary" />
+  <java-symbol type="attr" name="colorAccentTertiary" />
 
   <!-- CEC Configuration -->
   <java-symbol type="bool" name="config_cecHdmiCecEnabled_userConfigurable" />

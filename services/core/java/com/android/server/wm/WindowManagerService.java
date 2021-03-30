@@ -433,11 +433,6 @@ public class WindowManagerService extends IWindowManager.Stub
     public static boolean sEnableRemoteKeyguardAnimation =
             SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, false);
 
-    private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
-            "ro.sf.disable_triple_buffer";
-
-    static boolean sEnableTripleBuffering = !SystemProperties.getBoolean(
-            DISABLE_TRIPLE_BUFFERING_PROPERTY, false);
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
@@ -1747,9 +1742,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mUseBLAST) {
                 res |= WindowManagerGlobal.ADD_FLAG_USE_BLAST;
             }
-            if (sEnableTripleBuffering) {
-                res |= WindowManagerGlobal.ADD_FLAG_USE_TRIPLE_BUFFERING;
-            }
 
             if (displayContent.mCurrentFocus == null) {
                 displayContent.mWinAddedSinceNullFocus.add(win);
@@ -2236,18 +2228,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setFrameNumber(frameNumber);
 
-            final DisplayContent dc = win.getDisplayContent();
-
-            if (win.mPendingPositionChanged != null) {
-                win.mPendingPositionChanged.updateLeashPosition(frameNumber);
-                win.mPendingPositionChanged = null;
-            }
-
-            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
-                win.prepareDrawHandlers();
-                result |= RELAYOUT_RES_BLAST_SYNC;
-            }
-
             int attrChanges = 0;
             int flagChanges = 0;
             int privateFlagChanges = 0;
@@ -2520,6 +2500,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             win.mInRelayout = false;
 
+            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
+                win.prepareDrawHandlers();
+                win.markRedrawForSyncReported();
+                result |= RELAYOUT_RES_BLAST_SYNC;
+            }
+
             if (configChanged) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                         "relayoutWindow: postNewConfigurationToHandler");
@@ -2715,7 +2701,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Registers a listener for a {@link android.app.WindowContext} to subscribe to configuration
+     * Registers a listener for a {@link android.window.WindowContext} to subscribe to configuration
      * changes of a {@link DisplayArea}.
      *
      * @param clientToken the window context's token
@@ -8640,6 +8626,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return mDisplayHashController.verifyDisplayHash(displayHash);
     }
 
+    @Override
+    public void setDisplayHashThrottlingEnabled(boolean enable) {
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "setDisplayHashThrottle()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+        mDisplayHashController.setDisplayHashThrottlingEnabled(enable);
+    }
+
     void generateDisplayHash(Session session, IWindow window, Rect boundsInWindow,
             String hashAlgorithm, RemoteCallback callback) {
         final SurfaceControl displaySurfaceControl;
@@ -8648,6 +8642,13 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowState win = windowForClientLocked(session, window, false);
             if (win == null) {
                 Slog.w(TAG, "Failed to generate DisplayHash. Invalid window");
+                mDisplayHashController.sendDisplayHashError(callback,
+                        DISPLAY_HASH_ERROR_MISSING_WINDOW);
+                return;
+            }
+
+            if (win.mActivityRecord == null || !win.mActivityRecord.isState(
+                    Task.ActivityState.RESUMED)) {
                 mDisplayHashController.sendDisplayHashError(callback,
                         DISPLAY_HASH_ERROR_MISSING_WINDOW);
                 return;
@@ -8683,8 +8684,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         .setUid(uid)
                         .setSourceCrop(boundsInDisplay);
 
-        mDisplayHashController.generateDisplayHash(args, boundsInWindow,
-                hashAlgorithm, callback);
+        mDisplayHashController.generateDisplayHash(args, boundsInWindow, hashAlgorithm, uid,
+                callback);
     }
 
     boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {

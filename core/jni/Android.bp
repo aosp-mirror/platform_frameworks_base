@@ -221,7 +221,6 @@ cc_library_shared {
 
             static_libs: [
                 "libasync_safe",
-                "libconnectivityframeworkutils",
                 "libbinderthreadstateutils",
                 "libdmabufinfo",
                 "libgif",

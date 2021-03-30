@@ -26,6 +26,12 @@
             <item type="integer" name="config_networkMeteredMultipathPreference"/>
             <item type="array" name="config_networkSupportedKeepaliveCount"/>
             <item type="integer" name="config_networkAvoidBadWifi"/>
+            <item type="array" name="config_protectedNetworks"/>
+            <item type="bool" name="config_vehicleInternalNetworkAlwaysRequested"/>
+            <item type="integer" name="config_networkWakeupPacketMark"/>
+            <item type="integer" name="config_networkWakeupPacketMask"/>
+            <item type="integer" name="config_networkNotifySwitchType"/>
+            <item type="array" name="config_networkNotifySwitches"/>
 
         </policy>
     </overlayable>

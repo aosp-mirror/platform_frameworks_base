@@ -42,6 +42,10 @@ using ::android::StringPiece;
 using android::idmap2::policy::kPolicyStringToFlag;
 
 namespace aapt {
+namespace {
+constexpr const char* kPublicGroupTag = "public-group";
+constexpr const char* kStagingPublicGroupTag = "staging-public-group";
+}  // namespace
 
 constexpr const char* sXliffNamespaceUri = "urn:oasis:names:tc:xliff:document:1.2";
 
@@ -102,6 +106,7 @@ struct ParsedResource {
 
   ResourceId id;
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
+  bool staged_api = false;
   bool allow_new = false;
   Maybe<OverlayableItem> overlayable_item;
 
@@ -118,43 +123,44 @@ static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag, Parsed
     res->comment = trimmed_comment.to_string();
   }
 
+  NewResourceBuilder res_builder(res->name);
   if (res->visibility_level != Visibility::Level::kUndefined) {
     Visibility visibility;
     visibility.level = res->visibility_level;
+    visibility.staged_api = res->staged_api;
     visibility.source = res->source;
     visibility.comment = res->comment;
-    if (!table->SetVisibilityWithId(res->name, visibility, res->id, diag)) {
-      return false;
-    }
+    res_builder.SetVisibility(visibility);
+  }
+
+  if (res->id.is_valid()) {
+    res_builder.SetId(res->id);
   }
 
   if (res->allow_new) {
     AllowNew allow_new;
     allow_new.source = res->source;
     allow_new.comment = res->comment;
-    if (!table->SetAllowNew(res->name, allow_new, diag)) {
-      return false;
-    }
+    res_builder.SetAllowNew(allow_new);
   }
 
   if (res->overlayable_item) {
-    if (!table->SetOverlayable(res->name, res->overlayable_item.value(), diag)) {
-      return false;
-    }
+    res_builder.SetOverlayable(res->overlayable_item.value());
   }
 
   if (res->value != nullptr) {
     // Attach the comment, source and config to the value.
     res->value->SetComment(std::move(res->comment));
     res->value->SetSource(std::move(res->source));
-
-    if (!table->AddResourceWithId(res->name, res->id, res->config, res->product,
-                                  std::move(res->value), diag)) {
-      return false;
-    }
+    res_builder.SetValue(std::move(res->value), res->config, res->product);
   }
 
   bool error = false;
+  if (!res->name.entry.empty()) {
+    if (!table->AddResource(res_builder.Build(), diag)) {
+      return false;
+    }
+  }
   for (ParsedResource& child : res->child_resources) {
     error |= !AddResourcesToTable(table, diag, &child);
   }
@@ -525,6 +531,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       {"plurals", std::mem_fn(&ResourceParser::ParsePlural)},
       {"public", std::mem_fn(&ResourceParser::ParsePublic)},
       {"public-group", std::mem_fn(&ResourceParser::ParsePublicGroup)},
+      {"staging-public-group", std::mem_fn(&ResourceParser::ParseStagingPublicGroup)},
       {"string-array", std::mem_fn(&ResourceParser::ParseStringArray)},
       {"style", std::bind(&ResourceParser::ParseStyle, std::placeholders::_1, ResourceType::kStyle,
                           std::placeholders::_2, std::placeholders::_3)},
@@ -653,7 +660,8 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
     const auto bag_iter = elToBagMap.find(resource_type);
     if (bag_iter != elToBagMap.end()) {
       // Ensure we have a name (unless this is a <public-group> or <overlayable>).
-      if (resource_type != "public-group" && resource_type != "overlayable") {
+      if (resource_type != kPublicGroupTag && resource_type != kStagingPublicGroupTag &&
+          resource_type != "overlayable") {
         if (!maybe_name) {
           diag_->Error(DiagMessage(out_resource->source)
                        << "<" << parser->element_name() << "> missing 'name' attribute");
@@ -751,7 +759,7 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
     // table.
     std::unique_ptr<Id> id = util::make_unique<Id>();
     id->SetSource(source_.WithLine(begin_xml_line));
-    table_->AddResource(name, {}, {}, std::move(id), diag_);
+    table_->AddResource(NewResourceBuilder(name).SetValue(std::move(id)).Build(), diag_);
   };
 
   // Process the raw value.
@@ -890,54 +898,45 @@ bool ResourceParser::ParsePublic(xml::XmlPullParser* parser, ParsedResource* out
   return true;
 }
 
-bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource* out_resource) {
-  if (options_.visibility) {
-    diag_->Error(DiagMessage(out_resource->source)
-                 << "<public-group> tag not allowed with --visibility flag");
-    return false;
-  }
-
+template <typename Func>
+bool static ParseGroupImpl(xml::XmlPullParser* parser, ParsedResource* out_resource,
+                           const char* tag_name, IDiagnostics* diag, Func&& func) {
   if (out_resource->config != ConfigDescription::DefaultConfig()) {
-    diag_->Warn(DiagMessage(out_resource->source)
-                << "ignoring configuration '" << out_resource->config
-                << "' for <public-group> tag");
+    diag->Warn(DiagMessage(out_resource->source)
+               << "ignoring configuration '" << out_resource->config << "' for <" << tag_name
+               << "> tag");
   }
 
   Maybe<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type");
   if (!maybe_type) {
-    diag_->Error(DiagMessage(out_resource->source)
-                 << "<public-group> must have a 'type' attribute");
+    diag->Error(DiagMessage(out_resource->source)
+                << "<" << tag_name << "> must have a 'type' attribute");
     return false;
   }
 
   const ResourceType* parsed_type = ParseResourceType(maybe_type.value());
   if (!parsed_type) {
-    diag_->Error(DiagMessage(out_resource->source) << "invalid resource type '"
-                                                   << maybe_type.value()
-                                                   << "' in <public-group>");
+    diag->Error(DiagMessage(out_resource->source)
+                << "invalid resource type '" << maybe_type.value() << "' in <" << tag_name << ">");
     return false;
   }
 
-  Maybe<StringPiece> maybe_id_str =
-      xml::FindNonEmptyAttribute(parser, "first-id");
+  Maybe<StringPiece> maybe_id_str = xml::FindNonEmptyAttribute(parser, "first-id");
   if (!maybe_id_str) {
-    diag_->Error(DiagMessage(out_resource->source)
-                 << "<public-group> must have a 'first-id' attribute");
+    diag->Error(DiagMessage(out_resource->source)
+                << "<" << tag_name << "> must have a 'first-id' attribute");
     return false;
   }
 
-  Maybe<ResourceId> maybe_id =
-      ResourceUtils::ParseResourceId(maybe_id_str.value());
+  Maybe<ResourceId> maybe_id = ResourceUtils::ParseResourceId(maybe_id_str.value());
   if (!maybe_id) {
-    diag_->Error(DiagMessage(out_resource->source) << "invalid resource ID '"
-                                                   << maybe_id_str.value()
-                                                   << "' in <public-group>");
+    diag->Error(DiagMessage(out_resource->source)
+                << "invalid resource ID '" << maybe_id_str.value() << "' in <" << tag_name << ">");
     return false;
   }
-
-  ResourceId next_id = maybe_id.value();
 
   std::string comment;
+  ResourceId next_id = maybe_id.value();
   bool error = false;
   const size_t depth = parser->depth();
   while (xml::XmlPullParser::NextChildNode(parser, depth)) {
@@ -949,51 +948,70 @@ bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource
       continue;
     }
 
-    const Source item_source = source_.WithLine(parser->line_number());
+    const Source item_source = out_resource->source.WithLine(parser->line_number());
     const std::string& element_namespace = parser->element_namespace();
     const std::string& element_name = parser->element_name();
     if (element_namespace.empty() && element_name == "public") {
-      Maybe<StringPiece> maybe_name =
-          xml::FindNonEmptyAttribute(parser, "name");
+      auto maybe_name = xml::FindNonEmptyAttribute(parser, "name");
       if (!maybe_name) {
-        diag_->Error(DiagMessage(item_source)
-                     << "<public> must have a 'name' attribute");
+        diag->Error(DiagMessage(item_source) << "<public> must have a 'name' attribute");
         error = true;
         continue;
       }
 
       if (xml::FindNonEmptyAttribute(parser, "id")) {
-        diag_->Error(DiagMessage(item_source)
-                     << "'id' is ignored within <public-group>");
+        diag->Error(DiagMessage(item_source) << "'id' is ignored within <" << tag_name << ">");
         error = true;
         continue;
       }
 
       if (xml::FindNonEmptyAttribute(parser, "type")) {
-        diag_->Error(DiagMessage(item_source)
-                     << "'type' is ignored within <public-group>");
+        diag->Error(DiagMessage(item_source) << "'type' is ignored within <" << tag_name << ">");
         error = true;
         continue;
       }
 
-      ParsedResource child_resource;
-      child_resource.name.type = *parsed_type;
-      child_resource.name.entry = maybe_name.value().to_string();
-      child_resource.id = next_id;
-      // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
-      child_resource.comment = std::move(comment);
-      child_resource.source = item_source;
-      child_resource.visibility_level = Visibility::Level::kPublic;
-      out_resource->child_resources.push_back(std::move(child_resource));
+      ParsedResource& entry_res = out_resource->child_resources.emplace_back(ParsedResource{
+          .name = ResourceName{{}, *parsed_type, maybe_name.value().to_string()},
+          .source = item_source,
+          .id = next_id,
+          .comment = std::move(comment),
+      });
 
-      next_id.id += 1;
+      // Execute group specific code.
+      func(entry_res, next_id);
 
+      next_id.id++;
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
-      diag_->Error(DiagMessage(item_source) << ":" << element_name << ">");
+      diag->Error(DiagMessage(item_source) << ":" << element_name << ">");
       error = true;
     }
   }
   return !error;
+}
+
+bool ResourceParser::ParseStagingPublicGroup(xml::XmlPullParser* parser,
+                                             ParsedResource* out_resource) {
+  return ParseGroupImpl(parser, out_resource, kStagingPublicGroupTag, diag_,
+                        [](ParsedResource& parsed_entry, ResourceId id) {
+                          parsed_entry.id = id;
+                          parsed_entry.staged_api = true;
+                          parsed_entry.visibility_level = Visibility::Level::kPublic;
+                        });
+}
+
+bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  if (options_.visibility) {
+    diag_->Error(DiagMessage(out_resource->source)
+                 << "<" << kPublicGroupTag << "> tag not allowed with --visibility flag");
+    return false;
+  }
+
+  return ParseGroupImpl(parser, out_resource, kPublicGroupTag, diag_,
+                        [](ParsedResource& parsed_entry, ResourceId id) {
+                          parsed_entry.id = id;
+                          parsed_entry.visibility_level = Visibility::Level::kPublic;
+                        });
 }
 
 bool ResourceParser::ParseSymbolImpl(xml::XmlPullParser* parser,

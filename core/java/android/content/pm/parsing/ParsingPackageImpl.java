@@ -382,12 +382,18 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     private int autoRevokePermissions;
 
-    protected int gwpAsanMode;
-    protected int memtagMode;
+    @ApplicationInfo.GwpAsanMode
+    private int gwpAsanMode;
+
+    @ApplicationInfo.MemtagMode
+    private int memtagMode;
+
+    @ApplicationInfo.NativeHeapZeroInitialized
+    private int nativeHeapZeroInitialized;
 
     @Nullable
     @DataClass.ParcelWith(ForBoolean.class)
-    private Boolean nativeHeapZeroInit;
+    private Boolean requestOptimizedExternalStorageAccess;
 
     // TODO(chiuwinson): Non-null
     @Nullable
@@ -1067,7 +1073,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.zygotePreloadName = zygotePreloadName;
         appInfo.setGwpAsanMode(gwpAsanMode);
         appInfo.setMemtagMode(memtagMode);
-        appInfo.setNativeHeapZeroInit(nativeHeapZeroInit);
+        appInfo.setNativeHeapZeroInitialized(nativeHeapZeroInitialized);
+        appInfo.setRequestOptimizedExternalStorageAccess(requestOptimizedExternalStorageAccess);
         appInfo.setBaseCodePath(mBaseApkPath);
         appInfo.setBaseResourcePath(mBaseApkPath);
         appInfo.setCodePath(mPath);
@@ -1202,7 +1209,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeLong(this.mBooleans);
         dest.writeMap(this.mProperties);
         dest.writeInt(this.memtagMode);
-        sForBoolean.parcel(this.nativeHeapZeroInit, dest, flags);
+        dest.writeInt(this.nativeHeapZeroInitialized);
+        sForBoolean.parcel(this.requestOptimizedExternalStorageAccess, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1325,7 +1333,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.mBooleans = in.readLong();
         this.mProperties = in.createTypedArrayMap(Property.CREATOR);
         this.memtagMode = in.readInt();
-        this.nativeHeapZeroInit = sForBoolean.unparcel(in);
+        this.nativeHeapZeroInitialized = in.readInt();
+        this.requestOptimizedExternalStorageAccess = sForBoolean.unparcel(in);
         assignDerivedFields();
     }
 
@@ -2089,20 +2098,28 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return getBoolean(Booleans.DIRECT_BOOT_AWARE);
     }
 
+    @ApplicationInfo.GwpAsanMode
     @Override
     public int getGwpAsanMode() {
         return gwpAsanMode;
     }
 
+    @ApplicationInfo.MemtagMode
     @Override
     public int getMemtagMode() {
         return memtagMode;
     }
 
+    @ApplicationInfo.NativeHeapZeroInitialized
+    @Override
+    public int getNativeHeapZeroInitialized() {
+        return nativeHeapZeroInitialized;
+    }
+
     @Nullable
     @Override
-    public Boolean isNativeHeapZeroInit() {
-        return nativeHeapZeroInit;
+    public Boolean hasRequestOptimizedExternalStorageAccess() {
+        return requestOptimizedExternalStorageAccess;
     }
 
     @Override
@@ -2537,23 +2554,29 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setGwpAsanMode(int value) {
+    public ParsingPackageImpl setGwpAsanMode(@ApplicationInfo.GwpAsanMode int value) {
         gwpAsanMode = value;
         return this;
     }
 
     @Override
-    public ParsingPackageImpl setMemtagMode(int value) {
+    public ParsingPackageImpl setMemtagMode(@ApplicationInfo.MemtagMode int value) {
         memtagMode = value;
         return this;
     }
 
     @Override
-    public ParsingPackageImpl setNativeHeapZeroInit(@Nullable Boolean value) {
-        nativeHeapZeroInit = value;
+    public ParsingPackageImpl setNativeHeapZeroInitialized(
+            @ApplicationInfo.NativeHeapZeroInitialized int value) {
+        nativeHeapZeroInitialized = value;
         return this;
     }
 
+    @Override
+    public ParsingPackageImpl setRequestOptimizedExternalStorageAccess(@Nullable Boolean value) {
+        requestOptimizedExternalStorageAccess = value;
+        return this;
+    }
     @Override
     public ParsingPackageImpl setPartiallyDirectBootAware(boolean value) {
         return setBoolean(Booleans.PARTIALLY_DIRECT_BOOT_AWARE, value);

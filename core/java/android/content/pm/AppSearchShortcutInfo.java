@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -216,9 +217,8 @@ public class AppSearchShortcutInfo extends GenericDocument {
     @NonNull
     public static AppSearchShortcutInfo instance(@NonNull final ShortcutInfo shortcutInfo) {
         Objects.requireNonNull(shortcutInfo);
-        return new Builder(shortcutInfo.getId())
+        return new Builder(shortcutInfo.getPackage(), shortcutInfo.getId())
                 .setActivity(shortcutInfo.getActivity())
-                .setNamespace(shortcutInfo.getPackage())
                 .setShortLabel(shortcutInfo.getShortLabel())
                 .setShortLabelResId(shortcutInfo.getShortLabelResourceId())
                 .setShortLabelResName(shortcutInfo.getTitleResName())
@@ -327,12 +327,25 @@ public class AppSearchShortcutInfo extends GenericDocument {
         return si;
     }
 
+    /**
+     * @hide
+     */
+    @NonNull
+    public static List<GenericDocument> toGenericDocuments(
+            @NonNull final Collection<ShortcutInfo> shortcuts) {
+        final List<GenericDocument> docs = new ArrayList<>(shortcuts.size());
+        for (ShortcutInfo si : shortcuts) {
+            docs.add(AppSearchShortcutInfo.instance(si));
+        }
+        return docs;
+    }
+
     /** @hide */
     @VisibleForTesting
     public static class Builder extends GenericDocument.Builder<Builder> {
 
-        public Builder(String id) {
-            super(id, SCHEMA_TYPE);
+        public Builder(String packageName, String id) {
+            super(/*namespace=*/ packageName, id, SCHEMA_TYPE);
         }
 
         /**
@@ -553,16 +566,6 @@ public class AppSearchShortcutInfo extends GenericDocument {
         public Builder setExtras(@Nullable final PersistableBundle extras) {
             if (extras != null) {
                 setPropertyBytes(KEY_EXTRAS, transformToByteArray(extras));
-            }
-            return this;
-        }
-
-        /**
-         * @hide
-         */
-        public Builder setPackageName(@Nullable final String packageName) {
-            if (!TextUtils.isEmpty(packageName)) {
-                setNamespace(packageName);
             }
             return this;
         }

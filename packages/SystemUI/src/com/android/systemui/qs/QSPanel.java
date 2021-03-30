@@ -391,20 +391,13 @@ public class QSPanel extends LinearLayout implements Tunable {
         index++;
 
         if (mSecurityFooter != null) {
-            LinearLayout.LayoutParams layoutParams =
-                    (LayoutParams) mSecurityFooter.getLayoutParams();
             if (mUsingHorizontalLayout && mHeaderContainer != null) {
                 // Adding the security view to the header, that enables us to avoid scrolling
-                layoutParams.width = 0;
-                layoutParams.weight = 1.6f;
-                switchToParent(mSecurityFooter, mHeaderContainer, 1 /* always in second place */);
+                switchToParent(mSecurityFooter, mHeaderContainer, 0);
             } else {
-                layoutParams.width = LayoutParams.WRAP_CONTENT;
-                layoutParams.weight = 0;
                 switchToParent(mSecurityFooter, parent, index);
                 index++;
             }
-            mSecurityFooter.setLayoutParams(layoutParams);
         }
 
         if (mFooter != null) {

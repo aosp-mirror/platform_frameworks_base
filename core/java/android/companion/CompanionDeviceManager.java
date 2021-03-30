@@ -25,6 +25,7 @@ import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.Application;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
@@ -331,6 +332,33 @@ public final class CompanionDeviceManager {
     }
 
     /**
+     * Checks whether the bluetooth device represented by the mac address was recently associated
+     * with the companion app. This allows these devices to skip the Bluetooth pairing dialog if
+     * their pairing variant is {@link BluetoothDevice#PAIRING_VARIANT_CONSENT}.
+     *
+     * @param packageName the package name of the calling app
+     * @param deviceMacAddress the bluetooth device's mac address
+     * @param userId the calling user's identifier
+     * @return true if it was recently associated and we can bypass the dialog, false otherwise
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public boolean canPairWithoutPrompt(@NonNull String packageName,
+            @NonNull String deviceMacAddress, int userId) {
+        if (!checkFeaturePresent()) {
+            return false;
+        }
+        Objects.requireNonNull(packageName, "package name cannot be null");
+        Objects.requireNonNull(deviceMacAddress, "device mac address cannot be null");
+        try {
+            return mService.canPairWithoutPrompt(packageName, deviceMacAddress, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Register to receive callbacks whenever the associated device comes in and out of range.
      *
      * The provided device must be {@link #associate associated} with the calling app before
@@ -397,6 +425,32 @@ public final class CompanionDeviceManager {
                     mContext.getPackageName(), deviceAddress);
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+        }
+    }
+
+    /**
+     * Associates given device with given app for the given user directly, without UI prompt.
+     *
+     * @return whether successful
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES)
+    public boolean associate(
+            @NonNull String packageName,
+            @NonNull MacAddress macAddress) {
+        if (!checkFeaturePresent()) {
+            return false;
+        }
+        Objects.requireNonNull(packageName, "package name cannot be null");
+        Objects.requireNonNull(macAddress, "mac address cannot be null");
+
+        UserHandle user = android.os.Process.myUserHandle();
+        try {
+            return mService.createAssociation(
+                    packageName, macAddress.toString(), user.getIdentifier());
+        } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }

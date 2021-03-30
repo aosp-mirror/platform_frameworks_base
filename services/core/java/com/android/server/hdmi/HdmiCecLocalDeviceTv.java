@@ -47,6 +47,7 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -210,11 +211,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    boolean dispatchMessage(HdmiCecMessage message) {
+    @VisibleForTesting
+    @Constants.HandleMessageResult
+    protected int dispatchMessage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (mService.isPowerStandby() && !mService.isWakeUpMessageReceived()
                 && mStandbyHandler.handleCommand(message)) {
-            return true;
+            return Constants.HANDLED;
         }
         return super.onMessage(message);
     }
@@ -409,7 +412,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleActiveSource(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int logicalAddress = message.getSource();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
@@ -429,21 +433,22 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             HdmiLogger.debug("Input not ready for device: %X; buffering the command", info.getId());
             mDelayedMessageBuffer.add(message);
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleInactiveSource(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleInactiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #10
 
         // Ignore <Inactive Source> from non-active source device.
         if (getActiveSource().logicalAddress != message.getSource()) {
-            return true;
+            return Constants.HANDLED;
         }
         if (isProhibitMode()) {
-            return true;
+            return Constants.HANDLED;
         }
         int portId = getPrevPortId();
         if (portId != Constants.INVALID_PORT_ID) {
@@ -452,10 +457,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             HdmiDeviceInfo inactiveSource = mService.getHdmiCecNetwork().getCecDeviceInfo(
                     message.getSource());
             if (inactiveSource == null) {
-                return true;
+                return Constants.HANDLED;
             }
             if (mService.pathToPortId(inactiveSource.getPhysicalAddress()) == portId) {
-                return true;
+                return Constants.HANDLED;
             }
             // TODO: Switch the TV freeze mode off
 
@@ -468,29 +473,31 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             setActivePath(Constants.INVALID_PHYSICAL_ADDRESS);
             mService.invokeInputChangeListener(HdmiDeviceInfo.INACTIVE_DEVICE);
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleRequestActiveSource(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRequestActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #19
         if (mAddress == getActiveSource().logicalAddress) {
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildActiveSource(mAddress, getActivePath()));
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleGetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!broadcastMenuLanguage(mService.getLanguage())) {
             Slog.w(TAG, "Failed to respond to <Get Menu Language>: " + message.toString());
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @ServiceThreadOnly
@@ -506,7 +513,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
-    protected boolean handleReportPhysicalAddress(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleReportPhysicalAddress(HdmiCecMessage message) {
         super.handleReportPhysicalAddress(message);
         int path = HdmiUtils.twoBytesToInt(message.getParams());
         int address = message.getSource();
@@ -516,19 +524,21 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             handleNewDeviceAtTheTailOfActivePath(path);
         }
         startNewDeviceAction(ActiveSource.of(address, path), type);
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
-    protected boolean handleTimerStatus(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleTimerStatus(HdmiCecMessage message) {
         // Do nothing.
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
-    protected boolean handleRecordStatus(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRecordStatus(HdmiCecMessage message) {
         // Do nothing.
-        return true;
+        return Constants.HANDLED;
     }
 
     void startNewDeviceAction(ActiveSource activeSource, int deviceType) {
@@ -546,8 +556,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             }
         }
 
-        addAndStartAction(new NewDeviceAction(this, activeSource.logicalAddress,
-                activeSource.physicalAddress, deviceType));
+        if (!mService.isPowerStandbyOrTransient()) {
+            addAndStartAction(new NewDeviceAction(this, activeSource.logicalAddress,
+                    activeSource.physicalAddress, deviceType));
+        }
     }
 
     private boolean handleNewDeviceAtTheTailOfActivePath(int path) {
@@ -590,7 +602,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleRoutingChange(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRoutingChange(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #21
         byte[] params = message.getParams();
@@ -601,27 +614,29 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             int newPath = HdmiUtils.twoBytesToInt(params, 2);
             addAndStartAction(new RoutingControlAction(this, newPath, true, null));
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleReportAudioStatus(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleReportAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (mService.getHdmiCecVolumeControl()
                 == HdmiControlManager.VOLUME_CONTROL_DISABLED) {
-            return false;
+            return Constants.ABORT_REFUSED;
         }
 
         boolean mute = HdmiUtils.isAudioStatusMute(message);
         int volume = HdmiUtils.getAudioStatusVolume(message);
         setAudioStatus(mute, volume);
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleTextViewOn(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleTextViewOn(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
         // Note that <Text View On> (and <Image View On>) command won't be handled here in
@@ -634,12 +649,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (mService.isPowerStandbyOrTransient() && getAutoWakeup()) {
             mService.wakeUp();
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleImageViewOn(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleImageViewOn(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Currently, it's the same as <Text View On>.
         return handleTextViewOn(message);
@@ -695,10 +711,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onNewAvrAdded(HdmiDeviceInfo avr) {
         assertRunOnServiceThread();
-        addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
-        if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
-                && !hasAction(SetArcTransmissionStateAction.class)) {
-            startArcAction(true);
+        if (!mService.isPowerStandbyOrTransient()) {
+            addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
+            if (isConnected(avr.getPortId()) && isArcFeatureEnabled(avr.getPortId())
+                    && !hasAction(SetArcTransmissionStateAction.class)) {
+                startArcAction(true);
+            }
         }
     }
 
@@ -977,7 +995,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleInitiateArc(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleInitiateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
         if (!canStartArcUpdateAction(message.getSource(), true)) {
@@ -985,13 +1004,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             if (avrDeviceInfo == null) {
                 // AVR may not have been discovered yet. Delay the message processing.
                 mDelayedMessageBuffer.add(message);
-                return true;
+                return Constants.HANDLED;
             }
-            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             if (!isConnectedToArcPort(avrDeviceInfo.getPhysicalAddress())) {
                 displayOsd(OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT);
             }
-            return true;
+            return Constants.ABORT_REFUSED;
         }
 
         // In case where <Initiate Arc> is started by <Request ARC Initiation>
@@ -1000,7 +1018,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getSource(), true);
         addAndStartAction(action);
-        return true;
+        return Constants.HANDLED;
     }
 
     private boolean canStartArcUpdateAction(int avrAddress, boolean enabled) {
@@ -1022,11 +1040,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleTerminateArc(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleTerminateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (mService .isPowerStandbyOrTransient()) {
             setArcStatus(false);
-            return true;
+            return Constants.HANDLED;
         }
         // Do not check ARC configuration since the AVR might have been already removed.
         // Clean up RequestArcTerminationAction in case <Terminate Arc> was started by
@@ -1035,12 +1054,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getSource(), false);
         addAndStartAction(action);
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleSetSystemAudioMode(HdmiCecMessage message) {
         assertRunOnServiceThread();
         boolean systemAudioStatus = HdmiUtils.parseCommandParamSystemAudioStatus(message);
         if (!isMessageForSystemAudio(message)) {
@@ -1049,30 +1069,29 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mDelayedMessageBuffer.add(message);
             } else {
                 HdmiLogger.warning("Invalid <Set System Audio Mode> message:" + message);
-                mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+                return Constants.ABORT_REFUSED;
             }
-            return true;
         } else if (systemAudioStatus && !isSystemAudioControlFeatureEnabled()) {
             HdmiLogger.debug("Ignoring <Set System Audio Mode> message "
                     + "because the System Audio Control feature is disabled: %s", message);
-            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
-            return true;
+            return Constants.ABORT_REFUSED;
         }
         removeAction(SystemAudioAutoInitiationAction.class);
         SystemAudioActionFromAvr action = new SystemAudioActionFromAvr(this,
                 message.getSource(), systemAudioStatus, null);
         addAndStartAction(action);
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleSystemAudioModeStatus(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleSystemAudioModeStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
             HdmiLogger.warning("Invalid <System Audio Mode Status> message:" + message);
             // Ignore this message.
-            return true;
+            return Constants.HANDLED;
         }
         boolean tvSystemAudioMode = isSystemAudioControlFeatureEnabled();
         boolean avrSystemAudioMode = HdmiUtils.parseCommandParamSystemAudioStatus(message);
@@ -1089,13 +1108,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             setSystemAudioMode(tvSystemAudioMode);
         }
 
-        return true;
+        return Constants.HANDLED;
     }
 
     // Seq #53
     @Override
     @ServiceThreadOnly
-    protected boolean handleRecordTvScreen(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRecordTvScreen(HdmiCecMessage message) {
         List<OneTouchRecordAction> actions = getActions(OneTouchRecordAction.class);
         if (!actions.isEmpty()) {
             // Assumes only one OneTouchRecordAction.
@@ -1107,25 +1127,21 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             }
             // The default behavior of <Record TV Screen> is replying <Feature Abort> with
             // "Cannot provide source".
-            mService.maySendFeatureAbortCommand(message, Constants.ABORT_CANNOT_PROVIDE_SOURCE);
-            return true;
+            return Constants.ABORT_CANNOT_PROVIDE_SOURCE;
         }
 
         int recorderAddress = message.getSource();
         byte[] recordSource = mService.invokeRecordRequestListener(recorderAddress);
-        int reason = startOneTouchRecord(recorderAddress, recordSource);
-        if (reason != Constants.ABORT_NO_ERROR) {
-            mService.maySendFeatureAbortCommand(message, reason);
-        }
-        return true;
+        return startOneTouchRecord(recorderAddress, recordSource);
     }
 
     @Override
-    protected boolean handleTimerClearedStatus(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleTimerClearedStatus(HdmiCecMessage message) {
         byte[] params = message.getParams();
         int timerClearedStatusData = params[0] & 0xFF;
         announceTimerRecordingResult(message.getSource(), timerClearedStatusData);
-        return true;
+        return Constants.HANDLED;
     }
 
     void announceOneTouchRecordResult(int recorderAddress, int result) {
@@ -1251,6 +1267,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // Remove recording actions.
         removeAction(OneTouchRecordAction.class);
         removeAction(TimerRecordingAction.class);
+        removeAction(NewDeviceAction.class);
 
         disableSystemAudioIfExist();
         disableArcIfExist();
@@ -1291,10 +1308,18 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         setArcStatus(false);
 
         // Seq #44.
-        removeAction(RequestArcInitiationAction.class);
+        removeAllRunningArcAction();
         if (!hasAction(RequestArcTerminationAction.class) && isArcEstablished()) {
             addAndStartAction(new RequestArcTerminationAction(this, avr.getLogicalAddress()));
         }
+    }
+
+    @ServiceThreadOnly
+    private void removeAllRunningArcAction() {
+        // Running or pending actions make TV fail to broadcast <Standby> to connected devices
+        removeAction(RequestArcTerminationAction.class);
+        removeAction(RequestArcInitiationAction.class);
+        removeAction(SetArcTransmissionStateAction.class);
     }
 
     @Override
@@ -1337,6 +1362,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     // Seq #54 and #55
     @ServiceThreadOnly
+    @Constants.HandleMessageResult
     int startOneTouchRecord(int recorderAddress, byte[] recordSource) {
         assertRunOnServiceThread();
         if (!mService.isControlEnabled()) {
@@ -1362,7 +1388,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         addAndStartAction(new OneTouchRecordAction(this, recorderAddress, recordSource));
         Slog.i(TAG, "Start new [One Touch Record]-Target:" + recorderAddress + ", recordSource:"
                 + Arrays.toString(recordSource));
-        return Constants.ABORT_NO_ERROR;
+        return Constants.HANDLED;
     }
 
     @ServiceThreadOnly
@@ -1494,9 +1520,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
-    protected boolean handleMenuStatus(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleMenuStatus(HdmiCecMessage message) {
         // Do nothing and just return true not to prevent from responding <Feature Abort>.
-        return true;
+        return Constants.HANDLED;
     }
 
     @Constants.RcProfile

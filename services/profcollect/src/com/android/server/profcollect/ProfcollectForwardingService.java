@@ -30,6 +30,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
@@ -295,10 +297,56 @@ public final class ProfcollectForwardingService extends SystemService {
             return;
         }
 
-        try {
-            mIProfcollect.report();
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, e.getMessage());
+        final boolean uploadReport =
+                DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                                        "upload_report", false);
+
+        new Thread(() -> {
+            try {
+                String reportUuid = mIProfcollect.report();
+
+                if (!uploadReport) {
+                    return;
+                }
+
+                final int profileId = getBBProfileId();
+                mIProfcollect.copy_report_to_bb(profileId, reportUuid);
+                String reportPath =
+                        "/data/user/" + profileId
+                        + "/com.google.android.apps.internal.betterbug/cache/"
+                        + reportUuid + ".zip";
+                Intent uploadIntent =
+                        new Intent("com.google.android.apps.betterbug.intent.action.UPLOAD_PROFILE")
+                        .setPackage("com.google.android.apps.internal.betterbug")
+                        .putExtra("EXTRA_DESTINATION", "PROFCOLLECT")
+                        .putExtra("EXTRA_PACKAGE_NAME", getContext().getPackageName())
+                        .putExtra("EXTRA_PROFILE_PATH", reportPath)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                Context context = getContext();
+                if (context.getPackageManager().queryBroadcastReceivers(uploadIntent, 0) != null) {
+                    context.sendBroadcast(uploadIntent);
+                }
+                mIProfcollect.delete_report(reportUuid);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, e.getMessage());
+            }
+        }).start();
+    }
+
+    /**
+     * Get BetterBug's profile ID. It is the work profile ID, if it exists. Otherwise the system
+     * user ID.
+     *
+     * @return BetterBug's profile ID.
+     */
+    private int getBBProfileId() {
+        UserManager userManager = UserManager.get(getContext());
+        int[] profiles = userManager.getProfileIds(UserHandle.USER_SYSTEM, false);
+        for (int p : profiles) {
+            if (userManager.getUserInfo(p).isManagedProfile()) {
+                return p;
+            }
         }
+        return UserHandle.USER_SYSTEM;
     }
 }

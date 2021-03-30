@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"காலை வரை"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> வரை"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"ஒளிர்வைக் குறைத்தல்"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC முடக்கப்பட்டது"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC இயக்கப்பட்டது"</string>
@@ -652,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"டெமோ முறையைக் காட்டு"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ஈதர்நெட்"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"அலாரம்"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"வாலட்"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"தயாராக உள்ளது"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"பணிக் கணக்கு"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"விமானப் பயன்முறை"</string>
     <string name="add_tile" msgid="6239678623873086686">"டைலைச் சேர்க்கும்"</string>

@@ -425,15 +425,9 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
                                      io::IFileCollection* files,
                                      const std::vector<std::shared_ptr<Overlayable>>& overlayables,
                                      ResourceTable* out_table, std::string* out_error) {
-  Maybe<uint8_t> id;
-  if (pb_package.has_package_id()) {
-    id = static_cast<uint8_t>(pb_package.package_id().id());
-  }
-
   std::map<ResourceId, ResourceNameRef> id_index;
 
-  ResourceTablePackage* pkg =
-      out_table->CreatePackageAllowingDuplicateNames(pb_package.package_name(), id);
+  ResourceTablePackage* pkg = out_table->FindOrCreatePackage(pb_package.package_name());
   for (const pb::Type& pb_type : pb_package.type()) {
     const ResourceType* res_type = ParseResourceType(pb_type.name());
     if (res_type == nullptr) {
@@ -444,17 +438,15 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
     }
 
     ResourceTableType* type = pkg->FindOrCreateType(*res_type);
-    if (pb_type.has_type_id()) {
-      type->id = static_cast<uint8_t>(pb_type.type_id().id());
-    }
 
     for (const pb::Entry& pb_entry : pb_type.entry()) {
-      ResourceEntry* entry;
-      if (pb_entry.has_entry_id()) {
-        auto entry_id = static_cast<uint16_t>(pb_entry.entry_id().id());
-        entry = type->FindOrCreateEntry(pb_entry.name(), entry_id);
-      } else {
-        entry = type->FindOrCreateEntry(pb_entry.name());
+      ResourceEntry* entry = type->CreateEntry(pb_entry.name());
+      const ResourceId resource_id(
+          pb_package.has_package_id() ? static_cast<uint8_t>(pb_package.package_id().id()) : 0u,
+          pb_type.has_type_id() ? static_cast<uint8_t>(pb_type.type_id().id()) : 0u,
+          pb_entry.has_entry_id() ? static_cast<uint16_t>(pb_entry.entry_id().id()) : 0u);
+      if (resource_id.id != 0u) {
+        entry->id = resource_id;
       }
 
       // Deserialize the symbol status (public/private with source and comments).
@@ -464,6 +456,7 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
           DeserializeSourceFromPb(pb_visibility.source(), src_pool, &entry->visibility.source);
         }
         entry->visibility.comment = pb_visibility.comment();
+        entry->visibility.staged_api = pb_visibility.staged_api();
 
         const Visibility::Level level = DeserializeVisibilityFromPb(pb_visibility.level());
         entry->visibility.level = level;

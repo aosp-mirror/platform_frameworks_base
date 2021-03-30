@@ -206,6 +206,12 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
     }
 
+    private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
+    static {
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
+    }
+
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
 
     private static final String ACTION_TRACK = "com.android.fitness.TRACK";
@@ -272,7 +278,7 @@ final class DefaultPermissionGrantPolicy {
             try {
                 return mContext.getPackageManager().getPermissionInfo(permissionName, 0);
             } catch (NameNotFoundException e) {
-                Slog.e(TAG, "Permission not found: " + permissionName);
+                Slog.w(TAG, "Permission not found: " + permissionName);
                 return null;
             }
         }
@@ -731,7 +737,7 @@ final class DefaultPermissionGrantPolicy {
                 grantPermissionsToSystemPackage(pm, packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
                         ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
@@ -740,7 +746,7 @@ final class DefaultPermissionGrantPolicy {
             // Also grant location and activity recognition permission to location extra packages.
             for (String packageName : locationExtraPackageNames) {
                 grantPermissionsToSystemPackage(pm, packageName, userId,
-                        ALWAYS_LOCATION_PERMISSIONS);
+                        ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
                         ACTIVITY_RECOGNITION_PERMISSIONS);
             }
@@ -809,7 +815,7 @@ final class DefaultPermissionGrantPolicy {
         // Companion devices
         grantSystemFixedPermissionsToSystemPackage(pm,
                 CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, userId,
-                ALWAYS_LOCATION_PERMISSIONS);
+                ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
 
         // Ringtone Picker
         grantSystemFixedPermissionsToSystemPackage(pm,
@@ -1722,6 +1728,14 @@ final class DefaultPermissionGrantPolicy {
         @Override
         public void grantPermission(@NonNull String permission, @NonNull PackageInfo pkg,
                 @NonNull UserHandle user) {
+            if (PermissionManager.DEBUG_TRACE_GRANTS
+                    && PermissionManager.shouldTraceGrant(
+                    pkg.packageName, permission, user.getIdentifier())) {
+                Log.i(PermissionManager.LOG_TAG_TRACE_GRANTS,
+                        "PregrantPolicy is granting " + pkg.packageName + " "
+                                + permission + " for user " + user.getIdentifier(),
+                        new RuntimeException());
+            }
             PermissionState state = getPermissionState(permission, pkg, user);
             state.initGranted();
             state.newGranted = true;

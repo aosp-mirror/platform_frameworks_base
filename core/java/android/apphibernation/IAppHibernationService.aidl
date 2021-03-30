@@ -25,4 +25,5 @@ interface IAppHibernationService {
     void setHibernatingForUser(String packageName, int userId, boolean isHibernating);
     boolean isHibernatingGlobally(String packageName);
     void setHibernatingGlobally(String packageName, boolean isHibernating);
+    List<String> getHibernatingPackagesForUser(int userId);
 }

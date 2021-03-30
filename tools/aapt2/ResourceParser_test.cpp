@@ -831,25 +831,38 @@ TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
 
   Maybe<ResourceTable::SearchResult> result = table_.FindResource(test::ParseNameOrDie("attr/foo"));
   ASSERT_TRUE(result);
-
-  ASSERT_TRUE(result.value().package->id);
-  ASSERT_TRUE(result.value().type->id);
   ASSERT_TRUE(result.value().entry->id);
-  ResourceId actual_id(result.value().package->id.value(),
-                       result.value().type->id.value(),
-                       result.value().entry->id.value());
-  EXPECT_THAT(actual_id, Eq(ResourceId(0x01010040)));
+  EXPECT_THAT(result.value().entry->id.value(), Eq(ResourceId(0x01010040)));
+
+  result = table_.FindResource(test::ParseNameOrDie("attr/bar"));
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result.value().entry->id);
+  EXPECT_THAT(result.value().entry->id.value(), Eq(ResourceId(0x01010041)));
+}
+
+TEST_F(ResourceParserTest, StagingPublicGroup) {
+  std::string input = R"(
+      <staging-public-group type="attr" first-id="0x01ff0049">
+        <public name="foo" />
+        <public name="bar" />
+      </staging-public-group>)";
+  ASSERT_TRUE(TestParse(input));
+
+  Maybe<ResourceTable::SearchResult> result = table_.FindResource(test::ParseNameOrDie("attr/foo"));
+  ASSERT_TRUE(result);
+
+  ASSERT_TRUE(result.value().entry->id);
+  EXPECT_THAT(result.value().entry->id.value(), Eq(ResourceId(0x01ff0049)));
+  EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
+  EXPECT_TRUE(result.value().entry->visibility.staged_api);
 
   result = table_.FindResource(test::ParseNameOrDie("attr/bar"));
   ASSERT_TRUE(result);
 
-  ASSERT_TRUE(result.value().package->id);
-  ASSERT_TRUE(result.value().type->id);
   ASSERT_TRUE(result.value().entry->id);
-  actual_id = ResourceId(result.value().package->id.value(),
-                         result.value().type->id.value(),
-                         result.value().entry->id.value());
-  EXPECT_THAT(actual_id, Eq(ResourceId(0x01010041)));
+  EXPECT_THAT(result.value().entry->id.value(), Eq(ResourceId(0x01ff004a)));
+  EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
+  EXPECT_TRUE(result.value().entry->visibility.staged_api);
 }
 
 TEST_F(ResourceParserTest, StrongestSymbolVisibilityWins) {

@@ -81,6 +81,7 @@ import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
+import android.window.WindowContext;
 
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.compat.IPlatformCompatNative;
@@ -395,7 +396,7 @@ public abstract class Context {
      *
      * @hide
      */
-    public static final int BIND_ALLOW_NETWORK_ACCESS = 0x00020000;
+    public static final int BIND_BYPASS_POWER_NETWORK_RESTRICTIONS = 0x00020000;
 
     /**
      * Flag for {@link #bindService}: allow background foreground service starts from the bound
@@ -655,12 +656,21 @@ public abstract class Context {
     /**
      * Add a new {@link ComponentCallbacks} to the base application of the
      * Context, which will be called at the same times as the ComponentCallbacks
-     * methods of activities and other components are called.  Note that you
+     * methods of activities and other components are called. Note that you
      * <em>must</em> be sure to use {@link #unregisterComponentCallbacks} when
      * appropriate in the future; this will not be removed for you.
+     * <p>
+     * After {@link Build.VERSION_CODES#S}, Registering the ComponentCallbacks to Context created
+     * via {@link #createWindowContext(int, Bundle)} or
+     * {@link #createWindowContext(Display, int, Bundle)} will receive
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from Window Context rather
+     * than its base application. It is helpful if you want to handle UI components that
+     * associated with the Window Context when the Window Context has configuration changes.</p>
      *
      * @param callback The interface to call.  This can be either a
      * {@link ComponentCallbacks} or {@link ComponentCallbacks2} interface.
+     *
+     * @see Context#createWindowContext(int, Bundle)
      */
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         getApplicationContext().registerComponentCallbacks(callback);
@@ -876,6 +886,15 @@ public abstract class Context {
      * @return the attribution tag this context is for or {@code null} if this is the default.
      */
     public @Nullable String getAttributionTag() {
+        return null;
+    }
+
+    /**
+     * @return The identity of this context for permission purposes.
+     *
+     * @see AttributionSource
+     */
+    public @NonNull AttributionSource getAttributionSource() {
         return null;
     }
 
@@ -6358,6 +6377,16 @@ public abstract class Context {
      * windowContext.getSystemService(WindowManager.class).addView(overlayView, mParams);
      * </pre>
      * <p>
+     * After {@link Build.VERSION_CODES#S}, window context provides the capability to listen to its
+     * {@link Configuration} changes by calling
+     * {@link #registerComponentCallbacks(ComponentCallbacks)}, while other kinds of {@link Context}
+     * will register the {@link ComponentCallbacks} to {@link #getApplicationContext() its
+     * Application context}. Note that window context only propagate
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} callback.
+     * {@link ComponentCallbacks#onLowMemory()} or other callbacks in {@link ComponentCallbacks2}
+     * won't be invoked.
+     * </p>
+     * <p>
      * Note that using {@link android.app.Application} or {@link android.app.Service} context for
      * UI-related queries may result in layout or continuity issues on devices with variable screen
      * sizes (e.g. foldables) or in multi-window modes, since these non-UI contexts may not reflect
@@ -6445,8 +6474,10 @@ public abstract class Context {
      * @removed
      */
     @Deprecated
-    public @NonNull Context createFeatureContext(@Nullable String featureId) {
-        return createAttributionContext(featureId);
+    public @NonNull Context createFeatureContext(@Nullable String attributionTag) {
+        return createContext(new ContextParams.Builder()
+                .setAttributionTag(attributionTag)
+                .build());
     }
 
     /**
@@ -6774,4 +6805,15 @@ public abstract class Context {
     public boolean isUiContext() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
+
+    /**
+     * Called when a {@link Context} is going to be released.
+     * This method can be overridden to perform the final cleanups, such as release
+     * {@link BroadcastReceiver} registrations.
+     *
+     * @see WindowContext#destroy()
+     *
+     * @hide
+     */
+    public void destroy() { }
 }

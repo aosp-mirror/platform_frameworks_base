@@ -23,7 +23,6 @@ import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_IC
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_SETTINGS;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_SYSUI;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_THEME_PICKER;
-import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_NEUTRAL_PALETTE;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SHAPE;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SYSTEM_PALETTE;
 import static com.android.systemui.theme.ThemeOverlayApplier.SETTINGS_PACKAGE;
@@ -116,8 +115,6 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_ACCENT_COLOR, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_SYSTEM_PALETTE,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_SYSTEM_PALETTE, false),
-                        createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_NEUTRAL_PALETTE,
-                                ANDROID_PACKAGE, OVERLAY_CATEGORY_NEUTRAL_PALETTE, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_FONT,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_FONT, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_SHAPE,
@@ -128,8 +125,6 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_ACCENT_COLOR, true),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_SYSTEM_PALETTE,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_SYSTEM_PALETTE, true),
-                        createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_NEUTRAL_PALETTE,
-                                ANDROID_PACKAGE, OVERLAY_CATEGORY_NEUTRAL_PALETTE, true),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_FONT,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_FONT, true),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_SHAPE,

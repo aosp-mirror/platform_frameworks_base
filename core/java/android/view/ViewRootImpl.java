@@ -330,7 +330,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean mUseBLASTAdapter;
     private boolean mForceDisableBLAST;
-    private boolean mEnableTripleBuffering;
 
     private boolean mFastScrollSoundEffectsEnabled;
 
@@ -474,6 +473,7 @@ public final class ViewRootImpl implements ViewParent,
         FrameInfo frameInfo = mChoreographer.mFrameInfo;
         mViewFrameInfo.populateFrameInfo(frameInfo);
         mViewFrameInfo.reset();
+        mInputEventAssigner.notifyFrameProcessed();
         return frameInfo;
     }
 
@@ -1179,9 +1179,6 @@ public final class ViewRootImpl implements ViewParent,
                 if ((res & WindowManagerGlobal.ADD_FLAG_USE_BLAST) != 0) {
                     mUseBLASTAdapter = true;
                 }
-                if ((res & WindowManagerGlobal.ADD_FLAG_USE_TRIPLE_BUFFERING) != 0) {
-                    mEnableTripleBuffering = true;
-                }
 
                 if (view instanceof RootViewSurfaceTaker) {
                     mInputQueueCallback =
@@ -1373,17 +1370,10 @@ public final class ViewRootImpl implements ViewParent,
             // can be used by code on the system process to escape that and enable
             // HW accelerated drawing.  (This is basically for the lock screen.)
 
-            final boolean fakeHwAccelerated = (attrs.privateFlags &
-                    WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED) != 0;
             final boolean forceHwAccelerated = (attrs.privateFlags &
                     WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED) != 0;
 
-            if (fakeHwAccelerated) {
-                // This is exclusively for the preview windows the window manager
-                // shows for launching applications, so they will look more like
-                // the app being launched.
-                mAttachInfo.mHardwareAccelerationRequested = true;
-            } else if (ThreadedRenderer.sRendererEnabled || forceHwAccelerated) {
+            if (ThreadedRenderer.sRendererEnabled || forceHwAccelerated) {
                 if (mAttachInfo.mThreadedRenderer != null) {
                     mAttachInfo.mThreadedRenderer.destroy();
                 }
@@ -1907,7 +1897,7 @@ public final class ViewRootImpl implements ViewParent,
         Surface ret = null;
         if (mBlastBufferQueue == null) {
             mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl, width, height,
-                    format, mEnableTripleBuffering);
+                    format);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.createSurface();
@@ -3354,8 +3344,9 @@ public final class ViewRootImpl implements ViewParent,
         }
         // TODO (b/131181940): Make sure this doesn't leak Activity with mActivityConfigCallback
         // config changes.
+        final View focusedView = mView != null ? mView.findFocus() : null;
         if (hasWindowFocus) {
-            mInsetsController.onWindowFocusGained();
+            mInsetsController.onWindowFocusGained(focusedView != null /* hasViewFocused */);
         } else {
             mInsetsController.onWindowFocusLost();
         }
@@ -3404,8 +3395,7 @@ public final class ViewRootImpl implements ViewParent,
 
             // Note: must be done after the focus change callbacks,
             // so all of the view state is set up correctly.
-            mImeFocusController.onPostWindowFocus(mView != null ? mView.findFocus() : null,
-                    hasWindowFocus, mWindowAttributes);
+            mImeFocusController.onPostWindowFocus(focusedView, hasWindowFocus, mWindowAttributes);
 
             if (hasWindowFocus) {
                 // Clear the forward bit.  We can just do this directly, since
@@ -4303,7 +4293,7 @@ public final class ViewRootImpl implements ViewParent,
                 mChoreographer.getFrameTimeNanos() / TimeUtils.NANOS_PER_MS;
 
         boolean useAsyncReport = false;
-        if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty) {
+        if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty || mNextDrawUseBlastSync) {
             if (isHardwareEnabled()) {
                 // If accessibility focus moved, always invalidate the root.
                 boolean invalidateRoot = accessibilityFocusDirty || mInvalidateRootRequested;
@@ -7764,7 +7754,7 @@ public final class ViewRootImpl implements ViewParent,
      * {@inheritDoc}
      */
     @Override
-    public void playSoundEffect(int effectId) {
+    public void playSoundEffect(@SoundEffectConstants.SoundEffect int effectId) {
         checkThread();
 
         try {
@@ -8502,11 +8492,6 @@ public final class ViewRootImpl implements ViewParent,
             consumedBatches = false;
         }
         doProcessInputEvents();
-        if (consumedBatches) {
-            // Must be done after we processed the input events, to mark the completion of the frame
-            // from the input point of view
-            mInputEventAssigner.onChoreographerCallback();
-        }
         return consumedBatches;
     }
 

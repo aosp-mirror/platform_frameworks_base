@@ -182,11 +182,13 @@ import android.app.PropertyInvalidatedCache;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
+import android.app.job.JobParameters;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -212,7 +214,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProcessInfo;
@@ -223,6 +224,7 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -253,11 +255,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
-import android.os.PowerWhitelistManager.ReasonCode;
-import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -339,7 +341,11 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.DisplayThread;
@@ -366,6 +372,7 @@ import com.android.server.graphics.fonts.FontManagerInternal;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.os.NativeTombstoneManager;
 import com.android.server.pm.Installer;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
@@ -1120,24 +1127,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ContentProviderHelper mCpHelper;
 
     CoreSettingsObserver mCoreSettingsObserver;
-
-    /**
-     * Thread-local storage used to carry caller permissions over through
-     * indirect content-provider access.
-     */
-    private class Identity {
-        public final IBinder token;
-        public final int pid;
-        public final int uid;
-
-        Identity(IBinder _token, int _pid, int _uid) {
-            token = _token;
-            pid = _pid;
-            uid = _uid;
-        }
-    }
-
-    private static final ThreadLocal<Identity> sCallerIdentity = new ThreadLocal<Identity>();
 
     /**
      * All information we have collected about the runtime performance of
@@ -2603,8 +2592,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final ProcessRecord getProcessRecordLocked(String processName, int uid, boolean keepIfLarge) {
-        return mProcessList.getProcessRecordLocked(processName, uid, keepIfLarge);
+    final ProcessRecord getProcessRecordLocked(String processName, int uid) {
+        return mProcessList.getProcessRecordLocked(processName, uid);
     }
 
     @GuardedBy(anyOf = {"this", "mProcLock"})
@@ -2638,8 +2627,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     false /* knownToBeDead */, 0 /* intentFlags */,
                     sNullHostingRecord  /* hostingRecord */, ZYGOTE_POLICY_FLAG_EMPTY,
                     true /* allowWhileBooting */, true /* isolated */,
-                    uid, true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
-                    crashHandler);
+                    uid, abiOverride, entryPoint, entryPointArgs, crashHandler);
             return proc != null;
         }
     }
@@ -2648,10 +2636,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
             HostingRecord hostingRecord, int zygotePolicyFlags, boolean allowWhileBooting,
-            boolean isolated, boolean keepIfLarge) {
+            boolean isolated) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
                 hostingRecord, zygotePolicyFlags, allowWhileBooting, isolated, 0 /* isolatedUid */,
-                keepIfLarge, null /* ABI override */, null /* entryPoint */,
+                null /* ABI override */, null /* entryPoint */,
                 null /* entryPointArgs */, null /* crashHandler */);
     }
 
@@ -2970,9 +2958,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     final void handleAppDiedLocked(ProcessRecord app, int pid,
-            boolean restarting, boolean allowRestart) {
+            boolean restarting, boolean allowRestart, boolean fromBinderDied) {
         boolean kept = cleanUpApplicationRecordLocked(app, pid, restarting, allowRestart, -1,
-                false /*replacingPid*/);
+                false /*replacingPid*/, fromBinderDied);
         if (!kept && !restarting) {
             removeLruProcessLocked(app);
             if (pid > 0) {
@@ -3030,12 +3018,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     final void appDiedLocked(ProcessRecord app, int pid, IApplicationThread thread,
             boolean fromBinderDied, String reason) {
         // First check if this ProcessRecord is actually active for the pid.
+        final ProcessRecord curProc;
         synchronized (mPidsSelfLocked) {
-            ProcessRecord curProc = mPidsSelfLocked.get(pid);
-            if (curProc != app) {
+            curProc = mPidsSelfLocked.get(pid);
+        }
+        if (curProc != app) {
+            if (!fromBinderDied || !mProcessList.handleDyingAppDeathLocked(app, pid)) {
                 Slog.w(TAG, "Spurious death for " + app + ", curProc for " + pid + ": " + curProc);
-                return;
             }
+            return;
         }
 
         mBatteryStatsService.noteProcessDied(app.info.uid, pid);
@@ -3075,7 +3066,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             EventLogTags.writeAmProcDied(app.userId, pid, app.processName, setAdj, setProcState);
             if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
                 "Dying app: " + app + ", pid: " + pid + ", thread: " + thread.asBinder());
-            handleAppDiedLocked(app, pid, false, true);
+            handleAppDiedLocked(app, pid, false, true, fromBinderDied);
 
             if (doOomAdj) {
                 updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
@@ -3490,7 +3481,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     // Clear its scheduled jobs
                     JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
-                    js.cancelJobsForUid(appInfo.uid, "clear data");
+                    // Clearing data is akin to uninstalling. The app is force stopped before we
+                    // get to this point, so the reason won't be checked by the app.
+                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER, "clear data");
 
                     // Clear its pending alarms
                     AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
@@ -3902,7 +3895,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Only the system server can kill an application
         if (callerUid == SYSTEM_UID) {
             synchronized (this) {
-                ProcessRecord app = getProcessRecordLocked(processName, uid, true);
+                ProcessRecord app = getProcessRecordLocked(processName, uid);
                 IApplicationThread thread;
                 if (app != null && (thread = app.getThread()) != null) {
                     try {
@@ -4230,7 +4223,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 EventLog.writeEvent(0x534e4554, "131105245", app.getStartUid(), msg);
                 // If there is already an app occupying that pid that hasn't been cleaned up
                 cleanUpApplicationRecordLocked(app, pid, false, false, -1,
-                        true /*replacingPid*/);
+                        true /*replacingPid*/, false /* fromBinderDied */);
                 removePidLocked(pid, app);
                 app = null;
             }
@@ -4272,7 +4265,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If this application record is still attached to a previous
         // process, clean it up now.
         if (app.getThread() != null) {
-            handleAppDiedLocked(app, pid, true, true);
+            handleAppDiedLocked(app, pid, true, true, false /* fromBinderDied */);
         }
 
         // Tell the process all about itself.
@@ -4475,7 +4468,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.unlinkDeathRecipient();
             app.killLocked("error during bind", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
                     true);
-            handleAppDiedLocked(app, pid, false, true);
+            handleAppDiedLocked(app, pid, false, true, false /* fromBinderDied */);
             return false;
         }
 
@@ -4540,7 +4533,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (badApp) {
             app.killLocked("error during init", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
                     true);
-            handleAppDiedLocked(app, pid, false, true);
+            handleAppDiedLocked(app, pid, false, true, false /* fromBinderDied */);
             return false;
         }
 
@@ -5339,26 +5332,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return checkComponentPermission(permission, pid, uid, -1, true);
     }
 
-    @Override
-    public int checkPermissionWithToken(String permission, int pid, int uid, IBinder callerToken) {
-        if (permission == null) {
-            return PackageManager.PERMISSION_DENIED;
-        }
-
-        // We might be performing an operation on behalf of an indirect binder
-        // invocation, e.g. via {@link #openContentUri}.  Check and adjust the
-        // client identity accordingly before proceeding.
-        Identity tlsIdentity = sCallerIdentity.get();
-        if (tlsIdentity != null && tlsIdentity.token == callerToken) {
-            Slog.d(TAG, "checkComponentPermission() adjusting {pid,uid} to {"
-                    + tlsIdentity.pid + "," + tlsIdentity.uid + "}");
-            uid = tlsIdentity.uid;
-            pid = tlsIdentity.pid;
-        }
-
-        return checkComponentPermission(permission, pid, uid, -1, true);
-    }
-
     /**
      * Binder IPC calls go through the public entry point.
      * This can be called with or without the global lock held.
@@ -5612,14 +5585,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     public int checkUriPermission(Uri uri, int pid, int uid,
             final int modeFlags, int userId, IBinder callerToken) {
         enforceNotIsolatedCaller("checkUriPermission");
-
-        // Another redirected-binder-call permissions check as in
-        // {@link checkPermissionWithToken}.
-        Identity tlsIdentity = sCallerIdentity.get();
-        if (tlsIdentity != null && tlsIdentity.token == callerToken) {
-            uid = tlsIdentity.uid;
-            pid = tlsIdentity.pid;
-        }
 
         // Our own process gets to do everything.
         if (pid == MY_PID) {
@@ -6098,7 +6063,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
-                    info.uid, true);
+                    info.uid);
         } else {
             app = null;
         }
@@ -6154,23 +6119,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.getCallingUid(), "*opencontent*", userId);
         ParcelFileDescriptor pfd = null;
         if (cph != null) {
-            // We record the binder invoker's uid in thread-local storage before
-            // going to the content provider to open the file.  Later, in the code
-            // that handles all permissions checks, we look for this uid and use
-            // that rather than the Activity Manager's own uid.  The effect is that
-            // we do the check against the caller's permissions even though it looks
-            // to the content provider like the Activity Manager itself is making
-            // the request.
-            Binder token = new Binder();
-            sCallerIdentity.set(new Identity(
-                    token, Binder.getCallingPid(), Binder.getCallingUid()));
             try {
-                pfd = cph.provider.openFile(null, null, uri, "r", null, token);
+                // This method is exposed to the VNDK and to avoid changing its
+                // signature we just use the first package in the UID. For shared
+                // UIDs we may blame the wrong app but that is Okay as they are
+                // in the same security/privacy sandbox.
+                final AndroidPackage androidPackage = mPackageManagerInt
+                        .getPackage(Binder.getCallingUid());
+                if (androidPackage == null) {
+                    return null;
+                }
+                final AttributionSource attributionSource = new AttributionSource(
+                        Binder.getCallingUid(), androidPackage.getPackageName(), null);
+                pfd = cph.provider.openFile(attributionSource, uri, "r", null);
             } catch (FileNotFoundException e) {
                 // do nothing; pfd will be returned null
             } finally {
-                // Ensure that whatever happens, we clean up the identity state
-                sCallerIdentity.remove();
                 // Ensure we're done with the provider.
                 mCpHelper.removeContentProviderExternalUnchecked(name, null, userId);
             }
@@ -7703,9 +7667,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void handleApplicationCrashInner(String eventType, ProcessRecord r, String processName,
             ApplicationErrorReport.CrashInfo crashInfo) {
-        boolean isIncremental = false;
         float loadingProgress = 1;
-        long millisSinceOldestPendingRead = 0;
+        IncrementalMetrics incrementalMetrics = null;
         // Notify package manager service to possibly update package state
         if (r != null && r.info != null && r.info.packageName != null) {
             final String codePath = r.info.getCodePath();
@@ -7716,8 +7679,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (incrementalStatesInfo != null) {
                 loadingProgress = incrementalStatesInfo.getProgress();
             }
-            isIncremental = IncrementalManager.isIncrementalPath(codePath);
-            if (isIncremental) {
+            if (IncrementalManager.isIncrementalPath(codePath)) {
                 // Report in the main log about the incremental package
                 Slog.e(TAG, "App crashed on incremental package " + r.info.packageName
                         + " which is " + ((int) (loadingProgress * 100)) + "% loaded.");
@@ -7726,8 +7688,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (incrementalService != null) {
                     final IncrementalManager incrementalManager = new IncrementalManager(
                             IIncrementalService.Stub.asInterface(incrementalService));
-                    IncrementalMetrics metrics = incrementalManager.getMetrics(codePath);
-                    millisSinceOldestPendingRead = metrics.getMillisSinceOldestPendingRead();
+                    incrementalMetrics = incrementalManager.getMetrics(codePath);
                 }
             }
         }
@@ -7757,7 +7718,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
                         : (r != null) ? r.getProcessClassEnum()
                                       : ServerProtoEnums.ERROR_SOURCE_UNKNOWN,
-                isIncremental, loadingProgress, millisSinceOldestPendingRead
+                incrementalMetrics != null /* isIncremental */, loadingProgress,
+                incrementalMetrics != null ? incrementalMetrics.getMillisSinceOldestPendingRead()
+                        : -1
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
@@ -7770,7 +7733,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         addErrorToDropBox(
-                eventType, r, processName, null, null, null, null, null, null, crashInfo);
+                eventType, r, processName, null, null, null, null, null, null, crashInfo,
+                new Float(loadingProgress), incrementalMetrics);
 
         mAppErrors.crashApplication(r, crashInfo);
     }
@@ -7952,7 +7916,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         FrameworkStatsLog.write(FrameworkStatsLog.WTF_OCCURRED, callingUid, tag, processName,
                 callingPid, (r != null) ? r.getProcessClassEnum() : 0);
 
-        addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo);
+        addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo,
+                null, null);
 
         return r;
     }
@@ -7977,7 +7942,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (Pair<String, ApplicationErrorReport.CrashInfo> p = list.poll();
                 p != null; p = list.poll()) {
             addErrorToDropBox("wtf", proc, "system_server", null, null, null, p.first, null, null,
-                    p.second);
+                    p.second, null, null);
         }
     }
 
@@ -8066,12 +8031,15 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param report in long form describing the error, null if absent
      * @param dataFile text file to include in the report, null if none
      * @param crashInfo giving an application stack trace, null if absent
+     * @param loadingProgress the loading progress of an installed package, range in [0, 1].
+     * @param incrementalMetrics metrics for apps installed on Incremental.
      */
     public void addErrorToDropBox(String eventType,
             ProcessRecord process, String processName, String activityShortComponentName,
             String parentShortComponentName, ProcessRecord parentProcess,
             String subject, final String report, final File dataFile,
-            final ApplicationErrorReport.CrashInfo crashInfo) {
+            final ApplicationErrorReport.CrashInfo crashInfo,
+            @Nullable Float loadingProgress, @Nullable IncrementalMetrics incrementalMetrics) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
 
@@ -8131,6 +8099,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (crashInfo != null && crashInfo.crashTag != null && !crashInfo.crashTag.isEmpty()) {
             sb.append("Crash-Tag: ").append(crashInfo.crashTag).append("\n");
+        }
+        if (loadingProgress != null) {
+            sb.append("Loading-Progress: ").append(loadingProgress.floatValue()).append("\n");
+        }
+        if (incrementalMetrics != null) {
+            sb.append("Incremental: Yes").append("\n");
+            final long millisSinceOldestPendingRead =
+                    incrementalMetrics.getMillisSinceOldestPendingRead();
+            if (millisSinceOldestPendingRead > 0) {
+                sb.append("Millis-Since-Oldest-Pending-Read: ").append(
+                        millisSinceOldestPendingRead).append("\n");
+            }
         }
         sb.append("\n");
 
@@ -11482,7 +11462,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     final boolean cleanUpApplicationRecordLocked(ProcessRecord app, int pid,
-            boolean restarting, boolean allowRestart, int index, boolean replacingPid) {
+            boolean restarting, boolean allowRestart, int index, boolean replacingPid,
+            boolean fromBinderDied) {
         boolean restart;
         synchronized (mProcLock) {
             if (index >= 0) {
@@ -11490,7 +11471,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessList.remove(pid);
             }
 
-            restart = app.onCleanupApplicationRecordLSP(mProcessStats, allowRestart);
+            // We don't want to unlinkDeathRecipient immediately, if it's not called from binder
+            // and it's not isolated, as we'd need the signal to bookkeeping the dying process list.
+            restart = app.onCleanupApplicationRecordLSP(mProcessStats, allowRestart,
+                    fromBinderDied || app.isolated /* unlinkDeath */);
         }
         mAppProfiler.onCleanupApplicationRecordLocked(app);
         skipCurrentReceiverLocked(app);
@@ -11520,25 +11504,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessList.scheduleDispatchProcessDiedLocked(pid, app.info.uid);
 
         // If this is a preceding instance of another process instance
-        allowRestart = true;
-        synchronized (app) {
-            if (app.mSuccessor != null) {
-                // We don't allow restart with this ProcessRecord now,
-                // because we have created a new one already.
-                allowRestart = false;
-                // If it's persistent, add the successor to mPersistentStartingProcesses
-                if (app.isPersistent() && !app.isRemoved()) {
-                    if (mPersistentStartingProcesses.indexOf(app.mSuccessor) < 0) {
-                        mPersistentStartingProcesses.add(app.mSuccessor);
-                    }
-                }
-                // clean up the field so the successor's proc starter could proceed.
-                app.mSuccessor.mPredecessor = null;
-                app.mSuccessor = null;
-                // Notify if anyone is waiting for it.
-                app.notifyAll();
-            }
-        }
+        allowRestart = mProcessList.handlePrecedingAppDiedLocked(app);
 
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
@@ -11914,7 +11880,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessRecord proc = startProcessLocked(app.processName, app,
                     false, 0,
                     new HostingRecord("backup", hostingName),
-                    ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS, false, false, false);
+                    ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS, false, false);
             if (proc == null) {
                 Slog.e(TAG, "Unable to start backup agent process " + r);
                 return false;
@@ -13624,7 +13590,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessRecord app;
             synchronized (mProcLock) {
                 if (noRestart) {
-                    app = getProcessRecordLocked(ai.processName, ai.uid, true);
+                    app = getProcessRecordLocked(ai.processName, ai.uid);
                 } else {
                     // Instrumentation can kill and relaunch even persistent processes
                     forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false,
@@ -13667,7 +13633,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ApplicationInfo targetInfo) {
         ProcessRecord pr;
         synchronized (this) {
-            pr = getProcessRecordLocked(targetInfo.processName, targetInfo.uid, true);
+            pr = getProcessRecordLocked(targetInfo.processName, targetInfo.uid);
         }
 
         try {
@@ -14634,7 +14600,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 didSomething = true;
-                cleanUpApplicationRecordLocked(app, pid, false, true, -1, false /*replacingPid*/);
+                cleanUpApplicationRecordLocked(app, pid, false, true, -1, false /*replacingPid*/,
+                        false /* fromBinderDied */);
                 mProcessList.mRemovedProcesses.remove(i);
 
                 if (app.isPersistent()) {
@@ -15414,8 +15381,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void killProcess(String processName, int uid, String reason) {
             synchronized (ActivityManagerService.this) {
-                final ProcessRecord proc = getProcessRecordLocked(processName, uid,
-                        true /* keepIfLarge */);
+                final ProcessRecord proc = getProcessRecordLocked(processName, uid);
                 if (proc != null) {
                     mProcessList.removeProcessLocked(proc, false /* callerWillRestart */,
                             true /* allowRestart */,  ApplicationExitInfo.REASON_OTHER, reason);
@@ -15822,7 +15788,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
                             new HostingRecord(hostingType, hostingName, isTop),
                             ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE, false /* allowWhileBooting */,
-                            false /* isolated */, true /* keepIfLarge */);
+                            false /* isolated */);
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -16282,7 +16248,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private void updateApplicationInfoLOSP(@NonNull List<String> packagesToUpdate, int userId) {
         final boolean updateFrameworkRes = packagesToUpdate.contains("android");
         if (updateFrameworkRes) {
-            PackageParser.readConfigUseRoundIcon(null);
+            ParsingPackageUtils.readConfigUseRoundIcon(null);
         }
         mProcessList.updateApplicationInfoLOSP(packagesToUpdate, userId, updateFrameworkRes);
 
@@ -16630,6 +16596,74 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return superImpl.apply(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
                     message, shouldCollectMessage);
+        }
+
+        @Override
+        public int noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean shouldCollectAsyncNotedOp, @Nullable String message,
+                boolean shouldCollectMessage, boolean skiProxyOperation,
+                @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
+                                Boolean, Integer> superImpl) {
+            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
+                        attributionSource.getUid()), Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(code, new AttributionSource(shellUid,
+                            "com.android.shell", attributionSource.getAttributionTag(),
+                            attributionSource.getNext()),
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            skiProxyOperation);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, attributionSource, shouldCollectAsyncNotedOp,
+                    message, shouldCollectMessage, skiProxyOperation);
+        }
+
+        @Override
+        public int startProxyOperation(IBinder token, int code,
+                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                boolean skipProsyOperation, @NonNull OctFunction<IBinder, Integer,
+                        AttributionSource, Boolean, Boolean, String, Boolean, Boolean,
+                        Integer> superImpl) {
+            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
+                        attributionSource.getUid()), Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(token, code, new AttributionSource(shellUid,
+                                    "com.android.shell", attributionSource.getAttributionTag(),
+                                    attributionSource.getNext()), startIfModeDefault,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            skipProsyOperation);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(token, code, attributionSource, startIfModeDefault,
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProsyOperation);
+        }
+
+        @Override
+        public void finishProxyOperation(IBinder clientId, int code,
+                @NonNull AttributionSource attributionSource,
+                @NonNull TriFunction<IBinder, Integer, AttributionSource, Void> superImpl) {
+            if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(
+                        attributionSource.getUid()), Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    superImpl.apply(clientId, code, new AttributionSource(shellUid,
+                            "com.android.shell", attributionSource.getAttributionTag(),
+                            attributionSource.getNext()));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            superImpl.apply(clientId, code, attributionSource);
         }
 
         private boolean isTargetOp(int code) {

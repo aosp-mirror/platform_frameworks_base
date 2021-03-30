@@ -1507,6 +1507,26 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isCloneProfile(@UserIdInt int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isCloneProfile");
+        synchronized (mUsersLock) {
+            UserInfo userInfo = getUserInfoLU(userId);
+            return userInfo != null && userInfo.isCloneProfile();
+        }
+    }
+
+    @Override
+    public boolean sharesMediaWithParent(@UserIdInt int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "sharesMediaWithParent");
+        synchronized (mUsersLock) {
+            UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
+            return userTypeDetails != null ? userTypeDetails.isProfile()
+                    && userTypeDetails.sharesMediaWithParent() : false;
+        }
+    }
+
+    @Override
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
                 "isUserUnlockingOrUnlocked");

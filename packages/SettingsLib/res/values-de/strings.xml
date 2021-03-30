@@ -424,8 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (Rot-Grün-Sehschwäche)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (Blau-Gelb-Sehschwäche)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farbkorrektur"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (2333641630205214702) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Hier kannst du anpassen, wie Farben auf deinem Gerät dargestellt werden sollen. Das kann in folgenden Fällen hilfreich sein:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Wenn Farben genauer dargestellt werden sollen&lt;/li&gt; &lt;li&gt;&amp;nbsp;Wenn du Farben entfernen möchtest, um dich besser konzentrieren zu können&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Noch etwa <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>

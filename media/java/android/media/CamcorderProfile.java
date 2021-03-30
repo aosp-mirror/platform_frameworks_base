@@ -16,12 +16,18 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.os.Build;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Retrieves the
@@ -276,6 +282,53 @@ public class CamcorderProfile
     private static final int QUALITY_HIGH_SPEED_LIST_END = QUALITY_HIGH_SPEED_4KDCI;
 
     /**
+     * @hide
+     */
+    @IntDef({
+        QUALITY_LOW,
+        QUALITY_HIGH,
+        QUALITY_QCIF,
+        QUALITY_CIF,
+        QUALITY_480P,
+        QUALITY_720P,
+        QUALITY_1080P,
+        QUALITY_QVGA,
+        QUALITY_2160P,
+        QUALITY_VGA,
+        QUALITY_4KDCI,
+        QUALITY_QHD,
+        QUALITY_2K,
+        QUALITY_8KUHD,
+
+        QUALITY_TIME_LAPSE_LOW ,
+        QUALITY_TIME_LAPSE_HIGH,
+        QUALITY_TIME_LAPSE_QCIF,
+        QUALITY_TIME_LAPSE_CIF,
+        QUALITY_TIME_LAPSE_480P,
+        QUALITY_TIME_LAPSE_720P,
+        QUALITY_TIME_LAPSE_1080P,
+        QUALITY_TIME_LAPSE_QVGA,
+        QUALITY_TIME_LAPSE_2160P,
+        QUALITY_TIME_LAPSE_VGA,
+        QUALITY_TIME_LAPSE_4KDCI,
+        QUALITY_TIME_LAPSE_QHD,
+        QUALITY_TIME_LAPSE_2K,
+        QUALITY_TIME_LAPSE_8KUHD,
+
+        QUALITY_HIGH_SPEED_LOW,
+        QUALITY_HIGH_SPEED_HIGH,
+        QUALITY_HIGH_SPEED_480P,
+        QUALITY_HIGH_SPEED_720P,
+        QUALITY_HIGH_SPEED_1080P,
+        QUALITY_HIGH_SPEED_2160P,
+        QUALITY_HIGH_SPEED_CIF,
+        QUALITY_HIGH_SPEED_VGA,
+        QUALITY_HIGH_SPEED_4KDCI,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Quality {}
+
+    /**
      * Default recording duration in seconds before the session is terminated.
      * This is useful for applications like MMS has limited file size requirement.
      */
@@ -385,9 +438,8 @@ public class CamcorderProfile
     public int audioChannels;
 
     /**
-     * Returns the camcorder profile for the first back-facing camera on the
-     * device at the given quality level. If the device has no back-facing
-     * camera, this returns null.
+     * Returns the default camcorder profile at the given quality level for the first back-facing
+     * camera on the device. If the device has no back-facing camera, this returns null.
      * @param quality the target quality level for the camcorder profile
      * @see #get(int, int)
      */
@@ -404,8 +456,7 @@ public class CamcorderProfile
     }
 
     /**
-     * Returns the camcorder profile for the given camera at the given
-     * quality level.
+     * Returns the default camcorder profile for the given camera at the given quality level.
      *
      * Quality levels QUALITY_LOW, QUALITY_HIGH are guaranteed to be supported, while
      * other levels may or may not be supported. The supported levels can be checked using
@@ -457,6 +508,7 @@ public class CamcorderProfile
      * @see #QUALITY_HIGH_SPEED_720P
      * @see #QUALITY_HIGH_SPEED_1080P
      * @see #QUALITY_HIGH_SPEED_2160P
+     * @throws IllegalArgumentException if quality is not one of the defined QUALITY_ values.
     */
     public static CamcorderProfile get(int cameraId, int quality) {
         if (!((quality >= QUALITY_LIST_START &&
@@ -472,7 +524,119 @@ public class CamcorderProfile
     }
 
     /**
-     * Returns true if camcorder profile exists for the first back-facing
+     * Returns all encoder profiles of a camcorder profile for the given camera at
+     * the given quality level.
+     *
+     * Quality levels QUALITY_LOW, QUALITY_HIGH are guaranteed to be supported, while
+     * other levels may or may not be supported. The supported levels can be checked using
+     * {@link #hasProfile(int, int)}.
+     * QUALITY_LOW refers to the lowest quality available, while QUALITY_HIGH refers to
+     * the highest quality available.
+     * QUALITY_LOW/QUALITY_HIGH have to match one of qcif, cif, 480p, 720p, 1080p or 2160p.
+     * E.g. if the device supports 480p, 720p, 1080p and 2160p, then low is 480p and high is
+     * 2160p.
+     *
+     * The same is true for time lapse quality levels, i.e. QUALITY_TIME_LAPSE_LOW,
+     * QUALITY_TIME_LAPSE_HIGH are guaranteed to be supported and have to match one of
+     * qcif, cif, 480p, 720p, 1080p, or 2160p.
+     *
+     * For high speed quality levels, they may or may not be supported. If a subset of the levels
+     * are supported, QUALITY_HIGH_SPEED_LOW and QUALITY_HIGH_SPEED_HIGH are guaranteed to be
+     * supported and have to match one of 480p, 720p, or 1080p.
+     *
+     * A camcorder recording session with higher quality level usually has higher output
+     * bit rate, better video and/or audio recording quality, larger video frame
+     * resolution and higher audio sampling rate, etc, than those with lower quality
+     * level.
+     *
+     * @param cameraId the id for the camera. Numeric camera ids parsed from the list received by
+     *                 invoking {@link CameraManager#getCameraIdList} can be used as long as they
+     *                 are {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE}
+     *                 and not
+     *                 {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL EXTERNAL}.
+     * @param quality the target quality level for the camcorder profile.
+     * @return null if there are no encoder profiles defined for the quality level for the
+     * given camera.
+     * @throws IllegalArgumentException if quality is not one of the defined QUALITY_ values.
+     * @see #QUALITY_LOW
+     * @see #QUALITY_HIGH
+     * @see #QUALITY_QCIF
+     * @see #QUALITY_CIF
+     * @see #QUALITY_480P
+     * @see #QUALITY_720P
+     * @see #QUALITY_1080P
+     * @see #QUALITY_2160P
+     * @see #QUALITY_TIME_LAPSE_LOW
+     * @see #QUALITY_TIME_LAPSE_HIGH
+     * @see #QUALITY_TIME_LAPSE_QCIF
+     * @see #QUALITY_TIME_LAPSE_CIF
+     * @see #QUALITY_TIME_LAPSE_480P
+     * @see #QUALITY_TIME_LAPSE_720P
+     * @see #QUALITY_TIME_LAPSE_1080P
+     * @see #QUALITY_TIME_LAPSE_2160P
+     * @see #QUALITY_HIGH_SPEED_LOW
+     * @see #QUALITY_HIGH_SPEED_HIGH
+     * @see #QUALITY_HIGH_SPEED_480P
+     * @see #QUALITY_HIGH_SPEED_720P
+     * @see #QUALITY_HIGH_SPEED_1080P
+     * @see #QUALITY_HIGH_SPEED_2160P
+    */
+    @Nullable public static EncoderProfiles getAll(
+            @NonNull String cameraId, @Quality int quality) {
+        if (!((quality >= QUALITY_LIST_START &&
+               quality <= QUALITY_LIST_END) ||
+              (quality >= QUALITY_TIME_LAPSE_LIST_START &&
+               quality <= QUALITY_TIME_LAPSE_LIST_END) ||
+               (quality >= QUALITY_HIGH_SPEED_LIST_START &&
+               quality <= QUALITY_HIGH_SPEED_LIST_END))) {
+            String errMessage = "Unsupported quality level: " + quality;
+            throw new IllegalArgumentException(errMessage);
+        }
+
+        // TODO: get all profiles
+        int id;
+        try {
+            id = Integer.valueOf(cameraId);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        CamcorderProfile cp = native_get_camcorder_profile(id, quality);
+        if (cp == null) {
+            return null;
+        };
+
+        EncoderProfiles.AudioProfile[] audioProfiles;
+        // timelapse profiles do not list audio profiles
+        if (cp.quality >= QUALITY_TIME_LAPSE_LIST_START
+                && cp.quality <= QUALITY_TIME_LAPSE_LIST_END) {
+            audioProfiles = new EncoderProfiles.AudioProfile[] { };
+        } else {
+            audioProfiles = new EncoderProfiles.AudioProfile[] {
+                new EncoderProfiles.AudioProfile(
+                        cp.audioCodec,
+                        cp.audioChannels,
+                        cp.audioSampleRate,
+                        cp.audioBitRate)
+            };
+        }
+
+        return new EncoderProfiles(
+                cp.duration,
+                cp.fileFormat,
+                new EncoderProfiles.VideoProfile[] {
+                    new EncoderProfiles.VideoProfile(
+                        cp.videoCodec,
+                        cp.videoFrameWidth,
+                        cp.videoFrameHeight,
+                        cp.videoFrameRate,
+                        cp.videoBitRate,
+                        0 /* TODO: get profile */)
+                },
+                audioProfiles);
+    }
+
+    /**
+     * Returns true if a camcorder profile exists for the first back-facing
      * camera at the given quality level.
      *
      * <p>
@@ -507,7 +671,7 @@ public class CamcorderProfile
     }
 
     /**
-     * Returns true if camcorder profile exists for the given camera at
+     * Returns true if a camcorder profile exists for the given camera at
      * the given quality level.
      *
      * <p>

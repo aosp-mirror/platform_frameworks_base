@@ -46,6 +46,7 @@ import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -71,6 +72,7 @@ import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.IPackageInstallerSessionFileSystemConnector;
 import android.content.pm.IPackageLoadingProgressCallback;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstallationFile;
 import android.content.pm.InstallationFileParcel;
 import android.content.pm.PackageInfo;
@@ -92,6 +94,7 @@ import android.content.pm.parsing.result.ParseTypeImpl;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.FileUtils;
@@ -896,6 +899,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mInstallSource.installerPackageName, mInstallerUid);
     }
 
+    private static final int USER_ACTION_NOT_NEEDED = 0;
+    private static final int USER_ACTION_REQUIRED = 1;
+    private static final int USER_ACTION_PENDING_APK_PARSING = 2;
+
+    @IntDef({USER_ACTION_NOT_NEEDED, USER_ACTION_REQUIRED, USER_ACTION_PENDING_APK_PARSING})
+    @interface
+    UserActionRequirement {}
+
     /**
      * Checks if the permissions still need to be confirmed.
      *
@@ -904,15 +915,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      *
      * @return {@code true} iff we need to ask to confirm the permissions?
      */
-    private boolean needToAskForPermissions() {
+    @UserActionRequirement
+    private int computeUserActionRequirement() {
         final String packageName;
         synchronized (mLock) {
             if (mPermissionsManuallyAccepted) {
-                return false;
+                return USER_ACTION_NOT_NEEDED;
             }
             packageName = mPackageName;
         }
 
+        final boolean forcePermissionPrompt =
+                (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0
+                        || params.requireUserAction == Boolean.TRUE;
+        if (forcePermissionPrompt) {
+            return USER_ACTION_REQUIRED;
+        }
         // It is safe to access mInstallerUid and mInstallSource without lock
         // because they are immutable after sealing.
         final boolean isInstallPermissionGranted =
@@ -924,19 +942,47 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdatePermissionGranted =
                 (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGE_UPDATES,
                         mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+        final boolean isUpdateWithoutUserActionPermissionGranted = (mPm.checkUidPermission(
+                android.Manifest.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION, mInstallerUid)
+                == PackageManager.PERMISSION_GRANTED);
         final int targetPackageUid = mPm.getPackageUid(packageName, 0, userId);
+        final boolean isUpdate = targetPackageUid != -1;
+        final InstallSourceInfo installSourceInfo = isUpdate
+                ? mPm.getInstallSourceInfo(packageName)
+                : null;
+        final String installerPackageName = installSourceInfo != null
+                ? installSourceInfo.getInstallingPackageName()
+                : null;
+        final boolean isInstallerOfRecord = isUpdate
+                && Objects.equals(installerPackageName, getInstallerPackageName());
+        final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isPermissionGranted = isInstallPermissionGranted
-                || (isUpdatePermissionGranted && targetPackageUid != -1)
-                || (isSelfUpdatePermissionGranted && targetPackageUid == mInstallerUid);
+                || (isUpdatePermissionGranted && isUpdate)
+                || (isSelfUpdatePermissionGranted && isSelfUpdate);
         final boolean isInstallerRoot = (mInstallerUid == Process.ROOT_UID);
         final boolean isInstallerSystem = (mInstallerUid == Process.SYSTEM_UID);
-        final boolean forcePermissionPrompt =
-                (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0;
 
         // Device owners and affiliated profile owners  are allowed to silently install packages, so
         // the permission check is waived if the installer is the device owner.
-        return forcePermissionPrompt || !(isPermissionGranted || isInstallerRoot
-                || isInstallerSystem || isInstallerDeviceOwnerOrAffiliatedProfileOwner());
+        final boolean noUserActionNecessary = isPermissionGranted || isInstallerRoot
+                || isInstallerSystem || isInstallerDeviceOwnerOrAffiliatedProfileOwner();
+
+        if (noUserActionNecessary) {
+            return USER_ACTION_NOT_NEEDED;
+        }
+
+        if (mPm.isInstallDisabledForPackage(installerPackageName, mInstallerUid, userId)) {
+            // show the installer to account for device poslicy or unknown sources use cases
+            return USER_ACTION_REQUIRED;
+        }
+
+        if (params.requireUserAction == Boolean.FALSE
+                && isUpdateWithoutUserActionPermissionGranted
+                && (isInstallerOfRecord || isSelfUpdate)) {
+            return USER_ACTION_PENDING_APK_PARSING;
+        }
+
+        return USER_ACTION_REQUIRED;
     }
 
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
@@ -1109,6 +1155,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     getStagedSessionErrorMessage());
             info.createdMillis = createdMillis;
             info.updatedMillis = updatedMillis;
+            info.requireUserAction = params.requireUserAction;
         }
         return info;
     }
@@ -1212,12 +1259,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                     + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
         } else {
-            // For incremental installs, continue publishing the install progress during committing.
-            mProgress = mIncrementalProgress;
+            // For incremental install, continue to publish incremental progress during committing.
+            if (isIncrementalInstallation() && (mIncrementalProgress - mProgress) >= 0.01) {
+                // It takes some time for data loader to write to incremental file system, so at the
+                // beginning of the commit, the incremental progress might be very small.
+                // Wait till the incremental progress is larger than what's already displayed.
+                // This way we don't see the progress ring going backwards.
+                mProgress = mIncrementalProgress;
+            }
         }
 
         // Only publish when meaningful change
-        if (forcePublish || Math.abs(mProgress - mReportedProgress) >= 0.01) {
+        if (forcePublish || (mProgress - mReportedProgress) >= 0.01) {
             mReportedProgress = mProgress;
             mCallback.onSessionProgressChanged(this, mProgress);
         }
@@ -2188,7 +2241,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void verifyNonStaged()
             throws PackageManagerException {
         final PackageManagerService.VerificationParams verifyingSession =
-                makeVerificationParams();
+                prepareForVerification();
         if (verifyingSession == null) {
             return;
         }
@@ -2205,7 +2258,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
                     final PackageManagerService.VerificationParams verifyingChildSession =
-                            session.makeVerificationParams();
+                            session.prepareForVerification();
                     if (verifyingChildSession != null) {
                         verifyingChildSessions.add(verifyingChildSession);
                     }
@@ -2292,51 +2345,78 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * in case permissions need to be requested before verification can proceed.
      */
     @Nullable
-    private PackageManagerService.VerificationParams makeVerificationParams()
+    private PackageManagerService.VerificationParams prepareForVerification()
             throws PackageManagerException {
         assertNotLocked("makeSessionActive");
 
+        @UserActionRequirement
+        int userActionRequirement = USER_ACTION_NOT_NEEDED;
         // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
-        if (!params.isMultiPackage && needToAskForPermissions()) {
-            // User needs to confirm installation;
-            // give installer an intent they can use to involve
-            // user.
-            final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
-            intent.setPackage(mPm.getPackageInstallerPackageName());
-            intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-
-            final IntentSender statusReceiver;
-            synchronized (mLock) {
-                statusReceiver = mRemoteStatusReceiver;
-            }
-            sendOnUserActionRequired(mContext, statusReceiver, sessionId, intent);
-
-            // Commit was keeping session marked as active until now; release
-            // that extra refcount so session appears idle.
-            closeInternal(false);
-            return null;
+        if (!params.isMultiPackage) {
+            userActionRequirement = computeUserActionRequirement();
+            if (userActionRequirement == USER_ACTION_REQUIRED) {
+                sendPendingUserActionIntent();
+                return null;
+            } // else, we'll wait until we parse to determine if we need to
         }
 
         synchronized (mLock) {
+            if (mRelinquished) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session relinquished");
+            }
+            if (mDestroyed) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session destroyed");
+            }
+            if (!mSealed) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session not sealed");
+            }
+            PackageLite result = parseApkLite();
+            if (result != null) {
+                mPackageLite = result;
+                mInternalProgress = 0.5f;
+                computeProgressLocked(true);
+
+                extractNativeLibraries(
+                        mPackageLite, stageDir, params.abiOverride, mayInheritNativeLibs());
+
+                if (userActionRequirement == USER_ACTION_PENDING_APK_PARSING
+                        && (result.getTargetSdk() < Build.VERSION_CODES.Q)) {
+                    sendPendingUserActionIntent();
+                    return null;
+                }
+            }
             return makeVerificationParamsLocked();
         }
     }
 
-    @GuardedBy("mLock")
-    private PackageManagerService.VerificationParams makeVerificationParamsLocked()
-            throws PackageManagerException {
-        if (mRelinquished) {
-            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Session relinquished");
+    private void sendPendingUserActionIntent() {
+        // User needs to confirm installation;
+        // give installer an intent they can use to involve
+        // user.
+        final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
+        intent.setPackage(mPm.getPackageInstallerPackageName());
+        intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+
+        final IntentSender statusReceiver;
+        synchronized (mLock) {
+            statusReceiver = mRemoteStatusReceiver;
         }
-        if (mDestroyed) {
-            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Session destroyed");
-        }
-        if (!mSealed) {
-            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Session not sealed");
-        }
+        sendOnUserActionRequired(mContext, statusReceiver, sessionId, intent);
+
+        // Commit was keeping session marked as active until now; release
+        // that extra refcount so session appears idle.
+        closeInternal(false);
+    }
+
+    /**
+     * Prepares staged directory with any inherited APKs and returns the parsed package.
+     */
+    @Nullable
+    private PackageLite parseApkLite() throws PackageManagerException {
+
 
         // TODO(b/136257624): Some logic in this if block probably belongs in
         //  makeInstallParams().
@@ -2345,8 +2425,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             Objects.requireNonNull(mSigningDetails);
             Objects.requireNonNull(mResolvedBaseFile);
 
-            // Inherit any packages and native libraries from existing install that
-            // haven't been overridden.
+            // If we haven't already parsed, inherit any packages and native libraries from existing
+            // install that haven't been overridden.
             if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
                 try {
                     final List<File> fromFiles = mResolvedInheritedFiles;
@@ -2398,16 +2478,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // above block. Therefore, we need to parse the complete package in stage dir here.
             // Besides, PackageLite may be null for staged sessions that don't complete pre-reboot
             // verification.
-            mPackageLite = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
-
-            // TODO: surface more granular state from dexopt
-            mInternalProgress = 0.5f;
-            computeProgressLocked(true);
-
-            extractNativeLibraries(mPackageLite, stageDir, params.abiOverride,
-                    mayInheritNativeLibs());
+            return getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
         }
+        return null;
+    }
 
+    @GuardedBy("mLock")
+    @Nullable
+    /**
+     * Returns a {@link com.android.server.pm.PackageManagerService.VerificationParams}
+     */
+    private PackageManagerService.VerificationParams makeVerificationParamsLocked() {
         final IPackageInstallObserver2 localObserver;
         if (!hasParentSessionId()) {
             // Avoid attaching this observer to child session since they won't use it.
@@ -2707,9 +2788,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * <p>
      * Note that upgrade compatibility is still performed by
      * {@link PackageManagerService}.
+     * @return a {@link PackageLite} representation of the validated APK(s).
      */
     @GuardedBy("mLock")
-    private void validateApkInstallLocked() throws PackageManagerException {
+    private PackageLite validateApkInstallLocked() throws PackageManagerException {
         ApkLite baseApk = null;
         PackageLite packageLite = null;
         mPackageLite = null;
@@ -2731,6 +2813,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Missing existing base package");
         }
+
         // Default to require only if existing base apk has fs-verity.
         mVerityFoundForApks = PackageManagerServiceUtils.isApkVerityEnabled()
                 && params.mode == SessionParams.MODE_INHERIT_EXISTING
@@ -3017,6 +3100,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mIncrementalFileStorages.disallowReadLogs();
             }
         }
+        return packageLite;
     }
 
     @GuardedBy("mLock")

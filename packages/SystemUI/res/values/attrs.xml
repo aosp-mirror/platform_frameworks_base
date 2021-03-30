@@ -124,6 +124,7 @@
     <attr name="darkIconTheme" format="reference" />
     <attr name="wallpaperTextColor" format="reference|color" />
     <attr name="wallpaperTextColorSecondary" format="reference|color" />
+    <attr name="wallpaperTextColorAccent" format="reference|color" />
     <attr name="backgroundProtectedStyle" format="reference" />
 
     <declare-styleable name="SmartReplyView">

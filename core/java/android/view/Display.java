@@ -44,6 +44,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -1066,7 +1067,47 @@ public final class Display {
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.hdrCapabilities;
+            if (mDisplayInfo.userDisabledHdrTypes.length == 0) {
+                return mDisplayInfo.hdrCapabilities;
+            }
+            ArraySet<Integer> enabledTypesSet = new ArraySet<>();
+            for (int supportedType : mDisplayInfo.hdrCapabilities.getSupportedHdrTypes()) {
+                boolean typeDisabled = false;
+                for (int userDisabledType : mDisplayInfo.userDisabledHdrTypes) {
+                    if (supportedType == userDisabledType) {
+                        typeDisabled = true;
+                        break;
+                    }
+                }
+                if (!typeDisabled) {
+                    enabledTypesSet.add(supportedType);
+                }
+            }
+            int[] enabledTypes = new int[enabledTypesSet.size()];
+            int index = 0;
+            for (int enabledType : enabledTypesSet) {
+                enabledTypes[index++] = enabledType;
+            }
+            return new HdrCapabilities(enabledTypes,
+                    mDisplayInfo.hdrCapabilities.mMaxLuminance,
+                    mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,
+                    mDisplayInfo.hdrCapabilities.mMinLuminance);
+        }
+    }
+
+    /**
+     * @hide
+     * Returns the display's HDR supported types.
+     *
+     * @see #isHdr()
+     * @see HdrCapabilities#getSupportedHdrTypes()
+     */
+    @TestApi
+    @NonNull
+    public int[] getReportedHdrTypes() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.hdrCapabilities.getSupportedHdrTypes();
         }
     }
 
@@ -1079,7 +1120,7 @@ public final class Display {
     public boolean isHdr() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.isHdr();
+            return !(getHdrCapabilities().getSupportedHdrTypes().length == 0);
         }
     }
 
@@ -1853,6 +1894,14 @@ public final class Display {
          * HDR10+ display.
          */
         public static final int HDR_TYPE_HDR10_PLUS = 4;
+
+        /** @hide */
+        public static final int[] HDR_TYPES = {
+                HDR_TYPE_DOLBY_VISION,
+                HDR_TYPE_HDR10,
+                HDR_TYPE_HLG,
+                HDR_TYPE_HDR10_PLUS
+        };
 
         /** @hide */
         @IntDef(prefix = { "HDR_TYPE_" }, value = {

@@ -92,6 +92,7 @@ import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.hardware.usb.UsbManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -124,9 +125,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
@@ -220,16 +219,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private static final String PROFILE_OFF_SUSPENSION_TITLE = "suspension_title";
     private static final String PROFILE_OFF_SUSPENSION_TEXT = "suspension_text";
     private static final String PROFILE_OFF_SUSPENSION_SOON_TEXT = "suspension_tomorrow_text";
-
-    @BeforeClass
-    public static void setUpClass() {
-        Notification.DevFlags.sForceDefaults = true;
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        Notification.DevFlags.sForceDefaults = false;
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -4017,53 +4006,59 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testUpdateNetworkPreferenceOnStartOnStopUser() throws Exception {
-        dpms.handleStartUser(CALLER_USER_HANDLE);
-        // TODO(b/178655595)
-        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
-        //         any(UserHandle.class),
-        //         anyInt(),
-        //         any(Executor.class),
-        //         any(Runnable.class)
-        //);
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        mServiceContext.permissions.add(permission.INTERACT_ACROSS_USERS_FULL);
 
-        dpms.handleStopUser(CALLER_USER_HANDLE);
-        // TODO(b/178655595)
-        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
-        //         any(UserHandle.class),
-        //         eq(ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT),
-        //         any(Executor.class),
-        //         any(Runnable.class)
-        //);
+        dpms.handleStartUser(managedProfileUserId);
+        verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
+                eq(UserHandle.of(managedProfileUserId)),
+                anyInt(),
+                any(),
+                any()
+        );
+
+        dpms.handleStopUser(managedProfileUserId);
+        verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
+                eq(UserHandle.of(managedProfileUserId)),
+                eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT),
+                any(),
+                any()
+        );
     }
 
     @Test
-    public void testGetSetNetworkSlicing() throws Exception {
+    public void testGetSetEnterpriseNetworkPreference() throws Exception {
         assertExpectException(SecurityException.class, null,
-                () -> dpm.setNetworkSlicingEnabled(false));
+                () -> dpm.setEnterpriseNetworkPreferenceEnabled(false));
 
         assertExpectException(SecurityException.class, null,
-                () -> dpm.isNetworkSlicingEnabled());
+                () -> dpm.isEnterpriseNetworkPreferenceEnabled());
 
-        setupProfileOwner();
-        dpm.setNetworkSlicingEnabled(false);
-        assertThat(dpm.isNetworkSlicingEnabled()).isFalse();
-        // TODO(b/178655595)
-        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
-        //         any(UserHandle.class),
-        //         eq(ConnectivityManager.USER_PREFERENCE_SYSTEM_DEFAULT),
-        //         any(Executor.class),
-        //         any(Runnable.class)
-        //);
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        mContext.binder.callingUid = managedProfileAdminUid;
 
-        dpm.setNetworkSlicingEnabled(true);
-        assertThat(dpm.isNetworkSlicingEnabled()).isTrue();
-        // TODO(b/178655595)
-        // verify(getServices().connectivityManager, times(1)).setNetworkPreferenceForUser(
-        //         any(UserHandle.class),
-        //         eq(ConnectivityManager.USER_PREFERENCE_ENTERPRISE),
-        //         any(Executor.class),
-        //         any(Runnable.class)
-        //);
+        dpm.setEnterpriseNetworkPreferenceEnabled(false);
+        assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isFalse();
+        verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
+                eq(UserHandle.of(managedProfileUserId)),
+                eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT),
+                any(),
+                any()
+        );
+
+        dpm.setEnterpriseNetworkPreferenceEnabled(true);
+        assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isTrue();
+        verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
+                eq(UserHandle.of(managedProfileUserId)),
+                eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE),
+                any(),
+                any()
+        );
     }
 
     @Test

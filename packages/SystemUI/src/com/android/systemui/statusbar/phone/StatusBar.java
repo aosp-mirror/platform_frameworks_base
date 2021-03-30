@@ -184,7 +184,6 @@ import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CircleReveal;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
@@ -2469,39 +2468,19 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void showChargingAnimation(int batteryLevel, int transmittingBatteryLevel,
             long animationDelay) {
-        if (mDozing || mKeyguardManager.isKeyguardLocked()) {
-            // on ambient or lockscreen, hide notification panel
-            WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
-                    transmittingBatteryLevel, batteryLevel,
-                    new WirelessChargingAnimation.Callback() {
-                        @Override
-                        public void onAnimationStarting() {
-                            mNotificationShadeWindowController.setRequestTopUi(true, TAG);
-                            CrossFadeHelper.fadeOut(mNotificationPanelViewController.getView(), 1);
-                        }
+        WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
+                transmittingBatteryLevel, batteryLevel,
+                new WirelessChargingAnimation.Callback() {
+                    @Override
+                    public void onAnimationStarting() {
+                        mNotificationShadeWindowController.setRequestTopUi(true, TAG);
+                    }
 
-                        @Override
-                        public void onAnimationEnded() {
-                            CrossFadeHelper.fadeIn(mNotificationPanelViewController.getView());
-                            mNotificationShadeWindowController.setRequestTopUi(false, TAG);
-                        }
-                    }, mDozing).show(animationDelay);
-        } else {
-            // workspace
-            WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
-                    transmittingBatteryLevel, batteryLevel,
-                    new WirelessChargingAnimation.Callback() {
-                        @Override
-                        public void onAnimationStarting() {
-                            mNotificationShadeWindowController.setRequestTopUi(true, TAG);
-                        }
-
-                        @Override
-                        public void onAnimationEnded() {
-                            mNotificationShadeWindowController.setRequestTopUi(false, TAG);
-                        }
-                    }, false).show(animationDelay);
-        }
+                    @Override
+                    public void onAnimationEnded() {
+                        mNotificationShadeWindowController.setRequestTopUi(false, TAG);
+                    }
+                }, false).show(animationDelay);
     }
 
     @Override
@@ -4224,7 +4203,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
-        if (mStatusBarKeyguardViewManager.isShowingAlternativeAuth()) {
+        if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
             mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
         } else if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,

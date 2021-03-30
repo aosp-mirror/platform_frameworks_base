@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
@@ -92,7 +91,6 @@ public class DomainVerificationService extends SystemService
      * commands.
      */
     @ChangeId
-    @Disabled
     private static final long SETTINGS_API_V2 = 178111421;
 
     /**
@@ -148,6 +146,8 @@ public class DomainVerificationService extends SystemService
     @NonNull
     private DomainVerificationProxy mProxy = new DomainVerificationProxyUnavailable();
 
+    private boolean mCanSendBroadcasts;
+
     public DomainVerificationService(@NonNull Context context, @NonNull SystemConfig systemConfig,
             @NonNull PlatformCompat platformCompat) {
         super(context);
@@ -181,11 +181,18 @@ public class DomainVerificationService extends SystemService
     @Override
     public void onBootPhase(int phase) {
         super.onBootPhase(phase);
-        if (phase != SystemService.PHASE_BOOT_COMPLETED || !hasRealVerifier()) {
+        if (!hasRealVerifier()) {
             return;
         }
 
-        verifyPackages(null, false);
+        switch (phase) {
+            case PHASE_ACTIVITY_MANAGER_READY:
+                mCanSendBroadcasts = true;
+                break;
+            case PHASE_BOOT_COMPLETED:
+                verifyPackages(null, false);
+                break;
+        }
     }
 
     @Override
@@ -284,7 +291,8 @@ public class DomainVerificationService extends SystemService
             int state) throws NameNotFoundException {
         if (state < DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED) {
             if (state != DomainVerificationState.STATE_SUCCESS) {
-                return DomainVerificationManager.ERROR_INVALID_STATE_CODE;
+                throw new IllegalArgumentException(
+                        "Caller is not allowed to set state code " + state);
             }
         }
 
@@ -857,7 +865,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (sendBroadcast) {
-            sendBroadcastForPackage(pkgName);
+            sendBroadcast(pkgName);
         }
     }
 
@@ -936,7 +944,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (sendBroadcast && hasAutoVerifyDomains) {
-            sendBroadcastForPackage(pkgName);
+            sendBroadcast(pkgName);
         }
     }
 
@@ -1097,8 +1105,19 @@ public class DomainVerificationService extends SystemService
         return mCollector;
     }
 
-    private void sendBroadcastForPackage(@NonNull String packageName) {
-        mProxy.sendBroadcastForPackages(Collections.singleton(packageName));
+    private void sendBroadcast(@NonNull String packageName) {
+        sendBroadcast(Collections.singleton(packageName));
+    }
+
+    private void sendBroadcast(@NonNull Set<String> packageNames) {
+        if (!mCanSendBroadcasts) {
+            // If the system cannot send broadcasts, it's probably still in boot, so dropping this
+            // request should be fine. The verification agent should re-scan packages once boot
+            // completes.
+            return;
+        }
+
+        mProxy.sendBroadcastForPackages(packageNames);
     }
 
     private boolean hasRealVerifier() {
@@ -1119,7 +1138,7 @@ public class DomainVerificationService extends SystemService
             @NonNull Set<String> domains, boolean forAutoVerify, int callingUid,
             @Nullable Integer userIdForFilter) throws NameNotFoundException {
         if (domainSetId == null) {
-            return GetAttachedResult.error(DomainVerificationManager.ERROR_DOMAIN_SET_ID_NULL);
+            throw new IllegalArgumentException("domainSetId cannot be null");
         }
 
         DomainVerificationPkgState pkgState = mAttachedPkgStates.get(domainSetId);
@@ -1140,9 +1159,9 @@ public class DomainVerificationService extends SystemService
         }
 
         if (CollectionUtils.isEmpty(domains)) {
-            return GetAttachedResult.error(
-                    DomainVerificationManager.ERROR_DOMAIN_SET_NULL_OR_EMPTY);
+            throw new IllegalArgumentException("Provided domain set cannot be empty");
         }
+
         AndroidPackage pkg = pkgSetting.getPkg();
         ArraySet<String> declaredDomains = forAutoVerify
                 ? mCollector.collectValidAutoVerifyDomains(pkg)
@@ -1182,7 +1201,7 @@ public class DomainVerificationService extends SystemService
         }
 
         if (!packagesToBroadcast.isEmpty()) {
-            mProxy.sendBroadcastForPackages(packagesToBroadcast);
+            sendBroadcast(packagesToBroadcast);
         }
     }
 

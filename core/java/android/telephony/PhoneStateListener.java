@@ -343,11 +343,14 @@ public class PhoneStateListener {
     /**
      *  Listen for display info changed event.
      *
-     *  Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
-     *  READ_PHONE_STATE} or that the calling app has carrier privileges (see
-     *  {@link TelephonyManager#hasCarrierPrivileges}).
+     * For clients compiled on Android 11 SDK, requires permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling app has carrier
+     * privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * For clients compiled on Android 12 SDK or newer,
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or carrier privileges is not required
+     * anymore.
      *
-     *  @see #onDisplayInfoChanged
+     * @see #onDisplayInfoChanged
      * @deprecated Use {@link TelephonyCallback.DisplayInfoListener} instead.
      */
     @Deprecated
@@ -700,6 +703,10 @@ public class PhoneStateListener {
      * calling {@link TelephonyManager#getCallState()} from within this callback may return a
      * different state than the callback reports.
      *
+     * Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} for applications
+     * targeting API level 31+.
+     *
      * @param state call state
      * @param phoneNumber call phone number. If application does not have
      * {@link android.Manifest.permission#READ_CALL_LOG READ_CALL_LOG} permission or carrier
@@ -709,6 +716,7 @@ public class PhoneStateListener {
      * @deprecated Use {@link TelephonyCallback.CallStateListener} instead.
      */
     @Deprecated
+    @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
     public void onCallStateChanged(@CallState int state, String phoneNumber) {
         // default implementation empty
     }
@@ -981,8 +989,12 @@ public class PhoneStateListener {
      * <p> The {@link TelephonyDisplayInfo} contains status information shown to the user based on
      * carrier policy.
      *
-     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling
-     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * For clients compiled on Android 11 SDK, requires permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling app has carrier
+     * privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * For clients compiled on Android 12 SDK or newer,
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or carrier privileges is not required
+     * anymore.
      *
      * @param telephonyDisplayInfo The display information.
      * @deprecated Use {@link TelephonyCallback.DisplayInfoListener} instead.

@@ -47,12 +47,14 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
+import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.server.LocalServices;
 
 import org.junit.After;
@@ -126,6 +128,10 @@ public final class PeopleServiceTest {
                 .setPredictedTargetCount(APP_PREDICTION_TARGET_COUNT)
                 .setExtras(new Bundle())
                 .build();
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.DARK_LAUNCH_REMOTE_PREDICTION_SERVICE_ENABLED,
+                Boolean.toString(false),
+                true /* makeDefault*/);
     }
 
     @After

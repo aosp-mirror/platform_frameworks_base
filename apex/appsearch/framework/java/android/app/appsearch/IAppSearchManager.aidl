@@ -21,6 +21,7 @@ import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.IAppSearchBatchResultCallback;
 import android.app.appsearch.IAppSearchResultCallback;
+import android.os.ParcelFileDescriptor;
 import com.android.internal.infra.AndroidFuture;
 
 parcelable SearchResults;
@@ -41,7 +42,8 @@ interface IAppSearchManager {
      *     incompatible documents will be deleted.
      * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
-     *     {@link AppSearchResult}&lt;{@link Void}&gt;.
+     *     {@link AppSearchResult}&lt;{@link Bundle}&gt;, where the value are
+     *     {@link SetSchemaResponse} bundle.
      */
     void setSchema(
         in String packageName,
@@ -51,6 +53,7 @@ interface IAppSearchManager {
         in Map<String, List<Bundle>> schemasPackageAccessibleBundles,
         boolean forceOverride,
         in int userId,
+        in int schemaVersion,
         in IAppSearchResultCallback callback);
 
     /**
@@ -60,10 +63,24 @@ interface IAppSearchManager {
      * @param databaseName  The name of the database to retrieve.
      * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
-     *     {@link AppSearchResult}&lt;{@link List}&lt;{@link Bundle}&gt;&gt;, where the value are
-     *     AppSearchSchema bundle.
+     *     {@link AppSearchResult}&lt;{@link Bundle}&gt; where the bundle is a GetSchemaResponse.
      */
     void getSchema(
+        in String packageName,
+        in String databaseName,
+        in int userId,
+        in IAppSearchResultCallback callback);
+
+    /**
+     * Retrieves the set of all namespaces in the current database with at least one document.
+     *
+     * @param packageName The name of the package that owns the schema.
+     * @param databaseName  The name of the database to retrieve.
+     * @param userId Id of the calling user
+     * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+     *     {@link AppSearchResult}&lt;{@link List}&lt;{@link String}&gt;&gt;.
+     */
+    void getNamespaces(
         in String packageName,
         in String databaseName,
         in int userId,
@@ -174,6 +191,47 @@ interface IAppSearchManager {
     void invalidateNextPageToken(in long nextPageToken, in int userId);
 
     /**
+    * Searches a document based on a given specifications.
+    *
+    * <p>Documents will be save to the given ParcelFileDescriptor
+    *
+    * @param packageName The name of the package to query over.
+    * @param databaseName The databaseName this query for.
+    * @param fileDescriptor The ParcelFileDescriptor where documents should be written to.
+    * @param queryExpression String to search for.
+    * @param searchSpecBundle SearchSpec bundle.
+    * @param userId Id of the calling user.
+    * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+    *        {@link AppSearchResult}&lt;{@code null}&gt;.
+    */
+    void writeQueryResultsToFile(
+        in String packageName,
+        in String databaseName,
+        in ParcelFileDescriptor fileDescriptor,
+        in String queryExpression,
+        in Bundle searchSpecBundle,
+        in int userId,
+        in IAppSearchResultCallback callback);
+
+    /**
+    * Inserts documents from the given file into the index.
+    *
+    * @param packageName The name of the package that owns this document.
+    * @param databaseName  The name of the database where this document lives.
+    * @param fileDescriptor The ParcelFileDescriptor where documents should be read from.
+    * @param userId Id of the calling user.
+    * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+    *     {@link AppSearchResult}&lt;{@link List}&lt;{@link Bundle}&gt;&gt;, where the value are
+    *     MigrationFailure bundles.
+    */
+    void putDocumentsFromFile(
+        in String packageName,
+        in String databaseName,
+        in ParcelFileDescriptor fileDescriptor,
+        in int userId,
+        in IAppSearchResultCallback callback);
+
+    /**
      * Reports usage of a particular document by URI and namespace.
      *
      * <p>A usage report represents an event in which a user interacted with or viewed a document.
@@ -190,6 +248,7 @@ interface IAppSearchManager {
      * @param namespace Namespace the document being used belongs to.
      * @param uri URI of the document being used.
      * @param usageTimeMillis The timestamp at which the document was used.
+     * @param systemUsage Whether the usage was reported by a system app against another app's doc.
      * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
@@ -200,6 +259,7 @@ interface IAppSearchManager {
          in String namespace,
          in String uri,
          in long usageTimeMillis,
+         in boolean systemUsage,
          in int userId,
          in IAppSearchResultCallback callback);
 
@@ -243,6 +303,22 @@ interface IAppSearchManager {
         in String databaseName,
         in String queryExpression,
         in Bundle searchSpecBundle,
+        in int userId,
+        in IAppSearchResultCallback callback);
+
+    /**
+     * Gets the storage info.
+     *
+     * @param packageName The name of the package to get the storage info for.
+     * @param databaseName The databaseName to get the storage info for.
+     * @param userId Id of the calling user
+     * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+     *     {@link AppSearchResult}&lt;{@link Bundle}&gt;, where the value is a
+     *     {@link StorageInfo}.
+     */
+    void getStorageInfo(
+        in String packageName,
+        in String databaseName,
         in int userId,
         in IAppSearchResultCallback callback);
 

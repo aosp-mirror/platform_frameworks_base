@@ -1015,7 +1015,7 @@ public class ApplicationExitInfoTest {
         assertNotNull(info);
 
         if (timestamp != null) {
-            final long tolerance = 1000; // ms
+            final long tolerance = 10000; // ms
             assertTrue(timestamp - tolerance <= info.getTimestamp());
             assertTrue(timestamp + tolerance >= info.getTimestamp());
         }

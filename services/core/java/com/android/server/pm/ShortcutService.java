@@ -270,6 +270,7 @@ public class ShortcutService extends IShortcutService.Stub {
     final Context mContext;
 
     private final Object mLock = new Object();
+    private final Object mNonPersistentUsersLock = new Object();
 
     private static List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
 
@@ -310,8 +311,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
     /**
      * User ID -> ShortcutNonPersistentUser
+     *
+     * Note we use a fine-grained lock for {@link #mShortcutNonPersistentUsers} due to b/183618378.
      */
-    @GuardedBy("mLock")
+    @GuardedBy("mNonPersistentUsersLock")
     private final SparseArray<ShortcutNonPersistentUser> mShortcutNonPersistentUsers =
             new SparseArray<>();
 
@@ -342,7 +345,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final IPackageManager mIPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
-    private final UserManagerInternal mUserManagerInternal;
+    final UserManagerInternal mUserManagerInternal;
     private final UsageStatsManagerInternal mUsageStatsManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
     private final IUriGrantsManager mUriGrantsManager;
@@ -1308,7 +1311,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /** Return the non-persistent per-user state. */
-    @GuardedBy("mLock")
+    @GuardedBy("mNonPersistentUsersLock")
     @NonNull
     ShortcutNonPersistentUser getNonPersistentUserLocked(@UserIdInt int userId) {
         ShortcutNonPersistentUser ret = mShortcutNonPersistentUsers.get(userId);
@@ -2590,7 +2593,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
         ps.findAll(ret, query, cloneFlags);
-
         return new ParceledListSlice<>(setReturnedByServer(ret));
     }
 
@@ -2749,7 +2751,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (injectHasAccessShortcutsPermission(callingPid, callingUid)) {
             return true;
         }
-        synchronized (mLock) {
+        synchronized (mNonPersistentUsersLock) {
             return getNonPersistentUserLocked(userId).hasHostPackage(callingPackage);
         }
     }
@@ -2832,7 +2834,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     public void setShortcutHostPackage(@NonNull String type, @Nullable String packageName,
             int userId) {
-        synchronized (mLock) {
+        synchronized (mNonPersistentUsersLock) {
             getNonPersistentUserLocked(userId).setShortcutHostPackage(type, packageName);
         }
     }
@@ -5074,6 +5076,17 @@ public class ShortcutService extends IShortcutService.Stub {
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
+        }
+    }
+
+    @VisibleForTesting
+    void updatePackageShortcutForTest(String packageName, String shortcutId, int userId,
+            Consumer<ShortcutInfo> cb) {
+        synchronized (mLock) {
+            final ShortcutPackage pkg = getPackageShortcutForTest(packageName, userId);
+            if (pkg == null) return;
+
+            pkg.mutateShortcut(shortcutId, null, cb);
         }
     }
 

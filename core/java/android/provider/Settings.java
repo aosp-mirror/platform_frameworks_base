@@ -470,8 +470,8 @@ public final class Settings {
      * to be shown, with the "package" scheme. That is "package:com.my.app".
      * <p>
      * Output: Nothing.
-     * @hide
      */
+    @SuppressLint("ActionValue")
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS =
             "com.android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
@@ -1068,8 +1068,8 @@ public final class Settings {
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_MANAGE_ALL_SUBSCRIPTIONS_SETTINGS =
-            "android.settings.MANAGE_ALL_SUBSCRIPTIONS_SETTINGS";
+    public static final String ACTION_MANAGE_ALL_SIM_PROFILES_SETTINGS =
+            "android.settings.MANAGE_ALL_SIM_PROFILES_SETTINGS";
 
     /**
      * Activity Action: Show screen for controlling which apps can draw on top of other apps.
@@ -2754,7 +2754,7 @@ public final class Settings {
                     arg.putBoolean(CALL_METHOD_OVERRIDEABLE_BY_RESTORE_KEY, true);
                 }
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                cp.call(cr.getAttributionSource(),
                         mProviderHolder.mUri.getAuthority(), mCallSetCommand, name, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
@@ -2774,7 +2774,7 @@ public final class Settings {
                 args.putString(CALL_METHOD_PREFIX_KEY, prefix);
                 args.putSerializable(CALL_METHOD_FLAGS_KEY, keyValues);
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                Bundle bundle = cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                Bundle bundle = cp.call(cr.getAttributionSource(),
                         mProviderHolder.mUri.getAuthority(),
                         mCallSetAllCommand, null, args);
                 return bundle.getBoolean(KEY_CONFIG_SET_RETURN);
@@ -2862,14 +2862,14 @@ public final class Settings {
                     if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                            b = cp.call(cr.getAttributionSource(),
                                     mProviderHolder.mUri.getAuthority(), mCallGetCommand, name,
                                     args);
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
                     } else {
-                        b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                        b = cp.call(cr.getAttributionSource(),
                                 mProviderHolder.mUri.getAuthority(), mCallGetCommand, name, args);
                     }
                     if (b != null) {
@@ -2939,13 +2939,13 @@ public final class Settings {
                 if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                     final long token = Binder.clearCallingIdentity();
                     try {
-                        c = cp.query(cr.getPackageName(), cr.getAttributionTag(), mUri,
+                        c = cp.query(cr.getAttributionSource(), mUri,
                                 SELECT_VALUE_PROJECTION, queryArgs, null);
                     } finally {
                         Binder.restoreCallingIdentity(token);
                     }
                 } else {
-                    c = cp.query(cr.getPackageName(), cr.getAttributionTag(), mUri,
+                    c = cp.query(cr.getAttributionSource(), mUri,
                             SELECT_VALUE_PROJECTION, queryArgs, null);
                 }
                 if (c == null) {
@@ -3051,7 +3051,7 @@ public final class Settings {
                 }
 
                 // Fetch all flags for the namespace at once for caching purposes
-                Bundle b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
+                Bundle b = cp.call(cr.getAttributionSource(),
                         mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
                 if (b == null) {
                     // Invalid response, return an empty map
@@ -5877,7 +5877,7 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, mode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
+                cp.call(resolver.getAttributionSource(),
                         sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_SECURE, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset do defaults for " + CONTENT_URI, e);
@@ -6289,6 +6289,20 @@ public final class Settings {
         @Readable
         public static final String SELECTED_INPUT_METHOD_SUBTYPE =
                 "selected_input_method_subtype";
+
+        /**
+         * The {@link android.view.inputmethod.InputMethodInfo.InputMethodInfo#getId() ID} of the
+         * default voice input method.
+         * <p>
+         * This stores the last known default voice IME. If the related system config value changes,
+         * this is reset by InputMethodManagerService.
+         * <p>
+         * This IME is not necessarily in the enabled IME list. That state is still stored in
+         * {@link #ENABLED_INPUT_METHODS}.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_VOICE_INPUT_METHOD = "default_voice_input_method";
 
         /**
          * Setting to record the history of input method subtype, holding the pair of ID of IME
@@ -8523,6 +8537,15 @@ public final class Settings {
                 "one_handed_tutorial_show_count";
 
         /**
+         * Indicates whether transform is enabled.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String TRANSFORM_ENABLED = "transform_enabled";
+
+        /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
@@ -9153,6 +9176,22 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
 
         /**
+         * Whether the assistant can be triggered by a touch gesture.
+         *
+         * @hide
+         */
+        public static final String ASSIST_TOUCH_GESTURE_ENABLED =
+                "assist_touch_gesture_enabled";
+
+        /**
+         * Whether the assistant can be triggered by long-pressing the home button
+         *
+         * @hide
+         */
+        public static final String ASSIST_LONG_PRESS_HOME_ENABLED =
+                "assist_long_press_home_enabled";
+
+        /**
          * Control whether Trust Agents are in active unlock or extend unlock mode.
          * @hide
          */
@@ -9717,6 +9756,12 @@ public final class Settings {
                 "accessibility_magnification_mode";
 
         /**
+         * Magnification mode value that is a default value for the magnification logging feature.
+         * @hide
+         */
+        public static final int ACCESSIBILITY_MAGNIFICATION_MODE_NONE = 0x0;
+
+        /**
          * Magnification mode value that magnifies whole display.
          * @hide
          */
@@ -9748,6 +9793,7 @@ public final class Settings {
          * @hide
          */
         @TestApi
+        @Readable
         public static final String ACCESSIBILITY_MAGNIFICATION_CAPABILITY =
                 "accessibility_magnification_capability";
 
@@ -13112,7 +13158,7 @@ public final class Settings {
          * @see #ENABLE_RESTRICTED_BUCKET
          * @hide
          */
-        public static final int DEFAULT_ENABLE_RESTRICTED_BUCKET = 0;
+        public static final int DEFAULT_ENABLE_RESTRICTED_BUCKET = 1;
 
         /**
          * Whether or not app auto restriction is enabled. When it is enabled, settings app will
@@ -14032,6 +14078,40 @@ public final class Settings {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int ZEN_MODE_ALARMS = 3;
 
+        /**
+         * A comma-separated list of HDR formats that have been disabled by the user.
+         * <p>
+         * If present, these formats will not be reported to apps, even if the display supports
+         * them. This list is treated as empty if the ARE_USER_DISABLED_HDR_FORMATS_ALLOWED setting
+         * is '1'.
+         * </p>
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String USER_DISABLED_HDR_FORMATS = "user_disabled_hdr_formats";
+
+        /**
+         * Whether or not user-disabled HDR formats are allowed.
+         * <p>
+         * The value is boolean (1 or 0). The value '1' means the user preference for disabling a
+         * format is ignored, and the disabled formats are still reported to apps (if supported
+         * by the display). The value '0' means the user-disabled formats are not reported to
+         * apps, even if the display supports them.
+         * </p><p>
+         * The list of formats disabled by the user are contained in the
+         * USER_DISABLED_HDR_FORMATS setting. This list is treated as empty when the value of
+         * this setting is '1'.
+         * </p>
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String ARE_USER_DISABLED_HDR_FORMATS_ALLOWED =
+                "are_user_disabled_hdr_formats_allowed";
+
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
             if (mode == ZEN_MODE_ALARMS) return "ZEN_MODE_ALARMS";
@@ -14856,7 +14936,7 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, mode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
+                cp.call(resolver.getAttributionSource(),
                         sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_GLOBAL, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset do defaults for " + CONTENT_URI, e);
@@ -15995,7 +16075,7 @@ public final class Settings {
                     arg.putString(Settings.CALL_METHOD_PREFIX_KEY, createPrefix(namespace));
                 }
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
+                cp.call(resolver.getAttributionSource(),
                         sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_CONFIG, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset to defaults for " + DeviceConfig.CONTENT_URI, e);
@@ -16024,7 +16104,7 @@ public final class Settings {
                 arg.putInt(CALL_METHOD_USER_KEY, userHandle);
                 arg.putParcelable(CALL_METHOD_MONITOR_CALLBACK_KEY, callback);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
+                cp.call(resolver.getAttributionSource(),
                         sProviderHolder.mUri.getAuthority(),
                         CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG, null, arg);
             } catch (RemoteException e) {

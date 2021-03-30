@@ -300,8 +300,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikacija se izvaja"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije, ki porabljajo energijo baterije"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Povečava"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Varnostni pravilnik o funkcijah za ljudi s posebnimi potrebami"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> porablja energijo baterije"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Toliko aplikacij porablja energijo baterije: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dotaknite se za prikaz podrobnosti porabe baterije in prenosa podatkov"</string>
@@ -1734,7 +1733,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Uporabi bližnjico"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija barv"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Popravljanje barv"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Zmanjšanje svetlosti"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjeno"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vklopljena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je izklopljena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Za uporabo storitve <xliff:g id="SERVICE_NAME">%1$s</xliff:g> pritisnite obe tipki za glasnost in ju pridržite tri sekunde"</string>
@@ -2315,8 +2314,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Zasebnost pri uporabi tipal"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikona aplikacije"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Podoba blagovne znamke aplikacije"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Preverite nastavitve dostopa"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"Storitev <xliff:g id="SERVICE_NAME">%s</xliff:g> si lahko ogleda in upravlja vaš zaslon. Dotaknite se za pregled."</string>
 </resources>

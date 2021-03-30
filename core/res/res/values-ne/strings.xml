@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"एप चलिरहेको छ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"एपहरूले ब्याट्री खपत गर्दै छन्"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"जुम इन गर्ने सुविधा"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"सर्वसुलभताको सुरक्षासम्बन्धी नीति"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले ब्याट्री प्रयोग गर्दै छ"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> एपहरूले ब्याट्री प्रयोग गर्दै छन्"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
@@ -1129,7 +1128,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"सबैलाई चयन गर्नुहोस्"</string>
     <string name="cut" msgid="2561199725874745819">"काट्नुहोस्"</string>
-    <string name="copy" msgid="5472512047143665218">"प्रतिलिपि बनाउनुहोस्"</string>
+    <string name="copy" msgid="5472512047143665218">"कपी गर्नुहोस्"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"क्लिपबोर्डमा प्रतिलिपि गर्न सकिएन"</string>
     <string name="paste" msgid="461843306215520225">"टाँस्नुहोस्"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"सामान्य पाठको रूपमा टाँस्नुहोस्"</string>
@@ -1690,7 +1689,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ्ग सच्याउने सुविधा"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"चमक घटाइयोस्"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (3222994553174604132) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अन भयो।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अफ भयो।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
@@ -2247,8 +2247,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेन्सरसम्बन्धी गोपनीयता"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"एप जनाउने आइकन"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"एपको ब्रान्डिङ फोटो"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"हेर्ने तथा नियन्त्रण गर्ने अनुमतिसम्बन्धी सेटिङ जाँच्नु…"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ले तपाईंको स्क्रिन हेर्न र नियन्त्रण गर्न सक्छ। समीक्षा गर्न ट्याप गर्नुहोस्।"</string>
 </resources>

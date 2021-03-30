@@ -132,6 +132,12 @@ interface IDevicePolicyManager {
     void setScreenCaptureDisabled(in ComponentName who, boolean disabled, boolean parent);
     boolean getScreenCaptureDisabled(in ComponentName who, int userHandle, boolean parent);
 
+    void setNearbyNotificationStreamingPolicy(int policy);
+    int getNearbyNotificationStreamingPolicy();
+
+    void setNearbyAppStreamingPolicy(int policy);
+    int getNearbyAppStreamingPolicy();
+
     void setKeyguardDisabledFeatures(in ComponentName who, int which, boolean parent);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
 
@@ -268,8 +274,8 @@ interface IDevicePolicyManager {
     void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
     boolean isSecondaryLockscreenEnabled(in UserHandle userHandle);
 
-    void setNetworkSlicingEnabled(in boolean enabled);
-    boolean isNetworkSlicingEnabled(int userHandle);
+    void setEnterpriseNetworkPreferenceEnabled(in boolean enabled);
+    boolean isEnterpriseNetworkPreferenceEnabled(int userHandle);
 
     void setLockTaskPackages(in ComponentName who, in String[] packages);
     String[] getLockTaskPackages(in ComponentName who);
@@ -495,6 +501,10 @@ interface IDevicePolicyManager {
 
     long getManagedProfileMaximumTimeOff(in ComponentName admin);
     void setManagedProfileMaximumTimeOff(in ComponentName admin, long timeoutMs);
+
+    void acknowledgeDeviceCompliant();
+    boolean isComplianceAcknowledgementRequired();
+
     boolean canProfileOwnerResetPasswordWhenLocked(int userId);
 
     void setNextOperationSafety(int operation, int reason);

@@ -167,6 +167,11 @@ class KeyguardController {
         if (aodChanged) {
             // Ensure the new state takes effect.
             mWindowManager.mWindowPlacerLocked.performSurfacePlacement();
+            // If the device can enter AOD and keyguard at the same time, the screen will not be
+            // turned off, so the snapshot needs to be refreshed when these states are changed.
+            if (aodShowing && keyguardShowing && keyguardChanged) {
+                mWindowManager.mTaskSnapshotController.snapshotForSleeping(DEFAULT_DISPLAY);
+            }
         }
 
         if (keyguardChanged) {

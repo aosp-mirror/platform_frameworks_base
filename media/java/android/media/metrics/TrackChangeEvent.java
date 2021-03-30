@@ -102,39 +102,6 @@ public final class TrackChangeEvent extends Event implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TrackType {}
 
-    // TODO: remove this constructor. Use the private one below.
-    public TrackChangeEvent(
-            int state,
-            int reason,
-            @Nullable String containerMimeType,
-            @Nullable String sampleMimeType,
-            @Nullable String codecName,
-            int bitrate,
-            long timeSinceCreatedMillis,
-            int type,
-            @Nullable String language,
-            @Nullable String languageRegion,
-            int channelCount,
-            int sampleRate,
-            int width,
-            int height) {
-        this.mState = state;
-        this.mReason = reason;
-        this.mContainerMimeType = containerMimeType;
-        this.mSampleMimeType = sampleMimeType;
-        this.mCodecName = codecName;
-        this.mBitrate = bitrate;
-        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
-        this.mType = type;
-        this.mLanguage = language;
-        this.mLanguageRegion = languageRegion;
-        this.mChannelCount = channelCount;
-        this.mAudioSampleRate = sampleRate;
-        this.mWidth = width;
-        this.mHeight = height;
-        this.mVideoFrameRate = -1;
-    }
-
     private TrackChangeEvent(
             int state,
             int reason,
@@ -151,7 +118,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
             int width,
             int height,
             float videoFrameRate,
-            @Nullable Bundle extras) {
+            @NonNull Bundle extras) {
         this.mState = state;
         this.mReason = reason;
         this.mContainerMimeType = containerMimeType;
@@ -167,7 +134,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         this.mWidth = width;
         this.mHeight = height;
         this.mVideoFrameRate = videoFrameRate;
-        this.mExtras = extras == null ? null : extras.deepCopy();
+        this.mMetricsBundle = extras.deepCopy();
     }
 
     /**
@@ -258,11 +225,11 @@ public final class TrackChangeEvent extends Event implements Parcelable {
     }
 
     /**
-     * Gets sample rate.
+     * Gets audio sample rate.
      * @return the sample rate, or -1 if unknown.
      */
     @IntRange(from = -1, to = Integer.MAX_VALUE)
-    public int getSampleRate() {
+    public int getAudioSampleRate() {
         return mAudioSampleRate;
     }
 
@@ -287,11 +254,20 @@ public final class TrackChangeEvent extends Event implements Parcelable {
     /**
      * Gets video frame rate.
      * @return the video frame rate, or -1 if unknown.
-     * @hide
      */
     @FloatRange(from = -1, to = Float.MAX_VALUE)
     public float getVideoFrameRate() {
         return mVideoFrameRate;
+    }
+
+    /**
+     * Gets metrics-related information that is not supported by dedicated methods.
+     * <p>It is intended to be used for backwards compatibility by the metrics infrastructure.
+     */
+    @Override
+    @NonNull
+    public Bundle getMetricsBundle() {
+        return mMetricsBundle;
     }
 
     @Override
@@ -302,7 +278,6 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         if (mCodecName != null) flg |= 0x10;
         if (mLanguage != null) flg |= 0x100;
         if (mLanguageRegion != null) flg |= 0x200;
-        if (mExtras != null) flg |= 0x400;
         dest.writeInt(flg);
         dest.writeInt(mState);
         dest.writeInt(mReason);
@@ -319,7 +294,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
         dest.writeFloat(mVideoFrameRate);
-        if (mExtras != null) dest.writeBundle(mExtras);
+        dest.writeBundle(mMetricsBundle);
     }
 
     @Override
@@ -345,7 +320,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         int width = in.readInt();
         int height = in.readInt();
         float videoFrameRate = in.readFloat();
-        Bundle extras = (flg & 0x400) == 0 ? null : in.readBundle();
+        Bundle extras = in.readBundle();
 
         this.mState = state;
         this.mReason = reason;
@@ -362,7 +337,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         this.mWidth = width;
         this.mHeight = height;
         this.mVideoFrameRate = videoFrameRate;
-        this.mExtras = extras;
+        this.mMetricsBundle = extras;
     }
 
     public static final @NonNull Parcelable.Creator<TrackChangeEvent> CREATOR =
@@ -448,7 +423,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         private int mWidth = -1;
         private int mHeight = -1;
         private float mVideoFrameRate = -1;
-        private Bundle mExtras;
+        private Bundle mMetricsBundle = new Bundle();
 
         private long mBuilderFieldsSet = 0L;
 
@@ -571,9 +546,8 @@ public final class TrackChangeEvent extends Event implements Parcelable {
          * Sets sample rate.
          * @param value the sample rate. -1 indicates the value is unknown.
          */
-        public @NonNull Builder setSampleRate(
+        public @NonNull Builder setAudioSampleRate(
                 @IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
-            // TODO: rename it to setAudioSampleRate
             checkNotUsed();
             mBuilderFieldsSet |= 0x800;
             mAudioSampleRate = value;
@@ -605,7 +579,6 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         /**
          * Sets video frame rate.
          * @param value the video frame rate. -1 indicates the value is unknown.
-         * @hide
          */
         public @NonNull Builder setVideoFrameRate(
                 @FloatRange(from = -1, to = Float.MAX_VALUE) float value) {
@@ -615,12 +588,13 @@ public final class TrackChangeEvent extends Event implements Parcelable {
         }
 
         /**
-         * Set extras for compatibility.
-         * <p>Should be used by support library only.
-         * @hide
+         * Sets metrics-related information that is not supported by dedicated
+         * methods.
+         * <p>It is intended to be used for backwards compatibility by the
+         * metrics infrastructure.
          */
-        public @NonNull Builder setExtras(@NonNull Bundle extras) {
-            mExtras = extras;
+        public @NonNull Builder setMetricsBundle(@NonNull Bundle metricsBundle) {
+            mMetricsBundle = metricsBundle;
             return this;
         }
 
@@ -645,7 +619,7 @@ public final class TrackChangeEvent extends Event implements Parcelable {
                     mWidth,
                     mHeight,
                     mVideoFrameRate,
-                    mExtras);
+                    mMetricsBundle);
             return o;
         }
 

@@ -745,7 +745,7 @@
 
     <!-- Text shown when viewing channel settings for notifications related to accessibility
          security policy. [CHAR_LIMIT=NONE]-->
-    <string name="notification_channel_accessibility_security_policy">Accessibility security policy</string>
+    <string name="notification_channel_accessibility_security_policy">Accessibility usage</string>
 
     <!-- Label for foreground service notification when one app is running.
     [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
@@ -821,6 +821,11 @@
     <string name="permgrouplab_camera">Camera</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_camera">take pictures and record video</string>
+
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
+    <string name="permgrouplab_nearby_devices">Nearby Bluetooth Devices</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
+    <string name="permgroupdesc_nearby_devices">discover and connect to nearby Bluetooth devices</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calllog">Call logs</string>
@@ -1471,6 +1476,14 @@
     <string name="permdesc_bluetooth" product="default">Allows the app to view the
       configuration of the Bluetooth on the phone, and to make and accept
       connections with paired devices.</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
+    <string name="permlab_bluetooth_scan">discover and pair nearby Bluetooth devices</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <string name="permdesc_bluetooth_scan" product="default">Allows the app to discover and pair nearby Bluetooth devices</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
+    <string name="permlab_bluetooth_connect">connect to paired Bluetooth devices</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <string name="permdesc_bluetooth_connect" product="default">Allows the app to connect to paired Bluetooth devices</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_preferredPaymentInfo">Preferred NFC Payment Service Information</string>
@@ -1566,15 +1579,21 @@
     <string name="screen_lock_dialog_default_subtitle">Enter your device credential to continue</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_partial">Partial fingerprint detected. Please try again.</string>
+    <string name="fingerprint_acquired_partial">Partial fingerprint detected</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
-    <string name="fingerprint_acquired_imager_dirty">Fingerprint sensor is dirty. Please clean and try again.</string>
+    <string name="fingerprint_acquired_imager_dirty">Clean the sensor</string>
     <!-- Message shown during fingerprint acquisision when the user removes their finger from the sensor too quickly -->
-    <string name="fingerprint_acquired_too_fast">Finger moved too fast. Please try again.</string>
+    <string name="fingerprint_acquired_too_fast">Finger moved too fast</string>
     <!-- Message shown during fingerprint acquisision when the user moves their finger too slowly -->
     <string name="fingerprint_acquired_too_slow">Finger moved too slow. Please try again.</string>
+    <!-- Message shown during fingerprint acquisition when the fingerprint was already enrolled.[CHAR LIMIT=50] -->
+    <string name="fingerprint_acquired_already_enrolled">Try another fingerprint</string>
+    <!-- Message shown during fingerprint acquisition when fingerprint sensor detected too much light.[CHAR LIMIT=50] -->
+    <string name="fingerprint_acquired_too_bright">Too bright</string>
+    <!-- Message shown during fingerprint acquisition when a fingerprint must be adjusted.[CHAR LIMIT=50] -->
+    <string name="fingerprint_acquired_try_adjusting">Try adjusting</string>
     <!-- Array containing custom messages shown during fingerprint acquisision from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_acquired_vendor">
     </string-array>
@@ -1589,7 +1608,7 @@
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
     <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
     <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
-    <string name="fingerprint_error_no_space">Fingerprint can\'t be stored. Please remove an existing fingerprint.</string>
+    <string name="fingerprint_error_no_space">Can\u2019t set up fingerprint</string>
     <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
     <string name="fingerprint_error_timeout">Fingerprint time out reached. Try again.</string>
     <!-- Generic error message shown when the fingerprint operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user-->
@@ -1643,6 +1662,14 @@
     <string name="face_recalibrate_notification_title">Re-enroll your face</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_content">To improve recognition, please re-enroll your face</string>
+    <!-- Title of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
+    <string name="face_setup_notification_title">Set up face unlock</string>
+    <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
+    <string name="face_setup_notification_content">Unlock your phone by looking at it</string>
+    <!-- Title of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
+    <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_setup_notification_content">Tap to add a fingerprint</string>
 
     <!-- Message shown during face acquisition when the face cannot be recognized [CHAR LIMIT=50] -->
     <string name="face_acquired_insufficient">Couldn\u2019t capture accurate face data. Try again.</string>
@@ -2801,6 +2828,15 @@
 
     <!-- Displayed to the user to inform them that an app has accessed clipboard data (pasted as in "copy and paste") [CHAR LIMIT=50] -->
     <string name="pasted_from_clipboard"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted from clipboard</string>
+
+    <!-- Displayed to the user to inform them that an app has accessed text from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
+    <string name="pasted_text"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted text you copied</string>
+
+    <!-- Displayed to the user to inform them that an app has accessed an image from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
+    <string name="pasted_image"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted an image you copied</string>
+
+    <!-- Displayed to the user to inform them that an app has accessed content from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
+    <string name="pasted_content"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted content you copied</string>
 
     <!-- Menu item displayed at the end of a menu to allow users to see another page worth of menu items. This is shown on any app's menu as long as the app has too many items in the menu.-->
     <string name="more_item_label">More</string>
@@ -5613,40 +5649,39 @@
     <!-- Accessibility label for the work tab button. [CHAR LIMIT=NONE] -->
     <string name="resolver_work_tab_accessibility">Work view</string>
 
-    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this specific content with work apps. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_with_work_apps">Can\u2019t share this with work apps</string>
+    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this content across profiles. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cross_profile_blocked">Blocked by your IT admin</string>
     <!-- Error message. This text is explaining that the user's IT admin doesn't allow this specific content to be shared with apps in the work profile. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_with_work_apps_explanation">Your IT admin doesn\u2019t allow you to share this content with apps in your work profile</string>
+    <string name="resolver_cant_share_with_work_apps_explanation">This content can\u2019t be shared with work apps</string>
 
-    <!-- Title of an error screen. This error message lets the user know that their IT admin doesn't allow them to open this specific content with a work app. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_access_work_apps">Can\u2019t open this with work apps</string>
     <!-- Error message. This message lets the user know that their IT admin doesn't allow them to open this specific content with an app in their work profile. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_access_work_apps_explanation">Your IT admin doesn\u2019t allow you to open this content with apps in your work profile</string>
+    <string name="resolver_cant_access_work_apps_explanation">This content can\u2019t be opened with work apps</string>
 
-    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this specific content with personal apps. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_with_personal_apps">Can\u2019t share this with personal apps</string>
     <!-- Error message. This text is explaining that the user's IT admin doesn't allow them to share this specific content with apps in their personal profile. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_with_personal_apps_explanation">Your IT admin doesn\u2019t allow you to share this content with apps in your personal profile</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation">This content can\u2019t be shared with personal apps</string>
 
-    <!-- Title of an error screen. This error message lets the user know that their IT admin doesn't allow them to open this specific content with a personal app. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_access_personal_apps">Can\u2019t open this with personal apps</string>
     <!-- Error message. This message lets the user know that their IT admin doesn't allow them to open this specific content with an app in their personal profile. [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_access_personal_apps_explanation">Your IT admin doesn\u2019t allow you to open this content with apps in your personal profile</string>
+    <string name="resolver_cant_access_personal_apps_explanation">This content can\u2019t be opened with personal apps</string>
 
     <!-- Error message. This text lets the user know that they need to turn on work apps in order to share or open content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
     <string name="resolver_turn_on_work_apps">Work profile is paused</string>
     <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
-    <string name="resolver_switch_on_work">Turn on</string>
+    <string name="resolver_switch_on_work">Tap to turn on</string>
 
-    <!-- Error message. This text lets the user know that their current work apps don't support the specific content that they're trying to share. [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_work_apps_available_share">No work apps can support this content</string>
-    <!-- Error message. This text lets the user know that their current work apps can't open this specific content. [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_work_apps_available_resolve">No work apps can open this content</string>
+    <!-- Error message. This text lets the user know that their current work apps don't support the specific content. [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_work_apps_available">No work apps</string>
 
-    <!-- Error message. This text lets the user know that their current personal apps don't support the specific content that they're trying to share. [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_personal_apps_available_share">No personal apps can support this content</string>
-    <!-- Error message. This text lets the user know that their current personal apps can't open this specific content. [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_personal_apps_available_resolve">No personal apps can open this content</string>
+    <!-- Error message. This text lets the user know that their current personal apps don't support the specific content. [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_personal_apps_available">No personal apps</string>
+
+    <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_open_in_personal">Open in <xliff:g id="app" example="YouTube">%s</xliff:g> in personal profile?</string>
+    <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_open_in_work">Open in <xliff:g id="app" example="YouTube">%s</xliff:g> in work profile?</string>
+    <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_use_personal_browser">Use personal browser</string>
+    <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_use_work_browser">Use work browser</string>
 
     <!-- Icc depersonalization related strings -->
     <!-- Label text for PIN entry widget on SIM Network Depersonalization panel [CHAR LIMIT=none] -->
@@ -5893,9 +5928,9 @@ ul.</string>
     <!-- Window magnification prompt related string. -->
 
     <!-- Notification title to prompt the user that new magnification feature is available. [CHAR LIMIT=50] -->
-    <string name="window_magnification_prompt_title">Magnify part of your screen</string>
+    <string name="window_magnification_prompt_title">New magnification settings</string>
     <!-- Notification content to prompt the user that new magnification feature is available. [CHAR LIMIT=NONE] -->
-    <string name="window_magnification_prompt_content">You can now magnify your full screen, a specific area, or switch between both options.</string>
+    <string name="window_magnification_prompt_content">You can now magnify part of your screen</string>
     <!-- Notification action to bring the user to magnification settings page. [CHAR LIMIT=50] -->
     <string name="turn_on_magnification_settings_action">Turn on in Settings</string>
     <!-- Notification action to dismiss. [CHAR LIMIT=50] -->

@@ -32,7 +32,6 @@ public class SchemaToProtoConverterTest {
     public void testGetProto_Email() {
         AppSearchSchema emailSchema =
                 new AppSearchSchema.Builder("Email")
-                        .setVersion(12345)
                         .addProperty(
                                 new AppSearchSchema.StringPropertyConfig.Builder("subject")
                                         .setCardinality(
@@ -89,7 +88,7 @@ public class SchemaToProtoConverterTest {
                                                                 TermMatchType.Code.PREFIX)))
                         .build();
 
-        assertThat(SchemaToProtoConverter.toSchemaTypeConfigProto(emailSchema))
+        assertThat(SchemaToProtoConverter.toSchemaTypeConfigProto(emailSchema, /*version=*/ 12345))
                 .isEqualTo(expectedEmailProto);
         assertThat(SchemaToProtoConverter.toAppSearchSchema(expectedEmailProto))
                 .isEqualTo(emailSchema);
@@ -142,7 +141,9 @@ public class SchemaToProtoConverterTest {
                                                 PropertyConfigProto.Cardinality.Code.OPTIONAL))
                         .build();
 
-        assertThat(SchemaToProtoConverter.toSchemaTypeConfigProto(musicRecordingSchema))
+        assertThat(
+                        SchemaToProtoConverter.toSchemaTypeConfigProto(
+                                musicRecordingSchema, /*version=*/ 0))
                 .isEqualTo(expectedMusicRecordingProto);
         assertThat(SchemaToProtoConverter.toAppSearchSchema(expectedMusicRecordingProto))
                 .isEqualTo(musicRecordingSchema);

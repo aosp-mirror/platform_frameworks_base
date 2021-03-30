@@ -71,13 +71,10 @@ public class PermissionUsageHelper {
     private static final String PROPERTY_PERMISSIONS_HUB_2_ENABLED = "permissions_hub_2_enabled";
 
     /** How long after an access to show it as "recent" */
-    private static final String RECENT_ACCESS_TIME_MS = "recent_acccess_time_ms";
+    private static final String RECENT_ACCESS_TIME_MS = "recent_access_time_ms";
 
     /** How long after an access to show it as "running" */
-    private static final String RUNNING_ACCESS_TIME_MS = "running_acccess_time_ms";
-
-    /** The name of the expected voice IME subtype */
-    private static final String VOICE_IME_SUBTYPE = "voice";
+    private static final String RUNNING_ACCESS_TIME_MS = "running_access_time_ms";
 
     private static final String SYSTEM_PKG = "android";
 
@@ -279,13 +276,15 @@ public class PermissionUsageHelper {
                             opEntry.getAttributedOpEntries().get(attributionTag);
 
                     long lastAccessTime = attrOpEntry.getLastAccessTime(opFlags);
+                    if (attrOpEntry.isRunning()) {
+                        lastAccessTime = now;
+                    }
+
                     if (lastAccessTime < recentThreshold && !attrOpEntry.isRunning()) {
                         continue;
                     }
 
-                    if (packageName.equals(SYSTEM_PKG)
-                            || (!shouldShowPermissionsHub()
-                            && !isUserSensitive(packageName, user, op))) {
+                    if (!shouldShowPermissionsHub() && !isUserSensitive(packageName, user, op)) {
                         continue;
                     }
 
@@ -372,8 +371,10 @@ public class PermissionUsageHelper {
                 proxyLabels.put(usage, new ArrayList<>());
                 proxyUids.add(usage.uid);
             }
-            if (!mostRecentUsages.containsKey(usage.uid) || usage.lastAccessTime
-                    > mostRecentUsages.get(usage.uid).lastAccessTime) {
+            // If this usage is not by the system, and is more recent than the next-most recent
+            // for it's uid, save it.
+            if (!usage.packageName.equals(SYSTEM_PKG) && (!mostRecentUsages.containsKey(usage.uid)
+                    || usage.lastAccessTime > mostRecentUsages.get(usage.uid).lastAccessTime)) {
                 mostRecentUsages.put(usage.uid, usage);
             }
         }
@@ -416,20 +417,22 @@ public class PermissionUsageHelper {
                 }
 
                 proxyUids.add(currentUsage.uid);
-                try {
-                    PackageManager userPkgManager =
-                            getUserContext(currentUsage.getUser()).getPackageManager();
-                    ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
-                            currentUsage.packageName, 0);
-                    CharSequence appLabel = appInfo.loadLabel(userPkgManager);
-                    // If we don't already have the app label, and it's not the same as the main
-                    // app, add it
-                    if (!proxyLabelList.contains(appLabel)
-                            && !currentUsage.packageName.equals(start.packageName)) {
-                        proxyLabelList.add(appLabel);
+                // Don't add an app label for the main app, or the system app
+                if (!currentUsage.packageName.equals(start.packageName)
+                        && !currentUsage.packageName.equals(SYSTEM_PKG)) {
+                    try {
+                        PackageManager userPkgManager =
+                                getUserContext(currentUsage.getUser()).getPackageManager();
+                        ApplicationInfo appInfo = userPkgManager.getApplicationInfo(
+                                currentUsage.packageName, 0);
+                        CharSequence appLabel = appInfo.loadLabel(userPkgManager);
+                        // If we don't already have the app label add it
+                        if (!proxyLabelList.contains(appLabel)) {
+                            proxyLabelList.add(appLabel);
+                        }
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // Ignore
                     }
-                } catch (PackageManager.NameNotFoundException e) {
-                    // Ignore
                 }
                 iterNum++;
             }

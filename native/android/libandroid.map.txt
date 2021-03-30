@@ -258,6 +258,9 @@ LIBANDROID {
     ASurfaceTransaction_setHdrMetadata_cta861_3; # introduced=29
     ASurfaceTransaction_setHdrMetadata_smpte2086; # introduced=29
     ASurfaceTransaction_setOnComplete; # introduced=29
+    ASurfaceTransaction_setPosition; # introduced=31
+    ASurfaceTransaction_setSourceRect; # introduced=31
+    ASurfaceTransaction_setTransform; # introduced=31
     ASurfaceTransaction_setVisibility; # introduced=29
     ASurfaceTransaction_setZOrder; # introduced=29
     ASystemFontIterator_open; # introduced=29
@@ -285,7 +288,10 @@ LIBANDROID {
     ATrace_endAsyncSection; # introduced=29
     ATrace_setCounter; # introduced=29
     android_getaddrinfofornetwork; # introduced=23
+    android_getprocnetwork; # introduced=31
     android_setprocnetwork; # introduced=23
+    android_getprocdns; # introduced=31
+    android_setprocdns; # introduced=31
     android_setsocknetwork; # introduced=23
     android_res_cancel; # introduced=29
     android_res_nquery; # introduced=29

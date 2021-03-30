@@ -21,6 +21,21 @@
                 }
             ],
             "file_patterns": ["NotificationManagerService\\.java"]
+        },
+        {
+            "name": "CtsContentTestCases",
+            "options": [
+                {
+                    "include-filter": "android.content.cts.ClipboardManagerTest"
+                },
+                {
+                    "include-filter": "android.content.cts.ClipDataTest"
+                },
+                {
+                    "include-filter": "android.content.cts.ClipDescriptionTest"
+                }
+            ],
+            "file_patterns": ["ClipboardService\\.java"]
         }
     ],
     "presubmit-large": [

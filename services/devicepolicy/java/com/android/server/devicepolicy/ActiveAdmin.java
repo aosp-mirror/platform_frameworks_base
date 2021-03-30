@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_DISABLED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
@@ -69,6 +70,10 @@ class ActiveAdmin {
             "disable-bt-contacts-sharing";
     private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
     private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
+    private static final String TAG_NEARBY_NOTIFICATION_STREAMING_POLICY =
+            "nearby-notification-streaming-policy";
+    private static final String TAG_NEARBY_APP_STREAMING_POLICY =
+            "nearby-app-streaming-policy";
     private static final String TAG_REQUIRE_AUTO_TIME = "require_auto_time";
     private static final String TAG_FORCE_EPHEMERAL_USERS = "force_ephemeral_users";
     private static final String TAG_IS_NETWORK_LOGGING_ENABLED = "is_network_logging_enabled";
@@ -139,12 +144,13 @@ class ActiveAdmin {
     private static final String TAG_ENROLLMENT_SPECIFIC_ID = "enrollment-specific-id";
     private static final String TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS =
             "admin-can-grant-sensors-permissions";
-    private static final String TAG_NETWORK_SLICING_ENABLED = "network-slicing-enabled";
+    private static final String TAG_ENTERPRISE_NETWORK_PREFERENCE_ENABLED =
+            "enterprise-network-preference-enabled";
     private static final String TAG_USB_DATA_SIGNALING = "usb-data-signaling";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
-    private static final boolean NETWORK_SLICING_ENABLED_DEFAULT = true;
+    private static final boolean ENTERPRISE_NETWORK_PREFERENCE_ENABLED_DEFAULT = true;
 
     DeviceAdminInfo info;
 
@@ -157,6 +163,12 @@ class ActiveAdmin {
 
     @DevicePolicyManager.PasswordComplexity
     int mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
+
+    @DevicePolicyManager.NearbyStreamingPolicy
+    int mNearbyNotificationStreamingPolicy = NEARBY_STREAMING_DISABLED;
+
+    @DevicePolicyManager.NearbyStreamingPolicy
+    int mNearbyAppStreamingPolicy = NEARBY_STREAMING_DISABLED;
 
     @Nullable
     FactoryResetProtectionPolicy mFactoryResetProtectionPolicy = null;
@@ -284,7 +296,8 @@ class ActiveAdmin {
     public String mOrganizationId;
     public String mEnrollmentSpecificId;
     public boolean mAdminCanGrantSensorsPermissions;
-    public boolean mNetworkSlicingEnabled = NETWORK_SLICING_ENABLED_DEFAULT;
+    public boolean mEnterpriseNetworkPreferenceEnabled =
+            ENTERPRISE_NETWORK_PREFERENCE_ENABLED_DEFAULT;
 
     private static final boolean USB_DATA_SIGNALING_ENABLED_DEFAULT = true;
     boolean mUsbDataSignalingEnabled = USB_DATA_SIGNALING_ENABLED_DEFAULT;
@@ -547,6 +560,14 @@ class ActiveAdmin {
         if (mPasswordComplexity != PASSWORD_COMPLEXITY_NONE) {
             writeAttributeValueToXml(out, TAG_PASSWORD_COMPLEXITY, mPasswordComplexity);
         }
+        if (mNearbyNotificationStreamingPolicy != NEARBY_STREAMING_DISABLED) {
+            writeAttributeValueToXml(out, TAG_NEARBY_NOTIFICATION_STREAMING_POLICY,
+                    mNearbyNotificationStreamingPolicy);
+        }
+        if (mNearbyAppStreamingPolicy != NEARBY_STREAMING_DISABLED) {
+            writeAttributeValueToXml(out, TAG_NEARBY_APP_STREAMING_POLICY,
+                    mNearbyAppStreamingPolicy);
+        }
         if (!TextUtils.isEmpty(mOrganizationId)) {
             writeTextToXml(out, TAG_ORGANIZATION_ID, mOrganizationId);
         }
@@ -555,8 +576,9 @@ class ActiveAdmin {
         }
         writeAttributeValueToXml(out, TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS,
                 mAdminCanGrantSensorsPermissions);
-        if (mNetworkSlicingEnabled != NETWORK_SLICING_ENABLED_DEFAULT) {
-            writeAttributeValueToXml(out, TAG_NETWORK_SLICING_ENABLED, mNetworkSlicingEnabled);
+        if (mEnterpriseNetworkPreferenceEnabled != ENTERPRISE_NETWORK_PREFERENCE_ENABLED_DEFAULT) {
+            writeAttributeValueToXml(out, TAG_ENTERPRISE_NETWORK_PREFERENCE_ENABLED,
+                    mEnterpriseNetworkPreferenceEnabled);
         }
         if (mUsbDataSignalingEnabled != USB_DATA_SIGNALING_ENABLED_DEFAULT) {
             writeAttributeValueToXml(out, TAG_USB_DATA_SIGNALING, mUsbDataSignalingEnabled);
@@ -784,13 +806,17 @@ class ActiveAdmin {
                 mAlwaysOnVpnPackage = parser.getAttributeValue(null, ATTR_VALUE);
             } else if (TAG_ALWAYS_ON_VPN_LOCKDOWN.equals(tag)) {
                 mAlwaysOnVpnLockdown = parser.getAttributeBoolean(null, ATTR_VALUE, false);
-            } else if (TAG_NETWORK_SLICING_ENABLED.equals(tag)) {
-                mNetworkSlicingEnabled = parser.getAttributeBoolean(
-                        null, ATTR_VALUE, NETWORK_SLICING_ENABLED_DEFAULT);
+            } else if (TAG_ENTERPRISE_NETWORK_PREFERENCE_ENABLED.equals(tag)) {
+                mEnterpriseNetworkPreferenceEnabled = parser.getAttributeBoolean(
+                        null, ATTR_VALUE, ENTERPRISE_NETWORK_PREFERENCE_ENABLED_DEFAULT);
             } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
                 mCommonCriteriaMode = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PASSWORD_COMPLEXITY.equals(tag)) {
                 mPasswordComplexity = parser.getAttributeInt(null, ATTR_VALUE);
+            } else if (TAG_NEARBY_NOTIFICATION_STREAMING_POLICY.equals(tag)) {
+                mNearbyNotificationStreamingPolicy = parser.getAttributeInt(null, ATTR_VALUE);
+            } else if (TAG_NEARBY_APP_STREAMING_POLICY.equals(tag)) {
+                mNearbyAppStreamingPolicy = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_ORGANIZATION_ID.equals(tag)) {
                 type = parser.next();
                 if (type == TypedXmlPullParser.TEXT) {
@@ -1142,14 +1168,20 @@ class ActiveAdmin {
         pw.print("mAlwaysOnVpnLockdown=");
         pw.println(mAlwaysOnVpnLockdown);
 
-        pw.print("mNetworkSlicingEnabled=");
-        pw.println(mNetworkSlicingEnabled);
+        pw.print("mEnterpriseNetworkPreferenceEnabled=");
+        pw.println(mEnterpriseNetworkPreferenceEnabled);
 
         pw.print("mCommonCriteriaMode=");
         pw.println(mCommonCriteriaMode);
 
         pw.print("mPasswordComplexity=");
         pw.println(mPasswordComplexity);
+
+        pw.print("mNearbyNotificationStreamingPolicy=");
+        pw.println(mNearbyNotificationStreamingPolicy);
+
+        pw.print("mNearbyAppStreamingPolicy=");
+        pw.println(mNearbyAppStreamingPolicy);
 
         if (!TextUtils.isEmpty(mOrganizationId)) {
             pw.print("mOrganizationId=");

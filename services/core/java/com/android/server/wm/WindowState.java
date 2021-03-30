@@ -726,8 +726,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private InsetsState mFrozenInsetsState;
 
-    @Nullable InsetsSourceProvider mPendingPositionChanged;
-
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
     private KeyInterceptionInfo mKeyInterceptionInfo;
 
@@ -763,6 +761,56 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * into mReadyDrawHandlers. Finally once we get to finishDrawing we know everything in
      * mReadyDrawHandlers corresponds to state which was observed by the client and we can
      * invoke the consumers.
+     *
+     * To see in more detail that this works, we can look at it like this:
+     *
+     * The client is in one of these states:
+     *
+     * 1. Asleep
+     * 2. Traversal scheduled
+     * 3. Starting traversal
+     * 4. In relayout
+     * 5. Already drawing
+     *
+     * The property we want to implement with the draw handlers is:
+     *   If WM code makes a change to client observable state (e.g. configuration),
+     *   and registers a draw handler (without releasing the WM lock in between),
+     *   the FIRST frame reflecting that change, will be in the Transaction passed
+     *   to the draw handler.
+     *
+     * We describe the expected sequencing in each of the possible client states.
+     * We aim to "prove" that the WM can call applyWithNextDraw() with the client
+     * starting in any state, and achieve the desired result.
+     *
+     * 1. Asleep: The client will wake up in response to MSG_RESIZED, call relayout,
+     * observe the changes. Relayout will return BLAST_SYNC, and the client will
+     * send the transaction to finishDrawing. Since the client was asleep. This
+     * will be the first finishDrawing reflecting the change.
+     * 2, 3: traversal scheduled/starting traversal: These two states can be considered
+     *    together. Each has two sub-states:
+     *       a) Traversal will call relayout. In this case we proceed like the starting
+     *          from asleep case.
+     *       b) Traversal will not call relayout. In this case, the client produced
+     *       frame will not include the change. Because there is no call to relayout
+     *       there is no call to prepareDrawHandlers() and even if the client calls
+     *       finish drawing the draw handler will not be invoked. We have to wait
+     *       on the client to receive MSG_RESIZED, and will sync on the next frame
+     * 4. In relayout. In this case we are careful to prepare draw handlers and check
+     *    whether to return the BLAST flag at the end of relayoutWindow. This means if you
+     *    add a draw handler while the client is in relayout, BLAST_SYNC will be
+     *    immediately returned, and the client will submit the frame corresponding
+     *    to what returns from layout. When we prepare the draw handlers we clear the
+     *    flag which would later cause us to report draw for sync. Since we reported
+     *    sync through relayout (by luck the client was calling relayout perhaps)
+     *    there is no need for a MSG_RESIZED.
+     * 5. Already drawing. This works much like cases 2 and 3. If there is no call to
+     *    finishDrawing then of course the draw handlers will not be invoked and we just
+     *    wait on the next frame for sync. If there is a call to finishDrawing,
+     *    the draw handler will not have been prepared (since we did not call relayout)
+     *    and we will have to wait on the next frame.
+     *
+     * By this logic we can see no matter which of the client states we are in when the
+     * draw handler is added, it will always execute on the expected frame.
      */
     private final List<Consumer<SurfaceControl.Transaction>> mPendingDrawHandlers
         = new ArrayList<>();
@@ -772,6 +820,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Consumer<SurfaceControl.Transaction> mSeamlessRotationFinishedConsumer = t -> {
         finishSeamlessRotation(t);
         updateSurfacePosition(t);
+    };
+
+    private final Consumer<SurfaceControl.Transaction> mSetSurfacePositionConsumer = t -> {
+        if (mSurfaceControl != null && mSurfaceControl.isValid()) {
+            t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+        }
     };
 
     /**
@@ -1514,11 +1568,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void setOrientationChanging(boolean changing) {
-        mOrientationChanging = changing;
         mOrientationChangeTimedOut = false;
+        if (mOrientationChanging == changing) {
+            return;
+        }
+        mOrientationChanging = changing;
         if (changing) {
             mLastFreezeDuration = 0;
-            mWmService.mRoot.mOrientationChangeComplete = false;
+            if (mWmService.mRoot.mOrientationChangeComplete
+                    && mDisplayContent.waitForUnfreeze(this)) {
+                mWmService.mRoot.mOrientationChangeComplete = false;
+            }
+        } else {
+            // The orientation change is completed. If it was hidden by the animation, reshow it.
+            mDisplayContent.finishFadeRotationAnimation(this);
         }
     }
 
@@ -2121,18 +2184,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int left = mWindowFrames.mFrame.left;
         final int top = mWindowFrames.mFrame.top;
 
-        // During the transition from pip to fullscreen, the activity windowing mode is set to
-        // fullscreen at the beginning while the task is kept in pinned mode. Skip the move
-        // animation in such case since the transition is handled in SysUI.
-        final boolean hasMovementAnimation = getTask() == null
-                ? getWindowConfiguration().hasMovementAnimations()
-                : getTask().getWindowConfiguration().hasMovementAnimations();
-        if (mToken.okToAnimate()
-                && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                && !isDragResizing()
-                && hasMovementAnimation
-                && !mWinAnimator.mLastHidden
-                && !mSeamlesslyRotated) {
+        if (canPlayMoveAnimation()) {
             startMoveAnimation(left, top);
         }
 
@@ -2146,6 +2198,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } catch (RemoteException e) {
         }
         mMovedByResize = false;
+    }
+
+    private boolean canPlayMoveAnimation() {
+
+        // During the transition from pip to fullscreen, the activity windowing mode is set to
+        // fullscreen at the beginning while the task is kept in pinned mode. Skip the move
+        // animation in such case since the transition is handled in SysUI.
+        final boolean hasMovementAnimation = getTask() == null
+                ? getWindowConfiguration().hasMovementAnimations()
+                : getTask().getWindowConfiguration().hasMovementAnimations();
+        return mToken.okToAnimate()
+                && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
+                && !isDragResizing()
+                && hasMovementAnimation
+                && !mWinAnimator.mLastHidden
+                && !mSeamlesslyRotated;
     }
 
     /**
@@ -3394,6 +3462,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mAttrs.type >= FIRST_SYSTEM_WINDOW && mAttrs.type != TYPE_TOAST) {
             mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
         }
+        if (mIsImWindow && mWmService.mAccessibilityController != null) {
+            mWmService.mAccessibilityController.onImeSurfaceShownChanged(this, shown);
+        }
     }
 
     private void logExclusionRestrictions(int side) {
@@ -3697,7 +3768,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int displayId = getDisplayId();
         fillClientWindowFrames(mClientWindowFrames);
 
-        mRedrawForSyncReported = true;
+        markRedrawForSyncReported();
 
         try {
             mClient.resized(mClientWindowFrames, reportDraw, mergedConfiguration, forceRelayout,
@@ -5318,13 +5389,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // prior to the rotation.
         if (!mSurfaceAnimator.hasLeash() && mPendingSeamlessRotate == null
                 && !mLastSurfacePosition.equals(mSurfacePosition)) {
-            t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+            final boolean frameSizeChanged = mWindowFrames.isFrameSizeChangeReported();
+            final boolean surfaceInsetsChanged = surfaceInsetsChanging();
+            final boolean surfaceSizeChanged = frameSizeChanged || surfaceInsetsChanged;
             mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
-            if (surfaceInsetsChanging() && mWinAnimator.hasSurface()) {
+            if (surfaceInsetsChanged) {
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
-                t.deferTransactionUntil(mSurfaceControl,
-                        mWinAnimator.mSurfaceController.mSurfaceControl,
-                        getFrameNumber());
+            }
+            if (surfaceSizeChanged && mWinAnimator.getShown() && !canPlayMoveAnimation()
+                    && okToDisplay()) {
+                applyWithNextDraw(mSetSurfacePositionConsumer);
+            } else {
+                mSetSurfacePositionConsumer.accept(t);
             }
         }
     }
@@ -5841,7 +5917,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * "in relayout", the results may be undefined but at all other times the function
      * should sort of transparently work like this:
      *    1. Make changes to WM hierarchy (say change app configuration)
-     *    2. Call apply with next draw.
+     *    2. Call applyWithNextDraw
      *    3. After finishDrawing, our consumer will be passed the Transaction
      *    containing the buffer, and we can merge in additional operations.
      * See {@link WindowState#mPendingDrawHandlers}
@@ -5870,16 +5946,26 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * See {@link WindowState#mPendingDrawHandlers}
      */
     boolean executeDrawHandlers(SurfaceControl.Transaction t) {
-        if (t == null) t = mTmpTransaction;
         boolean hadHandlers = false;
+        boolean applyHere = false;
+        if (t == null) {
+            t = mTmpTransaction;
+            applyHere = true;
+        }
+
         for (int i = 0; i < mReadyDrawHandlers.size(); i++) {
             mReadyDrawHandlers.get(i).accept(t);
             hadHandlers = true;
         }
-        mReadyDrawHandlers.clear();
-        mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
 
-        t.apply();
+        if (hadHandlers) {
+            mReadyDrawHandlers.clear();
+            mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
+        }
+
+        if (applyHere) {
+            t.apply();
+        }
 
         return hadHandlers;
     }
@@ -5896,5 +5982,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     @WindowManager.LayoutParams.WindowType int getWindowType() {
         return mAttrs.type;
+    }
+
+    void markRedrawForSyncReported() {
+       mRedrawForSyncReported = true;
     }
 }

@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Programu inaendelea kutekelezwa"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Programu zinazotumia betri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ukuzaji"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Sera ya usalama wa ufikivu"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumia betri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Programu <xliff:g id="NUMBER">%1$d</xliff:g> zinatumia betri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Gusa ili upate maelezo kuhusu betri na matumizi ya data"</string>
@@ -1004,7 +1003,7 @@
     <string name="save_password_never" msgid="6776808375903410659">"Katu"</string>
     <string name="open_permission_deny" msgid="5136793905306987251">"Hauna idhini ya kufungua ukurasa huu."</string>
     <string name="text_copied" msgid="2531420577879738860">"Maandishi yamenakiliwa kwenye ubao wa kunakili."</string>
-    <string name="copied" msgid="4675902854553014676">"Imenakiliwa"</string>
+    <string name="copied" msgid="4675902854553014676">"Umenakili"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> imebandika kutoka <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> imebandika kutoka ubao wa kunakili"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Zaidi"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tumia Njia ya Mkato"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ugeuzaji rangi"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Usahihishaji wa rangi"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Punguza ung\'aavu"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Kipunguza mwangaza zaidi"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Vitufe vya sauti vilivyoshikiliwa. Umewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Vitufe vya sauti vimeshikiliwa. Umezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Bonyeza na ushikilie vitufe vyote viwili vya sauti kwa sekunde tatu ili utumie <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Faragha ya Kitambuzi"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Aikoni ya programu"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Picha ya kuweka chapa kwenye programu"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Angalia mipangilio ya kufikia"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> inaweza kuangalia na kudhibiti skrini yako. Gusa ili ukague."</string>
 </resources>

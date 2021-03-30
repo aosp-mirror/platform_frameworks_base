@@ -16,6 +16,8 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.testing.AndroidTestingRunner;
@@ -82,6 +84,13 @@ public class ZigZagClassifierTest extends ClassifierTest {
         assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
     }
 
+    @Test
+    public void testPass_brightnessSliderAlwaysPasses() {
+        appendMoveEvent(0, 0);
+        appendMoveEvent(0, 100);
+        appendMoveEvent(0, 1);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 1).isFalse()).isFalse();
+    }
 
     @Test
     public void testFail_minimumTouchesVertical() {

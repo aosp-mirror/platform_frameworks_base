@@ -752,6 +752,7 @@ public class TelephonyCallback {
          *
          * @param state the current call state
          */
+        @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
         public void onCallStateChanged(@Annotation.CallState int state);
     }
 
@@ -1057,7 +1058,6 @@ public class TelephonyCallback {
          *
          * @param telephonyDisplayInfo The display information.
          */
-        @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
         public void onDisplayInfoChanged(@NonNull TelephonyDisplayInfo telephonyDisplayInfo);
     }
 

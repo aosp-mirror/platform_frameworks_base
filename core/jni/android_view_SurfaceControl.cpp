@@ -1460,6 +1460,27 @@ static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->reparent(ctrl, newParent);
 }
 
+static void nativeOverrideHdrTypes(JNIEnv* env, jclass clazz, jobject tokenObject,
+                                   jintArray jHdrTypes) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
+    if (token == nullptr || jHdrTypes == nullptr) return;
+
+    int* hdrTypes = env->GetIntArrayElements(jHdrTypes, 0);
+    int numHdrTypes = env->GetArrayLength(jHdrTypes);
+
+    std::vector<ui::Hdr> hdrTypesVector;
+    for (int i = 0; i < numHdrTypes; i++) {
+        hdrTypesVector.push_back(static_cast<ui::Hdr>(hdrTypes[i]));
+    }
+    env->ReleaseIntArrayElements(jHdrTypes, hdrTypes, 0);
+
+    status_t error = SurfaceComposerClient::overrideHdrTypes(token, hdrTypesVector);
+    if (error != NO_ERROR) {
+        jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                             "ACCESS_SURFACE_FLINGER is missing");
+    }
+}
+
 static void nativeSetAutoLowLatencyMode(JNIEnv* env, jclass clazz, jobject tokenObject, jboolean on) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
     if (token == NULL) return;
@@ -1658,10 +1679,12 @@ public:
             jobject jJankData = env->NewObject(gJankDataClassInfo.clazz,
                     gJankDataClassInfo.ctor, jankData[i].frameVsyncId, jankData[i].jankType);
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);
+            env->DeleteLocalRef(jJankData);
         }
         env->CallVoidMethod(target,
                 gJankDataListenerClassInfo.onJankDataAvailable,
                 jJankDataArray);
+        env->DeleteLocalRef(jJankDataArray);
         env->DeleteLocalRef(target);
     }
 
@@ -1819,6 +1842,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetGameContentType },
     {"nativeGetCompositionDataspaces", "()[I",
             (void*)nativeGetCompositionDataspaces},
+    {"nativeOverrideHdrTypes", "(Landroid/os/IBinder;[I)V",
+                (void*)nativeOverrideHdrTypes },
     {"nativeClearContentFrameStats", "(J)Z",
             (void*)nativeClearContentFrameStats },
     {"nativeGetContentFrameStats", "(JLandroid/view/WindowContentFrameStats;)Z",

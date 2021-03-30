@@ -16,14 +16,17 @@
 
 package com.android.server.connectivity;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.NetworkScore.KEEP_CONNECTED_NONE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkScore;
+import android.net.NetworkScore.KeepConnectedReason;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -94,9 +97,13 @@ public class FullScore {
     // Bitmask of all the policies applied to this score.
     private final long mPolicies;
 
-    FullScore(final int legacyInt, final long policies) {
+    private final int mKeepConnectedReason;
+
+    FullScore(final int legacyInt, final long policies,
+            @KeepConnectedReason final int keepConnectedReason) {
         mLegacyInt = legacyInt;
         mPolicies = policies;
+        mKeepConnectedReason = keepConnectedReason;
     }
 
     /**
@@ -109,10 +116,38 @@ public class FullScore {
      */
     public static FullScore fromNetworkScore(@NonNull final NetworkScore score,
             @NonNull final NetworkCapabilities caps, @NonNull final NetworkAgentConfig config) {
-        return withPolicies(score.getLegacyInt(), caps.hasCapability(NET_CAPABILITY_VALIDATED),
+        return withPolicies(score.getLegacyInt(), score.getKeepConnectedReason(),
+                caps.hasCapability(NET_CAPABILITY_VALIDATED),
                 caps.hasTransport(TRANSPORT_VPN),
                 config.explicitlySelected,
                 config.acceptUnvalidated);
+    }
+
+    /**
+     * Given a score supplied by a NetworkProvider, produce a prospective score for an offer.
+     *
+     * NetworkOffers have score filters that are compared to the scores of actual networks
+     * to see if they could possibly beat the current satisfier. Some things the agent can't
+     * know in advance ; a good example is the validation bit – some networks will validate,
+     * others won't. For comparison purposes, assume the best, so all possibly beneficial
+     * networks will be brought up.
+     *
+     * @param score the score supplied by the agent for this offer
+     * @param caps the capabilities supplied by the agent for this offer
+     * @return a FullScore appropriate for comparing to actual network's scores.
+     */
+    public static FullScore makeProspectiveScore(@NonNull final NetworkScore score,
+            @NonNull final NetworkCapabilities caps) {
+        // If the network offers Internet access, it may validate.
+        final boolean mayValidate = caps.hasCapability(NET_CAPABILITY_INTERNET);
+        // VPN transports are known in advance.
+        final boolean vpn = caps.hasTransport(TRANSPORT_VPN);
+        // The network hasn't been chosen by the user (yet, at least).
+        final boolean everUserSelected = false;
+        // Don't assume the user will accept unvalidated connectivity.
+        final boolean acceptUnvalidated = false;
+        return withPolicies(score.getLegacyInt(), KEEP_CONNECTED_NONE,
+                mayValidate, vpn, everUserSelected, acceptUnvalidated);
     }
 
     /**
@@ -124,13 +159,15 @@ public class FullScore {
      */
     public FullScore mixInScore(@NonNull final NetworkCapabilities caps,
             @NonNull final NetworkAgentConfig config) {
-        return withPolicies(mLegacyInt, caps.hasCapability(NET_CAPABILITY_VALIDATED),
+        return withPolicies(mLegacyInt, mKeepConnectedReason,
+                caps.hasCapability(NET_CAPABILITY_VALIDATED),
                 caps.hasTransport(TRANSPORT_VPN),
                 config.explicitlySelected,
                 config.acceptUnvalidated);
     }
 
     private static FullScore withPolicies(@NonNull final int legacyInt,
+            @KeepConnectedReason final int keepConnectedReason,
             final boolean isValidated,
             final boolean isVpn,
             final boolean everUserSelected,
@@ -139,7 +176,8 @@ public class FullScore {
                 (isValidated         ? 1L << POLICY_IS_VALIDATED : 0)
                 | (isVpn             ? 1L << POLICY_IS_VPN : 0)
                 | (everUserSelected  ? 1L << POLICY_EVER_USER_SELECTED : 0)
-                | (acceptUnvalidated ? 1L << POLICY_ACCEPT_UNVALIDATED : 0));
+                | (acceptUnvalidated ? 1L << POLICY_ACCEPT_UNVALIDATED : 0),
+                keepConnectedReason);
     }
 
     /**
@@ -191,13 +229,21 @@ public class FullScore {
         return 0 != (mPolicies & (1L << policy));
     }
 
+    /**
+     * Returns the keep-connected reason, or KEEP_CONNECTED_NONE.
+     */
+    public int getKeepConnectedReason() {
+        return mKeepConnectedReason;
+    }
+
     // Example output :
     // Score(50 ; Policies : EVER_USER_SELECTED&IS_VALIDATED)
     @Override
     public String toString() {
         final StringJoiner sj = new StringJoiner(
                 "&", // delimiter
-                "Score(" + mLegacyInt + " ; Policies : ", // prefix
+                "Score(" + mLegacyInt + " ; KeepConnected : " + mKeepConnectedReason
+                        + " ; Policies : ", // prefix
                 ")"); // suffix
         for (int i = NetworkScore.MIN_AGENT_MANAGED_POLICY;
                 i <= NetworkScore.MAX_AGENT_MANAGED_POLICY; ++i) {

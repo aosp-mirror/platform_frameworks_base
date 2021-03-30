@@ -467,7 +467,7 @@ public abstract class Vibrator {
      */
     @NonNull
     public boolean[] arePrimitivesSupported(
-            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+            @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
         return new boolean[primitiveIds.length];
     }
 
@@ -478,7 +478,7 @@ public abstract class Vibrator {
      * @return Whether primitives effects are supported.
      */
     public final boolean areAllPrimitivesSupported(
-            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+            @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
         for (boolean supported : arePrimitivesSupported(primitiveIds)) {
             if (!supported) {
                 return false;

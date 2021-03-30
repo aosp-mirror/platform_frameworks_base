@@ -26,6 +26,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.PropertyInvalidatedCache;
+import android.companion.AssociationRequest;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
@@ -1022,6 +1023,24 @@ public final class BluetoothDevice implements Parcelable {
     public static final String EXTRA_MAS_INSTANCE =
             "android.bluetooth.device.extra.MAS_INSTANCE";
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+        prefix = { "ADDRESS_TYPE_" },
+        value = {
+            /** Hardware MAC Address */
+            ADDRESS_TYPE_PUBLIC,
+            /** Address is either resolvable, non-resolvable or static.*/
+            ADDRESS_TYPE_RANDOM,
+        }
+    )
+    public @interface AddressType {}
+
+    /** Hardware MAC Address of the device */
+    public static final int ADDRESS_TYPE_PUBLIC = 0;
+    /** Address is either resolvable, non-resolvable or static. */
+    public static final int ADDRESS_TYPE_RANDOM = 1;
+
     /**
      * Lazy initialization. Guaranteed final after first object constructed, or
      * getService() called.
@@ -1030,6 +1049,7 @@ public final class BluetoothDevice implements Parcelable {
     private static volatile IBluetooth sService;
 
     private final String mAddress;
+    @AddressType private final int mAddressType;
 
     /*package*/
     @UnsupportedAppUsage
@@ -1084,6 +1104,7 @@ public final class BluetoothDevice implements Parcelable {
         }
 
         mAddress = address;
+        mAddressType = ADDRESS_TYPE_PUBLIC;
     }
 
     @Override
@@ -1211,8 +1232,7 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Get the Bluetooth alias of the remote device.
-     * <p>Alias is the locally modified name of a remote device.
+     * Get the locally modifiable name (alias) of the remote Bluetooth device.
      *
      * @return the Bluetooth alias, the friendly device name if no alias, or
      * null if there was a problem
@@ -1238,25 +1258,35 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Set the Bluetooth alias of the remote device.
-     * <p>Alias is the locally modified name of a remote device.
-     * <p>This methoid overwrites the alias. The changed
-     * alias is saved in the local storage so that the change
-     * is preserved over power cycle.
+     * Sets the locally modifiable name (alias) of the remote Bluetooth device. This method
+     * overwrites the previously stored alias. The new alias is saved in local
+     * storage so that the change is preserved over power cycles.
      *
-     * @return true on success, false on error
-     * @hide
+     * <p>This method requires the calling app to be associated with Companion Device Manager (see
+     * {@link android.companion.CompanionDeviceManager#associate(AssociationRequest,
+     * android.companion.CompanionDeviceManager.Callback, Handler)}) and have the {@link
+     * android.Manifest.permission#BLUETOOTH} permission. Alternatively, if the caller has the
+     * {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED} permission, they can bypass the
+     * Companion Device Manager association requirement.
+     *
+     * @param alias is the new locally modifiable name for the remote Bluetooth device which must be
+     *              non-null and not the empty string.
+     * @return {@code true} if the alias is successfully set, {@code false} on error
+     * @throws IllegalArgumentException if the alias is {@code null} or the empty string
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean setAlias(@NonNull String alias) {
+        if (alias == null || alias.isEmpty()) {
+            throw new IllegalArgumentException("Cannot set the alias to null or the empty string");
+        }
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "BT not enabled. Cannot set Remote Device name");
             return false;
         }
         try {
-            return service.setRemoteAlias(this, alias);
+            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+            return service.setRemoteAlias(this, alias, adapter.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }

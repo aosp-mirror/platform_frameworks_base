@@ -17,76 +17,135 @@
 #include "compile/IdAssigner.h"
 
 #include <map>
+#include <unordered_map>
 
+#include "android-base/expected.h"
 #include "android-base/logging.h"
 
 #include "ResourceTable.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/Util.h"
 
+using android::base::expected;
+using android::base::unexpected;
+
 namespace aapt {
 
-/**
- * Assigns the intended ID to the ResourceTablePackage, ResourceTableType, and
- * ResourceEntry,
- * as long as there is no existing ID or the ID is the same.
- */
-static bool AssignId(IDiagnostics* diag, const ResourceId& id,
-                     const ResourceName& name, ResourceTablePackage* pkg,
-                     ResourceTableType* type, ResourceEntry* entry) {
-  if (pkg->id.value() == id.package_id()) {
-    if (!type->id || type->id.value() == id.type_id()) {
-      type->id = id.type_id();
+namespace {
+template <typename T>
+using Result = expected<T, std::string>;
 
-      if (!entry->id || entry->id.value() == id.entry_id()) {
-        entry->id = id.entry_id();
-        return true;
-      }
-    }
+template <typename Id, typename Key>
+struct NextIdFinder {
+  explicit NextIdFinder(Id start_id = 0u) : next_id_(start_id){};
+
+  // Attempts to reserve an identifier for the specified key.
+  // If the identifier is already reserved by a different key, an error message is returned.
+  // Reserving identifiers must be completed before `NextId` is called for the first time.
+  Result<Id> ReserveId(Key key, Id id);
+
+  // Retrieves the next available identifier that has not been reserved.
+  std::optional<Id> NextId();
+
+ private:
+  // Attempts to set `next_id_` to the next available identifier that has not been reserved.
+  // Returns whether there were any available identifiers.
+  std::optional<Id> SkipToNextAvailableId();
+
+  Id next_id_;
+  bool next_id_called_ = false;
+  bool exhausted_ = false;
+  std::map<Id, Key> pre_assigned_ids_;
+  typename std::map<Id, Key>::iterator next_preassigned_id_;
+};
+
+struct TypeGroup {
+  explicit TypeGroup(uint8_t package_id, uint8_t type_id)
+      : package_id_(package_id), type_id_(type_id){};
+
+  // Attempts to reserve the resource id for the specified resource name.
+  // If the id is already reserved by a different name, an error message is returned.
+  // Reserving identifiers must be completed before `NextId` is called for the first time.
+  Result<std::monostate> ReserveId(const ResourceName& name, ResourceId id);
+
+  // Retrieves the next available resource id that has not been reserved.
+  Result<ResourceId> NextId();
+
+ private:
+  uint8_t package_id_;
+  uint8_t type_id_;
+  NextIdFinder<uint16_t, ResourceName> next_entry_id_;
+};
+
+struct ResourceTypeKey {
+  ResourceType type;
+  uint8_t id;
+
+  bool operator<(const ResourceTypeKey& other) const {
+    return (type != other.type) ? type < other.type : id < other.id;
   }
 
-  const ResourceId existing_id(pkg->id.value(), type->id ? type->id.value() : 0,
-                               entry->id ? entry->id.value() : 0);
-  diag->Error(DiagMessage() << "can't assign ID " << id << " to resource "
-                            << name << " with conflicting ID " << existing_id);
-  return false;
+  bool operator==(const ResourceTypeKey& other) const {
+    return type == other.type && id == other.id;
+  }
+
+  bool operator!=(const ResourceTypeKey& other) const {
+    return !(*this == other);
+  }
+};
+
+::std::ostream& operator<<(::std::ostream& out, const ResourceTypeKey& type) {
+  return out << type.type;
 }
 
+struct IdAssignerContext {
+  IdAssignerContext(std::string package_name, uint8_t package_id)
+      : package_name_(std::move(package_name)), package_id_(package_id) {
+  }
+
+  // Attempts to reserve the resource id for the specified resource name.
+  // Returns whether the id was reserved successfully.
+  // Reserving identifiers must be completed before `NextId` is called for the first time.
+  bool ReserveId(const ResourceName& name, ResourceId id, const Visibility& visibility,
+                 IDiagnostics* diag);
+
+  // Retrieves the next available resource id that has not been reserved.
+  std::optional<ResourceId> NextId(const ResourceName& name, IDiagnostics* diag);
+
+ private:
+  std::string package_name_;
+  uint8_t package_id_;
+  std::map<ResourceTypeKey, TypeGroup> types_;
+  std::map<ResourceType, uint8_t> non_staged_type_ids_;
+  NextIdFinder<uint8_t, ResourceTypeKey> type_id_finder_ =
+      NextIdFinder<uint8_t, ResourceTypeKey>(1);
+};
+
+}  // namespace
+
 bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
-  std::map<ResourceId, ResourceName> assigned_ids;
-
+  IdAssignerContext assigned_ids(context->GetCompilationPackage(), context->GetPackageId());
   for (auto& package : table->packages) {
-    CHECK(bool(package->id)) << "packages must have manually assigned IDs";
-
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
         const ResourceName name(package->name, type->type, entry->name);
+        if (entry->id) {
+          if (!assigned_ids.ReserveId(name, entry->id.value(), entry->visibility,
+                                      context->GetDiagnostics())) {
+            return false;
+          }
+        }
 
         if (assigned_id_map_) {
           // Assign the pre-assigned stable ID meant for this resource.
           const auto iter = assigned_id_map_->find(name);
           if (iter != assigned_id_map_->end()) {
             const ResourceId assigned_id = iter->second;
-            const bool result =
-                AssignId(context->GetDiagnostics(), assigned_id, name,
-                         package.get(), type.get(), entry.get());
-            if (!result) {
+            if (!assigned_ids.ReserveId(name, assigned_id, entry->visibility,
+                                        context->GetDiagnostics())) {
               return false;
             }
-          }
-        }
-
-        if (package->id && type->id && entry->id) {
-          // If the ID is set for this resource, then reserve it.
-          ResourceId resource_id(package->id.value(), type->id.value(),
-                                 entry->id.value());
-          auto result = assigned_ids.insert({resource_id, name});
-          const ResourceName& existing_name = result.first->second;
-          if (!result.second) {
-            context->GetDiagnostics()->Error(
-                DiagMessage() << "resource " << name << " has same ID "
-                              << resource_id << " as " << existing_name);
-            return false;
+            entry->id = assigned_id;
           }
         }
       }
@@ -94,125 +153,185 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
   }
 
   if (assigned_id_map_) {
-    // Reserve all the IDs mentioned in the stable ID map. That way we won't
-    // assign
-    // IDs that were listed in the map if they don't exist in the table.
+    // Reserve all the IDs mentioned in the stable ID map. That way we won't assig IDs that were
+    // listed in the map if they don't exist in the table.
     for (const auto& stable_id_entry : *assigned_id_map_) {
       const ResourceName& pre_assigned_name = stable_id_entry.first;
       const ResourceId& pre_assigned_id = stable_id_entry.second;
-      auto result = assigned_ids.insert({pre_assigned_id, pre_assigned_name});
-      const ResourceName& existing_name = result.first->second;
-      if (!result.second && existing_name != pre_assigned_name) {
-        context->GetDiagnostics()->Error(
-            DiagMessage() << "stable ID " << pre_assigned_id << " for resource "
-                          << pre_assigned_name
-                          << " is already taken by resource " << existing_name);
+      if (!assigned_ids.ReserveId(pre_assigned_name, pre_assigned_id, {},
+                                  context->GetDiagnostics())) {
         return false;
       }
     }
   }
 
-  // Assign any resources without IDs the next available ID. Gaps will be filled
-  // if possible,
+  // Assign any resources without IDs the next available ID. Gaps will be filled if possible,
   // unless those IDs have been reserved.
-
-  const auto assigned_ids_iter_end = assigned_ids.end();
   for (auto& package : table->packages) {
-    CHECK(bool(package->id)) << "packages must have manually assigned IDs";
-
-    // Build a half filled ResourceId object, which will be used to find the
-    // closest matching
-    // reserved ID in the assignedId map. From that point the next available
-    // type ID can be
-    // found.
-    ResourceId resource_id(package->id.value(), 0, 0);
-    uint8_t next_expected_type_id = 1;
-
-    // Find the closest matching ResourceId that is <= the one with only the
-    // package set.
-    auto next_type_iter = assigned_ids.lower_bound(resource_id);
     for (auto& type : package->types) {
-      if (!type->id) {
-        // We need to assign a type ID. Iterate over the reserved IDs until we
-        // find
-        // some type ID that is a distance of 2 greater than the last one we've
-        // seen.
-        // That means there is an available type ID between these reserved IDs.
-        while (next_type_iter != assigned_ids_iter_end) {
-          if (next_type_iter->first.package_id() != package->id.value()) {
-            break;
-          }
-
-          const uint8_t type_id = next_type_iter->first.type_id();
-          if (type_id > next_expected_type_id) {
-            // There is a gap in the type IDs, so use the missing one.
-            type->id = next_expected_type_id++;
-            break;
-          }
-
-          // Set our expectation to be the next type ID after the reserved one
-          // we
-          // just saw.
-          next_expected_type_id = type_id + 1;
-
-          // Move to the next reserved ID.
-          ++next_type_iter;
-        }
-
-        if (!type->id) {
-          // We must have hit the end of the reserved IDs and not found a gap.
-          // That means the next ID is available.
-          type->id = next_expected_type_id++;
-        }
-      }
-
-      resource_id = ResourceId(package->id.value(), type->id.value(), 0);
-      uint16_t next_expected_entry_id = 0;
-
-      // Find the closest matching ResourceId that is <= the one with only the
-      // package
-      // and type set.
-      auto next_entry_iter = assigned_ids.lower_bound(resource_id);
       for (auto& entry : type->entries) {
-        if (!entry->id) {
-          // We need to assign an entry ID. Iterate over the reserved IDs until
-          // we find
-          // some entry ID that is a distance of 2 greater than the last one
-          // we've seen.
-          // That means there is an available entry ID between these reserved
-          // IDs.
-          while (next_entry_iter != assigned_ids_iter_end) {
-            if (next_entry_iter->first.package_id() != package->id.value() ||
-                next_entry_iter->first.type_id() != type->id.value()) {
-              break;
-            }
-
-            const uint16_t entry_id = next_entry_iter->first.entry_id();
-            if (entry_id > next_expected_entry_id) {
-              // There is a gap in the entry IDs, so use the missing one.
-              entry->id = next_expected_entry_id++;
-              break;
-            }
-
-            // Set our expectation to be the next type ID after the reserved one
-            // we
-            // just saw.
-            next_expected_entry_id = entry_id + 1;
-
-            // Move to the next reserved entry ID.
-            ++next_entry_iter;
-          }
-
-          if (!entry->id) {
-            // We must have hit the end of the reserved IDs and not found a gap.
-            // That means the next ID is available.
-            entry->id = next_expected_entry_id++;
-          }
+        const ResourceName name(package->name, type->type, entry->name);
+        if (entry->id) {
+          continue;
         }
+        auto id = assigned_ids.NextId(name, context->GetDiagnostics());
+        if (!id.has_value()) {
+          return false;
+        }
+        entry->id = id.value();
       }
     }
   }
   return true;
 }
+
+namespace {
+template <typename Id, typename Key>
+Result<Id> NextIdFinder<Id, Key>::ReserveId(Key key, Id id) {
+  CHECK(!next_id_called_) << "ReserveId cannot be called after NextId";
+  auto assign_result = pre_assigned_ids_.emplace(id, key);
+  if (!assign_result.second && assign_result.first->second != key) {
+    std::stringstream error;
+    error << "ID is already assigned to " << assign_result.first->second;
+    return unexpected(error.str());
+  }
+  return id;
+}
+
+template <typename Id, typename Key>
+std::optional<Id> NextIdFinder<Id, Key>::NextId() {
+  if (!next_id_called_) {
+    next_id_called_ = true;
+    next_preassigned_id_ = pre_assigned_ids_.begin();
+  }
+  return SkipToNextAvailableId();
+}
+
+template <typename Id, typename Key>
+std::optional<Id> NextIdFinder<Id, Key>::SkipToNextAvailableId() {
+  if (exhausted_) {
+    return {};
+  }
+  while (next_preassigned_id_ != pre_assigned_ids_.end()) {
+    if (next_preassigned_id_->first == next_id_) {
+      if (next_id_ == std::numeric_limits<Id>::max()) {
+        // The last identifier was reserved so there are no more available identifiers.
+        exhausted_ = true;
+        return {};
+      }
+      ++next_id_;
+      ++next_preassigned_id_;
+      continue;
+    }
+    CHECK(next_preassigned_id_->first > next_id_) << "Preassigned IDs are not in sorted order";
+    break;
+  }
+  if (next_id_ == std::numeric_limits<Id>::max()) {
+    // There are no more identifiers after this one, but this one is still available so return it.
+    exhausted_ = true;
+  }
+  return next_id_++;
+}
+
+Result<std::monostate> TypeGroup::ReserveId(const ResourceName& name, ResourceId id) {
+  if (type_id_ != id.type_id()) {
+    // Currently there cannot be multiple type ids for a single type.
+    std::stringstream error;
+    error << "type '" << name.type << "' already has ID " << std::hex << (int)id.type_id();
+    return unexpected(error.str());
+  }
+
+  auto assign_result = next_entry_id_.ReserveId(name, id.entry_id());
+  if (!assign_result.has_value()) {
+    std::stringstream error;
+    error << "entry " << assign_result.error();
+    return unexpected(error.str());
+  }
+  return {};
+}
+
+Result<ResourceId> TypeGroup::NextId() {
+  auto entry_id = next_entry_id_.NextId();
+  if (!entry_id.has_value()) {
+    std::stringstream error;
+    error << "resource type ID has exceeded the maximum number of resource entries ("
+          << (std::numeric_limits<uint16_t>::max() + 1u) << ")";
+    return unexpected(error.str());
+  }
+  return ResourceId(package_id_, type_id_, entry_id.value());
+}
+
+bool IdAssignerContext::ReserveId(const ResourceName& name, ResourceId id,
+                                  const Visibility& visibility, IDiagnostics* diag) {
+  if (package_id_ != id.package_id()) {
+    diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
+                              << " because package already has ID " << std::hex
+                              << (int)id.package_id());
+    return false;
+  }
+
+  auto key = ResourceTypeKey{name.type, id.type_id()};
+  auto type = types_.find(key);
+  if (type == types_.end()) {
+    // The type has not been assigned an id yet. Ensure that the specified id is not being used by
+    // another type.
+    auto assign_result = type_id_finder_.ReserveId(key, id.type_id());
+    if (!assign_result.has_value()) {
+      diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
+                                << " because type " << assign_result.error());
+      return false;
+    }
+    type = types_.emplace(key, TypeGroup(package_id_, id.type_id())).first;
+  }
+
+  if (!visibility.staged_api) {
+    // Ensure that non-staged resources can only exist in one type ID.
+    auto non_staged_type = non_staged_type_ids_.emplace(name.type, id.type_id());
+    if (!non_staged_type.second && non_staged_type.first->second != id.type_id()) {
+      diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
+                                << " because type already has ID " << std::hex
+                                << (int)id.type_id());
+      return false;
+    }
+  }
+
+  auto assign_result = type->second.ReserveId(name, id);
+  if (!assign_result.has_value()) {
+    diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name << " because "
+                              << assign_result.error());
+    return false;
+  }
+
+  return true;
+}
+
+std::optional<ResourceId> IdAssignerContext::NextId(const ResourceName& name, IDiagnostics* diag) {
+  // The package name is not known during the compile stage.
+  // Resources without a package name are considered a part of the app being linked.
+  CHECK(name.package.empty() || name.package == package_name_);
+
+  // Find the type id for non-staged resources of this type.
+  auto non_staged_type = non_staged_type_ids_.find(name.type);
+  if (non_staged_type == non_staged_type_ids_.end()) {
+    auto next_type_id = type_id_finder_.NextId();
+    CHECK(next_type_id.has_value()) << "resource type IDs allocated have exceeded maximum (256)";
+    non_staged_type = non_staged_type_ids_.emplace(name.type, *next_type_id).first;
+  }
+
+  ResourceTypeKey key{name.type, non_staged_type->second};
+  auto type = types_.find(key);
+  if (type == types_.end()) {
+    type = types_.emplace(key, TypeGroup(package_id_, key.id)).first;
+  }
+
+  auto assign_result = type->second.NextId();
+  if (!assign_result.has_value()) {
+    diag->Error(DiagMessage() << "can't assign resource ID to resource " << name << " because "
+                              << assign_result.error());
+    return {};
+  }
+  return assign_result.value();
+}
+}  // namespace
 
 }  // namespace aapt

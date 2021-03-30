@@ -66,6 +66,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     private Context mContext;
 
+    /** */
     @Inject
     public StatusBarIconControllerImpl(
             Context context,
@@ -84,6 +85,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         demoModeController.addCallback(this);
     }
 
+    /** */
     @Override
     public void addIconGroup(IconManager group) {
         mIconGroups.add(group);
@@ -101,12 +103,14 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
     }
 
+    /** */
     @Override
     public void removeIconGroup(IconManager group) {
         group.destroy();
         mIconGroups.remove(group);
     }
 
+    /** */
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (!ICON_HIDE_LIST.equals(key)) {
@@ -149,6 +153,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         mIconGroups.forEach(l -> l.onIconAdded(viewIndex, slot, hidden, holder));
     }
 
+    /** */
     @Override
     public void setIcon(String slot, int resourceId, CharSequence contentDescription) {
         int index = getSlotIndex(slot);
@@ -290,8 +295,9 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
      * For backwards compatibility, in the event that someone gives us a slot and a status bar icon
      */
     private void setIcon(int index, StatusBarIcon icon) {
+        String slot = getSlotName(index);
         if (icon == null) {
-            removeAllIconsForSlot(getSlotName(index));
+            removeAllIconsForSlot(slot);
             return;
         }
 
@@ -299,6 +305,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         setIcon(index, holder);
     }
 
+    /** */
     @Override
     public void setIcon(int index, @NonNull StatusBarIconHolder holder) {
         boolean isNew = getIcon(index, holder.getTag()) == null;
@@ -328,6 +335,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         handleSet(index, holder);
     }
 
+    /** */
     @Override
     public void setIconAccessibilityLiveRegion(String slotName, int accessibilityLiveRegion) {
         Slot slot = getSlot(slotName);
@@ -344,15 +352,18 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
     }
 
+    /** */
     public void removeIcon(String slot) {
         removeAllIconsForSlot(slot);
     }
 
+    /** */
     @Override
     public void removeIcon(String slot, int tag) {
         removeIcon(getSlotIndex(slot), tag);
     }
 
+    /** */
     @Override
     public void removeAllIconsForSlot(String slotName) {
         Slot slot = getSlot(slotName);
@@ -369,6 +380,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
     }
 
+    /** */
     @Override
     public void removeIcon(int index, int tag) {
         if (getIcon(index, tag) == null) {
@@ -384,6 +396,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         mIconGroups.forEach(l -> l.onSetIconHolder(viewIndex, holder));
     }
 
+    /** */
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG + " state:");
@@ -402,6 +415,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         super.dump(pw);
     }
 
+    /** */
     @Override
     public void onDemoModeStarted() {
         for (IconManager manager : mIconGroups) {
@@ -411,6 +425,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
     }
 
+    /** */
     @Override
     public void onDemoModeFinished() {
         for (IconManager manager : mIconGroups) {
@@ -420,6 +435,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
     }
 
+    /** */
     @Override
     public void dispatchDemoCommand(String command, Bundle args) {
         for (IconManager manager : mIconGroups) {
@@ -429,6 +445,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
     }
 
+    /** */
     @Override
     public List<String> demoCommands() {
         List<String> s = new ArrayList<>();
@@ -436,6 +453,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         return s;
     }
 
+    /** */
     @Override
     public void onDensityOrFontScaleChanged() {
         loadDimens();

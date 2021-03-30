@@ -203,7 +203,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    protected boolean handleActiveSource(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int logicalAddress = message.getSource();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
@@ -215,20 +216,22 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (isRoutingControlFeatureEnabled()) {
             switchInputOnReceivingNewActivePath(physicalAddress);
         }
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleRequestActiveSource(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRequestActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         maySendActiveSource(message.getSource());
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleSetStreamPath(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleSetStreamPath(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         // If current device is the target path, set to Active Source.
@@ -242,12 +245,13 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleSetStreamPath()");
         }
         switchInputOnReceivingNewActivePath(physicalAddress);
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleRoutingChange(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRoutingChange(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams(), 2);
         if (physicalAddress != mService.getPhysicalAddress() || !isActiveSource()) {
@@ -256,16 +260,16 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleRoutingChange()");
         }
         if (!isRoutingControlFeatureEnabled()) {
-            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
-            return true;
+            return Constants.ABORT_REFUSED;
         }
         handleRoutingChangeAndInformation(physicalAddress, message);
-        return true;
+        return Constants.HANDLED;
     }
 
     @Override
     @ServiceThreadOnly
-    protected boolean handleRoutingInformation(HdmiCecMessage message) {
+    @Constants.HandleMessageResult
+    protected int handleRoutingInformation(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         if (physicalAddress != mService.getPhysicalAddress() || !isActiveSource()) {
@@ -274,11 +278,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             setActiveSource(physicalAddress, "HdmiCecLocalDeviceSource#handleRoutingInformation()");
         }
         if (!isRoutingControlFeatureEnabled()) {
-            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
-            return true;
+            return Constants.ABORT_REFUSED;
         }
         handleRoutingChangeAndInformation(physicalAddress, message);
-        return true;
+        return Constants.HANDLED;
     }
 
     // Method to switch Input with the new Active Path.

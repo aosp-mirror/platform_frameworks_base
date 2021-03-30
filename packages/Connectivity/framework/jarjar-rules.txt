@@ -1,4 +1,5 @@
 rule com.android.net.module.util.** android.net.connectivity.framework.util.@1
+rule android.net.NetworkFactory* android.net.connectivity.framework.NetworkFactory@1
 
 # TODO (b/149403767): remove the annotations from net-utils-device-common instead of here
 zap android.annotation.**

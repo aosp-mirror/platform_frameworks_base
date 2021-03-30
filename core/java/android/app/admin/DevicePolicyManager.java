@@ -872,8 +872,7 @@ public class DevicePolicyManager {
      *
      * The name is displayed only during provisioning.
      *
-     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
-     * or {@link #ACTION_PROVISION_FINANCED_DEVICE}
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_FINANCED_DEVICE}
      *
      * @hide
      */
@@ -1675,6 +1674,29 @@ public class DevicePolicyManager {
             PASSWORD_COMPLEXITY_HIGH,
     })
     public @interface PasswordComplexity {}
+
+    /** Indicates that nearby streaming is disabled. */
+    public static final int NEARBY_STREAMING_DISABLED = 0;
+
+    /** Indicates that nearby streaming is enabled. */
+    public static final int NEARBY_STREAMING_ENABLED = 1;
+
+    /**
+     * Indicates that nearby streaming is enabled only to devices offering a comparable level of
+     * security, with the same authenticated managed account.
+     */
+    public static final int NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY = 2;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"NEARBY_STREAMING_"}, value = {
+        NEARBY_STREAMING_DISABLED,
+        NEARBY_STREAMING_ENABLED,
+        NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY,
+    })
+    public @interface NearbyStreamingPolicy {}
 
     /**
      * Activity action: have the user enter a new password for the parent profile.
@@ -3305,6 +3327,41 @@ public class DevicePolicyManager {
     @SystemApi
     public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED =
             "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
+
+    /**
+     * A {@code boolean} metadata to be included in a mainline module's {@code <application>}
+     * manifest element, which declares that the module should be considered a required app for
+     * managed users.
+     * <p>Being declared as a required app prevents removal of this package during the
+     * provisioning process.
+     * @hide
+     */
+    @SystemApi
+    public static final String REQUIRED_APP_MANAGED_USER = "android.app.REQUIRED_APP_MANAGED_USER";
+
+    /**
+     * A {@code boolean} metadata to be included in a mainline module's {@code <application>}
+     * manifest element, which declares that the module should be considered a required app for
+     * managed devices.
+     * <p>Being declared as a required app prevents removal of this package during the
+     * provisioning process.
+     * @hide
+     */
+    @SystemApi
+    public static final String REQUIRED_APP_MANAGED_DEVICE =
+            "android.app.REQUIRED_APP_MANAGED_DEVICE";
+
+    /**
+     * A {@code boolean} metadata to be included in a mainline module's {@code <application>}
+     * manifest element, which declares that the module should be considered a required app for
+     * managed profiles.
+     * <p>Being declared as a required app prevents removal of this package during the
+     * provisioning process.
+     * @hide
+     */
+    @SystemApi
+    public static final String REQUIRED_APP_MANAGED_PROFILE =
+            "android.app.REQUIRED_APP_MANAGED_PROFILE";
 
     /**
      * Called by an application that is administering the device to set the password restrictions it
@@ -7129,6 +7186,77 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device/profile owner to set nearby notification streaming policy. Notification
+     * streaming is sending notification data from pre-installed apps to nearby devices.
+     *
+     * @param policy One of the {@code NearbyStreamingPolicy} constants.
+     * @throws SecurityException if caller is not a device or profile owner
+     */
+    public void setNearbyNotificationStreamingPolicy(@NearbyStreamingPolicy int policy) {
+        throwIfParentInstance("setNearbyNotificationStreamingPolicy");
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.setNearbyNotificationStreamingPolicy(policy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current runtime nearby notification streaming policy set by the device or profile
+     * owner. The default is {@link #NEARBY_STREAMING_DISABLED}.
+     */
+    public @NearbyStreamingPolicy int getNearbyNotificationStreamingPolicy() {
+        throwIfParentInstance("getNearbyNotificationStreamingPolicy");
+        if (mService == null) {
+            return NEARBY_STREAMING_DISABLED;
+        }
+        try {
+            return mService.getNearbyNotificationStreamingPolicy();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by a device/profile owner to set nearby app streaming policy. App streaming is when
+     * the device starts an app on a virtual display and sends a video stream of the app to nearby
+     * devices.
+     *
+     * @param policy One of the {@code NearbyStreamingPolicy} constants.
+     * @throws SecurityException if caller is not a device or profile owner.
+     */
+    public void setNearbyAppStreamingPolicy(@NearbyStreamingPolicy int policy) {
+        throwIfParentInstance("setNearbyAppStreamingPolicy");
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.setNearbyAppStreamingPolicy(policy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current runtime nearby app streaming policy set by the device or profile owner.
+     * The default is {@link #NEARBY_STREAMING_DISABLED}.
+     */
+    public @NearbyStreamingPolicy int getNearbyAppStreamingPolicy() {
+        throwIfParentInstance("getNearbyAppStreamingPolicy");
+        if (mService == null) {
+            return NEARBY_STREAMING_DISABLED;
+        }
+        try {
+            return mService.getNearbyAppStreamingPolicy();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called by a device owner, or alternatively a profile owner from Android 8.0 (API level 26) or
      * higher, to set whether auto time is required. If auto time is required, no user will be able
      * set the date and time and network date and time will be used.
@@ -9990,26 +10118,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether 5g slicing is enabled on the work profile.
+     * Sets whether enterprise network preference is enabled on the work profile.
      *
-     * Slicing allows operators to virtually divide their networks in portions and use different
-     * portions for specific use cases; for example, a corporation can have a deal/agreement with
-     * a carrier that all of its employees’ devices use data on a slice dedicated for enterprise
-     * use.
+     * For example, a corporation can have a deal/agreement with a carrier that all of its
+     * employees’ devices use data on a network preference dedicated for enterprise use.
      *
-     * By default, 5g slicing is enabled on the work profile on supported carriers and devices.
-     * Admins can explicitly disable it with this API.
+     * By default, enterprise network preference is enabled on the work profile on supported
+     * carriers and devices. Admins can explicitly disable it with this API.
      *
      * <p>This method can only be called by the profile owner of a managed profile.
      *
-     * @param enabled whether 5g Slice should be enabled.
+     * @param enabled whether enterprise network preference should be enabled.
      * @throws SecurityException if the caller is not the profile owner.
      **/
-    public void setNetworkSlicingEnabled(boolean enabled) {
-        throwIfParentInstance("setNetworkSlicingEnabled");
+    public void setEnterpriseNetworkPreferenceEnabled(boolean enabled) {
+        throwIfParentInstance("setEnterpriseNetworkPreferenceEnabled");
         if (mService != null) {
             try {
-                mService.setNetworkSlicingEnabled(enabled);
+                mService.setEnterpriseNetworkPreferenceEnabled(enabled);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10017,20 +10143,20 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Indicates whether 5g slicing is enabled.
+     * Indicates whether whether enterprise network preference is enabled.
      *
      * <p>This method can be called by the profile owner of a managed profile.
      *
-     * @return whether 5g Slice is enabled.
+     * @return whether whether enterprise network preference is enabled.
      * @throws SecurityException if the caller is not the profile owner.
      */
-    public boolean isNetworkSlicingEnabled() {
-        throwIfParentInstance("isNetworkSlicingEnabled");
+    public boolean isEnterpriseNetworkPreferenceEnabled() {
+        throwIfParentInstance("isEnterpriseNetworkPreferenceEnabled");
         if (mService == null) {
             return false;
         }
         try {
-            return mService.isNetworkSlicingEnabled(myUserId());
+            return mService.isEnterpriseNetworkPreferenceEnabled(myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -13374,6 +13500,63 @@ public class DevicePolicyManager {
             }
         }
         return 0;
+    }
+
+    /**
+     * Called by a profile owner of an organization-owned managed profile to acknowledge that the
+     * device is compliant and the user can turn the profile off if needed according to the maximum
+     * time off policy.
+     *
+     * This method should be called when the device is deemed compliant after getting
+     * {@link DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)} callback in
+     * case it is overridden. Before this method is called the user is still free to turn the
+     * profile off, but the timer won't be reset, so personal apps will be suspended sooner.
+     *
+     * DPCs only need acknowledging device compliance if they override
+     * {@link DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)}, otherwise
+     * compliance is acknowledged automatically.
+     *
+     * @throws IllegalStateException if the user isn't unlocked
+     * @see #isComplianceAcknowledgementRequired()
+     * @see #setManagedProfileMaximumTimeOff(ComponentName, long)
+     * @see DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)
+     */
+    public void acknowledgeDeviceCompliant() {
+        throwIfParentInstance("acknowledgeDeviceCompliant");
+        if (mService != null) {
+            try {
+                mService.acknowledgeDeviceCompliant();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner of an organization-owned managed profile to query whether it needs
+     * to acknowledge device compliance to allow the user to turn the profile off if needed
+     * according to the maximum profile time off policy.
+     *
+     * Normally when acknowledgement is needed the DPC gets a
+     * {@link DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)} callback.
+     * But if the callback was not delivered or handled for some reason, this method can be used to
+     * verify if acknowledgement is needed.
+     *
+     * @throws IllegalStateException if the user isn't unlocked
+     * @see #acknowledgeDeviceCompliant()
+     * @see #setManagedProfileMaximumTimeOff(ComponentName, long)
+     * @see DeviceAdminReceiver#onComplianceAcknowledgementRequired(Context, Intent)
+     */
+    public boolean isComplianceAcknowledgementRequired() {
+        throwIfParentInstance("isComplianceAcknowledgementRequired");
+        if (mService != null) {
+            try {
+                return mService.isComplianceAcknowledgementRequired();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**

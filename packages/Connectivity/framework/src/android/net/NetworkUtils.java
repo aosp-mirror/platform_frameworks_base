@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.net.ConnectivityManager.NETID_UNSET;
+
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.system.ErrnoException;
@@ -40,6 +42,9 @@ import java.util.TreeSet;
  * {@hide}
  */
 public class NetworkUtils {
+    static {
+        System.loadLibrary("framework-connectivity-jni");
+    }
 
     private static final String TAG = "NetworkUtils";
 
@@ -55,6 +60,8 @@ public class NetworkUtils {
      */
     public static native void detachBPFFilter(FileDescriptor fd) throws SocketException;
 
+    private static native boolean bindProcessToNetworkHandle(long netHandle);
+
     /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
      * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
@@ -63,13 +70,20 @@ public class NetworkUtils {
      * is by design so an application doesn't accidentally use sockets it thinks are still bound to
      * a particular {@code Network}.  Passing NETID_UNSET clears the binding.
      */
-    public native static boolean bindProcessToNetwork(int netId);
+    public static boolean bindProcessToNetwork(int netId) {
+        return bindProcessToNetworkHandle(new Network(netId).getNetworkHandle());
+    }
+
+    private static native long getBoundNetworkHandleForProcess();
 
     /**
      * Return the netId last passed to {@link #bindProcessToNetwork}, or NETID_UNSET if
      * {@link #unbindProcessToNetwork} has been called since {@link #bindProcessToNetwork}.
      */
-    public native static int getBoundNetworkForProcess();
+    public static int getBoundNetworkForProcess() {
+        final long netHandle = getBoundNetworkHandleForProcess();
+        return netHandle == 0L ? NETID_UNSET : Network.fromNetworkHandle(netHandle).getNetId();
+    }
 
     /**
      * Binds host resolutions performed by this process to the network designated by {@code netId}.
@@ -81,18 +95,28 @@ public class NetworkUtils {
     @Deprecated
     public native static boolean bindProcessToNetworkForHostResolution(int netId);
 
+    private static native int bindSocketToNetworkHandle(FileDescriptor fd, long netHandle);
+
     /**
      * Explicitly binds {@code fd} to the network designated by {@code netId}.  This
      * overrides any binding via {@link #bindProcessToNetwork}.
      * @return 0 on success or negative errno on failure.
      */
-    public static native int bindSocketToNetwork(FileDescriptor fd, int netId);
+    public static int bindSocketToNetwork(FileDescriptor fd, int netId) {
+        return bindSocketToNetworkHandle(fd, new Network(netId).getNetworkHandle());
+    }
 
     /**
      * Determine if {@code uid} can access network designated by {@code netId}.
      * @return {@code true} if {@code uid} can access network, {@code false} otherwise.
      */
-    public native static boolean queryUserAccess(int uid, int netId);
+    public static boolean queryUserAccess(int uid, int netId) {
+        // TODO (b/183485986): remove this method
+        return false;
+    }
+
+    private static native FileDescriptor resNetworkSend(
+            long netHandle, byte[] msg, int msglen, int flags) throws ErrnoException;
 
     /**
      * DNS resolver series jni method.
@@ -100,8 +124,13 @@ public class NetworkUtils {
      * {@code flags} is an additional config to control actual querying behavior.
      * @return a file descriptor to watch for read events
      */
-    public static native FileDescriptor resNetworkSend(
-            int netId, byte[] msg, int msglen, int flags) throws ErrnoException;
+    public static FileDescriptor resNetworkSend(
+            int netId, byte[] msg, int msglen, int flags) throws ErrnoException {
+        return resNetworkSend(new Network(netId).getNetworkHandle(), msg, msglen, flags);
+    }
+
+    private static native FileDescriptor resNetworkQuery(
+            long netHandle, String dname, int nsClass, int nsType, int flags) throws ErrnoException;
 
     /**
      * DNS resolver series jni method.
@@ -110,8 +139,11 @@ public class NetworkUtils {
      * {@code flags} is an additional config to control actual querying behavior.
      * @return a file descriptor to watch for read events
      */
-    public static native FileDescriptor resNetworkQuery(
-            int netId, String dname, int nsClass, int nsType, int flags) throws ErrnoException;
+    public static FileDescriptor resNetworkQuery(
+            int netId, String dname, int nsClass, int nsType, int flags) throws ErrnoException {
+        return resNetworkQuery(new Network(netId).getNetworkHandle(), dname, nsClass, nsType,
+                flags);
+    }
 
     /**
      * DNS resolver series jni method.
@@ -323,22 +355,7 @@ public class NetworkUtils {
      */
     @UnsupportedAppUsage
     public static String trimV4AddrZeros(String addr) {
-        if (addr == null) return null;
-        String[] octets = addr.split("\\.");
-        if (octets.length != 4) return addr;
-        StringBuilder builder = new StringBuilder(16);
-        String result = null;
-        for (int i = 0; i < 4; i++) {
-            try {
-                if (octets[i].length() > 3) return addr;
-                builder.append(Integer.parseInt(octets[i]));
-            } catch (NumberFormatException e) {
-                return addr;
-            }
-            if (i < 3) builder.append('.');
-        }
-        result = builder.toString();
-        return result;
+        return Inet4AddressUtils.trimAddressZeros(addr);
     }
 
     /**

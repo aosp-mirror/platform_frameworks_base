@@ -45,8 +45,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerWhitelistManager;
-import android.os.PowerWhitelistManager.TempAllowListType;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -908,7 +908,7 @@ public final class BroadcastQueue {
     }
 
     final void scheduleTempAllowlistLocked(int uid, long duration, BroadcastRecord r,
-            @TempAllowListType int type, @PowerWhitelistManager.ReasonCode int reasonCode,
+            @TempAllowListType int type, @ReasonCode int reasonCode,
             @Nullable String reason) {
         if (duration > Integer.MAX_VALUE) {
             duration = Integer.MAX_VALUE;
@@ -1544,7 +1544,7 @@ public final class BroadcastQueue {
         }
         String targetProcess = info.activityInfo.processName;
         ProcessRecord app = mService.getProcessRecordLocked(targetProcess,
-                info.activityInfo.applicationInfo.uid, false);
+                info.activityInfo.applicationInfo.uid);
 
         if (!skip) {
             final int allowed = mService.getAppStartModeLOSP(
@@ -1678,7 +1678,7 @@ public final class BroadcastQueue {
                 r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
                 new HostingRecord("broadcast", r.curComponent), isActivityCapable
                 ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
-                (r.intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false, false);
+                (r.intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false);
         if (r.curApp == null) {
             // Ah, this recipient is unavailable.  Finish it if necessary,
             // and mark the broadcast record as ready for the next.

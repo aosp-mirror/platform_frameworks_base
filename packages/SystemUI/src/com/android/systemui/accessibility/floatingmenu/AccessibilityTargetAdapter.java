@@ -18,10 +18,6 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.View.GONE;
 
-import static com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ItemType.FIRST_ITEM;
-import static com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ItemType.LAST_ITEM;
-import static com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ItemType.REGULAR_ITEM;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,9 +43,9 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
     private final List<AccessibilityTarget> mTargets;
 
     @IntDef({
-            FIRST_ITEM,
-            REGULAR_ITEM,
-            LAST_ITEM
+            ItemType.FIRST_ITEM,
+            ItemType.REGULAR_ITEM,
+            ItemType.LAST_ITEM
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ItemType {
@@ -69,11 +65,11 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
                 R.layout.accessibility_floating_menu_item, parent,
                 /* attachToRoot= */ false);
 
-        if (itemType == FIRST_ITEM) {
+        if (itemType == ItemType.FIRST_ITEM) {
             return new TopViewHolder(root);
         }
 
-        if (itemType == LAST_ITEM) {
+        if (itemType == ItemType.LAST_ITEM) {
             return new BottomViewHolder(root);
         }
 
@@ -91,14 +87,14 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         if (position == 0) {
-            return FIRST_ITEM;
+            return ItemType.FIRST_ITEM;
         }
 
         if (position == (getItemCount() - 1)) {
-            return LAST_ITEM;
+            return ItemType.LAST_ITEM;
         }
 
-        return REGULAR_ITEM;
+        return ItemType.REGULAR_ITEM;
     }
 
     @Override

@@ -118,7 +118,6 @@ public final class WindowManagerGlobal {
 
     public static final int ADD_FLAG_IN_TOUCH_MODE = 0x1;
     public static final int ADD_FLAG_APP_VISIBLE = 0x2;
-    public static final int ADD_FLAG_USE_TRIPLE_BUFFERING = 0x4;
     public static final int ADD_FLAG_USE_BLAST = 0x8;
 
     /**

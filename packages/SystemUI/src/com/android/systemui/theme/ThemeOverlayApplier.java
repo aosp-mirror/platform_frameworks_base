@@ -65,8 +65,6 @@ public class ThemeOverlayApplier implements Dumpable {
             "android.theme.customization.accent_color";
     static final String OVERLAY_CATEGORY_SYSTEM_PALETTE =
             "android.theme.customization.system_palette";
-    static final String OVERLAY_CATEGORY_NEUTRAL_PALETTE =
-            "android.theme.customization.neutral_palette";
     @VisibleForTesting
     static final String OVERLAY_CATEGORY_FONT = "android.theme.customization.font";
     @VisibleForTesting
@@ -94,7 +92,6 @@ public class ThemeOverlayApplier implements Dumpable {
      */
     static final List<String> THEME_CATEGORIES = Lists.newArrayList(
             OVERLAY_CATEGORY_SYSTEM_PALETTE,
-            OVERLAY_CATEGORY_NEUTRAL_PALETTE,
             OVERLAY_CATEGORY_ICON_LAUNCHER,
             OVERLAY_CATEGORY_SHAPE,
             OVERLAY_CATEGORY_FONT,
@@ -108,7 +105,6 @@ public class ThemeOverlayApplier implements Dumpable {
     @VisibleForTesting
     static final Set<String> SYSTEM_USER_CATEGORIES = Sets.newHashSet(
             OVERLAY_CATEGORY_SYSTEM_PALETTE,
-            OVERLAY_CATEGORY_NEUTRAL_PALETTE,
             OVERLAY_CATEGORY_ACCENT_COLOR,
             OVERLAY_CATEGORY_FONT,
             OVERLAY_CATEGORY_SHAPE,
@@ -131,8 +127,8 @@ public class ThemeOverlayApplier implements Dumpable {
         mLauncherPackage = launcherPackage;
         mThemePickerPackage = themePickerPackage;
         mTargetPackageToCategories.put(ANDROID_PACKAGE, Sets.newHashSet(
-                OVERLAY_CATEGORY_SYSTEM_PALETTE, OVERLAY_CATEGORY_NEUTRAL_PALETTE,
-                OVERLAY_CATEGORY_ACCENT_COLOR, OVERLAY_CATEGORY_FONT, OVERLAY_CATEGORY_SHAPE,
+                OVERLAY_CATEGORY_SYSTEM_PALETTE, OVERLAY_CATEGORY_ACCENT_COLOR,
+                OVERLAY_CATEGORY_FONT, OVERLAY_CATEGORY_SHAPE,
                 OVERLAY_CATEGORY_ICON_ANDROID));
         mTargetPackageToCategories.put(SYSUI_PACKAGE,
                 Sets.newHashSet(OVERLAY_CATEGORY_ICON_SYSUI));

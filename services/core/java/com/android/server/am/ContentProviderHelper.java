@@ -33,6 +33,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ContentProviderHolder;
 import android.app.IApplicationThread;
 import android.app.usage.UsageEvents.Event;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -42,6 +43,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.database.ContentObserver;
@@ -67,7 +69,9 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.LocalServices;
 import com.android.server.RescueParty;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -436,7 +440,7 @@ public class ContentProviderHelper {
                         // Use existing process if already started
                         checkTime(startTime, "getContentProviderImpl: looking for process record");
                         ProcessRecord proc = mService.getProcessRecordLocked(
-                                cpi.processName, cpr.appInfo.uid, false);
+                                cpi.processName, cpr.appInfo.uid);
                         IApplicationThread thread;
                         if (proc != null && (thread = proc.getThread()) != null
                                 && !proc.isKilled()) {
@@ -459,7 +463,7 @@ public class ContentProviderHelper {
                                     new HostingRecord("content provider",
                                         new ComponentName(
                                                 cpi.applicationInfo.packageName, cpi.name)),
-                                    Process.ZYGOTE_POLICY_FLAG_EMPTY, false, false, false);
+                                    Process.ZYGOTE_POLICY_FLAG_EMPTY, false, false);
                             checkTime(startTime, "getContentProviderImpl: after start process");
                             if (proc == null) {
                                 Slog.w(TAG, "Unable to launch app "
@@ -1037,7 +1041,19 @@ public class ContentProviderHelper {
             holder = getContentProviderExternalUnchecked(name, null, callingUid,
                     "*checkContentProviderUriPermission*", userId);
             if (holder != null) {
-                return holder.provider.checkUriPermission(null, null, uri, callingUid, modeFlags);
+
+                final PackageManagerInternal packageManagerInt = LocalServices.getService(
+                        PackageManagerInternal.class);
+                final AndroidPackage androidPackage = packageManagerInt
+                        .getPackage(Binder.getCallingUid());
+                if (androidPackage == null) {
+                    return PackageManager.PERMISSION_DENIED;
+                }
+
+                final AttributionSource attributionSource = new AttributionSource(
+                        callingUid, androidPackage.getPackageName(), null);
+                return holder.provider.checkUriPermission(attributionSource, uri, callingUid,
+                        modeFlags);
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Content provider dead retrieving " + uri, e);

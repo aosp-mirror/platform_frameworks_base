@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Приложението работи"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Приложения, използващи батерията"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увеличение"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Правила за сигурност на услугите за достъпност"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> използва батерията"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> приложения използват батерията"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Коригиране на цветовете"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Намаляване на яркостта"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Допълнително затъмняване"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е изключена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"За да използвате <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, натиснете двата бутона за силата на звука и ги задръжте за 3 секунди"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Поверителност на сензорните данни"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Икона на приложението"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Изображение на търговската марка на приложението"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"Проверете настройките за достъп"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> може да преглежда и управлява съдържанието на екрана ви. Докоснете за преглед."</string>
 </resources>

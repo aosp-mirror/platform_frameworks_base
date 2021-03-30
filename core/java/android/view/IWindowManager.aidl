@@ -777,11 +777,20 @@ interface IWindowManager
     VerifiedDisplayHash verifyDisplayHash(in DisplayHash displayHash);
 
     /**
-     * Registers a listener for a {@link android.app.WindowContext} to handle configuration changes
-     * from the server side.
+     * Call to enable or disable the throttling when generating a display hash. This should only be
+     * used for testing. Throttling is enabled by default.
+     *
+     * Must be called from a process that has {@link android.Manifest.permission#READ_FRAME_BUFFER}
+     * permission.
+     */
+     void setDisplayHashThrottlingEnabled(boolean enable);
+
+    /**
+     * Registers a listener for a {@link android.window.WindowContext} to handle configuration
+     * changes from the server side.
      * <p>
      * Note that this API should be invoked after calling
-     * {@link android.app.WindowTokenClient#attachContext(WindowContext)}
+     * {@link android.window.WindowTokenClient#attachContext(Context)}
      * </p>
      *
      * @param clientToken the window context's token

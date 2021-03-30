@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import android.app.ActivityManager;
 import android.database.ContentObserver;
 import android.os.Handler;
 
@@ -24,27 +25,36 @@ import com.android.systemui.util.settings.SecureSettings;
 
 /** Helper for managing a secure setting. **/
 public abstract class SecureSetting extends ContentObserver implements Listenable {
-    private static final int DEFAULT = 0;
-
-    private SecureSettings mSecureSettings;
+    private final SecureSettings mSecureSettings;
     private final String mSettingName;
+    private final int mDefaultValue;
 
     private boolean mListening;
     private int mUserId;
-    private int mObservedValue = DEFAULT;
+    private int mObservedValue;
 
     protected abstract void handleValueChanged(int value, boolean observedChange);
 
     public SecureSetting(SecureSettings secureSettings, Handler handler, String settingName,
             int userId) {
+        this(secureSettings, handler, settingName, userId, 0);
+    }
+
+    public SecureSetting(SecureSettings secureSetting, Handler handler, String settingName) {
+        this(secureSetting, handler, settingName, ActivityManager.getCurrentUser());
+    }
+
+    public SecureSetting(SecureSettings secureSettings, Handler handler, String settingName,
+            int userId, int defaultValue) {
         super(handler);
         mSecureSettings = secureSettings;
         mSettingName = settingName;
+        mObservedValue = mDefaultValue = defaultValue;
         mUserId = userId;
     }
 
     public int getValue() {
-        return mSecureSettings.getIntForUser(mSettingName, DEFAULT, mUserId);
+        return mSecureSettings.getIntForUser(mSettingName, mDefaultValue, mUserId);
     }
 
     public void setValue(int value) {
@@ -61,7 +71,7 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
                     mSecureSettings.getUriFor(mSettingName), false, this, mUserId);
         } else {
             mSecureSettings.unregisterContentObserver(this);
-            mObservedValue = DEFAULT;
+            mObservedValue = mDefaultValue;
         }
     }
 

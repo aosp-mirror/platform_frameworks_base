@@ -172,7 +172,7 @@ public class NetworkPolicyManager {
 
     /** @hide */
     public static final int FOREGROUND_THRESHOLD_STATE =
-            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
@@ -202,81 +202,6 @@ public class NetworkPolicyManager {
         SUBSCRIPTION_OVERRIDE_CONGESTED
     })
     public @interface SubscriptionOverrideMask {}
-
-    /**
-     * Flag to indicate that an app is not subject to any restrictions that could result in its
-     * network access blocked.
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int BLOCKED_REASON_NONE = 0;
-
-    /**
-     * Flag to indicate that an app is subject to Battery saver restrictions that would
-     * result in its network access being blocked.
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int BLOCKED_REASON_BATTERY_SAVER = 1 << 0;
-
-    /**
-     * Flag to indicate that an app is subject to Doze restrictions that would
-     * result in its network access being blocked.
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int BLOCKED_REASON_DOZE = 1 << 1;
-
-    /**
-     * Flag to indicate that an app is subject to App Standby restrictions that would
-     * result in its network access being blocked.
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int BLOCKED_REASON_APP_STANDBY = 1 << 2;
-
-    /**
-     * Flag to indicate that an app is subject to Restricted mode restrictions that would
-     * result in its network access being blocked.
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int BLOCKED_REASON_RESTRICTED_MODE = 1 << 3;
-
-    /**
-     * Flag to indicate that an app is subject to Data saver restrictions that would
-     * result in its metered network access being blocked.
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int BLOCKED_METERED_REASON_DATA_SAVER = 1 << 16;
-
-    /**
-     * Flag to indicate that an app is subject to user restrictions that would
-     * result in its metered network access being blocked.
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int BLOCKED_METERED_REASON_USER_RESTRICTED = 1 << 17;
-
-    /**
-     * Flag to indicate that an app is subject to Device admin restrictions that would
-     * result in its metered network access being blocked.
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final int BLOCKED_METERED_REASON_ADMIN_DISABLED = 1 << 18;
-
-    /** @hide */
-    public static final int BLOCKED_METERED_REASON_MASK = 0xffff0000;
 
     /**
      * Flag to indicate that app is not exempt from any network restrictions.
@@ -326,25 +251,23 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int ALLOWED_METERED_REASON_USER_EXEMPTED = 1 << 16;
+    /**
+     * Flag to indicate that app is exempt from certain metered network restrictions because of it
+     * being a system component.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_METERED_REASON_SYSTEM = 1 << 17;
+    /**
+     * Flag to indicate that app is exempt from certain metered network restrictions because of it
+     * being in the foreground.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_METERED_REASON_FOREGROUND = 1 << 18;
 
     /** @hide */
     public static final int ALLOWED_METERED_REASON_MASK = 0xffff0000;
-
-    /**
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = {"BLOCKED_"}, value = {
-            BLOCKED_REASON_NONE,
-            BLOCKED_REASON_BATTERY_SAVER,
-            BLOCKED_REASON_DOZE,
-            BLOCKED_REASON_APP_STANDBY,
-            BLOCKED_REASON_RESTRICTED_MODE,
-            BLOCKED_METERED_REASON_DATA_SAVER,
-            BLOCKED_METERED_REASON_USER_RESTRICTED,
-            BLOCKED_METERED_REASON_ADMIN_DISABLED,
-    })
-    public @interface BlockedReason {}
 
     private final Context mContext;
     @UnsupportedAppUsage
@@ -862,35 +785,6 @@ public class NetworkPolicyManager {
     }
 
     /**
-     * Returns whether network access of an UID is blocked or not based on {@code blockedReasons}
-     * corresponding to it.
-     *
-     * {@code blockedReasons} would be a bitwise {@code OR} combination of the
-     * {@code BLOCKED_REASON_*} and/or {@code BLOCKED_METERED_REASON_*} constants.
-     *
-     * @param blockedReasons Value indicating the reasons for why the network access of an UID is
-     *                       blocked. If the value is equal to {@link #BLOCKED_REASON_NONE}, then
-     *                       it indicates that an app's network access is not blocked.
-     * @param meteredNetwork Value indicating whether the network is metered or not.
-     * @return Whether network access is blocked or not.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static boolean isUidBlocked(@BlockedReason int blockedReasons, boolean meteredNetwork) {
-        if (blockedReasons == BLOCKED_REASON_NONE) {
-            return false;
-        }
-        final int blockedOnAllNetworksReason = (blockedReasons & ~BLOCKED_METERED_REASON_MASK);
-        if (blockedOnAllNetworksReason != BLOCKED_REASON_NONE) {
-            return true;
-        }
-        if (meteredNetwork) {
-            return blockedReasons != BLOCKED_REASON_NONE;
-        }
-        return false;
-    }
-
-    /**
      * Returns the {@code string} representation of {@code blockedReasons} argument.
      *
      * @param blockedReasons Value indicating the reasons for why the network access of an UID is
@@ -899,7 +793,7 @@ public class NetworkPolicyManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
-    public static String blockedReasonsToString(@BlockedReason int blockedReasons) {
+    public static String blockedReasonsToString(int blockedReasons) {
         return DebugUtils.flagsToString(NetworkPolicyManager.class, "BLOCKED_", blockedReasons);
     }
 
@@ -963,7 +857,7 @@ public class NetworkPolicyManager {
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        default void onUidBlockedReasonChanged(int uid, @BlockedReason int blockedReasons) {}
+        default void onUidBlockedReasonChanged(int uid, int blockedReasons) {}
     }
 
     /** @hide */
@@ -978,8 +872,7 @@ public class NetworkPolicyManager {
         }
 
         @Override
-        public void onBlockedReasonChanged(int uid, @BlockedReason int oldBlockedReasons,
-                @BlockedReason int newBlockedReasons) {
+        public void onBlockedReasonChanged(int uid, int oldBlockedReasons, int newBlockedReasons) {
             if (oldBlockedReasons != newBlockedReasons) {
                 dispatchOnUidBlockedReasonChanged(mExecutor, mCallback, uid, newBlockedReasons);
             }
@@ -987,7 +880,7 @@ public class NetworkPolicyManager {
     }
 
     private static void dispatchOnUidBlockedReasonChanged(@Nullable Executor executor,
-            @NonNull NetworkPolicyCallback callback, int uid, @BlockedReason int blockedReasons) {
+            @NonNull NetworkPolicyCallback callback, int uid, int blockedReasons) {
         if (executor == null) {
             callback.onUidBlockedReasonChanged(uid, blockedReasons);
         } else {

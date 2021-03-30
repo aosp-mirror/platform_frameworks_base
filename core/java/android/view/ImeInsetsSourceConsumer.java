@@ -50,13 +50,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         super(ITYPE_IME, state, transactionSupplier, controller);
     }
 
-    public void applyImeVisibility(boolean setVisible) {
-        mController.applyImeVisibility(setVisible);
-    }
-
     @Override
-    public void onWindowFocusGained() {
-        super.onWindowFocusGained();
+    public void onWindowFocusGained(boolean hasViewFocus) {
+        super.onWindowFocusGained(hasViewFocus);
         getImm().registerImeConsumer(this);
     }
 
@@ -68,8 +64,14 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     @Override
-    void hide(boolean animationFinished, @AnimationType int animationType) {
+    public void hide() {
         super.hide();
+        mIsRequestedVisibleAwaitingControl = false;
+    }
+
+    @Override
+    void hide(boolean animationFinished, @AnimationType int animationType) {
+        hide();
 
         if (animationFinished) {
             // remove IME surface as IME has finished hide animation.
@@ -125,6 +127,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         if (control == null && !mIsRequestedVisibleAwaitingControl) {
             hide();
             removeSurface();
+        }
+        if (control != null) {
+            mIsRequestedVisibleAwaitingControl = false;
         }
     }
 

@@ -23,6 +23,7 @@ import android.net.IConnectivityDiagnosticsCallback;
 import android.net.INetworkAgent;
 import android.net.IOnCompleteListener;
 import android.net.INetworkActivityListener;
+import android.net.INetworkOfferCallback;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
 import android.net.LinkProperties;
@@ -142,7 +143,7 @@ interface IConnectivityManager
             in NetworkCapabilities nc, in NetworkScore score, in NetworkAgentConfig config,
             in int factorySerialNumber);
 
-    NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities, int reqType,
+    NetworkRequest requestNetwork(int uid, in NetworkCapabilities networkCapabilities, int reqType,
             in Messenger messenger, int timeoutSec, in IBinder binder, int legacy,
             int callbackFlags, String callingPackageName, String callingAttributionTag);
 
@@ -221,4 +222,8 @@ interface IConnectivityManager
             in IOnCompleteListener listener);
 
     int getRestrictBackgroundStatusByCaller();
+
+    void offerNetwork(int providerId, in NetworkScore score,
+            in NetworkCapabilities caps, in INetworkOfferCallback callback);
+    void unofferNetwork(in INetworkOfferCallback callback);
 }

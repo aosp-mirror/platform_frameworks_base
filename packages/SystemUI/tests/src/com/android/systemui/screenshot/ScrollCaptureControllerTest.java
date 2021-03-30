@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -57,13 +58,17 @@ public class ScrollCaptureControllerTest extends SysuiTestCase {
         public int availableBottom = Integer.MAX_VALUE;
         // If true, return an empty rect any time a partial result would have been returned.
         public boolean emptyInsteadOfPartial = false;
+        private int mPreviousTopRequested = 0;
 
         @Override
         public ListenableFuture<ScrollCaptureClient.CaptureResult> requestTile(int top) {
+            // Ensure we don't request a tile more than a tile away.
+            assertTrue(Math.abs(top - mPreviousTopRequested) <= getTileHeight());
+            mPreviousTopRequested = top;
             Rect requested = new Rect(0, top, getPageWidth(), top + getTileHeight());
             Rect fullContent = new Rect(0, availableTop, getPageWidth(), availableBottom);
             Rect captured = new Rect(requested);
-            captured.intersect(fullContent);
+            assertTrue(captured.intersect(fullContent));
             if (emptyInsteadOfPartial && captured.height() != getTileHeight()) {
                 captured = new Rect();
             }

@@ -131,7 +131,7 @@
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"מתבצעת התאמה של מכשיר שמיעה שמאלי…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"מתבצעת התאמה של מכשיר שמיעה ימני…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"שמאלי - טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"ימני - טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"ימני – טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"‏Wi-Fi כבוי."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"‏Wi-Fi מנותק."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"‏פס אחד של Wi-Fi."</string>

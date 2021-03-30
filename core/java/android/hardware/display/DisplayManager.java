@@ -17,8 +17,10 @@
 package android.hardware.display;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -36,6 +38,7 @@ import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
@@ -344,6 +347,37 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
 
+
+    /** @hide */
+    @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {
+            MATCH_CONTENT_FRAMERATE_UNKNOWN,
+            MATCH_CONTENT_FRAMERATE_NEVER,
+            MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY,
+            MATCH_CONTENT_FRAMERATE_ALWAYS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MatchContentFrameRateType {}
+
+    /**
+     * Match content frame rate user preference is unknown.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_UNKNOWN = -1;
+
+    /**
+     * No mode switching is allowed.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_NEVER = 0;
+
+    /**
+     * Only refresh rate switches without visual interruptions are allowed.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY = 1;
+
+    /**
+     * Refresh rate switches between all refresh rates are allowed even if they have visual
+     * interruptions for the user.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_ALWAYS = 2;
 
     /** @hide */
     @IntDef(prefix = {"SWITCHING_TYPE_"}, value = {
@@ -709,6 +743,55 @@ public final class DisplayManager {
     }
 
     /**
+     * Sets the HDR types that have been disabled by user.
+     * @param userDisabledTypes the HDR types to disable.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setUserDisabledHdrTypes(@NonNull @HdrType int[] userDisabledTypes) {
+        mGlobal.setUserDisabledHdrTypes(userDisabledTypes);
+    }
+
+    /**
+     * Sets whether or not the user disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     *
+     * @param areUserDisabledHdrTypesAllowed If true, the user-disabled types
+     * are ignored and returned, if the display supports them. If false, the
+     * user-disabled types are taken into consideration and are never returned,
+     * even if the display supports them.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed) {
+        mGlobal.setAreUserDisabledHdrTypesAllowed(areUserDisabledHdrTypesAllowed);
+    }
+
+    /**
+     * Returns whether or not the user-disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean areUserDisabledHdrTypesAllowed() {
+        return mGlobal.areUserDisabledHdrTypesAllowed();
+    }
+
+    /**
+     * Returns the HDR formats disabled by the user.
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull int[] getUserDisabledHdrTypes() {
+        return mGlobal.getUserDisabledHdrTypes();
+    }
+
+
+    /**
      * Creates a virtual display.
      *
      * @see #createVirtualDisplay(String, int, int, int, Surface, int,
@@ -921,6 +1004,43 @@ public final class DisplayManager {
         mGlobal.setTemporaryBrightness(displayId, brightness);
     }
 
+
+    /**
+     * Sets the brightness of the specified display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId the logical display id
+     * @param brightness The brightness value from 0.0f to 1.0f.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    public void setBrightness(int displayId, @FloatRange(from = 0f, to = 1f) float brightness) {
+        mGlobal.setBrightness(displayId, brightness);
+    }
+
+
+    /**
+     * Gets the brightness of the specified display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId The display of which brightness value to get from.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @FloatRange(from = 0f, to = 1f)
+    public float getBrightness(int displayId) {
+        return mGlobal.getBrightness(displayId);
+    }
+
+
     /**
      * Temporarily sets the auto brightness adjustment factor.
      * <p>
@@ -988,14 +1108,36 @@ public final class DisplayManager {
     }
 
     /**
-     * Returns the refresh rate switching type.
-     *
-     * @hide
+     * Returns the user preference for "Match content frame rate".
+     * <p>
+     * Never: Even if the app requests it, the device will never try to match its output to the
+     * original frame rate of the content.
+     * </p><p>
+     * Seamless: If the app requests it, the device will match its output to the original frame
+     * rate of the content, ONLY if the display can transition seamlessly.
+     * </p><p>
+     * Always: If the app requests it, the device will match its output to the original
+     * frame rate of the content. This may cause the screen to go blank for a
+     * second when exiting or entering a video playback.
+     * </p>
      */
-    @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE)
-    @SwitchingType public int getRefreshRateSwitchingType() {
-        return mGlobal.getRefreshRateSwitchingType();
+    @MatchContentFrameRateType public int getMatchContentFrameRateUserPreference() {
+        return toMatchContentFrameRateSetting(mGlobal.getRefreshRateSwitchingType());
+    }
+
+    @MatchContentFrameRateType
+    private int toMatchContentFrameRateSetting(@SwitchingType int switchingType) {
+        switch (switchingType) {
+            case SWITCHING_TYPE_NONE:
+                return MATCH_CONTENT_FRAMERATE_NEVER;
+            case SWITCHING_TYPE_WITHIN_GROUPS:
+                return MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY;
+            case SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:
+                return MATCH_CONTENT_FRAMERATE_ALWAYS;
+            default:
+                Slog.e(TAG, switchingType + " is not a valid value of switching type.");
+                return MATCH_CONTENT_FRAMERATE_UNKNOWN;
+        }
     }
 
     /**

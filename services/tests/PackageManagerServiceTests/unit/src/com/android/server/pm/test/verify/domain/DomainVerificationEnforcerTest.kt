@@ -114,12 +114,7 @@ class DomainVerificationEnforcerTest {
                     it,
                     mockThrowOnUnmocked { whenever(linkedApps) { ArraySet<String>() } },
                     mockThrowOnUnmocked {
-                        whenever(
-                            isChangeEnabled(
-                                anyLong(),
-                                any()
-                            )
-                        ) { true }
+                        whenever(isChangeEnabledInternalNoLogging(anyLong(), any())) { true }
                     }).apply {
                     setConnection(connection)
                 }
@@ -422,7 +417,7 @@ class DomainVerificationEnforcerTest {
 
         allowQueryAll.set(true)
 
-        runMethod(target, NON_VERIFIER_UID)
+        assertFails { runMethod(target, NON_VERIFIER_UID) }
     }
 
     private fun approvedVerifier() {
@@ -821,7 +816,7 @@ class DomainVerificationEnforcerTest {
         // System/shell only
         INTERNAL,
 
-        // INTERNAL || domain verification agent || user setting permission holder
+        // INTERNAL || non-legacy domain verification agent
         QUERENT,
 
         // INTERNAL || domain verification agent

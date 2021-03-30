@@ -83,12 +83,11 @@ public class StartingSurfaceDrawerTests {
         }
 
         @Override
-        protected boolean postAddWindow(int taskId, IBinder appToken,
+        protected void postAddWindow(int taskId, IBinder appToken,
                 View view, WindowManager wm, WindowManager.LayoutParams params) {
             // listen for addView
             mAddWindowForTask = taskId;
             mViewThemeResId = view.getContext().getThemeResId();
-            return true;
         }
 
         @Override
@@ -113,7 +112,8 @@ public class StartingSurfaceDrawerTests {
         spyOn(context);
         spyOn(realWindowManager);
         try {
-            doReturn(context).when(context).createPackageContext(anyString(), anyInt());
+            doReturn(context).when(context)
+                    .createPackageContextAsUser(anyString(), anyInt(), any());
         } catch (PackageManager.NameNotFoundException e) {
             //
         }

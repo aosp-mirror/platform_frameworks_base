@@ -31,14 +31,18 @@ import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.flagsToString;
 import static android.app.AppOpsManager.getUidStateName;
 
+import static java.lang.Long.min;
 import static java.lang.Math.max;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
+import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
@@ -82,8 +86,16 @@ final class DiscreteRegistry {
     static final String TIMELINE_FILE_SUFFIX = "tl";
     private static final String TAG = DiscreteRegistry.class.getSimpleName();
 
-    private static final long TIMELINE_HISTORY_CUTOFF = Duration.ofHours(24).toMillis();
-    private static final long TIMELINE_QUANTIZATION = Duration.ofMinutes(1).toMillis();
+    private static final String PROPERTY_DISCRETE_HISTORY_CUTOFF = "discrete_history_cutoff_millis";
+    private static final String PROPERTY_DISCRETE_HISTORY_QUANTIZATION =
+            "discrete_history_quantization_millis";
+    private static final long DEFAULT_DISCRETE_HISTORY_CUTOFF = Duration.ofHours(24).toMillis();
+    private static final long MAXIMUM_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(30).toMillis();
+    private static final long DEFAULT_DISCRETE_HISTORY_QUANTIZATION =
+            Duration.ofMinutes(1).toMillis();
+
+    private static long sDiscreteHistoryCutoff;
+    private static long sDiscreteHistoryQuantization;
 
     private static final String TAG_HISTORY = "h";
     private static final String ATTR_VERSION = "v";
@@ -116,7 +128,7 @@ final class DiscreteRegistry {
     private final @NonNull Object mInMemoryLock;
 
     @GuardedBy("mOnDiskLock")
-    private final File mDiscreteAccessDir;
+    private File mDiscreteAccessDir;
 
     @GuardedBy("mInMemoryLock")
     private DiscreteOps mDiscreteOps;
@@ -126,10 +138,42 @@ final class DiscreteRegistry {
 
     DiscreteRegistry(Object inMemoryLock) {
         mInMemoryLock = inMemoryLock;
-        mDiscreteAccessDir = new File(new File(Environment.getDataSystemDirectory(), "appops"),
-                "discrete");
-        createDiscreteAccessDir();
-        mDiscreteOps = new DiscreteOps();
+    }
+
+    void systemReady() {
+        synchronized (mOnDiskLock) {
+            mDiscreteAccessDir = new File(new File(Environment.getDataSystemDirectory(), "appops"),
+                    "discrete");
+            createDiscreteAccessDirLocked();
+            mDiscreteOps = new DiscreteOps();
+        }
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
+                AsyncTask.THREAD_POOL_EXECUTOR, (DeviceConfig.Properties p) -> {
+                    setDiscreteHistoryParameters(p);
+                });
+        sDiscreteHistoryCutoff = DeviceConfig.getLong(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_DISCRETE_HISTORY_CUTOFF, DEFAULT_DISCRETE_HISTORY_CUTOFF);
+        sDiscreteHistoryQuantization = DeviceConfig.getLong(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_DISCRETE_HISTORY_QUANTIZATION, DEFAULT_DISCRETE_HISTORY_QUANTIZATION);
+    }
+
+    private void setDiscreteHistoryParameters(DeviceConfig.Properties p) {
+        if (p.getKeyset().contains(PROPERTY_DISCRETE_HISTORY_CUTOFF)) {
+            sDiscreteHistoryCutoff = p.getLong(PROPERTY_DISCRETE_HISTORY_CUTOFF,
+                    DEFAULT_DISCRETE_HISTORY_CUTOFF);
+            if (!Build.IS_DEBUGGABLE) {
+                sDiscreteHistoryCutoff = min(MAXIMUM_DISCRETE_HISTORY_CUTOFF,
+                        sDiscreteHistoryCutoff);
+            }
+        }
+        if (p.getKeyset().contains(PROPERTY_DISCRETE_HISTORY_QUANTIZATION)) {
+            sDiscreteHistoryQuantization = p.getLong(PROPERTY_DISCRETE_HISTORY_QUANTIZATION,
+                    DEFAULT_DISCRETE_HISTORY_QUANTIZATION);
+            if (!Build.IS_DEBUGGABLE) {
+                sDiscreteHistoryQuantization = max(DEFAULT_DISCRETE_HISTORY_QUANTIZATION,
+                        sDiscreteHistoryQuantization);
+            }
+        }
     }
 
     private void createDiscreteAccessDir() {
@@ -142,6 +186,7 @@ final class DiscreteRegistry {
         }
     }
 
+    /* can be called only after HistoricalRegistry.isPersistenceInitialized() check */
     void recordDiscreteAccess(int uid, String packageName, int op, @Nullable String attributionTag,
             @AppOpsManager.OpFlags int flags, @AppOpsManager.UidState int uidState, long accessTime,
             long accessDuration) {
@@ -156,6 +201,10 @@ final class DiscreteRegistry {
 
     void writeAndClearAccessHistory() {
         synchronized (mOnDiskLock) {
+            if (mDiscreteAccessDir == null) {
+                Slog.e(TAG, "State not saved - persistence not initialized.");
+                return;
+            }
             final File[] files = mDiscreteAccessDir.listFiles();
             if (files != null && files.length > 0) {
                 for (File f : files) {
@@ -166,7 +215,7 @@ final class DiscreteRegistry {
                     try {
                         long timestamp = Long.valueOf(fileName.substring(0,
                                 fileName.length() - TIMELINE_FILE_SUFFIX.length()));
-                        if (Instant.now().minus(TIMELINE_HISTORY_CUTOFF,
+                        if (Instant.now().minus(sDiscreteHistoryCutoff,
                                 ChronoUnit.MILLIS).toEpochMilli() > timestamp) {
                             f.delete();
                             Slog.e(TAG, "Deleting file " + fileName);
@@ -229,7 +278,7 @@ final class DiscreteRegistry {
 
     private void readDiscreteOpsFromDisk(DiscreteOps discreteOps) {
         synchronized (mOnDiskLock) {
-            long beginTimeMillis = Instant.now().minus(TIMELINE_HISTORY_CUTOFF,
+            long beginTimeMillis = Instant.now().minus(sDiscreteHistoryCutoff,
                     ChronoUnit.MILLIS).toEpochMilli();
 
             final File[] files = mDiscreteAccessDir.listFiles();
@@ -420,6 +469,16 @@ final class DiscreteRegistry {
                         + Arrays.toString(t.getStackTrace()));
             }
 
+        }
+    }
+
+    private void createDiscreteAccessDirLocked() {
+        if (!mDiscreteAccessDir.exists()) {
+            if (!mDiscreteAccessDir.mkdirs()) {
+                Slog.e(TAG, "Failed to create DiscreteRegistry directory");
+            }
+            FileUtils.setPermissions(mDiscreteAccessDir.getPath(),
+                    FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH, -1, -1);
         }
     }
 
@@ -663,7 +722,7 @@ final class DiscreteRegistry {
                 long accessTime, long accessDuration) {
             List<DiscreteOpEvent> attributedOps = getOrCreateDiscreteOpEventsList(
                     attributionTag);
-            accessTime = accessTime / TIMELINE_QUANTIZATION * TIMELINE_QUANTIZATION;
+            accessTime = accessTime / sDiscreteHistoryQuantization * sDiscreteHistoryQuantization;
 
             int nAttributedOps = attributedOps.size();
             int i = nAttributedOps;
@@ -674,7 +733,7 @@ final class DiscreteRegistry {
                 }
                 if (previousOp.mOpFlag == flags && previousOp.mUidState == uidState) {
                     if (accessDuration != previousOp.mNoteDuration
-                            && accessDuration > TIMELINE_QUANTIZATION) {
+                            && accessDuration > sDiscreteHistoryQuantization) {
                         break;
                     } else {
                         return;

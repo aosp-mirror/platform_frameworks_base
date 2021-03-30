@@ -1004,6 +1004,24 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getCpuMeasuredBatteryConsumptionUC();
 
         /**
+         * Returns the battery consumption (in microcoulombs) of the uid's GNSS usage, derived from
+         * on device power measurement data.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+         *
+         * {@hide}
+         */
+        public abstract long getGnssMeasuredBatteryConsumptionUC();
+
+        /**
+         * Returns the battery consumption (in microcoulombs) of the uid's radio usage, derived from
+         * on device power measurement data.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+         *
+         * {@hide}
+         */
+        public abstract long getMobileRadioMeasuredBatteryConsumptionUC();
+
+        /**
          * Returns the battery consumption (in microcoulombs) of the screen while on and uid active,
          * derived from on device power measurement data.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
@@ -2546,6 +2564,24 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract long getCpuMeasuredBatteryConsumptionUC();
+
+    /**
+     * Returns the battery consumption (in microcoulombs) of the GNSS, derived from on device power
+     * measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+     *
+     * {@hide}
+     */
+    public abstract long getGnssMeasuredBatteryConsumptionUC();
+
+    /**
+     * Returns the battery consumption (in microcoulombs) of the radio, derived from on device power
+     * measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+     *
+     * {@hide}
+     */
+    public abstract long getMobileRadioMeasuredBatteryConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of the screen while on, derived from on
@@ -6030,7 +6066,7 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(":");
                     for (int it=0; it<types.size(); it++) {
                         pw.print(" ");
-                        pw.print(JobParameters.getReasonCodeDescription(types.keyAt(it)));
+                        pw.print(JobParameters.getLegacyReasonCodeDescription(types.keyAt(it)));
                         pw.print("(");
                         pw.print(types.valueAt(it));
                         pw.print("x)");

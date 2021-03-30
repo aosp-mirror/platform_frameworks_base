@@ -24,6 +24,9 @@ import android.hardware.security.keymint.KeyPurpose;
 import android.hardware.security.keymint.SecurityLevel;
 import android.hardware.security.keymint.Tag;
 import android.os.Build;
+import android.os.RemoteException;
+import android.security.GenerateRkpKey;
+import android.security.GenerateRkpKeyException;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore;
 import android.security.KeyStore2;
@@ -520,6 +523,18 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     @Override
     public KeyPair generateKeyPair() {
+        try {
+            return generateKeyPairHelper();
+        } catch (GenerateRkpKeyException e) {
+            try {
+                return generateKeyPairHelper();
+            } catch (GenerateRkpKeyException f) {
+                throw new ProviderException("Failed to provision new attestation keys.");
+            }
+        }
+    }
+
+    private KeyPair generateKeyPairHelper() throws GenerateRkpKeyException {
         if (mKeyStore == null || mSpec == null) {
             throw new IllegalStateException("Not initialized");
         }
@@ -557,13 +572,30 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             AndroidKeyStorePublicKey publicKey =
                     AndroidKeyStoreProvider.makeAndroidKeyStorePublicKeyFromKeyEntryResponse(
                             descriptor, metadata, iSecurityLevel, mKeymasterAlgorithm);
-
+            GenerateRkpKey keyGen = new GenerateRkpKey(KeyStore.getApplicationContext());
+            try {
+                if (mSpec.getAttestationChallenge() != null) {
+                    keyGen.notifyKeyGenerated(securityLevel);
+                }
+            } catch (RemoteException e) {
+                // This is not really an error state, and necessarily does not apply to non RKP
+                // systems or hybrid systems where RKP is not currently turned on.
+                Log.d(TAG, "Couldn't connect to the RemoteProvisioner backend.");
+            }
             success = true;
             return new KeyPair(publicKey, publicKey.getPrivateKey());
         } catch (android.security.KeyStoreException e) {
             switch(e.getErrorCode()) {
                 case KeymasterDefs.KM_ERROR_HARDWARE_TYPE_UNAVAILABLE:
                     throw new StrongBoxUnavailableException("Failed to generated key pair.", e);
+                case ResponseCode.OUT_OF_KEYS:
+                    GenerateRkpKey keyGen = new GenerateRkpKey(KeyStore.getApplicationContext());
+                    try {
+                        keyGen.notifyEmpty(securityLevel);
+                    } catch (RemoteException f) {
+                        throw new ProviderException("Failed to talk to RemoteProvisioner", f);
+                    }
+                    throw new GenerateRkpKeyException();
                 default:
                     ProviderException p = new ProviderException("Failed to generate key pair.", e);
                     if ((mSpec.getPurposes() & KeyProperties.PURPOSE_WRAP_KEY) != 0) {

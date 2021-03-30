@@ -16,6 +16,8 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.testing.AndroidTestingRunner;
@@ -96,13 +98,9 @@ public class DistanceClassifierTest extends ClassifierTest {
     }
 
     @Test
-    public void testPass_swipe() {
-
+    public void testPass_BrightnessSliderAlwaysPasses() {
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
-
-        mClassifier.onTouchEvent(appendMoveEvent(1, mDataProvider.getYdpi() * 3, 3));
-        mClassifier.onTouchEvent(appendUpEvent(1, mDataProvider.getYdpi() * 3, 300));
-        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 1).isFalse())
+                .isFalse();
     }
 }

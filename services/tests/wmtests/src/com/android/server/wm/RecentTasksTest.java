@@ -219,7 +219,7 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testAddTasksNoMultiple_expectNoTrim() {
+    public void testAddDocumentTasksNoMultiple_expectNoTrim() {
         // Add same non-multiple-task document tasks will remove the task (to re-add it) but not
         // trim it
         Task documentTask1 = createDocumentTask(".DocumentTask1");
@@ -262,7 +262,7 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testAddTasksMultipleDocumentTasks_expectNoTrim() {
+    public void testAddMultipleDocumentTasks_expectNoTrim() {
         // Add same multiple-task document tasks does not trim the first tasks
         Task documentTask1 = createDocumentTask(".DocumentTask1",
                 FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -278,9 +278,33 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testAddTasksMultipleTasks_expectRemovedNoTrim() {
-        // Add multiple same-affinity non-document tasks, ensure that it removes the other task,
-        // but that it does not trim it
+    public void testAddTasks_expectRemovedNoTrim() {
+        // Add multiple same-affinity non-document tasks, ensure that it removes, but does not trim
+        // the other task
+        Task task1 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .build();
+        Task task2 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .build();
+        mRecentTasks.add(task1);
+        assertThat(mCallbacksRecorder.mAdded).hasSize(1);
+        assertThat(mCallbacksRecorder.mAdded).contains(task1);
+        assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
+        assertThat(mCallbacksRecorder.mRemoved).isEmpty();
+        mCallbacksRecorder.clear();
+        mRecentTasks.add(task2);
+        assertThat(mCallbacksRecorder.mAdded).hasSize(1);
+        assertThat(mCallbacksRecorder.mAdded).contains(task2);
+        assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
+        assertThat(mCallbacksRecorder.mRemoved).hasSize(1);
+        assertThat(mCallbacksRecorder.mRemoved).contains(task1);
+    }
+
+    @Test
+    public void testAddMultipleTasks_expectNotRemoved() {
+        // Add multiple same-affinity non-document tasks with MULTIPLE_TASK, ensure that it does not
+        // remove the other task
         Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
                 .build();
@@ -297,8 +321,7 @@ public class RecentTasksTest extends WindowTestsBase {
         assertThat(mCallbacksRecorder.mAdded).hasSize(1);
         assertThat(mCallbacksRecorder.mAdded).contains(task2);
         assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
-        assertThat(mCallbacksRecorder.mRemoved).hasSize(1);
-        assertThat(mCallbacksRecorder.mRemoved).contains(task1);
+        assertThat(mCallbacksRecorder.mRemoved).isEmpty();
     }
 
     @Test

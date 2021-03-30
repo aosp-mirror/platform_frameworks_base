@@ -52,6 +52,8 @@ import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -743,7 +745,6 @@ public final class BluetoothAdapter {
      * Use {@link #getDefaultAdapter} to get the BluetoothAdapter instance.
      */
     BluetoothAdapter(IBluetoothManager managerService) {
-
         if (managerService == null) {
             throw new IllegalArgumentException("bluetooth manager service is null");
         }
@@ -3150,6 +3151,25 @@ public final class BluetoothAdapter {
             }
         }
         return true;
+    }
+
+    /**
+     * Determines whether a String Bluetooth address, such as "00:43:A8:23:10:F0"
+     * is a RANDOM STATIC address.
+     *
+     * RANDOM STATIC: (addr & 0b11) == 0b11
+     * RANDOM RESOLVABLE: (addr & 0b11) == 0b10
+     * RANDOM non-RESOLVABLE: (addr & 0b11) == 0b00
+     *
+     * @param address Bluetooth address as string
+     * @return true if the 2 Least Significant Bits of the address equals 0b11.
+     *
+     * @hide
+     */
+    public static boolean isAddressRandomStatic(@NonNull String address) {
+        Preconditions.checkNotNull(address);
+        return checkBluetoothAddress(address)
+                && (Integer.parseInt(address.split(":")[5], 16) & 0b11) == 0b11;
     }
 
     @UnsupportedAppUsage

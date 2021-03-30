@@ -43,6 +43,7 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import java.util.UUID
 
@@ -366,7 +367,7 @@ class DomainVerificationPackageTest {
             }, mockThrowOnUnmocked {
                 whenever(linkedApps) { ArraySet<String>() }
             }, mockThrowOnUnmocked {
-                whenever(isChangeEnabled(ArgumentMatchers.anyLong(), any())) { true }
+                whenever(isChangeEnabledInternalNoLogging(anyLong(), any())) { true }
             }).apply {
                 setConnection(mockThrowOnUnmocked {
                     whenever(filterAppAccess(anyString(), anyInt(), anyInt())) { false }

@@ -635,25 +635,33 @@ class TaskSnapshotController {
         mHandler.post(() -> {
             try {
                 synchronized (mService.mGlobalLock) {
-                    mTmpTasks.clear();
-                    mService.mRoot.getDisplayContent(displayId).forAllTasks(task -> {
-                        // Since RecentsAnimation will handle task snapshot while switching apps
-                        // with the best capture timing (e.g. IME window capture), No need
-                        // additional task capture while task is controlled by RecentsAnimation.
-                        if (task.isVisible() && !task.isAnimatingByRecents()) {
-                            mTmpTasks.add(task);
-                        }
-                    });
-                    // Allow taking snapshot of home when turning screen off to reduce the delay of
-                    // waking from secure lock to home.
-                    final boolean allowSnapshotHome = displayId == Display.DEFAULT_DISPLAY &&
-                            mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
-                    snapshotTasks(mTmpTasks, allowSnapshotHome);
+                    snapshotForSleeping(displayId);
                 }
             } finally {
                 listener.onScreenOff();
             }
         });
+    }
+
+    /** Called when the device is going to sleep (e.g. screen off, AOD without screen off). */
+    void snapshotForSleeping(int displayId) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        mTmpTasks.clear();
+        mService.mRoot.getDisplayContent(displayId).forAllTasks(task -> {
+            // Since RecentsAnimation will handle task snapshot while switching apps with the best
+            // capture timing (e.g. IME window capture), No need additional task capture while task
+            // is controlled by RecentsAnimation.
+            if (task.isVisible() && !task.isAnimatingByRecents()) {
+                mTmpTasks.add(task);
+            }
+        });
+        // Allow taking snapshot of home when turning screen off to reduce the delay of waking from
+        // secure lock to home.
+        final boolean allowSnapshotHome = displayId == Display.DEFAULT_DISPLAY
+                && mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
+        snapshotTasks(mTmpTasks, allowSnapshotHome);
     }
 
     /**

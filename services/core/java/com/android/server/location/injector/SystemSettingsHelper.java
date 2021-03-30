@@ -35,6 +35,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -348,31 +349,73 @@ public class SystemSettingsHelper extends SettingsHelper {
      */
     @Override
     public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
-        int userId = ActivityManager.getCurrentUser();
+        int[] userIds;
+        try {
+            userIds = ActivityManager.getService().getRunningUserIds();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
 
-        ipw.print("Location Enabled: ");
-        ipw.println(isLocationEnabled(userId));
-
-        List<String> locationPackageBlacklist = mLocationPackageBlacklist.getValueForUser(userId);
-        if (!locationPackageBlacklist.isEmpty()) {
-            ipw.println("Location Deny Packages:");
-            ipw.increaseIndent();
-            for (String packageName : locationPackageBlacklist) {
-                ipw.println(packageName);
+        ipw.print("Location Setting: ");
+        ipw.increaseIndent();
+        if (userIds.length > 1) {
+            ipw.println();
+            for (int userId : userIds) {
+                ipw.print("[u");
+                ipw.print(userId);
+                ipw.print("] ");
+                ipw.println(isLocationEnabled(userId));
             }
-            ipw.decreaseIndent();
+        } else {
+            ipw.println(isLocationEnabled(userIds[0]));
+        }
+        ipw.decreaseIndent();
 
-            List<String> locationPackageWhitelist = mLocationPackageWhitelist.getValueForUser(
-                    userId);
-            if (!locationPackageWhitelist.isEmpty()) {
-                ipw.println("Location Allow Packages:");
+        ipw.println("Location Allow/Deny Packages:");
+        ipw.increaseIndent();
+        if (userIds.length > 1) {
+            for (int userId : userIds) {
+                List<String> locationPackageBlacklist = mLocationPackageBlacklist.getValueForUser(
+                        userId);
+                if (locationPackageBlacklist.isEmpty()) {
+                    continue;
+                }
+
+                ipw.print("user ");
+                ipw.print(userId);
+                ipw.println(":");
                 ipw.increaseIndent();
-                for (String packageName : locationPackageWhitelist) {
+
+                for (String packageName : locationPackageBlacklist) {
+                    ipw.print("[deny] ");
                     ipw.println(packageName);
                 }
+
+                List<String> locationPackageWhitelist = mLocationPackageWhitelist.getValueForUser(
+                        userId);
+                for (String packageName : locationPackageWhitelist) {
+                    ipw.print("[allow] ");
+                    ipw.println(packageName);
+                }
+
                 ipw.decreaseIndent();
             }
+        } else {
+            List<String> locationPackageBlacklist = mLocationPackageBlacklist.getValueForUser(
+                    userIds[0]);
+            for (String packageName : locationPackageBlacklist) {
+                ipw.print("[deny] ");
+                ipw.println(packageName);
+            }
+
+            List<String> locationPackageWhitelist = mLocationPackageWhitelist.getValueForUser(
+                    userIds[0]);
+            for (String packageName : locationPackageWhitelist) {
+                ipw.print("[allow] ");
+                ipw.println(packageName);
+            }
         }
+        ipw.decreaseIndent();
 
         Set<String> backgroundThrottlePackageWhitelist =
                 mBackgroundThrottlePackageWhitelist.getValue();

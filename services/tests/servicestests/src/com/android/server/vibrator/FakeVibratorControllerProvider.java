@@ -20,6 +20,12 @@ import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.RampSegment;
+import android.os.vibrator.StepSegment;
+import android.os.vibrator.VibrationEffectSegment;
 
 import com.android.server.vibrator.VibratorController.OnVibrationCompleteListener;
 
@@ -34,12 +40,12 @@ import java.util.Map;
  * interactions.
  */
 final class FakeVibratorControllerProvider {
-
     private static final int EFFECT_DURATION = 20;
 
-    private final Map<Long, VibrationEffect.Prebaked> mEnabledAlwaysOnEffects = new HashMap<>();
-    private final List<VibrationEffect> mEffects = new ArrayList<>();
-    private final List<Integer> mAmplitudes = new ArrayList<>();
+    private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();
+    private final List<VibrationEffectSegment> mEffectSegments = new ArrayList<>();
+    private final List<Integer> mBraking = new ArrayList<>();
+    private final List<Float> mAmplitudes = new ArrayList<>();
     private final Handler mHandler;
     private final FakeNativeWrapper mNativeWrapper;
 
@@ -48,96 +54,109 @@ final class FakeVibratorControllerProvider {
 
     private int mCapabilities;
     private int[] mSupportedEffects;
+    private int[] mSupportedBraking;
     private int[] mSupportedPrimitives;
-    private float mResonantFrequency;
-    private float mQFactor;
+    private float mMinFrequency = Float.NaN;
+    private float mResonantFrequency = Float.NaN;
+    private float mFrequencyResolution = Float.NaN;
+    private float mQFactor = Float.NaN;
+    private float[] mMaxAmplitudes;
 
     private final class FakeNativeWrapper extends VibratorController.NativeWrapper {
         public int vibratorId;
         public OnVibrationCompleteListener listener;
         public boolean isInitialized;
 
+        @Override
         public void init(int vibratorId, OnVibrationCompleteListener listener) {
             isInitialized = true;
             this.vibratorId = vibratorId;
             this.listener = listener;
         }
 
+        @Override
         public boolean isAvailable() {
             return mIsAvailable;
         }
 
-        public void on(long milliseconds, long vibrationId) {
-            VibrationEffect effect = VibrationEffect.createOneShot(
-                    milliseconds, VibrationEffect.DEFAULT_AMPLITUDE);
-            mEffects.add(effect);
+        @Override
+        public long on(long milliseconds, long vibrationId) {
+            mEffectSegments.add(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
+                    /* frequency= */ 0, (int) milliseconds));
             applyLatency();
             scheduleListener(milliseconds, vibrationId);
+            return milliseconds;
         }
 
+        @Override
         public void off() {
         }
 
-        public void setAmplitude(int amplitude) {
+        @Override
+        public void setAmplitude(float amplitude) {
             mAmplitudes.add(amplitude);
             applyLatency();
         }
 
-        public int[] getSupportedEffects() {
-            return mSupportedEffects;
-        }
-
-        public int[] getSupportedPrimitives() {
-            return mSupportedPrimitives;
-        }
-
-        public float getResonantFrequency() {
-            return mResonantFrequency;
-        }
-
-        public float getQFactor() {
-            return mQFactor;
-        }
-
+        @Override
         public long perform(long effect, long strength, long vibrationId) {
             if (mSupportedEffects == null
                     || Arrays.binarySearch(mSupportedEffects, (int) effect) < 0) {
                 return 0;
             }
-            mEffects.add(new VibrationEffect.Prebaked((int) effect, false, (int) strength));
+            mEffectSegments.add(new PrebakedSegment((int) effect, false, (int) strength));
             applyLatency();
             scheduleListener(EFFECT_DURATION, vibrationId);
             return EFFECT_DURATION;
         }
 
-        public long compose(VibrationEffect.Composition.PrimitiveEffect[] effect,
-                long vibrationId) {
-            VibrationEffect.Composed composed = new VibrationEffect.Composed(Arrays.asList(effect));
-            mEffects.add(composed);
-            applyLatency();
+        @Override
+        public long compose(PrimitiveSegment[] effects, long vibrationId) {
             long duration = 0;
-            for (VibrationEffect.Composition.PrimitiveEffect e : effect) {
-                duration += EFFECT_DURATION + e.delay;
+            for (PrimitiveSegment primitive : effects) {
+                duration += EFFECT_DURATION + primitive.getDelay();
+                mEffectSegments.add(primitive);
             }
+            applyLatency();
             scheduleListener(duration, vibrationId);
             return duration;
         }
 
+        @Override
+        public long composePwle(RampSegment[] primitives, int braking, long vibrationId) {
+            long duration = 0;
+            for (RampSegment primitive : primitives) {
+                duration += primitive.getDuration();
+                mEffectSegments.add(primitive);
+            }
+            mBraking.add(braking);
+            applyLatency();
+            scheduleListener(duration, vibrationId);
+            return duration;
+        }
+
+        @Override
         public void setExternalControl(boolean enabled) {
         }
 
-        public long getCapabilities() {
-            return mCapabilities;
-        }
-
+        @Override
         public void alwaysOnEnable(long id, long effect, long strength) {
-            VibrationEffect.Prebaked prebaked = new VibrationEffect.Prebaked((int) effect, false,
-                    (int) strength);
+            PrebakedSegment prebaked = new PrebakedSegment((int) effect, false, (int) strength);
             mEnabledAlwaysOnEffects.put(id, prebaked);
         }
 
+        @Override
         public void alwaysOnDisable(long id) {
             mEnabledAlwaysOnEffects.remove(id);
+        }
+
+        @Override
+        public VibratorInfo getInfo(float suggestedFrequencyRange) {
+            VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
+                    mMinFrequency, mResonantFrequency, mFrequencyResolution,
+                    suggestedFrequencyRange, mMaxAmplitudes);
+            return new VibratorInfo(vibratorId, mCapabilities, mSupportedEffects, mSupportedBraking,
+                    mSupportedPrimitives, mQFactor, frequencyMapping);
         }
 
         private void applyLatency() {
@@ -199,6 +218,15 @@ final class FakeVibratorControllerProvider {
         mSupportedEffects = effects;
     }
 
+    /** Set the effects supported by the fake vibrator hardware. */
+    public void setSupportedBraking(int... braking) {
+        if (braking != null) {
+            braking = Arrays.copyOf(braking, braking.length);
+            Arrays.sort(braking);
+        }
+        mSupportedBraking = braking;
+    }
+
     /** Set the primitives supported by the fake vibrator hardware. */
     public void setSupportedPrimitives(int... primitives) {
         if (primitives != null) {
@@ -209,8 +237,18 @@ final class FakeVibratorControllerProvider {
     }
 
     /** Set the resonant frequency of the fake vibrator hardware. */
-    public void setResonantFrequency(float resonantFrequency) {
-        mResonantFrequency = resonantFrequency;
+    public void setResonantFrequency(float frequencyHz) {
+        mResonantFrequency = frequencyHz;
+    }
+
+    /** Set the minimum frequency of the fake vibrator hardware. */
+    public void setMinFrequency(float frequencyHz) {
+        mMinFrequency = frequencyHz;
+    }
+
+    /** Set the frequency resolution of the fake vibrator hardware. */
+    public void setFrequencyResolution(float frequencyHz) {
+        mFrequencyResolution = frequencyHz;
     }
 
     /** Set the Q factor of the fake vibrator hardware. */
@@ -218,25 +256,35 @@ final class FakeVibratorControllerProvider {
         mQFactor = qFactor;
     }
 
+    /** Set the max amplitude supported for each frequency f the fake vibrator hardware. */
+    public void setMaxAmplitudes(float... maxAmplitudes) {
+        mMaxAmplitudes = maxAmplitudes;
+    }
+
     /**
      * Return the amplitudes set by this controller, including zeroes for each time the vibrator was
      * turned off.
      */
-    public List<Integer> getAmplitudes() {
+    public List<Float> getAmplitudes() {
         return new ArrayList<>(mAmplitudes);
     }
 
-    /** Return list of {@link VibrationEffect} played by this controller, in order. */
-    public List<VibrationEffect> getEffects() {
-        return new ArrayList<>(mEffects);
+    /** Return the braking values passed to the compose PWLE method. */
+    public List<Integer> getBraking() {
+        return mBraking;
+    }
+
+    /** Return list of {@link VibrationEffectSegment} played by this controller, in order. */
+    public List<VibrationEffectSegment> getEffectSegments() {
+        return new ArrayList<>(mEffectSegments);
     }
 
     /**
-     * Return the {@link VibrationEffect.Prebaked} effect enabled with given id, or {@code null} if
+     * Return the {@link PrebakedSegment} effect enabled with given id, or {@code null} if
      * missing or disabled.
      */
     @Nullable
-    public VibrationEffect.Prebaked getAlwaysOnEffect(int id) {
+    public PrebakedSegment getAlwaysOnEffect(int id) {
         return mEnabledAlwaysOnEffects.get((long) id);
     }
 }

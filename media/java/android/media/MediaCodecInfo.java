@@ -571,6 +571,14 @@ public final class MediaCodecInfo {
         public static final String FEATURE_LowLatency = "low-latency";
 
         /**
+         * <b>video encoder only</b>: codec supports quantization parameter bounds.
+         * @see MediaFormat#KEY_VIDEO_QP_MAX
+         * @see MediaFormat#KEY_VIDEO_QP_MIN
+         */
+        @SuppressLint("AllUpper")
+        public static final String FEATURE_QpBounds = "qp-bounds";
+
+        /**
          * Query codec feature capabilities.
          * <p>
          * These features are supported to be used by the codec.  These
@@ -606,6 +614,7 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_IntraRefresh, (1 << 0), false),
             new Feature(FEATURE_MultipleFrames, (1 << 1), false),
             new Feature(FEATURE_DynamicTimestamp, (1 << 2), false),
+            new Feature(FEATURE_QpBounds, (1 << 3), false),
         };
 
         /** @hide */
@@ -3434,11 +3443,14 @@ public final class MediaCodecInfo {
         public static final int BITRATE_MODE_VBR = 1;
         /** Constant bitrate mode */
         public static final int BITRATE_MODE_CBR = 2;
+        /** Constant bitrate mode with frame drops */
+        public static final int BITRATE_MODE_CBR_FD =  3;
 
         private static final Feature[] bitrates = new Feature[] {
             new Feature("VBR", BITRATE_MODE_VBR, true),
             new Feature("CBR", BITRATE_MODE_CBR, false),
-            new Feature("CQ",  BITRATE_MODE_CQ,  false)
+            new Feature("CQ",  BITRATE_MODE_CQ,  false),
+            new Feature("CBR-FD", BITRATE_MODE_CBR_FD, false)
         };
 
         private static int parseBitrateMode(String mode) {

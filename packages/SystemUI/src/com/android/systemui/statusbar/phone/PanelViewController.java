@@ -454,7 +454,7 @@ public abstract class PanelViewController {
                 mView.postOnAnimation(mPostCollapseRunnable);
             }
         } else if (!mStatusBar.isBouncerShowing()
-                && !mStatusBarKeyguardViewManager.isShowingAlternativeAuthOrAnimating()) {
+                && !mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()) {
             boolean expands = onEmptySpaceClick(mInitialTouchX);
             onTrackingStopped(expands);
         }

@@ -158,4 +158,22 @@ public class BatteryUsageStatsProviderTest {
 
         assertThat(item.time).isEqualTo(elapsedTimeMs);
     }
+
+    @Test
+    public void shouldUpdateStats() {
+        Context context = InstrumentationRegistry.getContext();
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+                mStatsRule.getBatteryStats());
+
+        final List<BatteryUsageStatsQuery> queries = List.of(
+                new BatteryUsageStatsQuery.Builder().setMaxStatsAgeMs(1000).build(),
+                new BatteryUsageStatsQuery.Builder().setMaxStatsAgeMs(2000).build()
+        );
+
+        mStatsRule.setTime(10500, 0);
+        assertThat(provider.shouldUpdateStats(queries, 10000)).isFalse();
+
+        mStatsRule.setTime(11500, 0);
+        assertThat(provider.shouldUpdateStats(queries, 10000)).isTrue();
+    }
 }

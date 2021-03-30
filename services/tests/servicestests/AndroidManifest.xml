@@ -70,10 +70,14 @@
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD"/>
     <uses-permission android:name="android.permission.MANAGE_BIND_INSTANT_SERVICE"/>
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS"/>
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"/>
     <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG"/>
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <uses-permission android:name="android.permission.DUMP"/>
     <uses-permission android:name="android.permission.READ_DREAM_STATE"/>

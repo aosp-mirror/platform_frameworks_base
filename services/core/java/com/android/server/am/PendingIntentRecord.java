@@ -66,7 +66,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     /**
      * Map IBinder to duration specified as Pair<Long, Integer>, Long is allowlist duration in
      * milliseconds, Integer is allowlist type defined at
-     * {@link android.os.PowerWhitelistManager.TempAllowListType}
+     * {@link android.os.PowerExemptionManager.TempAllowListType}
      */
     private ArrayMap<IBinder, TempAllowListDuration> mAllowlistDuration;
     private RemoteCallbackList<IResultReceiver> mCancelCallbacks;

@@ -89,4 +89,6 @@
     <dimen name="leanback_button_radius">55dp</dimen>
     <dimen name="leanback_button_padding_horizontal">22dp</dimen>
     <dimen name="leanback_button_padding_vertical">11dp</dimen>
+
+    <dimen name="leanback_dialog_corner_radius">8dp</dimen>
 </resources>

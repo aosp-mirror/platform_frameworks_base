@@ -11,19 +11,34 @@ package android.net {
     method @Nullable public android.net.ProxyInfo getGlobalProxy();
     method @NonNull public static android.util.Range<java.lang.Integer> getIpSecNetIdRange();
     method @NonNull public static String getPrivateDnsMode(@NonNull android.content.Context);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerDefaultNetworkCallbackAsUid(int, @NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerSystemDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void requestBackgroundNetwork(@NonNull android.net.NetworkRequest, @NonNull android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
+    method @Deprecated public boolean requestRouteToHostAddress(int, java.net.InetAddress);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void setAcceptPartialConnectivity(@NonNull android.net.Network, boolean, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void setAcceptUnvalidated(@NonNull android.net.Network, boolean, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void setAvoidUnvalidated(@NonNull android.net.Network);
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setGlobalProxy(@Nullable android.net.ProxyInfo);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void setLegacyLockdownVpnEnabled(boolean);
+    method public static void setPrivateDnsMode(@NonNull android.content.Context, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setProfileNetworkPreference(@NonNull android.os.UserHandle, int, @Nullable java.util.concurrent.Executor, @Nullable Runnable);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void setRequireVpnForUids(boolean, @NonNull java.util.Collection<android.util.Range<java.lang.Integer>>);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void startCaptivePortalApp(@NonNull android.net.Network);
     method public void systemReady();
     field public static final String ACTION_PROMPT_LOST_VALIDATION = "android.net.action.PROMPT_LOST_VALIDATION";
     field public static final String ACTION_PROMPT_PARTIAL_CONNECTIVITY = "android.net.action.PROMPT_PARTIAL_CONNECTIVITY";
     field public static final String ACTION_PROMPT_UNVALIDATED = "android.net.action.PROMPT_UNVALIDATED";
+    field public static final int BLOCKED_METERED_REASON_ADMIN_DISABLED = 262144; // 0x40000
+    field public static final int BLOCKED_METERED_REASON_DATA_SAVER = 65536; // 0x10000
+    field public static final int BLOCKED_METERED_REASON_MASK = -65536; // 0xffff0000
+    field public static final int BLOCKED_METERED_REASON_USER_RESTRICTED = 131072; // 0x20000
+    field public static final int BLOCKED_REASON_APP_STANDBY = 4; // 0x4
+    field public static final int BLOCKED_REASON_BATTERY_SAVER = 1; // 0x1
+    field public static final int BLOCKED_REASON_DOZE = 2; // 0x2
+    field public static final int BLOCKED_REASON_LOCKDOWN_VPN = 16; // 0x10
+    field public static final int BLOCKED_REASON_NONE = 0; // 0x0
+    field public static final int BLOCKED_REASON_RESTRICTED_MODE = 8; // 0x8
     field public static final String PRIVATE_DNS_MODE_OFF = "off";
     field public static final String PRIVATE_DNS_MODE_OPPORTUNISTIC = "opportunistic";
     field public static final String PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = "hostname";
@@ -31,16 +46,75 @@ package android.net {
     field public static final int PROFILE_NETWORK_PREFERENCE_ENTERPRISE = 1; // 0x1
   }
 
+  public static class ConnectivityManager.NetworkCallback {
+    method public void onBlockedStatusChanged(@NonNull android.net.Network, int);
+  }
+
+  public class ConnectivitySettingsManager {
+    method public static void clearGlobalProxy(@NonNull android.content.Context);
+    method @Nullable public static String getCaptivePortalHttpUrl(@NonNull android.content.Context);
+    method public static int getCaptivePortalMode(@NonNull android.content.Context, int);
+    method @NonNull public static java.time.Duration getConnectivityKeepPendingIntentDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method @NonNull public static android.util.Range<java.lang.Integer> getDnsResolverSampleRanges(@NonNull android.content.Context);
+    method @NonNull public static java.time.Duration getDnsResolverSampleValidityDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static int getDnsResolverSuccessThresholdPercent(@NonNull android.content.Context, int);
+    method @Nullable public static android.net.ProxyInfo getGlobalProxy(@NonNull android.content.Context);
+    method @NonNull public static java.time.Duration getMobileDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static boolean getMobileDataAlwaysOn(@NonNull android.content.Context, boolean);
+    method @Nullable public static String getMobileDataPreferredApps(@NonNull android.content.Context);
+    method public static int getNetworkAvoidBadWifi(@NonNull android.content.Context);
+    method @Nullable public static String getNetworkMeteredMultipathPreference(@NonNull android.content.Context);
+    method public static int getNetworkSwitchNotificationMaximumDailyCount(@NonNull android.content.Context, int);
+    method @NonNull public static java.time.Duration getNetworkSwitchNotificationRateDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method @NonNull public static String getPrivateDnsDefaultMode(@NonNull android.content.Context);
+    method @Nullable public static String getPrivateDnsHostname(@NonNull android.content.Context);
+    method public static boolean getWifiAlwaysRequested(@NonNull android.content.Context, boolean);
+    method @NonNull public static java.time.Duration getWifiDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setCaptivePortalHttpUrl(@NonNull android.content.Context, @Nullable String);
+    method public static void setCaptivePortalMode(@NonNull android.content.Context, int);
+    method public static void setConnectivityKeepPendingIntentDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setDnsResolverSampleRanges(@NonNull android.content.Context, @NonNull android.util.Range<java.lang.Integer>);
+    method public static void setDnsResolverSampleValidityDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setDnsResolverSuccessThresholdPercent(@NonNull android.content.Context, @IntRange(from=0, to=100) int);
+    method public static void setGlobalProxy(@NonNull android.content.Context, @NonNull android.net.ProxyInfo);
+    method public static void setMobileDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setMobileDataAlwaysOn(@NonNull android.content.Context, boolean);
+    method public static void setMobileDataPreferredApps(@NonNull android.content.Context, @Nullable String);
+    method public static void setNetworkAvoidBadWifi(@NonNull android.content.Context, int);
+    method public static void setNetworkMeteredMultipathPreference(@NonNull android.content.Context, @NonNull String);
+    method public static void setNetworkSwitchNotificationMaximumDailyCount(@NonNull android.content.Context, @IntRange(from=0) int);
+    method public static void setNetworkSwitchNotificationRateDuration(@NonNull android.content.Context, @NonNull java.time.Duration);
+    method public static void setPrivateDnsDefaultMode(@NonNull android.content.Context, @NonNull String);
+    method public static void setPrivateDnsHostname(@NonNull android.content.Context, @Nullable String);
+    method public static void setWifiAlwaysRequested(@NonNull android.content.Context, boolean);
+    method public static void setWifiDataActivityTimeout(@NonNull android.content.Context, @NonNull java.time.Duration);
+    field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
+    field public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0; // 0x0
+    field public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1; // 0x1
+    field public static final int NETWORK_AVOID_BAD_WIFI_AVOID = 2; // 0x2
+    field public static final int NETWORK_AVOID_BAD_WIFI_IGNORE = 0; // 0x0
+    field public static final int NETWORK_AVOID_BAD_WIFI_PROMPT = 1; // 0x1
+  }
+
   public final class NetworkAgentConfig implements android.os.Parcelable {
     method @Nullable public String getSubscriberId();
+    method public boolean isBypassableVpn();
   }
 
   public static final class NetworkAgentConfig.Builder {
+    method @NonNull public android.net.NetworkAgentConfig.Builder setBypassableVpn(boolean);
     method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
+    ctor public NetworkCapabilities(@Nullable android.net.NetworkCapabilities, long);
     method @Nullable public java.util.Set<android.util.Range<java.lang.Integer>> getUids();
+    method public boolean hasUnwantedCapability(int);
+    field public static final long REDACT_ALL = -1L; // 0xffffffffffffffffL
+    field public static final long REDACT_FOR_ACCESS_FINE_LOCATION = 1L; // 0x1L
+    field public static final long REDACT_FOR_LOCAL_MAC_ADDRESS = 2L; // 0x2L
+    field public static final long REDACT_FOR_NETWORK_SETTINGS = 4L; // 0x4L
+    field public static final long REDACT_NONE = 0L; // 0x0L
     field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
@@ -48,7 +122,14 @@ package android.net {
     method @NonNull public android.net.NetworkCapabilities.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
   }
 
+  public class NetworkRequest implements android.os.Parcelable {
+    method @NonNull public int[] getUnwantedCapabilities();
+    method public boolean hasUnwantedCapability(int);
+  }
+
   public static class NetworkRequest.Builder {
+    method @NonNull public android.net.NetworkRequest.Builder addUnwantedCapability(int);
+    method @NonNull public android.net.NetworkRequest.Builder removeUnwantedCapability(int);
     method @NonNull public android.net.NetworkRequest.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
   }
 
@@ -92,11 +173,18 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.TestNetworkSpecifier> CREATOR;
   }
 
+  public interface TransportInfo {
+    method public default long getApplicableRedactions();
+    method @NonNull public default android.net.TransportInfo makeCopy(long);
+  }
+
   public final class VpnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
-    ctor public VpnTransportInfo(int);
+    ctor public VpnTransportInfo(int, @Nullable String);
     method public int describeContents();
+    method @NonNull public android.net.VpnTransportInfo makeCopy(long);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnTransportInfo> CREATOR;
+    field @Nullable public final String sessionId;
     field public final int type;
   }
 

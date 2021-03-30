@@ -52,7 +52,7 @@ package android.net {
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_FACTORY}) public int registerNetworkProvider(@NonNull android.net.NetworkProvider);
-    method public void registerQosCallback(@NonNull android.net.QosSocketInfo, @NonNull android.net.QosCallback, @NonNull java.util.concurrent.Executor);
+    method public void registerQosCallback(@NonNull android.net.QosSocketInfo, @NonNull java.util.concurrent.Executor, @NonNull android.net.QosCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void requestNetwork(@NonNull android.net.NetworkRequest, int, int, @NonNull android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_AIRPLANE_MODE, android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
@@ -212,10 +212,14 @@ package android.net {
 
   public abstract class NetworkAgent {
     ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
+    ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, @NonNull android.net.NetworkScore, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
     method @Nullable public android.net.Network getNetwork();
     method public void markConnected();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
+    method public void onBandwidthUpdateRequested();
+    method public void onNetworkCreated();
+    method public void onNetworkDestroyed();
     method public void onNetworkUnwanted();
     method public void onQosCallbackRegistered(int, @NonNull android.net.QosFilter);
     method public void onQosCallbackUnregistered(int);
@@ -230,9 +234,11 @@ package android.net {
     method public final void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
     method public final void sendNetworkScore(@IntRange(from=0, to=99) int);
     method public final void sendQosCallbackError(int, int);
-    method public final void sendQosSessionAvailable(int, int, @NonNull android.telephony.data.EpsBearerQosSessionAttributes);
-    method public final void sendQosSessionLost(int, int);
+    method public final void sendQosSessionAvailable(int, int, @NonNull android.net.QosSessionAttributes);
+    method public final void sendQosSessionLost(int, int, int);
     method public final void sendSocketKeepaliveEvent(int, int);
+    method @Deprecated public void setLegacySubtype(int, @NonNull String);
+    method public void setTeardownDelayMs(@IntRange(from=0, to=0x1388) int);
     method public final void setUnderlyingNetworks(@Nullable java.util.List<android.net.Network>);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
@@ -253,7 +259,12 @@ package android.net {
   public static final class NetworkAgentConfig.Builder {
     ctor public NetworkAgentConfig.Builder();
     method @NonNull public android.net.NetworkAgentConfig build();
+    method @NonNull public android.net.NetworkAgentConfig.Builder disableNat64Detection();
+    method @NonNull public android.net.NetworkAgentConfig.Builder disableProvisioningNotification();
     method @NonNull public android.net.NetworkAgentConfig.Builder setExplicitlySelected(boolean);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyExtraInfo(@NonNull String);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacySubType(int);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setLegacySubTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyType(int);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setPartialConnectivityAcceptable(boolean);
@@ -261,17 +272,19 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    ctor public NetworkCapabilities(@Nullable android.net.NetworkCapabilities, boolean);
     method @NonNull public int[] getAdministratorUids();
+    method @Nullable public static String getCapabilityCarrierName(int);
     method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
     method public boolean isPrivateDnsBroken();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
+    field public static final int NET_CAPABILITY_BIP = 31; // 0x1f
     field public static final int NET_CAPABILITY_NOT_VCN_MANAGED = 28; // 0x1c
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
     field public static final int NET_CAPABILITY_OEM_PRIVATE = 26; // 0x1a
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
     field public static final int NET_CAPABILITY_VEHICLE_INTERNAL = 27; // 0x1b
+    field public static final int NET_CAPABILITY_VSIM = 30; // 0x1e
   }
 
   public static final class NetworkCapabilities.Builder {
@@ -302,7 +315,14 @@ package android.net {
     method public int getProviderId();
     method public void onNetworkRequestWithdrawn(@NonNull android.net.NetworkRequest);
     method public void onNetworkRequested(@NonNull android.net.NetworkRequest, @IntRange(from=0, to=99) int, int);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void registerNetworkOffer(@NonNull android.net.NetworkScore, @NonNull android.net.NetworkCapabilities, @NonNull java.util.concurrent.Executor, @NonNull android.net.NetworkProvider.NetworkOfferCallback);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void unregisterNetworkOffer(@NonNull android.net.NetworkProvider.NetworkOfferCallback);
     field public static final int ID_NONE = -1; // 0xffffffff
+  }
+
+  public static interface NetworkProvider.NetworkOfferCallback {
+    method public void onNetworkNeeded(@NonNull android.net.NetworkRequest);
+    method public void onNetworkUnneeded(@NonNull android.net.NetworkRequest);
   }
 
   public class NetworkReleasedException extends java.lang.Exception {
@@ -315,6 +335,23 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
+  }
+
+  public final class NetworkScore implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getKeepConnectedReason();
+    method public int getLegacyInt();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkScore> CREATOR;
+    field public static final int KEEP_CONNECTED_FOR_HANDOVER = 1; // 0x1
+    field public static final int KEEP_CONNECTED_NONE = 0; // 0x0
+  }
+
+  public static final class NetworkScore.Builder {
+    ctor public NetworkScore.Builder();
+    method @NonNull public android.net.NetworkScore build();
+    method @NonNull public android.net.NetworkScore.Builder setKeepConnectedReason(int);
+    method @NonNull public android.net.NetworkScore.Builder setLegacyInt(int);
   }
 
   public final class OemNetworkPreferences implements android.os.Parcelable {
@@ -364,6 +401,7 @@ package android.net {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.QosSession> CREATOR;
     field public static final int TYPE_EPS_BEARER = 1; // 0x1
+    field public static final int TYPE_NR_BEARER = 2; // 0x2
   }
 
   public interface QosSessionAttributes {
@@ -389,6 +427,7 @@ package android.net {
   }
 
   public abstract class SocketKeepalive implements java.lang.AutoCloseable {
+    field public static final int ERROR_NO_SUCH_SLOT = -33; // 0xffffffdf
     field public static final int SUCCESS = 0; // 0x0
   }
 
@@ -433,11 +472,6 @@ package android.net {
     field public final int tcpSeq;
     field public final int tcpWindow;
     field public final int tcpWindowScale;
-  }
-
-  public interface TransportInfo {
-    method public default boolean hasLocationSensitiveFields();
-    method @NonNull public default android.net.TransportInfo makeCopy(boolean);
   }
 
 }

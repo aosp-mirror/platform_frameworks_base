@@ -31,9 +31,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.media.session.MediaSession;
 import android.os.Build;
-import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -73,7 +71,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     private NotificationRecord mRecordMinCallNonInterruptive;
     private NotificationRecord mRecordMinCall;
     private NotificationRecord mRecordHighCall;
-    private NotificationRecord mRecordDefaultMedia;
     private NotificationRecord mRecordEmail;
     private NotificationRecord mRecordInlineReply;
     private NotificationRecord mRecordSms;
@@ -138,15 +135,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 callPkg, 1, "highcall", callUid, callUid, n2,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
         mRecordHighCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
-
-        Notification n3 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
-                .setStyle(new Notification.MediaStyle()
-                        .setMediaSession(new MediaSession.Token(Process.myUid(), null)))
-                .build();
-        mRecordDefaultMedia = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, 1, "media", uid2, uid2, n3, new UserHandle(userId),
-                "", 1499), getDefaultChannel());
-        mRecordDefaultMedia.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n4 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MessagingStyle("sender!")).build();
@@ -218,7 +206,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 .setStyle(new Notification.MediaStyle())
                 .build();
         mNoMediaSessionMedia = new NotificationRecord(mContext, new StatusBarNotification(
-                pkg2, pkg2, 1, "cheater", uid2, uid2, n12, new UserHandle(userId),
+                pkg2, pkg2, 1, "media", uid2, uid2, n12, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mNoMediaSessionMedia.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
@@ -247,7 +235,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         final List<NotificationRecord> expected = new ArrayList<>();
         expected.add(mRecordColorizedCall);
         expected.add(mRecordColorized);
-        expected.add(mRecordDefaultMedia);
         expected.add(mRecordHighCall);
         expected.add(mRecordInlineReply);
         if (mRecordSms != null) {

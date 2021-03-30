@@ -130,6 +130,16 @@ public abstract class ImeTracing {
     public abstract void triggerManagerServiceDump(String where);
 
     /**
+     * Being called while taking a bugreport so that tracing files can be included in the bugreport
+     * when the IME tracing is running.  Does nothing otherwise.
+     *
+     * @param pw Print writer
+     */
+    public void saveForBugreport(@Nullable PrintWriter pw) {
+        // does nothing by default.
+    }
+
+    /**
      * Sets whether ime tracing is enabled.
      *
      * @param enabled Tells whether ime tracing should be enabled or disabled.
@@ -153,11 +163,6 @@ public abstract class ImeTracing {
     }
 
     /**
-     * Writes the current tracing data to the specific output proto file.
-     */
-    public abstract void writeTracesToFiles();
-
-    /**
      * Starts a new IME trace if one is not already started.
      *
      * @param pw Print writer
@@ -170,14 +175,6 @@ public abstract class ImeTracing {
      * @param pw Print writer
      */
     public abstract void stopTrace(@Nullable PrintWriter pw);
-
-    /**
-     * Stops the IME trace if one was previously started.
-     *
-     * @param pw Print writer
-     * @param writeToFile If the current buffer should be written to disk or not
-     */
-    public abstract void stopTrace(@Nullable PrintWriter pw, boolean writeToFile);
 
     private static boolean isSystemProcess() {
         return ActivityThread.isSystem();

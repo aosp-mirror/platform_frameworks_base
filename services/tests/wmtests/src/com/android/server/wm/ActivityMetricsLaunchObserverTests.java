@@ -38,6 +38,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityOptions.SourceInfo;
 import android.app.WaitResult;
 import android.content.Intent;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
@@ -399,6 +400,26 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         // The first transition should still be valid.
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+    }
+
+    @Test
+    public void testConsecutiveLaunchNewTask() {
+        final IBinder launchCookie = mock(IBinder.class);
+        mTrampolineActivity.noDisplay = true;
+        mTrampolineActivity.mLaunchCookie = launchCookie;
+        onActivityLaunched(mTrampolineActivity);
+        final ActivityRecord activityOnNewTask = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .build();
+        mActivityMetricsLogger.notifyActivityLaunching(activityOnNewTask.intent,
+                mTrampolineActivity /* caller */);
+        notifyActivityLaunched(START_SUCCESS, activityOnNewTask);
+
+        transitToDrawnAndVerifyOnLaunchFinished(activityOnNewTask);
+        assertWithMessage("Trampoline's cookie must be transferred").that(
+                mTrampolineActivity.mLaunchCookie).isNull();
+        assertWithMessage("The last launch task has the transferred cookie").that(
+                activityOnNewTask.mLaunchCookie).isEqualTo(launchCookie);
     }
 
     @Test

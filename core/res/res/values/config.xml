@@ -951,6 +951,11 @@
     -->
     <integer name="config_longPressOnPowerBehavior">1</integer>
 
+    <!-- Whether the setting to change long press on power behaviour from default to assistant (5)
+         is available in Settings.
+     -->
+    <bool name="config_longPressOnPowerForAssistantSettingAvailable">true</bool>
+
     <!-- Control the behavior when the user long presses the power button for a long time.
             0 - Nothing
             1 - Global actions menu
@@ -3556,10 +3561,6 @@
     <!-- True if assistant app should be pinned via Pinner Service -->
     <bool name="config_pinnerAssistantApp">false</bool>
 
-    <!-- List of files pinned by the Pinner Service with the JIT Zygote boot image b/119800099 -->
-    <string-array translatable="false" name="config_jitzygoteBootImagePinnerServiceFiles">
-    </string-array>
-
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->
     <integer name="config_keepPreloadsMinDays">7</integer>
@@ -3726,6 +3727,13 @@
          Example: "com.android.wellbeing"
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
+
+    <!-- The package name for the companion provider app.
+         This package must be trusted, as it has the permissions to associate apps with devices
+         without a UI prompt.
+         Example: "com.google.android.gms"
+     -->
+    <string name="config_companionProviderPackage" translatable="false"></string>
 
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.
@@ -4574,6 +4582,11 @@
     <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
+
+    <!-- Boolean indicating whether all CB messages should be disabled on this device. This config
+         is intended to be used by OEMs who need to disable CB messages for regulatory requirements,
+         (e.g. the device is a tablet in a country where tablets should not receive CB messages) -->
+    <bool translatable="false" name="config_disable_all_cb_messages">false</bool>
 
     <!-- Screen Wake Keys
          Determines whether the specified key groups can be used to wake up the device. -->

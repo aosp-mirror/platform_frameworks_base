@@ -18,6 +18,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false"
           android:alpha="?attr/disabledAlpha"
-          android:color="@color/system_primary_400"/>
-    <item android:color="@color/system_primary_400"/>
+          android:color="@color/system_neutral2_400"/>
+    <item android:color="@color/system_neutral2_400"/>
 </selector>

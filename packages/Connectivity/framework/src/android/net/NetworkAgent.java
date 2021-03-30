@@ -32,6 +32,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -184,6 +185,20 @@ public abstract class NetworkAgent {
     public static final int EVENT_UNDERLYING_NETWORKS_CHANGED = BASE + 5;
 
     /**
+     * Sent by the NetworkAgent to ConnectivityService to pass the current value of the teardown
+     * delay.
+     * arg1 = teardown delay in milliseconds
+     * @hide
+     */
+    public static final int EVENT_TEARDOWN_DELAY_CHANGED = BASE + 6;
+
+    /**
+     * The maximum value for the teardown delay, in milliseconds.
+     * @hide
+     */
+    public static final int MAX_TEARDOWN_DELAY_MS = 5000;
+
+    /**
      * Sent by ConnectivityService to the NetworkAgent to inform the agent of the
      * networks status - whether we could use the network or could not, due to
      * either a bad network configuration (no internet link) or captive portal.
@@ -195,7 +210,6 @@ public abstract class NetworkAgent {
      * @hide
      */
     public static final int CMD_REPORT_NETWORK_STATUS = BASE + 7;
-
 
     /**
      * Network validation suceeded.
@@ -361,10 +375,25 @@ public abstract class NetworkAgent {
      */
     public static final int CMD_UNREGISTER_QOS_CALLBACK = BASE + 21;
 
+    /**
+     * Sent by ConnectivityService to {@link NetworkAgent} to inform the agent that its native
+     * network was created and the Network object is now valid.
+     *
+     * @hide
+     */
+    public static final int CMD_NETWORK_CREATED = BASE + 22;
+
+    /**
+     * Sent by ConnectivityService to {@link NetworkAgent} to inform the agent that its native
+     * network was destroyed.
+     *
+     * @hide
+     */
+    public static final int CMD_NETWORK_DESTROYED = BASE + 23;
+
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
-        // The subtype can be changed with (TODO) setLegacySubtype, but it starts
-        // with 0 (TelephonyManager.NETWORK_TYPE_UNKNOWN) and an empty description.
-        final NetworkInfo ni = new NetworkInfo(config.legacyType, 0, config.legacyTypeName, "");
+        final NetworkInfo ni = new NetworkInfo(config.legacyType, config.legacySubType,
+                config.legacyTypeName, config.legacySubTypeName);
         ni.setIsAvailable(true);
         ni.setDetailedState(NetworkInfo.DetailedState.CONNECTING, null /* reason */,
                 config.getLegacyExtraInfo());
@@ -390,7 +419,6 @@ public abstract class NetworkAgent {
      * @param score the initial score of this network. Update with sendNetworkScore.
      * @param config an immutable {@link NetworkAgentConfig} for this agent.
      * @param provider the {@link NetworkProvider} managing this agent.
-     * @hide TODO : unhide when impl is complete
      */
     public NetworkAgent(@NonNull Context context, @NonNull Looper looper, @NonNull String logTag,
             @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp,
@@ -434,7 +462,7 @@ public abstract class NetworkAgent {
         }
 
         mInitialConfiguration = new InitialConfiguration(context,
-                new NetworkCapabilities(nc, /* parcelLocationSensitiveFields */ true),
+                new NetworkCapabilities(nc, NetworkCapabilities.REDACT_NONE),
                 new LinkProperties(lp), score, config, ni);
     }
 
@@ -560,6 +588,14 @@ public abstract class NetworkAgent {
                 case CMD_UNREGISTER_QOS_CALLBACK: {
                     onQosCallbackUnregistered(
                             msg.arg1 /* QoS callback id */);
+                    break;
+                }
+                case CMD_NETWORK_CREATED: {
+                    onNetworkCreated();
+                    break;
+                }
+                case CMD_NETWORK_DESTROYED: {
+                    onNetworkDestroyed();
                     break;
                 }
             }
@@ -702,6 +738,16 @@ public abstract class NetworkAgent {
             mHandler.sendMessage(mHandler.obtainMessage(
                     CMD_UNREGISTER_QOS_CALLBACK, qosCallbackId, 0, null));
         }
+
+        @Override
+        public void onNetworkCreated() {
+            mHandler.sendMessage(mHandler.obtainMessage(CMD_NETWORK_CREATED));
+        }
+
+        @Override
+        public void onNetworkDestroyed() {
+            mHandler.sendMessage(mHandler.obtainMessage(CMD_NETWORK_DESTROYED));
+        }
     }
 
     /**
@@ -818,6 +864,29 @@ public abstract class NetworkAgent {
     }
 
     /**
+     * Sets the value of the teardown delay.
+     *
+     * The teardown delay is the time between when the network disconnects and when the native
+     * network corresponding to this {@code NetworkAgent} is destroyed. By default, the native
+     * network is destroyed immediately. If {@code teardownDelayMs} is non-zero, then when this
+     * network disconnects, the system will instead immediately mark the network as restricted
+     * and unavailable to unprivileged apps, but will defer destroying the native network until the
+     * teardown delay timer expires.
+     *
+     * The interfaces in use by this network will remain in use until the native network is
+     * destroyed and cannot be reused until {@link #onNetworkDestroyed()} is called.
+     *
+     * This method may be called at any time while the network is connected. It has no effect if
+     * the network is already disconnected and the teardown delay timer is running.
+     *
+     * @param teardownDelayMs the teardown delay to set, or 0 to disable teardown delay.
+     */
+    public void setTeardownDelayMs(
+            @IntRange(from = 0, to = MAX_TEARDOWN_DELAY_MS) int teardownDelayMs) {
+        queueOrSendMessage(reg -> reg.sendTeardownDelayMs(teardownDelayMs));
+    }
+
+    /**
      * Change the legacy subtype of this network agent.
      *
      * This is only for backward compatibility and should not be used by non-legacy network agents,
@@ -829,6 +898,7 @@ public abstract class NetworkAgent {
      * @hide
      */
     @Deprecated
+    @SystemApi
     public void setLegacySubtype(final int legacySubtype, @NonNull final String legacySubtypeName) {
         mNetworkInfo.setSubtype(legacySubtype, legacySubtypeName);
         queueOrSendNetworkInfo(mNetworkInfo);
@@ -878,8 +948,7 @@ public abstract class NetworkAgent {
         mBandwidthUpdatePending.set(false);
         mLastBwRefreshTime = System.currentTimeMillis();
         final NetworkCapabilities nc =
-                new NetworkCapabilities(networkCapabilities,
-                        /* parcelLocationSensitiveFields */ true);
+                new NetworkCapabilities(networkCapabilities, NetworkCapabilities.REDACT_NONE);
         queueOrSendMessage(reg -> reg.sendNetworkCapabilities(nc));
     }
 
@@ -963,6 +1032,7 @@ public abstract class NetworkAgent {
      * shall try to overwrite this method and produce a bandwidth update if capable.
      * @hide
      */
+    @SystemApi
     public void onBandwidthUpdateRequested() {
         pollLceData();
     }
@@ -1009,6 +1079,17 @@ public abstract class NetworkAgent {
     /** @hide TODO delete once subclasses have moved to onSaveAcceptUnvalidated */
     protected void saveAcceptUnvalidated(boolean accept) {
     }
+
+    /**
+     * Called when ConnectivityService has successfully created this NetworkAgent's native network.
+     */
+    public void onNetworkCreated() {}
+
+
+    /**
+     * Called when ConnectivityService has successfully destroy this NetworkAgent's native network.
+     */
+    public void onNetworkDestroyed() {}
 
     /**
      * Requests that the network hardware send the specified packet at the specified interval.
@@ -1161,29 +1242,37 @@ public abstract class NetworkAgent {
 
 
     /**
-     * Sends the attributes of Eps Bearer Qos Session back to the Application
+     * Sends the attributes of Qos Session back to the Application
      *
      * @param qosCallbackId the callback id that the session belongs to
-     * @param sessionId the unique session id across all Eps Bearer Qos Sessions
-     * @param attributes the attributes of the Eps Qos Session
+     * @param sessionId the unique session id across all Qos Sessions
+     * @param attributes the attributes of the Qos Session
      */
     public final void sendQosSessionAvailable(final int qosCallbackId, final int sessionId,
-            @NonNull final EpsBearerQosSessionAttributes attributes) {
+            @NonNull final QosSessionAttributes attributes) {
         Objects.requireNonNull(attributes, "The attributes must be non-null");
-        queueOrSendMessage(ra -> ra.sendEpsQosSessionAvailable(qosCallbackId,
-                new QosSession(sessionId, QosSession.TYPE_EPS_BEARER),
-                attributes));
+        if (attributes instanceof EpsBearerQosSessionAttributes) {
+            queueOrSendMessage(ra -> ra.sendEpsQosSessionAvailable(qosCallbackId,
+                    new QosSession(sessionId, QosSession.TYPE_EPS_BEARER),
+                    (EpsBearerQosSessionAttributes)attributes));
+        } else if (attributes instanceof NrQosSessionAttributes) {
+            queueOrSendMessage(ra -> ra.sendNrQosSessionAvailable(qosCallbackId,
+                    new QosSession(sessionId, QosSession.TYPE_NR_BEARER),
+                    (NrQosSessionAttributes)attributes));
+        }
     }
 
     /**
-     * Sends event that the Eps Qos Session was lost.
+     * Sends event that the Qos Session was lost.
      *
      * @param qosCallbackId the callback id that the session belongs to
-     * @param sessionId the unique session id across all Eps Bearer Qos Sessions
+     * @param sessionId the unique session id across all Qos Sessions
+     * @param qosSessionType the session type {@code QosSesson#QosSessionType}
      */
-    public final void sendQosSessionLost(final int qosCallbackId, final int sessionId) {
+    public final void sendQosSessionLost(final int qosCallbackId,
+            final int sessionId, final int qosSessionType) {
         queueOrSendMessage(ra -> ra.sendQosSessionLost(qosCallbackId,
-                new QosSession(sessionId, QosSession.TYPE_EPS_BEARER)));
+                new QosSession(sessionId, qosSessionType)));
     }
 
     /**

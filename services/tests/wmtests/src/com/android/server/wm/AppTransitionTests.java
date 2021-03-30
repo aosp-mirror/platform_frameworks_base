@@ -177,13 +177,13 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCleanAppTransitionWhenTaskStackReparent() {
+    public void testCleanAppTransitionWhenRootTaskReparent() {
         // Create 2 displays & presume both display the state is ON for ready to display & animate.
         final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
         final DisplayContent dc2 = createNewDisplay(Display.STATE_ON);
 
-        final Task stack1 = createTaskStackOnDisplay(dc1);
-        final Task task1 = createTaskInStack(stack1, 0 /* userId */);
+        final Task rootTask1 = createTask(dc1);
+        final Task task1 = createTaskInRootTask(rootTask1, 0 /* userId */);
         final ActivityRecord activity1 = createNonAttachedActivityRecord(dc1);
         task1.addChild(activity1, 0);
 
@@ -198,8 +198,8 @@ public class AppTransitionTests extends WindowTestsBase {
         dc1.mOpeningApps.add(activity1);
         assertTrue(dc1.mOpeningApps.size() > 0);
 
-        // Move stack to another display.
-        stack1.reparent(dc2.getDefaultTaskDisplayArea(), true);
+        // Move root task to another display.
+        rootTask1.reparent(dc2.getDefaultTaskDisplayArea(), true);
 
         // Verify if token are cleared from both pending transition list in former display.
         assertFalse(dc1.mOpeningApps.contains(activity1));

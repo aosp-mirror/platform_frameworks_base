@@ -139,14 +139,6 @@ class ImeTracingServerImpl extends ImeTracing {
         }
     }
 
-    @GuardedBy("mEnabledLock")
-    @Override
-    public void writeTracesToFiles() {
-        synchronized (mEnabledLock) {
-            writeTracesToFilesLocked();
-        }
-    }
-
     private void writeTracesToFilesLocked() {
         try {
             ProtoOutputStream clientsProto = new ProtoOutputStream();
@@ -192,12 +184,6 @@ class ImeTracingServerImpl extends ImeTracing {
 
     @Override
     public void stopTrace(@Nullable PrintWriter pw) {
-        stopTrace(pw, true /* writeToFile */);
-    }
-
-    @GuardedBy("mEnabledLock")
-    @Override
-    public void stopTrace(@Nullable PrintWriter pw, boolean writeToFile) {
         if (IS_USER) {
             Log.w(TAG, "Warn: Tracing is not supported on user builds.");
             return;
@@ -213,9 +199,35 @@ class ImeTracingServerImpl extends ImeTracing {
                     + TRACE_FILENAME_CLIENTS + ", " + TRACE_FILENAME_IMS + ", "
                     + TRACE_FILENAME_IMMS);
             sEnabled = false;
-            if (writeToFile) {
-                writeTracesToFilesLocked();
+            writeTracesToFilesLocked();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveForBugreport(@Nullable PrintWriter pw) {
+        if (IS_USER) {
+            return;
+        }
+        synchronized (mEnabledLock) {
+            if (!isAvailable() || !isEnabled()) {
+                return;
             }
+            // Temporarily stop accepting logs from trace event providers.  There is a small chance
+            // that we may drop some trace events while writing the file, but we currently need to
+            // live with that.  Note that addToBuffer() also has a bug that it doesn't do
+            // read-acquire so flipping sEnabled here doesn't even guarantee that addToBuffer() will
+            // temporarily stop accepting incoming events...
+            // TODO(b/175761228): Implement atomic snapshot to avoid downtime.
+            // TODO(b/175761228): Fix synchronization around sEnabled.
+            sEnabled = false;
+            logAndPrintln(pw, "Writing traces in " + TRACE_DIRNAME + ": "
+                    + TRACE_FILENAME_CLIENTS + ", " + TRACE_FILENAME_IMS + ", "
+                    + TRACE_FILENAME_IMMS);
+            writeTracesToFilesLocked();
+            sEnabled = true;
         }
     }
 

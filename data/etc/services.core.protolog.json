@@ -1219,12 +1219,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DragState.java"
     },
-    "-681380736": {
-      "message": "Sandbox max bounds for uid %s to bounds %s due to letterboxing from mismatch with parent bounds? %s size compat mode %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-677449371": {
       "message": "moveTaskToRootTask: moving task=%d to rootTaskId=%d toTop=%b",
       "level": "DEBUG",
@@ -2874,6 +2868,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1237719089": {
+      "message": "Sandbox max bounds for uid %s to bounds %s. letterboxing from mismatch with parent bounds = %s, has mCompatDisplayInsets = %s, should create compatDisplayInsets = %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1246035185": {
       "message": "stopFreezingDisplayLocked: Returning waitingForConfig=%b, waitingForRemoteRotation=%b, mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, mClientFreezingScreen=%b, mOpeningApps.size()=%d",

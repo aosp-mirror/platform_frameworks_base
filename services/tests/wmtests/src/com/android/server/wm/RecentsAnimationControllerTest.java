@@ -488,9 +488,9 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testIsAnimatingByRecents() {
         final ActivityRecord homeActivity = createHomeActivity();
-        final Task rootTask = createTaskStackOnDisplay(mDefaultDisplay);
-        final Task childTask = createTaskInStack(rootTask, 0 /* userId */);
-        final Task leafTask = createTaskInStack(childTask, 0 /* userId */);
+        final Task rootTask = createTask(mDefaultDisplay);
+        final Task childTask = createTaskInRootTask(rootTask, 0 /* userId */);
+        final Task leafTask = createTaskInRootTask(childTask, 0 /* userId */);
         spyOn(leafTask);
         doReturn(true).when(leafTask).isVisible();
 
@@ -556,11 +556,11 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testNotAttachNavigationBar_controlledByFixedRotationAnimation() {
+    public void testNotAttachNavigationBar_controlledByFadeRotationAnimation() {
         setupForShouldAttachNavBarDuringTransition();
-        FixedRotationAnimationController mockController =
-                mock(FixedRotationAnimationController.class);
-        doReturn(mockController).when(mDefaultDisplay).getFixedRotationAnimationController();
+        FadeRotationAnimationController mockController =
+                mock(FadeRotationAnimationController.class);
+        doReturn(mockController).when(mDefaultDisplay).getFadeRotationAnimationController();
         final ActivityRecord homeActivity = createHomeActivity();
         initializeRecentsAnimationController(mController, homeActivity);
         assertFalse(mController.isNavigationBarAttachedToApp());

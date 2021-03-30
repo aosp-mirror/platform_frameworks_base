@@ -130,12 +130,6 @@ public final class SystemUiDeviceConfigFlags {
     // Flags related to media notifications
 
     /**
-     * (boolean) If {@code true}, enables the seekbar in compact media notifications.
-     */
-    public static final String COMPACT_MEDIA_SEEKBAR_ENABLED =
-            "compact_media_notification_seekbar_enabled";
-
-    /**
      * (int) Maximum number of days to retain the salt for hashing direct share targets in logging
      */
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
@@ -380,11 +374,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SCREENSHOT_CORNER_FLOW = "enable_screenshot_corner_flow";
 
-    /**
-     * (boolean) Whether scrolling screenshots are enabled.
-     */
-    public static final String SCREENSHOT_SCROLLING_ENABLED = "enable_screenshot_scrolling";
-
     // Flags related to Nav Bar
 
     /**
@@ -413,6 +402,12 @@ public final class SystemUiDeviceConfigFlags {
      * (boolean) Whether ChooserTargets ranking on Sharesheet is enabled.
      */
     public static final String CHOOSER_TARGET_RANKING_ENABLED = "chooser_target_ranking_enabled";
+
+    /**
+     * (boolean) Whether dark launch of remote prediction service is enabled.
+     */
+    public static final String DARK_LAUNCH_REMOTE_PREDICTION_SERVICE_ENABLED =
+            "dark_launch_remote_prediction_service_enabled";
 
     /**
      * (boolean) Whether to enable pinch resizing for PIP.
@@ -473,6 +468,14 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SHARE_USE_SERVICE_TARGETS = "share_use_service_targets";
 
+    /**
+     * (boolean) If true, SysUI provides guardrails for app usage of Direct Share by enforcing
+     * limits on number of targets per app & adjusting scores for apps providing many targets. If
+     * false, this step is skipped. This should be true unless the ranking provider configured by
+     * [some other flag] is expected to manage these incentives.
+     */
+    public static final String APPLY_SHARING_APP_LIMITS_IN_SYSUI =
+            "apply_sharing_app_limits_in_sysui";
 
     /*
      * (long) The duration that the home button must be pressed before triggering Assist

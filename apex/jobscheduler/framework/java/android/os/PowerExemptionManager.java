@@ -40,9 +40,9 @@ import java.util.List;
 /**
  * Interface to access and modify the permanent and temporary power save allow list. The two lists
  * are kept separately. Apps placed on the permanent allow list are only removed via an explicit
- * {@link #removeFromAllowList(String)} call. Apps allow-listed by default by the system cannot be
- * removed. Apps placed on the temporary allow list are removed from that allow list after a
- * predetermined amount of time.
+ * {@link #removeFromPermanentAllowList(String)} call. Apps allow-listed by default by the system
+ * cannot be removed. Apps placed on the temporary allow list are removed from that allow list after
+ * a predetermined amount of time.
  *
  * @hide
  */
@@ -83,6 +83,12 @@ public class PowerExemptionManager {
     }
 
     /**
+     * Does not place the app on any temporary allow list. Nullifies the previous call to
+     * {@link android.app.BroadcastOptions#setTemporaryAppAllowlist(long, int, int, String)}.
+     * Note: this will not remove the receiver app from the temp allow list.
+     */
+    public static final int TEMPORARY_ALLOW_LIST_TYPE_NONE = -1;
+    /**
      * Allow the temp allow list behavior, plus allow foreground service start from background.
      */
     public static final int TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0;
@@ -96,6 +102,7 @@ public class PowerExemptionManager {
      * @hide
      */
     @IntDef(flag = true, prefix = { "TEMPORARY_ALLOW_LIST_TYPE_" }, value = {
+            TEMPORARY_ALLOW_LIST_TYPE_NONE,
             TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
             TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
     })
@@ -378,6 +385,8 @@ public class PowerExemptionManager {
 
     /**
      * Add the specified package to the permanent power save allow list.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void addToPermanentAllowList(@NonNull String packageName) {
@@ -386,6 +395,8 @@ public class PowerExemptionManager {
 
     /**
      * Add the specified packages to the permanent power save allow list.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public void addToPermanentAllowList(@NonNull List<String> packageNames) {
@@ -405,6 +416,7 @@ public class PowerExemptionManager {
      * @hide
      */
     @NonNull
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
     public int[] getAllowListedAppIds(boolean includingIdle) {
         try {
             if (includingIdle) {
@@ -443,9 +455,10 @@ public class PowerExemptionManager {
      * removed. Apps allow-listed by default by the system cannot be removed.
      *
      * @param packageName The app to remove from the allow list
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
-    public void removeFromAllowList(@NonNull String packageName) {
+    public void removeFromPermanentAllowList(@NonNull String packageName) {
         try {
             mService.removePowerSaveWhitelistApp(packageName);
         } catch (RemoteException e) {
@@ -463,8 +476,8 @@ public class PowerExemptionManager {
      */
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
-    public void addToTemporaryAllowList(@NonNull String packageName, long durationMs,
-            @ReasonCode int reasonCode, @Nullable String reason) {
+    public void addToTemporaryAllowList(@NonNull String packageName, @ReasonCode int reasonCode,
+            @Nullable String reason, long durationMs) {
         try {
             mService.addPowerSaveTempWhitelistApp(packageName, durationMs, mContext.getUserId(),
                     reasonCode, reason);
@@ -488,7 +501,7 @@ public class PowerExemptionManager {
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public long addToTemporaryAllowListForEvent(@NonNull String packageName,
-            @AllowListEvent int event, @ReasonCode int reasonCode, @Nullable String reason) {
+            @ReasonCode int reasonCode, @Nullable String reason, @AllowListEvent int event) {
         try {
             switch (event) {
                 case EVENT_MMS:

@@ -269,7 +269,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         }
         mShownOnFinish = shown;
         mFinished = true;
-        setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, 1f /* alpha */, 1f /* fraction */,
+        setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, mPendingAlpha, 1f /* fraction */,
                 true /* allowWhenFinished */);
 
         if (DEBUG) Log.d(TAG, "notify control request finished for types: " + mTypes);

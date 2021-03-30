@@ -21,9 +21,7 @@ import android.hardware.SensorManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.Bundle;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -88,29 +86,31 @@ public class BatteryUsageStatsProvider {
     }
 
     /**
+     * Returns true if the last update was too long ago for the tolerances specified
+     * by the supplied queries.
+     */
+    public boolean shouldUpdateStats(List<BatteryUsageStatsQuery> queries,
+            long lastUpdateTimeStampMs) {
+        long allowableStatsAge = Long.MAX_VALUE;
+        for (int i = queries.size() - 1; i >= 0; i--) {
+            BatteryUsageStatsQuery query = queries.get(i);
+            allowableStatsAge = Math.min(allowableStatsAge, query.getMaxStatsAge());
+        }
+
+        return mStats.mClocks.elapsedRealtime() - lastUpdateTimeStampMs > allowableStatsAge;
+    }
+
+    /**
      * Returns snapshots of battery attribution data, one per supplied query.
      */
     public List<BatteryUsageStats> getBatteryUsageStats(List<BatteryUsageStatsQuery> queries) {
-
-        // TODO(b/174186345): instead of BatteryStatsHelper, use PowerCalculators directly.
-        final BatteryStatsHelper batteryStatsHelper = new BatteryStatsHelper(mContext,
-                false /* collectBatteryBroadcast */);
-        batteryStatsHelper.create((Bundle) null);
-        final List<UserHandle> users = new ArrayList<>();
-        for (int i = 0; i < queries.size(); i++) {
-            BatteryUsageStatsQuery query = queries.get(i);
-            for (int userId : query.getUserIds()) {
-                UserHandle userHandle = UserHandle.of(userId);
-                if (!users.contains(userHandle)) {
-                    users.add(userHandle);
-                }
-            }
-        }
-        batteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, users);
-
         ArrayList<BatteryUsageStats> results = new ArrayList<>(queries.size());
-        for (int i = 0; i < queries.size(); i++) {
-            results.add(getBatteryUsageStats(queries.get(i)));
+        synchronized (mStats) {
+            mStats.prepareForDumpLocked();
+
+            for (int i = 0; i < queries.size(); i++) {
+                results.add(getBatteryUsageStats(queries.get(i)));
+            }
         }
         return results;
     }
@@ -134,7 +134,7 @@ public class BatteryUsageStatsProvider {
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder =
                 new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount)
-                        .setStatsStartRealtime(mStats.getStatsStartRealtime() / 1000);
+                        .setStatsStartTimestamp(mStats.getStartClockTime());
 
         SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
         for (int i = uidStats.size() - 1; i >= 0; i--) {

@@ -27,6 +27,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
@@ -35,22 +36,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.media.AudioFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.UserHandle;
+import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.system.OsConstants;
-import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -60,6 +66,7 @@ import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.LocalServices;
+import com.android.server.wm.ActivityAssistInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.ActivityTokens;
 
@@ -167,12 +174,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mSessionComponentName = new ComponentName(service.getPackageName(),
                 mInfo.getSessionService());
         final String hotwordDetectionServiceName = mInfo.getHotwordDetectionService();
-        if (hotwordDetectionServiceName != null) {
-            mHotwordDetectionComponentName = new ComponentName(service.getPackageName(),
-                    hotwordDetectionServiceName);
-        } else {
-            mHotwordDetectionComponentName = null;
-        }
+        mHotwordDetectionComponentName = hotwordDetectionServiceName != null
+                ? new ComponentName(service.getPackageName(), hotwordDetectionServiceName) : null;
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         IntentFilter filter = new IntentFilter();
@@ -187,24 +190,23 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                     mSessionComponentName, mUser, mContext, this,
                     mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
-        List<Pair<IBinder, Integer>> allVisibleActivities =
+        List<ActivityAssistInfo> allVisibleActivities =
                 LocalServices.getService(ActivityTaskManagerInternal.class)
                         .getTopVisibleActivities();
 
-        List<Pair<IBinder, Integer>> visibleActivities = null;
+        List<ActivityAssistInfo> visibleActivities = null;
         if (activityToken != null) {
             visibleActivities = new ArrayList();
             int activitiesCount = allVisibleActivities.size();
             for (int i = 0; i < activitiesCount; i++) {
-                if (allVisibleActivities.get(i).first == activityToken) {
-                    visibleActivities.add(
-                            new Pair<>(activityToken, allVisibleActivities.get(i).second));
+                ActivityAssistInfo info = allVisibleActivities.get(i);
+                if (info.getActivityToken() == activityToken) {
+                    visibleActivities.add(info);
                     break;
                 }
             }
         } else {
-            visibleActivities = LocalServices.getService(ActivityTaskManagerInternal.class)
-                    .getTopVisibleActivities();
+            visibleActivities = allVisibleActivities;
         }
         return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback,
                 visibleActivities);
@@ -402,10 +404,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
-    public void setHotwordDetectionServiceConfigLocked(@Nullable Bundle options,
-            @Nullable SharedMemory sharedMemory) {
+    public void updateStateLocked(@Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
         if (DEBUG) {
-            Slog.d(TAG, "setHotwordDetectionServiceConfigLocked");
+            Slog.d(TAG, "updateStateLocked");
         }
         if (mHotwordDetectionComponentName == null) {
             Slog.w(TAG, "Hotword detection service name not found");
@@ -416,7 +418,6 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             throw new IllegalStateException("Hotword detection service not in isolated process");
         }
         // TODO : Need to check related permissions for hotword detection service
-        // TODO : Sanitize for bundle
 
         if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
             Slog.w(TAG, "Can't set sharedMemory to be read-only");
@@ -426,9 +427,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
-                    options, sharedMemory);
+                    options, sharedMemory, callback);
         } else {
-            mHotwordDetectionConnection.setConfigLocked(options, sharedMemory);
+            mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }
     }
 
@@ -446,6 +447,52 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mHotwordDetectionConnection = null;
     }
 
+    public void startListeningFromMicLocked(
+            AudioFormat audioFormat,
+            IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromMic");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            // TODO: callback.onError();
+            return;
+        }
+
+        mHotwordDetectionConnection.startListeningFromMic(audioFormat, callback);
+    }
+
+    public void startListeningFromExternalSourceLocked(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            @Nullable PersistableBundle options,
+            IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromExternalSource");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            // TODO: callback.onError();
+            return;
+        }
+
+        mHotwordDetectionConnection
+                .startListeningFromExternalSource(audioStream, audioFormat, options, callback);
+    }
+
+    public void stopListeningFromMicLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "stopListeningFromMic");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "stopListeningFromMic() called but connection isn't established");
+            return;
+        }
+
+        mHotwordDetectionConnection.stopListening();
+    }
+
     public IRecognitionStatusCallback createSoundTriggerCallbackLocked(
             IHotwordRecognitionStatusCallback callback) {
         if (DEBUG) {
@@ -456,8 +503,22 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     }
 
     boolean isIsolatedProcessLocked(ComponentName componentName) {
-        // TODO : Need to make sure this component exists and is :isolated.
-        return true;
+        IPackageManager pm = AppGlobals.getPackageManager();
+        try {
+            ServiceInfo serviceInfo = pm.getServiceInfo(componentName,
+                    PackageManager.GET_META_DATA
+                            | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, mUser);
+            if (serviceInfo != null) {
+                return (serviceInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
+                        && (serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) == 0;
+            }
+        } catch (RemoteException e) {
+            if (DEBUG) {
+                Slog.w(TAG, "isIsolatedProcess RemoteException : " + e);
+            }
+        }
+        return false;
     }
 
     public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -476,6 +537,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         pw.println("  Service info:");
         mInfo.getServiceInfo().dump(new PrintWriterPrinter(pw), "    ");
         pw.print("  Recognition service="); pw.println(mInfo.getRecognitionService());
+        pw.print("  Hotword detection service="); pw.println(mInfo.getHotwordDetectionService());
         pw.print("  Settings activity="); pw.println(mInfo.getSettingsActivity());
         pw.print("  Supports assist="); pw.println(mInfo.getSupportsAssist());
         pw.print("  Supports launch from keyguard=");

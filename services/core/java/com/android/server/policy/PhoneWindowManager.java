@@ -434,7 +434,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // to hold wakelocks during dispatch and eliminating the critical path.
     volatile boolean mPowerKeyHandled;
     volatile boolean mBackKeyHandled;
-    volatile boolean mBeganFromNonInteractive;
     volatile boolean mEndCallKeyHandled;
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
 
@@ -876,16 +875,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mPowerKeyHandled) {
             if (!interactive) {
                 wakeUpFromPowerKey(event.getDownTime());
-                if (mSupportLongPressPowerWhenNonInteractive && hasLongPressOnPowerBehavior()) {
-                    mBeganFromNonInteractive = true;
-                } else {
-                    final int maxCount = getMaxMultiPressPowerCount();
-                    if (maxCount <= 1) {
-                        mPowerKeyHandled = true;
-                    } else {
-                        mBeganFromNonInteractive = true;
-                    }
-                }
             }
         } else {
             // handled by another power key policy.
@@ -895,7 +884,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void interceptPowerKeyUp(KeyEvent event, boolean interactive, boolean canceled) {
+    private void interceptPowerKeyUp(KeyEvent event, boolean canceled) {
         final boolean handled = canceled || mPowerKeyHandled;
 
         if (!handled) {
@@ -906,33 +895,36 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             // handled by single key or another power key policy.
             mSingleKeyGestureDetector.reset();
-            finishPowerKeyPress();
         }
+
+        finishPowerKeyPress();
     }
 
     private void finishPowerKeyPress() {
-        mBeganFromNonInteractive = false;
         mPowerKeyHandled = false;
         if (mPowerKeyWakeLock.isHeld()) {
             mPowerKeyWakeLock.release();
         }
     }
 
-    private void powerPress(long eventTime, boolean interactive, int count) {
+    private void powerPress(long eventTime, int count, boolean beganFromNonInteractive) {
         if (mDefaultDisplayPolicy.isScreenOnEarly() && !mDefaultDisplayPolicy.isScreenOnFully()) {
             Slog.i(TAG, "Suppressed redundant power key press while "
                     + "already in the process of turning the screen on.");
             return;
         }
+
+        final boolean interactive = Display.isOnState(mDefaultDisplay.getState());
+
         Slog.d(TAG, "powerPress: eventTime=" + eventTime + " interactive=" + interactive
-                + " count=" + count + " beganFromNonInteractive=" + mBeganFromNonInteractive +
-                " mShortPressOnPowerBehavior=" + mShortPressOnPowerBehavior);
+                + " count=" + count + " beganFromNonInteractive=" + beganFromNonInteractive
+                + " mShortPressOnPowerBehavior=" + mShortPressOnPowerBehavior);
 
         if (count == 2) {
             powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
         } else if (count == 3) {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
-        } else if (interactive && !mBeganFromNonInteractive) {
+        } else if (interactive && !beganFromNonInteractive) {
             switch (mShortPressOnPowerBehavior) {
                 case SHORT_PRESS_POWER_NOTHING:
                     break;
@@ -1906,12 +1898,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onPress(long downTime) {
-            powerPress(downTime, true, 1 /*count*/);
+            powerPress(downTime, 1 /*count*/,
+                    mSingleKeyGestureDetector.beganFromNonInteractive());
             finishPowerKeyPress();
         }
 
         @Override
         void onLongPress(long eventTime) {
+            if (mSingleKeyGestureDetector.beganFromNonInteractive()
+                    && !mSupportLongPressPowerWhenNonInteractive) {
+                Slog.v(TAG, "Not support long press power when device is not interactive.");
+                return;
+            }
+
             powerLongPress(eventTime);
         }
 
@@ -1923,7 +1922,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onMultiPress(long downTime, int count) {
-            powerPress(downTime, true, count);
+            powerPress(downTime, count, mSingleKeyGestureDetector.beganFromNonInteractive());
             finishPowerKeyPress();
         }
     }
@@ -2341,8 +2340,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             params.packageName = packageName;
             params.windowAnimations = win.getWindowStyle().getResourceId(
                     com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
-            params.privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
             params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
             // Setting as trusted overlay to let touches pass through. This is safe because this
             // window is controlled by the system.
@@ -2624,23 +2621,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
                                 UserHandle.USER_CURRENT_OR_SELF);
                     }
-                    float minFloat = mPowerManager.getBrightnessConstraint(
+                    float min = mPowerManager.getBrightnessConstraint(
                             PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-                    float maxFloat = mPowerManager.getBrightnessConstraint(
+                    float max = mPowerManager.getBrightnessConstraint(
                             PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
-                    float stepFloat = (maxFloat - minFloat) / BRIGHTNESS_STEPS * direction;
-                    float brightnessFloat = Settings.System.getFloatForUser(
-                            mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_FLOAT,
-                            mContext.getDisplay().getBrightnessDefault(),
-                            UserHandle.USER_CURRENT_OR_SELF);
-                    brightnessFloat += stepFloat;
+                    float step = (max - min) / BRIGHTNESS_STEPS * direction;
+                    int screenDisplayId = displayId < 0 ? DEFAULT_DISPLAY : displayId;
+                    float brightness = mDisplayManager.getBrightness(screenDisplayId);
+                    brightness += step;
                     // Make sure we don't go beyond the limits.
-                    brightnessFloat = Math.min(maxFloat, brightnessFloat);
-                    brightnessFloat = Math.max(minFloat, brightnessFloat);
+                    brightness = Math.min(max, brightness);
+                    brightness = Math.max(min, brightness);
 
-                    Settings.System.putFloatForUser(mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightnessFloat,
-                            UserHandle.USER_CURRENT_OR_SELF);
+                    mDisplayManager.setBrightness(screenDisplayId, brightness);
                     startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
                             UserHandle.CURRENT_OR_SELF);
                 }
@@ -3568,7 +3561,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down) {
                     interceptPowerKeyDown(event, interactiveAndOn);
                 } else {
-                    interceptPowerKeyUp(event, interactiveAndOn, canceled);
+                    interceptPowerKeyUp(event, canceled);
                 }
                 break;
             }
@@ -3758,7 +3751,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        mSingleKeyGestureDetector.interceptKey(event);
+        mSingleKeyGestureDetector.interceptKey(event, interactive);
     }
 
     // The camera gesture will be detected by GestureLauncherService.
@@ -5236,6 +5229,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
 
         mGlobalKeyManager.dump(prefix, pw);
+        mKeyCombinationManager.dump(prefix, pw);
+        mSingleKeyGestureDetector.dump(prefix, pw);
 
         if (mWakeGestureListener != null) {
             mWakeGestureListener.dump(pw, prefix);

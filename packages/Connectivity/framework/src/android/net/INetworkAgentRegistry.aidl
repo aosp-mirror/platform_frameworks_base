@@ -22,6 +22,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkScore;
 import android.net.QosSession;
 import android.telephony.data.EpsBearerQosSessionAttributes;
+import android.telephony.data.NrQosSessionAttributes;
 
 /**
  * Interface for NetworkAgents to send network properties.
@@ -37,6 +38,8 @@ oneway interface INetworkAgentRegistry {
     void sendSocketKeepaliveEvent(int slot, int reason);
     void sendUnderlyingNetworks(in @nullable List<Network> networks);
     void sendEpsQosSessionAvailable(int callbackId, in QosSession session, in EpsBearerQosSessionAttributes attributes);
+    void sendNrQosSessionAvailable(int callbackId, in QosSession session, in NrQosSessionAttributes attributes);
     void sendQosSessionLost(int qosCallbackId, in QosSession session);
     void sendQosCallbackError(int qosCallbackId, int exceptionType);
+    void sendTeardownDelayMs(int teardownDelayMs);
 }

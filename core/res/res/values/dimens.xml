@@ -47,10 +47,6 @@
     <dimen name="status_bar_height_landscape">@dimen/status_bar_height_portrait</dimen>
     <!-- Height of area above QQS where battery/time go -->
     <dimen name="quick_qs_offset_height">48dp</dimen>
-    <!-- Total height of QQS (quick_qs_offset_height + 128) -->
-    <dimen name="quick_qs_total_height">176dp</dimen>
-    <!-- Total height of QQS with two rows to fit media player (quick_qs_offset_height + 176) -->
-    <dimen name="quick_qs_total_height_with_media">224dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
@@ -226,9 +222,6 @@
     <!-- The margin on the end of the top-line content views (accommodates the expander) -->
     <dimen name="notification_heading_margin_end">56dp</dimen>
 
-    <!-- The margin for text at the end of the image view for media notifications -->
-    <dimen name="notification_media_image_margin_end">72dp</dimen>
-
     <!-- The height of the notification action list -->
     <dimen name="notification_action_list_height">60dp</dimen>
 
@@ -345,6 +338,9 @@
     <!-- The minimum width of the app name in the header if it shrinks -->
     <dimen name="notification_header_shrink_min_width">72dp</dimen>
 
+    <!-- The minimum width of optional header fields below which the view is simply hidden -->
+    <dimen name="notification_header_shrink_hide_width">24sp</dimen>
+
     <!-- The size of the media actions in the media notification. -->
     <dimen name="media_notification_action_button_size">48dp</dimen>
 
@@ -359,9 +355,6 @@
 
     <!-- The absolute height for the header in a media notification. -->
     <dimen name="media_notification_header_height">@dimen/notification_header_height</dimen>
-
-    <!-- The margin of the content to an image-->
-    <dimen name="notification_content_image_margin_end">8dp</dimen>
 
     <!-- The padding at the end of actions when the snooze and bubble buttons are gone-->
     <dimen name="snooze_and_bubble_gone_padding_end">12dp</dimen>
@@ -482,9 +475,6 @@
 
     <!-- Top padding for notification when text is large and narrow (i.e. it has 3 lines -->
     <dimen name="notification_top_pad_large_text_narrow">-4dp</dimen>
-
-    <!-- Padding for notification icon when drawn with circle around it -->
-    <dimen name="notification_large_icon_circle_padding">11dp</dimen>
 
     <!-- The margin on top of the text of the notification -->
     <dimen name="notification_text_margin_top">6dp</dimen>
@@ -736,12 +726,10 @@
     <dimen name="notification_big_picture_max_height">284dp</dimen>
     <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. This value is determined by the standard panel size -->
     <dimen name="notification_big_picture_max_width">416dp</dimen>
-    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. This value is determined by the expanded media template-->
-    <dimen name="notification_media_image_max_height">140dp</dimen>
-    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
-    <dimen name="notification_media_image_max_width">280dp</dimen>
     <!-- The size of the right icon -->
     <dimen name="notification_right_icon_size">48dp</dimen>
+    <!-- The margin between the right icon and the content. -->
+    <dimen name="notification_right_icon_content_margin">12dp</dimen>
     <!-- The top and bottom margin of the right icon in the normal notification states -->
     <dimen name="notification_right_icon_headerless_margin">20dp</dimen>
     <!-- The top margin of the right icon in the "big" notification states -->
@@ -762,10 +750,6 @@
     <dimen name="notification_big_picture_max_height_low_ram">208dp</dimen>
     <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. -->
     <dimen name="notification_big_picture_max_width_low_ram">294dp</dimen>
-    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. -->
-    <dimen name="notification_media_image_max_height_low_ram">100dp</dimen>
-    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
-    <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size</dimen>
     <!-- The maximum size of the grayscale icon -->

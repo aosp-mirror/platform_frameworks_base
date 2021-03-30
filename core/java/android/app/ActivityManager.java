@@ -901,7 +901,6 @@ public class ActivityManager {
      *
      * @hide
      */
-    @TestApi
     @ChangeId
     public static final long DROP_CLOSE_SYSTEM_DIALOGS = 174664120L;
 

@@ -275,19 +275,6 @@ public abstract class WindowOrientationListener {
         }
     }
 
-    /**
-     * Returns true if the current status of the phone is suitable for using rotation resolver
-     * service.
-     *
-     * To reduce the power consumption of rotation resolver service, rotation query should run less
-     * frequently than other low power orientation sensors. This method is used to check whether
-     * the current status of the phone is necessary to request a suggested screen rotation from the
-     * rotation resolver service. Note that it always returns {@code false} in the base class. It
-     * should be overridden in the derived classes.
-     */
-    public boolean canUseRotationResolver() {
-        return false;
-    }
 
     /**
      * Returns true if the rotation resolver feature is enabled by setting. It means {@link
@@ -1150,11 +1137,12 @@ public abstract class WindowOrientationListener {
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.DEVICE_ROTATED,
                             event.timestamp,
-                            rotationToLogEnum(reportedRotation));
+                            rotationToLogEnum(reportedRotation),
+                            FrameworkStatsLog.DEVICE_ROTATED__ROTATION_EVENT_TYPE__ACTUAL_EVENT);
                 }
             }
 
-            if (isRotationResolverEnabled() && canUseRotationResolver()) {
+            if (isRotationResolverEnabled()) {
                 if (mRotationResolverService == null) {
                     mRotationResolverService = LocalServices.getService(
                             RotationResolverInternal.class);

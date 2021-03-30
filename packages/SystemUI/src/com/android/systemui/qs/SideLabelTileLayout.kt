@@ -18,6 +18,7 @@ package com.android.systemui.qs
 
 import android.content.Context
 import android.util.AttributeSet
+import com.android.systemui.R
 
 open class SideLabelTileLayout(
     context: Context,
@@ -26,7 +27,7 @@ open class SideLabelTileLayout(
 
     override fun updateResources(): Boolean {
         return super.updateResources().also {
-            mMaxAllowedRows = 4
+            mMaxAllowedRows = context.resources.getInteger(R.integer.quick_settings_max_rows)
         }
     }
 
@@ -43,5 +44,20 @@ open class SideLabelTileLayout(
     fun getPhantomTopPosition(index: Int): Int {
         val row = index / mColumns
         return getRowTop(row)
+    }
+
+    override fun updateMaxRows(allowedHeight: Int, tilesCount: Int): Boolean {
+        val previousRows = mRows
+        mRows = mMaxAllowedRows
+        // We want at most mMaxAllowedRows, but it could be that we don't have enough tiles to fit
+        // that many rows. In that case, we want
+        // `tilesCount = (mRows - 1) * mColumns + X`
+        // where X is some remainder between 1 and `mColumns - 1`
+        // Adding `mColumns - 1` will guarantee that the final value F will satisfy
+        // `mRows * mColumns <= F < (mRows + 1) * mColumns
+        if (mRows > (tilesCount + mColumns - 1) / mColumns) {
+            mRows = (tilesCount + mColumns - 1) / mColumns
+        }
+        return previousRows != mRows
     }
 }

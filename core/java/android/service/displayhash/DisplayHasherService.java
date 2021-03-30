@@ -52,6 +52,16 @@ public abstract class DisplayHasherService extends Service {
             "android.service.displayhash.extra.VERIFIED_DISPLAY_HASH";
 
     /**
+     * Name under which a DisplayHasherService component publishes information
+     * about itself.  This meta-data must reference an XML resource containing a
+     * {@link com.android.internal.R.styleable#DisplayHasherService} tag.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String SERVICE_META_DATA = "android.displayhash.display_hasher_service";
+
+    /**
      * The {@link Intent} action that must be declared as handled by a service in its manifest
      * for the system to recognize it as a DisplayHash providing service.
      *

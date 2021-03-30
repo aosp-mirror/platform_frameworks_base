@@ -47,6 +47,7 @@ public final class SearchResult {
     static final String MATCHES_FIELD = "matches";
     static final String PACKAGE_NAME_FIELD = "packageName";
     static final String DATABASE_NAME_FIELD = "databaseName";
+    static final String RANKING_SIGNAL_FIELD = "rankingSignal";
 
     @NonNull private final Bundle mBundle;
 
@@ -65,13 +66,6 @@ public final class SearchResult {
     @NonNull
     public Bundle getBundle() {
         return mBundle;
-    }
-
-    /** @deprecated TODO(b/181887768): This method exists only for dogfooder transition. */
-    @NonNull
-    @Deprecated
-    public GenericDocument getDocument() {
-        return getGenericDocument();
     }
 
     /**
@@ -131,6 +125,36 @@ public final class SearchResult {
         return Preconditions.checkNotNull(mBundle.getString(DATABASE_NAME_FIELD));
     }
 
+    /**
+     * Returns the ranking signal of the {@link GenericDocument}, according to the ranking strategy
+     * set in {@link SearchSpec.Builder#setRankingStrategy(int)}.
+     *
+     * <p>The meaning of the ranking signal and its value is determined by the selected ranking
+     * strategy:
+     *
+     * <ul>
+     *   <li>{@link SearchSpec#RANKING_STRATEGY_NONE} - this value will be 0
+     *   <li>{@link SearchSpec#RANKING_STRATEGY_DOCUMENT_SCORE} - the value returned by calling
+     *       {@link GenericDocument#getScore()} on the document returned by {@link
+     *       #getGenericDocument()}
+     *   <li>{@link SearchSpec#RANKING_STRATEGY_CREATION_TIMESTAMP} - the value returned by calling
+     *       {@link GenericDocument#getCreationTimestampMillis()} on the document returned by {@link
+     *       #getGenericDocument()}
+     *   <li>{@link SearchSpec#RANKING_STRATEGY_RELEVANCE_SCORE} - an arbitrary double value where a
+     *       higher value means more relevant
+     *   <li>{@link SearchSpec#RANKING_STRATEGY_USAGE_COUNT} - the number of times usage has been
+     *       reported for the document returned by {@link #getGenericDocument()}
+     *   <li>{@link SearchSpec#RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP} - the timestamp of the
+     *       most recent usage that has been reported for the document returned by {@link
+     *       #getGenericDocument()}
+     * </ul>
+     *
+     * @return Ranking signal of the document
+     */
+    public double getRankingSignal() {
+        return mBundle.getDouble(RANKING_SIGNAL_FIELD);
+    }
+
     /** Builder for {@link SearchResult} objects. */
     public static final class Builder {
         private final Bundle mBundle = new Bundle();
@@ -170,6 +194,14 @@ public final class SearchResult {
                     "This MatchInfo is already associated with a SearchResult and can't be "
                             + "reassigned");
             mMatchInfos.add(matchInfo.mBundle);
+            return this;
+        }
+
+        /** Sets the ranking signal of the matched document in this SearchResult. */
+        @NonNull
+        public Builder setRankingSignal(double rankingSignal) {
+            Preconditions.checkState(!mBuilt, "Builder has already been used");
+            mBundle.putDouble(RANKING_SIGNAL_FIELD, rankingSignal);
             return this;
         }
 
@@ -316,13 +348,6 @@ public final class SearchResult {
             return mFullText;
         }
 
-        /** @deprecated TODO(b/181887768): This method exists only for dogfooder transition. */
-        @NonNull
-        @Deprecated
-        public MatchRange getExactMatchPosition() {
-            return getExactMatchRange();
-        }
-
         /**
          * Gets the exact {@link MatchRange} corresponding to the given entry.
          *
@@ -347,13 +372,6 @@ public final class SearchResult {
         @NonNull
         public CharSequence getExactMatch() {
             return getSubstring(getExactMatchRange());
-        }
-
-        /** @deprecated TODO(b/181887768): This method exists only for dogfooder transition. */
-        @NonNull
-        @Deprecated
-        public MatchRange getSnippetPosition() {
-            return getSnippetRange();
         }
 
         /**

@@ -89,6 +89,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseDoubleArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
@@ -169,7 +170,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 195;
+    static final int VERSION = 196;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -1013,6 +1014,9 @@ public class BatteryStatsImpl extends BatteryStats {
     @Nullable BluetoothPowerCalculator mBluetoothPowerCalculator = null;
     /** Cpu Power calculator for attributing measured cpu charge consumption to uids */
     @Nullable CpuPowerCalculator mCpuPowerCalculator = null;
+    /** Mobile Radio Power calculator for attributing measured radio charge consumption to uids */
+    @Nullable
+    MobileRadioPowerCalculator mMobileRadioPowerCalculator = null;
     /** Wifi Power calculator for attributing measured wifi charge consumption to uids */
     @Nullable WifiPowerCalculator mWifiPowerCalculator = null;
 
@@ -1194,6 +1198,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public BatteryStatsImpl(Clocks clocks) {
         init(clocks);
+        mStartClockTimeMs = System.currentTimeMillis();
         mStatsFile = null;
         mCheckinFile = null;
         mDailyFile = null;
@@ -6981,6 +6986,16 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    public long getGnssMeasuredBatteryConsumptionUC() {
+        return getPowerBucketConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_GNSS);
+    }
+
+    @Override
+    public long getMobileRadioMeasuredBatteryConsumptionUC() {
+        return getPowerBucketConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO);
+    }
+
+    @Override
     public long getScreenOnMeasuredBatteryConsumptionUC() {
         return getPowerBucketConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON);
     }
@@ -7840,6 +7855,16 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        public long getGnssMeasuredBatteryConsumptionUC() {
+            return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_GNSS);
+        }
+
+        @Override
+        public long getMobileRadioMeasuredBatteryConsumptionUC() {
+            return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO);
+        }
+
+        @Override
         public long getScreenOnMeasuredBatteryConsumptionUC() {
             return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON);
         }
@@ -7876,6 +7901,27 @@ public class BatteryStatsImpl extends BatteryStats {
 
             // Return the min of the two
             return (topTimeUs < fgTimeUs) ? topTimeUs : fgTimeUs;
+        }
+
+
+        /**
+         * Gets the uid's time spent using the GNSS since last marked. Also sets the mark time for
+         * the GNSS timer.
+         */
+        private long markGnssTimeUs(long elapsedRealtimeMs) {
+            final Sensor sensor = mSensorStats.get(Sensor.GPS);
+            if (sensor == null) {
+                return 0;
+            }
+
+            final StopwatchTimer timer = sensor.mTimer;
+            if (timer == null) {
+                return 0;
+            }
+
+            final long gnssTimeUs = timer.getTimeSinceMarkLocked(elapsedRealtimeMs * 1000);
+            timer.setMark(elapsedRealtimeMs);
+            return gnssTimeUs;
         }
 
         public StopwatchTimer createAudioTurnedOnTimerLocked() {
@@ -11821,7 +11867,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * Distribute Cell radio energy info and network traffic to apps.
      */
     public void noteModemControllerActivity(@Nullable final ModemActivityInfo activityInfo,
-            long elapsedRealtimeMs, long uptimeMs) {
+            final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs) {
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating mobile radio stats with " + activityInfo);
         }
@@ -11850,6 +11896,16 @@ public class BatteryStatsImpl extends BatteryStats {
                     mNetworkStatsPool.release(delta);
                 }
                 return;
+            }
+
+            final SparseDoubleArray uidEstimatedConsumptionMah;
+            if (consumedChargeUC > 0 && mMobileRadioPowerCalculator != null
+                    && mGlobalMeasuredEnergyStats != null) {
+                mGlobalMeasuredEnergyStats.updateStandardBucket(
+                        MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO, consumedChargeUC);
+                uidEstimatedConsumptionMah = new SparseDoubleArray();
+            } else {
+                uidEstimatedConsumptionMah = null;
             }
 
             if (deltaInfo != null) {
@@ -11896,7 +11952,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     mTmpRailStats.resetCellularTotalEnergyUsed();
                 }
             }
-            long radioTimeUs = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
+            long totalAppRadioTimeUs = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000);
             mMobileRadioActivePerAppTimer.setMark(elapsedRealtimeMs);
 
@@ -11956,12 +12012,21 @@ public class BatteryStatsImpl extends BatteryStats {
 
                         // Distribute total radio active time in to this app.
                         final long appPackets = entry.rxPackets + entry.txPackets;
-                        final long appRadioTimeUs = (radioTimeUs * appPackets) / totalPackets;
+                        final long appRadioTimeUs =
+                                (totalAppRadioTimeUs * appPackets) / totalPackets;
                         u.noteMobileRadioActiveTimeLocked(appRadioTimeUs);
+
+                        // Distribute measured mobile radio charge consumption based on app radio
+                        // active time
+                        if (uidEstimatedConsumptionMah != null) {
+                            uidEstimatedConsumptionMah.add(u.getUid(),
+                                    mMobileRadioPowerCalculator.calcPowerFromRadioActiveDurationMah(
+                                            appRadioTimeUs / 1000));
+                        }
 
                         // Remove this app from the totals, so that we don't lose any time
                         // due to rounding.
-                        radioTimeUs -= appRadioTimeUs;
+                        totalAppRadioTimeUs -= appRadioTimeUs;
                         totalPackets -= appPackets;
 
                         if (deltaInfo != null) {
@@ -11986,10 +12051,49 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 }
 
-                if (radioTimeUs > 0) {
+                if (totalAppRadioTimeUs > 0) {
                     // Whoops, there is some radio time we can't blame on an app!
-                    mMobileRadioActiveUnknownTime.addCountLocked(radioTimeUs);
+                    mMobileRadioActiveUnknownTime.addCountLocked(totalAppRadioTimeUs);
                     mMobileRadioActiveUnknownCount.addCountLocked(1);
+                }
+
+
+                // Update the MeasuredEnergyStats information.
+                if (uidEstimatedConsumptionMah != null) {
+                    double totalEstimatedConsumptionMah = 0.0;
+
+                    // Estimate total active radio power consumption since last mark.
+                    final long totalRadioTimeMs = mMobileRadioActiveTimer.getTimeSinceMarkLocked(
+                            elapsedRealtimeMs * 1000) / 1000;
+                    mMobileRadioActiveTimer.setMark(elapsedRealtimeMs);
+                    totalEstimatedConsumptionMah +=
+                            mMobileRadioPowerCalculator.calcPowerFromRadioActiveDurationMah(
+                                    totalRadioTimeMs);
+
+                    // Estimate idle power consumption at each signal strength level
+                    final int numSignalStrengthLevels = mPhoneSignalStrengthsTimer.length;
+                    for (int strengthLevel = 0; strengthLevel < numSignalStrengthLevels;
+                            strengthLevel++) {
+                        final long strengthLevelDurationMs =
+                                mPhoneSignalStrengthsTimer[strengthLevel].getTimeSinceMarkLocked(
+                                        elapsedRealtimeMs * 1000) / 1000;
+                        mPhoneSignalStrengthsTimer[strengthLevel].setMark(elapsedRealtimeMs);
+
+                        totalEstimatedConsumptionMah +=
+                                mMobileRadioPowerCalculator.calcIdlePowerAtSignalStrengthMah(
+                                        strengthLevelDurationMs, strengthLevel);
+                    }
+
+                    // Estimate total active radio power consumption since last mark.
+                    final long scanTimeMs = mPhoneSignalScanningTimer.getTimeSinceMarkLocked(
+                            elapsedRealtimeMs * 1000) / 1000;
+                    mPhoneSignalScanningTimer.setMark(elapsedRealtimeMs);
+                    totalEstimatedConsumptionMah +=
+                            mMobileRadioPowerCalculator.calcScanTimePowerMah(scanTimeMs);
+
+                    distributeEnergyToUidsLocked(MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO,
+                            consumedChargeUC, uidEstimatedConsumptionMah,
+                            totalEstimatedConsumptionMah);
                 }
 
                 mNetworkStatsPool.release(delta);
@@ -12451,7 +12555,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // 'double counted' and will simply exceed the realtime that elapsed.
         // If multidisplay becomes a reality, this is probably more reasonable than pooling.
 
-        // On the first pass, collect total time since mark so that we can normalize power.
+        // Collect total time since mark so that we can normalize power.
         final SparseDoubleArray fgTimeUsArray = new SparseDoubleArray();
         final long elapsedRealtimeUs = elapsedRealtimeMs * 1000;
         // TODO(b/175726779): Update and optimize the algorithm (e.g. avoid iterating over ALL uids)
@@ -12463,6 +12567,50 @@ public class BatteryStatsImpl extends BatteryStats {
             fgTimeUsArray.put(uid.getUid(), (double) fgTimeUs);
         }
         distributeEnergyToUidsLocked(powerBucket, chargeUC, fgTimeUsArray, 0);
+    }
+
+    /**
+     * Accumulate GNSS charge consumption and distribute it to the correct state and the apps.
+     *
+     * @param chargeUC amount of charge (microcoulombs) used by GNSS since this was last called.
+     */
+    @GuardedBy("this")
+    public void updateGnssMeasuredEnergyStatsLocked(long chargeUC, long elapsedRealtimeMs) {
+        if (DEBUG_ENERGY) Slog.d(TAG, "Updating gnss stats: " + chargeUC);
+        if (mGlobalMeasuredEnergyStats == null) {
+            return;
+        }
+
+        if (!mOnBatteryInternal || chargeUC <= 0) {
+            // There's nothing further to update.
+            return;
+        }
+        if (mIgnoreNextExternalStats) {
+            // Although under ordinary resets we won't get here, and typically a new sync will
+            // happen right after the reset, strictly speaking we need to set all mark times to now.
+            final int uidStatsSize = mUidStats.size();
+            for (int i = 0; i < uidStatsSize; i++) {
+                final Uid uid = mUidStats.valueAt(i);
+                uid.markGnssTimeUs(elapsedRealtimeMs);
+            }
+            return;
+        }
+
+        mGlobalMeasuredEnergyStats.updateStandardBucket(MeasuredEnergyStats.POWER_BUCKET_GNSS,
+                chargeUC);
+
+        // Collect the per uid time since mark so that we can normalize power.
+        final SparseDoubleArray gnssTimeUsArray = new SparseDoubleArray();
+        // TODO(b/175726779): Update and optimize the algorithm (e.g. avoid iterating over ALL uids)
+        final int uidStatsSize = mUidStats.size();
+        for (int i = 0; i < uidStatsSize; i++) {
+            final Uid uid = mUidStats.valueAt(i);
+            final long gnssTimeUs = uid.markGnssTimeUs(elapsedRealtimeMs);
+            if (gnssTimeUs == 0) continue;
+            gnssTimeUsArray.put(uid.getUid(), (double) gnssTimeUs);
+        }
+        distributeEnergyToUidsLocked(MeasuredEnergyStats.POWER_BUCKET_GNSS, chargeUC,
+                gnssTimeUsArray, 0);
     }
 
     /**
@@ -12545,81 +12693,6 @@ public class BatteryStatsImpl extends BatteryStats {
                     = (long) (totalConsumedChargeUC * ratioNumerator / ratioDenominator + 0.5);
             uid.addChargeToStandardBucketLocked(uidActualUC, bucket);
         }
-    }
-
-    /**
-     * SparseDoubleArray map integers to doubles.
-     * Its implementation is the same as that of {@link SparseLongArray}; see there for details.
-     *
-     * @see SparseLongArray
-     */
-    private static class SparseDoubleArray {
-        /**
-         * The int->double map, but storing the doubles as longs using
-         * {@link Double.doubleToRawLongBits(double)}.
-         */
-        private final SparseLongArray mValues = new SparseLongArray();
-
-        /**
-         * Gets the double mapped from the specified key, or <code>0</code>
-         * if no such mapping has been made.
-         */
-        public double get(int key) {
-            if (mValues.indexOfKey(key) >= 0) {
-                return Double.longBitsToDouble(mValues.get(key));
-            }
-            return 0;
-        }
-
-        /**
-         * Adds a mapping from the specified key to the specified value,
-         * replacing the previous mapping from the specified key if there
-         * was one.
-         */
-        public void put(int key, double value) {
-            mValues.put(key, Double.doubleToRawLongBits(value));
-        }
-
-        /**
-         * Adds a mapping from the specified key to the specified value,
-         * <b>adding</b> to the previous mapping from the specified key if there
-         * was one.
-         */
-        public void add(int key, double summand) {
-            final double oldValue = get(key);
-            put(key, oldValue + summand);
-        }
-
-        /**
-         * Returns the number of key-value mappings that this SparseDoubleArray
-         * currently stores.
-         */
-        public int size() {
-            return mValues.size();
-        }
-
-        /**
-         * Given an index in the range <code>0...size()-1</code>, returns
-         * the key from the <code>index</code>th key-value mapping that this
-         * SparseDoubleArray stores.
-         *
-         * @see SparseLongArray#keyAt(int)
-         */
-        public int keyAt(int index) {
-            return mValues.keyAt(index);
-        }
-
-        /**
-         * Given an index in the range <code>0...size()-1</code>, returns
-         * the value from the <code>index</code>th key-value mapping that this
-         * SparseDoubleArray stores.
-         *
-         * @see SparseLongArray#valueAt(int)
-         */
-        public double valueAt(int index) {
-            return Double.longBitsToDouble(mValues.valueAt(index));
-        }
-
     }
 
     /**
@@ -14466,6 +14539,9 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             if (supportedStandardBuckets[MeasuredEnergyStats.POWER_BUCKET_CPU]) {
                 mCpuPowerCalculator = new CpuPowerCalculator(mPowerProfile);
+            }
+            if (supportedStandardBuckets[MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO]) {
+                mMobileRadioPowerCalculator = new MobileRadioPowerCalculator(mPowerProfile);
             }
             if (supportedStandardBuckets[MeasuredEnergyStats.POWER_BUCKET_WIFI]) {
                 mWifiPowerCalculator = new WifiPowerCalculator(mPowerProfile);
@@ -16598,6 +16674,8 @@ public class BatteryStatsImpl extends BatteryStats {
         // Pull the clock time.  This may update the time and make a new history entry
         // if we had originally pulled a time before the RTC was set.
         getStartClockTime();
+
+        updateSystemServiceCallStats();
     }
 
     public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {

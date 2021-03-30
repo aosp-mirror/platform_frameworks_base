@@ -25,7 +25,7 @@ package {
 
 cc_library_shared {
     name: "libservice-connectivity",
-    // TODO: build against the NDK (sdk_version: "30" for example)
+    min_sdk_version: "30",
     cflags: [
         "-Wall",
         "-Werror",
@@ -36,13 +36,13 @@ cc_library_shared {
         "jni/com_android_server_TestNetworkService.cpp",
         "jni/onload.cpp",
     ],
+    stl: "libc++_static",
+    header_libs: [
+        "libbase_headers",
+    ],
     shared_libs: [
-        "libbase",
         "liblog",
         "libnativehelper",
-        // TODO: remove dependency on ifc_[add/del]_address by having Java code to add/delete
-        // addresses, and remove dependency on libnetutils.
-        "libnetutils",
     ],
     apex_available: [
         "com.android.tethering",
@@ -51,39 +51,69 @@ cc_library_shared {
 
 java_library {
     name: "service-connectivity-pre-jarjar",
+    sdk_version: "system_server_current",
+    min_sdk_version: "30",
     srcs: [
-        ":framework-connectivity-shared-srcs",
         ":connectivity-service-srcs",
+        ":framework-connectivity-shared-srcs",
+        ":services-connectivity-shared-srcs",
+        // TODO: move to net-utils-device-common, enable shrink optimization to avoid extra classes
+        ":net-module-utils-srcs",
     ],
     libs: [
-        "android.net.ipsec.ike",
-        "services.core",
-        "services.net",
+        // TODO (b/183097033) remove once system_server_current includes core_current
+        "stable.core.platform.api.stubs",
+        "android_system_server_stubs_current",
+        "framework-annotations-lib",
+        "framework-connectivity.impl",
+        "framework-tethering.stubs.module_lib",
+        "framework-wifi.stubs.module_lib",
         "unsupportedappusage",
         "ServiceConnectivityResources",
     ],
     static_libs: [
+        "dnsresolver_aidl_interface-V8-java",
         "modules-utils-os",
         "net-utils-device-common",
         "net-utils-framework-common",
         "netd-client",
+        "netlink-client",
+        "networkstack-client",
         "PlatformProperties",
+        "service-connectivity-protos",
     ],
     apex_available: [
-        "//apex_available:platform",
+        "com.android.tethering",
+    ],
+}
+
+java_library {
+    name: "service-connectivity-protos",
+    sdk_version: "system_current",
+    min_sdk_version: "30",
+    proto: {
+        type: "nano",
+    },
+    srcs: [
+        ":system-messages-proto-src",
+    ],
+    libs: ["libprotobuf-java-nano"],
+    apex_available: [
         "com.android.tethering",
     ],
 }
 
 java_library {
     name: "service-connectivity",
+    sdk_version: "system_server_current",
+    min_sdk_version: "30",
     installable: true,
     static_libs: [
         "service-connectivity-pre-jarjar",
     ],
     jarjar_rules: "jarjar-rules.txt",
     apex_available: [
-        "//apex_available:platform",
+        "//apex_available:platform", // For arc-services
         "com.android.tethering",
     ],
 }

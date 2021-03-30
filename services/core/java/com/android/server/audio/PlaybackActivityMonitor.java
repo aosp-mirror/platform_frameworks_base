@@ -704,6 +704,7 @@ public final class PlaybackActivityMonitor
         // find which players to fade out
         synchronized (mPlayerLock) {
             if (mPlayers.isEmpty()) {
+                if (DEBUG) { Log.v(TAG, "no players to fade out"); }
                 return false;
             }
             // check if this UID needs to be faded out (return false if not), and gather list of
@@ -731,8 +732,6 @@ public final class PlaybackActivityMonitor
                     apcsToFadeOut.add(apc);
                 }
             }
-            //###
-            //mDuckingManager.duckUid(loser.getClientUid(), apcsToFadeOut);
             if (loserHasActivePlayers) {
                 mFadingManager.fadeOutUid(loser.getClientUid(), apcsToFadeOut);
             }

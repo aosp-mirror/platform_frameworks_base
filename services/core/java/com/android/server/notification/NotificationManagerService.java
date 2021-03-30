@@ -60,7 +60,6 @@ import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.media.AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
@@ -85,6 +84,8 @@ import static android.service.notification.NotificationListenerService.REASON_AP
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
+import static android.service.notification.NotificationListenerService.REASON_CHANNEL_REMOVED;
+import static android.service.notification.NotificationListenerService.REASON_CLEAR_DATA;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_ERROR;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
@@ -454,6 +455,13 @@ public class NotificationManagerService extends SystemService {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long NOTIFICATION_TRAMPOLINE_BLOCK = 167676448L;
+
+    /**
+     * Whether a notification listeners can understand new, more specific, cancellation reasons.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    private static final long NOTIFICATION_CANCELLATION_REASONS = 175319604L;
 
     /**
      * Rate limit showing toasts, on a per package basis.
@@ -3599,7 +3607,7 @@ public class NotificationManagerService extends SystemService {
             }
             enforceDeletingChannelHasNoFgService(pkg, callingUser, channelId);
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
-                    callingUser, REASON_CHANNEL_BANNED, null);
+                    callingUser, REASON_CHANNEL_REMOVED, null);
             mPreferencesHelper.deleteNotificationChannel(pkg, callingUid, channelId);
             mListeners.notifyNotificationChannelChanged(pkg,
                     UserHandle.getUserHandleForUid(callingUid),
@@ -3607,34 +3615,6 @@ public class NotificationManagerService extends SystemService {
                     NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
             handleSavePolicyFile();
         }
-
-        @Override
-        public void deleteConversationNotificationChannels(String pkg, int uid,
-                String conversationId) {
-            checkCallerIsSystem();
-            List<NotificationChannel> channels =
-                    mPreferencesHelper.getNotificationChannelsByConversationId(
-                            pkg, uid, conversationId);
-            if (!channels.isEmpty()) {
-                // Preflight for fg service notifications in these channels:  do nothing
-                // unless they're all eligible
-                final int appUserId = UserHandle.getUserId(uid);
-                for (NotificationChannel nc : channels) {
-                    final String channelId = nc.getId();
-                    mAmi.stopForegroundServicesForChannel(pkg, appUserId, channelId);
-                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, nc.getId(), 0, 0, true,
-                            appUserId, REASON_CHANNEL_BANNED, null);
-                    mPreferencesHelper.deleteNotificationChannel(pkg, uid, channelId);
-                    mListeners.notifyNotificationChannelChanged(pkg,
-                            UserHandle.getUserHandleForUid(uid),
-                            mPreferencesHelper.getNotificationChannel(
-                                    pkg, uid, channelId, true),
-                            NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
-                }
-                handleSavePolicyFile();
-            }
-        }
-
 
         @Override
         public NotificationChannelGroup getNotificationChannelGroup(String pkg, String groupId) {
@@ -3672,7 +3652,7 @@ public class NotificationManagerService extends SystemService {
                     final NotificationChannel deletedChannel = deletedChannels.get(i);
                     cancelAllNotificationsInt(MY_UID, MY_PID, pkg, deletedChannel.getId(), 0, 0,
                             true,
-                            userId, REASON_CHANNEL_BANNED,
+                            userId, REASON_CHANNEL_REMOVED,
                             null);
                     mListeners.notifyNotificationChannelChanged(pkg,
                             UserHandle.getUserHandleForUid(callingUid),
@@ -3852,7 +3832,7 @@ public class NotificationManagerService extends SystemService {
             // Cancel posted notifications
             final int userId = UserHandle.getUserId(uid);
             cancelAllNotificationsInt(MY_UID, MY_PID, packageName, null, 0, 0, true,
-                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED, null);
+                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CLEAR_DATA, null);
 
             // Zen
             packagesChanged |=
@@ -4128,7 +4108,7 @@ public class NotificationManagerService extends SystemService {
         public void registerListener(final INotificationListener listener,
                 final ComponentName component, final int userid) {
             enforceSystemOrSystemUI("INotificationManager.registerListener");
-            mListeners.registerSystemService(listener, component, userid);
+            mListeners.registerSystemService(listener, component, userid, Binder.getCallingUid());
         }
 
         /**
@@ -6075,7 +6055,7 @@ public class NotificationManagerService extends SystemService {
                 mPreferencesHelper.deleteConversations(pkg, uid, shortcuts);
         for (String channelId : deletedChannelIds) {
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
-                    UserHandle.getUserId(uid), REASON_CHANNEL_BANNED,
+                    UserHandle.getUserId(uid), REASON_CHANNEL_REMOVED,
                     null);
         }
         handleSavePolicyFile();
@@ -7482,9 +7462,11 @@ public class NotificationManagerService extends SystemService {
             boolean rateLimitingEnabled =
                     !mToastRateLimitingDisabledUids.contains(record.uid);
             boolean isWithinQuota =
-                    mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG);
+                    mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG)
+                            || isExemptFromRateLimiting(record.pkg, userId);
 
-            if (tryShowToast(record, rateLimitingEnabled, isWithinQuota)) {
+            if (tryShowToast(
+                    record, rateLimitingEnabled, isWithinQuota)) {
                 scheduleDurationReachedLocked(record, lastToastWasTextRecord);
                 mIsCurrentToastShown = true;
                 if (rateLimitingEnabled) {
@@ -7516,6 +7498,18 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         return record.show();
+    }
+
+    private boolean isExemptFromRateLimiting(String pkg, int userId) {
+        boolean isExemptFromRateLimiting = false;
+        try {
+            isExemptFromRateLimiting = mPackageManager.checkPermission(
+                    android.Manifest.permission.UNLIMITED_TOASTS, pkg, userId)
+                    == PackageManager.PERMISSION_GRANTED;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to connect with package manager");
+        }
+        return isExemptFromRateLimiting;
     }
 
     /** Reports rate limiting toasts compat change (used when the toast was blocked). */
@@ -10324,6 +10318,10 @@ public class NotificationManagerService extends SystemService {
             final INotificationListener listener = (INotificationListener) info.service;
             StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
+                if (!CompatChanges.isChangeEnabled(NOTIFICATION_CANCELLATION_REASONS, info.uid)
+                        && (reason == REASON_CHANNEL_REMOVED || reason == REASON_CLEAR_DATA)) {
+                    reason = REASON_CHANNEL_BANNED;
+                }
                 listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "unable to notify listener (removed): " + info, ex);
@@ -10649,8 +10647,6 @@ public class NotificationManagerService extends SystemService {
      * TODO(b/161957908): Remove dogfooder toast.
      */
     private class NotificationTrampolineCallback implements BackgroundActivityStartCallback {
-        private final Set<String> mPackagesShown = new ArraySet<>();
-
         @Override
         public boolean isActivityStartAllowed(Collection<IBinder> tokens, int uid,
                 String packageName) {
@@ -10663,16 +10659,12 @@ public class NotificationManagerService extends SystemService {
             }
             String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
-            // Call to toast() method is posted to mHandler below to offload PM lookup from the
-            // activity start path
             if (CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid)) {
-                mHandler.post(() -> toast(packageName, uid, /* blocked */ true));
+                // Post toast() call to mHandler to offload PM lookup from the activity start path
+                mHandler.post(() -> toast(packageName, uid));
                 Slog.e(TAG, logcatMessage + " blocked");
                 return false;
             } else {
-                if (mPackagesShown.add(packageName)) {
-                    mHandler.post(() -> toast(packageName, uid, /* blocked */ false));
-                }
                 Slog.w(TAG, logcatMessage + ", this should be avoided for performance reasons");
                 return true;
             }
@@ -10687,7 +10679,7 @@ public class NotificationManagerService extends SystemService {
                     && !CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
         }
 
-        private void toast(String packageName, int uid, boolean blocked) {
+        private void toast(String packageName, int uid) {
             final CharSequence label;
             try {
                 label = mPackageManagerClient.getApplicationLabel(
@@ -10698,8 +10690,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             mUiHandler.post(() -> Toast.makeText(getUiContext(),
-                    label + " launch " + (blocked ? "blocked" : "will be blocked")
-                            + "\ng.co/dev/trampolines", Toast.LENGTH_LONG).show());
+                    label + " launch blocked\ng.co/dev/trampolines", Toast.LENGTH_LONG).show());
         }
     }
 }

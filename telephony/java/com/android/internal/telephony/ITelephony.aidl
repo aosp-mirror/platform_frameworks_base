@@ -298,9 +298,9 @@ interface ITelephony {
     int getCallState();
 
     /**
-     * Returns the call state for a slot.
+     * Returns the call state for a specific subscriiption.
      */
-    int getCallStateForSlot(int slotIndex);
+    int getCallStateForSubscription(int subId, String callingPackage, String featureId);
 
     /**
      * Replaced by getDataActivityForSubId.
@@ -2250,10 +2250,12 @@ interface ITelephony {
      *
      * @param subId the id of the subscription
      * @param thermalMitigationRequest holds the parameters necessary for the request.
+     * @param callingPackage the package name of the calling package.
      * @throws InvalidThermalMitigationRequestException if the parametes are invalid.
      */
     int sendThermalMitigationRequest(int subId,
-            in ThermalMitigationRequest thermalMitigationRequest);
+            in ThermalMitigationRequest thermalMitigationRequest,
+            String callingPackage);
 
     /**
      * get the Generic Bootstrapping Architecture authentication keys
@@ -2349,6 +2351,16 @@ interface ITelephony {
     boolean getCarrierSingleRegistrationEnabled(int subId);
 
     /**
+     * Overrides the ims feature validation result
+     */
+    boolean setImsFeatureValidationOverride(int subId, String enabled);
+
+    /**
+     * Gets the ims feature validation override value
+     */
+    boolean getImsFeatureValidationOverride(int subId);
+
+    /**
      *  Return the mobile provisioning url that is used to launch a browser to allow users to manage
      *  their mobile plan.
      */
@@ -2440,4 +2452,10 @@ interface ITelephony {
      * of error.
      */
     int prepareForUnattendedReboot();
+
+    /**
+     * Request to get the current slicing configuration including URSP rules and
+     * NSSAIs (configured, allowed and rejected).
+     */
+    void getSlicingConfig(in ResultReceiver callback);
 }

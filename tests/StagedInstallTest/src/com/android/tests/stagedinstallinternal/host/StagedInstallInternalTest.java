@@ -44,7 +44,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -252,6 +251,28 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     }
 
     @Test
+    public void testStagedSessionShouldCleanUpOnVerificationFailure() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedSessionShouldCleanUpOnVerificationFailure");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
+    @LargeTest
+    public void testStagedSessionShouldCleanUpOnOnSuccess() throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedSessionShouldCleanUpOnOnSuccess_Commit");
+        assertThat(getStagingDirectories()).isNotEqualTo(before);
+        getDevice().reboot();
+        runPhase("testStagedSessionShouldCleanUpOnOnSuccess_Verify");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
     public void testStagedInstallationShouldCleanUpOnValidationFailure() throws Exception {
         List<String> before = getStagingDirectories();
         runPhase("testStagedInstallationShouldCleanUpOnValidationFailure");
@@ -273,12 +294,14 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         //create random directories in /data/app-staging folder
         getDevice().enableAdbRoot();
         getDevice().executeShellCommand("mkdir /data/app-staging/session_123");
-        getDevice().executeShellCommand("mkdir /data/app-staging/random_name");
+        getDevice().executeShellCommand("mkdir /data/app-staging/session_456");
         getDevice().disableAdbRoot();
 
-        assertThat(getStagingDirectories()).isNotEmpty();
+        assertThat(getStagingDirectories()).contains("session_123");
+        assertThat(getStagingDirectories()).contains("session_456");
         getDevice().reboot();
-        assertThat(getStagingDirectories()).isEmpty();
+        assertThat(getStagingDirectories()).doesNotContain("session_123");
+        assertThat(getStagingDirectories()).doesNotContain("session_456");
     }
 
     @Test
@@ -304,9 +327,6 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
                     .stream().filter(entry -> entry.getName().matches("session_\\d+"))
                     .map(entry -> entry.getName())
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            // Return an empty list if any error
-            return Collections.EMPTY_LIST;
         } finally {
             getDevice().disableAdbRoot();
         }

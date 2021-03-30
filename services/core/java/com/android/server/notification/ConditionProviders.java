@@ -25,6 +25,7 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -40,8 +41,6 @@ import android.util.TypedXmlSerializer;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
-
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -78,8 +77,8 @@ public class ConditionProviders extends ManagedServices {
     public void addSystemProvider(SystemConditionProviderService service) {
         mSystemConditionProviders.add(service);
         service.attachBase(mContext);
-        registerSystemService(
-                service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM);
+        registerSystemService(service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM,
+                Process.SYSTEM_UID);
     }
 
     public Iterable<SystemConditionProviderService> getSystemProviders() {

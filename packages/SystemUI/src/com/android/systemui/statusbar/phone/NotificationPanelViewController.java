@@ -83,6 +83,7 @@ import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
+import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.DejankUtils;
@@ -298,6 +299,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     private final KeyguardQsUserSwitchComponent.Factory mKeyguardQsUserSwitchComponentFactory;
     private final KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
+    private final KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
     private final QSDetailDisplayer mQSDetailDisplayer;
     private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
@@ -313,6 +315,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardQsUserSwitchController mKeyguardQsUserSwitchController;
     private KeyguardUserSwitcherController mKeyguardUserSwitcherController;
     private KeyguardStatusBarView mKeyguardStatusBar;
+    private KeyguardStatusBarViewController mKeyguarStatusBarViewController;
     private ViewGroup mBigClockContainer;
     private QS mQs;
     private FrameLayout mQsFrame;
@@ -565,6 +568,7 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             KeyguardQsUserSwitchComponent.Factory keyguardQsUserSwitchComponentFactory,
             KeyguardUserSwitcherComponent.Factory keyguardUserSwitcherComponentFactory,
+            KeyguardStatusBarViewComponent.Factory keyguardStatusBarViewComponentFactory,
             QSDetailDisplayer qsDetailDisplayer,
             NotificationGroupManagerLegacy groupManager,
             NotificationIconAreaController notificationIconAreaController,
@@ -589,6 +593,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mGroupManager = groupManager;
         mNotificationIconAreaController = notificationIconAreaController;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
+        mKeyguardStatusBarViewComponentFactory = keyguardStatusBarViewComponentFactory;
         mFeatureFlags = featureFlags;
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
         mKeyguardUserSwitcherComponentFactory = keyguardUserSwitcherComponentFactory;
@@ -693,7 +698,9 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view),
-                userAvatarView, keyguardUserSwitcherView);
+                userAvatarView,
+                mKeyguardStatusBar,
+                keyguardUserSwitcherView);
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
         NotificationStackScrollLayout stackScrollLayout = mView.findViewById(
                 R.id.notification_stack_scroller);
@@ -773,12 +780,20 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
-            UserAvatarView userAvatarView, KeyguardUserSwitcherView keyguardUserSwitcherView) {
+            UserAvatarView userAvatarView,
+            KeyguardStatusBarView keyguardStatusBarView,
+            KeyguardUserSwitcherView keyguardUserSwitcherView) {
         // Re-associate the KeyguardStatusViewController
         KeyguardStatusViewComponent statusViewComponent =
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
         mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
         mKeyguardStatusViewController.init();
+
+        KeyguardStatusBarViewComponent statusBarViewComponent =
+                mKeyguardStatusBarViewComponentFactory.build(keyguardStatusBarView);
+        mKeyguarStatusBarViewController =
+                statusBarViewComponent.getKeyguardStatusBarViewController();
+        mKeyguarStatusBarViewController.init();
 
         // Re-associate the clock container with the keyguard clock switch.
         KeyguardClockSwitchController keyguardClockSwitchController =
@@ -919,7 +934,8 @@ public class NotificationPanelViewController extends PanelViewController {
                         showKeyguardUserSwitcher /* enabled */);
 
         mBigClockContainer.removeAllViews();
-        updateViewControllers(keyguardStatusView, userAvatarView, keyguardUserSwitcherView);
+        updateViewControllers(
+                keyguardStatusView, userAvatarView, mKeyguardStatusBar, keyguardUserSwitcherView);
 
         // Update keyguard bottom area
         index = mView.indexOfChild(mKeyguardBottomArea);
@@ -1325,6 +1341,9 @@ public class NotificationPanelViewController extends PanelViewController {
         traceQsJank(true /* startTracing */, false /* wasCancelled */);
         flingSettings(0 /* velocity */, FLING_EXPAND);
         mQSDetailDisplayer.showDetailAdapter(qsDetailAdapter, 0, 0);
+        if (mAccessibilityManager.isEnabled()) {
+            mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
+        }
     }
 
     public void expandWithoutQs() {
@@ -1824,6 +1843,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mNotificationContainerParent.setQsExpanded(expanded);
             mPulseExpansionHandler.setQsExpanded(expanded);
             mKeyguardBypassController.setQSExpanded(expanded);
+            mStatusBarKeyguardViewManager.setQsExpanded(expanded);
         }
     }
 
@@ -3389,7 +3409,7 @@ public class NotificationPanelViewController extends PanelViewController {
         return new TouchHandler() {
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
-                if (mStatusBarKeyguardViewManager.isShowingAlternativeAuthOrAnimating()) {
+                if (mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()) {
                     return true;
                 }
                 if (mBlockTouches || mQsFullyExpanded && mQs.disallowPanelTouches()) {
@@ -3420,8 +3440,8 @@ public class NotificationPanelViewController extends PanelViewController {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 final boolean showingOrAnimatingAltAuth =
-                        mStatusBarKeyguardViewManager.isShowingAlternativeAuthOrAnimating();
-                if (showingOrAnimatingAltAuth) {
+                        mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating();
+                if (showingOrAnimatingAltAuth && event.getAction() == MotionEvent.ACTION_DOWN) {
                     mStatusBarKeyguardViewManager.resetAlternateAuth();
                 }
 

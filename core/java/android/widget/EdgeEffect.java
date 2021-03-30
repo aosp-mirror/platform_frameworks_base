@@ -130,11 +130,11 @@ public class EdgeEffect {
     public @interface EdgeEffectType {
     }
 
-    private static final float LINEAR_STRETCH_INTENSITY = 0.03f;
+    private static final float LINEAR_STRETCH_INTENSITY = 0.06f;
 
-    private static final float EXP_STRETCH_INTENSITY = 0.02f;
+    private static final float EXP_STRETCH_INTENSITY = 0.06f;
 
-    private static final float SCROLL_DIST_AFFECTED_BY_EXP_STRETCH = 0.4f;
+    private static final float SCROLL_DIST_AFFECTED_BY_EXP_STRETCH = 0.33f;
 
     @SuppressWarnings("UnusedDeclaration")
     private static final String TAG = "EdgeEffect";
@@ -640,6 +640,12 @@ public class EdgeEffect {
                     mWidth,
                     mHeight
             );
+        } else {
+            // This is TYPE_STRETCH and drawing into a Canvas that isn't a Recording Canvas,
+            // so no effect can be shown. Just end the effect.
+            mState = STATE_IDLE;
+            mDistance = 0;
+            mVelocity = 0;
         }
 
         boolean oneLastFrame = false;
@@ -771,8 +777,9 @@ public class EdgeEffect {
      * considered at rest or false if it is still animating.
      */
     private boolean isAtEquilibrium() {
-        double displacement = mDistance * mHeight; // in pixels
-        return Math.abs(mVelocity) < VELOCITY_THRESHOLD
+        double displacement = mDistance * mHeight * LINEAR_STRETCH_INTENSITY; // in pixels
+        double velocity = mVelocity * LINEAR_STRETCH_INTENSITY;
+        return Math.abs(velocity) < VELOCITY_THRESHOLD
                 && Math.abs(displacement) < VALUE_THRESHOLD;
     }
 

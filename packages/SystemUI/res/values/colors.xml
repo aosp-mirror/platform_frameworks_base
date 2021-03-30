@@ -151,8 +151,8 @@
     <color name="minimize_dock_shadow_end">#00000000</color>
 
     <color name="default_remote_input_background">@*android:color/notification_default_color</color>
-    <color name="remote_input_hint">#99ffffff</color>
-
+    <color name="notif_pill_background">@android:color/system_neutral2_100</color>
+    <color name="notif_pill_text">@android:color/system_neutral1_900</color>
     <color name="remote_input_accent">?android:attr/colorAccent</color>
 
     <color name="quick_step_track_background_background_dark">#1F000000</color>
@@ -202,7 +202,7 @@
     <color name="global_screenshot_background_protection_start">#40000000</color> <!-- 25% black -->
 
     <!-- Long screenshot UI -->
-    <color name="screenshot_crop_scrim">#9444</color>
+    <color name="screenshot_crop_scrim">#6444</color>
 
     <!-- GM2 colors -->
     <color name="GM2_grey_50">#F8F9FA</color>
@@ -272,8 +272,7 @@
     <color name="screenrecord_status_color">#E94235</color>
 
     <!-- TODO(b/178093014) Colors for privacy dialog. These should be changed to the new palette -->
-    <color name="privacy_circle_camera">#1E8E3E</color> <!-- g600 -->
-    <color name="privacy_circle_microphone_location">#E8710A</color> <!--o600 -->
+    <color name="privacy_circle">#1E8E3E</color> <!-- g600 -->
 
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#CCFFFFFF</color> <!-- 80% -->

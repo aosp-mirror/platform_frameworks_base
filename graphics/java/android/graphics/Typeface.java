@@ -34,9 +34,11 @@ import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
+import android.icu.util.ULocale;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
@@ -45,6 +47,7 @@ import android.system.OsConstants;
 import android.text.FontConfig;
 import android.util.ArrayMap;
 import android.util.Base64;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
 import android.util.SparseArray;
@@ -1375,13 +1378,35 @@ public class Typeface {
 
     static {
         // Preload Roboto-Regular.ttf in Zygote for improving app launch performance.
-        // TODO: add new attribute to fonts.xml to preload fonts in Zygote.
         preloadFontFile("/system/fonts/Roboto-Regular.ttf");
+
+        String locale = SystemProperties.get("persist.sys.locale", "en-US");
+        String script = ULocale.addLikelySubtags(ULocale.forLanguageTag(locale)).getScript();
+
+        FontConfig config = SystemFonts.getSystemPreinstalledFontConfig();
+        for (int i = 0; i < config.getFontFamilies().size(); ++i) {
+            FontConfig.FontFamily family = config.getFontFamilies().get(i);
+            boolean loadFamily = false;
+            for (int j = 0; j < family.getLocaleList().size(); ++j) {
+                String fontScript = ULocale.addLikelySubtags(
+                        ULocale.forLocale(family.getLocaleList().get(j))).getScript();
+                loadFamily = fontScript.equals(script);
+                if (loadFamily) {
+                    break;
+                }
+            }
+            if (loadFamily) {
+                for (int j = 0; j < family.getFontList().size(); ++j) {
+                    preloadFontFile(family.getFontList().get(j).getFile().getAbsolutePath());
+                }
+            }
+        }
     }
 
     private static void preloadFontFile(String filePath) {
         File file = new File(filePath);
         if (file.exists()) {
+            Log.i(TAG, "Preloading " + file.getAbsolutePath());
             nativeWarmUpCache(filePath);
         }
     }
@@ -1441,13 +1466,11 @@ public class Typeface {
 
     /** @hide */
     public boolean isSupportedAxes(int axis) {
-        if (mSupportedAxes == null) {
-            synchronized (this) {
+        synchronized (this) {
+            if (mSupportedAxes == null) {
+                mSupportedAxes = nativeGetSupportedAxes(native_instance);
                 if (mSupportedAxes == null) {
-                    mSupportedAxes = nativeGetSupportedAxes(native_instance);
-                    if (mSupportedAxes == null) {
-                        mSupportedAxes = EMPTY_AXES;
-                    }
+                    mSupportedAxes = EMPTY_AXES;
                 }
             }
         }

@@ -23,7 +23,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 
@@ -49,24 +48,27 @@ public class KeyguardSecurityModel {
     private final boolean mIsPukScreenAvailable;
 
     private final LockPatternUtils mLockPatternUtils;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Inject
-    KeyguardSecurityModel(@Main Resources resources, LockPatternUtils lockPatternUtils) {
+    KeyguardSecurityModel(@Main Resources resources, LockPatternUtils lockPatternUtils,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mIsPukScreenAvailable = resources.getBoolean(
                 com.android.internal.R.bool.config_enable_puk_unlock_screen);
         mLockPatternUtils = lockPatternUtils;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
     }
 
     public SecurityMode getSecurityMode(int userId) {
-        KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
-
         if (mIsPukScreenAvailable && SubscriptionManager.isValidSubscriptionId(
-                monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PUK_REQUIRED))) {
+                mKeyguardUpdateMonitor.getNextSubIdForState(
+                        TelephonyManager.SIM_STATE_PUK_REQUIRED))) {
             return SecurityMode.SimPuk;
         }
 
         if (SubscriptionManager.isValidSubscriptionId(
-                monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PIN_REQUIRED))) {
+                mKeyguardUpdateMonitor.getNextSubIdForState(
+                        TelephonyManager.SIM_STATE_PIN_REQUIRED))) {
             return SecurityMode.SimPin;
         }
 

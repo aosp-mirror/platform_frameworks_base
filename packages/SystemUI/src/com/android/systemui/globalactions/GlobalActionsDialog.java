@@ -50,6 +50,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -72,8 +73,8 @@ import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.sysprop.TelephonyProperties;
 import android.telecom.TelecomManager;
-import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
@@ -137,6 +138,7 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.leak.RotationUtils;
@@ -302,7 +304,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             AudioManager audioManager, IDreamManager iDreamManager,
             DevicePolicyManager devicePolicyManager, LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
-            ConnectivityManager connectivityManager, TelephonyManager telephonyManager,
+            ConnectivityManager connectivityManager,
+            TelephonyListenerManager telephonyListenerManager,
             ContentResolver contentResolver, @Nullable Vibrator vibrator, @Main Resources resources,
             ConfigurationController configurationController, ActivityStarter activityStarter,
             KeyguardStateController keyguardStateController, UserManager userManager,
@@ -356,10 +359,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         filter.addAction(TelephonyManager.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter);
 
-        mHasTelephony = connectivityManager.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        mHasTelephony =
+                context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
 
         // get notified of phone state changes
-        telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
+        telephonyListenerManager.addServiceStateListener(mPhoneStateListener);
         contentResolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
@@ -2047,7 +2051,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     };
 
-    PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+    private final TelephonyCallback.ServiceStateListener mPhoneStateListener =
+            new TelephonyCallback.ServiceStateListener() {
         @Override
         public void onServiceStateChanged(ServiceState serviceState) {
             if (!mHasTelephony) return;

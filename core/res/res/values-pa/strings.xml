@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ਚੱਲ ਰਹੀ ਐਪ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ਬੈਟਰੀ ਦੀ ਖਪਤ ਕਰਨ ਵਾਲੀਆਂ ਐਪਾਂ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"ਪਹੁੰਚਯੋਗਤਾ ਸੁਰੱਖਿਆ ਨੀਤੀ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ਐਪਾਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ਬੈਟਰੀ ਅਤੇ ਡਾਟਾ ਵਰਤੋਂ ਸਬੰਧੀ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -1690,7 +1689,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ਰੰਗ ਪਲਟਨਾ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ਰੰਗ ਸੁਧਾਈ"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"ਚਮਕ ਘਟਾਓ"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (3222994553174604132) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦਬਾਈ ਰੱਖੋ"</string>
@@ -2247,8 +2247,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ਸੈਂਸਰ ਪਰਦੇਦਾਰੀ"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ਐਪਲੀਕੇਸ਼ਨ ਪ੍ਰਤੀਕ"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ਐਪਲੀਕੇਸ਼ਨ ਦਾ ਬ੍ਰਾਂਡ ਵਾਲਾ ਚਿੱਤਰ"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ਪਹੁੰਚ ਸੈਟਿੰਗਾਂ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ਸੇਵਾ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਨੂੰ ਦੇਖ ਅਤੇ ਕੰਟਰੋਲ ਕਰ ਸਕਦੀ ਹੈ। ਸਮੀਖਿਆ ਲਈ ਟੈਪ ਕਰੋ।"</string>
 </resources>

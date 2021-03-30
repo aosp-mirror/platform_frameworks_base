@@ -18,6 +18,7 @@ import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_ICON
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_MOBILE;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_WIFI;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -37,7 +38,6 @@ import com.android.systemui.R;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorI
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface StatusBarIconController {
@@ -54,15 +55,22 @@ public interface StatusBarIconController {
      * When an icon is added with TAG_PRIMARY, it will be treated as the primary icon
      * in that slot and not added as a sub slot.
      */
-    public static final int TAG_PRIMARY = 0;
+    int TAG_PRIMARY = 0;
 
-    public void addIconGroup(IconManager iconManager);
-    public void removeIconGroup(IconManager iconManager);
-    public void setExternalIcon(String slot);
-    public void setIcon(String slot, int resourceId, CharSequence contentDescription);
-    public void setIcon(String slot, StatusBarIcon icon);
-    public void setSignalIcon(String slot, WifiIconState state);
-    public void setMobileIcons(String slot, List<MobileIconState> states);
+    /** */
+    void addIconGroup(IconManager iconManager);
+    /** */
+    void removeIconGroup(IconManager iconManager);
+    /** */
+    void setExternalIcon(String slot);
+    /** */
+    void setIcon(String slot, int resourceId, CharSequence contentDescription);
+    /** */
+    void setIcon(String slot, StatusBarIcon icon);
+    /** */
+    void setSignalIcon(String slot, WifiIconState state);
+    /** */
+    void setMobileIcons(String slot, List<MobileIconState> states);
     /**
      * Display the no calling & SMS icons.
      */
@@ -85,8 +93,9 @@ public interface StatusBarIconController {
      * If you don't know what to pass for `tag`, either remove all icons for slot, or use
      * TAG_PRIMARY to refer to the first icon at a given slot.
      */
-    public void removeIcon(String slot, int tag);
-    public void removeAllIconsForSlot(String slot);
+    void removeIcon(String slot, int tag);
+    /** */
+    void removeAllIconsForSlot(String slot);
 
     // TODO: See if we can rename this tunable name.
     String ICON_HIDE_LIST = "icon_blacklist";
@@ -108,12 +117,12 @@ public interface StatusBarIconController {
     /**
      * Version of ViewGroup that observes state from the DarkIconDispatcher.
      */
-    public static class DarkIconManager extends IconManager {
+    class DarkIconManager extends IconManager {
         private final DarkIconDispatcher mDarkIconDispatcher;
         private int mIconHPadding;
 
-        public DarkIconManager(LinearLayout linearLayout, CommandQueue commandQueue) {
-            super(linearLayout, commandQueue);
+        public DarkIconManager(LinearLayout linearLayout) {
+            super(linearLayout);
             mIconHPadding = mContext.getResources().getDimensionPixelSize(
                     R.dimen.status_bar_icon_padding);
             mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
@@ -169,11 +178,12 @@ public interface StatusBarIconController {
         }
     }
 
-    public static class TintedIconManager extends IconManager {
+    /** */
+    class TintedIconManager extends IconManager {
         private int mColor;
 
-        public TintedIconManager(ViewGroup group, CommandQueue commandQueue) {
-            super(group, commandQueue);
+        public TintedIconManager(ViewGroup group) {
+            super(group);
         }
 
         @Override
@@ -219,7 +229,9 @@ public interface StatusBarIconController {
         private boolean mIsInDemoMode;
         protected DemoStatusIcons mDemoStatusIcons;
 
-        public IconManager(ViewGroup group, CommandQueue commandQueue) {
+        protected ArrayList<String> mBlockList = new ArrayList<>();
+
+        public IconManager(ViewGroup group) {
             mGroup = group;
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
@@ -232,6 +244,15 @@ public interface StatusBarIconController {
 
         public void setIsDemoable(boolean demoable) {
             mDemoable = demoable;
+        }
+
+        public void setBlockList(@Nullable List<String> blockList) {
+            mBlockList.clear();
+            if (blockList == null || blockList.isEmpty()) {
+                return;
+            }
+
+            mBlockList.addAll(blockList);
         }
 
         public void setShouldLog(boolean should) {
@@ -249,6 +270,11 @@ public interface StatusBarIconController {
 
         protected StatusIconDisplayable addHolder(int index, String slot, boolean blocked,
                 StatusBarIconHolder holder) {
+            // This is a little hacky, and probably regrettable, but just set `blocked` on any icon
+            // that is in our blocked list, then we'll never see it
+            if (mBlockList.contains(slot)) {
+                blocked = true;
+            }
             switch (holder.getType()) {
                 case TYPE_ICON:
                     return addIcon(index, slot, blocked, holder.getIcon());

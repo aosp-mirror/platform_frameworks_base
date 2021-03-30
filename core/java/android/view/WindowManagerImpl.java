@@ -36,6 +36,7 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
@@ -110,7 +111,7 @@ public final class WindowManagerImpl implements WindowManager {
         return new WindowManagerImpl(displayContext, mParentWindow, mWindowContextToken);
     }
 
-    /** Creates a {@link WindowManager} for a {@link android.app.WindowContext}. */
+    /** Creates a {@link WindowManager} for a {@link WindowContext}. */
     public static WindowManager createWindowContextWindowManager(Context context) {
         final IBinder clientToken = context.getWindowContextToken();
         return new WindowManagerImpl(context, null /* parentWindow */, clientToken);

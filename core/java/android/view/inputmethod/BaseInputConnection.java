@@ -608,7 +608,12 @@ public class BaseInputConnection implements InputConnection {
         Preconditions.checkArgumentNonnegative(afterLength);
 
         final Editable content = getEditable();
-        if (content == null) return null;
+        // If {@link #getEditable()} is null or {@code mEditable} is equal to {@link #getEditable()}
+        // (a.k.a, a fake editable), it means we cannot get valid content from the editable, so
+        // fallback to retrieve surrounding text from other APIs.
+        if (content == null || mEditable == content) {
+            return InputConnection.super.getSurroundingText(beforeLength, afterLength, flags);
+        }
 
         int selStart = Selection.getSelectionStart(content);
         int selEnd = Selection.getSelectionEnd(content);
@@ -954,10 +959,10 @@ public class BaseInputConnection implements InputConnection {
         }
         final ClipData clip = new ClipData(inputContentInfo.getDescription(),
                 new ClipData.Item(inputContentInfo.getContentUri()));
-        final ContentInfo payload =
-                new ContentInfo.Builder(clip, SOURCE_INPUT_METHOD)
+        final ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_INPUT_METHOD)
                 .setLinkUri(inputContentInfo.getLinkUri())
                 .setExtras(opts)
+                .setInputContentInfo(inputContentInfo)
                 .build();
         return mTargetView.performReceiveContent(payload) == null;
     }

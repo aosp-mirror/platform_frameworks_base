@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.rotation
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -79,7 +80,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.navBarLayerIsAlwaysVisible()
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun navBarLayerRotatesAndScales() {
         testSpec.navBarLayerRotatesAndScales(
@@ -98,14 +99,14 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.statusBarLayerIsAlwaysVisible()
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun statusBarLayerRotatesScales() {
         testSpec.statusBarLayerRotatesScales(
             testSpec.config.startRotation, testSpec.config.endRotation)
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
@@ -121,7 +122,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun noUncoveredRegions() {
         testSpec.noUncoveredRegions(testSpec.config.startRotation,
@@ -134,19 +135,19 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.focusDoesNotChange()
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
-            this.coversExactly(startingPos, testApp.getPackage())
+            this.visibleRegion(testApp.getPackage()).coversExactly(startingPos)
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
-            this.coversExactly(endingPos, testApp.getPackage())
+            this.visibleRegion(testApp.getPackage()).coversExactly(endingPos)
         }
     }
 }

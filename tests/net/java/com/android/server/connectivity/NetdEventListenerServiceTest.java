@@ -23,8 +23,9 @@ import static com.android.testutils.MiscAsserts.assertStringContains;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -42,6 +43,7 @@ import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpCon
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
@@ -61,18 +63,16 @@ public class NetdEventListenerServiceTest {
 
     NetdEventListenerService mService;
     ConnectivityManager mCm;
+    private static final NetworkCapabilities CAPABILITIES_WIFI = new NetworkCapabilities.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .build();
+    private static final NetworkCapabilities CAPABILITIES_CELL = new NetworkCapabilities.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build();
 
     @Before
     public void setUp() {
-        NetworkCapabilities ncWifi = new NetworkCapabilities();
-        NetworkCapabilities ncCell = new NetworkCapabilities();
-        ncWifi.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-        ncCell.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-
         mCm = mock(ConnectivityManager.class);
-        when(mCm.getNetworkCapabilities(new Network(100))).thenReturn(ncWifi);
-        when(mCm.getNetworkCapabilities(new Network(101))).thenReturn(ncCell);
-
         mService = new NetdEventListenerService(mCm);
     }
 
@@ -470,7 +470,16 @@ public class NetdEventListenerServiceTest {
         assertEquals(want, got);
     }
 
+    private void setCapabilities(int netId) {
+        final ArgumentCaptor<ConnectivityManager.NetworkCallback> networkCallback =
+                ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
+        verify(mCm).registerNetworkCallback(any(), networkCallback.capture());
+        networkCallback.getValue().onCapabilitiesChanged(new Network(netId),
+                netId == 100 ? CAPABILITIES_WIFI : CAPABILITIES_CELL);
+    }
+
     Thread connectEventAction(int netId, int error, int latencyMs, String ipAddr) {
+        setCapabilities(netId);
         return new Thread(() -> {
             try {
                 mService.onConnectEvent(netId, error, latencyMs, ipAddr, 80, 1);
@@ -481,6 +490,7 @@ public class NetdEventListenerServiceTest {
     }
 
     void dnsEvent(int netId, int type, int result, int latency) throws Exception {
+        setCapabilities(netId);
         mService.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
     }
 

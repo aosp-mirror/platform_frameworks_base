@@ -16,20 +16,11 @@
 
 package com.android.systemui.people;
 
-import static android.app.Notification.CATEGORY_MISSED_CALL;
-import static android.app.people.ConversationStatus.ACTIVITY_BIRTHDAY;
-import static android.app.people.ConversationStatus.ACTIVITY_GAME;
-import static android.app.people.ConversationStatus.ACTIVITY_NEW_STORY;
-import static android.app.people.ConversationStatus.AVAILABILITY_AVAILABLE;
-import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
-
 import static com.android.systemui.people.PeopleSpaceUtils.PACKAGE_NAME;
-import static com.android.systemui.people.PeopleSpaceUtils.REQUIRED_WIDTH_FOR_MEDIUM;
 import static com.android.systemui.people.widget.AppWidgetOptionsHelper.OPTIONS_PEOPLE_TILE;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -48,7 +39,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Person;
 import android.app.people.ConversationChannel;
-import android.app.people.ConversationStatus;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
@@ -70,13 +60,12 @@ import android.provider.ContactsContract;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
-import android.view.View;
-import android.widget.RemoteViews;
-import android.widget.TextView;
+import android.util.DisplayMetrics;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.widget.PeopleTileKey;
@@ -117,8 +106,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     private static final int TEST_COLUMN_INDEX = 1;
     private static final Uri URI = Uri.parse("fake_uri");
     private static final Icon ICON = Icon.createWithResource("package", R.drawable.ic_android);
-    private static final String GAME_DESCRIPTION = "Playing a game!";
-    private static final CharSequence MISSED_CALL = "Custom missed call message";
     private static final String NAME = "username";
     private static final Person PERSON = new Person.Builder()
             .setName("name")
@@ -126,11 +113,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
             .setUri(URI.toString())
             .setBot(false)
             .build();
-    private static final PeopleSpaceTile PERSON_TILE_WITHOUT_NOTIFICATION =
-            new PeopleSpaceTile
-                    .Builder(SHORTCUT_ID_1, NAME, ICON, new Intent())
-                    .setLastInteractionTimestamp(0L)
-                    .build();
     private static final PeopleSpaceTile PERSON_TILE =
             new PeopleSpaceTile
                     .Builder(SHORTCUT_ID_1, NAME, ICON, new Intent())
@@ -138,16 +120,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                     .setNotificationKey(NOTIFICATION_KEY)
                     .setNotificationContent(NOTIFICATION_CONTENT)
                     .setNotificationDataUri(URI)
-                    .build();
-    private static final ConversationStatus GAME_STATUS =
-            new ConversationStatus
-                    .Builder(PERSON_TILE.getId(), ACTIVITY_GAME)
-                    .setDescription(GAME_DESCRIPTION)
-                    .build();
-    private static final ConversationStatus NEW_STORY_WITH_AVAILABILITY =
-            new ConversationStatus
-                    .Builder(PERSON_TILE.getId(), ACTIVITY_NEW_STORY)
-                    .setAvailability(AVAILABILITY_AVAILABLE)
+                    .setMessagesCount(1)
                     .build();
 
     private final ShortcutInfo mShortcutInfo = new ShortcutInfo.Builder(mContext,
@@ -244,6 +217,12 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITHOUT_SHORTCUT)))
                 .thenReturn(new Bundle());
 
+        Configuration configuration = mock(Configuration.class);
+        DisplayMetrics displayMetrics = mock(DisplayMetrics.class);
+        Resources resources = mock(Resources.class);
+        when(mMockContext.getResources()).thenReturn(resources);
+        when(resources.getConfiguration()).thenReturn(configuration);
+        when(resources.getDisplayMetrics()).thenReturn(displayMetrics);
         when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
         when(mMockContentResolver.query(any(Uri.class), any(), anyString(), any(),
                 isNull())).thenReturn(mMockCursor);
@@ -254,10 +233,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         when(mMockContext.getPackageManager()).thenReturn(mPackageManager);
         when(mMockContext.getString(R.string.over_timestamp)).thenReturn(
                 mContext.getString(R.string.over_timestamp));
-        Configuration configuration = mock(Configuration.class);
-        Resources resources = mock(Resources.class);
-        when(mMockContext.getResources()).thenReturn(resources);
-        when(resources.getConfiguration()).thenReturn(configuration);
         when(mPackageManager.getApplicationIcon(anyString())).thenReturn(null);
         when(mNotificationEntryManager.getVisibleNotifications())
                 .thenReturn(List.of(mNotificationEntry1, mNotificationEntry2, mNotificationEntry3));
@@ -345,7 +320,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetLastMessagingStyleMessageNoMessage() {
+    public void testGetMessagingStyleMessagesNoMessage() {
         Notification notification = new Notification.Builder(mContext, "test")
                 .setContentTitle("TEST_TITLE")
                 .setContentText("TEST_TEXT")
@@ -355,111 +330,23 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 .setNotification(notification)
                 .build();
 
-        Notification.MessagingStyle.Message lastMessage =
-                PeopleSpaceUtils.getLastMessagingStyleMessage(sbn.getNotification());
+        List<Notification.MessagingStyle.Message> messages =
+                PeopleSpaceUtils.getMessagingStyleMessages(sbn.getNotification());
 
-        assertThat(lastMessage).isNull();
+        assertThat(ArrayUtils.isEmpty(messages)).isTrue();
     }
 
     @Test
-    public void testGetBackgroundTextFromMessageNoPunctuation() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test");
-
-        assertThat(backgroundText).isNull();
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageSingleExclamation() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test!");
-
-        assertThat(backgroundText).isNull();
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageSingleQuestion() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("?test");
-
-        assertThat(backgroundText).isNull();
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageSeparatedMarks() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test! right!");
-
-        assertThat(backgroundText).isNull();
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageDoubleExclamation() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("!!test");
-
-        assertThat(backgroundText).isEqualTo("!");
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageDoubleQuestion() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test??");
-
-        assertThat(backgroundText).isEqualTo("?");
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageMixed() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test?!");
-
-        assertThat(backgroundText).isEqualTo("!?");
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageMixedInTheMiddle() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
-                "test!? in the middle");
-
-        assertThat(backgroundText).isEqualTo("!?");
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageMixedDifferentOrder() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
-                "test!? in the middle");
-
-        assertThat(backgroundText).isEqualTo("!?");
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageMultiple() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
-                "test!?!!? in the middle");
-
-        assertThat(backgroundText).isEqualTo("!?");
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageQuestionFirst() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
-                "test?? in the middle!!");
-
-        assertThat(backgroundText).isEqualTo("?");
-    }
-
-    @Test
-    public void testGetBackgroundTextFromMessageExclamationFirst() {
-        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
-                "test!! in the middle??");
-
-        assertThat(backgroundText).isEqualTo("!");
-    }
-
-    @Test
-    public void testGetLastMessagingStyleMessage() {
+    public void testGetMessagingStyleMessages() {
         StatusBarNotification sbn = new SbnBuilder()
                 .setNotification(mNotification1)
                 .build();
 
-        Notification.MessagingStyle.Message lastMessage =
-                PeopleSpaceUtils.getLastMessagingStyleMessage(sbn.getNotification());
+        List<Notification.MessagingStyle.Message> messages =
+                PeopleSpaceUtils.getMessagingStyleMessages(sbn.getNotification());
 
-        assertThat(lastMessage.getText().toString()).isEqualTo(NOTIFICATION_TEXT_2);
+        assertThat(messages.size()).isEqualTo(3);
+        assertThat(messages.get(0).getText().toString()).isEqualTo(NOTIFICATION_TEXT_2);
     }
 
     @Test
@@ -687,225 +574,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 any());
     }
 
-    @Test
-    public void testCreateRemoteViewsWithLastInteractionTime() {
-        RemoteViews views = PeopleSpaceUtils.createRemoteViews(mMockContext,
-                PERSON_TILE_WITHOUT_NOTIFICATION, 0, mOptions);
-        View result = views.apply(mContext, null);
-
-        TextView name = (TextView) result.findViewById(R.id.name);
-        assertEquals(name.getText(), NAME);
-        // Has last interaction.
-        TextView lastInteraction = (TextView) result.findViewById(R.id.last_interaction);
-        assertEquals(lastInteraction.getText(), mContext.getString(R.string.basic_status));
-        // No availability.
-        View availability = result.findViewById(R.id.availability);
-        assertEquals(View.GONE, availability.getVisibility());
-        // Shows person icon.
-        View personIcon = result.findViewById(R.id.person_icon);
-        assertEquals(View.VISIBLE, personIcon.getVisibility());
-        // No status.
-        assertThat((View) result.findViewById(R.id.text_content)).isNull();
-
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH, REQUIRED_WIDTH_FOR_MEDIUM - 1);
-        RemoteViews smallView = PeopleSpaceUtils.createRemoteViews(mContext,
-                PERSON_TILE_WITHOUT_NOTIFICATION, 0, mOptions);
-        View smallResult = smallView.apply(mContext, null);
-
-        // Show name over predefined icon.
-        assertEquals(View.VISIBLE, smallResult.findViewById(R.id.name).getVisibility());
-        assertEquals(View.GONE, smallResult.findViewById(R.id.predefined_icon).getVisibility());
-        // Shows person icon.
-        assertEquals(View.VISIBLE, smallResult.findViewById(R.id.person_icon).getVisibility());
-    }
-
-    @Test
-    public void testCreateRemoteViewsWithGameTypeOnlyIsIgnored() {
-        PeopleSpaceTile tileWithAvailabilityAndNewStory =
-                PERSON_TILE_WITHOUT_NOTIFICATION.toBuilder().setStatuses(
-                        Arrays.asList(NEW_STORY_WITH_AVAILABILITY,
-                                new ConversationStatus.Builder(
-                                        PERSON_TILE_WITHOUT_NOTIFICATION.getId(),
-                                        ACTIVITY_GAME).build())).build();
-        RemoteViews views = PeopleSpaceUtils.createRemoteViews(mMockContext,
-                tileWithAvailabilityAndNewStory, 0, mOptions);
-        View result = views.apply(mContext, null);
-
-        TextView name = (TextView) result.findViewById(R.id.name);
-        assertEquals(name.getText(), NAME);
-        // Has last interaction over status.
-        TextView lastInteraction = (TextView) result.findViewById(R.id.last_interaction);
-        assertEquals(lastInteraction.getText(), mContext.getString(R.string.basic_status));
-        // Has availability.
-        View availability = result.findViewById(R.id.availability);
-        assertEquals(View.VISIBLE, availability.getVisibility());
-        // Has person icon.
-        View personIcon = result.findViewById(R.id.person_icon);
-        assertEquals(View.VISIBLE, personIcon.getVisibility());
-        // No status.
-        assertThat((View) result.findViewById(R.id.text_content)).isNull();
-
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH, REQUIRED_WIDTH_FOR_MEDIUM - 1);
-        RemoteViews smallView = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithAvailabilityAndNewStory, 0, mOptions);
-        View smallResult = smallView.apply(mContext, null);
-
-        // Show name rather than game type.
-        assertEquals(View.VISIBLE, smallResult.findViewById(R.id.name).getVisibility());
-        assertEquals(View.GONE, smallResult.findViewById(R.id.predefined_icon).getVisibility());
-        // Has person icon.
-        assertEquals(View.VISIBLE,
-                smallResult.findViewById(R.id.person_icon).getVisibility());
-    }
-
-    @Test
-    public void testCreateRemoteViewsWithBirthdayTypeOnlyIsNotIgnored() {
-        PeopleSpaceTile tileWithStatusTemplate =
-                PERSON_TILE_WITHOUT_NOTIFICATION.toBuilder().setStatuses(
-                        Arrays.asList(
-                                NEW_STORY_WITH_AVAILABILITY, new ConversationStatus.Builder(
-                                        PERSON_TILE_WITHOUT_NOTIFICATION.getId(),
-                                        ACTIVITY_BIRTHDAY).build())).build();
-        RemoteViews views = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithStatusTemplate, 0, mOptions);
-        View result = views.apply(mContext, null);
-
-        TextView name = (TextView) result.findViewById(R.id.name);
-        assertEquals(name.getText(), NAME);
-        // Has availability.
-        View availability = result.findViewById(R.id.availability);
-        assertEquals(View.VISIBLE, availability.getVisibility());
-        // Has person icon.
-        View personIcon = result.findViewById(R.id.person_icon);
-        assertEquals(View.VISIBLE, personIcon.getVisibility());
-        // Has status text from backup text.
-        TextView statusContent = (TextView) result.findViewById(R.id.text_content);
-        assertEquals(statusContent.getText(), mContext.getString(R.string.birthday_status));
-
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH, REQUIRED_WIDTH_FOR_MEDIUM - 1);
-        RemoteViews smallView = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithStatusTemplate, 0, mOptions);
-        View smallResult = smallView.apply(mContext, null);
-
-        // Show icon instead of name.
-        assertEquals(View.GONE, smallResult.findViewById(R.id.name).getVisibility());
-        assertEquals(View.VISIBLE,
-                smallResult.findViewById(R.id.predefined_icon).getVisibility());
-        // Has person icon.
-        assertEquals(View.VISIBLE,
-                smallResult.findViewById(R.id.person_icon).getVisibility());
-    }
-
-    @Test
-    public void testCreateRemoteViewsWithStatusTemplate() {
-        PeopleSpaceTile tileWithStatusTemplate =
-                PERSON_TILE_WITHOUT_NOTIFICATION.toBuilder().setStatuses(
-                        Arrays.asList(GAME_STATUS,
-                                NEW_STORY_WITH_AVAILABILITY)).build();
-        RemoteViews views = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithStatusTemplate, 0, mOptions);
-        View result = views.apply(mContext, null);
-
-        TextView name = (TextView) result.findViewById(R.id.name);
-        assertEquals(name.getText(), NAME);
-        // Has availability.
-        View availability = result.findViewById(R.id.availability);
-        assertEquals(View.VISIBLE, availability.getVisibility());
-        // Has person icon.
-        View personIcon = result.findViewById(R.id.person_icon);
-        assertEquals(View.VISIBLE, personIcon.getVisibility());
-        // Has status.
-        TextView statusContent = (TextView) result.findViewById(R.id.text_content);
-        assertEquals(statusContent.getText(), GAME_DESCRIPTION);
-
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH, REQUIRED_WIDTH_FOR_MEDIUM - 1);
-        RemoteViews smallView = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithStatusTemplate, 0, mOptions);
-        View smallResult = smallView.apply(mContext, null);
-
-        // Show icon instead of name.
-        assertEquals(View.GONE, smallResult.findViewById(R.id.name).getVisibility());
-        assertEquals(View.VISIBLE,
-                smallResult.findViewById(R.id.predefined_icon).getVisibility());
-        // Has person icon.
-        assertEquals(View.VISIBLE,
-                smallResult.findViewById(R.id.person_icon).getVisibility());
-    }
-
-    @Test
-    public void testCreateRemoteViewsWithMissedCallNotification() {
-        PeopleSpaceTile tileWithMissedCallNotification = PERSON_TILE.toBuilder()
-                .setNotificationDataUri(null)
-                .setNotificationCategory(CATEGORY_MISSED_CALL)
-                .setNotificationContent(MISSED_CALL)
-                .build();
-        RemoteViews views = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithMissedCallNotification, 0, mOptions);
-        View result = views.apply(mContext, null);
-
-        TextView name = (TextView) result.findViewById(R.id.name);
-        assertEquals(name.getText(), NAME);
-        // Has availability.
-        View availability = result.findViewById(R.id.availability);
-        assertEquals(View.GONE, availability.getVisibility());
-        // Has person icon.
-        View personIcon = result.findViewById(R.id.person_icon);
-        assertEquals(View.VISIBLE, personIcon.getVisibility());
-        // Has missed call notification content.
-        TextView statusContent = (TextView) result.findViewById(R.id.text_content);
-        assertEquals(statusContent.getText(), MISSED_CALL);
-
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH, REQUIRED_WIDTH_FOR_MEDIUM - 1);
-        RemoteViews smallView = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithMissedCallNotification, 0, mOptions);
-        View smallResult = smallView.apply(mContext, null);
-
-        // Show icon instead of name.
-        assertEquals(View.GONE, smallResult.findViewById(R.id.name).getVisibility());
-        assertEquals(View.VISIBLE,
-                smallResult.findViewById(R.id.predefined_icon).getVisibility());
-        // Has person icon.
-        assertEquals(View.VISIBLE, smallResult.findViewById(R.id.person_icon).getVisibility());
-    }
-
-    @Test
-    public void testCreateRemoteViewsWithNotificationTemplate() {
-        PeopleSpaceTile tileWithStatusAndNotification = PERSON_TILE.toBuilder()
-                .setNotificationDataUri(null)
-                .setStatuses(Arrays.asList(GAME_STATUS,
-                        NEW_STORY_WITH_AVAILABILITY)).build();
-        RemoteViews views = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithStatusAndNotification, 0, mOptions);
-        View result = views.apply(mContext, null);
-
-        TextView name = (TextView) result.findViewById(R.id.name);
-        assertEquals(name.getText(), NAME);
-        TextView subtext = (TextView) result.findViewById(R.id.subtext);
-        assertEquals(View.GONE, subtext.getVisibility());
-        // Has availability.
-        View availability = result.findViewById(R.id.availability);
-        assertEquals(View.VISIBLE, availability.getVisibility());
-        // Has person icon.
-        View personIcon = result.findViewById(R.id.person_icon);
-        assertEquals(View.VISIBLE, personIcon.getVisibility());
-        // Has notification content.
-        TextView statusContent = (TextView) result.findViewById(R.id.text_content);
-        assertEquals(statusContent.getText(), NOTIFICATION_CONTENT);
-
-        mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH, REQUIRED_WIDTH_FOR_MEDIUM - 1);
-        RemoteViews smallView = PeopleSpaceUtils.createRemoteViews(mContext,
-                tileWithStatusAndNotification, 0, mOptions);
-        View smallResult = smallView.apply(mContext, null);
-
-        // Show icon instead of name.
-        assertEquals(View.GONE, smallResult.findViewById(R.id.name).getVisibility());
-        assertEquals(View.VISIBLE,
-                smallResult.findViewById(R.id.predefined_icon).getVisibility());
-        // Has person icon.
-        assertEquals(View.VISIBLE,
-                smallResult.findViewById(R.id.person_icon).getVisibility());
-    }
-
     private ConversationChannelWrapper getConversationChannelWrapper(String shortcutId,
             boolean importantConversation, long lastInteractionTimestamp) throws Exception {
         ConversationChannelWrapper convo = new ConversationChannelWrapper();
@@ -929,15 +597,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 lastInteractionTimestamp, false);
         when(mPeopleManager.getLastInteraction(anyString(), anyInt(),
                 eq(shortcutId))).thenReturn(lastInteractionTimestamp);
-        return convo;
-    }
-
-    private ConversationChannel getConversationChannelWithoutTimestamp(String shortcutId)
-            throws Exception {
-        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext, shortcutId).setLongLabel(
-                "name").build();
-        ConversationChannel convo = new ConversationChannel(shortcutInfo, 0, null, null,
-                0L, false);
         return convo;
     }
 }

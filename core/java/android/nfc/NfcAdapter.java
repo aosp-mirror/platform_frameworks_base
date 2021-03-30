@@ -2254,13 +2254,13 @@ public final class NfcAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public boolean setAlwaysOn(boolean value) {
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public boolean setControllerAlwaysOn(boolean value) {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
         }
         try {
-            return sService.setAlwaysOn(value);
+            return sService.setControllerAlwaysOn(value);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -2269,7 +2269,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.setAlwaysOn(value);
+                return sService.setControllerAlwaysOn(value);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
@@ -2286,10 +2286,10 @@ public final class NfcAdapter {
      */
 
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public boolean isAlwaysOnEnabled() {
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public boolean isControllerAlwaysOn() {
         try {
-            return sService.isAlwaysOnEnabled();
+            return sService.isControllerAlwaysOn();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -2298,7 +2298,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.isAlwaysOnEnabled();
+                return sService.isControllerAlwaysOn();
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
@@ -2315,13 +2315,13 @@ public final class NfcAdapter {
      */
 
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public boolean isAlwaysOnSupported() {
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public boolean isControllerAlwaysOnSupported() {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
         }
         try {
-            return sService.isAlwaysOnSupported();
+            return sService.isControllerAlwaysOnSupported();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -2330,7 +2330,7 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.isAlwaysOnSupported();
+                return sService.isControllerAlwaysOnSupported();
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }

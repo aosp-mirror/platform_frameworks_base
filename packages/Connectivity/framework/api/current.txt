@@ -68,6 +68,7 @@ package android.net {
     method public boolean bindProcessToNetwork(@Nullable android.net.Network);
     method @NonNull public android.net.SocketKeepalive createSocketKeepalive(@NonNull android.net.Network, @NonNull android.net.IpSecManager.UdpEncapsulationSocket, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull java.util.concurrent.Executor, @NonNull android.net.SocketKeepalive.Callback);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.Network getActiveNetwork();
+    method @Nullable @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public android.net.Network getActiveNetworkForUid(int);
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.NetworkInfo getActiveNetworkInfo();
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.NetworkInfo[] getAllNetworkInfo();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public android.net.Network[] getAllNetworks();
@@ -310,6 +311,7 @@ package android.net {
     field public static final int NET_CAPABILITY_ENTERPRISE = 29; // 0x1d
     field public static final int NET_CAPABILITY_FOREGROUND = 19; // 0x13
     field public static final int NET_CAPABILITY_FOTA = 3; // 0x3
+    field public static final int NET_CAPABILITY_HEAD_UNIT = 32; // 0x20
     field public static final int NET_CAPABILITY_IA = 7; // 0x7
     field public static final int NET_CAPABILITY_IMS = 4; // 0x4
     field public static final int NET_CAPABILITY_INTERNET = 12; // 0xc
@@ -333,6 +335,7 @@ package android.net {
     field public static final int TRANSPORT_CELLULAR = 0; // 0x0
     field public static final int TRANSPORT_ETHERNET = 3; // 0x3
     field public static final int TRANSPORT_LOWPAN = 6; // 0x6
+    field public static final int TRANSPORT_USB = 8; // 0x8
     field public static final int TRANSPORT_VPN = 4; // 0x4
     field public static final int TRANSPORT_WIFI = 1; // 0x1
     field public static final int TRANSPORT_WIFI_AWARE = 5; // 0x5
@@ -387,7 +390,9 @@ package android.net {
   public class NetworkRequest implements android.os.Parcelable {
     method public boolean canBeSatisfiedBy(@Nullable android.net.NetworkCapabilities);
     method public int describeContents();
+    method @NonNull public int[] getCapabilities();
     method @Nullable public android.net.NetworkSpecifier getNetworkSpecifier();
+    method @NonNull public int[] getTransportTypes();
     method public boolean hasCapability(int);
     method public boolean hasTransport(int);
     method public void writeToParcel(android.os.Parcel, int);
@@ -396,6 +401,7 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     ctor public NetworkRequest.Builder();
+    ctor public NetworkRequest.Builder(@NonNull android.net.NetworkRequest);
     method public android.net.NetworkRequest.Builder addCapability(int);
     method public android.net.NetworkRequest.Builder addTransportType(int);
     method public android.net.NetworkRequest build();

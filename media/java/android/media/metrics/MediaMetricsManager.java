@@ -104,7 +104,6 @@ public class MediaMetricsManager {
 
     /**
      * Creates a recording session.
-     * @hide
      */
     @NonNull
     public RecordingSession createRecordingSession() {

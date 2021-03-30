@@ -35,6 +35,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGR
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
@@ -84,11 +85,13 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
+import android.content.AttributionSource;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
@@ -158,6 +161,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -252,6 +256,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @GuardedBy("mLock")
     @NonNull
     private final PermissionRegistry mRegistry = new PermissionRegistry();
+
+    @NonNull
+    private final AttributionSourceRegistry mAttributionSourceRegistry =
+            new AttributionSourceRegistry();
 
     @GuardedBy("mLock")
     @Nullable
@@ -1337,7 +1345,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             boolean overridePolicy, int callingUid, final int userId, PermissionCallback callback) {
         if (PermissionManager.DEBUG_TRACE_GRANTS
                 && PermissionManager.shouldTraceGrant(packageName, permName, userId)) {
-            Log.i(TAG, "System is granting " + packageName + " "
+            Log.i(PermissionManager.LOG_TAG_TRACE_GRANTS, "System is granting " + packageName + " "
                     + permName + " for user " + userId + " on behalf of uid " + callingUid
                     + " " + mPackageManagerInt.getNameForUid(callingUid),
                     new RuntimeException());
@@ -1657,7 +1665,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 | FLAG_PERMISSION_USER_FIXED
                 | FLAG_PERMISSION_REVOKED_COMPAT
                 | FLAG_PERMISSION_REVIEW_REQUIRED
-                | FLAG_PERMISSION_ONE_TIME;
+                | FLAG_PERMISSION_ONE_TIME
+                | FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY;
 
         final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
                 | FLAG_PERMISSION_POLICY_FIXED;
@@ -1796,9 +1805,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // PermissionPolicyService will handle the app op for runtime permissions later.
                 grantRuntimePermissionInternal(packageName, permName, false,
                         Process.SYSTEM_UID, userId, delayingPermCallback);
-            // If permission review is enabled the permissions for a legacy apps
-            // are represented as constantly granted runtime ones, so don't revoke.
-            } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
+            // In certain cases we should leave the state unchanged:
+            // -- If permission review is enabled the permissions for a legacy apps
+            // are represented as constantly granted runtime ones
+            // -- If the permission was split from a non-runtime permission
+            } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0
+                    && !isPermissionSplitFromNonRuntime(permName, targetSdk)) {
                 // Otherwise, reset the permission.
                 revokeRuntimePermissionInternal(packageName, permName, false, Process.SYSTEM_UID,
                         userId, null, delayingPermCallback);
@@ -1828,6 +1840,27 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         mPackageManagerInt.writePermissionSettings(syncUpdatedUsers.toArray(), false);
         mPackageManagerInt.writePermissionSettings(asyncUpdatedUsers.toArray(), true);
+    }
+
+    /**
+     * Determine if the given permission should be treated as split from a
+     * non-runtime permission for an application targeting the given SDK level.
+     */
+    private boolean isPermissionSplitFromNonRuntime(String permName, int targetSdk) {
+        final List<PermissionManager.SplitPermissionInfo> splitPerms = getSplitPermissionInfos();
+        final int size = splitPerms.size();
+        for (int i = 0; i < size; i++) {
+            final PermissionManager.SplitPermissionInfo splitPerm = splitPerms.get(i);
+            if (targetSdk < splitPerm.getTargetSdk()
+                    && splitPerm.getNewPermissions().contains(permName)) {
+                synchronized (mLock) {
+                    final Permission perm =
+                            mRegistry.getPermission(splitPerm.getSplitPermission());
+                    return perm != null && !perm.isRuntime();
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -2937,7 +2970,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 >= Build.VERSION_CODES.M;
 
         for (String permission : ps.getGrantedPermissions()) {
-            if (!pkg.getImplicitPermissions().contains(permission)) {
+            if (pkg.getRequestedPermissions().contains(permission)
+                    && !pkg.getImplicitPermissions().contains(permission)) {
                 Permission bp = mRegistry.getPermission(permission);
                 if (bp != null && bp.isRuntime()) {
                     int flags = ps.getPermissionFlags(permission);
@@ -3201,6 +3235,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @Override
+    public @NonNull AttributionSource registerAttributionSource(@NonNull AttributionSource source) {
+        return mAttributionSourceRegistry.registerAttributionSource(source);
+    }
+
+    @Override
+    public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
+        return mAttributionSourceRegistry.isRegisteredAttributionSource(source);
     }
 
     @Override
@@ -5236,6 +5280,75 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // null permissions means all permissions are targeted
             return mDelegatedPermissionNames == null
                     || mDelegatedPermissionNames.contains(permissionName);
+        }
+    }
+
+    private static final class AttributionSourceRegistry {
+        private final Object mLock = new Object();
+
+        private final WeakHashMap<IBinder, AttributionSource> mAttributions = new WeakHashMap<>();
+
+        public @NonNull AttributionSource registerAttributionSource(
+                @NonNull AttributionSource source) {
+            //   Here we keep track of attribution sources that were created by an app
+            // from an attribution chain that called into the app and the apps's
+            // own attribution source. An app can register an attribution chain up
+            // to itself inclusive if and only if it is adding a node for itself which
+            // optionally points to an attribution chain that was created by each
+            // preceding app recursively up to the beginning of the chain.
+            //   The only special case is when the first app in the attribution chain
+            // creates a source that points to another app (not a chain of apps). We
+            // allow this even if the source the app points to is not registered since
+            // in app ops we allow every app to blame every other app (untrusted if not
+            // holding a special permission).
+            //  This technique ensures that a bad actor in the middle of the attribution
+            // chain can neither prepend nor append an invalid attribution sequence, i.e.
+            // a sequence that is not constructed by trusted sources up to the that bad
+            // actor's app.
+            //   Note that passing your attribution source to another app means you allow
+            // it to blame private data access on your app. This can be mediated by the OS
+            // in, which case security is already enforced; by other app's code running in
+            // your process calling into the other app, in which case it can already access
+            // the private data in your process; or by you explicitly calling to another
+            // app passing the source, in which case you must trust the other side;
+
+            final int callingUid = Binder.getCallingUid();
+            if (source.getUid() != callingUid) {
+                throw new SecurityException("Cannot register attribution source for uid:"
+                        + source.getUid() + " from uid:" + callingUid);
+            }
+
+            final PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                    PackageManagerInternal.class);
+            if (packageManagerInternal.getPackageUid(source.getPackageName(), 0,
+                    UserHandle.getUserId(callingUid)) != source.getUid()) {
+                throw new SecurityException("Cannot register attribution source for package:"
+                        + source.getPackageName() + " from uid:" + callingUid);
+            }
+
+            final AttributionSource next = source.getNext();
+            if (next != null && next.getNext() != null
+                    && !isRegisteredAttributionSource(next)) {
+                throw new SecurityException("Cannot register forged attribution source:"
+                        + source);
+            }
+
+            synchronized (mLock) {
+                final IBinder token = new Binder();
+                final AttributionSource result = source.withToken(token);
+                mAttributions.put(token, result);
+                return result;
+            }
+        }
+
+        public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
+            synchronized (mLock) {
+                final AttributionSource cachedSource = mAttributions.get(source.getToken());
+                if (cachedSource != null) {
+                    return cachedSource.equals(source);
+                }
+                return false;
+            }
         }
     }
 }

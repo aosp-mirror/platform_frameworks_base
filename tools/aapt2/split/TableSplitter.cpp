@@ -185,7 +185,7 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
     // Initialize all packages for splits.
     for (size_t idx = 0; idx < split_count; idx++) {
       ResourceTable* split_table = splits_[idx].get();
-      split_table->CreatePackage(pkg->name, pkg->id);
+      split_table->FindOrCreatePackage(pkg->name);
     }
 
     for (auto& type : pkg->types) {
@@ -241,10 +241,7 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
             // not have actual values for each type/entry.
             ResourceTablePackage* split_pkg = split_table->FindPackage(pkg->name);
             ResourceTableType* split_type = split_pkg->FindOrCreateType(type->type);
-            if (!split_type->id) {
-              split_type->id = type->id;
-              split_type->visibility_level = type->visibility_level;
-            }
+            split_type->visibility_level = type->visibility_level;
 
             ResourceEntry* split_entry = split_type->FindOrCreateEntry(entry->name);
             if (!split_entry->id) {

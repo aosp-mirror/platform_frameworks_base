@@ -21,9 +21,9 @@ import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
@@ -32,17 +32,12 @@ import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
-import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
-import com.android.systemui.statusbar.policy.NextAlarmController
-import com.android.systemui.util.RingerModeTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.utils.leaks.FakeZenModeController
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -62,27 +57,15 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var view: QuickStatusBarHeader
     @Mock
-    private lateinit var zenModeController: FakeZenModeController
-    @Mock
-    private lateinit var nextAlarmController: NextAlarmController
-    @Mock
     private lateinit var privacyItemController: PrivacyItemController
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private lateinit var ringerModeTracker: RingerModeTracker
     @Mock
     private lateinit var activityStarter: ActivityStarter
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
     @Mock
-    private lateinit var qsTileHost: QSTileHost
-    @Mock
     private lateinit var statusBarIconController: StatusBarIconController
     @Mock
-    private lateinit var commandQueue: CommandQueue
-    @Mock
     private lateinit var demoModeController: DemoModeController
-    @Mock
-    private lateinit var userTracker: UserTracker
     @Mock
     private lateinit var quickQSPanelController: QuickQSPanelController
     @Mock(answer = Answers.RETURNS_SELF)
@@ -108,6 +91,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private lateinit var context: Context
 
+    private val qsExpansionPathInterpolator = QSExpansionPathInterpolator()
+
     private lateinit var controller: QuickStatusBarHeaderController
 
     @Before
@@ -122,22 +107,17 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
         controller = QuickStatusBarHeaderController(
                 view,
-                zenModeController,
-                nextAlarmController,
                 privacyItemController,
-                ringerModeTracker,
                 activityStarter,
                 uiEventLogger,
-                qsTileHost,
                 statusBarIconController,
-                commandQueue,
                 demoModeController,
-                userTracker,
                 quickQSPanelController,
                 qsCarrierGroupControllerBuilder,
                 privacyLogger,
                 colorExtractor,
-                privacyDialogController
+                privacyDialogController,
+                qsExpansionPathInterpolator
         )
     }
 

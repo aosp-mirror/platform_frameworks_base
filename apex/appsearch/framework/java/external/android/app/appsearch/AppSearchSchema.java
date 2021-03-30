@@ -17,7 +17,6 @@
 package android.app.appsearch;
 
 import android.annotation.IntDef;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.appsearch.exceptions.IllegalSchemaException;
@@ -46,7 +45,6 @@ import java.util.Set;
  */
 public final class AppSearchSchema {
     private static final String SCHEMA_TYPE_FIELD = "schemaType";
-    private static final String VERSION_FIELD = "version";
     private static final String PROPERTIES_FIELD = "properties";
 
     private final Bundle mBundle;
@@ -76,11 +74,6 @@ public final class AppSearchSchema {
     @NonNull
     public String getSchemaType() {
         return mBundle.getString(SCHEMA_TYPE_FIELD, "");
-    }
-
-    /** Returns the version of this {@link AppSearchSchema}. */
-    public @IntRange(from = 0) int getVersion() {
-        return mBundle.getInt(VERSION_FIELD);
     }
 
     /**
@@ -115,15 +108,12 @@ public final class AppSearchSchema {
         if (!getSchemaType().equals(otherSchema.getSchemaType())) {
             return false;
         }
-        if (getVersion() != otherSchema.getVersion()) {
-            return false;
-        }
         return getProperties().equals(otherSchema.getProperties());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getSchemaType(), getVersion(), getProperties());
+        return Objects.hash(getSchemaType(), getProperties());
     }
 
     /** Builder for {@link AppSearchSchema objects}. */
@@ -131,7 +121,6 @@ public final class AppSearchSchema {
         private final String mSchemaType;
         private final ArrayList<Bundle> mPropertyBundles = new ArrayList<>();
         private final Set<String> mPropertyNames = new ArraySet<>();
-        private int mVersion;
         private boolean mBuilt = false;
 
         /** Creates a new {@link AppSearchSchema.Builder}. */
@@ -154,42 +143,6 @@ public final class AppSearchSchema {
         }
 
         /**
-         * Sets the version number of the {@link AppSearchSchema}.
-         *
-         * <p>The {@link AppSearchSession} database can only ever hold documents for one version of
-         * a {@link AppSearchSchema} type at a time.
-         *
-         * <p>Setting a version number that is different from the version number of the schema
-         * currently stored in AppSearch will result in AppSearch calling the {@link Migrator}
-         * provided to {@link AppSearchSession#setSchema} to migrate the documents already in
-         * AppSearch from the previous version to the one set in this request. The version number
-         * can be updated without any other changes to the schema.
-         *
-         * <p>The version number can stay the same, increase, or decrease relative to the current
-         * version number of the {@link AppSearchSchema} type that is already stored in the {@link
-         * AppSearchSession} database.
-         *
-         * <p>The version number will be updated if the {@link SetSchemaRequest} contains
-         * backwards-compatible changes or {@link SetSchemaRequest.Builder#setForceOverride} method
-         * is set to {@code true}.
-         *
-         * @param version A non-negative int number represents the version of this {@link
-         *     AppSearchSchema}, default version is 0.
-         * @throws IllegalStateException if the version is negative or the builder has already been
-         *     used.
-         * @see AppSearchSession#setSchema
-         * @see Migrator
-         * @see SetSchemaRequest.Builder#setMigrator
-         */
-        @NonNull
-        public AppSearchSchema.Builder setVersion(@IntRange(from = 0) int version) {
-            Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkArgumentNonnegative(version);
-            mVersion = version;
-            return this;
-        }
-
-        /**
          * Constructs a new {@link AppSearchSchema} from the contents of this builder.
          *
          * <p>After calling this method, the builder must no longer be used.
@@ -199,7 +152,6 @@ public final class AppSearchSchema {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Bundle bundle = new Bundle();
             bundle.putString(AppSearchSchema.SCHEMA_TYPE_FIELD, mSchemaType);
-            bundle.putInt(AppSearchSchema.VERSION_FIELD, mVersion);
             bundle.putParcelableArrayList(AppSearchSchema.PROPERTIES_FIELD, mPropertyBundles);
             mBuilt = true;
             return new AppSearchSchema(bundle);

@@ -239,10 +239,8 @@
     <string name="screenshot_edit_label">Edit</string>
     <!-- Content description indicating that tapping the element will allow editing the screenshot [CHAR LIMIT=NONE] -->
     <string name="screenshot_edit_description">Edit screenshot</string>
-    <!-- Label for UI element which allows scrolling and extending the screenshot to be taller [CHAR LIMIT=30] -->
-    <string name="screenshot_scroll_label">Scroll</string>
-    <!-- Content description UI element which allows scrolling and extending the screenshot to be taller [CHAR LIMIT=NONE] -->
-    <string name="screenshot_scroll_description">Scroll screenshot</string>
+    <!-- Label for UI element which allows the user to capture additional off-screen content in a screenshot. [CHAR LIMIT=30] -->
+    <string name="screenshot_scroll_label">Capture more</string>
     <!-- Content description indicating that tapping a button will dismiss the screenshots UI [CHAR LIMIT=NONE] -->
     <string name="screenshot_dismiss_description">Dismiss screenshot</string>
     <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
@@ -426,6 +424,12 @@
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
     <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_fingerprint_dialog_fingerprint_icon">Fingerprint icon</string>
+    <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
+    <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
+    <!-- Message shown to ask the user to use fingerprint to continue.[CHAR LIMIT=50] -->
+    <string name="fingerprint_dialog_use_fingerprint">Use your fingerprint to continue</string>
+    <!-- Message shown to ask the user to use screenlock to continue.[CHAR LIMIT=NONE] -->
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock">Can\u2019t recognize fingerprint. Use screen lock instead.</string>
 
     <!-- Message shown when the system-provided face dialog is shown, asking for authentication [CHAR LIMIT=30] -->
     <string name="face_dialog_looking_for_face">Looking for you\u2026</string>
@@ -889,8 +893,12 @@
     <string name="quick_settings_color_space_label">Color correction mode</string>
     <!-- QuickSettings: Control panel: Label for button that navigates to settings. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_more_settings">More settings</string>
+    <!-- QuickSettings: Control panel: Label for button that navigates to user settings. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_more_user_settings">User settings</string>
     <!-- QuickSettings: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_done">Done</string>
+    <!-- QuickSettings: Control panel: Label for button that dismisses user switcher control panel. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_close_user_panel">Close</string>
     <!-- QuickSettings: Control panel: Label for connected device. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_connected">Connected</string>
     <!-- QuickSettings: Control panel: Label for connected device, showing remote device battery level. [CHAR LIMIT=NONE] -->
@@ -1281,6 +1289,9 @@
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a managed profile which can be monitored by the profile owner [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_named_managed_profile_monitoring"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> may monitor network traffic in your work profile</string>
+
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device has a managed profile where network activity is visible to their IT admin [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_managed_profile_network_activity">Work profile network activity is visible to your IT admin</string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that a certificate authorithy is installed on this device and the traffic might be monitored [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_monitoring">Network may be monitored</string>
@@ -2865,6 +2876,8 @@
     <string name="empty_status">Let’s chat tonight!</string>
     <!-- Default text for missed call notifications on their Conversation widget [CHAR LIMIT=20] -->
     <string name="missed_call">Missed call</string>
+    <!-- Text when a Notification may have more messages than the number indicated [CHAR LIMIT=5] -->
+    <string name="messages_count_overflow_indicator"><xliff:g id="number" example="7">%d</xliff:g>+</string>
     <!-- Description text for adding a Conversation widget [CHAR LIMIT=100] -->
     <string name="people_tile_description">See recent messages, missed calls, and status updates</string>
     <!-- Title text displayed for the Conversation widget [CHAR LIMIT=50] -->

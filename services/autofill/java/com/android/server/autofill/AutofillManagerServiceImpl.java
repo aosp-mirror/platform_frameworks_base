@@ -307,10 +307,10 @@ final class AutofillManagerServiceImpl
      * {@link AutofillManager#RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY}).
      */
     @GuardedBy("mLock")
-    long startSessionLocked(@NonNull IBinder activityToken, int taskId, int uid,
-            @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
+    long startSessionLocked(@NonNull IBinder activityToken, int taskId, int clientUid,
+            @NonNull IBinder clientCallback, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
-            @NonNull ComponentName componentName, boolean compatMode,
+            @NonNull ComponentName clientActivity, boolean compatMode,
             boolean bindInstantServiceAllowed, int flags) {
         // FLAG_AUGMENTED_AUTOFILL_REQUEST is set in the flags when standard autofill is disabled
         // but the package is allowlisted for augmented autofill
@@ -320,29 +320,29 @@ final class AutofillManagerServiceImpl
             return 0;
         }
 
-        if (!forAugmentedAutofillOnly && isAutofillDisabledLocked(componentName)) {
+        if (!forAugmentedAutofillOnly && isAutofillDisabledLocked(clientActivity)) {
             // Standard autofill is enabled, but service disabled autofill for this activity; that
             // means no session, unless the activity is allowlisted for augmented autofill
-            if (isWhitelistedForAugmentedAutofillLocked(componentName)) {
+            if (isWhitelistedForAugmentedAutofillLocked(clientActivity)) {
                 if (sDebug) {
-                    Slog.d(TAG, "startSession(" + componentName + "): disabled by service but "
+                    Slog.d(TAG, "startSession(" + clientActivity + "): disabled by service but "
                             + "whitelisted for augmented autofill");
                 }
                 forAugmentedAutofillOnly = true;
 
             } else {
                 if (sDebug) {
-                    Slog.d(TAG, "startSession(" + componentName + "): ignored because "
+                    Slog.d(TAG, "startSession(" + clientActivity + "): ignored because "
                             + "disabled by service and not whitelisted for augmented autofill");
                 }
                 final IAutoFillManagerClient client = IAutoFillManagerClient.Stub
-                        .asInterface(appCallbackToken);
+                        .asInterface(clientCallback);
                 try {
                     client.setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE,
                             /* autofillableIds= */ null);
                 } catch (RemoteException e) {
                     Slog.w(TAG,
-                            "Could not notify " + componentName + " that it's disabled: " + e);
+                            "Could not notify " + clientActivity + " that it's disabled: " + e);
                 }
 
                 return NO_SESSION;
@@ -357,8 +357,8 @@ final class AutofillManagerServiceImpl
         // Occasionally clean up abandoned sessions
         pruneAbandonedSessionsLocked();
 
-        final Session newSession = createSessionByTokenLocked(activityToken, taskId, uid,
-                appCallbackToken, hasCallback, componentName, compatMode,
+        final Session newSession = createSessionByTokenLocked(activityToken, taskId, clientUid,
+                clientCallback, hasCallback, clientActivity, compatMode,
                 bindInstantServiceAllowed, forAugmentedAutofillOnly, flags);
         if (newSession == null) {
             return NO_SESSION;
@@ -367,7 +367,7 @@ final class AutofillManagerServiceImpl
         // Service can be null when it's only for augmented autofill
         String servicePackageName = mInfo == null ? null : mInfo.getServiceInfo().packageName;
         final String historyItem =
-                "id=" + newSession.id + " uid=" + uid + " a=" + componentName.toShortString()
+                "id=" + newSession.id + " uid=" + clientUid + " a=" + clientActivity.toShortString()
                 + " s=" + servicePackageName
                 + " u=" + mUserId + " i=" + autofillId + " b=" + virtualBounds
                 + " hc=" + hasCallback + " f=" + flags + " aa=" + forAugmentedAutofillOnly;
@@ -493,9 +493,9 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int taskId, int uid,
-            @NonNull IBinder appCallbackToken, boolean hasCallback,
-            @NonNull ComponentName componentName, boolean compatMode,
+    private Session createSessionByTokenLocked(@NonNull IBinder clientActivityToken, int taskId,
+            int clientUid, @NonNull IBinder clientCallback, boolean hasCallback,
+            @NonNull ComponentName clientActivity, boolean compatMode,
             boolean bindInstantServiceAllowed, boolean forAugmentedAutofillOnly, int flags) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
@@ -511,15 +511,15 @@ final class AutofillManagerServiceImpl
         } while (sessionId == 0 || sessionId == NO_SESSION
                 || mSessions.indexOfKey(sessionId) >= 0);
 
-        assertCallerLocked(componentName, compatMode);
+        assertCallerLocked(clientActivity, compatMode);
 
         // It's null when the session is just for augmented autofill
         final ComponentName serviceComponentName = mInfo == null ? null
                 : mInfo.getServiceInfo().getComponentName();
         final Session newSession = new Session(this, mUi, getContext(), mHandler, mUserId, mLock,
-                sessionId, taskId, uid, activityToken, appCallbackToken, hasCallback,
+                sessionId, taskId, clientUid, clientActivityToken, clientCallback, hasCallback,
                 mUiLatencyHistory, mWtfHistory, serviceComponentName,
-                componentName, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
+                clientActivity, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
                 flags, mInputMethodManagerInternal);
         mSessions.put(newSession.id, newSession);
 

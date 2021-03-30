@@ -49,7 +49,6 @@ import java.util.function.Consumer;
  */
 @Presubmit
 @SmallTest
-@FlakyTest(detail = "promote once confirmed flake-free")
 @RunWith(MockitoJUnitRunner.class)
 public class ViewGroupScrollCaptureTest {
 

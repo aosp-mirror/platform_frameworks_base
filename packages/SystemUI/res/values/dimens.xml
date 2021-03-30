@@ -19,6 +19,8 @@
     <!-- Recommended minimum clickable element dimension -->
     <dimen name="min_clickable_item_size">48dp</dimen>
 
+    <dimen name="remote_input_view_text_stroke">3dp</dimen>
+
     <!-- Amount to offset bottom of notification peek window from top of status bar. -->
     <dimen name="peek_window_y_offset">-12dp</dimen>
 
@@ -334,7 +336,6 @@
     <dimen name="screenshot_action_container_corner_radius">10dp</dimen>
     <dimen name="screenshot_action_container_padding_vertical">6dp</dimen>
     <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
-    <dimen name="screenshot_action_container_padding_left">96dp</dimen>
     <dimen name="screenshot_action_container_padding_right">8dp</dimen>
     <!-- Radius of the chip background on global screenshot actions -->
     <dimen name="screenshot_button_corner_radius">20dp</dimen>
@@ -462,6 +463,10 @@
     <dimen name="volume_dialog_panel_width_half">32dp</dimen>
 
     <dimen name="volume_dialog_slider_height">116dp</dimen>
+
+    <dimen name="volume_dialog_slider_width">@dimen/volume_dialog_panel_width</dimen>
+
+    <dimen name="volume_dialog_slider_corner_radius">@dimen/volume_dialog_panel_width_half</dimen>
 
     <dimen name="volume_dialog_ringer_size">64dp</dimen>
 
@@ -1354,7 +1359,20 @@
 
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>
+    <dimen name="people_space_messages_count_radius">12dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
+    <dimen name="required_width_for_medium">146dp</dimen>
+    <dimen name="required_width_for_large">138dp</dimen>
+    <dimen name="required_height_for_large">182dp</dimen>
+    <dimen name="default_width">146dp</dimen>
+    <dimen name="default_height">92dp</dimen>
+    <dimen name="avatar_size_for_medium">52dp</dimen>
+    <dimen name="max_people_avatar_size_for_large_content">64dp</dimen>
+    <dimen name="max_people_avatar_size">108dp</dimen>
+    <dimen name="name_text_size_for_small">14sp</dimen>
+    <dimen name="name_text_size_for_large">24sp</dimen>
+    <dimen name="content_text_size_for_medium">12sp</dimen>
+    <dimen name="content_text_size_for_large">14sp</dimen>
 
     <!-- Accessibility floating menu -->
     <dimen name="accessibility_floating_menu_elevation">5dp</dimen>

@@ -106,16 +106,42 @@ class HostClipboardMonitor implements Runnable {
         return bits;
     }
 
-    private void openPipe() {
+    private boolean openPipe() {
         try {
-            mPipe = new RandomAccessFile(PIPE_DEVICE, "rw");
-            mPipe.write(createOpenHandshake());
-        } catch (IOException e) {
+            final RandomAccessFile pipe = new RandomAccessFile(PIPE_DEVICE, "rw");
             try {
-                if (mPipe != null) mPipe.close();
-            } catch (IOException ee) {}
-            mPipe = null;
+                pipe.write(createOpenHandshake());
+                mPipe = pipe;
+                return true;
+            } catch (IOException ignore) {
+                pipe.close();
+            }
+        } catch (IOException ignore) {
         }
+        return false;
+    }
+
+    private void closePipe() {
+        try {
+            final RandomAccessFile pipe = mPipe;
+            mPipe = null;
+            if (pipe != null) {
+                pipe.close();
+            }
+        } catch (IOException ignore) {
+        }
+    }
+
+    private byte[] receiveMessage() throws IOException {
+        final int size = Integer.reverseBytes(mPipe.readInt());
+        final byte[] receivedData = new byte[size];
+        mPipe.readFully(receivedData);
+        return receivedData;
+    }
+
+    private void sendMessage(byte[] message) throws IOException {
+        mPipe.writeInt(Integer.reverseBytes(message.length));
+        mPipe.write(message);
     }
 
     public HostClipboardMonitor(HostClipboardCallback cb) {
@@ -129,21 +155,15 @@ class HostClipboardMonitor implements Runnable {
                 // There's no guarantee that QEMU pipes will be ready at the moment
                 // this method is invoked. We simply try to get the pipe open and
                 // retry on failure indefinitely.
-                while (mPipe == null) {
-                    openPipe();
+                while ((mPipe == null) && !openPipe()) {
                     Thread.sleep(100);
                 }
-                int size = mPipe.readInt();
-                size = Integer.reverseBytes(size);
-                byte[] receivedData = new byte[size];
-                mPipe.readFully(receivedData);
+
+                final byte[] receivedData = receiveMessage();
                 mHostClipboardCallback.onHostClipboardUpdated(
                     new String(receivedData));
             } catch (IOException e) {
-                try {
-                    mPipe.close();
-                } catch (IOException ee) {}
-                mPipe = null;
+                closePipe();
             } catch (InterruptedException e) {}
         }
     }
@@ -151,8 +171,7 @@ class HostClipboardMonitor implements Runnable {
     public void setHostClipboard(String content) {
         try {
             if (mPipe != null) {
-                mPipe.writeInt(Integer.reverseBytes(content.getBytes().length));
-                mPipe.write(content.getBytes());
+                sendMessage(content.getBytes());
             }
         } catch(IOException e) {
             Slog.e("HostClipboardMonitor",
@@ -460,7 +479,7 @@ public class ClipboardService extends SystemService {
             synchronized (mLock) {
                 addActiveOwnerLocked(intendingUid, pkg);
                 PerUserClipboard clipboard = getClipboardLocked(intendingUserId);
-                maybeNotifyLocked(pkg, intendingUid, intendingUserId, clipboard);
+                showAccessNotificationLocked(pkg, intendingUid, intendingUserId, clipboard);
                 return clipboard.primaryClip;
             }
         }
@@ -924,7 +943,7 @@ public class ClipboardService extends SystemService {
     private boolean clipboardAccessAllowed(int op, String callingPackage, int uid,
             @UserIdInt int userId, boolean shouldNoteOp) {
 
-        boolean allowed = false;
+        boolean allowed;
 
         // First, verify package ownership to ensure use below is safe.
         mAppOps.checkPackage(uid, callingPackage);
@@ -933,15 +952,9 @@ public class ClipboardService extends SystemService {
         if (mPm.checkPermission(android.Manifest.permission.READ_CLIPBOARD_IN_BACKGROUND,
                     callingPackage) == PackageManager.PERMISSION_GRANTED) {
             allowed = true;
-        }
-        // The default IME is always allowed to access the clipboard.
-        String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
-                Settings.Secure.DEFAULT_INPUT_METHOD, userId);
-        if (!TextUtils.isEmpty(defaultIme)) {
-            final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
-            if (imePkg.equals(callingPackage)) {
-                allowed = true;
-            }
+        } else {
+            // The default IME is always allowed to access the clipboard.
+            allowed = isDefaultIme(userId, callingPackage);
         }
 
         switch (op) {
@@ -998,12 +1011,24 @@ public class ClipboardService extends SystemService {
         return appOpsResult == AppOpsManager.MODE_ALLOWED;
     }
 
+    private boolean isDefaultIme(int userId, String packageName) {
+        String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
+                Settings.Secure.DEFAULT_INPUT_METHOD, userId);
+        if (!TextUtils.isEmpty(defaultIme)) {
+            final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
+            return imePkg.equals(packageName);
+        }
+        return false;
+    }
+
     /**
-     * Potentially notifies the user (via a toast) about an app accessing the clipboard.
-     * TODO(b/167676460): STOPSHIP as we don't want this code as-is to launch. Just an experiment.
+     * Shows a toast to inform the user that an app has accessed the clipboard. This is only done if
+     * the setting is enabled, and if the accessing app is not the source of the data and is not the
+     * IME, the content capture service, or the autofill service. The notification is also only
+     * shown once per clip for each app.
      */
     @GuardedBy("mLock")
-    private void maybeNotifyLocked(String callingPackage, int uid, @UserIdInt int userId,
+    private void showAccessNotificationLocked(String callingPackage, int uid, @UserIdInt int userId,
             PerUserClipboard clipboard) {
         if (clipboard.primaryClip == null) {
             return;
@@ -1019,15 +1044,9 @@ public class ClipboardService extends SystemService {
         if (UserHandle.isSameApp(uid, clipboard.primaryClipUid)) {
             return;
         }
-        // Exclude some special cases. It's a bit wasteful to check these again here, but for now
-        // beneficial to have all the logic contained in this single (probably temporary) method.
-        String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
-                Settings.Secure.DEFAULT_INPUT_METHOD, userId);
-        if (!TextUtils.isEmpty(defaultIme)) {
-            final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
-            if (imePkg.equals(callingPackage)) {
-                return;
-            }
+        // Exclude special cases: IME, ContentCapture, Autofill.
+        if (isDefaultIme(userId, callingPackage)) {
+            return;
         }
         if (mContentCaptureInternal != null
                 && mContentCaptureInternal.isContentCaptureServiceForUser(uid, userId)) {
@@ -1044,27 +1063,16 @@ public class ClipboardService extends SystemService {
         clipboard.mNotifiedUids.put(uid, true);
 
         Binder.withCleanCallingIdentity(() -> {
-            // Retrieve the app label of the source of the clip data
-            CharSequence sourceAppLabel = null;
-            if (clipboard.mPrimaryClipPackage != null) {
-                try {
-                    sourceAppLabel = mPm.getApplicationLabel(mPm.getApplicationInfoAsUser(
-                            clipboard.mPrimaryClipPackage, 0, userId));
-                } catch (PackageManager.NameNotFoundException e) {
-                    // leave label as null
-                }
-            }
-
             try {
                 CharSequence callingAppLabel = mPm.getApplicationLabel(
                         mPm.getApplicationInfoAsUser(callingPackage, 0, userId));
                 String message;
-                if (sourceAppLabel != null) {
+                if (isText(clipboard.primaryClip)) {
                     message = getContext().getString(
-                            R.string.pasted_from_app, callingAppLabel, sourceAppLabel);
+                            R.string.pasted_text, callingAppLabel);
                 } else {
                     message = getContext().getString(
-                            R.string.pasted_from_clipboard, callingAppLabel);
+                            R.string.pasted_content, callingAppLabel);
                 }
                 Slog.i(TAG, message);
                 Toast.makeText(
@@ -1075,4 +1083,21 @@ public class ClipboardService extends SystemService {
             }
         });
     }
+
+    /**
+     * Returns true if the provided {@link ClipData} represents a single piece of text. That is, if
+     * there is only on {@link ClipData.Item}, and that item contains a non-empty piece of text and
+     * no URI or Intent. Note that HTML may be provided along with text so the presence of
+     * HtmlText in the clip does not prevent this method returning true.
+     */
+    private static boolean isText(@NonNull ClipData data) {
+        if (data.getItemCount() > 1) {
+            return false;
+        }
+        ClipData.Item item = data.getItemAt(0);
+
+        return !TextUtils.isEmpty(item.getText()) && item.getUri() == null
+                && item.getIntent() == null;
+    }
+
 }

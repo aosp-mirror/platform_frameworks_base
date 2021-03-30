@@ -32,6 +32,7 @@ import android.content.Context;
 import android.media.MediaRecorder.Source;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
+import android.media.metrics.LogSessionId;
 import android.media.permission.Identity;
 import android.media.projection.MediaProjection;
 import android.os.Binder;
@@ -282,9 +283,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
     /**
      * The log session id used for metrics.
-     * A null or empty string here means it is not set.
+     * {@link LogSessionId#LOG_SESSION_ID_NONE} here means it is not set.
      */
-    private String mLogSessionId;
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
 
     //---------------------------------------------------------
     // Constructor, Finalize
@@ -1963,22 +1964,32 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     }
 
     /**
-     * Sets a string handle to this AudioRecord for metrics collection.
+     * Sets a {@link LogSessionId} instance to this AudioRecord for metrics collection.
      *
-     * @param logSessionId a string which is used to identify this object
-     *        to the metrics service.  Proper generated Ids must be obtained
-     *        from the Java metrics service and should be considered opaque.
-     *        Use null to remove the logSessionId association.
+     * @param logSessionId a {@link LogSessionId} instance which is used to
+     *        identify this object to the metrics service. Proper generated
+     *        Ids must be obtained from the Java metrics service and should
+     *        be considered opaque. Use
+     *        {@link LogSessionId#LOG_SESSION_ID_NONE} to remove the
+     *        logSessionId association.
      * @throws IllegalStateException if AudioRecord not initialized.
-     *
-     * @hide
      */
-    public void setLogSessionId(@Nullable String logSessionId) {
+    public void setLogSessionId(@NonNull LogSessionId logSessionId) {
+        Objects.requireNonNull(logSessionId);
         if (mState == STATE_UNINITIALIZED) {
             throw new IllegalStateException("AudioRecord not initialized");
         }
-        native_setLogSessionId(logSessionId);
+        String stringId = logSessionId.getStringId();
+        native_setLogSessionId(stringId);
         mLogSessionId = logSessionId;
+    }
+
+    /**
+     * Returns the {@link LogSessionId}.
+     */
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
     }
 
     //---------------------------------------------------------

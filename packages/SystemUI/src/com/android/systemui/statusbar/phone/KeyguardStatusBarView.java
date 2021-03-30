@@ -47,7 +47,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -59,6 +58,8 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The header group on Keyguard.
@@ -89,6 +90,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private int mSystemIconsBaseMargin;
     private View mSystemIconsContainer;
     private TintedIconManager mIconManager;
+    private List<String> mBlockedIcons = new ArrayList<>();
 
     private View mCutoutSpace;
     private ViewGroup mStatusIconArea;
@@ -121,6 +123,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mStatusIconContainer = findViewById(R.id.statusIcons);
 
         loadDimens();
+        loadBlockList();
         mBatteryController = Dependency.get(BatteryController.class);
     }
 
@@ -179,6 +182,14 @@ public class KeyguardStatusBarView extends RelativeLayout
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
         mRoundedCornerPadding = res.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
+    }
+
+    // Set hidden status bar items
+    private void loadBlockList() {
+        Resources r = getResources();
+        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_volume));
+        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_alarm_clock));
+        mBlockedIcons.add(r.getString(com.android.internal.R.string.status_bar_call_strength));
     }
 
     private void updateVisibilities() {
@@ -336,8 +347,8 @@ public class KeyguardStatusBarView extends RelativeLayout
         userInfoController.addCallback(this);
         userInfoController.reloadUserInfo();
         Dependency.get(ConfigurationController.class).addCallback(this);
-        mIconManager = new TintedIconManager(findViewById(R.id.statusIcons),
-                Dependency.get(CommandQueue.class));
+        mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
+        mIconManager.setBlockList(mBlockedIcons);
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         onThemeChanged();
     }

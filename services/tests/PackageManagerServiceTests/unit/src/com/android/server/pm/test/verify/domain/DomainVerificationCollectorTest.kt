@@ -41,7 +41,12 @@ class DomainVerificationCollectorTest {
     }
 
     private val platformCompat: PlatformCompat = mockThrowOnUnmocked {
-        whenever(isChangeEnabled(eq(DomainVerificationCollector.RESTRICT_DOMAINS), any())) {
+        whenever(
+            isChangeEnabledInternalNoLogging(
+                eq(DomainVerificationCollector.RESTRICT_DOMAINS),
+                any()
+            )
+        ) {
             (arguments[1] as ApplicationInfo).targetSdkVersion >= Build.VERSION_CODES.S
         }
     }

@@ -70,7 +70,7 @@ public final class SchemaMigrationUtil {
             // we don't have migrator or won't trigger migration for this schema type.
             Migrator migrator = migrators.get(unmigratedSchemaType);
             if (migrator == null
-                    || !migrator.shouldMigrateToFinalVersion(currentVersion, finalVersion)) {
+                    || !migrator.shouldMigrate(currentVersion, finalVersion)) {
                 unmigratedSchemaTypes.add(unmigratedSchemaType);
             }
         }
@@ -102,16 +102,17 @@ public final class SchemaMigrationUtil {
                             + schemaType
                             + ", but the schema doesn't exist in the request.");
         }
-        return migrator.shouldMigrateToFinalVersion(currentVersion, finalVersion);
+        return migrator.shouldMigrate(currentVersion, finalVersion);
     }
 
     /** Builds a Map of SchemaType and its version of given set of {@link AppSearchSchema}. */
+    //TODO(b/182620003) remove this method once support migrate to another type
     @NonNull
     public static Map<String, Integer> buildVersionMap(
-            @NonNull Collection<AppSearchSchema> schemas) {
+            @NonNull Collection<AppSearchSchema> schemas, int version) {
         Map<String, Integer> currentVersionMap = new ArrayMap<>(schemas.size());
         for (AppSearchSchema currentSchema : schemas) {
-            currentVersionMap.put(currentSchema.getSchemaType(), currentSchema.getVersion());
+            currentVersionMap.put(currentSchema.getSchemaType(), version);
         }
         return currentVersionMap;
     }

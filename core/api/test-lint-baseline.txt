@@ -1515,30 +1515,6 @@ MissingNullability: android.os.VibrationEffect#get(int):
     
 MissingNullability: android.os.VibrationEffect#get(int, boolean):
     
-MissingNullability: android.os.VibrationEffect.OneShot#OneShot(android.os.Parcel) parameter #0:
-    
-MissingNullability: android.os.VibrationEffect.OneShot#scale(float, int):
-    
-MissingNullability: android.os.VibrationEffect.OneShot#writeToParcel(android.os.Parcel, int) parameter #0:
-    
-MissingNullability: android.os.VibrationEffect.Prebaked#Prebaked(android.os.Parcel) parameter #0:
-    
-MissingNullability: android.os.VibrationEffect.Prebaked#writeToParcel(android.os.Parcel, int) parameter #0:
-    
-MissingNullability: android.os.VibrationEffect.Waveform#Waveform(android.os.Parcel) parameter #0:
-    
-MissingNullability: android.os.VibrationEffect.Waveform#Waveform(long[], int[], int) parameter #0:
-    
-MissingNullability: android.os.VibrationEffect.Waveform#Waveform(long[], int[], int) parameter #1:
-    
-MissingNullability: android.os.VibrationEffect.Waveform#getAmplitudes():
-    
-MissingNullability: android.os.VibrationEffect.Waveform#getTimings():
-    
-MissingNullability: android.os.VibrationEffect.Waveform#scale(float, int):
-    
-MissingNullability: android.os.VibrationEffect.Waveform#writeToParcel(android.os.Parcel, int) parameter #0:
-    
 MissingNullability: android.os.VintfObject#getHalNamesAndVersions():
     
 MissingNullability: android.os.VintfObject#getSepolicyVersion():
@@ -2739,12 +2715,6 @@ ParcelConstructor: android.os.IncidentReportArgs#IncidentReportArgs(android.os.P
     
 ParcelConstructor: android.os.StrictMode.ViolationInfo#ViolationInfo(android.os.Parcel):
     
-ParcelConstructor: android.os.VibrationEffect.OneShot#OneShot(android.os.Parcel):
-    
-ParcelConstructor: android.os.VibrationEffect.Prebaked#Prebaked(android.os.Parcel):
-    
-ParcelConstructor: android.os.VibrationEffect.Waveform#Waveform(android.os.Parcel):
-    
 ParcelConstructor: android.os.health.HealthStatsParceler#HealthStatsParceler(android.os.Parcel):
     
 ParcelConstructor: android.service.notification.SnoozeCriterion#SnoozeCriterion(android.os.Parcel):
@@ -2773,12 +2743,6 @@ ParcelCreator: android.net.metrics.RaEvent:
     
 ParcelCreator: android.net.metrics.ValidationProbeEvent:
     
-ParcelCreator: android.os.VibrationEffect.OneShot:
-    
-ParcelCreator: android.os.VibrationEffect.Prebaked:
-    
-ParcelCreator: android.os.VibrationEffect.Waveform:
-    
 ParcelCreator: android.service.autofill.InternalOnClickAction:
     
 ParcelCreator: android.service.autofill.InternalSanitizer:
@@ -2796,12 +2760,6 @@ ParcelNotFinal: android.content.pm.UserInfo:
 ParcelNotFinal: android.net.metrics.IpConnectivityLog.Event:
     
 ParcelNotFinal: android.os.IncidentManager.IncidentReport:
-    
-ParcelNotFinal: android.os.VibrationEffect.OneShot:
-    
-ParcelNotFinal: android.os.VibrationEffect.Prebaked:
-    
-ParcelNotFinal: android.os.VibrationEffect.Waveform:
     
 ParcelNotFinal: android.os.health.HealthStatsParceler:
     

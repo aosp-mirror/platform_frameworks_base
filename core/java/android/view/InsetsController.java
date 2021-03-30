@@ -189,22 +189,43 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private static final String TAG = "InsetsController";
-    private static final int ANIMATION_DURATION_SHOW_MS = 275;
-    private static final int ANIMATION_DURATION_HIDE_MS = 340;
+    private static final int ANIMATION_DURATION_MOVE_IN_MS = 275;
+    private static final int ANIMATION_DURATION_MOVE_OUT_MS = 340;
+    private static final int ANIMATION_DURATION_FADE_IN_MS = 500;
+    private static final int ANIMATION_DURATION_FADE_OUT_MS = 1500;
+
+    private static final int ANIMATION_DELAY_DIM_MS = 500;
 
     private static final int ANIMATION_DURATION_SYNC_IME_MS = 285;
     private static final int ANIMATION_DURATION_UNSYNC_IME_MS = 200;
 
     private static final int PENDING_CONTROL_TIMEOUT_MS = 2000;
 
-    public static final Interpolator SYSTEM_BARS_INTERPOLATOR =
+    private static final Interpolator SYSTEM_BARS_INSETS_INTERPOLATOR =
             new PathInterpolator(0.4f, 0f, 0.2f, 1f);
+    private static final Interpolator SYSTEM_BARS_ALPHA_INTERPOLATOR =
+            new PathInterpolator(0.3f, 0f, 1f, 1f);
+    private static final Interpolator SYSTEM_BARS_DIM_INTERPOLATOR = alphaFraction -> {
+        // While playing dim animation, alphaFraction is changed from 1f to 0f. Here changes it to
+        // time-based fraction for computing delay and interpolation.
+        float fraction = 1 - alphaFraction;
+        final float fractionDelay = (float) ANIMATION_DELAY_DIM_MS / ANIMATION_DURATION_FADE_OUT_MS;
+        if (fraction <= fractionDelay) {
+            return 1f;
+        } else {
+            float innerFraction = (fraction - fractionDelay) / (1f - fractionDelay);
+            return 1f - SYSTEM_BARS_ALPHA_INTERPOLATOR.getInterpolation(innerFraction);
+        }
+    };
     private static final Interpolator SYNC_IME_INTERPOLATOR =
             new PathInterpolator(0.2f, 0f, 0f, 1f);
     private static final Interpolator LINEAR_OUT_SLOW_IN_INTERPOLATOR =
             new PathInterpolator(0, 0, 0.2f, 1f);
     private static final Interpolator FAST_OUT_LINEAR_IN_INTERPOLATOR =
             new PathInterpolator(0.4f, 0f, 1f, 1f);
+
+    /** The amount IME will move up/down when animating in floating mode. */
+    private static final int FLOATING_IME_BOTTOM_INSET_DP = -80;
 
     static final boolean DEBUG = false;
     static final boolean WARN = false;
@@ -278,14 +299,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public static class InternalAnimationControlListener
             implements WindowInsetsAnimationControlListener {
 
-        /** The amount IME will move up/down when animating in floating mode. */
-        protected static final int FLOATING_IME_BOTTOM_INSET = -80;
-
         private WindowInsetsAnimationController mController;
         private ValueAnimator mAnimator;
         private final boolean mShow;
         private final boolean mHasAnimationCallbacks;
         private final @InsetsType int mRequestedTypes;
+        private final @Behavior int mBehavior;
         private final long mDurationMs;
         private final boolean mDisable;
         private final int mFloatingImeBottomInset;
@@ -301,10 +320,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         };
 
         public InternalAnimationControlListener(boolean show, boolean hasAnimationCallbacks,
-                int requestedTypes, boolean disable, int floatingImeBottomInset) {
+                @InsetsType int requestedTypes, @Behavior int behavior, boolean disable,
+                int floatingImeBottomInset) {
             mShow = show;
             mHasAnimationCallbacks = hasAnimationCallbacks;
             mRequestedTypes = requestedTypes;
+            mBehavior = behavior;
             mDurationMs = calculateDurationMs();
             mDisable = disable;
             mFloatingImeBottomInset = floatingImeBottomInset;
@@ -335,7 +356,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             Insets end = mShow
                     ? controller.getShownStateInsets()
                     : hiddenInsets;
-            Interpolator insetsInterpolator = getInterpolator();
+            Interpolator insetsInterpolator = getInsetsInterpolator();
             Interpolator alphaInterpolator = getAlphaInterpolator();
             mAnimator.addUpdateListener(animation -> {
                 float rawFraction = animation.getAnimatedFraction();
@@ -379,7 +400,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     + mRequestedTypes);
         }
 
-        Interpolator getInterpolator() {
+        protected Interpolator getInsetsInterpolator() {
             if ((mRequestedTypes & ime()) != 0) {
                 if (mHasAnimationCallbacks) {
                     return SYNC_IME_INTERPOLATOR;
@@ -389,7 +410,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     return FAST_OUT_LINEAR_IN_INTERPOLATOR;
                 }
             } else {
-                return SYSTEM_BARS_INTERPOLATOR;
+                if (mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) {
+                    return SYSTEM_BARS_INSETS_INTERPOLATOR;
+                } else {
+                    // Makes insets stay at the shown position.
+                    return input -> mShow ? 1f : 0f;
+                }
             }
         }
 
@@ -405,7 +431,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     return FAST_OUT_LINEAR_IN_INTERPOLATOR;
                 }
             } else {
-                return input -> 1f;
+                if (mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) {
+                    return input -> 1f;
+                } else {
+                    if (mShow) {
+                        return SYSTEM_BARS_ALPHA_INTERPOLATOR;
+                    } else {
+                        return SYSTEM_BARS_DIM_INTERPOLATOR;
+                    }
+                }
             }
         }
 
@@ -429,7 +463,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     return ANIMATION_DURATION_UNSYNC_IME_MS;
                 }
             } else {
-                return mShow ? ANIMATION_DURATION_SHOW_MS : ANIMATION_DURATION_HIDE_MS;
+                if (mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) {
+                    return mShow ? ANIMATION_DURATION_MOVE_IN_MS : ANIMATION_DURATION_MOVE_OUT_MS;
+                } else {
+                    return mShow ? ANIMATION_DURATION_FADE_IN_MS : ANIMATION_DURATION_FADE_OUT_MS;
+                }
             }
         }
     }
@@ -882,7 +920,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         hide(types, false /* fromIme */);
     }
 
-    void hide(@InsetsType int types, boolean fromIme) {
+    @VisibleForTesting
+    public void hide(@InsetsType int types, boolean fromIme) {
         if (fromIme) {
             ImeTracing.getInstance().triggerClientDump("InsetsController#hide",
                     mHost.getInputMethodManager(), null /* icProto */);
@@ -1263,8 +1302,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /**
      * Called when current window gains focus.
      */
-    public void onWindowFocusGained() {
-        getSourceConsumer(ITYPE_IME).onWindowFocusGained();
+    public void onWindowFocusGained(boolean hasViewFocused) {
+        getSourceConsumer(ITYPE_IME).onWindowFocusGained(hasViewFocused);
     }
 
     /**
@@ -1272,19 +1311,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      */
     public void onWindowFocusLost() {
         getSourceConsumer(ITYPE_IME).onWindowFocusLost();
-    }
-
-    /**
-     * Used by {@link ImeInsetsSourceConsumer} when IME decides to be shown/hidden.
-     * @hide
-     */
-    @VisibleForTesting
-    public void applyImeVisibility(boolean setVisible) {
-        if (setVisible) {
-            show(Type.IME, true /* fromIme */);
-        } else {
-            hide(Type.IME);
-        }
     }
 
     @VisibleForTesting
@@ -1340,8 +1366,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             final InsetsSourceControl imeControl = consumer != null ? consumer.getControl() : null;
             // Skip showing animation once that made by system for some reason.
             // (e.g. starting window with IME snapshot)
-            if (imeControl != null && show) {
-                skipAnim = imeControl.getAndClearSkipAnimationOnce();
+            if (imeControl != null) {
+                skipAnim = imeControl.getAndClearSkipAnimationOnce() && show
+                        && consumer.hasViewFocusWhenWindowFocusGain();
             }
         }
         applyAnimation(types, show, fromIme, skipAnim);
@@ -1358,14 +1385,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         boolean hasAnimationCallbacks = mHost.hasAnimationCallbacks();
         final InternalAnimationControlListener listener = new InternalAnimationControlListener(
-                show, hasAnimationCallbacks, types, skipAnim || mAnimationsDisabled,
-                mHost.dipToPx(InternalAnimationControlListener.FLOATING_IME_BOTTOM_INSET));
+                show, hasAnimationCallbacks, types, mHost.getSystemBarsBehavior(),
+                skipAnim || mAnimationsDisabled, mHost.dipToPx(FLOATING_IME_BOTTOM_INSET_DP));
 
         // We are about to playing the default animation (show/hide). Passing a null frame indicates
         // the controlled types should be animated regardless of the frame.
         controlAnimationUnchecked(
                 types, null /* cancellationSignal */, listener, null /* frame */, fromIme,
-                listener.getDurationMs(), listener.getInterpolator(),
+                listener.getDurationMs(), listener.getInsetsInterpolator(),
                 show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE,
                 show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN,
                 !hasAnimationCallbacks /* useInsetsAnimationThread */);

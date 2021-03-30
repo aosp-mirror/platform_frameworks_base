@@ -29,6 +29,7 @@ import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.Camera;
+import android.media.metrics.LogSessionId;
 import android.media.permission.Identity;
 import android.os.Build;
 import android.os.Handler;
@@ -130,6 +131,8 @@ public class MediaRecorder implements AudioRouting,
 
     private int mChannelCount;
 
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
+
     /**
      * Default constructor.
      *
@@ -162,6 +165,27 @@ public class MediaRecorder implements AudioRouting,
          */
         native_setup(new WeakReference<MediaRecorder>(this),
                 ActivityThread.currentPackageName(), myIdentity(context));
+    }
+
+    /**
+     * Sets the {@link LogSessionId} for MediaRecorder.
+     *
+     * @param id the global ID for monitoring the MediaRecorder performance
+     */
+    public void setLogSessionId(@NonNull LogSessionId id) {
+        Objects.requireNonNull(id);
+        mLogSessionId = id;
+        setParameter("log-session-id=" + id.getStringId());
+    }
+
+    /**
+     * Returns the {@link LogSessionId} for MediaRecorder.
+     *
+     * @return the global ID for monitoring the MediaRecorder performance
+     */
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
     }
 
     /**
@@ -725,6 +749,47 @@ public class MediaRecorder implements AudioRouting,
             setAudioChannels(profile.audioChannels);
             setAudioSamplingRate(profile.audioSampleRate);
             setAudioEncoder(profile.audioCodec);
+        }
+    }
+
+    /**
+     * Uses the settings from an AudioProfile for recording.
+     * <p>
+     * This method should be called after the video AND audio sources are set, and before
+     * setOutputFile().
+     * <p>
+     * This method can be used instead of {@link #setProfile} when using EncoderProfiles.
+     *
+     * @param profile the AudioProfile to use
+     * @see android.media.EncoderProfiles
+     * @see android.media.CamcorderProfile#getAll
+     */
+    public void setAudioProfile(@NonNull EncoderProfiles.AudioProfile profile) {
+        setAudioEncodingBitRate(profile.getBitrate());
+        setAudioChannels(profile.getChannels());
+        setAudioSamplingRate(profile.getSampleRate());
+        setAudioEncoder(profile.getCodec());
+    }
+
+    /**
+     * Uses the settings from a VideoProfile object for recording.
+     * <p>
+     * This method should be called after the video AND audio sources are set, and before
+     * setOutputFile().
+     * <p>
+     * This method can be used instead of {@link #setProfile} when using EncoderProfiles.
+     *
+     * @param profile the VideoProfile to use
+     * @see android.media.EncoderProfiles
+     * @see android.media.CamcorderProfile#getAll
+     */
+    public void setVideoProfile(@NonNull EncoderProfiles.VideoProfile profile) {
+        setVideoFrameRate(profile.getFrameRate());
+        setVideoSize(profile.getWidth(), profile.getHeight());
+        setVideoEncodingBitRate(profile.getBitrate());
+        setVideoEncoder(profile.getCodec());
+        if (profile.getProfile() > 0) {
+            setVideoEncodingProfileLevel(profile.getProfile(), 0 /* level */);
         }
     }
 
@@ -1937,4 +2002,3 @@ public class MediaRecorder implements AudioRouting,
 
     }
 }
-

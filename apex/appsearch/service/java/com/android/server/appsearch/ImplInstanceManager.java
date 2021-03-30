@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.util.SparseArray;
 
 import com.android.internal.R;
@@ -130,11 +129,7 @@ public final class ImplInstanceManager {
 
     private static File getAppSearchDir(@NonNull Context context, @UserIdInt int userId) {
         // See com.android.internal.app.ChooserActivity::getPinnedSharedPrefs
-        //TODO(b/177685938):Switch from getDataUserCePackageDirectory to getDataSystemCeDirectory
-        File userCeDir =
-                Environment.getDataUserCePackageDirectory(
-                        StorageManager.UUID_PRIVATE_INTERNAL, userId, context.getPackageName());
-        return new File(userCeDir, APP_SEARCH_DIR);
+        return new File(Environment.getDataSystemCeDirectory(userId), APP_SEARCH_DIR);
     }
 
     /**

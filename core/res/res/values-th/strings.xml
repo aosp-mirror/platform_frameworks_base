@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"แอปที่ทำงานอยู่"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"แอปหลายแอปกำลังใช้แบตเตอรี่"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"การขยาย"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (3350443906017624270) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"นโยบายความปลอดภัยสำหรับการช่วยเหลือพิเศษ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังใช้แบตเตอรี่"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"แอป <xliff:g id="NUMBER">%1$d</xliff:g> แอปกำลังใช้แบตเตอรี่"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"แตะเพื่อดูรายละเอียดเกี่ยวกับแบตเตอรี่และปริมาณการใช้อินเทอร์เน็ต"</string>
@@ -1690,7 +1689,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ใช้ทางลัด"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"การกลับสี"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"การแก้สี"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"ลดความสว่าง"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"หรี่แสงเพิ่มเติม"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว ปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 3 วินาทีเพื่อใช้ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2247,8 +2246,6 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ความเป็นส่วนตัวสำหรับเซ็นเซอร์"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ไอคอนแอปพลิเคชัน"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ภาพลักษณ์ของแบรนด์แอปพลิเคชัน"</string>
-    <!-- no translation found for view_and_control_notification_title (4300765399209912240) -->
-    <skip />
-    <!-- no translation found for view_and_control_notification_content (8003766498562604034) -->
-    <skip />
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ตรวจสอบการตั้งค่าการเข้าถึง"</string>
+    <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> จะดูและควบคุมหน้าจอของคุณได้ แตะเพื่อตรวจสอบ"</string>
 </resources>

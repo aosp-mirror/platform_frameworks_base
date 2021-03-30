@@ -460,7 +460,8 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
 
   const std::string field_name = TransformToFieldName(name.entry);
   if (out_class_def != nullptr) {
-    auto resource_member = util::make_unique<ResourceMember>(field_name, real_id);
+    auto resource_member =
+        util::make_unique<ResourceMember>(field_name, real_id, entry.visibility.staged_api);
 
     // Build the comments and annotations for this entry.
     AnnotationProcessor* processor = resource_member->GetCommentBuilder();
@@ -542,8 +543,8 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
 
     // Create an ID if there is one (static libraries don't need one).
     ResourceId id;
-    if (package.id && type.id && entry->id) {
-      id = ResourceId(package.id.value(), type.id.value(), entry->id.value());
+    if (entry->id) {
+      id = entry->id.value();
     }
 
     // We need to make sure we hide the fact that we are generating kAttrPrivate attributes.

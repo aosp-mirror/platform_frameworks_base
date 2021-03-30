@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Binder;
 
 import com.android.internal.util.CollectionUtils;
 import com.android.server.compat.PlatformCompat;
@@ -77,9 +76,7 @@ public final class DomainVerificationUtils {
 
     static boolean isChangeEnabled(PlatformCompat platformCompat, AndroidPackage pkg,
             long changeId) {
-        //noinspection ConstantConditions
-        return Binder.withCleanCallingIdentity(
-                () -> platformCompat.isChangeEnabled(changeId, buildMockAppInfo(pkg)));
+        return  platformCompat.isChangeEnabledInternalNoLogging(changeId, buildMockAppInfo(pkg));
     }
 
     /**

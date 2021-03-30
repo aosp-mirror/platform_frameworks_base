@@ -626,7 +626,7 @@ public class DisplayRotation {
         }, true /* traverseTopToBottom */);
         mSeamlessRotationCount = 0;
         mRotatingSeamlessly = false;
-        mDisplayContent.finishFixedRotationAnimationIfPossible();
+        mDisplayContent.finishFadeRotationAnimationIfPossible();
     }
 
     private void prepareSeamlessRotation() {
@@ -717,7 +717,7 @@ public class DisplayRotation {
                     "Performing post-rotate rotation after seamless rotation");
             // Finish seamless rotation.
             mRotatingSeamlessly = false;
-            mDisplayContent.finishFixedRotationAnimationIfPossible();
+            mDisplayContent.finishFadeRotationAnimationIfPossible();
 
             updateRotationAndSendNewConfigIfChanged();
         }
@@ -1539,20 +1539,6 @@ public class DisplayRotation {
             }
         }
 
-        @Override
-        public boolean canUseRotationResolver() {
-            if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) return false;
-
-            switch (mCurrentAppOrientation) {
-                case ActivityInfo.SCREEN_ORIENTATION_FULL_USER:
-                case ActivityInfo.SCREEN_ORIENTATION_USER:
-                case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
-                case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
-                case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
-                    return true;
-            }
-            return false;
-        }
 
         @Override
         public void onProposedRotationChanged(int rotation) {

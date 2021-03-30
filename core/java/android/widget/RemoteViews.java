@@ -5476,14 +5476,14 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Object allowing the modification of a context to overload the system's dynamic colors.
      *
-     * Only colors from {@link android.R.color#system_primary_0} to
-     * {@link android.R.color#system_neutral_1000} can be overloaded.
+     * Only colors from {@link android.R.color#system_accent1_0} to
+     * {@link android.R.color#system_neutral2_1000} can be overloaded.
      * @hide
      */
     public static final class ColorResources {
         // Set of valid colors resources.
-        private static final int FIRST_RESOURCE_COLOR_ID = android.R.color.system_primary_0;
-        private static final int LAST_RESOURCE_COLOR_ID = android.R.color.system_neutral_1000;
+        private static final int FIRST_RESOURCE_COLOR_ID = android.R.color.system_neutral1_0;
+        private static final int LAST_RESOURCE_COLOR_ID = android.R.color.system_accent3_1000;
         // Size, in bytes, of an entry in the array of colors in an ARSC file.
         private static final int ARSC_ENTRY_SIZE = 16;
 
@@ -6341,6 +6341,9 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * Set the ID of the top-level view of the XML layout.
+     *
+     * The view's ID is changed right after inflation, before it gets added to its parent. The ID
+     * of a given view can never change after the initial inflation.
      *
      * Set to {@link View#NO_ID} to reset and simply keep the id defined in the XML layout.
      *

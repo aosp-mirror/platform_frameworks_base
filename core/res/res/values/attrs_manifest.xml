@@ -1595,6 +1595,20 @@
        <enum name="always" value="1" />
     </attr>
 
+    <!-- Enable hardware memory tagging (ARM MTE) in this process.
+         When enabled, heap memory bugs like use-after-free and buffer overlow
+         are detected and result in an immediate ("sync" mode) or delayed ("async"
+         mode) crash instead of a silent memory corruption. Sync mode, while slower,
+         provides enhanced bug reports including stack traces at the time of allocation
+         and deallocation of memory, similar to AddressSanitizer.
+
+         See the <a href="https://community.arm.com/developer/ip-products/processors/b/processors-ip-blog/posts/enhancing-memory-safety">ARM announcement</a>
+         for more details.
+
+         <p>This attribute can be applied to a
+         {@link android.R.styleable#AndroidManifestProcess process} tag, or to an
+         {@link android.R.styleable#AndroidManifestApplication application} tag (to supply
+         a default setting for all application components). -->
     <attr name="memtagMode">
        <enum name="default" value="-1" />
        <enum name="off" value="0" />
@@ -1853,6 +1867,25 @@
              -->
         <attr name="preserveLegacyExternalStorage" format="boolean" />
 
+        <!-- If {@code true} this app would like optimized external storage access.
+
+        <p> This flag can only be used by apps holding
+        <ul>
+        <li>{@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} permission or
+        <li>{@link android.app.role}#SYSTEM_GALLERY role.
+        </ul>
+        When the flag is set, bulk file path operations will be optimized.
+
+        The default value is {@code true} if
+        <ul>
+        <li>app has {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} permission and
+        targets targetSDK<=30.
+        <li>app has {@link android.app.role}#SYSTEM_GALLERY role and targetSDK<=29
+        </ul>
+        {@code false} otherwise.
+        -->
+        <attr name="requestOptimizedExternalStorageAccess" format="boolean" />
+
         <!-- If {@code true} this app declares that it should be visible to all other apps on
              device, regardless of what they declare via the {@code queries} tags in their
              manifest.
@@ -1879,7 +1912,9 @@
 
         <attr name="memtagMode" />
 
-        <attr name="nativeHeapZeroInit" format="boolean" />
+        <!-- If {@code true} enables automatic zero initialization of all native heap
+             allocations. -->
+        <attr name="nativeHeapZeroInitialized" format="boolean" />
 
         <!-- @hide no longer used, kept to preserve padding -->
         <attr name="allowAutoRevokePermissionsExemption" format="boolean" />
@@ -2467,7 +2502,7 @@
         <attr name="process" />
         <attr name="gwpAsanMode" />
         <attr name="memtagMode" />
-        <attr name="nativeHeapZeroInit" />
+        <attr name="nativeHeapZeroInitialized" />
     </declare-styleable>
 
     <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied
@@ -2843,6 +2878,13 @@
             {@link android.content.Context#sendBroadcast(Intent, String)} being used.
             Multiple tags can be specified separated by '|'. -->
         <attr name="attributionTags"/>
+        <!-- Specifies whether a home sound effect should be played if the home app moves to
+             front after an activity with this flag set to <code>true</code>.
+             <p>The default value of this attribute is <code>true</code>.
+             <p>Also note that home sounds are only played if the device supports home sounds,
+             usually TVs.
+             <p>Requires permission {@code android.permission.DISABLE_SYSTEM_SOUND_EFFECTS}. -->
+        <attr name="playHomeTransitionSound" format="boolean"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

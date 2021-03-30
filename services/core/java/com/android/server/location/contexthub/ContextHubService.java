@@ -259,13 +259,16 @@ public class ContextHubService extends IContextHubService.Stub {
             BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())) {
+                    if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())
+                            || WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED.equals(
+                                intent.getAction())) {
                         sendWifiSettingUpdate(false /* forceUpdate */);
                     }
                 }
             };
             IntentFilter filter = new IntentFilter();
             filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+            filter.addAction(WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED);
             mContext.registerReceiver(wifiReceiver, filter);
 
             mContext.getContentResolver().registerContentObserver(
@@ -298,7 +301,7 @@ public class ContextHubService extends IContextHubService.Stub {
             mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
                     SensorPrivacyManager.Sensors.MICROPHONE, (userId, enabled) -> {
                         if (userId == getCurrentUserId()) {
-                            Log.d(TAG, "User: " + userId + " enabled: " + enabled);
+                            Log.d(TAG, "User: " + userId + "mic privacy: " + enabled);
                             sendMicrophoneDisableSettingUpdate(enabled);
                         }
                 });
@@ -691,6 +694,7 @@ public class ContextHubService extends IContextHubService.Stub {
             sendLocationSettingUpdate();
             sendWifiSettingUpdate(true /* forceUpdate */);
             sendAirplaneModeSettingUpdate();
+            sendMicrophoneDisableSettingUpdateForCurrentUser();
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
@@ -1123,6 +1127,7 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     public void onUserChanged() {
         Log.d(TAG, "User changed to id: " + getCurrentUserId());
+        sendLocationSettingUpdate();
         sendMicrophoneDisableSettingUpdateForCurrentUser();
     }
 }

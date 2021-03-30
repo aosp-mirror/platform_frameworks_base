@@ -1125,6 +1125,15 @@
              to framework controls (via colorControlActivated). -->
         <attr name="colorAccent" format="color" />
 
+        <!-- Light accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentPrimary" format="color" />
+
+        <!-- Secondary accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentSecondary" format="color" />
+
+        <!-- Tertiary accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentTertiary" format="color" />
+
         <!-- The color applied to framework controls in their normal state. -->
         <attr name="colorControlNormal" format="color" />
 
@@ -6061,6 +6070,8 @@
         <attr name="color" />
         <!-- Alpha multiplier applied to the base color. -->
         <attr name="alpha" />
+        <!-- Perceptual luminance applied to the base color. From 0 to 100. -->
+        <attr name="lStar" format="float" />
     </declare-styleable>
 
     <!-- Drawable used to render according to the animation scale. Esp. when it is 0 due to battery
@@ -9526,4 +9537,12 @@
 
     <attr name="iconfactoryIconSize" format="dimension"/>
     <attr name="iconfactoryBadgeSize" format="dimension"/>
+    <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
+    <attr name="lStar" format="float"/>
+
+    <declare-styleable name="DisplayHasherService">
+        <!-- The throttle duration for display hash requests
+             @hide @SystemApi -->
+        <attr name="throttleDurationMillis" format="integer" />
+    </declare-styleable>
 </resources>

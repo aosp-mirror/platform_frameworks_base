@@ -16,7 +16,9 @@
 
 package android.hardware.display;
 
+
 import static android.hardware.display.DisplayManager.EventsMask;
+import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -508,6 +510,59 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Sets the HDR types that have been disabled by user.
+     * @param userDisabledHdrTypes the HDR types to disable. The HDR types are any of
+     */
+    public void setUserDisabledHdrTypes(@HdrType int[] userDisabledHdrTypes) {
+        try {
+            mDm.setUserDisabledHdrTypes(userDisabledHdrTypes);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets whether or not the user disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     *
+     * @param areUserDisabledHdrTypesAllowed If true, the user-disabled
+     * types are ignored and returned, if the display supports them. If
+     * false, the user-disabled types are taken into consideration and
+     * are never returned, even if the display supports them.
+     */
+    public void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed) {
+        try {
+            mDm.setAreUserDisabledHdrTypesAllowed(areUserDisabledHdrTypesAllowed);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether or not the user-disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     */
+    public boolean areUserDisabledHdrTypesAllowed() {
+        try {
+            return mDm.areUserDisabledHdrTypesAllowed();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the HDR formats disabled by the user.
+     *
+     */
+    public int[] getUserDisabledHdrTypes() {
+        try {
+            return mDm.getUserDisabledHdrTypes();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     public void requestColorMode(int displayId, int colorMode) {
         try {
             mDm.requestColorMode(displayId, colorMode);
@@ -685,6 +740,37 @@ public final class DisplayManagerGlobal {
     public void setTemporaryBrightness(int displayId, float brightness) {
         try {
             mDm.setTemporaryBrightness(displayId, brightness);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Sets the brightness of the display.
+     *
+     * @param brightness The brightness value from 0.0f to 1.0f.
+     *
+     * @hide
+     */
+    public void setBrightness(int displayId, float brightness) {
+        try {
+            mDm.setBrightness(displayId, brightness);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the brightness of the display.
+     *
+     * @param displayId The display from which to get the brightness
+     *
+     * @hide
+     */
+    public float getBrightness(int displayId) {
+        try {
+            return mDm.getBrightness(displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

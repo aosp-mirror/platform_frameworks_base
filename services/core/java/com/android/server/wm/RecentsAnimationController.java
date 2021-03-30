@@ -568,8 +568,9 @@ public class RecentsAnimationController implements DeathRecipient {
                             ? mMinimizedHomeBounds
                             : null;
             final Rect contentInsets;
-            if (mTargetActivityRecord != null && mTargetActivityRecord.findMainWindow() != null) {
-                contentInsets = mTargetActivityRecord.findMainWindow()
+            final WindowState targetAppMainWindow = getTargetAppMainWindow();
+            if (targetAppMainWindow != null) {
+                contentInsets = targetAppMainWindow
                         .getInsetsStateWithVisibilityOverride()
                         .calculateInsets(mTargetActivityRecord.getBounds(), Type.systemBars(),
                                 false /* ignoreVisibility */);
@@ -607,8 +608,8 @@ public class RecentsAnimationController implements DeathRecipient {
 
     private void attachNavigationBarToApp() {
         if (!mShouldAttachNavBarToAppDuringTransition
-                // Skip the case where the nav bar is controlled by fixed rotation.
-                || mDisplayContent.getFixedRotationAnimationController() != null) {
+                // Skip the case where the nav bar is controlled by fade rotation.
+                || mDisplayContent.getFadeRotationAnimationController() != null) {
             return;
         }
         ActivityRecord topActivity = null;
@@ -1004,9 +1005,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     boolean updateInputConsumerForApp(InputWindowHandle inputWindowHandle) {
         // Update the input consumer touchable region to match the target app main window
-        final WindowState targetAppMainWindow = mTargetActivityRecord != null
-                ? mTargetActivityRecord.findMainWindow()
-                : null;
+        final WindowState targetAppMainWindow = getTargetAppMainWindow();
         if (targetAppMainWindow != null) {
             targetAppMainWindow.getBounds(mTmpRect);
             inputWindowHandle.touchableRegion.set(mTmpRect);
@@ -1024,6 +1023,13 @@ public class RecentsAnimationController implements DeathRecipient {
             return false;
         }
         return mTargetActivityRecord.windowsCanBeWallpaperTarget();
+    }
+
+    WindowState getTargetAppMainWindow() {
+        if (mTargetActivityRecord == null) {
+            return null;
+        }
+        return mTargetActivityRecord.findMainWindow();
     }
 
     boolean isAnimatingTask(Task task) {

@@ -58,7 +58,6 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.UiServiceTestCase;
 
@@ -70,8 +69,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -514,6 +511,20 @@ public class ManagedServicesTest extends UiServiceTestCase {
         List<ComponentName> components =  service.getAllowedComponents(0);
         assertEquals(5, components.size());
         assertTrue(components.contains(new ComponentName("package", "default")));
+    }
+
+    @Test
+    public void resetPackage_clearsUserSet() {
+        // setup
+        ManagedServices service =
+                new TestManagedServices(
+                        getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
+        String componentName = "package/user-allowed";
+        service.addApprovedList(componentName, 0, true);
+
+        service.resetComponents("package", 0);
+
+        assertFalse(service.isPackageOrComponentUserSet(componentName, 0));
     }
 
     /** Test that backup only writes packages/components that belong to the target user. */
@@ -1111,7 +1122,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         when(service.asBinder()).thenReturn(mock(IBinder.class));
         ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
                 mIpm, APPROVAL_BY_PACKAGE);
-        services.registerSystemService(service, null, 10);
+        services.registerSystemService(service, null, 10, 1000);
         ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
         info.isSystem = true;
 
@@ -1163,10 +1174,10 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         ManagedServices.ManagedServiceInfo service0 = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("a/a"), 0, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 34);
         ManagedServices.ManagedServiceInfo service10 = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("b/b"), 10, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 345);
         Set<ManagedServices.ManagedServiceInfo> removableBoundServices = new ArraySet<>();
         removableBoundServices.add(service0);
         removableBoundServices.add(service10);
@@ -1199,13 +1210,13 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         ManagedServices.ManagedServiceInfo service0 = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("a/a"), 0, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 345);
         ManagedServices.ManagedServiceInfo service0a = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("c/c"), 0, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 3456);
         ManagedServices.ManagedServiceInfo service10 = service.new ManagedServiceInfo(
                 iInterface, ComponentName.unflattenFromString("b/b"), 10, false,
-                mock(ServiceConnection.class), 26);
+                mock(ServiceConnection.class), 26, 34567);
         Set<ManagedServices.ManagedServiceInfo> removableBoundServices = new ArraySet<>();
         removableBoundServices.add(service0);
         removableBoundServices.add(service0a);

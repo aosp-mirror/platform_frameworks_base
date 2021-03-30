@@ -41,12 +41,14 @@ import android.media.permission.Identity;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.HotwordDetectionService.InitializationStatus;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -67,7 +69,7 @@ import java.util.Locale;
  *                    mark and track it as such.
  */
 @SystemApi
-public class AlwaysOnHotwordDetector {
+public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     //---- States of Keyphrase availability. Return codes for onAvailabilityChanged() ----//
     /**
      * Indicates that this hotword detector is no longer valid for any recognition
@@ -239,18 +241,6 @@ public class AlwaysOnHotwordDetector {
     public @interface ModelParams {}
 
     /**
-     * Indicates that the given audio data is a false alert for {@link VoiceInteractionService}.
-     */
-    public static final int HOTWORD_DETECTION_FALSE_ALERT = 0;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "HOTWORD_DETECTION_" }, value = {
-            HOTWORD_DETECTION_FALSE_ALERT,
-    })
-    public @interface HotwordDetectionResult {}
-
-    /**
      * Controls the sensitivity threshold adjustment factor for a given model.
      * Negative value corresponds to less sensitive model (high threshold) and
      * a positive value corresponds to a more sensitive model (low threshold).
@@ -271,6 +261,7 @@ public class AlwaysOnHotwordDetector {
     private static final int MSG_DETECTION_PAUSE = 4;
     private static final int MSG_DETECTION_RESUME = 5;
     private static final int MSG_HOTWORD_REJECTED = 6;
+    private static final int MSG_HOTWORD_STATUS_REPORTED = 7;
 
     private final String mText;
     private final Locale mLocale;
@@ -354,14 +345,35 @@ public class AlwaysOnHotwordDetector {
         // Raw data associated with the event.
         // This is the audio that triggered the keyphrase if {@code isTriggerAudio} is true.
         private final byte[] mData;
+        private final HotwordDetectedResult mHotwordDetectedResult;
+        private final ParcelFileDescriptor mAudioStream;
 
         private EventPayload(boolean triggerAvailable, boolean captureAvailable,
                 AudioFormat audioFormat, int captureSession, byte[] data) {
+            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data, null,
+                    null);
+        }
+
+        EventPayload(AudioFormat audioFormat, HotwordDetectedResult hotwordDetectedResult) {
+            this(false, false, audioFormat, -1, null, hotwordDetectedResult, null);
+        }
+
+        EventPayload(AudioFormat audioFormat,
+                HotwordDetectedResult hotwordDetectedResult,
+                ParcelFileDescriptor audioStream) {
+            this(false, false, audioFormat, -1, null, hotwordDetectedResult, audioStream);
+        }
+
+        private EventPayload(boolean triggerAvailable, boolean captureAvailable,
+                AudioFormat audioFormat, int captureSession, byte[] data,
+                HotwordDetectedResult hotwordDetectedResult, ParcelFileDescriptor audioStream) {
             mTriggerAvailable = triggerAvailable;
             mCaptureAvailable = captureAvailable;
             mCaptureSession = captureSession;
             mAudioFormat = audioFormat;
             mData = data;
+            mHotwordDetectedResult = hotwordDetectedResult;
+            mAudioStream = audioStream;
         }
 
         /**
@@ -417,12 +429,39 @@ public class AlwaysOnHotwordDetector {
                 return null;
             }
         }
+
+        /**
+         * Returns {@link HotwordDetectedResult} associated with the hotword event, passed from
+         * {@link HotwordDetectionService}.
+         */
+        @Nullable
+        public HotwordDetectedResult getHotwordDetectedResult() {
+            return mHotwordDetectedResult;
+        }
+
+        /**
+         * Returns a stream with bytes corresponding to the open audio stream with hotword data.
+         *
+         * <p>This data represents an audio stream in the format returned by
+         * {@link #getCaptureAudioFormat}.
+         *
+         * <p>Clients are expected to start consuming the stream within 1 second of receiving the
+         * event.
+         *
+         * <p>When this method returns a non-null, clients must close this stream when it's no
+         * longer needed. Failing to do so will result in microphone being open for longer periods
+         * of time, and app being attributed for microphone usage.
+         */
+        @Nullable
+        public ParcelFileDescriptor getAudioStream() {
+            return mAudioStream;
+        }
     }
 
     /**
      * Callbacks for always-on hotword detection.
      */
-    public static abstract class Callback {
+    public abstract static class Callback implements HotwordDetector.Callback {
 
         /**
          * Updates the availability state of the active keyphrase and locale on every keyphrase
@@ -478,11 +517,23 @@ public class AlwaysOnHotwordDetector {
         public abstract void onRecognitionResumed();
 
         /**
-         * Called when the validated result is invalid.
+         * Called when the {@link HotwordDetectionService second stage detection} did not detect the
+         * keyphrase.
          *
-         * @param reason The reason why the validated result is invalid.
+         * @param result Info about the second stage detection result, provided by the
+         *         {@link HotwordDetectionService}.
          */
-        public void onRejected(@HotwordDetectionResult int reason) {}
+        public void onRejected(@Nullable HotwordRejectedResult result) {
+        }
+
+        /**
+         * Called when the {@link HotwordDetectionService} is created by the system and given a
+         * short amount of time to report it's initialization state.
+         *
+         * @param status Info about initialization state of {@link HotwordDetectionService}.
+         */
+        public void onHotwordDetectionServiceInitialized(@InitializationStatus int status) {
+        }
     }
 
     /**
@@ -494,8 +545,8 @@ public class AlwaysOnHotwordDetector {
      * @param supportHotwordDetectionService {@code true} if hotword detection service should be
      * triggered, otherwise {@code false}.
      * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
-     * contents that can be used to communicate with other processes.
+     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
      * @param sharedMemory The unrestricted data blob provided by the
      * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
@@ -505,19 +556,21 @@ public class AlwaysOnHotwordDetector {
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportHotwordDetectionService, @Nullable Bundle options,
+            boolean supportHotwordDetectionService, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
+        super(modelManagementService, callback);
+
+        mHandler = new MyHandler();
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
         mExternalCallback = callback;
-        mHandler = new MyHandler();
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mTargetSdkVersion = targetSdkVersion;
         mSupportHotwordDetectionService = supportHotwordDetectionService;
         if (mSupportHotwordDetectionService) {
-            setHotwordDetectionServiceConfig(options, sharedMemory);
+            updateStateLocked(options, sharedMemory, mInternalCallback);
         }
         try {
             Identity identity = new Identity();
@@ -533,30 +586,42 @@ public class AlwaysOnHotwordDetector {
     /**
      * Set configuration and pass read-only data to hotword detection service.
      *
-     * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. The system strips out any remotable objects or other
-     * contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob provided by the
-     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
+     * @param options Application configuration data to provide to the
+     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
+     * other contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to the
+     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
      * such data to the trusted process.
      *
-     * @throws IllegalStateException if it doesn't support hotword detection service.
-     *
-     * @hide
+     * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
+     * {@link HotwordDetectionService} when it was created. In addition, if this
+     * AlwaysOnHotwordDetector is in an invalid or error state.
      */
-    public final void setHotwordDetectionServiceConfig(@Nullable Bundle options,
+    public final void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         if (DBG) {
-            Slog.d(TAG, "setHotwordDetectionServiceConfig()");
+            Slog.d(TAG, "updateState()");
         }
-        if (!mSupportHotwordDetectionService) {
-            throw new IllegalStateException(
-                    "setHotwordDetectionServiceConfig called, but it doesn't support hotword"
-                            + " detection service");
+        synchronized (mLock) {
+            if (!mSupportHotwordDetectionService) {
+                throw new IllegalStateException(
+                        "updateState called, but it doesn't support hotword detection service");
+            }
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException(
+                        "updateState called on an invalid detector or error state");
+            }
+            updateStateLocked(options, sharedMemory, null /* callback */);
         }
+    }
 
+    private void updateStateLocked(@Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
+        if (DBG) {
+            Slog.d(TAG, "updateStateLocked()");
+        }
         try {
-            mModelManagementService.setHotwordDetectionServiceConfig(options, sharedMemory);
+            mModelManagementService.updateState(options, sharedMemory, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -667,6 +732,17 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
+     * Starts recognition for the associated keyphrase.
+     *
+     * @see #startRecognition(int)
+     */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    @Override
+    public boolean startRecognition() {
+        return startRecognition(0);
+    }
+
+    /**
      * Stops recognition for the associated keyphrase.
      * Caller must be the active voice interaction service via
      * Settings.Secure.VOICE_INTERACTION_SERVICE.
@@ -680,6 +756,7 @@ public class AlwaysOnHotwordDetector {
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    @Override
     public boolean stopRecognition() {
         if (DBG) Slog.d(TAG, "stopRecognition()");
         synchronized (mLock) {
@@ -1069,13 +1146,13 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onRejected(int reason) {
+        public void onRejected(HotwordRejectedResult result) {
             if (DBG) {
-                Slog.d(TAG, "onRejected(" + reason + ")");
+                Slog.d(TAG, "onRejected(" + result + ")");
             } else {
                 Slog.i(TAG, "onRejected");
             }
-            Message.obtain(mHandler, MSG_HOTWORD_REJECTED, reason).sendToTarget();
+            Message.obtain(mHandler, MSG_HOTWORD_REJECTED, result).sendToTarget();
         }
 
         @Override
@@ -1094,6 +1171,18 @@ public class AlwaysOnHotwordDetector {
         public void onRecognitionResumed() {
             Slog.i(TAG, "onRecognitionResumed");
             mHandler.sendEmptyMessage(MSG_DETECTION_RESUME);
+        }
+
+        @Override
+        public void onStatusReported(int status) {
+            if (DBG) {
+                Slog.d(TAG, "onStatusReported(" + status + ")");
+            } else {
+                Slog.i(TAG, "onStatusReported");
+            }
+            Message message = Message.obtain(mHandler, MSG_HOTWORD_STATUS_REPORTED);
+            message.arg1 = status;
+            message.sendToTarget();
         }
     }
 
@@ -1124,7 +1213,10 @@ public class AlwaysOnHotwordDetector {
                     mExternalCallback.onRecognitionResumed();
                     break;
                 case MSG_HOTWORD_REJECTED:
-                    mExternalCallback.onRejected(msg.arg1);
+                    mExternalCallback.onRejected((HotwordRejectedResult) msg.obj);
+                    break;
+                case MSG_HOTWORD_STATUS_REPORTED:
+                    mExternalCallback.onHotwordDetectionServiceInitialized(msg.arg1);
                     break;
                 default:
                     super.handleMessage(msg);

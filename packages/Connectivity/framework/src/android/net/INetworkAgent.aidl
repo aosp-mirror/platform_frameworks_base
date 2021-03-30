@@ -46,4 +46,6 @@ oneway interface INetworkAgent {
     void onRemoveKeepalivePacketFilter(int slot);
     void onQosFilterCallbackRegistered(int qosCallbackId, in QosFilterParcelable filterParcel);
     void onQosCallbackUnregistered(int qosCallbackId);
+    void onNetworkCreated();
+    void onNetworkDestroyed();
 }

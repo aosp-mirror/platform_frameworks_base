@@ -118,6 +118,12 @@ public class MeasuredEnergySnapshot {
         /** The chargeUC for {@link EnergyConsumerType#DISPLAY}. */
         public long displayChargeUC = UNAVAILABLE;
 
+        /** The chargeUC for {@link EnergyConsumerType#GNSS}. */
+        public long gnssChargeUC = UNAVAILABLE;
+
+        /** The chargeUC for {@link EnergyConsumerType#MOBILE_RADIO}. */
+        public long mobileRadioChargeUC = UNAVAILABLE;
+
         /** The chargeUC for {@link EnergyConsumerType#WIFI}. */
         public long wifiChargeUC = UNAVAILABLE;
 
@@ -217,6 +223,14 @@ public class MeasuredEnergySnapshot {
                     output.displayChargeUC = deltaChargeUC;
                     break;
 
+                case EnergyConsumerType.GNSS:
+                    output.gnssChargeUC = deltaChargeUC;
+                    break;
+
+                case EnergyConsumerType.MOBILE_RADIO:
+                    output.mobileRadioChargeUC = deltaChargeUC;
+                    break;
+
                 case EnergyConsumerType.WIFI:
                     output.wifiChargeUC = deltaChargeUC;
                     break;
@@ -241,7 +255,7 @@ public class MeasuredEnergySnapshot {
     /**
      * For a consumer of type {@link EnergyConsumerType#OTHER}, updates
      * {@link #mAttributionSnapshots} with freshly measured energies (per uid) and returns the
-     * charge consumed (in microcouloumbs) between the previously stored values and the passed-in
+     * charge consumed (in microcoulombs) between the previously stored values and the passed-in
      * values.
      *
      * @param consumerInfo a consumer of type {@link EnergyConsumerType#OTHER}.
@@ -341,11 +355,11 @@ public class MeasuredEnergySnapshot {
         return numOrdinals;
     }
 
-    /** Calculate charge consumption (in microcouloumbs) from a given energy and voltage */
+    /** Calculate charge consumption (in microcoulombs) from a given energy and voltage */
     private long calculateChargeConsumedUC(long deltaEnergyUJ, int avgVoltageMV) {
         // To overflow, a 3.7V 10000mAh battery would need to completely drain 69244 times
-        // since the last snapshot. Round up to the nearest whole long.
-        return (deltaEnergyUJ * MILLIVOLTS_PER_VOLT + (avgVoltageMV + 1) / 2) / avgVoltageMV;
+        // since the last snapshot. Round off to the nearest whole long.
+        return (deltaEnergyUJ * MILLIVOLTS_PER_VOLT + (avgVoltageMV / 2)) / avgVoltageMV;
     }
 
 }
