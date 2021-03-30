@@ -1635,13 +1635,6 @@ class UserController implements Handler.Callback {
      * PIN or pattern.
      */
     private boolean maybeUnlockUser(final @UserIdInt int userId) {
-        if (mInjector.isFileEncryptedNativeOnly() && mLockPatternUtils.isSecure(userId)) {
-            // A token is needed, so don't bother trying to unlock without one.
-            // This keeps misleading error messages from being logged.
-            Slog.d(TAG, "Not unlocking user " + userId
-                    + "'s CE storage yet because a credential token is needed");
-            return false;
-        }
         // Try unlocking storage using empty token
         return unlockUserCleared(userId, null, null, null);
     }
@@ -3091,12 +3084,6 @@ class UserController implements Handler.Callback {
 
         protected IStorageManager getStorageManager() {
             return IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
-        }
-
-        // This is needed because isFileEncryptedNativeOnly is a static method,
-        // but it needs to be mocked out in tests.
-        protected boolean isFileEncryptedNativeOnly() {
-            return StorageManager.isFileEncryptedNativeOnly();
         }
     }
 }
