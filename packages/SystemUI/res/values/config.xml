@@ -589,6 +589,10 @@
     <!-- Determines whether the shell features all run on another thread. -->
     <bool name="config_enableShellMainThread">false</bool>
 
+    <!-- package name of a built-in camera app to use to restrict implicit intent resolution
+         when the double-press power gesture is used. Ignored if empty. -->
+    <string translatable="false" name="config_cameraGesturePackage"></string>
+
     <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
     <bool name="allow_force_nav_bar_handle_opaque">true</bool>
 
