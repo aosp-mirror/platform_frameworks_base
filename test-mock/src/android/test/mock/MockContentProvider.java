@@ -18,6 +18,7 @@ package android.test.mock;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.AttributionSource;
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -60,21 +61,20 @@ public class MockContentProvider extends ContentProvider {
      */
     private class InversionIContentProvider implements IContentProvider {
         @Override
-        public ContentProviderResult[] applyBatch(String callingPackage,
-                @Nullable String featureId, String authority,
-                ArrayList<ContentProviderOperation> operations)
+        public ContentProviderResult[] applyBatch(@NonNull AttributionSource attributionSource,
+                String authority, ArrayList<ContentProviderOperation> operations)
                 throws RemoteException, OperationApplicationException {
             return MockContentProvider.this.applyBatch(authority, operations);
         }
 
         @Override
-        public int bulkInsert(String callingPackage, @Nullable String featureId, Uri url,
+        public int bulkInsert(@NonNull AttributionSource attributionSource, Uri url,
                 ContentValues[] initialValues) throws RemoteException {
             return MockContentProvider.this.bulkInsert(url, initialValues);
         }
 
         @Override
-        public int delete(String callingPackage, @Nullable String featureId, Uri url,
+        public int delete(@NonNull AttributionSource attributionSource, Uri url,
                 Bundle extras) throws RemoteException {
             return MockContentProvider.this.delete(url, extras);
         }
@@ -90,40 +90,40 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public Uri insert(String callingPackage, @Nullable String featureId, Uri url,
+        public Uri insert(@NonNull AttributionSource attributionSource, Uri url,
                 ContentValues initialValues, Bundle extras) throws RemoteException {
             return MockContentProvider.this.insert(url, initialValues, extras);
         }
 
         @Override
-        public AssetFileDescriptor openAssetFile(String callingPackage,
-                @Nullable String featureId, Uri url, String mode, ICancellationSignal signal)
+        public AssetFileDescriptor openAssetFile(@NonNull AttributionSource attributionSource,
+                Uri url, String mode, ICancellationSignal signal)
                 throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openAssetFile(url, mode);
         }
 
         @Override
-        public ParcelFileDescriptor openFile(String callingPackage, @Nullable String featureId,
-                Uri url, String mode, ICancellationSignal signal, IBinder callerToken)
+        public ParcelFileDescriptor openFile(@NonNull AttributionSource attributionSource,
+                Uri url, String mode, ICancellationSignal signal)
                 throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openFile(url, mode);
         }
 
         @Override
-        public Cursor query(String callingPackage, @Nullable String featureId, Uri url,
+        public Cursor query(@NonNull AttributionSource attributionSource, Uri url,
                 @Nullable String[] projection, @Nullable Bundle queryArgs,
                 @Nullable ICancellationSignal cancellationSignal) throws RemoteException {
             return MockContentProvider.this.query(url, projection, queryArgs, null);
         }
 
         @Override
-        public int update(String callingPackage, @Nullable String featureId, Uri url,
+        public int update(@NonNull AttributionSource attributionSource, Uri url,
                 ContentValues values, Bundle extras) throws RemoteException {
             return MockContentProvider.this.update(url, values, extras);
         }
 
         @Override
-        public Bundle call(String callingPackage, @Nullable String featureId, String authority,
+        public Bundle call(@NonNull AttributionSource attributionSource, String authority,
                 String method, String request, Bundle args) throws RemoteException {
             return MockContentProvider.this.call(authority, method, request, args);
         }
@@ -139,9 +139,10 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public AssetFileDescriptor openTypedAssetFile(String callingPackage,
-                @Nullable String featureId, Uri url, String mimeType, Bundle opts,
-                ICancellationSignal signal) throws RemoteException, FileNotFoundException {
+        public AssetFileDescriptor openTypedAssetFile(
+                @NonNull AttributionSource attributionSource, Uri url, String mimeType,
+                Bundle opts, ICancellationSignal signal)
+                throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openTypedAssetFile(url, mimeType, opts);
         }
 
@@ -151,37 +152,37 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public Uri canonicalize(String callingPkg, @Nullable String featureId, Uri uri)
+        public Uri canonicalize(@NonNull AttributionSource attributionSource, Uri uri)
                 throws RemoteException {
             return MockContentProvider.this.canonicalize(uri);
         }
 
         @Override
-        public void canonicalizeAsync(String callingPkg, String featureId, Uri uri,
+        public void canonicalizeAsync(@NonNull AttributionSource attributionSource, Uri uri,
                 RemoteCallback callback) {
             MockContentProvider.this.canonicalizeAsync(uri, callback);
         }
 
         @Override
-        public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri uri)
+        public Uri uncanonicalize(@NonNull AttributionSource attributionSource, Uri uri)
                 throws RemoteException {
             return MockContentProvider.this.uncanonicalize(uri);
         }
 
         @Override
-        public void uncanonicalizeAsync(String callingPkg, String featureId, Uri uri,
+        public void uncanonicalizeAsync(@NonNull AttributionSource attributionSource, Uri uri,
                 RemoteCallback callback) {
             MockContentProvider.this.uncanonicalizeAsync(uri, callback);
         }
 
         @Override
-        public boolean refresh(String callingPkg, @Nullable String featureId, Uri url,
+        public boolean refresh(@NonNull AttributionSource attributionSource, Uri url,
                 Bundle args, ICancellationSignal cancellationSignal) throws RemoteException {
             return MockContentProvider.this.refresh(url, args);
         }
 
         @Override
-        public int checkUriPermission(String callingPkg, @Nullable String featureId, Uri uri,
+        public int checkUriPermission(@NonNull AttributionSource attributionSource, Uri uri,
                 int uid, int modeFlags) {
             return MockContentProvider.this.checkUriPermission(uri, uid, modeFlags);
         }

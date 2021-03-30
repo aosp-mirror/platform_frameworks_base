@@ -64,13 +64,6 @@ final class MediaButtonReceiverHolder {
     private static final int PACKAGE_MANAGER_COMMON_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
-    /**
-     * Denotes the duration during which a media button receiver will be exempted from
-     * FGS-from-BG restriction and so will be allowed to start an FGS even if it is in the
-     * background state while it receives a media key event.
-     */
-    private static final long FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS = 10_000;
-
     private final int mUserId;
     private final PendingIntent mPendingIntent;
     private final ComponentName mComponentName;
@@ -185,10 +178,13 @@ final class MediaButtonReceiverHolder {
      *                           Ignored if there's no valid pending intent.
      * @param handler handler to be used to call onFinishedListener
      *                Ignored if there's no valid pending intent.
+     * @param fgsAllowlistDurationMs duration for which the media button receiver will be
+     *                               allowed to start FGS from BG.
      * @see PendingIntent#send(Context, int, Intent, PendingIntent.OnFinished, Handler)
      */
     public boolean send(Context context, KeyEvent keyEvent, String callingPackageName,
-            int resultCode, PendingIntent.OnFinished onFinishedListener, Handler handler) {
+            int resultCode, PendingIntent.OnFinished onFinishedListener, Handler handler,
+            long fgsAllowlistDurationMs) {
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
@@ -196,7 +192,7 @@ final class MediaButtonReceiverHolder {
         mediaButtonIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, callingPackageName);
 
         final BroadcastOptions options = BroadcastOptions.makeBasic();
-        options.setTemporaryAppAllowlist(FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS,
+        options.setTemporaryAppAllowlist(fgsAllowlistDurationMs,
                 PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                 PowerWhitelistManager.REASON_MEDIA_BUTTON, "");
         if (mPendingIntent != null) {

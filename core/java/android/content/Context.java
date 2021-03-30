@@ -889,6 +889,15 @@ public abstract class Context {
         return null;
     }
 
+    /**
+     * @return The identity of this context for permission purposes.
+     *
+     * @see AttributionSource
+     */
+    public @NonNull AttributionSource getAttributionSource() {
+        return null;
+    }
+
     // TODO moltmann: Remove
     /**
      * @removed
@@ -6465,8 +6474,10 @@ public abstract class Context {
      * @removed
      */
     @Deprecated
-    public @NonNull Context createFeatureContext(@Nullable String featureId) {
-        return createAttributionContext(featureId);
+    public @NonNull Context createFeatureContext(@Nullable String attributionTag) {
+        return createContext(new ContextParams.Builder()
+                .setAttributionTag(attributionTag)
+                .build());
     }
 
     /**

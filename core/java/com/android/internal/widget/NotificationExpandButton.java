@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
@@ -165,11 +166,13 @@ public class NotificationExpandButton extends FrameLayout {
     private void updateColors() {
         if (shouldShowNumber() && !mDisallowColor) {
             mPillView.setBackgroundTintList(ColorStateList.valueOf(mHighlightPillColor));
-            mIconView.setColorFilter(mHighlightTextColor);
+            mPillView.setBackgroundTintMode(PorterDuff.Mode.SRC_IN);
+            mIconView.setColorFilter(mHighlightTextColor, PorterDuff.Mode.SRC_IN);
             mNumberView.setTextColor(mHighlightTextColor);
         } else {
             mPillView.setBackgroundTintList(ColorStateList.valueOf(mDefaultPillColor));
-            mIconView.setColorFilter(mDefaultTextColor);
+            mPillView.setBackgroundTintMode(PorterDuff.Mode.SRC_IN);
+            mIconView.setColorFilter(mDefaultTextColor, PorterDuff.Mode.SRC_IN);
             mNumberView.setTextColor(mDefaultTextColor);
         }
     }

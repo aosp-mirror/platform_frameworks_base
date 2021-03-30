@@ -18,20 +18,18 @@
 
 #include <algorithm>
 #include <memory>
-#include <string>
 #include <tuple>
 
 #include "android-base/logging.h"
-#include "android-base/stringprintf.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 
-#include "Debug.h"
 #include "NameMangler.h"
+#include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-#include "trace/TraceBuffer.h"
 #include "text/Unicode.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 
 using ::aapt::text::IsValidResourceEntryName;
@@ -43,135 +41,108 @@ namespace aapt {
 
 const char* Overlayable::kActorScheme = "overlay";
 
-static bool less_than_type_and_id(const std::unique_ptr<ResourceTableType>& lhs,
-                                  const std::pair<ResourceType, Maybe<uint8_t>>& rhs) {
-  return lhs->type < rhs.first || (lhs->type == rhs.first && rhs.second && lhs->id < rhs.second);
+namespace {
+bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs, ResourceType rhs) {
+  return lhs->type < rhs;
 }
 
 template <typename T>
-static bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, const StringPiece& rhs) {
+bool less_than_type_and_id(const T& lhs, const std::pair<ResourceType, Maybe<uint8_t>>& rhs) {
+  return lhs.id != rhs.second ? lhs.id < rhs.second : lhs.type < rhs.first;
+}
+
+template <typename T>
+bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, const StringPiece& rhs) {
   return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
 }
 
 template <typename T>
-static bool less_than_struct_with_name_and_id(const std::unique_ptr<T>& lhs,
-                                              const std::pair<StringPiece, Maybe<uint16_t>>& rhs) {
-  int name_cmp = lhs->name.compare(0, lhs->name.size(), rhs.first.data(), rhs.first.size());
-  return name_cmp < 0 || (name_cmp == 0 && rhs.second && lhs->id < rhs.second);
+bool greater_than_struct_with_name(const StringPiece& lhs, const std::unique_ptr<T>& rhs) {
+  return rhs->name.compare(0, rhs->name.size(), lhs.data(), lhs.size()) > 0;
 }
 
-ResourceTablePackage* ResourceTable::FindPackage(const StringPiece& name) const {
-  const auto last = packages.end();
-  auto iter = std::lower_bound(packages.begin(), last, name,
-                               less_than_struct_with_name<ResourceTablePackage>);
-  if (iter != last && name == (*iter)->name) {
-    return iter->get();
+template <typename T>
+struct NameEqualRange {
+  bool operator()(const std::unique_ptr<T>& lhs, const StringPiece& rhs) const {
+    return less_than_struct_with_name<T>(lhs, rhs);
   }
-  return nullptr;
+  bool operator()(const StringPiece& lhs, const std::unique_ptr<T>& rhs) const {
+    return greater_than_struct_with_name<T>(lhs, rhs);
+  }
+};
+
+template <typename T, typename U>
+bool less_than_struct_with_name_and_id(const T& lhs,
+                                       const std::pair<std::string_view, Maybe<U>>& rhs) {
+  if (lhs.id != rhs.second) {
+    return lhs.id < rhs.second;
+  }
+  return lhs.name.compare(0, lhs.name.size(), rhs.first.data(), rhs.first.size()) < 0;
 }
 
-ResourceTablePackage* ResourceTable::FindPackageById(uint8_t id) const {
-  for (auto& package : packages) {
-    if (package->id && package->id.value() == id) {
-      return package.get();
-    }
-  }
-  return nullptr;
+template <typename T, typename U>
+bool less_than_struct_with_name_and_id_pointer(const T* lhs,
+                                               const std::pair<std::string_view, Maybe<U>>& rhs) {
+  return less_than_struct_with_name_and_id(*lhs, rhs);
 }
 
-ResourceTablePackage* ResourceTable::CreatePackage(const StringPiece& name, Maybe<uint8_t> id) {
-  TRACE_CALL();
-  ResourceTablePackage* package = FindOrCreatePackage(name);
-  if (id && !package->id) {
-    package->id = id;
-    return package;
-  }
-
-  if (id && package->id && package->id.value() != id.value()) {
-    return nullptr;
-  }
-  return package;
+template <typename T, typename Func, typename Elements>
+T* FindElementsRunAction(const android::StringPiece& name, Elements& entries, Func action) {
+  const auto iter =
+      std::lower_bound(entries.begin(), entries.end(), name, less_than_struct_with_name<T>);
+  const bool found = iter != entries.end() && name == (*iter)->name;
+  return action(found, iter);
 }
 
-ResourceTablePackage* ResourceTable::CreatePackageAllowingDuplicateNames(const StringPiece& name,
-                                                                         const Maybe<uint8_t> id) {
-  const auto last = packages.end();
-  auto iter = std::lower_bound(packages.begin(), last, std::make_pair(name, id),
-                               less_than_struct_with_name_and_id<ResourceTablePackage>);
+}  // namespace
 
-  if (iter != last && name == (*iter)->name && id == (*iter)->id) {
-    return iter->get();
-  }
-
-  std::unique_ptr<ResourceTablePackage> new_package = util::make_unique<ResourceTablePackage>();
-  new_package->name = name.to_string();
-  new_package->id = id;
-  return packages.emplace(iter, std::move(new_package))->get();
+ResourceTable::ResourceTable(ResourceTable::Validation validation) : validation_(validation) {
 }
 
-ResourceTablePackage* ResourceTable::FindOrCreatePackage(const StringPiece& name) {
-  const auto last = packages.end();
-  auto iter = std::lower_bound(packages.begin(), last, name,
-                               less_than_struct_with_name<ResourceTablePackage>);
-  if (iter != last && name == (*iter)->name) {
-    return iter->get();
-  }
-
-  std::unique_ptr<ResourceTablePackage> new_package = util::make_unique<ResourceTablePackage>();
-  new_package->name = name.to_string();
-  return packages.emplace(iter, std::move(new_package))->get();
+ResourceTablePackage* ResourceTable::FindPackage(const android::StringPiece& name) const {
+  return FindElementsRunAction<ResourceTablePackage>(
+      name, packages, [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
 }
 
-ResourceTableType* ResourceTablePackage::FindType(ResourceType type, const Maybe<uint8_t> id) {
-  const auto last = types.end();
-  auto iter = std::lower_bound(types.begin(), last, std::make_pair(type, id),
-                               less_than_type_and_id);
-  if (iter != last && (*iter)->type == type && (!id || id == (*iter)->id)) {
-    return iter->get();
-  }
-  return nullptr;
+ResourceTablePackage* ResourceTable::FindOrCreatePackage(const android::StringPiece& name) {
+  return FindElementsRunAction<ResourceTablePackage>(name, packages, [&](bool found, auto& iter) {
+    return found ? iter->get() : packages.emplace(iter, new ResourceTablePackage(name))->get();
+  });
 }
 
-ResourceTableType* ResourceTablePackage::FindOrCreateType(ResourceType type,
-                                                          const Maybe<uint8_t> id) {
-  const auto last = types.end();
-  auto iter = std::lower_bound(types.begin(), last, std::make_pair(type, id),
-                               less_than_type_and_id);
-  if (iter != last && (*iter)->type == type && (!id || id == (*iter)->id)) {
-    return iter->get();
-  }
-
-  auto new_type = new ResourceTableType(type);
-  new_type->id = id;
-  return types.emplace(iter, std::move(new_type))->get();
+template <typename Func, typename Elements>
+static ResourceTableType* FindTypeRunAction(ResourceType type, Elements& entries, Func action) {
+  const auto iter = std::lower_bound(entries.begin(), entries.end(), type, less_than_type);
+  const bool found = iter != entries.end() && type == (*iter)->type;
+  return action(found, iter);
 }
 
-ResourceEntry* ResourceTableType::FindEntry(const StringPiece& name, const Maybe<uint16_t> id) {
-  const auto last = entries.end();
-  auto iter = std::lower_bound(entries.begin(), last, std::make_pair(name, id),
-      less_than_struct_with_name_and_id<ResourceEntry>);
-  if (iter != last && name == (*iter)->name && (!id || id == (*iter)->id)) {
-    return iter->get();
-  }
-  return nullptr;
+ResourceTableType* ResourceTablePackage::FindType(ResourceType type) const {
+  return FindTypeRunAction(type, types,
+                           [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
 }
 
-ResourceEntry* ResourceTableType::FindOrCreateEntry(const StringPiece& name,
-                                                    const Maybe<uint16_t > id) {
-  auto last = entries.end();
-  auto iter = std::lower_bound(entries.begin(), last, std::make_pair(name, id),
-                               less_than_struct_with_name_and_id<ResourceEntry>);
-  if (iter != last && name == (*iter)->name && (!id || id == (*iter)->id)) {
-    return iter->get();
-  }
-
-  auto new_entry = new ResourceEntry(name);
-  new_entry->id = id;
-  return entries.emplace(iter, std::move(new_entry))->get();
+ResourceTableType* ResourceTablePackage::FindOrCreateType(ResourceType type) {
+  return FindTypeRunAction(type, types, [&](bool found, auto& iter) {
+    return found ? iter->get() : types.emplace(iter, new ResourceTableType(type))->get();
+  });
 }
 
-ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config) {
-  return FindValue(config, StringPiece());
+ResourceEntry* ResourceTableType::CreateEntry(const android::StringPiece& name) {
+  return FindElementsRunAction<ResourceEntry>(name, entries, [&](bool found, auto& iter) {
+    return entries.emplace(iter, new ResourceEntry(name))->get();
+  });
+}
+
+ResourceEntry* ResourceTableType::FindEntry(const android::StringPiece& name) const {
+  return FindElementsRunAction<ResourceEntry>(
+      name, entries, [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
+}
+
+ResourceEntry* ResourceTableType::FindOrCreateEntry(const android::StringPiece& name) {
+  return FindElementsRunAction<ResourceEntry>(name, entries, [&](bool found, auto& iter) {
+    return found ? iter->get() : entries.emplace(iter, new ResourceEntry(name))->get();
+  });
 }
 
 struct ConfigKey {
@@ -188,7 +159,20 @@ bool lt_config_key_ref(const std::unique_ptr<ResourceConfigValue>& lhs, const Co
 }
 
 ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
-                                              const StringPiece& product) {
+                                              android::StringPiece product) {
+  auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
+                               lt_config_key_ref);
+  if (iter != values.end()) {
+    ResourceConfigValue* value = iter->get();
+    if (value->config == config && StringPiece(value->product) == product) {
+      return value;
+    }
+  }
+  return nullptr;
+}
+
+const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescription& config,
+                                                    android::StringPiece product) const {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
                                lt_config_key_ref);
   if (iter != values.end()) {
@@ -323,303 +307,174 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
   return CollisionResult::kConflict;
 }
 
-ResourceTable::CollisionResult ResourceTable::IgnoreCollision(Value* /** existing **/,
-                                                              Value* /** incoming **/) {
-  return CollisionResult::kKeepBoth;
-}
+ResourceTableView ResourceTable::GetPartitionedView() const {
+  ResourceTableView view;
+  for (const auto& package : packages) {
+    for (const auto& type : package->types) {
+      for (const auto& entry : type->entries) {
+        std::pair<std::string_view, Maybe<uint8_t>> package_key(package->name, {});
+        std::pair<std::string_view, Maybe<ResourceId>> entry_key(entry->name, {});
+        std::pair<ResourceType, Maybe<uint8_t>> type_key(type->type, {});
+        if (entry->id) {
+          // If the entry has a defined id, use the id to determine insertion position.
+          package_key.second = entry->id.value().package_id();
+          type_key.second = entry->id.value().type_id();
+          entry_key.second = entry->id.value();
+        }
 
-static StringPiece ResourceNameValidator(const StringPiece& name) {
-  if (!IsValidResourceEntryName(name)) {
-    return name;
-  }
-  return {};
-}
+        auto package_it =
+            std::lower_bound(view.packages.begin(), view.packages.end(), package_key,
+                             less_than_struct_with_name_and_id<ResourceTablePackageView, uint8_t>);
+        if (package_it == view.packages.end() || package_it->name != package_key.first ||
+            package_it->id != package_key.second) {
+          ResourceTablePackageView new_package{std::string(package_key.first), package_key.second};
+          package_it = view.packages.insert(package_it, new_package);
+        }
 
-static StringPiece SkipNameValidator(const StringPiece& /*name*/) {
-  return {};
-}
+        auto type_it = std::lower_bound(package_it->types.begin(), package_it->types.end(),
+                                        type_key, less_than_type_and_id<ResourceTableTypeView>);
+        if (type_it == package_it->types.end() || type_key.first != type_it->type ||
+            type_it->id != type_key.second) {
+          ResourceTableTypeView new_type{type_key.first, type_key.second};
+          type_it = package_it->types.insert(type_it, new_type);
+        }
 
-bool ResourceTable::AddResource(const ResourceNameRef& name,
-                                const ConfigDescription& config,
-                                const StringPiece& product,
-                                std::unique_ptr<Value> value,
-                                IDiagnostics* diag) {
-  return AddResourceImpl(name, ResourceId{}, config, product, std::move(value),
-                         (validate_resources_ ? ResourceNameValidator : SkipNameValidator),
-                         (validate_resources_ ? ResolveValueCollision : IgnoreCollision), diag);
-}
+        if (entry->visibility.level == Visibility::Level::kPublic) {
+          // Only mark the type visibility level as public, it doesn't care about being private.
+          type_it->visibility_level = Visibility::Level::kPublic;
+        }
 
-bool ResourceTable::AddResourceWithId(const ResourceNameRef& name, const ResourceId& res_id,
-                                      const ConfigDescription& config, const StringPiece& product,
-                                      std::unique_ptr<Value> value, IDiagnostics* diag) {
-  return AddResourceImpl(name, res_id, config, product, std::move(value),
-                         (validate_resources_ ? ResourceNameValidator : SkipNameValidator),
-                         (validate_resources_ ? ResolveValueCollision : IgnoreCollision), diag);
-}
-
-bool ResourceTable::AddResourceMangled(const ResourceNameRef& name, const ConfigDescription& config,
-                                       const StringPiece& product, std::unique_ptr<Value> value,
-                                       IDiagnostics* diag) {
-  return AddResourceImpl(name, ResourceId{}, config, product, std::move(value), SkipNameValidator,
-                         (validate_resources_ ? ResolveValueCollision : IgnoreCollision), diag);
-}
-
-bool ResourceTable::AddResourceWithIdMangled(const ResourceNameRef& name, const ResourceId& id,
-                                             const ConfigDescription& config,
-                                             const StringPiece& product,
-                                             std::unique_ptr<Value> value, IDiagnostics* diag) {
-  return AddResourceImpl(name, id, config, product, std::move(value), SkipNameValidator,
-                         (validate_resources_ ? ResolveValueCollision : IgnoreCollision), diag);
-}
-
-bool ResourceTable::ValidateName(NameValidator name_validator, const ResourceNameRef& name,
-                                 const Source& source, IDiagnostics* diag) {
-  const StringPiece bad_char = name_validator(name.entry);
-  if (!bad_char.empty()) {
-    diag->Error(DiagMessage(source) << "resource '" << name << "' has invalid entry name '"
-                                    << name.entry << "'. Invalid character '" << bad_char << "'");
-    return false;
-  }
-  return true;
-}
-
-bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceId& res_id,
-                                    const ConfigDescription& config, const StringPiece& product,
-                                    std::unique_ptr<Value> value, NameValidator name_validator,
-                                    const CollisionResolverFunc& conflict_resolver,
-                                    IDiagnostics* diag) {
-  CHECK(value != nullptr);
-  CHECK(diag != nullptr);
-
-  const Source& source = value->GetSource();
-  if (!ValidateName(name_validator, name, source, diag)) {
-    return false;
-  }
-
-  // Check for package names appearing twice with two different package ids
-  ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  if (res_id.is_valid() && package->id && package->id.value() != res_id.package_id()) {
-    diag->Error(DiagMessage(source)
-                    << "trying to add resource '" << name << "' with ID " << res_id
-                    << " but package '" << package->name << "' already has ID "
-                    << StringPrintf("%02x", package->id.value()));
-    return false;
-  }
-
-  // Whether or not to error on duplicate resources
-  bool check_id = validate_resources_ && res_id.is_valid();
-  // Whether or not to create a duplicate resource if the id does not match
-  bool use_id = !validate_resources_ && res_id.is_valid();
-
-  ResourceTableType* type = package->FindOrCreateType(name.type, use_id ? res_id.type_id()
-                                                                        : Maybe<uint8_t>());
-
-  // Check for types appearing twice with two different type ids
-  if (check_id && type->id && type->id.value() != res_id.type_id()) {
-    diag->Error(DiagMessage(source)
-                    << "trying to add resource '" << name << "' with ID " << res_id
-                    << " but type '" << type->type << "' already has ID "
-                    << StringPrintf("%02x", type->id.value()));
-    return false;
-  }
-
-  ResourceEntry* entry = type->FindOrCreateEntry(name.entry, use_id ? res_id.entry_id()
-                                                                    : Maybe<uint16_t>());
-
-  // Check for entries appearing twice with two different entry ids
-  if (check_id && entry->id && entry->id.value() != res_id.entry_id()) {
-    diag->Error(DiagMessage(source)
-                    << "trying to add resource '" << name << "' with ID " << res_id
-                    << " but resource already has ID "
-                    << ResourceId(package->id.value(), type->id.value(), entry->id.value()));
-    return false;
-  }
-
-  ResourceConfigValue* config_value = entry->FindOrCreateValue(config, product);
-  if (!config_value->value) {
-    // Resource does not exist, add it now.
-    config_value->value = std::move(value);
-  } else {
-    switch (conflict_resolver(config_value->value.get(), value.get())) {
-      case CollisionResult::kKeepBoth:
-        // Insert the value ignoring for duplicate configurations
-        entry->values.push_back(util::make_unique<ResourceConfigValue>(config, product));
-        entry->values.back()->value = std::move(value);
-        break;
-
-      case CollisionResult::kTakeNew:
-        // Take the incoming value.
-        config_value->value = std::move(value);
-        break;
-
-      case CollisionResult::kConflict:
-        diag->Error(DiagMessage(source) << "duplicate value for resource '" << name << "' "
-                                        << "with config '" << config << "'");
-        diag->Error(DiagMessage(source) << "resource previously defined here");
-        return false;
-
-      case CollisionResult::kKeepOriginal:
-        break;
+        auto entry_it =
+            std::lower_bound(type_it->entries.begin(), type_it->entries.end(), entry_key,
+                             less_than_struct_with_name_and_id_pointer<ResourceEntry, ResourceId>);
+        type_it->entries.insert(entry_it, entry.get());
+      }
     }
   }
 
-  if (res_id.is_valid()) {
-    package->id = res_id.package_id();
-    type->id = res_id.type_id();
-    entry->id = res_id.entry_id();
-  }
-
-  return true;
+  return view;
 }
 
-bool ResourceTable::GetValidateResources() {
-  return validate_resources_;
-}
+bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
+  CHECK(diag != nullptr) << "Diagnostic pointer is null";
 
-bool ResourceTable::SetVisibility(const ResourceNameRef& name, const Visibility& visibility,
-                                  IDiagnostics* diag) {
-  return SetVisibilityImpl(name, visibility, {}, ResourceNameValidator, diag);
-}
-
-bool ResourceTable::SetVisibilityWithId(const ResourceNameRef& name, const Visibility& visibility,
-                                        const ResourceId& res_id, IDiagnostics* diag) {
-  return SetVisibilityImpl(name, visibility, res_id, ResourceNameValidator, diag);
-}
-
-bool ResourceTable::SetVisibilityWithIdMangled(const ResourceNameRef& name,
-                                               const Visibility& visibility,
-                                               const ResourceId& res_id, IDiagnostics* diag) {
-  return SetVisibilityImpl(name, visibility, res_id, SkipNameValidator, diag);
-}
-
-bool ResourceTable::SetVisibilityImpl(const ResourceNameRef& name, const Visibility& visibility,
-                                      const ResourceId& res_id, NameValidator name_validator,
-                                      IDiagnostics* diag) {
-  CHECK(diag != nullptr);
-
-  const Source& source = visibility.source;
-  if (!ValidateName(name_validator, name, source, diag)) {
-    return false;
-  }
-
-  // Check for package names appearing twice with two different package ids
-  ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  if (res_id.is_valid() && package->id && package->id.value() != res_id.package_id()) {
+  const bool validate = validation_ == Validation::kEnabled;
+  const Source source = res.value ? res.value->GetSource() : Source{};
+  if (validate && !res.allow_mangled && !IsValidResourceEntryName(res.name.entry)) {
     diag->Error(DiagMessage(source)
-                    << "trying to add resource '" << name << "' with ID " << res_id
-                    << " but package '" << package->name << "' already has ID "
-                    << StringPrintf("%02x", package->id.value()));
+                << "resource '" << res.name << "' has invalid entry name '" << res.name.entry);
     return false;
   }
 
-  // Whether or not to error on duplicate resources
-  bool check_id = validate_resources_ && res_id.is_valid();
-  // Whether or not to create a duplicate resource if the id does not match
-  bool use_id = !validate_resources_ && res_id.is_valid();
-
-  ResourceTableType* type = package->FindOrCreateType(name.type, use_id ? res_id.type_id()
-                                                                        : Maybe<uint8_t>());
-
-  // Check for types appearing twice with two different type ids
-  if (check_id && type->id && type->id.value() != res_id.type_id()) {
-    diag->Error(DiagMessage(source)
-                    << "trying to add resource '" << name << "' with ID " << res_id
-                    << " but type '" << type->type << "' already has ID "
-                    << StringPrintf("%02x", type->id.value()));
+  if (res.id.has_value() && !res.id->first.is_valid()) {
+    diag->Error(DiagMessage(source) << "trying to add resource '" << res.name << "' with ID "
+                                    << res.id->first << " but that ID is invalid");
     return false;
   }
 
-  ResourceEntry* entry = type->FindOrCreateEntry(name.entry, use_id ? res_id.entry_id()
-                                                                    : Maybe<uint16_t>());
+  auto package = FindOrCreatePackage(res.name.package);
+  auto type = package->FindOrCreateType(res.name.type);
+  auto entry_it = std::equal_range(type->entries.begin(), type->entries.end(), res.name.entry,
+                                   NameEqualRange<ResourceEntry>{});
+  const size_t entry_count = std::distance(entry_it.first, entry_it.second);
 
-  // Check for entries appearing twice with two different entry ids
-  if (check_id && entry->id && entry->id.value() != res_id.entry_id()) {
-    diag->Error(DiagMessage(source)
-                    << "trying to add resource '" << name << "' with ID " << res_id
-                    << " but resource already has ID "
-                    << ResourceId(package->id.value(), type->id.value(), entry->id.value()));
-    return false;
+  ResourceEntry* entry;
+  if (entry_count == 0) {
+    // Adding a new resource
+    entry = type->CreateEntry(res.name.entry);
+  } else if (entry_count == 1) {
+    // Assume that the existing resource is being modified
+    entry = entry_it.first->get();
+  } else {
+    // Multiple resources with the same name exist in the resource table. The only way to
+    // distinguish between them is using resource id since each resource should have a unique id.
+    CHECK(res.id.has_value()) << "ambiguous modification of resource entry '" << res.name
+                              << "' without specifying a resource id.";
+    entry = entry_it.first->get();
+    for (auto it = entry_it.first; it != entry_it.second; ++it) {
+      CHECK((bool)(*it)->id) << "ambiguous modification of resource entry '" << res.name
+                             << "' with multiple entries without resource ids";
+      if ((*it)->id == res.id->first) {
+        entry = it->get();
+        break;
+      }
+    }
   }
 
-  if (res_id.is_valid()) {
-    package->id = res_id.package_id();
-    type->id = res_id.type_id();
-    entry->id = res_id.entry_id();
+  if (res.id.has_value()) {
+    if (entry->id && entry->id.value() != res.id->first) {
+      if (res.id->second != OnIdConflict::CREATE_ENTRY) {
+        diag->Error(DiagMessage(source)
+                    << "trying to add resource '" << res.name << "' with ID " << res.id->first
+                    << " but resource already has ID " << entry->id.value());
+        return false;
+      }
+      entry = type->CreateEntry(res.name.entry);
+    }
+    entry->id = res.id->first;
   }
 
-  // Only mark the type visibility level as public, it doesn't care about being private.
-  if (visibility.level == Visibility::Level::kPublic) {
-    type->visibility_level = Visibility::Level::kPublic;
+  if (res.visibility.has_value()) {
+    // Only mark the type visibility level as public, it doesn't care about being private.
+    if (res.visibility->level == Visibility::Level::kPublic) {
+      type->visibility_level = Visibility::Level::kPublic;
+    }
+
+    if (res.visibility->level > entry->visibility.level) {
+      // This symbol definition takes precedence, replace.
+      entry->visibility = res.visibility.value();
+    }
   }
 
-  if (visibility.level == Visibility::Level::kUndefined &&
-      entry->visibility.level != Visibility::Level::kUndefined) {
-    // We can't undefine a symbol (remove its visibility). Ignore.
-    return true;
+  if (res.overlayable.has_value()) {
+    if (entry->overlayable_item) {
+      diag->Error(DiagMessage(res.overlayable->source)
+                  << "duplicate overlayable declaration for resource '" << res.name << "'");
+      diag->Error(DiagMessage(entry->overlayable_item.value().source)
+                  << "previous declaration here");
+      return false;
+    }
+    entry->overlayable_item = res.overlayable.value();
   }
 
-  if (visibility.level < entry->visibility.level) {
-    // We can't downgrade public to private. Ignore.
-    return true;
+  if (res.allow_new.has_value()) {
+    entry->allow_new = res.allow_new.value();
   }
 
-  // This symbol definition takes precedence, replace.
-  entry->visibility = visibility;
-  return true;
-}
+  if (res.value != nullptr) {
+    auto config_value = entry->FindOrCreateValue(res.config, res.product);
+    if (!config_value->value) {
+      // Resource does not exist, add it now.
+      config_value->value = std::move(res.value);
+    } else {
+      // When validation is enabled, ensure that a resource cannot have multiple values defined for
+      // the same configuration.
+      auto result = validate ? ResolveValueCollision(config_value->value.get(), res.value.get())
+                             : CollisionResult::kKeepBoth;
+      switch (result) {
+        case CollisionResult::kKeepBoth:
+          // Insert the value ignoring for duplicate configurations
+          entry->values.push_back(util::make_unique<ResourceConfigValue>(res.config, res.product));
+          entry->values.back()->value = std::move(res.value);
+          break;
 
-bool ResourceTable::SetAllowNew(const ResourceNameRef& name, const AllowNew& allow_new,
-                                IDiagnostics* diag) {
-  return SetAllowNewImpl(name, allow_new, ResourceNameValidator, diag);
-}
+        case CollisionResult::kTakeNew:
+          // Take the incoming value.
+          config_value->value = std::move(res.value);
+          break;
 
-bool ResourceTable::SetAllowNewMangled(const ResourceNameRef& name, const AllowNew& allow_new,
-                                       IDiagnostics* diag) {
-  return SetAllowNewImpl(name, allow_new, SkipNameValidator, diag);
-}
+        case CollisionResult::kConflict:
+          diag->Error(DiagMessage(source) << "duplicate value for resource '" << res.name << "' "
+                                          << "with config '" << res.config << "'");
+          diag->Error(DiagMessage(source) << "resource previously defined here");
+          return false;
 
-bool ResourceTable::SetAllowNewImpl(const ResourceNameRef& name, const AllowNew& allow_new,
-                                    NameValidator name_validator, IDiagnostics* diag) {
-  CHECK(diag != nullptr);
-
-  if (!ValidateName(name_validator, name, allow_new.source, diag)) {
-    return false;
+        case CollisionResult::kKeepOriginal:
+          break;
+      }
+    }
   }
 
-  ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  ResourceTableType* type = package->FindOrCreateType(name.type);
-  ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
-  entry->allow_new = allow_new;
-  return true;
-}
-
-bool ResourceTable::SetOverlayable(const ResourceNameRef& name, const OverlayableItem& overlayable,
-                                   IDiagnostics* diag) {
-  return SetOverlayableImpl(name, overlayable, ResourceNameValidator, diag);
-}
-
-bool ResourceTable::SetOverlayableImpl(const ResourceNameRef& name,
-                                       const OverlayableItem& overlayable,
-                                       NameValidator name_validator, IDiagnostics *diag) {
-  CHECK(diag != nullptr);
-
-  if (!ValidateName(name_validator, name, overlayable.source, diag)) {
-    return false;
-  }
-
-  ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  ResourceTableType* type = package->FindOrCreateType(name.type);
-  ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
-
-  if (entry->overlayable_item) {
-    diag->Error(DiagMessage(overlayable.source)
-                << "duplicate overlayable declaration for resource '" << name << "'");
-    diag->Error(DiagMessage(entry->overlayable_item.value().source)
-                << "previous declaration here");
-    return false;
-  }
-
-  entry->overlayable_item = overlayable;
   return true;
 }
 
@@ -641,17 +496,38 @@ Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNam
   return SearchResult{package, type, entry};
 }
 
+Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNameRef& name,
+                                                               ResourceId id) const {
+  ResourceTablePackage* package = FindPackage(name.package);
+  if (package == nullptr) {
+    return {};
+  }
+
+  ResourceTableType* type = package->FindType(name.type);
+  if (type == nullptr) {
+    return {};
+  }
+
+  auto entry_it = std::equal_range(type->entries.begin(), type->entries.end(), name.entry,
+                                   NameEqualRange<ResourceEntry>{});
+  for (auto it = entry_it.first; it != entry_it.second; ++it) {
+    if ((*it)->id == id) {
+      return SearchResult{package, type, it->get()};
+    }
+  }
+  return {};
+}
+
 std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
   std::unique_ptr<ResourceTable> new_table = util::make_unique<ResourceTable>();
   for (const auto& pkg : packages) {
-    ResourceTablePackage* new_pkg = new_table->CreatePackage(pkg->name, pkg->id);
+    ResourceTablePackage* new_pkg = new_table->FindOrCreatePackage(pkg->name);
     for (const auto& type : pkg->types) {
       ResourceTableType* new_type = new_pkg->FindOrCreateType(type->type);
-      new_type->id = type->id;
       new_type->visibility_level = type->visibility_level;
 
       for (const auto& entry : type->entries) {
-        ResourceEntry* new_entry = new_type->FindOrCreateEntry(entry->name);
+        ResourceEntry* new_entry = new_type->CreateEntry(entry->name);
         new_entry->id = entry->id;
         new_entry->visibility = entry->visibility;
         new_entry->allow_new = entry->allow_new;
@@ -666,6 +542,53 @@ std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
     }
   }
   return new_table;
+}
+
+NewResourceBuilder::NewResourceBuilder(const ResourceNameRef& name) {
+  res_.name = name.ToResourceName();
+}
+
+NewResourceBuilder::NewResourceBuilder(const std::string& name) {
+  ResourceNameRef ref;
+  CHECK(ResourceUtils::ParseResourceName(name, &ref)) << "invalid resource name: " << name;
+  res_.name = ref.ToResourceName();
+}
+
+NewResourceBuilder& NewResourceBuilder::SetValue(std::unique_ptr<Value> value,
+                                                 android::ConfigDescription config,
+                                                 std::string product) {
+  res_.value = std::move(value);
+  res_.config = std::move(config);
+  res_.product = std::move(product);
+  return *this;
+}
+
+NewResourceBuilder& NewResourceBuilder::SetId(ResourceId id, OnIdConflict on_conflict) {
+  res_.id = std::make_pair(id, on_conflict);
+  return *this;
+}
+
+NewResourceBuilder& NewResourceBuilder::SetVisibility(Visibility visibility) {
+  res_.visibility = std::move(visibility);
+  return *this;
+}
+
+NewResourceBuilder& NewResourceBuilder::SetOverlayable(OverlayableItem overlayable) {
+  res_.overlayable = std::move(overlayable);
+  return *this;
+}
+NewResourceBuilder& NewResourceBuilder::SetAllowNew(AllowNew allow_new) {
+  res_.allow_new = std::move(allow_new);
+  return *this;
+}
+
+NewResourceBuilder& NewResourceBuilder::SetAllowMangled(bool allow_mangled) {
+  res_.allow_mangled = allow_mangled;
+  return *this;
+}
+
+NewResource NewResourceBuilder::Build() {
+  return std::move(res_);
 }
 
 }  // namespace aapt

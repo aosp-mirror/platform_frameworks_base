@@ -20,13 +20,18 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
+import android.content.AttributionSource;
 import android.location.LocationManagerInternal;
+import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
 
 import java.util.Set;
@@ -52,7 +57,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     @GuardedBy("mLock - writes only - see above")
     @NonNull
     private final ConcurrentHashMap<Integer, ArrayMap<String, ArraySet<String>>> mLocationTags =
-            new ConcurrentHashMap();
+            new ConcurrentHashMap<>();
 
     public AppOpsPolicy() {
         final LocationManagerInternal locationManagerInternal = LocalServices.getService(
@@ -112,22 +117,59 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     @Override
     public int noteOperation(int code, int uid, @Nullable String packageName,
-            @Nullable String featureId, boolean shouldCollectAsyncNotedOp, @Nullable String message,
-            boolean shouldCollectMessage, @NonNull HeptFunction<Integer, Integer, String, String,
-                    Boolean, String, Boolean, Integer> superImpl) {
-        if (isHandledOp(code)) {
+            @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp, @Nullable
+            String message, boolean shouldCollectMessage, @NonNull HeptFunction<Integer, Integer,
+                    String, String, Boolean, String, Boolean, Integer> superImpl) {
+        return superImpl.apply(resolveOpCode(code, uid, packageName, attributionTag), uid,
+                packageName, attributionTag, shouldCollectAsyncNotedOp,
+                message, shouldCollectMessage);
+    }
+
+    @Override
+    public int noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
+            boolean shouldCollectAsyncNotedOp, @Nullable String message,
+            boolean shouldCollectMessage, boolean skipProxyOperation, @NonNull HexFunction<Integer,
+                    AttributionSource, Boolean, String, Boolean, Boolean, Integer> superImpl) {
+        return superImpl.apply(resolveOpCode(code, attributionSource.getUid(),
+                attributionSource.getPackageName(), attributionSource.getAttributionTag()),
+                attributionSource, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                skipProxyOperation);
+    }
+
+    @Override
+    public int startProxyOperation(IBinder token, int code,
+            @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            boolean skipProxyOperation, @NonNull OctFunction<IBinder, Integer, AttributionSource,
+                    Boolean, Boolean, String, Boolean, Boolean, Integer> superImpl) {
+        return superImpl.apply(token, resolveOpCode(code, attributionSource.getUid(),
+                attributionSource.getPackageName(), attributionSource.getAttributionTag()),
+                attributionSource, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                shouldCollectMessage, skipProxyOperation);
+    }
+
+    @Override
+    public void finishProxyOperation(IBinder clientId, int code,
+            @NonNull AttributionSource attributionSource,
+            @NonNull TriFunction<IBinder, Integer, AttributionSource, Void> superImpl) {
+        superImpl.apply(clientId, resolveOpCode(code, attributionSource.getUid(),
+                attributionSource.getPackageName(), attributionSource.getAttributionTag()),
+                attributionSource);
+    }
+
+    private int resolveOpCode(int code, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
+        if (isHandledOp(code) && attributionTag != null) {
             // Only a single lookup from the underlying concurrent data structure
             final ArrayMap<String, ArraySet<String>> uidTags = mLocationTags.get(uid);
             if (uidTags != null) {
                 final ArraySet<String> packageTags = uidTags.get(packageName);
-                if (packageTags != null && packageTags.contains(featureId)) {
-                    return superImpl.apply(resolveLocationOp(code), uid, packageName, featureId,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                if (packageTags != null && packageTags.contains(attributionTag)) {
+                    return resolveHandledOp(code);
                 }
             }
         }
-        return superImpl.apply(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
-                message, shouldCollectMessage);
+        return code;
     }
 
     private static boolean isHandledOp(int code) {
@@ -139,7 +181,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         return false;
     }
 
-    private static int resolveLocationOp(int code) {
+    private static int resolveHandledOp(int code) {
         switch (code) {
             case AppOpsManager.OP_FINE_LOCATION:
                 return AppOpsManager.OP_FINE_LOCATION_SOURCE;

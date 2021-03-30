@@ -6070,6 +6070,8 @@
         <attr name="color" />
         <!-- Alpha multiplier applied to the base color. -->
         <attr name="alpha" />
+        <!-- Perceptual luminance applied to the base color. From 0 to 100. -->
+        <attr name="lStar" format="float" />
     </declare-styleable>
 
     <!-- Drawable used to render according to the animation scale. Esp. when it is 0 due to battery
@@ -9535,4 +9537,6 @@
 
     <attr name="iconfactoryIconSize" format="dimension"/>
     <attr name="iconfactoryBadgeSize" format="dimension"/>
+    <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
+    <attr name="lStar" format="float"/>
 </resources>

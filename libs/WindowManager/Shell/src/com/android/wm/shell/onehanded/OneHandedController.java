@@ -17,10 +17,10 @@
 package com.android.wm.shell.onehanded;
 
 import static android.os.UserHandle.USER_CURRENT;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 
-import android.Manifest;
 import android.annotation.BinderThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,13 +28,13 @@ import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
+import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -47,7 +47,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.ExecutorUtils;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
@@ -76,9 +76,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private boolean mLockedDisabled;
     private float mOffSetFraction;
 
-    private final Context mContext;
+    private Context mContext;
+
+    private final AccessibilityManager mAccessibilityManager;
     private final DisplayController mDisplayController;
-    private final OneHandedGestureHandler mGestureHandler;
     private final OneHandedSettingsUtil mOneHandedSettingsUtil;
     private final OneHandedTimeoutHandler mTimeoutHandler;
     private final OneHandedTouchHandler mTouchHandler;
@@ -89,10 +90,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
     private final OneHandedImpl mImpl = new OneHandedImpl();
-    private final WindowManager mWindowManager;
 
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
-    private final AccessibilityManager mAccessibilityManager;
+    private OneHandedGestureHandler mGestureHandler;
     private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
 
     /**
@@ -100,8 +100,29 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController =
             (display, fromRotation, toRotation, wct) -> {
-                if (mDisplayAreaOrganizer != null) {
-                    mDisplayAreaOrganizer.onRotateDisplay(fromRotation, toRotation, wct);
+                if (!isInitialized()) {
+                    return;
+                }
+                mDisplayAreaOrganizer.onRotateDisplay(mContext, toRotation, wct);
+                mGestureHandler.onRotateDisplay(mDisplayAreaOrganizer.getDisplayLayout());
+            };
+
+    private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
+            new DisplayController.OnDisplaysChangedListener() {
+                @Override
+                public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+                    if (displayId != DEFAULT_DISPLAY || !isInitialized()) {
+                        return;
+                    }
+                    updateDisplayLayout(displayId);
+                }
+
+                @Override
+                public void onDisplayAdded(int displayId) {
+                    if (displayId != DEFAULT_DISPLAY || !isInitialized()) {
+                        return;
+                    }
+                    updateDisplayLayout(displayId);
                 }
             };
 
@@ -115,8 +136,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             new AccessibilityManager.AccessibilityStateChangeListener() {
                 @Override
                 public void onAccessibilityStateChanged(boolean enabled) {
-                    if (mOneHandedSettingsUtil == null) {
-                        Slog.w(TAG, "mOneHandedSettingsUtil may not instantiate yet");
+                    if (!isInitialized()) {
                         return;
                     }
                     if (enabled) {
@@ -147,6 +167,14 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 }
             };
 
+    private boolean isInitialized() {
+        if (mDisplayAreaOrganizer == null || mDisplayController == null
+                || mGestureHandler == null || mOneHandedSettingsUtil == null) {
+            Slog.w(TAG, "Components may not initialized yet!");
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Creates {@link OneHandedController}, returns {@code null} if the feature is not supported.
@@ -154,8 +182,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     @Nullable
     public static OneHandedController create(
             Context context, WindowManager windowManager, DisplayController displayController,
-            TaskStackListenerImpl taskStackListener, UiEventLogger uiEventLogger,
-            ShellExecutor mainExecutor, Handler mainHandler) {
+            DisplayLayout displayLayout, TaskStackListenerImpl taskStackListener,
+            UiEventLogger uiEventLogger, ShellExecutor mainExecutor, Handler mainHandler) {
         if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
             Slog.w(TAG, "Device doesn't support OneHanded feature");
             return null;
@@ -169,19 +197,17 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler(timeoutHandler,
                 mainExecutor);
         OneHandedGestureHandler gestureHandler = new OneHandedGestureHandler(
-                context, windowManager, displayController, ViewConfiguration.get(context),
-                mainExecutor);
+                context, displayLayout, ViewConfiguration.get(context), mainExecutor);
         OneHandedBackgroundPanelOrganizer oneHandedBackgroundPanelOrganizer =
-                new OneHandedBackgroundPanelOrganizer(context, windowManager, displayController,
-                        mainExecutor);
+                new OneHandedBackgroundPanelOrganizer(context, displayLayout, mainExecutor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
-                context, windowManager, animationController, tutorialHandler,
+                context, displayLayout, animationController, tutorialHandler,
                 oneHandedBackgroundPanelOrganizer, mainExecutor);
         OneHandedSettingsUtil settingsUtil = new OneHandedSettingsUtil();
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
-        return new OneHandedController(context, windowManager, displayController,
+        return new OneHandedController(context, displayController,
                 oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
                 gestureHandler, settingsUtil, timeoutHandler, oneHandedUiEventsLogger,
                 overlayManager, taskStackListener, mainExecutor, mainHandler);
@@ -189,7 +215,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     OneHandedController(Context context,
-            WindowManager windowManager,
             DisplayController displayController,
             OneHandedBackgroundPanelOrganizer backgroundPanelOrganizer,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
@@ -205,7 +230,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             Handler mainHandler) {
         mContext = context;
         mOneHandedSettingsUtil = settingsUtil;
-        mWindowManager = windowManager;
         mBackgroundPanelOrganizer = backgroundPanelOrganizer;
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mDisplayController = displayController;
@@ -218,6 +242,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mOneHandedUiEventLogger = uiEventsLogger;
         mTaskStackListener = taskStackListener;
 
+        mDisplayController.addDisplayWindowListener(mDisplaysChangedListener);
         final float offsetPercentageConfig = context.getResources().getFraction(
                 R.fraction.config_one_handed_offset, 1, 1);
         final int sysPropPercentageConfig = SystemProperties.getInt(
@@ -297,8 +322,14 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             Slog.d(TAG, "Temporary lock disabled");
             return;
         }
+        final int currentRotation = mDisplayAreaOrganizer.getDisplayLayout().rotation();
+        if (currentRotation != Surface.ROTATION_0 && currentRotation != Surface.ROTATION_180) {
+            Slog.w(TAG, "One handed mode only support portrait mode");
+            return;
+        }
         if (!mDisplayAreaOrganizer.isInOneHanded()) {
-            final int yOffSet = Math.round(getDisplaySize().height() * mOffSetFraction);
+            final int yOffSet = Math.round(
+                    mDisplayAreaOrganizer.getDisplayLayout().height() * mOffSetFraction);
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
             mTimeoutHandler.resetTimer();
 
@@ -369,6 +400,12 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 .getSettingsTapsAppToExit(mContext.getContentResolver()));
         setSwipeToNotificationEnabled(mOneHandedSettingsUtil
                 .getSettingsSwipeToNotificationEnabled(mContext.getContentResolver()));
+    }
+
+    private void updateDisplayLayout(int displayId) {
+        mDisplayAreaOrganizer.setDisplayLayout(
+                mDisplayController.getDisplayLayout(displayId));
+        mGestureHandler.onDisplayChanged(mDisplayAreaOrganizer.getDisplayLayout());
     }
 
     private ContentObserver getObserver(Runnable onChangeRunnable) {
@@ -454,24 +491,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT));
     }
 
-    /**
-     * Query the current display real size from {@link WindowManager}
-     *
-     * @return {@link WindowManager#getCurrentWindowMetrics()#getBounds()}
-     */
-    private Rect getDisplaySize() {
-        if (mWindowManager == null) {
-            Slog.e(TAG, "WindowManager instance is null! Can not get display size!");
-            return new Rect();
-        }
-        final Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
-        if (displaySize.width() == 0 || displaySize.height() == 0) {
-            Slog.e(TAG, "Display size error! width = " + displaySize.width()
-                    + ", height = " + displaySize.height());
-        }
-        return displaySize;
-    }
-
     @VisibleForTesting
     boolean isLockedDisabled() {
         return mLockedDisabled;
@@ -483,7 +502,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         }
 
         mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
-        mGestureHandler.onOneHandedEnabled(mIsOneHandedEnabled || mIsSwipeToNotificationEnabled);
+        mGestureHandler.onGestureEnabled(mIsOneHandedEnabled || mIsSwipeToNotificationEnabled);
 
         if (!mIsOneHandedEnabled) {
             mDisplayAreaOrganizer.unregisterOrganizer();
@@ -532,10 +551,15 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void setLockedDisabled(boolean locked, boolean enabled) {
-        if (enabled == mIsOneHandedEnabled) {
+        final boolean isFeatureEnabled = mIsOneHandedEnabled || mIsSwipeToNotificationEnabled;
+
+        if (enabled == isFeatureEnabled) {
             return;
         }
         mLockedDisabled = locked && !enabled;
+
+        // Disabled gesture when keyguard ON
+        mGestureHandler.onGestureEnabled(!mLockedDisabled && isFeatureEnabled);
     }
 
     private void onConfigChanged(Configuration newConfig) {
@@ -555,6 +579,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         pw.println(mOffSetFraction);
         pw.print(innerPrefix + "mLockedDisabled=");
         pw.println(mLockedDisabled);
+
+        if (mBackgroundPanelOrganizer != null) {
+            mBackgroundPanelOrganizer.dump(pw);
+        }
 
         if (mDisplayAreaOrganizer != null) {
             mDisplayAreaOrganizer.dump(pw);

@@ -45,8 +45,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerWhitelistManager;
-import android.os.PowerWhitelistManager.TempAllowListType;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -908,7 +908,7 @@ public final class BroadcastQueue {
     }
 
     final void scheduleTempAllowlistLocked(int uid, long duration, BroadcastRecord r,
-            @TempAllowListType int type, @PowerWhitelistManager.ReasonCode int reasonCode,
+            @TempAllowListType int type, @ReasonCode int reasonCode,
             @Nullable String reason) {
         if (duration > Integer.MAX_VALUE) {
             duration = Integer.MAX_VALUE;

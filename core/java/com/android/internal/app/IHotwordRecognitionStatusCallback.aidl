@@ -66,4 +66,12 @@ oneway interface IHotwordRecognitionStatusCallback {
      * Called when the recognition is resumed after it was temporarily paused.
      */
     void onRecognitionResumed();
+
+    /**
+     * Called when the {@link HotwordDetectionService} reported the result for requesting update
+     * state action.
+     *
+     * @param status The status about the result of requesting update state action.
+     */
+    void onStatusReported(int status);
 }

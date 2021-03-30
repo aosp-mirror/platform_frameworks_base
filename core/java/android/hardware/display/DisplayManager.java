@@ -749,6 +749,17 @@ public final class DisplayManager {
     }
 
     /**
+     * Returns the HDR formats disabled by the user.
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull int[] getUserDisabledHdrTypes() {
+        return mGlobal.getUserDisabledHdrTypes();
+    }
+
+
+    /**
      * Creates a virtual display.
      *
      * @see #createVirtualDisplay(String, int, int, int, Surface, int,

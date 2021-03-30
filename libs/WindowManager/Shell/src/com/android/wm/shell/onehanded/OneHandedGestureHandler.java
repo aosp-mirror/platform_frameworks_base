@@ -24,7 +24,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Display;
 import android.view.InputChannel;
 import android.view.InputEvent;
@@ -33,29 +32,23 @@ import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.ViewConfiguration;
-import android.view.WindowManager;
-import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.common.DisplayChangeController;
-import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
 
 /**
- * The class manage swipe up and down gesture for 3-Button mode navigation,
- * others(e.g, 2-button, full gesture mode) are handled by Launcher quick steps.
- * TODO(b/160934654) Migrate to Launcher quick steps
+ * The class manage swipe up and down gesture for 3-Button mode navigation, others(e.g, 2-button,
+ * full gesture mode) are handled by Launcher quick steps. TODO(b/160934654) Migrate to Launcher
+ * quick steps
  */
-public class OneHandedGestureHandler implements OneHandedTransitionCallback,
-        DisplayChangeController.OnDisplayChangingListener {
+public class OneHandedGestureHandler implements OneHandedTransitionCallback {
     private static final String TAG = "OneHandedGestureHandler";
-    private static final boolean DEBUG_GESTURE = false;
 
     private static final int ANGLE_MAX = 150;
     private static final int ANGLE_MIN = 30;
@@ -64,14 +57,13 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     private final PointF mDownPos = new PointF();
     private final PointF mLastPos = new PointF();
     private final PointF mStartDragPos = new PointF();
-    private final WindowManager mWindowManager;
 
     private boolean mPassedSlop;
     private boolean mAllowGesture;
     private boolean mIsEnabled;
     private int mNavGestureHeight;
     private boolean mIsThreeButtonModeEnabled;
-    private int mRotation = Surface.ROTATION_0;
+    private int mRotation;
 
     @VisibleForTesting
     InputMonitor mInputMonitor;
@@ -85,37 +77,35 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     private boolean mIsStopGesture;
 
     /**
-     * Constructor of OneHandedGestureHandler, we only handle the gesture of
-     * {@link Display#DEFAULT_DISPLAY}
+     * Constructor of OneHandedGestureHandler, we only handle the gesture of {@link
+     * Display#DEFAULT_DISPLAY}
      *
-     * @param context                  {@link Context}
-     * @param displayController        {@link DisplayController}
+     * @param context       Any context
+     * @param displayLayout Current {@link DisplayLayout} from controller
+     * @param viewConfig    {@link ViewConfiguration} to obtain touch slop
+     * @param mainExecutor  The wm-shell main executor
      */
-    public OneHandedGestureHandler(Context context, WindowManager windowManager,
-            DisplayController displayController, ViewConfiguration viewConfig,
+    public OneHandedGestureHandler(Context context,
+            DisplayLayout displayLayout,
+            ViewConfiguration viewConfig,
             ShellExecutor mainExecutor) {
-        mWindowManager = windowManager;
         mMainExecutor = mainExecutor;
-        displayController.addDisplayChangingController(this);
-        mNavGestureHeight = getNavBarSize(context,
-                displayController.getDisplayLayout(DEFAULT_DISPLAY));
         mDragDistThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.gestures_onehanded_drag_threshold);
+
         final float slop = viewConfig.getScaledTouchSlop();
         mSquaredSlop = slop * slop;
-
+        onDisplayChanged(displayLayout);
         updateIsEnabled();
     }
 
     /**
-     * Notified by {@link OneHandedController}, when user update settings of Enabled or Disabled
+     * Notifies by {@link OneHandedController}, when swipe down gesture is enabled on 3 button
+     * navigation bar mode.
      *
-     * @param isEnabled is one handed settings enabled or not
+     * @param isEnabled Either one handed mode or swipe for notification function enabled or not
      */
-    public void onOneHandedEnabled(boolean isEnabled) {
-        if (DEBUG_GESTURE) {
-            Log.d(TAG, "onOneHandedEnabled, isEnabled = " + isEnabled);
-        }
+    public void onGestureEnabled(boolean isEnabled) {
         mIsEnabled = isEnabled;
         updateIsEnabled();
     }
@@ -126,24 +116,30 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     }
 
     /**
-     * Register {@link OneHandedGestureEventCallback} to receive onStart(), onStop() callback
+     * Registers {@link OneHandedGestureEventCallback} to receive onStart(), onStop() callback
      */
     public void setGestureEventListener(OneHandedGestureEventCallback callback) {
         mGestureEventCallback = callback;
     }
 
+    /**
+     * Called when onDisplayAdded() or onDisplayRemoved() callback
+     * @param displayLayout The latest {@link DisplayLayout} representing current displayId
+     */
+    public void onDisplayChanged(DisplayLayout displayLayout) {
+        mNavGestureHeight = getNavBarSize(displayLayout);
+        mGestureRegion.set(0, displayLayout.height() - mNavGestureHeight, displayLayout.width(),
+                displayLayout.height());
+        mRotation = displayLayout.rotation();
+    }
+
     private void onMotionEvent(MotionEvent ev) {
         int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
-            mAllowGesture = isWithinTouchRegion(ev.getX(), ev.getY())
-                    && mRotation == Surface.ROTATION_0;
+            mAllowGesture = isWithinTouchRegion(ev.getX(), ev.getY()) && isGestureAvailable();
             if (mAllowGesture) {
                 mDownPos.set(ev.getX(), ev.getY());
                 mLastPos.set(mDownPos);
-            }
-            if (DEBUG_GESTURE) {
-                Log.d(TAG, "ACTION_DOWN, mDownPos=" + mDownPos + ", mAllowGesture="
-                        + mAllowGesture);
             }
         } else if (mAllowGesture) {
             switch (action) {
@@ -204,34 +200,17 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     }
 
     private boolean isWithinTouchRegion(float x, float y) {
-        if (DEBUG_GESTURE) {
-            Log.d(TAG, "isWithinTouchRegion(), mGestureRegion=" + mGestureRegion + ", downX=" + x
-                    + ", downY=" + y);
-        }
         return mGestureRegion.contains(Math.round(x), Math.round(y));
     }
 
-    private int getNavBarSize(Context context, @Nullable DisplayLayout displayLayout) {
-        if (displayLayout != null) {
-            return displayLayout.navBarFrameHeight();
-        } else {
-            return isRotated()
-                    ? context.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.navigation_bar_height_landscape)
-                    : context.getResources().getDimensionPixelSize(
-                            com.android.internal.R.dimen.navigation_bar_height);
-        }
+    private int getNavBarSize(@NonNull DisplayLayout displayLayout) {
+        return isGestureAvailable() ? displayLayout.navBarFrameHeight() : 0 /* In landscape */;
     }
 
     private void updateIsEnabled() {
         disposeInputChannel();
 
-        // Either OHM or swipe notification shade can activate in portrait mode only
-        if (mIsEnabled && mIsThreeButtonModeEnabled && !isRotated()) {
-            final Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
-            // Register input event receiver to monitor the touch region of NavBar gesture height
-            mGestureRegion.set(0, displaySize.height() - mNavGestureHeight, displaySize.width(),
-                    displaySize.height());
+        if (mIsEnabled && mIsThreeButtonModeEnabled && isGestureAvailable()) {
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "onehanded-gesture-offset", DEFAULT_DISPLAY);
             try {
@@ -251,10 +230,16 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         }
     }
 
-    @Override
-    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
-            WindowContainerTransaction t) {
-        mRotation = toRotation;
+    /**
+     * Handler for display rotation changes by {@link DisplayLayout}
+     *
+     * @param displayLayout The rotated displayLayout
+     */
+    public void onRotateDisplay(DisplayLayout displayLayout) {
+        mRotation = displayLayout.rotation();
+        mNavGestureHeight = getNavBarSize(displayLayout);
+        mGestureRegion.set(0, displayLayout.height() - mNavGestureHeight, displayLayout.width(),
+                displayLayout.height());
         updateIsEnabled();
     }
 
@@ -270,8 +255,9 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         }
     }
 
-    private boolean isRotated() {
-        return mRotation == Surface.ROTATION_90 || mRotation == Surface.ROTATION_270;
+    private boolean isGestureAvailable() {
+        // Either OHM or swipe notification shade can activate in portrait mode only
+        return mRotation == Surface.ROTATION_0 || mRotation == Surface.ROTATION_180;
     }
 
     private boolean isValidStartAngle(float deltaX, float deltaY) {
@@ -291,14 +277,18 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG + "States: ");
+        pw.print(innerPrefix + "mAllowGesture=");
+        pw.println(mAllowGesture);
         pw.print(innerPrefix + "mIsEnabled=");
         pw.println(mIsEnabled);
+        pw.print(innerPrefix + "mGestureRegion=");
+        pw.println(mGestureRegion);
         pw.print(innerPrefix + "mNavGestureHeight=");
         pw.println(mNavGestureHeight);
         pw.print(innerPrefix + "mIsThreeButtonModeEnabled=");
         pw.println(mIsThreeButtonModeEnabled);
-        pw.print(innerPrefix + "isLandscape=");
-        pw.println(isRotated());
+        pw.print(innerPrefix + "mRotation=");
+        pw.println(mRotation);
     }
 
     /**

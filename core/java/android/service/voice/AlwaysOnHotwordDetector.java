@@ -48,6 +48,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.HotwordDetectionService.InitializationStatus;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -260,6 +261,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     private static final int MSG_DETECTION_PAUSE = 4;
     private static final int MSG_DETECTION_RESUME = 5;
     private static final int MSG_HOTWORD_REJECTED = 6;
+    private static final int MSG_HOTWORD_STATUS_REPORTED = 7;
 
     private final String mText;
     private final Locale mLocale;
@@ -523,6 +525,15 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
          */
         public void onRejected(@Nullable HotwordRejectedResult result) {
         }
+
+        /**
+         * Called when the {@link HotwordDetectionService} is created by the system and given a
+         * short amount of time to report it's initialization state.
+         *
+         * @param status Info about initialization state of {@link HotwordDetectionService}.
+         */
+        public void onHotwordDetectionServiceInitialized(@InitializationStatus int status) {
+        }
     }
 
     /**
@@ -559,7 +570,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         mTargetSdkVersion = targetSdkVersion;
         mSupportHotwordDetectionService = supportHotwordDetectionService;
         if (mSupportHotwordDetectionService) {
-            updateState(options, sharedMemory);
+            updateStateLocked(options, sharedMemory, mInternalCallback);
         }
         try {
             Identity identity = new Identity();
@@ -583,20 +594,34 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * such data to the trusted process.
      *
      * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
-     * {@link HotwordDetectionService} when it was created.
+     * {@link HotwordDetectionService} when it was created. In addition, if this
+     * AlwaysOnHotwordDetector is in an invalid or error state.
      */
     public final void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
         if (DBG) {
             Slog.d(TAG, "updateState()");
         }
-        if (!mSupportHotwordDetectionService) {
-            throw new IllegalStateException(
-                    "updateState called, but it doesn't support hotword detection service");
+        synchronized (mLock) {
+            if (!mSupportHotwordDetectionService) {
+                throw new IllegalStateException(
+                        "updateState called, but it doesn't support hotword detection service");
+            }
+            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                throw new IllegalStateException(
+                        "updateState called on an invalid detector or error state");
+            }
+            updateStateLocked(options, sharedMemory, null /* callback */);
         }
+    }
 
+    private void updateStateLocked(@Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
+        if (DBG) {
+            Slog.d(TAG, "updateStateLocked()");
+        }
         try {
-            mModelManagementService.updateState(options, sharedMemory);
+            mModelManagementService.updateState(options, sharedMemory, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1147,6 +1172,18 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             Slog.i(TAG, "onRecognitionResumed");
             mHandler.sendEmptyMessage(MSG_DETECTION_RESUME);
         }
+
+        @Override
+        public void onStatusReported(int status) {
+            if (DBG) {
+                Slog.d(TAG, "onStatusReported(" + status + ")");
+            } else {
+                Slog.i(TAG, "onStatusReported");
+            }
+            Message message = Message.obtain(mHandler, MSG_HOTWORD_STATUS_REPORTED);
+            message.arg1 = status;
+            message.sendToTarget();
+        }
     }
 
     class MyHandler extends Handler {
@@ -1177,6 +1214,9 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                     break;
                 case MSG_HOTWORD_REJECTED:
                     mExternalCallback.onRejected((HotwordRejectedResult) msg.obj);
+                    break;
+                case MSG_HOTWORD_STATUS_REPORTED:
+                    mExternalCallback.onHotwordDetectionServiceInitialized(msg.arg1);
                     break;
                 default:
                     super.handleMessage(msg);

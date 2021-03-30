@@ -1026,7 +1026,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public void updateState(@Nullable PersistableBundle options,
-                @Nullable SharedMemory sharedMemory) {
+                @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
             enforceCallingPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION);
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
@@ -1037,7 +1037,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.updateStateLocked(options, sharedMemory);
+                    mImpl.updateStateLocked(options, sharedMemory, callback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
