@@ -17,6 +17,7 @@
 package com.android.systemui.classifier;
 
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
 import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN;
@@ -276,5 +277,47 @@ public class TypeClassifierTest extends ClassifierTest {
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
         assertThat(mClassifier.classifyGesture(RIGHT_AFFORDANCE, 0.5, 0).isFalse()).isTrue();
+    }
+
+    @Test
+    public void testPass_BrightnessSlider() {
+        when(mDataProvider.isVertical()).thenReturn(false);
+
+        when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
+        when(mDataProvider.isRight()).thenReturn(false);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse()).isFalse();
+
+        when(mDataProvider.isUp()).thenReturn(true);
+        when(mDataProvider.isRight()).thenReturn(false);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse()).isFalse();
+
+        when(mDataProvider.isUp()).thenReturn(false);
+        when(mDataProvider.isRight()).thenReturn(true);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse()).isFalse();
+
+        when(mDataProvider.isUp()).thenReturn(true);
+        when(mDataProvider.isRight()).thenReturn(true);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse()).isFalse();
+    }
+
+    @Test
+    public void testFalse_BrightnessSlider() {
+        when(mDataProvider.isVertical()).thenReturn(true);
+
+        when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
+        when(mDataProvider.isRight()).thenReturn(false);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse()).isTrue();
+
+        when(mDataProvider.isUp()).thenReturn(true);
+        when(mDataProvider.isRight()).thenReturn(false);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse()).isTrue();
+
+        when(mDataProvider.isUp()).thenReturn(false);
+        when(mDataProvider.isRight()).thenReturn(true);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse()).isTrue();
+
+        when(mDataProvider.isUp()).thenReturn(true);
+        when(mDataProvider.isRight()).thenReturn(true);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse()).isTrue();
     }
 }
