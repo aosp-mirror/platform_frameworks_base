@@ -1050,7 +1050,10 @@ public class ShortcutService extends IShortcutService.Stub {
             file.failWrite(os);
         }
 
-        getUserShortcutsLocked(userId).logSharingShortcutStats(mMetricsLogger);
+        final ShortcutUser user = getUserShortcutsLocked(userId);
+        // Close AppSearchSession to flush pending changes.
+        user.forAllPackages(ShortcutPackage::closeAppSearchSession);
+        user.logSharingShortcutStats(mMetricsLogger);
     }
 
     @GuardedBy("mLock")
