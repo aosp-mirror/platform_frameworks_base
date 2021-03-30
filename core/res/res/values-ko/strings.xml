@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"실행 중인 앱"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"배터리를 소모하는 앱"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"확대"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"접근성 보안 정책"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 배터리 사용 중"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"앱 <xliff:g id="NUMBER">%1$d</xliff:g>개에서 배터리 사용 중"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"탭하여 배터리 및 데이터 사용량 확인"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"신체 활동 정보에 액세스"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"카메라"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"사진 및 동영상 촬영"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"근처의 블루투스 기기"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"근처의 블루투스 기기를 찾고 연결"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"통화 기록"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"통화 기록 읽고 쓰기"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"전화"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"앱이 태블릿의 블루투스 설정을 확인하고 페어링된 기기에 연결하며 연결을 수락할 수 있도록 허용합니다."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"앱이 Android TV 기기에서 블루투스 설정을 보고 페어링된 기기에 연결하며 페어링된 기기와의 연결을 수락하도록 허용합니다."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"앱에서 휴대전화의 블루투스 설정을 확인하고 등록된 디바이스에 연결하며 연결을 수락할 수 있습니다."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"근처의 블루투스 기기를 찾고 페어링"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"앱이 근처의 블루투스 기기를 찾고 페어링하도록 허용"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"페어링된 블루투스 기기에 연결"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"앱이 페어링된 블루투스 기기에 연결하도록 허용"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"기본 NFC 결제 서비스 정보"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
@@ -567,18 +574,28 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"계속하려면 기기의 사용자 인증 정보를 입력하세요"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"지문이 일부만 인식되었습니다. 다시 시도해 주세요."</string>
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"지문 센서를 깨끗이 닦고 다시 시도하세요."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"손가락을 너무 빨리 움직였습니다. 다시 시도해 주세요."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"얼굴이 인증되었습니다. 확인을 누르세요"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"지문 인식 하드웨어를 사용할 수 없습니다."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"지문을 저장할 수 없습니다. 기존 지문을 삭제하세요."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"지문 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"지문 인식 작업이 취소되었습니다."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"사용자가 지문 인식 작업을 취소했습니다."</string>
@@ -603,6 +620,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"얼굴인식 잠금해제"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"얼굴 재등록 필요"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"인식률을 개선하려면 얼굴을 다시 등록하세요."</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"정확한 얼굴 데이터를 캡처하지 못했습니다. 다시 시도하세요."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"너무 밝습니다. 조명 밝기를 조금 낮춰보세요."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"너무 어둡습니다. 조명을 밝게 해 보세요."</string>
@@ -1006,6 +1031,12 @@
     <string name="copied" msgid="4675902854553014676">"복사 완료"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> 앱에서 복사하여 붙여넣음"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 클립보드에서 복사하여 붙여넣음"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"더보기"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2054,7 +2085,7 @@
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"이전에 이 알림의 중요도는 더 낮았습니다. 의견을 보내려면 탭하세요."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 배터리 세이버가 활성화되었습니다."</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 절전 모드가 활성화되었습니다."</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"절전 모드"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"절전 모드가 사용 중지되었습니다"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"휴대전화의 배터리가 충분하므로 기능이 더 이상 제한되지 않습니다"</string>
@@ -2110,20 +2141,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"직장"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"개인 뷰"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"직장 뷰"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"직장 앱과 공유할 수 없음"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT 관리자가 이 콘텐츠를 직장 프로필의 앱과 공유할 수 있도록 허용하지 않았습니다."</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"직장 앱으로 열 수 없음"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT 관리자가 이 콘텐츠를 직장 프로필의 앱에서 열 수 있도록 허용하지 않았습니다."</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"개인 앱과 공유할 수 없는 콘텐츠"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT 관리자가 개인 프로필의 앱에서 이 콘텐츠를 공유하도록 허용하지 않습니다."</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"개인 앱으로 열 수 없는 콘텐츠"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT 관리자가 개인 프로필의 앱에서 이 콘텐츠를 열도록 허용하지 않습니다."</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"사용 설정"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"이 콘텐츠를 지원하는 직장 앱이 없음"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"이 콘텐츠를 열 수 있는 직장 앱이 없음"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"이 콘텐츠를 지원하는 개인 앱이 없음"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"이 콘텐츠를 열 수 있는 개인 앱이 없음"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 네트워크 잠금 해제 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 네트워크 하위 집합 잠금 해제 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 회사 잠금 해제 PIN"</string>
@@ -2236,8 +2278,10 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"일부 화면 확대"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"이제 전체 화면, 특정 영역을 확대하거나 두 가지 옵션 간에 전환할 수 있습니다."</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
+    <skip />
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"설정에서 사용 설정"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"닫기"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"계속하려면 &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;에서 기기 마이크에 액세스해야 합니다."</string>
