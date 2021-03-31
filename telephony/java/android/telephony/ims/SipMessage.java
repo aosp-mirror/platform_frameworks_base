@@ -204,8 +204,32 @@ public final class SipMessage implements Parcelable {
 
     /**
      * @return the UTF-8 encoded SIP message.
+     * @deprecated Use {@link #toEncodedMessage} instead
      */
+    @Deprecated
     public @NonNull byte[] getEncodedMessage() {
+        byte[] header = new StringBuilder()
+                .append(mStartLine)
+                .append(mHeaderSection)
+                .append(CRLF)
+                .toString().getBytes(UTF_8);
+        byte[] sipMessage = new byte[header.length + mContent.length];
+        System.arraycopy(header, 0, sipMessage, 0, header.length);
+        System.arraycopy(mContent, 0, sipMessage, header.length, mContent.length);
+        return sipMessage;
+    }
+
+    /**
+     * According RFC-3261 section 7, SIP is a text protocol and uses the UTF-8 charset. Its format
+     * consists of a start-line, one or more header fields, an empty line indicating the end of the
+     * header fields, and an optional message-body.
+     *
+     * <p>
+     * Returns a byte array with UTF-8 format representation of the encoded SipMessage.
+     *
+     * @return byte array with UTF-8 format representation of the encoded SipMessage.
+     */
+    public @NonNull byte[] toEncodedMessage() {
         byte[] header = new StringBuilder()
                 .append(mStartLine)
                 .append(mHeaderSection)
