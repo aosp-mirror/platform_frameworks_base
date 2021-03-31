@@ -5975,10 +5975,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void setImeWindowStatus(int vis, int backDisposition,
-                IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.setImeWindowStatus(mToken, vis, backDisposition));
+        public void setImeWindowStatusAsync(int vis, int backDisposition) {
+            mImms.setImeWindowStatus(mToken, vis, backDisposition);
         }
 
         @BinderThread
