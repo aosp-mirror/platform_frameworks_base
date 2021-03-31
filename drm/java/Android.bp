@@ -1,0 +1,5 @@
+filegroup {
+    name: "framework-drm-sources",
+    srcs: ["**/*.java"],
+    visibility: ["//frameworks/base"],
+}

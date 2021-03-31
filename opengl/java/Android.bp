@@ -1,0 +1,5 @@
+filegroup {
+    name: "framework-opengl-sources",
+    srcs: ["**/*.java"],
+    visibility: ["//frameworks/base"],
+}
