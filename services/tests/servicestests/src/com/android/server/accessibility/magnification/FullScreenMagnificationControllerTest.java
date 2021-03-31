@@ -16,7 +16,7 @@
 
 package com.android.server.accessibility.magnification;
 
-import static com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationRequestObserver;
+import static com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -96,8 +96,8 @@ public class FullScreenMagnificationControllerTest {
     final WindowManagerInternal mMockWindowManager = mock(WindowManagerInternal.class);
     private final MagnificationAnimationCallback mAnimationCallback = mock(
             MagnificationAnimationCallback.class);
-    private final MagnificationRequestObserver mRequestObserver = mock(
-            MagnificationRequestObserver.class);
+    private final MagnificationInfoChangedCallback mRequestObserver = mock(
+            MagnificationInfoChangedCallback.class);
     final MessageCapturingHandler mMessageCapturingHandler = new MessageCapturingHandler(null);
 
     ValueAnimator mMockValueAnimator;
@@ -1143,6 +1143,15 @@ public class FullScreenMagnificationControllerTest {
 
         mFullScreenMagnificationController.reset(DISPLAY_0, mAnimationCallback);
         verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(false));
+    }
+
+    @Test
+    public void testImeWindowIsShown_serviceNotified() {
+        register(DISPLAY_0);
+        MagnificationCallbacks callbacks = getMagnificationCallbacks(DISPLAY_0);
+        callbacks.onImeWindowVisibilityChanged(true);
+        mMessageCapturingHandler.sendAllMessages();
+        verify(mRequestObserver).onImeWindowVisibilityChanged(eq(true));
     }
 
     private void setScaleToMagnifying() {

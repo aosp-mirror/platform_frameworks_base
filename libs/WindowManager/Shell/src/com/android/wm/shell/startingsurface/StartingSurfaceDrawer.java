@@ -126,6 +126,7 @@ public class StartingSurfaceDrawer {
             labelRes = app.labelRes;
         }
 
+        final int taskId = taskInfo.taskId;
         Context context = mContext;
         // replace with the default theme if the application didn't set
         final int theme = windowInfo.splashScreenThemeResId != 0
@@ -153,6 +154,7 @@ public class StartingSurfaceDrawer {
             } catch (PackageManager.NameNotFoundException e) {
                 Slog.w(TAG, "Failed creating package context with package name "
                         + activityInfo.packageName + " for user " + taskInfo.userId, e);
+                return;
             }
         }
 
@@ -167,15 +169,21 @@ public class StartingSurfaceDrawer {
             final TypedArray typedArray = overrideContext.obtainStyledAttributes(
                     com.android.internal.R.styleable.Window);
             final int resId = typedArray.getResourceId(R.styleable.Window_windowBackground, 0);
-            if (resId != 0 && overrideContext.getDrawable(resId) != null) {
-                // We want to use the windowBackground for the override context if it is
-                // available, otherwise we use the default one to make sure a themed starting
-                // window is displayed for the app.
-                if (DEBUG_SPLASH_SCREEN) {
-                    Slog.d(TAG, "addSplashScreen: apply overrideConfig"
-                            + taskConfig + " to starting window resId=" + resId);
+            try {
+                if (resId != 0 && overrideContext.getDrawable(resId) != null) {
+                    // We want to use the windowBackground for the override context if it is
+                    // available, otherwise we use the default one to make sure a themed starting
+                    // window is displayed for the app.
+                    if (DEBUG_SPLASH_SCREEN) {
+                        Slog.d(TAG, "addSplashScreen: apply overrideConfig"
+                                + taskConfig + " to starting window resId=" + resId);
+                    }
+                    context = overrideContext;
                 }
-                context = overrideContext;
+            } catch (Resources.NotFoundException e) {
+                Slog.w(TAG, "failed creating starting window for overrideConfig at taskId: "
+                        + taskId, e);
+                return;
             }
             typedArray.recycle();
         }
@@ -258,7 +266,6 @@ public class StartingSurfaceDrawer {
         params.setTitle("Splash Screen " + activityInfo.packageName);
 
         // TODO(b/173975965) tracking performance
-        final int taskId = taskInfo.taskId;
         SplashScreenView sView = null;
         try {
             final View view = win.getDecorView();

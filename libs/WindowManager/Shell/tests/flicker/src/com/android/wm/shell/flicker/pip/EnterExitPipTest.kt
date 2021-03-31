@@ -90,8 +90,8 @@ class EnterExitPipTest(
     @Test
     fun testAppCoversFullScreenWithPipOnDisplay() {
         testSpec.assertLayersStart {
-            coversExactly(displayBounds, testApp.defaultWindowName)
-            coversAtMost(displayBounds, pipApp.defaultWindowName)
+            visibleRegion(testApp.defaultWindowName).coversExactly(displayBounds)
+            visibleRegion(pipApp.defaultWindowName).coversAtMost(displayBounds)
         }
     }
 
@@ -99,7 +99,7 @@ class EnterExitPipTest(
     @Test
     fun pipAppCoversFullScreen() {
         testSpec.assertLayersEnd {
-            coversExactly(displayBounds, pipApp.defaultWindowName)
+            visibleRegion(pipApp.defaultWindowName).coversExactly(displayBounds)
         }
     }
 

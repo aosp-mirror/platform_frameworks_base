@@ -42,13 +42,7 @@ packages_to_document = [
 
 stubs_defaults {
     name: "metalava-non-updatable-api-stubs-default",
-    srcs: [
-        ":framework-non-updatable-sources",
-        "core/java/**/*.logtags",
-        ":opt-telephony-srcs",
-        ":opt-net-voip-srcs",
-        "**/package.html",
-    ],
+    srcs: [":framework-non-updatable-stub-sources"],
     sdk_version: "none",
     system_modules: "none",
     java_version: "1.8",

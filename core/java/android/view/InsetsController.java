@@ -1302,8 +1302,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /**
      * Called when current window gains focus.
      */
-    public void onWindowFocusGained() {
-        getSourceConsumer(ITYPE_IME).onWindowFocusGained();
+    public void onWindowFocusGained(boolean hasViewFocused) {
+        getSourceConsumer(ITYPE_IME).onWindowFocusGained(hasViewFocused);
     }
 
     /**
@@ -1366,8 +1366,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             final InsetsSourceControl imeControl = consumer != null ? consumer.getControl() : null;
             // Skip showing animation once that made by system for some reason.
             // (e.g. starting window with IME snapshot)
-            if (imeControl != null && show) {
-                skipAnim = imeControl.getAndClearSkipAnimationOnce();
+            if (imeControl != null) {
+                skipAnim = imeControl.getAndClearSkipAnimationOnce() && show
+                        && consumer.hasViewFocusWhenWindowFocusGain();
             }
         }
         applyAnimation(types, show, fromIme, skipAnim);

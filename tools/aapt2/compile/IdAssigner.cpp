@@ -77,6 +77,27 @@ struct TypeGroup {
   NextIdFinder<uint16_t, ResourceName> next_entry_id_;
 };
 
+struct ResourceTypeKey {
+  ResourceType type;
+  uint8_t id;
+
+  bool operator<(const ResourceTypeKey& other) const {
+    return (type != other.type) ? type < other.type : id < other.id;
+  }
+
+  bool operator==(const ResourceTypeKey& other) const {
+    return type == other.type && id == other.id;
+  }
+
+  bool operator!=(const ResourceTypeKey& other) const {
+    return !(*this == other);
+  }
+};
+
+::std::ostream& operator<<(::std::ostream& out, const ResourceTypeKey& type) {
+  return out << type.type;
+}
+
 struct IdAssignerContext {
   IdAssignerContext(std::string package_name, uint8_t package_id)
       : package_name_(std::move(package_name)), package_id_(package_id) {
@@ -85,7 +106,8 @@ struct IdAssignerContext {
   // Attempts to reserve the resource id for the specified resource name.
   // Returns whether the id was reserved successfully.
   // Reserving identifiers must be completed before `NextId` is called for the first time.
-  bool ReserveId(const ResourceName& name, ResourceId id, IDiagnostics* diag);
+  bool ReserveId(const ResourceName& name, ResourceId id, const Visibility& visibility,
+                 IDiagnostics* diag);
 
   // Retrieves the next available resource id that has not been reserved.
   std::optional<ResourceId> NextId(const ResourceName& name, IDiagnostics* diag);
@@ -93,8 +115,10 @@ struct IdAssignerContext {
  private:
   std::string package_name_;
   uint8_t package_id_;
-  std::map<ResourceType, TypeGroup> types_;
-  NextIdFinder<uint8_t, ResourceType> type_id_finder_ = NextIdFinder<uint8_t, ResourceType>(1);
+  std::map<ResourceTypeKey, TypeGroup> types_;
+  std::map<ResourceType, uint8_t> non_staged_type_ids_;
+  NextIdFinder<uint8_t, ResourceTypeKey> type_id_finder_ =
+      NextIdFinder<uint8_t, ResourceTypeKey>(1);
 };
 
 }  // namespace
@@ -106,7 +130,8 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
       for (auto& entry : type->entries) {
         const ResourceName name(package->name, type->type, entry->name);
         if (entry->id) {
-          if (!assigned_ids.ReserveId(name, entry->id.value(), context->GetDiagnostics())) {
+          if (!assigned_ids.ReserveId(name, entry->id.value(), entry->visibility,
+                                      context->GetDiagnostics())) {
             return false;
           }
         }
@@ -116,7 +141,8 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
           const auto iter = assigned_id_map_->find(name);
           if (iter != assigned_id_map_->end()) {
             const ResourceId assigned_id = iter->second;
-            if (!assigned_ids.ReserveId(name, assigned_id, context->GetDiagnostics())) {
+            if (!assigned_ids.ReserveId(name, assigned_id, entry->visibility,
+                                        context->GetDiagnostics())) {
               return false;
             }
             entry->id = assigned_id;
@@ -132,7 +158,8 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
     for (const auto& stable_id_entry : *assigned_id_map_) {
       const ResourceName& pre_assigned_name = stable_id_entry.first;
       const ResourceId& pre_assigned_id = stable_id_entry.second;
-      if (!assigned_ids.ReserveId(pre_assigned_name, pre_assigned_id, context->GetDiagnostics())) {
+      if (!assigned_ids.ReserveId(pre_assigned_name, pre_assigned_id, {},
+                                  context->GetDiagnostics())) {
         return false;
       }
     }
@@ -165,7 +192,7 @@ Result<Id> NextIdFinder<Id, Key>::ReserveId(Key key, Id id) {
   auto assign_result = pre_assigned_ids_.emplace(id, key);
   if (!assign_result.second && assign_result.first->second != key) {
     std::stringstream error;
-    error << "ID " << id << " is already assigned to " << assign_result.first->second;
+    error << "ID is already assigned to " << assign_result.first->second;
     return unexpected(error.str());
   }
   return id;
@@ -210,7 +237,7 @@ Result<std::monostate> TypeGroup::ReserveId(const ResourceName& name, ResourceId
   if (type_id_ != id.type_id()) {
     // Currently there cannot be multiple type ids for a single type.
     std::stringstream error;
-    error << "type '" << name.type << "' already has ID " << id.type_id();
+    error << "type '" << name.type << "' already has ID " << std::hex << (int)id.type_id();
     return unexpected(error.str());
   }
 
@@ -234,24 +261,38 @@ Result<ResourceId> TypeGroup::NextId() {
   return ResourceId(package_id_, type_id_, entry_id.value());
 }
 
-bool IdAssignerContext::ReserveId(const ResourceName& name, ResourceId id, IDiagnostics* diag) {
+bool IdAssignerContext::ReserveId(const ResourceName& name, ResourceId id,
+                                  const Visibility& visibility, IDiagnostics* diag) {
   if (package_id_ != id.package_id()) {
     diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
-                              << " because package already has ID " << id.package_id());
+                              << " because package already has ID " << std::hex
+                              << (int)id.package_id());
     return false;
   }
 
-  auto type = types_.find(name.type);
+  auto key = ResourceTypeKey{name.type, id.type_id()};
+  auto type = types_.find(key);
   if (type == types_.end()) {
     // The type has not been assigned an id yet. Ensure that the specified id is not being used by
     // another type.
-    auto assign_result = type_id_finder_.ReserveId(name.type, id.type_id());
+    auto assign_result = type_id_finder_.ReserveId(key, id.type_id());
     if (!assign_result.has_value()) {
       diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
                                 << " because type " << assign_result.error());
       return false;
     }
-    type = types_.emplace(name.type, TypeGroup(package_id_, id.type_id())).first;
+    type = types_.emplace(key, TypeGroup(package_id_, id.type_id())).first;
+  }
+
+  if (!visibility.staged_api) {
+    // Ensure that non-staged resources can only exist in one type ID.
+    auto non_staged_type = non_staged_type_ids_.emplace(name.type, id.type_id());
+    if (!non_staged_type.second && non_staged_type.first->second != id.type_id()) {
+      diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
+                                << " because type already has ID " << std::hex
+                                << (int)id.type_id());
+      return false;
+    }
   }
 
   auto assign_result = type->second.ReserveId(name, id);
@@ -268,11 +309,19 @@ std::optional<ResourceId> IdAssignerContext::NextId(const ResourceName& name, ID
   // The package name is not known during the compile stage.
   // Resources without a package name are considered a part of the app being linked.
   CHECK(name.package.empty() || name.package == package_name_);
-  auto type = types_.find(name.type);
-  if (type == types_.end()) {
+
+  // Find the type id for non-staged resources of this type.
+  auto non_staged_type = non_staged_type_ids_.find(name.type);
+  if (non_staged_type == non_staged_type_ids_.end()) {
     auto next_type_id = type_id_finder_.NextId();
     CHECK(next_type_id.has_value()) << "resource type IDs allocated have exceeded maximum (256)";
-    type = types_.emplace(name.type, TypeGroup(package_id_, next_type_id.value())).first;
+    non_staged_type = non_staged_type_ids_.emplace(name.type, *next_type_id).first;
+  }
+
+  ResourceTypeKey key{name.type, non_staged_type->second};
+  auto type = types_.find(key);
+  if (type == types_.end()) {
+    type = types_.emplace(key, TypeGroup(package_id_, key.id)).first;
   }
 
   auto assign_result = type->second.NextId();

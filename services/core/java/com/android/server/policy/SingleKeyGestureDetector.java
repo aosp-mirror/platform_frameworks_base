@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import java.util.ArrayList;
 
 public final class SingleKeyGestureDetector {
     private static final String TAG = "SingleKeyGesture";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = PhoneWindowManager.DEBUG_INPUT;
 
     private static final int MSG_KEY_LONG_PRESS = 0;
     private static final int MSG_KEY_VERY_LONG_PRESS = 1;
@@ -47,6 +48,7 @@ public final class SingleKeyGestureDetector {
     private final long mVeryLongPressTimeout;
 
     private volatile int mKeyPressCounter;
+    private boolean mBeganFromNonInteractive = false;
 
     private final ArrayList<SingleKeyRule> mRules = new ArrayList();
     private SingleKeyRule mActiveRule = null;
@@ -56,7 +58,6 @@ public final class SingleKeyGestureDetector {
     private volatile boolean mHandledByLongPress = false;
     private final Handler mHandler;
     private static final long MULTI_PRESS_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
-
 
     /** Supported gesture flags */
     public static final int KEY_LONGPRESS = 1 << 1;
@@ -143,10 +144,10 @@ public final class SingleKeyGestureDetector {
 
         @Override
         public String toString() {
-            return "KeyCode = " + KeyEvent.keyCodeToString(mKeyCode)
-                    + ", long press : " + supportLongPress()
-                    + ", very Long press : " + supportVeryLongPress()
-                    + ", max multi press count : " + getMaxMultiPressCount();
+            return "KeyCode=" + KeyEvent.keyCodeToString(mKeyCode)
+                    + ", LongPress=" + supportLongPress()
+                    + ", VeryLongPress=" + supportVeryLongPress()
+                    + ", MaxMultiPressCount=" + getMaxMultiPressCount();
         }
     }
 
@@ -161,8 +162,12 @@ public final class SingleKeyGestureDetector {
         mRules.add(rule);
     }
 
-    void interceptKey(KeyEvent event) {
+    void interceptKey(KeyEvent event, boolean interactive) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            // Store the non interactive state when first down.
+            if (mDownKeyCode == KeyEvent.KEYCODE_UNKNOWN || mDownKeyCode != event.getKeyCode()) {
+                mBeganFromNonInteractive = !interactive;
+            }
             interceptKeyDown(event);
         } else {
             interceptKeyUp(event);
@@ -268,6 +273,7 @@ public final class SingleKeyGestureDetector {
                     Log.i(TAG, "press key " + KeyEvent.keyCodeToString(event.getKeyCode()));
                 }
                 mActiveRule.onPress(downTime);
+                reset();
                 return true;
             }
 
@@ -316,6 +322,17 @@ public final class SingleKeyGestureDetector {
         return false;
     }
 
+    boolean beganFromNonInteractive() {
+        return mBeganFromNonInteractive;
+    }
+
+    void dump(String prefix, PrintWriter pw) {
+        pw.println(prefix + "SingleKey rules:");
+        for (SingleKeyRule rule : mRules) {
+            pw.println(prefix + "  " + rule);
+        }
+    }
+
     private class KeyHandler extends Handler {
         KeyHandler() {
             super(Looper.getMainLooper());
@@ -354,7 +371,7 @@ public final class SingleKeyGestureDetector {
                     } else {
                         mActiveRule.onMultiPress(eventTime, mKeyPressCounter);
                     }
-                    mKeyPressCounter = 0;
+                    reset();
                     break;
             }
         }

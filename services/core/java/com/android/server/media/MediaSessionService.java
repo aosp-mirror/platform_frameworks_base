@@ -238,7 +238,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         mSession2TokenCallback);
                 break;
             case PHASE_ACTIVITY_MANAGER_READY:
-                MediaSessionConfig.initialize(mContext);
+                MediaSessionDeviceConfig.initialize(mContext);
                 break;
         }
     }
@@ -560,7 +560,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         PowerExemptionManager.class);
                 powerExemptionManager.addToTemporaryAllowList(targetPackage,
                         PowerExemptionManager.REASON_MEDIA_SESSION_CALLBACK, reason,
-                        MediaSessionConfig.getMediaSessionCallbackFgsAllowlistDurationMs());
+                        MediaSessionDeviceConfig.getMediaSessionCallbackFgsAllowlistDurationMs());
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1975,7 +1975,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 mAudioPlayerStateMonitor.dump(mContext, pw, "");
             }
-            MediaSessionConfig.dump(pw, "");
+            MediaSessionDeviceConfig.dump(pw, "");
         }
 
         /**
@@ -2260,7 +2260,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         mContext, keyEvent, callingPackageName,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1, mKeyEventReceiver,
                         mHandler,
-                        MediaSessionConfig.getMediaButtonReceiverFgsAllowlistDurationMs());
+                        MediaSessionDeviceConfig.getMediaButtonReceiverFgsAllowlistDurationMs());
                 if (sent) {
                     String pkgName = mediaButtonReceiverHolder.getPackageName();
                     for (FullUserRecord.OnMediaKeyEventDispatchedListenerRecord cr

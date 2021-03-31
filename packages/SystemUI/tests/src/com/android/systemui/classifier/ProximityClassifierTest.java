@@ -16,11 +16,12 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -72,7 +73,7 @@ public class ProximityClassifierTest extends ClassifierTest {
     public void testPass_uncovered() {
         touchDown();
         touchUp(10);
-        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
@@ -81,7 +82,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 1));
         mClassifier.onProximityEvent(createSensorEvent(false, 2));
         touchUp(20);
-        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
@@ -90,7 +91,17 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 1));
         mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
-        assertThat(mClassifier.classifyGesture(QUICK_SETTINGS, 0.5, 0).isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(QUICK_SETTINGS, 0.5, 0).isFalse()).isFalse();
+    }
+
+    @Test
+    public void testPass_brightnessSlider() {
+        touchDown();
+        mClassifier.onProximityEvent(createSensorEvent(true, 1));
+        mClassifier.onProximityEvent(createSensorEvent(false, 11));
+        touchUp(10);
+        assertThat(mClassifier.classifyGesture(BRIGHTNESS_SLIDER, 0.5, 0).isFalse())
+                .isFalse();
     }
 
     @Test
@@ -99,7 +110,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 1));
         mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
-        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
     }
 
     @Test
@@ -110,7 +121,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 96));
         mClassifier.onProximityEvent(createSensorEvent(false, 100));
         touchUp(100);
-        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse(), is(true));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isTrue();
     }
 
     @Test
@@ -120,7 +131,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
         when(mDistanceClassifier.isLongSwipe()).thenReturn(mPassedResult);
-        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse(), is(false));
+        assertThat(mClassifier.classifyGesture(GENERIC, 0.5, 0).isFalse()).isFalse();
     }
 
     private void touchDown() {

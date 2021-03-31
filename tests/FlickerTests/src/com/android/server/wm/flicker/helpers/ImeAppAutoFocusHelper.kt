@@ -34,7 +34,7 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         wmHelper: WindowManagerStateHelper?
     ) {
         // do nothing (the app is focused automatically)
-        waitAndAssertIMEShown(device, wmHelper)
+        waitIMEShown(device, wmHelper)
     }
 
     override fun open() {

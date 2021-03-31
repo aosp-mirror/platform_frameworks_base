@@ -58,13 +58,9 @@ framework_docs_only_libs = [
 stubs_defaults {
     name: "framework-doc-stubs-default",
     srcs: [
-        ":framework-mime-sources",
-        ":framework-non-updatable-sources",
+        ":framework-non-updatable-stub-sources",
         ":framework-updatable-sources",
-        "core/java/**/*.logtags",
         "test-base/src/**/*.java",
-        ":opt-telephony-srcs",
-        ":opt-net-voip-srcs",
         ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
         ":i18n.module.public.api{.public.stubs.source}",

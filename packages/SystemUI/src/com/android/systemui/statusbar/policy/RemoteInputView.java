@@ -921,13 +921,18 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 if (clip.getItemCount() > 1
                         || description.getMimeTypeCount() < 1
                         || remainingItems != null) {
-                    // TODO(b/172363500): Update to loop over all the items
+                    // Direct-reply in notifications currently only supports only one uri item
+                    // at a time and requires the MIME type to be set.
+                    Log.w(TAG, "Invalid payload: " + payload);
                     return payload;
                 }
                 Uri contentUri = clip.getItemAt(0).getUri();
                 String mimeType = description.getMimeType(0);
                 Intent dataIntent =
                         mRemoteInputView.prepareRemoteInputFromData(mimeType, contentUri);
+                // We can release the uri permissions granted to us as soon as we've created the
+                // grant for the target app in the call above.
+                payload.releasePermissions();
                 mRemoteInputView.sendRemoteInput(dataIntent);
             }
             return remainingItems;

@@ -2894,8 +2894,8 @@ public class Editor {
             final int originalLength = mTextView.getText().length();
             Selection.setSelection((Spannable) mTextView.getText(), offset);
             final ClipData clip = event.getClipData();
-            final ContentInfo payload =
-                    new ContentInfo.Builder(clip, SOURCE_DRAG_AND_DROP)
+            final ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_DRAG_AND_DROP)
+                    .setDragAndDropPermissions(permissions)
                     .build();
             mTextView.performReceiveContent(payload);
             if (dragDropIntoItself) {

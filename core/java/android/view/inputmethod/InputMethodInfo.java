@@ -61,6 +61,7 @@ import java.util.List;
  * @attr ref android.R.styleable#InputMethod_supportsSwitchingToNextInputMethod
  * @attr ref android.R.styleable#InputMethod_supportsInlineSuggestions
  * @attr ref android.R.styleable#InputMethod_suppressesSpellChecker
+ * @attr ref android.R.styleable#InputMethod_showInInputMethodPicker
  */
 public final class InputMethodInfo implements Parcelable {
     static final String TAG = "InputMethodInfo";
@@ -124,6 +125,11 @@ public final class InputMethodInfo implements Parcelable {
     private final boolean mSuppressesSpellChecker;
 
     /**
+     * The flag whether this IME should be shown as an option in the IME picker.
+     */
+    private final boolean mShowInInputMethodPicker;
+
+    /**
      * @param service the {@link ResolveInfo} corresponds in which the IME is implemented.
      * @return a unique ID to be returned by {@link #getId()}. We have used
      *         {@link ComponentName#flattenToShortString()} for this purpose (and it is already
@@ -167,6 +173,7 @@ public final class InputMethodInfo implements Parcelable {
         boolean supportsSwitchingToNextInputMethod = false; // false as default
         boolean inlineSuggestionsEnabled = false; // false as default
         boolean suppressesSpellChecker = false; // false as default
+        boolean showInInputMethodPicker = true; // true as default
         mForceDefault = false;
 
         PackageManager pm = context.getPackageManager();
@@ -212,6 +219,8 @@ public final class InputMethodInfo implements Parcelable {
                     com.android.internal.R.styleable.InputMethod_supportsInlineSuggestions, false);
             suppressesSpellChecker = sa.getBoolean(
                     com.android.internal.R.styleable.InputMethod_suppressesSpellChecker, false);
+            showInInputMethodPicker = sa.getBoolean(
+                    com.android.internal.R.styleable.InputMethod_showInInputMethodPicker, true);
             sa.recycle();
 
             final int depth = parser.getDepth();
@@ -284,6 +293,7 @@ public final class InputMethodInfo implements Parcelable {
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
         mInlineSuggestionsEnabled = inlineSuggestionsEnabled;
         mSuppressesSpellChecker = suppressesSpellChecker;
+        mShowInInputMethodPicker = showInInputMethodPicker;
         mIsVrOnly = isVrOnly;
     }
 
@@ -295,6 +305,7 @@ public final class InputMethodInfo implements Parcelable {
         mSupportsSwitchingToNextInputMethod = source.readInt() == 1;
         mInlineSuggestionsEnabled = source.readInt() == 1;
         mSuppressesSpellChecker = source.readBoolean();
+        mShowInInputMethodPicker = source.readBoolean();
         mIsVrOnly = source.readBoolean();
         mService = ResolveInfo.CREATOR.createFromParcel(source);
         mSubtypes = new InputMethodSubtypeArray(source);
@@ -354,6 +365,7 @@ public final class InputMethodInfo implements Parcelable {
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
         mInlineSuggestionsEnabled = inlineSuggestionsEnabled;
         mSuppressesSpellChecker = false;
+        mShowInInputMethodPicker = true;
         mIsVrOnly = isVrOnly;
     }
 
@@ -507,7 +519,8 @@ public final class InputMethodInfo implements Parcelable {
                 + " mIsVrOnly=" + mIsVrOnly
                 + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod
                 + " mInlineSuggestionsEnabled=" + mInlineSuggestionsEnabled
-                + " mSuppressesSpellChecker=" + mSuppressesSpellChecker);
+                + " mSuppressesSpellChecker=" + mSuppressesSpellChecker
+                + " mShowInInputMethodPicker=" + mShowInInputMethodPicker);
         pw.println(prefix + "mIsDefaultResId=0x"
                 + Integer.toHexString(mIsDefaultResId));
         pw.println(prefix + "Service:");
@@ -583,6 +596,14 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * Return {@code true} if this input method should be shown in the IME picker.
+     * @hide
+     */
+    public boolean showInInputMethodPicker() {
+        return mShowInInputMethodPicker;
+    }
+
+    /**
      * Used to package this object into a {@link Parcel}.
      *
      * @param dest The {@link Parcel} to be written.
@@ -597,6 +618,7 @@ public final class InputMethodInfo implements Parcelable {
         dest.writeInt(mSupportsSwitchingToNextInputMethod ? 1 : 0);
         dest.writeInt(mInlineSuggestionsEnabled ? 1 : 0);
         dest.writeBoolean(mSuppressesSpellChecker);
+        dest.writeBoolean(mShowInInputMethodPicker);
         dest.writeBoolean(mIsVrOnly);
         mService.writeToParcel(dest, flags);
         mSubtypes.writeToParcel(dest);

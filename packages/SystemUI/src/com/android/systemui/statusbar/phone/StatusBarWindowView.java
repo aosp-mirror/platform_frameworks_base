@@ -33,6 +33,8 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.util.leak.RotationUtils;
 
 /**
@@ -91,6 +93,7 @@ public class StatusBarWindowView extends FrameLayout {
      * @param roundedCornerContentPadding
      * @return
      */
+    @NonNull
     public static Pair<Integer, Integer> paddingNeededForCutoutAndRoundedCorner(
             DisplayCutout cutout, Pair<Integer, Integer> cornerCutoutPadding,
             int roundedCornerContentPadding) {

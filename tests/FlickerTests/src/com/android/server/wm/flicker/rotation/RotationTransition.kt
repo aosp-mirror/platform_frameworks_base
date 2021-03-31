@@ -139,7 +139,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
-            this.coversExactly(startingPos, testApp.getPackage())
+            this.visibleRegion(testApp.getPackage()).coversExactly(startingPos)
         }
     }
 
@@ -147,7 +147,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     @Test
     open fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
-            this.coversExactly(endingPos, testApp.getPackage())
+            this.visibleRegion(testApp.getPackage()).coversExactly(endingPos)
         }
     }
 }

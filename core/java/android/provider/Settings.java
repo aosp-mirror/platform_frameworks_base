@@ -9176,6 +9176,22 @@ public final class Settings {
         public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
 
         /**
+         * Whether the assistant can be triggered by a touch gesture.
+         *
+         * @hide
+         */
+        public static final String ASSIST_TOUCH_GESTURE_ENABLED =
+                "assist_touch_gesture_enabled";
+
+        /**
+         * Whether the assistant can be triggered by long-pressing the home button
+         *
+         * @hide
+         */
+        public static final String ASSIST_LONG_PRESS_HOME_ENABLED =
+                "assist_long_press_home_enabled";
+
+        /**
          * Control whether Trust Agents are in active unlock or extend unlock mode.
          * @hide
          */
@@ -9738,6 +9754,12 @@ public final class Settings {
         @Readable
         public static final String ACCESSIBILITY_MAGNIFICATION_MODE =
                 "accessibility_magnification_mode";
+
+        /**
+         * Magnification mode value that is a default value for the magnification logging feature.
+         * @hide
+         */
+        public static final int ACCESSIBILITY_MAGNIFICATION_MODE_NONE = 0x0;
 
         /**
          * Magnification mode value that magnifies whole display.

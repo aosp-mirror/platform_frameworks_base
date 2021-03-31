@@ -81,6 +81,11 @@ public class InsetsSourceConsumer {
     private final Supplier<Transaction> mTransactionSupplier;
     private @Nullable InsetsSourceControl mSourceControl;
     private boolean mHasWindowFocus;
+
+    /**
+     * Whether the view has focus returned by {@link #onWindowFocusGained(boolean)}.
+     */
+    private boolean mHasViewFocusWhenWindowFocusGain;
     private Rect mPendingFrame;
     private Rect mPendingVisibleFrame;
 
@@ -223,8 +228,9 @@ public class InsetsSourceConsumer {
     /**
      * Called when current window gains focus
      */
-    public void onWindowFocusGained() {
+    public void onWindowFocusGained(boolean hasViewFocus) {
         mHasWindowFocus = true;
+        mHasViewFocusWhenWindowFocusGain = hasViewFocus;
     }
 
     /**
@@ -236,6 +242,10 @@ public class InsetsSourceConsumer {
 
     boolean hasWindowFocus() {
         return mHasWindowFocus;
+    }
+
+    boolean hasViewFocusWhenWindowFocusGain() {
+        return mHasViewFocusWhenWindowFocusGain;
     }
 
     boolean applyLocalVisibilityOverride() {

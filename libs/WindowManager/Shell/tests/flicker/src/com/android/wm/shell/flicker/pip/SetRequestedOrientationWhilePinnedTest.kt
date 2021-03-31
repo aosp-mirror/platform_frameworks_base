@@ -91,7 +91,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipWindowInsideDisplay() {
         testSpec.assertWmStart {
-            coversAtMost(startingBounds, pipApp.defaultWindowName)
+            frameRegion(pipApp.defaultWindowName).coversAtMost(startingBounds)
         }
     }
 
@@ -107,7 +107,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
-            coversAtMost(startingBounds, pipApp.defaultWindowName)
+            visibleRegion(pipApp.defaultWindowName).coversAtMost(startingBounds)
         }
     }
 
@@ -121,7 +121,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
-            coversExactly(endingBounds, pipApp.defaultWindowName)
+            visibleRegion(pipApp.defaultWindowName).coversExactly(endingBounds)
         }
     }
 

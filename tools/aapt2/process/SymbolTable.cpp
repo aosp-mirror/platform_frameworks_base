@@ -199,7 +199,8 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
 
   if (sr.entry->id) {
     symbol->id = sr.entry->id.value();
-    symbol->is_dynamic = (sr.entry->id.value().package_id() == 0);
+    symbol->is_dynamic =
+        (sr.entry->id.value().package_id() == 0) || sr.entry->visibility.staged_api;
   }
 
   if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {
@@ -374,7 +375,8 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
 
   if (s) {
     s->is_public = (type_spec_flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
-    s->is_dynamic = IsPackageDynamic(ResourceId(res_id).package_id(), real_name.package);
+    s->is_dynamic = IsPackageDynamic(ResourceId(res_id).package_id(), real_name.package) ||
+                    (type_spec_flags & android::ResTable_typeSpec::SPEC_STAGED_API) != 0;
     return s;
   }
   return {};
@@ -421,7 +423,8 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
 
   if (s) {
     s->is_public = (*flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
-    s->is_dynamic = IsPackageDynamic(ResourceId(id).package_id(), name.package);
+    s->is_dynamic = IsPackageDynamic(ResourceId(id).package_id(), name.package) ||
+                    (*flags & android::ResTable_typeSpec::SPEC_STAGED_API) != 0;
     return s;
   }
   return {};

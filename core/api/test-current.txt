@@ -1155,7 +1155,6 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public boolean areUserDisabledHdrTypesAllowed();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public int getRefreshRateSwitchingType();
     method @NonNull public int[] getUserDisabledHdrTypes();
     method public boolean isMinimalPostProcessingRequested(int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAreUserDisabledHdrTypesAllowed(boolean);
@@ -1657,6 +1656,7 @@ package android.os {
     field public static final int FIRST_ISOLATED_UID = 99000; // 0x182b8
     field public static final int LAST_APP_ZYGOTE_ISOLATED_UID = 98999; // 0x182b7
     field public static final int LAST_ISOLATED_UID = 99999; // 0x1869f
+    field public static final int NFC_UID = 1027; // 0x403
     field public static final int NUM_UIDS_PER_APP_ZYGOTE = 100; // 0x64
   }
 
@@ -2873,6 +2873,14 @@ package android.view.contentcapture {
     method public void setTransformation(android.graphics.Matrix);
     method public void setVisibility(int);
     method public void setWebDomain(String);
+  }
+
+}
+
+package android.view.displayhash {
+
+  public final class DisplayHashManager {
+    method @RequiresPermission("android.permission.READ_FRAME_BUFFER") public void setDisplayHashThrottlingEnabled(boolean);
   }
 
 }

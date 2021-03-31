@@ -98,6 +98,37 @@ TEST_F(IdAssignerTests, FailWhenNonUniqueIdsAssigned) {
   ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
 }
 
+TEST_F(IdAssignerTests, FailWhenNonUniqueTypeIdsAssigned) {
+  auto table = test::ResourceTableBuilder()
+                   .AddSimple("android:string/foo", ResourceId(0x01040000))
+                   .AddSimple("android:attr/bar", ResourceId(0x01040006))
+                   .Build();
+  IdAssigner assigner;
+  ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
+}
+
+TEST_F(IdAssignerTests, FailWhenTypeHasTwoNonStagedIds) {
+  auto table = test::ResourceTableBuilder()
+                   .AddSimple("android:attr/foo", ResourceId(0x01050000))
+                   .AddSimple("android:attr/bar", ResourceId(0x01040006))
+                   .Build();
+  IdAssigner assigner;
+  ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
+}
+
+TEST_F(IdAssignerTests, FailWhenTypeHasTwoNonStagedIdsRegardlessOfStagedId) {
+  auto table = test::ResourceTableBuilder()
+                   .AddSimple("android:attr/foo", ResourceId(0x01050000))
+                   .AddSimple("android:attr/bar", ResourceId(0x01ff0006))
+                   .Add(NewResourceBuilder("android:attr/staged_baz")
+                            .SetId(0x01ff0000)
+                            .SetVisibility({.staged_api = true})
+                            .Build())
+                   .Build();
+  IdAssigner assigner;
+  ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
+}
+
 TEST_F(IdAssignerTests, AssignIdsWithIdMap) {
   auto table = test::ResourceTableBuilder()
                    .AddSimple("android:attr/foo")
@@ -154,52 +185,24 @@ TEST_F(IdAssignerTests, ExaustEntryIdsLastIdIsPublic) {
 }
 
 ::testing::AssertionResult VerifyIds(ResourceTable* table) {
-  std::set<uint8_t> package_ids;
-  auto table_view = table->GetPartitionedView();
-  for (auto& package : table_view.packages) {
-    if (!package.id) {
-      return ::testing::AssertionFailure() << "package " << package.name << " has no ID";
-    }
-
-    if (!package_ids.insert(package.id.value()).second) {
-      return ::testing::AssertionFailure() << "package " << package.name << " has non-unique ID "
-                                           << std::hex << (int)package.id.value() << std::dec;
-    }
-  }
-
-  for (auto& package : table_view.packages) {
-    std::set<uint8_t> type_ids;
-    for (auto& type : package.types) {
-      if (!type.id) {
-        return ::testing::AssertionFailure()
-               << "type " << type.type << " of package " << package.name << " has no ID";
-      }
-
-      if (!type_ids.insert(type.id.value()).second) {
-        return ::testing::AssertionFailure()
-               << "type " << type.type << " of package " << package.name << " has non-unique ID "
-               << std::hex << (int)type.id.value() << std::dec;
-      }
-    }
-
-    for (auto& type : package.types) {
-      std::set<ResourceId> entry_ids;
-      for (auto& entry : type.entries) {
+  std::set<ResourceId> seen_ids;
+  for (auto& package : table->packages) {
+    for (auto& type : package->types) {
+      for (auto& entry : type->entries) {
         if (!entry->id) {
           return ::testing::AssertionFailure()
-                 << "entry " << entry->name << " of type " << type.type << " of package "
-                 << package.name << " has no ID";
+                 << "resource " << ResourceNameRef(package->name, type->type, entry->name)
+                 << " has no ID";
         }
-
-        if (!entry_ids.insert(entry->id.value()).second) {
+        if (!seen_ids.insert(entry->id.value()).second) {
           return ::testing::AssertionFailure()
-                 << "entry " << entry->name << " of type " << type.type << " of package "
-                 << package.name << " has non-unique ID " << std::hex << entry->id.value()
-                 << std::dec;
+                 << "resource " << ResourceNameRef(package->name, type->type, entry->name)
+                 << " has a non-unique ID" << std::hex << entry->id.value() << std::dec;
         }
       }
     }
   }
+
   return ::testing::AssertionSuccess() << "all IDs are unique and assigned";
 }
 

@@ -233,7 +233,8 @@ public class SystemUIToast implements ToastPlugin.Toast {
             return null;
         }
         final AppEntry appEntry = appState.getEntry(packageName, userId);
-        if (!ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(appEntry)) {
+        if (appEntry.info == null
+                || !ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(appEntry)) {
             return null;
         }
 
