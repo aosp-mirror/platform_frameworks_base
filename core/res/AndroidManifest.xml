@@ -2551,10 +2551,6 @@
     <permission android:name="android.permission.CREATE_USERS"
         android:protectionLevel="signature" />
 
-    <!-- @TestApi @hide Allows an application to query user info for all users on the device. -->
-    <permission android:name="android.permission.QUERY_USERS"
-                android:protectionLevel="signature" />
-
     <!-- @hide Allows an application to set the profile owners and the device owner.
          This permission is not available to third party applications.-->
     <permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"
