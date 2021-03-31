@@ -142,7 +142,7 @@ public class SoundTriggerService extends SystemService {
             }
 
             if (stat.mIsStarted) {
-                Slog.e(TAG, "error onStart(): Model " + id + " already started");
+                Slog.w(TAG, "error onStart(): Model " + id + " already started");
                 return;
             }
 
@@ -154,12 +154,12 @@ public class SoundTriggerService extends SystemService {
         public synchronized void onStop(UUID id) {
             SoundModelStat stat = mModelStats.get(id);
             if (stat == null) {
-                Slog.e(TAG, "error onStop(): Model " + id + " has no stats available");
+                Slog.w(TAG, "error onStop(): Model " + id + " has no stats available");
                 return;
             }
 
             if (!stat.mIsStarted) {
-                Slog.e(TAG, "error onStop(): Model " + id + " already stopped");
+                Slog.w(TAG, "error onStop(): Model " + id + " already stopped");
                 return;
             }
 
@@ -314,7 +314,7 @@ public class SoundTriggerService extends SystemService {
 
                 GenericSoundModel model = getSoundModel(parcelUuid);
                 if (model == null) {
-                    Slog.e(TAG, "Null model in database for id: " + parcelUuid);
+                    Slog.w(TAG, "Null model in database for id: " + parcelUuid);
 
                     sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "startRecognition(): Null model in database for id: " + parcelUuid));
@@ -409,7 +409,7 @@ public class SoundTriggerService extends SystemService {
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
                 enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
                 if (soundModel == null || soundModel.getUuid() == null) {
-                    Slog.e(TAG, "Invalid sound model");
+                    Slog.w(TAG, "Invalid sound model");
 
                     sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "loadGenericSoundModel(): Invalid sound model"));
@@ -445,7 +445,7 @@ public class SoundTriggerService extends SystemService {
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
                 enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
                 if (soundModel == null || soundModel.getUuid() == null) {
-                    Slog.e(TAG, "Invalid sound model");
+                    Slog.w(TAG, "Invalid sound model");
 
                     sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "loadKeyphraseSoundModel(): Invalid sound model"));
@@ -453,7 +453,7 @@ public class SoundTriggerService extends SystemService {
                     return STATUS_ERROR;
                 }
                 if (soundModel.getKeyphrases() == null || soundModel.getKeyphrases().length != 1) {
-                    Slog.e(TAG, "Only one keyphrase per model is currently supported.");
+                    Slog.w(TAG, "Only one keyphrase per model is currently supported.");
 
                     sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "loadKeyphraseSoundModel(): Only one keyphrase per model"
@@ -513,7 +513,7 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                     if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded");
+                        Slog.w(TAG, soundModelId + " is not loaded");
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "startRecognitionForService():" + soundModelId + " is not loaded"));
@@ -525,7 +525,7 @@ public class SoundTriggerService extends SystemService {
                         existingCallback = mCallbacks.get(soundModelId.getUuid());
                     }
                     if (existingCallback != null) {
-                        Slog.e(TAG, soundModelId + " is already running");
+                        Slog.w(TAG, soundModelId + " is already running");
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "startRecognitionForService():"
@@ -580,7 +580,7 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                     if (soundModel == null) {
-                        Slog.e(TAG, soundModelId + " is not loaded");
+                        Slog.w(TAG, soundModelId + " is not loaded");
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "stopRecognitionForService(): " + soundModelId
@@ -593,7 +593,7 @@ public class SoundTriggerService extends SystemService {
                         callback = mCallbacks.get(soundModelId.getUuid());
                     }
                     if (callback == null) {
-                        Slog.e(TAG, soundModelId + " is not running");
+                        Slog.w(TAG, soundModelId + " is not running");
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "stopRecognitionForService(): " + soundModelId
@@ -648,7 +648,7 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                     if (soundModel == null) {
-                        Slog.e(TAG, soundModelId + " is not loaded");
+                        Slog.w(TAG, soundModelId + " is not loaded");
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "unloadSoundModel(): " + soundModelId + " is not loaded"));
@@ -715,7 +715,7 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                     if (soundModel == null) {
-                        Slog.e(TAG, soundModelId + " is not loaded");
+                        Slog.w(TAG, soundModelId + " is not loaded");
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): "
                                 + soundModelId + " is not loaded"));
@@ -777,7 +777,7 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                     if (soundModel == null) {
-                        Slog.e(TAG, soundModelId + " is not loaded. Loaded models: "
+                        Slog.w(TAG, soundModelId + " is not loaded. Loaded models: "
                                 + mLoadedModels.toString());
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent("setParameter(): "
@@ -810,7 +810,7 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                     if (soundModel == null) {
-                        Slog.e(TAG, soundModelId + " is not loaded");
+                        Slog.w(TAG, soundModelId + " is not loaded");
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent("getParameter(): "
                                 + soundModelId + " is not loaded"));
@@ -841,7 +841,7 @@ public class SoundTriggerService extends SystemService {
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                     if (soundModel == null) {
-                        Slog.e(TAG, soundModelId + " is not loaded");
+                        Slog.w(TAG, soundModelId + " is not loaded");
 
                         sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "queryParameter(): "
