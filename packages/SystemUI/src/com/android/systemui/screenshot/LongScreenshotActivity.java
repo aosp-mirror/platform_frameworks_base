@@ -17,11 +17,13 @@
 package com.android.systemui.screenshot;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
+import android.graphics.Matrix;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
@@ -35,8 +37,12 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.ScrollCaptureResponse;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -64,6 +70,8 @@ public class LongScreenshotActivity extends Activity {
     public static final String EXTRA_CAPTURE_RESPONSE = "capture-response";
     private static final String KEY_SAVED_IMAGE_PATH = "saved-image-path";
 
+    private static final boolean USE_SHARED_ELEMENT = false;
+
     private final UiEventLogger mUiEventLogger;
     private final ScrollCaptureController mScrollCaptureController;
     private final Executor mUiExecutor;
@@ -75,6 +83,7 @@ public class LongScreenshotActivity extends Activity {
     private boolean mRestoringInstance;
 
     private ImageView mPreview;
+    private ImageView mTransitionView;
     private View mSave;
     private View mEdit;
     private View mShare;
@@ -88,6 +97,7 @@ public class LongScreenshotActivity extends Activity {
 
     private ListenableFuture<LongScreenshot> mLongScreenshotFuture;
     private LongScreenshot mLongScreenshot;
+    private boolean mTransitionStarted;
 
     private enum PendingAction {
         SHARE,
@@ -110,8 +120,8 @@ public class LongScreenshotActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate(savedInstanceState = " + savedInstanceState + ")");
-
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
         setContentView(R.layout.long_screenshot);
 
         mPreview = requireViewById(R.id.preview);
@@ -121,6 +131,7 @@ public class LongScreenshotActivity extends Activity {
         mCropView = requireViewById(R.id.crop_view);
         mMagnifierView = requireViewById(R.id.magnifier);
         mCropView.setCropInteractionListener(mMagnifierView);
+        mTransitionView = requireViewById(R.id.transition);
 
         mSave.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
@@ -206,6 +217,7 @@ public class LongScreenshotActivity extends Activity {
         Log.d(TAG, "onCaptureCompleted(longScreenshot=" + longScreenshot + ")");
         mLongScreenshot = longScreenshot;
         mPreview.setImageDrawable(mLongScreenshot.getDrawable());
+        mTransitionView.setImageDrawable(mLongScreenshot.getDrawable());
         updateImageDimensions();
         mMagnifierView.setDrawable(mLongScreenshot.getDrawable(),
                 mLongScreenshot.getWidth(), mLongScreenshot.getHeight());
@@ -275,6 +287,9 @@ public class LongScreenshotActivity extends Activity {
     protected void onStop() {
         Log.d(TAG, "onStop finishing=" + isFinishing());
         super.onStop();
+        if (mTransitionStarted) {
+            finish();
+        }
         if (isFinishing()) {
             if (mScrollCaptureResponse != null) {
                 mScrollCaptureResponse.close();
@@ -321,11 +336,22 @@ public class LongScreenshotActivity extends Activity {
             intent.setComponent(ComponentName.unflattenFromString(editorPackage));
         }
         intent.setDataAndType(uri, "image/png");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-        startActivityAsUser(intent, UserHandle.CURRENT);
-        finishAndRemoveTask();
+        if (USE_SHARED_ELEMENT) {
+            updateImageDimensions();
+            mTransitionView.setVisibility(View.VISIBLE);
+            // TODO: listen for transition completing instead of finishing onStop
+            mTransitionStarted = true;
+            startActivity(intent,
+                    ActivityOptions.makeSceneTransitionAnimation(this, mTransitionView,
+                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle());
+        } else {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivityAsUser(intent, UserHandle.CURRENT);
+            finishAndRemoveTask();
+        }
     }
 
     private void doShare(Uri uri) {
@@ -415,19 +441,47 @@ public class LongScreenshotActivity extends Activity {
                 - mPreview.getPaddingBottom();
         float viewRatio = previewWidth / (float) previewHeight;
 
+        // Top and left offsets of the image relative to mPreview.
+        int imageLeft = mPreview.getPaddingLeft();
+        int imageTop = mPreview.getPaddingTop();
+
+        // The image width and height on screen
+        int imageHeight = previewHeight;
+        int imageWidth = previewWidth;
+        float scale;
         if (imageRatio > viewRatio) {
             // Image is full width and height is constrained, compute extra padding to inform
             // CropView
-            float imageHeight = previewHeight * viewRatio / imageRatio;
-            int extraPadding = (int) (previewHeight - imageHeight) / 2;
+            imageHeight = (int) (previewHeight * viewRatio / imageRatio);
+            int extraPadding = (previewHeight - imageHeight) / 2;
             mCropView.setExtraPadding(extraPadding + mPreview.getPaddingTop(),
                     extraPadding + mPreview.getPaddingBottom());
+            imageTop += (previewHeight - imageHeight) / 2;
+            scale = imageHeight / bounds.height();
+            mCropView.setExtraPadding(extraPadding, extraPadding);
             mCropView.setImageWidth(previewWidth);
         } else {
+            imageWidth = (int) (previewWidth * imageRatio / viewRatio);
+            imageLeft += (previewWidth - imageWidth) / 2;
+            scale = imageWidth / (float) bounds.width();
             // Image is full height
             mCropView.setExtraPadding(mPreview.getPaddingTop(),  mPreview.getPaddingBottom());
             mCropView.setImageWidth((int) (previewHeight * imageRatio));
         }
 
+        // Update transition view's position and scale.
+        Rect boundaries = mCropView.getCropBoundaries(imageWidth, imageHeight);
+        mTransitionView.setTranslationX(imageLeft + boundaries.left);
+        mTransitionView.setTranslationY(imageTop + boundaries.top);
+        ConstraintLayout.LayoutParams params =
+                (ConstraintLayout.LayoutParams) mTransitionView.getLayoutParams();
+        params.width = boundaries.width();
+        params.height = boundaries.height();
+        mTransitionView.setLayoutParams(params);
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale, scale, 0, 0);
+        matrix.postTranslate(-boundaries.left, -boundaries.top);
+        mTransitionView.setImageMatrix(matrix);
     }
 }
