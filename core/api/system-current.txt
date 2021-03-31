@@ -9795,7 +9795,6 @@ package android.telephony {
     method @Deprecated public int getDataConnectionApnTypeBitMask();
     method @Deprecated public int getDataConnectionFailCause();
     method @Deprecated public int getDataConnectionState();
-    method public int getId();
   }
 
   public final class PreciseDisconnectCause {
