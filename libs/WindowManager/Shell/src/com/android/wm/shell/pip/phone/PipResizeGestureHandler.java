@@ -71,6 +71,7 @@ public class PipResizeGestureHandler {
     private final PipBoundsState mPipBoundsState;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PhonePipMenuController mPhonePipMenuController;
+    private final PipDismissTargetHandler mPipDismissTargetHandler;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipPinchResizingAlgorithm mPinchResizingAlgorithm;
     private final int mDisplayId;
@@ -117,9 +118,10 @@ public class PipResizeGestureHandler {
 
     public PipResizeGestureHandler(Context context, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
-            PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
-            Runnable updateMovementBoundsRunnable, PipUiEventLogger pipUiEventLogger,
-            PhonePipMenuController menuActivityController, ShellExecutor mainExecutor) {
+            PipTaskOrganizer pipTaskOrganizer, PipDismissTargetHandler pipDismissTargetHandler,
+            Function<Rect, Rect> movementBoundsSupplier, Runnable updateMovementBoundsRunnable,
+            PipUiEventLogger pipUiEventLogger, PhonePipMenuController menuActivityController,
+            ShellExecutor mainExecutor) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = mainExecutor;
@@ -127,6 +129,7 @@ public class PipResizeGestureHandler {
         mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
+        mPipDismissTargetHandler = pipDismissTargetHandler;
         mMovementBoundsSupplier = movementBoundsSupplier;
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
         mPhonePipMenuController = menuActivityController;
@@ -510,6 +513,8 @@ public class PipResizeGestureHandler {
                 mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
                         PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE, callback);
             }
+            mPipDismissTargetHandler
+                    .setMagneticFieldRadiusPercent((float) mLastResizeBounds.width() / mMinSize.x);
             mPipUiEventLogger.log(
                     PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_RESIZE);
         } else {
