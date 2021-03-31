@@ -111,6 +111,7 @@ import android.os.IThermalService;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
@@ -148,6 +149,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
+import com.android.internal.os.DmabufInfoReader;
 import com.android.internal.os.KernelCpuBpfTracking;
 import com.android.internal.os.KernelCpuThreadReader;
 import com.android.internal.os.KernelCpuThreadReaderDiff;
@@ -198,6 +200,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -528,6 +531,8 @@ public class StatsPullAtomService extends SystemService {
                         synchronized (mProcessSystemIonHeapSizeLock) {
                             return pullProcessSystemIonHeapSizeLocked(atomTag, data);
                         }
+                    case FrameworkStatsLog.PROCESS_DMABUF_MEMORY:
+                        return pullProcessDmabufMemory(atomTag, data);
                     case FrameworkStatsLog.SYSTEM_MEMORY:
                         return pullSystemMemory(atomTag, data);
                     case FrameworkStatsLog.TEMPERATURE:
@@ -818,6 +823,7 @@ public class StatsPullAtomService extends SystemService {
         registerIonHeapSize();
         registerProcessSystemIonHeapSize();
         registerSystemMemory();
+        registerProcessDmabufMemory();
         registerTemperature();
         registerCoolingDevice();
         registerBinderCallsStats();
@@ -2179,6 +2185,43 @@ public class StatsPullAtomService extends SystemService {
                     readCmdlineFromProcfs(allocations.pid),
                     (int) (allocations.totalSizeInBytes / 1024), allocations.count,
                     (int) (allocations.maxSizeInBytes / 1024)));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerProcessDmabufMemory() {
+        int tagId = FrameworkStatsLog.PROCESS_DMABUF_MEMORY;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullProcessDmabufMemory(int atomTag, List<StatsEvent> pulledData) {
+        List<ProcessMemoryState> managedProcessList =
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .getMemoryStateForProcesses();
+        managedProcessList.sort(Comparator.comparingInt(x -> x.oomScore));
+        for (ProcessMemoryState process : managedProcessList) {
+            if (process.uid == Process.SYSTEM_UID) {
+                continue;
+            }
+            DmabufInfoReader.ProcessDmabuf proc = DmabufInfoReader.getProcessStats(process.pid);
+            if (proc == null || (proc.retainedBuffersCount <= 0 && proc.mappedBuffersCount <= 0)) {
+                continue;
+            }
+            pulledData.add(
+                    FrameworkStatsLog.buildStatsEvent(
+                            atomTag,
+                            process.uid,
+                            process.processName,
+                            process.oomScore,
+                            proc.retainedSizeKb,
+                            proc.retainedBuffersCount,
+                            proc.mappedSizeKb,
+                            proc.mappedBuffersCount));
         }
         return StatsManager.PULL_SUCCESS;
     }
