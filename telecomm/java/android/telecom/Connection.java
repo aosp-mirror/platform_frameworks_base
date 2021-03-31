@@ -1153,6 +1153,10 @@ public abstract class Connection extends Conferenceable {
             builder.append(isLong ? " PROPERTY_IS_ADHOC_CONFERENCE" : " adhoc_conf");
         }
 
+        if ((properties & PROPERTY_IS_DOWNGRADED_CONFERENCE) == PROPERTY_IS_DOWNGRADED_CONFERENCE) {
+            builder.append(isLong ? " PROPERTY_IS_DOWNGRADED_CONFERENCE" : " dngrd_conf");
+        }
+
         builder.append("]");
         return builder.toString();
     }
