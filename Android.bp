@@ -441,26 +441,6 @@ filegroup {
     ],
 }
 
-filegroup {
-    name: "framework-updatable-sources",
-    srcs: [
-        ":framework-appsearch-sources",
-        ":framework-connectivity-sources",
-        ":framework-graphics-srcs",
-        ":framework-mediaprovider-sources",
-        ":framework-permission-sources",
-        ":framework-permission-s-sources",
-        ":framework-scheduling-sources",
-        ":framework-sdkextensions-sources",
-        ":framework-statsd-sources",
-        ":framework-tethering-srcs",
-        ":framework-wifi-updatable-sources",
-        ":ike-srcs",
-        ":updatable-media-srcs",
-    ],
-    visibility: ["//visibility:private"],
-}
-
 java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
