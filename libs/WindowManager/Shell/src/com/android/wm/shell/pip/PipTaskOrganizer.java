@@ -553,7 +553,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        if (mState == State.UNDEFINED) {
+        if (!mState.isInPip()) {
             return;
         }
         final WindowContainerToken token = info.token;

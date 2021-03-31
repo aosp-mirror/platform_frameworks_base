@@ -23,6 +23,7 @@ import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -334,6 +335,18 @@ public final class WindowContainerTransaction implements Parcelable {
         mHierarchyOps.add(HierarchyOp.createForAdjacentRoots(
                 root1.asBinder(),
                 root2.asBinder()));
+        return this;
+    }
+
+    /**
+     * Starts a task by id. The task is expected to already exist (eg. as a recent task).
+     * @param taskId Id of task to start.
+     * @param options bundle containing ActivityOptions for the task's top activity.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction startTask(int taskId, @Nullable Bundle options) {
+        mHierarchyOps.add(HierarchyOp.createForTaskLaunch(taskId, options));
         return this;
     }
 
@@ -663,6 +676,11 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT = 2;
         public static final int HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT = 3;
         public static final int HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS = 4;
+        public static final int HIERARCHY_OP_TYPE_LAUNCH_TASK = 5;
+
+        // The following key(s) are for use with mLaunchOptions:
+        // When launching a task (eg. from recents), this is the taskId to be launched.
+        public static final String LAUNCH_KEY_TASK_ID = "android:transaction.hop.taskId";
 
         private final int mType;
 
@@ -678,36 +696,47 @@ public final class WindowContainerTransaction implements Parcelable {
         final private int[]  mWindowingModes;
         final private int[] mActivityTypes;
 
+        private final Bundle mLaunchOptions;
+
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
             return new HierarchyOp(HIERARCHY_OP_TYPE_REPARENT,
-                    container, reparent, null, null, toTop);
+                    container, reparent, null, null, toTop, null);
         }
 
         public static HierarchyOp createForReorder(@NonNull IBinder container, boolean toTop) {
             return new HierarchyOp(HIERARCHY_OP_TYPE_REORDER,
-                    container, container, null, null, toTop);
+                    container, container, null, null, toTop, null);
         }
 
         public static HierarchyOp createForChildrenTasksReparent(IBinder currentParent,
                 IBinder newParent, int[] windowingModes, int[] activityTypes, boolean onTop) {
             return new HierarchyOp(HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT,
-                    currentParent, newParent, windowingModes, activityTypes, onTop);
+                    currentParent, newParent, windowingModes, activityTypes, onTop, null);
         }
 
         public static HierarchyOp createForSetLaunchRoot(IBinder container,
                 int[] windowingModes, int[] activityTypes) {
             return new HierarchyOp(HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT,
-                    container, null, windowingModes, activityTypes, false);
+                    container, null, windowingModes, activityTypes, false, null);
         }
 
         public static HierarchyOp createForAdjacentRoots(IBinder root1, IBinder root2) {
             return new HierarchyOp(HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS,
-                    root1, root2, null, null, false);
+                    root1, root2, null, null, false, null);
         }
 
-        private HierarchyOp(int type, @NonNull IBinder container, @Nullable IBinder reparent,
-                int[] windowingModes, int[] activityTypes, boolean toTop) {
+        /** Create a hierarchy op for launching a task. */
+        public static HierarchyOp createForTaskLaunch(int taskId, @Nullable Bundle options) {
+            final Bundle fullOptions = options == null ? new Bundle() : options;
+            fullOptions.putInt(LAUNCH_KEY_TASK_ID, taskId);
+            return new HierarchyOp(HIERARCHY_OP_TYPE_LAUNCH_TASK, null, null, null, null, true,
+                    fullOptions);
+        }
+
+        private HierarchyOp(int type, @Nullable IBinder container, @Nullable IBinder reparent,
+                int[] windowingModes, int[] activityTypes, boolean toTop,
+                @Nullable Bundle launchOptions) {
             mType = type;
             mContainer = container;
             mReparent = reparent;
@@ -716,6 +745,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mActivityTypes = activityTypes != null ?
                     Arrays.copyOf(activityTypes, activityTypes.length) : null;
             mToTop = toTop;
+            mLaunchOptions = launchOptions;
         }
 
         public HierarchyOp(@NonNull HierarchyOp copy) {
@@ -725,6 +755,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mToTop = copy.mToTop;
             mWindowingModes = copy.mWindowingModes;
             mActivityTypes = copy.mActivityTypes;
+            mLaunchOptions = copy.mLaunchOptions;
         }
 
         protected HierarchyOp(Parcel in) {
@@ -734,6 +765,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mToTop = in.readBoolean();
             mWindowingModes = in.createIntArray();
             mActivityTypes = in.createIntArray();
+            mLaunchOptions = in.readBundle();
         }
 
         public int getType() {
@@ -771,6 +803,11 @@ public final class WindowContainerTransaction implements Parcelable {
             return mActivityTypes;
         }
 
+        @Nullable
+        public Bundle getLaunchOptions() {
+            return mLaunchOptions;
+        }
+
         @Override
         public String toString() {
             switch (mType) {
@@ -790,6 +827,8 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
                     return "{SetAdjacentRoot: container=" + mContainer
                             + " adjacentRoot=" + mReparent + "}";
+                case HIERARCHY_OP_TYPE_LAUNCH_TASK:
+                    return "{LaunchTask: " + mLaunchOptions + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes
@@ -805,6 +844,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeBoolean(mToTop);
             dest.writeIntArray(mWindowingModes);
             dest.writeIntArray(mActivityTypes);
+            dest.writeBundle(mLaunchOptions);
         }
 
         @Override

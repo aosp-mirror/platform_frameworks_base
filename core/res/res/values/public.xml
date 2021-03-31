@@ -3096,6 +3096,9 @@
     <!-- @hide @SystemApi -->
     <public name="playHomeTransitionSound" />
     <public name="lStar" />
+    <!-- @hide @SystemApi -->
+    <public name="throttleDurationMillis" />
+    <public name="showInInputMethodPicker" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">

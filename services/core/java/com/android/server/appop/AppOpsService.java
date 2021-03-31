@@ -2042,7 +2042,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName,
             int[] ops) {
         enforceGetAppOpsStatsPermissionIfNeeded(uid,packageName);
-        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return Collections.emptyList();
         }
@@ -2966,7 +2966,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
-        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
@@ -3149,8 +3149,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         skipProxyOperation = resolveSkipProxyOperation(skipProxyOperation, attributionSource);
 
-        String resolveProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
-                proxyPackageName);
+        String resolveProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
         if (resolveProxyPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
@@ -3172,8 +3171,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        String resolveProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
-                proxiedPackageName);
+        String resolveProxiedPackageName = resolvePackageName(proxiedUid, proxiedPackageName);
         if (resolveProxiedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
@@ -3220,7 +3218,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
-        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
@@ -3603,7 +3601,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
-        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
@@ -3676,8 +3674,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         skipProxyOperation = resolveSkipProxyOperation(skipProxyOperation, attributionSource);
 
-        String resolvedProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
-                proxyPackageName);
+        String resolvedProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
         if (resolvedProxyPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
@@ -3687,8 +3684,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
                 == PackageManager.PERMISSION_GRANTED || isSelfBlame;
 
-        String resolvedProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
-                proxiedPackageName);
+        String resolvedProxiedPackageName = resolvePackageName(proxiedUid, proxiedPackageName);
         if (resolvedProxiedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
         }
@@ -3827,7 +3823,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
-        String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return;
         }
@@ -3873,8 +3869,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
         verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
 
-        String resolvedProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
-                proxyPackageName);
+        String resolvedProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
         if (resolvedProxyPackageName == null) {
             return null;
         }
@@ -3882,8 +3877,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         finishOperationUnchecked(clientId, code, proxyUid, resolvedProxyPackageName,
                 proxyAttributionTag);
 
-        String resolvedProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
-                proxiedPackageName);
+        String resolvedProxiedPackageName = resolvePackageName(proxiedUid, proxiedPackageName);
         if (resolvedProxiedPackageName == null) {
             return null;
         }
@@ -4357,8 +4351,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (mPlatformCompat.isChangeEnabledByPackageName(
                             SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, packageName,
                             userId) && mPlatformCompat.isChangeEnabledByUid(
-                                    SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE,
-                            callingUid)) {
+                                    SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, callingUid)) {
                         throw new SecurityException(msg);
                     } else {
                         Slog.e(TAG, msg);
@@ -6258,7 +6251,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
-        final String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
+        final String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return false;
         }
@@ -6654,6 +6647,23 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (uid != Process.SYSTEM_UID) {
             throw new SecurityException(function + " must by called by the system");
         }
+    }
+
+    private static String resolvePackageName(int uid, String packageName)  {
+        if (uid == Process.ROOT_UID) {
+            return "root";
+        } else if (uid == Process.SHELL_UID) {
+            return "com.android.shell";
+        } else if (uid == Process.MEDIA_UID) {
+            return "media";
+        } else if (uid == Process.AUDIOSERVER_UID) {
+            return "audioserver";
+        } else if (uid == Process.CAMERASERVER_UID) {
+            return "cameraserver";
+        } else if (uid == Process.SYSTEM_UID && packageName == null) {
+            return "android";
+        }
+        return packageName;
     }
 
     private static int resolveUid(String packageName)  {

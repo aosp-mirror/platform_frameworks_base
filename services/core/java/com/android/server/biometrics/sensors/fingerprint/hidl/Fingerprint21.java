@@ -402,7 +402,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @VisibleForTesting
     synchronized IBiometricsFingerprint getDaemon() {
         if (mTestHalEnabled) {
-            final TestHal testHal = new TestHal();
+            final TestHal testHal = new TestHal(mContext, mSensorId);
             testHal.setNotify(mHalResultController);
             return testHal;
         }

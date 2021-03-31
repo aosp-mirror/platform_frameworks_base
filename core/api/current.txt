@@ -1296,6 +1296,7 @@ package android {
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
     field public static final int showForAllUsers = 16844015; // 0x10104ef
+    field public static final int showInInputMethodPicker = 16844361; // 0x1010649
     field public static final int showMetadataInPreview = 16844079; // 0x101052f
     field @Deprecated public static final int showOnLockScreen = 16843721; // 0x10103c9
     field public static final int showSilent = 16843259; // 0x10101fb
@@ -10683,7 +10684,7 @@ package android.content {
     ctor public ContextParams.Builder(@NonNull android.content.ContextParams);
     method @NonNull public android.content.ContextParams build();
     method @NonNull public android.content.ContextParams.Builder setAttributionTag(@Nullable String);
-    method @NonNull public android.content.ContextParams.Builder setNextAttributionSource(@Nullable android.content.AttributionSource);
+    method @NonNull public android.content.ContextParams.Builder setNextAttributionSource(@NonNull android.content.AttributionSource);
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -18842,9 +18843,14 @@ package android.hardware.display {
     method public android.view.Display getDisplay(int);
     method public android.view.Display[] getDisplays();
     method public android.view.Display[] getDisplays(String);
+    method public int getMatchContentFrameRateUserPreference();
     method public void registerDisplayListener(android.hardware.display.DisplayManager.DisplayListener, android.os.Handler);
     method public void unregisterDisplayListener(android.hardware.display.DisplayManager.DisplayListener);
     field public static final String DISPLAY_CATEGORY_PRESENTATION = "android.hardware.display.category.PRESENTATION";
+    field public static final int MATCH_CONTENT_FRAMERATE_ALWAYS = 2; // 0x2
+    field public static final int MATCH_CONTENT_FRAMERATE_NEVER = 0; // 0x0
+    field public static final int MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY = 1; // 0x1
+    field public static final int MATCH_CONTENT_FRAMERATE_UNKNOWN = -1; // 0xffffffff
     field public static final int VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR = 16; // 0x10
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = 8; // 0x8
     field public static final int VIRTUAL_DISPLAY_FLAG_PRESENTATION = 2; // 0x2
@@ -51545,6 +51551,7 @@ package android.view.displayhash {
     field public static final int DISPLAY_HASH_ERROR_INVALID_HASH_ALGORITHM = -5; // 0xfffffffb
     field public static final int DISPLAY_HASH_ERROR_MISSING_WINDOW = -3; // 0xfffffffd
     field public static final int DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN = -4; // 0xfffffffc
+    field public static final int DISPLAY_HASH_ERROR_TOO_MANY_REQUESTS = -6; // 0xfffffffa
     field public static final int DISPLAY_HASH_ERROR_UNKNOWN = -1; // 0xffffffff
   }
 
@@ -52775,11 +52782,16 @@ package android.view.translation {
   }
 
   public final class TranslationManager {
-    method public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
-    method @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
-    method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getTranslationCapabilities(int, int);
-    method @Nullable public android.app.PendingIntent getTranslationSettingsActivityIntent();
-    method public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method public void addOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Deprecated public void addTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Nullable @WorkerThread public android.view.translation.Translator createOnDeviceTranslator(@NonNull android.view.translation.TranslationContext);
+    method @Deprecated @Nullable @WorkerThread public android.view.translation.Translator createTranslator(@NonNull android.view.translation.TranslationContext);
+    method @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getOnDeviceTranslationCapabilities(int, int);
+    method @Nullable public android.app.PendingIntent getOnDeviceTranslationSettingsActivityIntent();
+    method @Deprecated @NonNull @WorkerThread public java.util.Set<android.view.translation.TranslationCapability> getTranslationCapabilities(int, int);
+    method @Deprecated @Nullable public android.app.PendingIntent getTranslationSettingsActivityIntent();
+    method public void removeOnDeviceTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
+    method @Deprecated public void removeTranslationCapabilityUpdateListener(int, int, @NonNull android.app.PendingIntent);
   }
 
   public final class TranslationRequest implements android.os.Parcelable {

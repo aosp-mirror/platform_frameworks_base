@@ -21,7 +21,9 @@ import static android.content.Context.DISPLAY_HASH_SERVICE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -92,6 +94,21 @@ public final class DisplayHashManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send request verifyImpressionToken", e);
             return null;
+        }
+    }
+
+    /**
+     * Call to enable or disable the throttling when generating a display hash. This should only be
+     * used for testing. Throttling is enabled by default.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.READ_FRAME_BUFFER)
+    public void setDisplayHashThrottlingEnabled(boolean enable) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().setDisplayHashThrottlingEnabled(enable);
+        } catch (RemoteException e) {
         }
     }
 }

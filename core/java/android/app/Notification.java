@@ -5360,6 +5360,11 @@ public class Notification implements Parcelable
             // Use different highlighted colors except when low-priority mode prevents that
             if (!p.mReduceHighlights) {
                 pillColor = getAccentTertiaryColor(p);
+                // TODO(b/183710694): The accent tertiary is currently too bright in dark mode, so
+                //  we need to pick a contrasting color.
+                textColor = ColorUtils.setAlphaComponent(
+                        ContrastColorUtil.resolvePrimaryColor(mContext, pillColor, mInNightMode),
+                        0xFF);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);

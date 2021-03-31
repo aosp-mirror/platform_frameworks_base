@@ -228,6 +228,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return mHost.createTile(subPanel);
     }
 
+    boolean areThereTiles() {
+        return !mRecords.isEmpty();
+    }
 
     QSTileView getTileView(QSTile tile) {
         for (QSPanelControllerBase.TileRecord r : mRecords) {

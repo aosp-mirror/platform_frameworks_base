@@ -1979,6 +1979,43 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.VIEW_PERMISSION_USAGE";
 
     /**
+     * Activity action: Launch UI to show information about the usage of a given permission group in
+     * a given period. This action would be handled by apps that want to show details about how and
+     * why given permission group is being used.
+     * <p>
+     * <strong>Important:</strong>You must protect the activity that handles this action with the
+     * {@link android.Manifest.permission#START_VIEW_PERMISSION_USAGE} permission to ensure that
+     * only the system can launch this activity. The system will not launch activities that are not
+     * properly protected.
+     *
+     * <p>
+     * Input: {@link #EXTRA_PERMISSION_GROUP_NAME} specifies the permission group for which the
+     * launched UI would be targeted.
+     * </p>
+     * <p>
+     * Input: {@link #EXTRA_ATTRIBUTION_TAGS} specifies the attribution tags for the usage entry.
+     * </p>
+     * <p>
+     * Input: {@link #EXTRA_START_TIME} specifies the start time of the period. Both start time and
+     * end time are needed and start time must be <= end time.
+     * </p>
+     * <p>
+     * Input: {@link #EXTRA_END_TIME} specifies the end time of the period. Both start time and end
+     * time are needed and start time must be <= end time.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE)
+    @SystemApi
+    public static final String ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD =
+            "android.intent.action.VIEW_PERMISSION_USAGE_FOR_PERIOD";
+
+    /**
      * Activity action: Launch UI to manage a default app.
      * <p>
      * Input: {@link #EXTRA_ROLE_NAME} specifies the role of the default app which will be managed
@@ -5334,6 +5371,33 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String EXTRA_TASK_ID = "android.intent.extra.TASK_ID";
+
+    /**
+     * A String[] holding attribution tags when used with
+     * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ATTRIBUTION_TAGS = "android.intent.extra.ATTRIBUTION_TAGS";
+
+    /**
+     * A long representing the start timestamp (in millis) of the permission usage when used with
+     * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
+
+    /**
+     * A long representing the end timestamp (in millis) of the permission usage when used with
+     * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_END_TIME = "android.intent.extra.END_TIME";
 
     /**
      * An Intent[] describing additional, alternate choices you would like shown with

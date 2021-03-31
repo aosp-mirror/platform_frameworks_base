@@ -6475,7 +6475,7 @@ public abstract class Context {
      */
     @Deprecated
     public @NonNull Context createFeatureContext(@Nullable String attributionTag) {
-        return createContext(new ContextParams.Builder(getParams())
+        return createContext(new ContextParams.Builder()
                 .setAttributionTag(attributionTag)
                 .build());
     }

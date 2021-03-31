@@ -29,16 +29,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Represents a rounded corner of the display.
- *
- * <code>
- *       ________
- *     /        ^
- *    /         | Radius
- *    |         v
- *    |       X <- Center point
- *    |<----->
- *     Radius
- * </code>
+ * <p>
+ * <img src="{@docRoot}reference/android/images/rounded_corner/rounded-corner-info.png" height="120"
+ * alt="A figure to describe what the rounded corner radius and the center point are. "/>
+ * </p>
  *
  * <p>Note: The rounded corner formed by the radius and the center is an approximation.</p>
  *

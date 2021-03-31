@@ -132,6 +132,11 @@ message Visibility {
 
   // The comment associated with the <public> tag.
   string comment = 3;
+
+  // Indicates that the resource id may change across builds and that the public R.java identifier
+  // for this resource should not be final. This is set to `true` for resources in `staging-group`
+  // tags.
+  bool staged_api = 4;
 }
 
 // Whether a resource comes from a compile-time overlay and is explicitly allowed to not overlay an

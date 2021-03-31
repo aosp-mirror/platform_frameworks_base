@@ -24,7 +24,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.os.Binder;
 import android.os.Process;
-import android.util.Slog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -71,8 +70,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @hide
  */
 public final class PermissionChecker {
-    private static final String LOG_TAG = PermissionChecker.class.getName();
-
     private static final String PLATFORM_PACKAGE_NAME = "android";
 
     /** The permission is granted. */
@@ -95,7 +92,6 @@ public final class PermissionChecker {
     /** Constant when the PID for which we check permissions is unknown. */
     public static final int PID_UNKNOWN = -1;
 
-    // Cache for platform defined runtime permissions to avoid multi lookup (name -> info)
     private static final ConcurrentHashMap<String, PermissionInfo> sPlatformPermissions
             = new ConcurrentHashMap<>();
 
@@ -848,6 +844,8 @@ public final class PermissionChecker {
             return PERMISSION_HARD_DENIED;
         }
 
+        final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+
         AttributionSource current = attributionSource;
         AttributionSource next = null;
 
@@ -858,21 +856,28 @@ public final class PermissionChecker {
 
             // If the call is from a datasource we need to vet only the chain before it. This
             // way we can avoid the datasource creating an attribution context for every call.
-            if (!(fromDatasource && current == attributionSource)
+            if ((!fromDatasource || current != attributionSource)
                     && next != null && !current.isTrusted(context)) {
                 return PERMISSION_HARD_DENIED;
             }
 
-            // The access is for oneself if this is the single receiver of data
-            // after the data source or if this is the single attribution source
-            // in the chain if not from a datasource.
-            final boolean singleReceiverFromDatasource = (fromDatasource
-                    && current == attributionSource && next != null && next.getNext() == null);
-            final boolean selfAccess = singleReceiverFromDatasource || next == null;
-
-            final int opMode = performOpTransaction(context, op, current, message,
-                    forDataDelivery, /*startDataDelivery*/ false, skipCurrentChecks,
-                    selfAccess, singleReceiverFromDatasource);
+            int opMode;
+            if (forDataDelivery) {
+                if (next == null) {
+                    opMode = appOpsManager.noteOpNoThrow(op, current.getUid(),
+                            current.getPackageName(), current.getAttributionTag(), message);
+                } else {
+                    opMode = appOpsManager.noteProxyOpNoThrow(op, current, message,
+                            skipCurrentChecks);
+                }
+            } else {
+                opMode = appOpsManager.unsafeCheckOpRawNoThrow(op, current.getUid(),
+                        current.getPackageName());
+                if (next != null && opMode == AppOpsManager.MODE_ALLOWED) {
+                    opMode = appOpsManager.unsafeCheckOpRawNoThrow(op, next.getUid(),
+                            next.getPackageName());
+                }
+            }
 
             switch (opMode) {
                 case AppOpsManager.MODE_IGNORED:
@@ -915,7 +920,7 @@ public final class PermissionChecker {
 
             // If the call is from a datasource we need to vet only the chain before it. This
             // way we can avoid the datasource creating an attribution context for every call.
-            if (!(fromDatasource && current == attributionSource)
+            if ((!fromDatasource || current != attributionSource)
                     && next != null && !current.isTrusted(context)) {
                 return PERMISSION_HARD_DENIED;
             }
@@ -932,8 +937,6 @@ public final class PermissionChecker {
             }
 
             if (op < 0) {
-                Slog.wtf(LOG_TAG, "Runtime permission " + permission + "with no app op defined:!");
-                current = next;
                 continue;
             }
 
@@ -1018,7 +1021,7 @@ public final class PermissionChecker {
             current = next;
         }
     }
-
+    // If from data source and there is next app after that we need to note SELF of (noteOp) for the app vs proxy
     private static int performOpTransaction(@NonNull Context context, int op,
             @NonNull AttributionSource attributionSource, @Nullable String message,
             boolean forDataDelivery, boolean startDataDelivery, boolean skipProxyOperation,
@@ -1028,26 +1031,27 @@ public final class PermissionChecker {
         // do a best effort to resolve the package from the UID (pick first without a loss
         // of generality - they are in the same security sandbox).
         final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-        final AttributionSource accessorSource = (!singleReceiverFromDatasource)
-                ? attributionSource : attributionSource.getNext();
         if (!forDataDelivery) {
-            final String resolvedAccessorPackageName = resolvePackageName(context, accessorSource);
-            if (resolvedAccessorPackageName == null) {
+            final String resolvedPackageName = resolvePackageName(context, attributionSource);
+            if (resolvedPackageName == null) {
                 return AppOpsManager.MODE_ERRORED;
             }
             final int opMode = appOpsManager.unsafeCheckOpRawNoThrow(op,
-                    accessorSource.getUid(), resolvedAccessorPackageName);
-            final AttributionSource next = accessorSource.getNext();
-            if (!selfAccess && opMode == AppOpsManager.MODE_ALLOWED && next != null) {
-                final String resolvedNextPackageName = resolvePackageName(context, next);
-                if (resolvedNextPackageName == null) {
+                    attributionSource.getUid(), resolvedPackageName);
+            final AttributionSource previous = attributionSource.getNext();
+            if (opMode == AppOpsManager.MODE_ALLOWED && previous != null) {
+                final String resolvedPreviousPackageName = resolvePackageName(context,
+                        previous);
+                if (resolvedPreviousPackageName == null) {
                     return AppOpsManager.MODE_ERRORED;
                 }
-                return appOpsManager.unsafeCheckOpRawNoThrow(op, next.getUid(),
-                        resolvedNextPackageName);
+                return appOpsManager.unsafeCheckOpRawNoThrow(op, previous.getUid(),
+                        resolvedPreviousPackageName);
             }
             return opMode;
         } else if (startDataDelivery) {
+            final AttributionSource accessorSource = (!singleReceiverFromDatasource)
+                    ? attributionSource : attributionSource.getNext();
             final AttributionSource resolvedAttributionSource = resolveAttributionSource(
                     context, accessorSource);
             if (resolvedAttributionSource.getPackageName() == null) {
@@ -1064,6 +1068,8 @@ public final class PermissionChecker {
                         skipProxyOperation);
             }
         } else {
+            final AttributionSource accessorSource = (!singleReceiverFromDatasource)
+                    ? attributionSource : attributionSource.getNext();
             final AttributionSource resolvedAttributionSource = resolveAttributionSource(
                     context, accessorSource);
             if (resolvedAttributionSource.getPackageName() == null) {
@@ -1093,9 +1099,7 @@ public final class PermissionChecker {
             // sandbox is UID, therefore we pick an arbitrary package.
             return packageNames[0];
         }
-        // Last resort to handle special UIDs like root, etc.
-        return AppOpsManager.resolvePackageName(attributionSource.getUid(),
-                attributionSource.getPackageName());
+        return null;
     }
 
     private static @NonNull AttributionSource resolveAttributionSource(

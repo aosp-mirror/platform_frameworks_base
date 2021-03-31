@@ -49,6 +49,7 @@ import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintServiceReceiver;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -145,12 +146,7 @@ public class FingerprintService extends SystemService implements BiometricServic
                 Utils.checkPermission(getContext(), TEST_BIOMETRIC);
             }
 
-            final List<FingerprintSensorPropertiesInternal> properties =
-                    FingerprintService.this.getSensorProperties();
-
-            Slog.d(TAG, "Retrieved sensor properties for: " + opPackageName
-                    + ", sensors: " + properties.size());
-            return properties;
+            return FingerprintService.this.getSensorProperties();
         }
 
         @Override
@@ -505,12 +501,31 @@ public class FingerprintService extends SystemService implements BiometricServic
         @Override // Binder call
         public void removeAll(final IBinder token, final int userId,
                 final IFingerprintServiceReceiver receiver, final String opPackageName) {
-            Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
+            final FingerprintServiceReceiver internalReceiver = new FingerprintServiceReceiver() {
+                int sensorsFinishedRemoving = 0;
+                final int numSensors = getSensorPropertiesInternal(
+                        getContext().getOpPackageName()).size();
+                @Override
+                public void onRemoved(Fingerprint fp, int remaining) throws RemoteException {
+                    if (remaining == 0) {
+                        sensorsFinishedRemoving++;
+                        Slog.d(TAG, "sensorsFinishedRemoving: " + sensorsFinishedRemoving
+                                + ", numSensors: " + numSensors);
+                        if (sensorsFinishedRemoving == numSensors) {
+                            receiver.onRemoved(null, 0 /* remaining */);
+                        }
+                    }
+                }
+            };
+
+            // This effectively iterates through all sensors, but has to do so by finding all
+            // sensors under each provider.
             for (ServiceProvider provider : mServiceProviders) {
                 List<FingerprintSensorPropertiesInternal> props = provider.getSensorProperties();
                 for (FingerprintSensorPropertiesInternal prop : props) {
-                    provider.scheduleRemoveAll(prop.sensorId, token, receiver, userId,
+                    provider.scheduleRemoveAll(prop.sensorId, token, internalReceiver, userId,
                             opPackageName);
                 }
             }

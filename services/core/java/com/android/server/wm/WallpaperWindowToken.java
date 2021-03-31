@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -177,7 +177,7 @@ class WallpaperWindowToken extends WindowToken {
     void commitVisibility(boolean visible) {
         if (visible == isVisible()) return;
 
-        ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS,
+        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "commitVisibility: %s: visible=%b mVisibleRequested=%b", this,
                 isVisible(), mVisibleRequested);
 
