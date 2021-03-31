@@ -2678,8 +2678,8 @@ public class DevicePolicyManager {
      * A boolean extra which determines whether to skip the ownership disclaimer screen during the
      * provisioning flow. The default value is {@code false}.
      *
-     * If the value is {@code true}, it is the responsibility of the provisioning initiator to
-     * show the relevant disclaimer.
+     * If the value is {@code true}, the provisioning initiator must display a device ownership
+     * disclaimer screen similar to that provided in AOSP.
      *
      * <p>This extra is only respected when provided alongside the {@link
      * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
