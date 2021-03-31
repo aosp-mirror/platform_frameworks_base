@@ -86,14 +86,6 @@
         android:visibility="invisible" />
 
     <TextView
-        android:id="@+id/install_confirm_question_update_system"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_confirm_question_update_system"
-        android:visibility="invisible" />
-
-    <TextView
         android:id="@+id/install_success"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
