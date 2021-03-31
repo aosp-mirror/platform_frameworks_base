@@ -4803,6 +4803,10 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         if (r.isTopResumedActivity == onTop) {
+            if (!Build.IS_DEBUGGABLE) {
+                Slog.w(TAG, "Activity top position already set to onTop=" + onTop);
+                return;
+            }
             throw new IllegalStateException("Activity top position already set to onTop=" + onTop);
         }
 
