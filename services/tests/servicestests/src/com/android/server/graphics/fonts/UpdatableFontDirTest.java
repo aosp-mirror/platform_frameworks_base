@@ -69,7 +69,14 @@ public final class UpdatableFontDirTest {
      */
     private static class FakeFontFileParser implements UpdatableFontDir.FontFileParser {
         @Override
-        public String getCanonicalFileName(File file) throws IOException {
+        public String getPostScriptName(File file) throws IOException {
+            String content = FileUtils.readTextFile(file, 100, "");
+            String filename = content.split(",")[0];
+            return filename.substring(0, filename.length() - 4);
+        }
+
+        @Override
+        public String buildFontFileName(File file) throws IOException {
             String content = FileUtils.readTextFile(file, 100, "");
             return content.split(",")[0];
         }
@@ -77,6 +84,7 @@ public final class UpdatableFontDirTest {
         @Override
         public long getRevision(File file) throws IOException {
             String content = FileUtils.readTextFile(file, 100, "");
+            android.util.Log.e("Debug", "content: " + content);
             return Long.parseLong(content.split(",")[1]);
         }
     }
@@ -549,8 +557,14 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs,
                 new UpdatableFontDir.FontFileParser() {
+
                     @Override
-                    public String getCanonicalFileName(File file) throws IOException {
+                    public String getPostScriptName(File file) throws IOException {
+                        return null;
+                    }
+
+                    @Override
+                    public String buildFontFileName(File file) throws IOException {
                         return null;
                     }
 
@@ -579,7 +593,12 @@ public final class UpdatableFontDirTest {
                 mUpdatableFontFilesDir, mPreinstalledFontDirs,
                 new UpdatableFontDir.FontFileParser() {
                     @Override
-                    public String getCanonicalFileName(File file) throws IOException {
+                    public String getPostScriptName(File file) throws IOException {
+                        throw new IOException();
+                    }
+
+                    @Override
+                    public String buildFontFileName(File file) throws IOException {
                         throw new IOException();
                     }
 
