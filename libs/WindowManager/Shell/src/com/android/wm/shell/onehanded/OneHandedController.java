@@ -405,9 +405,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     }
 
     private void updateDisplayLayout(int displayId) {
-        mDisplayAreaOrganizer.setDisplayLayout(
-                mDisplayController.getDisplayLayout(displayId));
-        mGestureHandler.onDisplayChanged(mDisplayAreaOrganizer.getDisplayLayout());
+        final DisplayLayout newDisplayLayout = mDisplayController.getDisplayLayout(displayId);
+        mDisplayAreaOrganizer.setDisplayLayout(newDisplayLayout);
+        mGestureHandler.onDisplayChanged(newDisplayLayout);
     }
 
     private ContentObserver getObserver(Runnable onChangeRunnable) {
