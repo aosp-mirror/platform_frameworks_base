@@ -39,6 +39,7 @@ import android.util.PathParser;
 import android.view.LayoutInflater;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.launcher3.icons.BitmapInfo;
@@ -118,7 +119,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     /**
      * Info necessary to render a bubble.
      */
-    static class BubbleViewInfo {
+    @VisibleForTesting
+    public static class BubbleViewInfo {
         BadgedImageView imageView;
         BubbleExpandedView expandedView;
         ShortcutInfo shortcutInfo;
@@ -129,8 +131,9 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         Path dotPath;
         Bubble.FlyoutMessage flyoutMessage;
 
+        @VisibleForTesting
         @Nullable
-        static BubbleViewInfo populate(Context c, BubbleController controller,
+        public static BubbleViewInfo populate(Context c, BubbleController controller,
                 BubbleStackView stackView, BubbleIconFactory iconFactory, Bubble b,
                 boolean skipInflation) {
             BubbleViewInfo info = new BubbleViewInfo();
@@ -152,7 +155,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             }
 
             // App name & app icon
-            PackageManager pm = c.getPackageManager();
+            PackageManager pm = BubbleController.getPackageManagerForUser(c,
+                    b.getUser().getIdentifier());
             ApplicationInfo appInfo;
             Drawable badgedIcon;
             Drawable appIcon;
