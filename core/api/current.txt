@@ -52922,8 +52922,9 @@ package android.view.translation {
 
   public static final class ViewTranslationRequest.Builder {
     ctor public ViewTranslationRequest.Builder(@NonNull android.view.autofill.AutofillId);
+    ctor public ViewTranslationRequest.Builder(@NonNull android.view.autofill.AutofillId, long);
     method @NonNull public android.view.translation.ViewTranslationRequest build();
-    method public android.view.translation.ViewTranslationRequest.Builder setValue(String, android.view.translation.TranslationRequestValue);
+    method @NonNull public android.view.translation.ViewTranslationRequest.Builder setValue(@NonNull String, @NonNull android.view.translation.TranslationRequestValue);
   }
 
   public final class ViewTranslationResponse implements android.os.Parcelable {
