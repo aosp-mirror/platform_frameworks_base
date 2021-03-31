@@ -15,10 +15,12 @@
 package com.android.systemui.plugins.qs;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
+import android.view.View;
 
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -53,10 +55,16 @@ public interface QSTile {
     void removeCallbacks();
 
     QSIconView createTileView(Context context);
-    
+
     void click();
     void secondaryClick();
-    void longClick();
+
+    /**
+     * The tile was long clicked.
+     *
+     * @param view The view that was clicked.
+     */
+    void longClick(@Nullable View view);
 
     void userSwitch(int currentUser);
     int getMetricsCategory();
