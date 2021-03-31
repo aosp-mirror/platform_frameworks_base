@@ -1996,17 +1996,16 @@ public final class ActiveServices {
         final long now = SystemClock.uptimeMillis();
         final boolean isLegacyApp = (r.appInfo.targetSdkVersion < Build.VERSION_CODES.S);
 
-        boolean showNow = withinFgsDeferRateLimit(uid, now);
+        // Is the behavior enabled at all?
+        boolean showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled;
         if (!showNow) {
-            final boolean showLegacyNow = isLegacyApp
-                    && mAm.mConstants.mFlagFgsNotificationDeferralApiGated;
-            showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled || showLegacyNow;
+            // Did the app have another FGS notification deferred recently?
+            showNow = withinFgsDeferRateLimit(uid, now);
         }
         if (!showNow) {
             // Legacy apps' FGS notifications are not deferred unless the relevant
             // DeviceConfig element has been set
-            showNow = mAm.mConstants.mFlagFgsNotificationDeferralApiGated
-                    && isLegacyApp;
+            showNow = isLegacyApp && mAm.mConstants.mFlagFgsNotificationDeferralApiGated;
         }
         if (!showNow) {
             // has the app forced deferral?
