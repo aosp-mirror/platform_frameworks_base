@@ -369,7 +369,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (!isActiveSource()) {
             return;
         }
-        // Wake up the device
+        // Wake up the device. This will also exit dream mode.
         mService.wakeUp();
         return;
     }
