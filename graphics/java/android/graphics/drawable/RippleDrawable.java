@@ -48,6 +48,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.view.animation.LinearInterpolator;
 
@@ -151,7 +152,8 @@ public class RippleDrawable extends LayerDrawable {
     private static final int MAX_RIPPLES = 10;
     private static final LinearInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
     /** Temporary flag for teamfood. **/
-    private static final boolean FORCE_PATTERNED_STYLE = true;
+    private static final boolean FORCE_PATTERNED_STYLE =
+            SystemProperties.getBoolean("persist.material.patternedripple", false);
 
     private final Rect mTempRect = new Rect();
 
