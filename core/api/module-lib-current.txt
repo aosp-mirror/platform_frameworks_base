@@ -78,14 +78,6 @@ package android.content.pm {
 
 }
 
-package android.content.rollback {
-
-  public class RollbackManagerFrameworkInitializer {
-    method public static void initialize();
-  }
-
-}
-
 package android.hardware.usb {
 
   public class UsbManager {
