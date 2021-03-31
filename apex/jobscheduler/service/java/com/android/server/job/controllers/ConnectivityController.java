@@ -188,11 +188,8 @@ public final class ConnectivityController extends RestrictingController implemen
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         if (jobStatus.hasConnectivityConstraint()) {
-            UidStats uidStats = mUidStats.get(jobStatus.getSourceUid());
-            if (uidStats == null) {
-                uidStats = new UidStats(jobStatus.getSourceUid());
-                mUidStats.append(jobStatus.getSourceUid(), uidStats);
-            }
+            final UidStats uidStats =
+                    getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), false);
             if (wouldBeReadyWithConstraintLocked(jobStatus, JobStatus.CONSTRAINT_CONNECTIVITY)) {
                 uidStats.numReadyWithConnectivity++;
             }
@@ -211,7 +208,8 @@ public final class ConnectivityController extends RestrictingController implemen
     @Override
     public void prepareForExecutionLocked(JobStatus jobStatus) {
         if (jobStatus.hasConnectivityConstraint()) {
-            UidStats uidStats = mUidStats.get(jobStatus.getSourceUid());
+            final UidStats uidStats =
+                    getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
             uidStats.numRunning++;
         }
     }
@@ -225,23 +223,11 @@ public final class ConnectivityController extends RestrictingController implemen
             if (jobs != null) {
                 jobs.remove(jobStatus);
             }
-            UidStats us = mUidStats.get(jobStatus.getSourceUid());
-            if (us == null) {
-                // This shouldn't be happening. We create a UidStats object for the app when the
-                // first job is scheduled in maybeStartTrackingJobLocked() and only ever drop the
-                // object if the app is uninstalled or the user is removed. That means that if we
-                // end up in this situation, onAppRemovedLocked() or onUserRemovedLocked() was
-                // called before maybeStopTrackingJobLocked(), which is the reverse order of what
-                // JobSchedulerService does (JSS calls maybeStopTrackingJobLocked() for all jobs
-                // before calling onAppRemovedLocked() or onUserRemovedLocked()).
-                Slog.wtfStack(TAG,
-                        "UidStats was null after job for " + jobStatus.getSourcePackageName()
-                                + " was registered");
-            } else {
-                us.numReadyWithConnectivity--;
-                if (jobStatus.madeActive != 0) {
-                    us.numRunning--;
-                }
+            final UidStats uidStats =
+                    getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
+            uidStats.numReadyWithConnectivity--;
+            if (jobStatus.madeActive != 0) {
+                uidStats.numRunning--;
             }
             maybeRevokeStandbyExceptionLocked(jobStatus);
             maybeAdjustRegisteredCallbacksLocked();
@@ -264,6 +250,27 @@ public final class ConnectivityController extends RestrictingController implemen
         if (jobStatus.hasConnectivityConstraint()) {
             updateConstraintsSatisfied(jobStatus);
         }
+    }
+
+    @NonNull
+    private UidStats getUidStats(int uid, String packageName, boolean shouldExist) {
+        UidStats us = mUidStats.get(uid);
+        if (us == null) {
+            if (shouldExist) {
+                // This shouldn't be happening. We create a UidStats object for the app when the
+                // first job is scheduled in maybeStartTrackingJobLocked() and only ever drop the
+                // object if the app is uninstalled or the user is removed. That means that if we
+                // end up in this situation, onAppRemovedLocked() or onUserRemovedLocked() was
+                // called before maybeStopTrackingJobLocked(), which is the reverse order of what
+                // JobSchedulerService does (JSS calls maybeStopTrackingJobLocked() for all jobs
+                // before calling onAppRemovedLocked() or onUserRemovedLocked()).
+                Slog.wtfStack(TAG,
+                        "UidStats was null after job for " + packageName + " was registered");
+            }
+            us = new UidStats(uid);
+            mUidStats.append(uid, us);
+        }
+        return us;
     }
 
     /**
@@ -332,7 +339,8 @@ public final class ConnectivityController extends RestrictingController implemen
             return;
         }
 
-        UidStats uidStats = mUidStats.get(jobStatus.getSourceUid());
+        final UidStats uidStats =
+                getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
 
         if (jobStatus.shouldTreatAsExpeditedJob()) {
             if (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)) {
@@ -584,7 +592,8 @@ public final class ConnectivityController extends RestrictingController implemen
         if (mCurrentDefaultNetworkCallbacks.contains(sourceUid)) {
             return;
         }
-        UidStats uidStats = mUidStats.get(sourceUid);
+        final UidStats uidStats =
+                getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
         if (!mSortedStats.contains(uidStats)) {
             mSortedStats.add(uidStats);
         }
