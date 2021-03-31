@@ -5458,7 +5458,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
         sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
-                "default:0", "enterprise:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
+                "enterprise:0", "default:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
