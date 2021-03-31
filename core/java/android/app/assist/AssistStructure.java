@@ -717,7 +717,7 @@ public class AssistStructure implements Parcelable {
         String mWebDomain;
         Bundle mExtras;
         LocaleList mLocaleList;
-        String[] mOnReceiveContentMimeTypes;
+        String[] mReceiveContentMimeTypes;
 
         ViewNode[] mChildren;
 
@@ -884,7 +884,7 @@ public class AssistStructure implements Parcelable {
                 mLocaleList = in.readParcelable(null);
             }
             if ((flags & FLAGS_HAS_MIME_TYPES) != 0) {
-                mOnReceiveContentMimeTypes = in.readStringArray();
+                mReceiveContentMimeTypes = in.readStringArray();
             }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 mExtras = in.readBundle();
@@ -945,7 +945,7 @@ public class AssistStructure implements Parcelable {
             if (mLocaleList != null) {
                 flags |= FLAGS_HAS_LOCALE_LIST;
             }
-            if (mOnReceiveContentMimeTypes != null) {
+            if (mReceiveContentMimeTypes != null) {
                 flags |= FLAGS_HAS_MIME_TYPES;
             }
             if (mExtras != null) {
@@ -1119,7 +1119,7 @@ public class AssistStructure implements Parcelable {
                 out.writeParcelable(mLocaleList, 0);
             }
             if ((flags & FLAGS_HAS_MIME_TYPES) != 0) {
-                out.writeStringArray(mOnReceiveContentMimeTypes);
+                out.writeStringArray(mReceiveContentMimeTypes);
             }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
@@ -1540,12 +1540,12 @@ public class AssistStructure implements Parcelable {
 
         /**
          * Returns the MIME types accepted by {@link View#performReceiveContent} for this view. See
-         * {@link View#getOnReceiveContentMimeTypes()} for details.
+         * {@link View#getReceiveContentMimeTypes()} for details.
          */
         @Nullable
         @SuppressLint("NullableCollection")
-        public String[] getOnReceiveContentMimeTypes() {
-            return mOnReceiveContentMimeTypes;
+        public String[] getReceiveContentMimeTypes() {
+            return mReceiveContentMimeTypes;
         }
 
         /**
@@ -2168,8 +2168,8 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setOnReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
-            mNode.mOnReceiveContentMimeTypes = mimeTypes;
+        public void setReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
+            mNode.mReceiveContentMimeTypes = mimeTypes;
         }
 
         @Override
@@ -2449,7 +2449,7 @@ public class AssistStructure implements Parcelable {
         if (localeList != null) {
             Log.i(TAG, prefix + "  LocaleList: " + localeList);
         }
-        String[] mimeTypes = node.getOnReceiveContentMimeTypes();
+        String[] mimeTypes = node.getReceiveContentMimeTypes();
         if (mimeTypes != null) {
             Log.i(TAG, prefix + "  MIME types: " + Arrays.toString(mimeTypes));
         }

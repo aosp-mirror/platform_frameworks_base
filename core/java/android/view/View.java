@@ -5255,7 +5255,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mUnbufferedInputSource = InputDevice.SOURCE_CLASS_NONE;
 
     @Nullable
-    private String[] mOnReceiveContentMimeTypes;
+    private String[] mReceiveContentMimeTypes;
 
     @Nullable
     private ViewTranslationCallback mViewTranslationCallback;
@@ -8847,7 +8847,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setAutofillValue(getAutofillValue());
             }
             structure.setImportantForAutofill(getImportantForAutofill());
-            structure.setOnReceiveContentMimeTypes(getOnReceiveContentMimeTypes());
+            structure.setReceiveContentMimeTypes(getReceiveContentMimeTypes());
         }
 
         int ignoredParentLeft = 0;
@@ -9066,7 +9066,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Preconditions.checkArgument(Arrays.stream(mimeTypes).noneMatch(t -> t.startsWith("*")),
                     "A MIME type set here must not start with *: " + Arrays.toString(mimeTypes));
         }
-        mOnReceiveContentMimeTypes = ArrayUtils.isEmpty(mimeTypes) ? null : mimeTypes;
+        mReceiveContentMimeTypes = ArrayUtils.isEmpty(mimeTypes) ? null : mimeTypes;
         getListenerInfo().mOnReceiveContentListener = listener;
     }
 
@@ -9134,8 +9134,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @SuppressLint("NullableCollection")
     @Nullable
-    public String[] getOnReceiveContentMimeTypes() {
-        return mOnReceiveContentMimeTypes;
+    public String[] getReceiveContentMimeTypes() {
+        return mReceiveContentMimeTypes;
     }
 
     /**
