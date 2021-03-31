@@ -24,7 +24,6 @@
         android:background="@drawable/people_space_activity_card"
         android:padding="12dp"
         android:elevation="4dp"
-        android:layout_marginBottom="12dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -43,12 +42,14 @@
                 android:id="@+id/tile_view_package_icon"
                 android:layout_width="16dp"
                 android:layout_marginStart="-8dp"
+                android:layout_marginTop="32dp"
                 android:layout_height="16dp" />
 
             <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
 
                 <TextView
                     android:id="@+id/tile_view_name"
@@ -56,16 +57,8 @@
                     android:paddingHorizontal="16dp"
                     android:textSize="22sp"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/tile_view_status"
-                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                    android:paddingVertical="4dp"
-                    android:textSize="12sp"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ellipsize="end" />
+                    android:layout_gravity="center_vertical"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
