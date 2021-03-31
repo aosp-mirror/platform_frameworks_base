@@ -18,19 +18,23 @@ package android.view.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.inputmethodservice.InputMethodService;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -62,6 +66,7 @@ import java.util.List;
  * @attr ref android.R.styleable#InputMethod_supportsInlineSuggestions
  * @attr ref android.R.styleable#InputMethod_suppressesSpellChecker
  * @attr ref android.R.styleable#InputMethod_showInInputMethodPicker
+ * @attr ref android.R.styleable#InputMethod_configChanges
  */
 public final class InputMethodInfo implements Parcelable {
     static final String TAG = "InputMethodInfo";
@@ -128,6 +133,12 @@ public final class InputMethodInfo implements Parcelable {
      * The flag whether this IME should be shown as an option in the IME picker.
      */
     private final boolean mShowInInputMethodPicker;
+
+    /**
+     * The flag for configurations IME assumes the responsibility for handling in
+     * {@link InputMethodService#onConfigurationChanged(Configuration)}}.
+     */
+    private final int mHandledConfigChanges;
 
     /**
      * @param service the {@link ResolveInfo} corresponds in which the IME is implemented.
@@ -221,6 +232,8 @@ public final class InputMethodInfo implements Parcelable {
                     com.android.internal.R.styleable.InputMethod_suppressesSpellChecker, false);
             showInInputMethodPicker = sa.getBoolean(
                     com.android.internal.R.styleable.InputMethod_showInInputMethodPicker, true);
+            mHandledConfigChanges = sa.getInt(
+                    com.android.internal.R.styleable.InputMethod_configChanges, 0);
             sa.recycle();
 
             final int depth = parser.getDepth();
@@ -309,6 +322,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsVrOnly = source.readBoolean();
         mService = ResolveInfo.CREATOR.createFromParcel(source);
         mSubtypes = new InputMethodSubtypeArray(source);
+        mHandledConfigChanges = source.readInt();
         mForceDefault = false;
     }
 
@@ -320,7 +334,22 @@ public final class InputMethodInfo implements Parcelable {
         this(buildFakeResolveInfo(packageName, className, label), false /* isAuxIme */,
                 settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
-                false /* inlineSuggestionsEnabled */, false /* isVrOnly */);
+                false /* inlineSuggestionsEnabled */, false /* isVrOnly */,
+                0 /* handledConfigChanges */);
+    }
+
+    /**
+     * Temporary API for creating a built-in input method for test.
+     * @hide
+     */
+    @TestApi
+    public InputMethodInfo(@NonNull String packageName, @NonNull String className,
+            @NonNull CharSequence label, @NonNull String settingsActivity,
+            int handledConfigChanges) {
+        this(buildFakeResolveInfo(packageName, className, label), false /* isAuxIme */,
+                settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
+                false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
+                false /* inlineSuggestionsEnabled */, false /* isVrOnly */, handledConfigChanges);
     }
 
     /**
@@ -332,7 +361,7 @@ public final class InputMethodInfo implements Parcelable {
             boolean forceDefault) {
         this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
                 true /* supportsSwitchingToNextInputMethod */, false /* inlineSuggestionsEnabled */,
-                false /* isVrOnly */);
+                false /* isVrOnly */, 0 /* handledconfigChanges */);
     }
 
     /**
@@ -343,7 +372,8 @@ public final class InputMethodInfo implements Parcelable {
             List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
             boolean supportsSwitchingToNextInputMethod, boolean isVrOnly) {
         this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
-                supportsSwitchingToNextInputMethod, false /* inlineSuggestionsEnabled */, isVrOnly);
+                supportsSwitchingToNextInputMethod, false /* inlineSuggestionsEnabled */, isVrOnly,
+                0 /* handledConfigChanges */);
     }
 
     /**
@@ -353,7 +383,7 @@ public final class InputMethodInfo implements Parcelable {
     public InputMethodInfo(ResolveInfo ri, boolean isAuxIme, String settingsActivity,
             List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
             boolean supportsSwitchingToNextInputMethod, boolean inlineSuggestionsEnabled,
-            boolean isVrOnly) {
+            boolean isVrOnly, int handledConfigChanges) {
         final ServiceInfo si = ri.serviceInfo;
         mService = ri;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
@@ -367,6 +397,7 @@ public final class InputMethodInfo implements Parcelable {
         mSuppressesSpellChecker = false;
         mShowInInputMethodPicker = true;
         mIsVrOnly = isVrOnly;
+        mHandledConfigChanges = handledConfigChanges;
     }
 
     private static ResolveInfo buildFakeResolveInfo(String packageName, String className,
@@ -513,6 +544,17 @@ public final class InputMethodInfo implements Parcelable {
         }
     }
 
+    /**
+     * Returns the bit mask of kinds of configuration changes that this IME
+     * can handle itself (without being restarted by the system).
+     *
+     * @attr ref android.R.styleable#InputMethod_configChanges
+     */
+    @ActivityInfo.Config
+    public int getConfigChanges() {
+        return mHandledConfigChanges;
+    }
+
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + "mId=" + mId
                 + " mSettingsActivityName=" + mSettingsActivityName
@@ -622,6 +664,7 @@ public final class InputMethodInfo implements Parcelable {
         dest.writeBoolean(mIsVrOnly);
         mService.writeToParcel(dest, flags);
         mSubtypes.writeToParcel(dest);
+        dest.writeInt(mHandledConfigChanges);
     }
 
     /**

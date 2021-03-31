@@ -3585,6 +3585,16 @@
              Note: This functions as a hint to the system, which may choose to ignore this
              preference in certain situations or in future releases.-->
         <attr name="showInInputMethodPicker" format="boolean" />
+        <!-- Specify one or more configuration changes that the IME will handle itself. If not
+             specified, the IME will be restarted if any of these configuration changes happen in
+              the system.  Otherwise, the IME will remain running and its
+             {@link android.inputmethodservice.InputMethodService#onConfigurationChanged}
+             method is called with the new configuration.
+             <p>Note that all of these configuration changes can impact the
+             resource values seen by the application, so you will generally need
+             to re-retrieve all resources (including view layouts, drawables, etc)
+             to correctly handle any configuration change.-->
+        <attr name="configChanges" />
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and
