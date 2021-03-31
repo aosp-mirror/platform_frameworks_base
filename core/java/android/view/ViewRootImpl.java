@@ -224,7 +224,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl implements ViewParent,
-        View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks {
+        View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks, ViewRoot {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
@@ -10248,5 +10248,22 @@ public final class ViewRootImpl implements ViewParent,
         } else {
             t.apply();
         }
+    }
+
+    @Override
+    @Nullable public SurfaceControl.Transaction buildReparentTransaction(
+        @NonNull SurfaceControl child) {
+        if (mSurfaceControl.isValid()) {
+            return new SurfaceControl.Transaction().reparent(child, mSurfaceControl);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean applyTransactionOnDraw(@NonNull SurfaceControl.Transaction t) {
+        registerRtFrameCallback(frame -> {
+            mergeWithNextTransaction(t, frame);
+        });
+        return true;
     }
 }
