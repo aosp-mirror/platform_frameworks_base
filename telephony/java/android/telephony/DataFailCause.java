@@ -1055,6 +1055,20 @@ public final class DataFailCause {
      */
     public static final int HANDOVER_FAILED = 0x10006;
 
+    /**
+     * Enterprise setup failure: duplicate CID in DataCallResponse.
+     *
+     * @hide
+     */
+    public static final int DUPLICATE_CID = 0x10007;
+
+    /**
+     * Enterprise setup failure: no default data connection set up yet.
+     *
+     * @hide
+     */
+    public static final int NO_DEFAULT_DATA = 0x10008;
+
     private static final Map<Integer, String> sFailCauseMap;
     static {
         sFailCauseMap = new HashMap<>();
@@ -1481,6 +1495,9 @@ public final class DataFailCause {
         sFailCauseMap.put(UNACCEPTABLE_NETWORK_PARAMETER,
                 "UNACCEPTABLE_NETWORK_PARAMETER");
         sFailCauseMap.put(LOST_CONNECTION, "LOST_CONNECTION");
+        sFailCauseMap.put(HANDOVER_FAILED, "HANDOVER_FAILED");
+        sFailCauseMap.put(DUPLICATE_CID, "DUPLICATE_CID");
+        sFailCauseMap.put(NO_DEFAULT_DATA, "NO_DEFAULT_DATA");
     }
 
     private DataFailCause() {
@@ -1580,6 +1597,7 @@ public final class DataFailCause {
                             add(RADIO_NOT_AVAILABLE);
                             add(UNACCEPTABLE_NETWORK_PARAMETER);
                             add(SIGNAL_LOST);
+                            add(DUPLICATE_CID);
                         }
                     };
                 }
