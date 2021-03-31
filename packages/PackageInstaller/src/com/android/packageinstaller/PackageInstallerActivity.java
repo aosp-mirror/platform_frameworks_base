@@ -123,9 +123,8 @@ public class PackageInstallerActivity extends AlertActivity {
         View viewToEnable;
 
         if (mAppInfo != null) {
-            viewToEnable = (mAppInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-                    ? requireViewById(R.id.install_confirm_question_update_system)
-                    : requireViewById(R.id.install_confirm_question_update);
+            viewToEnable = requireViewById(R.id.install_confirm_question_update);
+            mOk.setText(R.string.update);
         } else {
             // This is a new application with no permissions.
             viewToEnable = requireViewById(R.id.install_confirm_question);
