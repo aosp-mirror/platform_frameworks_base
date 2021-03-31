@@ -1,0 +1,5 @@
+filegroup {
+    name: "framework-identity-sources",
+    srcs: ["**/*.java"],
+    visibility: ["//frameworks/base"],
+}
