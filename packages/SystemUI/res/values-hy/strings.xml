@@ -758,11 +758,11 @@
     <string name="snooze_undo" msgid="60890935148417175">"ՀԵՏԱՐԿԵԼ"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Հետաձգվել է <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>ով"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="one">%d hours</item>
+      <item quantity="one">%d ժամ</item>
       <item quantity="other">%d ժամ</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="one">%d minutes</item>
+      <item quantity="one">%d րոպե</item>
       <item quantity="other">%d րոպե</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Մարտկոցի օգտագործում"</string>

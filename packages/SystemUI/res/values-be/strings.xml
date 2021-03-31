@@ -28,7 +28,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Засталося <xliff:g id="PERCENTAGE">%1$s</xliff:g>, у вас ёсць каля <xliff:g id="TIME">%2$s</xliff:g> на аснове даных аб выкарыстанні вашай прылады"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Засталося <xliff:g id="PERCENTAGE">%1$s</xliff:g>, у вас ёсць каля <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>. Уключана эканомія зараду."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>. Уключаны рэжым эканоміі зараду."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"Не ўдалося выканаць зарадку праз USB. Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Не ўдалося выканаць зарадку праз USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады"</string>
@@ -776,7 +776,7 @@
       <item quantity="other">%d хвіліны</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Выкарыстанне зараду"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Эканомія зараду акумулятара недаступная падчас зарадкі"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Рэжым эканоміі зараду акумулятара недаступны падчас зарадкі"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Эканомія зараду"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Памяншае прадукцыйнасць і фонавую перадачу даных"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Кнопка <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -996,7 +996,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Уключыце, калі зарад акумулятара заканчваецца"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Не, дзякуй"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Уключаны рэжым эканоміі зараду"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Калі ўзровень зараду акумулятара знізіцца да <xliff:g id="PERCENTAGE">%d</xliff:g>%%, аўтаматычна ўключыцца рэжым эканоміі энергіі."</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Калі ўзровень зараду акумулятара знізіцца да <xliff:g id="PERCENTAGE">%d</xliff:g>%%, аўтаматычна ўключыцца рэжым эканоміі зараду."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Налады"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Зразумела"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
