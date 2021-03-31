@@ -1069,6 +1069,17 @@ public final class MediaFormat {
     public static final String KEY_AUDIO_SESSION_ID = "audio-session-id";
 
     /**
+     * A key describing the audio hardware sync ID of the AudioTrack associated
+     * to a tunneled video codec. The associated value is an integer.
+     *
+     * @hide
+     *
+     * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
+     * @see AudioManager#getAudioHwSyncForSession
+     */
+    public static final String KEY_AUDIO_HW_SYNC = "audio-hw-sync";
+
+    /**
      * A key for boolean AUTOSELECT behavior for the track. Tracks with AUTOSELECT=true
      * are considered when automatically selecting a track without specific user
      * choice, based on the current locale.
