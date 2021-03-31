@@ -79,7 +79,7 @@
          (e.g. cannot be switched to) -->
     <color name="kg_user_switcher_restricted_avatar_icon_color">@color/GM2_grey_600</color>
     <!-- Color of background circle of user avatars in keyguard user switcher -->
-    <color name="kg_user_switcher_avatar_background">@color/GM2_grey_300</color>
+    <color name="kg_user_switcher_avatar_background">?android:attr/colorBackgroundFloating</color>
 
     <!-- Icon color for user avatars in user switcher quick settings -->
     <color name="qs_user_switcher_avatar_icon_color">#3C4043</color>

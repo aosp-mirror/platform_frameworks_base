@@ -92,8 +92,6 @@
     <color name="kg_user_switcher_avatar_icon_color">@android:color/background_light</color>
     <!-- Icon color for selected user avatars in keyguard user switcher -->
     <color name="kg_user_switcher_selected_avatar_icon_color">#202124</color>
-    <!-- Color of background circle of user avatars in keyguard user switcher -->
-    <color name="kg_user_switcher_avatar_background">#3C4043</color>
     <!-- Icon color for user avatars in quick settings user switcher  -->
     <color name="qs_user_switcher_avatar_icon_color">@android:color/background_light</color>
     <!-- Icon color for selected user avatars in quick settings user switcher  -->
