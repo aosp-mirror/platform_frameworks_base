@@ -41,4 +41,5 @@ oneway interface INetworkAgentRegistry {
     void sendNrQosSessionAvailable(int callbackId, in QosSession session, in NrQosSessionAttributes attributes);
     void sendQosSessionLost(int qosCallbackId, in QosSession session);
     void sendQosCallbackError(int qosCallbackId, int exceptionType);
+    void sendTeardownDelayMs(int teardownDelayMs);
 }

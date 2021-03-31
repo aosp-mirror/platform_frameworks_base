@@ -254,7 +254,7 @@ public class UiTranslationController {
                 viewsResult.put(translatedResult.keyAt(i), result);
             } else {
                 final boolean isVirtualViewAdded =
-                        virtualViewsResult.indexOfKey(autofillId.getViewId()) > 0;
+                        virtualViewsResult.indexOfKey(autofillId.getViewId()) >= 0;
                 final LongSparseArray<ViewTranslationResponse> childIds =
                         isVirtualViewAdded ? virtualViewsResult.get(autofillId.getViewId())
                                 : new LongSparseArray<>();

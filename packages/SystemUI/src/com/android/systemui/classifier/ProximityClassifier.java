@@ -17,6 +17,7 @@
 package com.android.systemui.classifier;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD;
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 
 import android.provider.DeviceConfig;
@@ -115,7 +116,7 @@ class ProximityClassifier extends FalsingClassifier {
     Result calculateFalsingResult(
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
-        if (interactionType == QUICK_SETTINGS) {
+        if (interactionType == QUICK_SETTINGS || interactionType == BRIGHTNESS_SLIDER) {
             return Result.passed(0);
         }
 

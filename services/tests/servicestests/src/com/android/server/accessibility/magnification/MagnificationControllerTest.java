@@ -486,6 +486,47 @@ public class MagnificationControllerTest {
                 eq(MODE_WINDOW));
     }
 
+    @Test
+    public void imeWindowStateShown_windowMagnifying_logWindowMode() {
+        mMagnificationController.onWindowMagnificationActivationState(true);
+
+        mMagnificationController.onImeWindowVisibilityChanged(true);
+
+        verify(mMagnificationController).logMagnificationModeWithIme(
+                eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
+    }
+
+    @Test
+    public void imeWindowStateShown_fullScreenMagnifying_logFullScreenMode() {
+        mMagnificationController.onFullScreenMagnificationActivationState(true);
+
+        mMagnificationController.onImeWindowVisibilityChanged(true);
+
+        verify(mMagnificationController).logMagnificationModeWithIme(
+                eq(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
+    }
+
+    @Test
+    public void imeWindowStateShown_noMagnifying_noLogAnyMode() {
+        mMagnificationController.onImeWindowVisibilityChanged(true);
+
+        verify(mMagnificationController, never()).logMagnificationModeWithIme(anyInt());
+    }
+
+    @Test
+    public void imeWindowStateHidden_windowMagnifying_noLogAnyMode() {
+        mMagnificationController.onFullScreenMagnificationActivationState(true);
+
+        verify(mMagnificationController, never()).logMagnificationModeWithIme(anyInt());
+    }
+
+    @Test
+    public void imeWindowStateHidden_fullScreenMagnifying_noLogAnyMode() {
+        mMagnificationController.onWindowMagnificationActivationState(true);
+
+        verify(mMagnificationController, never()).logMagnificationModeWithIme(anyInt());
+    }
+
     private void setMagnificationEnabled(int mode) throws RemoteException {
 
         setMagnificationEnabled(mode, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);

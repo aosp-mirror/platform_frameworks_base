@@ -830,13 +830,13 @@
     </string-array>
 
     <!-- Default strength, in percentage, of bright color reduction when activated. -->
-    <integer name="config_reduceBrightColorsStrengthDefault">0</integer>
+    <integer name="config_reduceBrightColorsStrengthDefault">50</integer>
 
     <!-- Minimum strength, in percentage, supported by bright color reduction. -->
-    <integer name="config_reduceBrightColorsStrengthMin">0</integer>
+    <integer name="config_reduceBrightColorsStrengthMin">25</integer>
 
     <!-- Maximum strength, in percentage, supported by bright color reduction. -->
-    <integer name="config_reduceBrightColorsStrengthMax">100</integer>
+    <integer name="config_reduceBrightColorsStrengthMax">90</integer>
 
     <!-- Boolean indicating whether display white balance is supported. -->
     <bool name="config_displayWhiteBalanceAvailable">false</bool>

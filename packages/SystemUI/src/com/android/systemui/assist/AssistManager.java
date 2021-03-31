@@ -59,7 +59,7 @@ public class AssistManager {
          *
          * @param type     one of INVOCATION_TYPE_GESTURE, INVOCATION_TYPE_ACTIVE_EDGE,
          *                 INVOCATION_TYPE_VOICE, INVOCATION_TYPE_QUICK_SEARCH_BAR,
-         *                 INVOCATION_HOME_BUTTON_LONG_PRESS
+         *                 INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS
          * @param progress a float between 0 and 1 inclusive. 0 represents the beginning of the
          *                 gesture; 1 represents the end.
          */
@@ -86,18 +86,27 @@ public class AssistManager {
 
     private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
     private static final String INVOCATION_PHONE_STATE_KEY = "invocation_phone_state";
-    public static final String INVOCATION_TYPE_KEY = "invocation_type";
     protected static final String ACTION_KEY = "action";
     protected static final String SHOW_ASSIST_HANDLES_ACTION = "show_assist_handles";
     protected static final String SET_ASSIST_GESTURE_CONSTRAINED_ACTION =
             "set_assist_gesture_constrained";
     protected static final String CONSTRAINED_KEY = "should_constrain";
 
-    public static final int INVOCATION_TYPE_GESTURE = 1;
-    public static final int INVOCATION_TYPE_OTHER = 2;
-    public static final int INVOCATION_TYPE_VOICE = 3;
-    public static final int INVOCATION_TYPE_QUICK_SEARCH_BAR = 4;
-    public static final int INVOCATION_HOME_BUTTON_LONG_PRESS = 5;
+    public static final String INVOCATION_TYPE_KEY = "invocation_type";
+    public static final int INVOCATION_TYPE_UNKNOWN =
+            AssistUtils.INVOCATION_TYPE_UNKNOWN;
+    public static final int INVOCATION_TYPE_GESTURE =
+            AssistUtils.INVOCATION_TYPE_GESTURE;
+    public static final int INVOCATION_TYPE_OTHER =
+            AssistUtils.INVOCATION_TYPE_PHYSICAL_GESTURE;
+    public static final int INVOCATION_TYPE_VOICE =
+            AssistUtils.INVOCATION_TYPE_VOICE;
+    public static final int INVOCATION_TYPE_QUICK_SEARCH_BAR =
+            AssistUtils.INVOCATION_TYPE_QUICK_SEARCH_BAR;
+    public static final int INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS =
+            AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS;
+    public static final int INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS =
+            AssistUtils.INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS;
 
     public static final int DISMISS_REASON_INVOCATION_CANCELLED = 1;
     public static final int DISMISS_REASON_TAP = 2;

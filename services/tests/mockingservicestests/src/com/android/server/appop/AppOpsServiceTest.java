@@ -16,8 +16,6 @@
 package com.android.server.appop;
 
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
-import static android.app.AppOpsManager.FILTER_BY_UID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
@@ -44,7 +42,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.ContentResolver;
@@ -53,7 +50,6 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.os.RemoteCallback;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
@@ -66,6 +62,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.quality.Strictness;
@@ -73,9 +70,6 @@ import org.mockito.quality.Strictness;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Unit tests for AppOpsService. Covers functionality that is difficult to test using CTS tests
@@ -229,6 +223,7 @@ public class AppOpsServiceTest {
 
     // Tests that ops are persisted during shutdown.
     @Test
+    @Ignore("b/183523911")
     public void testShutdown() {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
         mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);

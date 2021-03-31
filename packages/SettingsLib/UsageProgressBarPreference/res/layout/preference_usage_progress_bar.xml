@@ -70,4 +70,13 @@
         android:scaleY="2"
         android:layout_marginTop="4dp"
         android:max="100"/>
+
+    <TextView
+        android:id="@+id/bottom_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:ellipsize="marquee"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body1"
+        android:textSize="14sp"/>
 </LinearLayout>

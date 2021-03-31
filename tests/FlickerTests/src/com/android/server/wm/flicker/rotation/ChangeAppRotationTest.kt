@@ -24,7 +24,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,20 +56,6 @@ class ChangeAppRotationTest(
     @Test
     override fun focusDoesNotChange() {
         super.focusDoesNotChange()
-    }
-
-    @Presubmit
-    @Test
-    override fun navBarLayerRotatesAndScales() {
-        Assume.assumeFalse(testSpec.isRotated)
-        super.navBarLayerRotatesAndScales()
-    }
-
-    @FlakyTest(bugId = 140855415)
-    @Test
-    fun navBarLayerRotatesAndScales_flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
-        super.navBarLayerRotatesAndScales()
     }
 
     @Presubmit

@@ -50,6 +50,53 @@ ResourceEntry* GetEntry(ResourceTable* table, const ResourceNameRef& res_name, R
   return (result) ? result.value().entry : nullptr;
 }
 
+TEST(ProtoSerializeTest, SerializeVisibility) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .Add(NewResourceBuilder("com.app.a:bool/foo")
+                   .SetVisibility({Visibility::Level::kUndefined})
+                   .Build())
+          .Add(NewResourceBuilder("com.app.a:bool/bar")
+                   .SetVisibility({Visibility::Level::kPrivate})
+                   .Build())
+          .Add(NewResourceBuilder("com.app.a:bool/baz")
+                   .SetVisibility({Visibility::Level::kPublic})
+                   .Build())
+          .Add(NewResourceBuilder("com.app.a:bool/fiz")
+                   .SetVisibility({.level = Visibility::Level::kPublic, .staged_api = true})
+                   .Build())
+          .Build();
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  MockFileCollection files;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  auto search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
+  ASSERT_TRUE(search_result);
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
+  EXPECT_FALSE(search_result.value().entry->visibility.staged_api);
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/bar"));
+  ASSERT_TRUE(search_result);
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kPrivate));
+  EXPECT_FALSE(search_result.value().entry->visibility.staged_api);
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/baz"));
+  ASSERT_TRUE(search_result);
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
+  EXPECT_FALSE(search_result.value().entry->visibility.staged_api);
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/fiz"));
+  ASSERT_TRUE(search_result);
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
+  EXPECT_TRUE(search_result.value().entry->visibility.staged_api);
+}
+
 TEST(ProtoSerializeTest, SerializeSinglePackage) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<ResourceTable> table =

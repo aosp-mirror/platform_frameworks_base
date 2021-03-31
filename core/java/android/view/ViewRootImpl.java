@@ -3344,8 +3344,9 @@ public final class ViewRootImpl implements ViewParent,
         }
         // TODO (b/131181940): Make sure this doesn't leak Activity with mActivityConfigCallback
         // config changes.
+        final View focusedView = mView != null ? mView.findFocus() : null;
         if (hasWindowFocus) {
-            mInsetsController.onWindowFocusGained();
+            mInsetsController.onWindowFocusGained(focusedView != null /* hasViewFocused */);
         } else {
             mInsetsController.onWindowFocusLost();
         }
@@ -3394,8 +3395,7 @@ public final class ViewRootImpl implements ViewParent,
 
             // Note: must be done after the focus change callbacks,
             // so all of the view state is set up correctly.
-            mImeFocusController.onPostWindowFocus(mView != null ? mView.findFocus() : null,
-                    hasWindowFocus, mWindowAttributes);
+            mImeFocusController.onPostWindowFocus(focusedView, hasWindowFocus, mWindowAttributes);
 
             if (hasWindowFocus) {
                 // Clear the forward bit.  We can just do this directly, since

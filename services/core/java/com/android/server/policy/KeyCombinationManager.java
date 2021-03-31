@@ -18,11 +18,13 @@ package com.android.server.policy;
 import static android.view.KeyEvent.KEYCODE_POWER;
 
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseLongArray;
 import android.view.KeyEvent;
 
 import com.android.internal.util.ToBooleanFunction;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -89,8 +91,8 @@ public class KeyCombinationManager {
 
         @Override
         public String toString() {
-            return "KeyCode1 = " + KeyEvent.keyCodeToString(mKeyCode1)
-                    + ", KeyCode2 = " +  KeyEvent.keyCodeToString(mKeyCode2);
+            return KeyEvent.keyCodeToString(mKeyCode1) + " + "
+                    + KeyEvent.keyCodeToString(mKeyCode2);
         }
     }
 
@@ -151,6 +153,7 @@ public class KeyCombinationManager {
                     if (!rule.shouldInterceptKeys(mDownTimes)) {
                         return false;
                     }
+                    Log.v(TAG, "Performing combination rule : " + rule);
                     rule.execute();
                     mTriggeredRule = rule;
                     return true;
@@ -229,5 +232,12 @@ public class KeyCombinationManager {
             }
         }
         return false;
+    }
+
+    void dump(String prefix, PrintWriter pw) {
+        pw.println(prefix + "KeyCombination rules:");
+        forAllRules(mRules, (rule)-> {
+            pw.println(prefix + "  " + rule);
+        });
     }
 }

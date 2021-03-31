@@ -18,6 +18,7 @@ package com.android.systemui.classifier;
 
 
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
 import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN;
@@ -45,6 +46,7 @@ public class TypeClassifier extends FalsingClassifier {
         boolean up = isUp();
         boolean right = isRight();
 
+        double confidence = 1;
         boolean wrongDirection = true;
         switch (interactionType) {
             case QUICK_SETTINGS:
@@ -52,6 +54,11 @@ public class TypeClassifier extends FalsingClassifier {
             case NOTIFICATION_DRAG_DOWN:
                 wrongDirection = !vertical || up;
                 break;
+            case BRIGHTNESS_SLIDER:
+                confidence = 0;  // Owners may return to original brightness.
+                // A more sophisticated thing to do here would be to look at the size of the
+                // vertical change relative to the screen size. _Some_ amount of vertical
+                // change should be expected.
             case NOTIFICATION_DISMISS:
                 wrongDirection = vertical;
                 break;
@@ -70,7 +77,7 @@ public class TypeClassifier extends FalsingClassifier {
                 break;
         }
 
-        return wrongDirection ? falsed(1, getReason(interactionType)) : Result.passed(0.5);
+        return wrongDirection ? falsed(confidence, getReason(interactionType)) : Result.passed(0.5);
     }
 
     private String getReason(int interactionType) {

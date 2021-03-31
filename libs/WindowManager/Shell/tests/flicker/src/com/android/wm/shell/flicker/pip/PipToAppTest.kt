@@ -83,7 +83,7 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun testAppCoversFullScreen() {
         testSpec.assertLayersStart {
-            coversExactly(displayBounds, pipApp.defaultWindowName)
+            visibleRegion(pipApp.defaultWindowName).coversExactly(displayBounds)
         }
     }
 

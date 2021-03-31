@@ -311,6 +311,7 @@ package android.net {
     field public static final int NET_CAPABILITY_ENTERPRISE = 29; // 0x1d
     field public static final int NET_CAPABILITY_FOREGROUND = 19; // 0x13
     field public static final int NET_CAPABILITY_FOTA = 3; // 0x3
+    field public static final int NET_CAPABILITY_HEAD_UNIT = 32; // 0x20
     field public static final int NET_CAPABILITY_IA = 7; // 0x7
     field public static final int NET_CAPABILITY_IMS = 4; // 0x4
     field public static final int NET_CAPABILITY_INTERNET = 12; // 0xc
@@ -334,6 +335,7 @@ package android.net {
     field public static final int TRANSPORT_CELLULAR = 0; // 0x0
     field public static final int TRANSPORT_ETHERNET = 3; // 0x3
     field public static final int TRANSPORT_LOWPAN = 6; // 0x6
+    field public static final int TRANSPORT_USB = 8; // 0x8
     field public static final int TRANSPORT_VPN = 4; // 0x4
     field public static final int TRANSPORT_WIFI = 1; // 0x1
     field public static final int TRANSPORT_WIFI_AWARE = 5; // 0x5
