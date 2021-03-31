@@ -6202,6 +6202,7 @@ package android.app {
   public class NotificationManager {
     method public String addAutomaticZenRule(android.app.AutomaticZenRule);
     method @Deprecated public boolean areBubblesAllowed();
+    method public boolean areBubblesEnabled();
     method public boolean areNotificationsEnabled();
     method public boolean areNotificationsPaused();
     method public boolean canNotifyAsPackage(@NonNull String);
