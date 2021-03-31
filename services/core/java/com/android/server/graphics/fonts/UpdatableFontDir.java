@@ -59,7 +59,9 @@ final class UpdatableFontDir {
 
     /** Interface to mock font file access in tests. */
     interface FontFileParser {
-        String getCanonicalFileName(File file) throws IOException;
+        String getPostScriptName(File file) throws IOException;
+
+        String buildFontFileName(File file) throws IOException;
 
         long getRevision(File file) throws IOException;
     }
@@ -76,15 +78,21 @@ final class UpdatableFontDir {
     /** Data class to hold font file path and revision. */
     private static final class FontFileInfo {
         private final File mFile;
+        private final String mPsName;
         private final long mRevision;
 
-        FontFileInfo(File file, long revision) {
+        FontFileInfo(File file, String psName, long revision) {
             mFile = file;
+            mPsName = psName;
             mRevision = revision;
         }
 
         public File getFile() {
             return mFile;
+        }
+
+        public String getPostScriptName() {
+            return mPsName;
         }
 
         /** Returns the unique randomized font dir containing this font file. */
@@ -98,7 +106,9 @@ final class UpdatableFontDir {
 
         @Override
         public String toString() {
-            return "FontFileInfo{mFile=" + mFile + ", mRevision=" + mRevision + '}';
+            return "FontFileInfo{mFile=" + mFile
+                    + ", psName=" + mPsName
+                    + ", mRevision=" + mRevision + '}';
         }
     }
 
@@ -329,20 +339,20 @@ final class UpdatableFontDir {
                         FontManager.RESULT_ERROR_VERIFICATION_FAILURE,
                         "Failed to setup fs-verity.", e);
             }
-            String canonicalFileName;
+            String fontFileName;
             try {
-                canonicalFileName = mParser.getCanonicalFileName(tempNewFontFile);
+                fontFileName = mParser.buildFontFileName(tempNewFontFile);
             } catch (IOException e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_FONT_FILE,
                         "Failed to read PostScript name from font file", e);
             }
-            if (canonicalFileName == null) {
+            if (fontFileName == null) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_FONT_NAME,
                         "Failed to read PostScript name from font file");
             }
-            File newFontFile = new File(newDir, canonicalFileName);
+            File newFontFile = new File(newDir, fontFileName);
             if (!mFsverityUtil.rename(tempNewFontFile, newFontFile)) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE,
@@ -388,22 +398,12 @@ final class UpdatableFontDir {
         return dir;
     }
 
-    private FontFileInfo lookupFontFileInfo(File file) {
-        String name = file.getName();
-
-        if (!name.endsWith(".ttf") && !name.endsWith(".otf") && !name.endsWith(".ttc")
-                && !name.endsWith(".otc")) {
-            return null;
-        }
-        String key = name.substring(0, name.length() - 4);
-        return mFontFileInfoMap.get(key);
+    private FontFileInfo lookupFontFileInfo(String psName) {
+        return mFontFileInfoMap.get(psName);
     }
 
     private void putFontFileInfo(FontFileInfo info) {
-        String name = info.getFile().getName();
-        // The file name in FontFileInfo is already validated. Thus, just strip last 4 chars.
-        String key = name.substring(0, name.length() - 4);
-        mFontFileInfoMap.put(key, info);
+        mFontFileInfoMap.put(info.getPostScriptName(), info);
     }
 
     /**
@@ -412,7 +412,7 @@ final class UpdatableFontDir {
      * #mPreinstalledFontDirs}).
      */
     private boolean addFileToMapIfNewer(FontFileInfo fontFileInfo, boolean deleteOldFile) {
-        FontFileInfo existingInfo = lookupFontFileInfo(fontFileInfo.getFile());
+        FontFileInfo existingInfo = lookupFontFileInfo(fontFileInfo.getPostScriptName());
         final boolean shouldAddToMap;
         if (existingInfo == null) {
             // We got a new updatable font. We need to check if it's newer than preinstalled fonts.
@@ -465,10 +465,13 @@ final class UpdatableFontDir {
                     FontManager.RESULT_ERROR_VERIFICATION_FAILURE,
                     "Font validation failed. Fs-verity is not enabled: " + file);
         }
-        if (!validateFontFileName(file)) {
+        final String psName;
+        try {
+            psName = mParser.getPostScriptName(file);
+        } catch (IOException e) {
             throw new SystemFontException(
                     FontManager.RESULT_ERROR_INVALID_FONT_NAME,
-                    "Font validation failed. Could not validate font file name: " + file);
+                    "Font validation failed. Could not read PostScript name name: " + file);
         }
         long revision = getFontRevision(file);
         if (revision == -1) {
@@ -476,38 +479,8 @@ final class UpdatableFontDir {
                     FontManager.RESULT_ERROR_INVALID_FONT_FILE,
                     "Font validation failed. Could not read font revision: " + file);
         }
-        return new FontFileInfo(file, revision);
+        return new FontFileInfo(file, psName, revision);
     }
-
-    /**
-     * Returns true if the font file's file name matches with the PostScript name metadata in the
-     * font file.
-     *
-     * <p>We check the font file names because apps use file name to look up fonts.
-     * <p>Because PostScript name does not include extension, the extension is appended for
-     * comparison. For example, if the file name is "NotoColorEmoji.ttf", the PostScript name should
-     * be "NotoColorEmoji".
-     */
-    private boolean validateFontFileName(File file) {
-        String fileName = file.getName();
-        String canonicalFileName = getCanonicalFileName(file);
-        if (canonicalFileName == null) {
-            return false;
-        }
-        return canonicalFileName.equals(fileName);
-    }
-
-    /** Returns the PostScript name of the given font file, or null. */
-    @Nullable
-    private String getCanonicalFileName(File file) {
-        try {
-            return mParser.getCanonicalFileName(file);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to read font file", e);
-            return null;
-        }
-    }
-
     /** Returns the non-negative font revision of the given font file, or -1. */
     private long getFontRevision(File file) {
         try {
