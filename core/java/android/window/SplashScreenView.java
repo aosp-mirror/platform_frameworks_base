@@ -22,6 +22,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UiThread;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -32,7 +33,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -46,7 +46,8 @@ import android.widget.FrameLayout;
 import com.android.internal.R;
 import com.android.internal.policy.DecorView;
 
-import java.util.function.Consumer;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * <p>The view which allows an activity to customize its splash screen exit animation.</p>
@@ -75,8 +76,8 @@ public final class SplashScreenView extends FrameLayout {
     private Bitmap mParceledIconBitmap;
     private View mBrandingImageView;
     private Bitmap mParceledBrandingBitmap;
-    private long mIconAnimationDuration;
-    private long mIconAnimationStart;
+    private Duration mIconAnimationDuration;
+    private Instant mIconAnimationStart;
 
     // The host activity when transfer view to it.
     private Activity mHostActivity;
@@ -85,6 +86,7 @@ public final class SplashScreenView extends FrameLayout {
     private boolean mDrawBarBackground;
     private int mStatusBarColor;
     private int mNavigationBarColor;
+    private boolean mHasRemoved;
 
     /**
      * Internal builder to create a SplashScreenView object.
@@ -101,8 +103,8 @@ public final class SplashScreenView extends FrameLayout {
         private int mBrandingImageHeight;
         private Drawable mBrandingDrawable;
         private Bitmap mParceledBrandingBitmap;
-        private long mIconAnimationStart;
-        private long mIconAnimationDuration;
+        private Instant mIconAnimationStart;
+        private Duration mIconAnimationDuration;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -126,8 +128,8 @@ public final class SplashScreenView extends FrameLayout {
                         parcelable.mBrandingHeight);
                 mParceledBrandingBitmap = parcelable.mBrandingBitmap;
             }
-            mIconAnimationStart = parcelable.mIconAnimationStart;
-            mIconAnimationDuration = parcelable.mIconAnimationDuration;
+            mIconAnimationStart = Instant.ofEpochMilli(parcelable.mIconAnimationStartMillis);
+            mIconAnimationDuration = Duration.ofMillis(parcelable.mIconAnimationDurationMillis);
             return this;
         }
 
@@ -166,8 +168,8 @@ public final class SplashScreenView extends FrameLayout {
         /**
          * Set the animation duration if icon is animatable.
          */
-        public Builder setAnimationDuration(int duration) {
-            mIconAnimationDuration = duration;
+        public Builder setAnimationDurationMillis(int duration) {
+            mIconAnimationDuration = Duration.ofMillis(duration);
             return this;
         }
 
@@ -203,7 +205,8 @@ public final class SplashScreenView extends FrameLayout {
             }
             if (mIconDrawable != null) {
                 view.mIconView.setBackground(mIconDrawable);
-                view.initIconAnimation(mIconDrawable, mIconAnimationDuration);
+                view.initIconAnimation(mIconDrawable,
+                        mIconAnimationDuration != null ? mIconAnimationDuration.toMillis() : 0);
             }
             view.mIconAnimationStart = mIconAnimationStart;
             view.mIconAnimationDuration = mIconAnimationDuration;
@@ -266,15 +269,16 @@ public final class SplashScreenView extends FrameLayout {
      * @see android.R.attr#windowSplashScreenAnimatedIcon
      * @see android.R.attr#windowSplashScreenAnimationDuration
      */
-    public long getIconAnimationDurationMillis() {
+    @Nullable
+    public Duration getIconAnimationDuration() {
         return mIconAnimationDuration;
     }
 
     /**
-     * If the replaced icon is animatable, return the animation start time in millisecond based on
-     * system. The start time is set using {@link SystemClock#uptimeMillis()}.
+     * If the replaced icon is animatable, return the animation start time based on system clock.
      */
-    public long getIconAnimationStartMillis() {
+    @Nullable
+    public Instant getIconAnimationStart() {
         return mIconAnimationStart;
     }
 
@@ -286,8 +290,8 @@ public final class SplashScreenView extends FrameLayout {
         aniDrawable.prepareAnimate(duration, this::animationStartCallback);
     }
 
-    private void animationStartCallback(long startAt) {
-        mIconAnimationStart = startAt;
+    private void animationStartCallback() {
+        mIconAnimationStart = Instant.now();
     }
 
     /**
@@ -295,7 +299,11 @@ public final class SplashScreenView extends FrameLayout {
      * <p><strong>Do not</strong> invoke this method from a drawing method
      * ({@link #onDraw(android.graphics.Canvas)} for instance).</p>
      */
+    @UiThread
     public void remove() {
+        if (mHasRemoved) {
+            return;
+        }
         setVisibility(GONE);
         if (mParceledIconBitmap != null) {
             mIconView.setBackground(null);
@@ -321,6 +329,7 @@ public final class SplashScreenView extends FrameLayout {
         if (mHostActivity != null) {
             mHostActivity.detachSplashScreenView();
         }
+        mHasRemoved = true;
     }
 
     /**
@@ -414,7 +423,7 @@ public final class SplashScreenView extends FrameLayout {
          * @param startListener The callback listener used to receive the start of the animation.
          * @return true if this drawable object can also be animated and it can be played now.
          */
-        protected boolean prepareAnimate(long duration, Consumer<Long> startListener) {
+        protected boolean prepareAnimate(long duration, Runnable startListener) {
             return false;
         }
     }
@@ -433,8 +442,8 @@ public final class SplashScreenView extends FrameLayout {
         private int mBrandingHeight;
         private Bitmap mBrandingBitmap;
 
-        private long mIconAnimationStart;
-        private long mIconAnimationDuration;
+        private long mIconAnimationStartMillis;
+        private long mIconAnimationDurationMillis;
 
         public SplashScreenViewParcelable(SplashScreenView view) {
             ViewGroup.LayoutParams params = view.getIconView().getLayoutParams();
@@ -447,8 +456,12 @@ public final class SplashScreenView extends FrameLayout {
             mBrandingWidth = params.width;
             mBrandingHeight = params.height;
 
-            mIconAnimationStart = view.getIconAnimationStartMillis();
-            mIconAnimationDuration = view.getIconAnimationDurationMillis();
+            if (view.getIconAnimationStart() != null) {
+                mIconAnimationStartMillis = view.getIconAnimationStart().toEpochMilli();
+            }
+            if (view.getIconAnimationDuration() != null) {
+                mIconAnimationDurationMillis = view.getIconAnimationDuration().toMillis();
+            }
         }
 
         private Bitmap copyDrawable(Drawable drawable) {
@@ -479,8 +492,8 @@ public final class SplashScreenView extends FrameLayout {
             mBrandingWidth = source.readInt();
             mBrandingHeight = source.readInt();
             mBrandingBitmap = source.readTypedObject(Bitmap.CREATOR);
-            mIconAnimationStart = source.readLong();
-            mIconAnimationDuration = source.readLong();
+            mIconAnimationStartMillis = source.readLong();
+            mIconAnimationDurationMillis = source.readLong();
             mIconBackground = source.readInt();
         }
 
@@ -497,8 +510,8 @@ public final class SplashScreenView extends FrameLayout {
             dest.writeInt(mBrandingWidth);
             dest.writeInt(mBrandingHeight);
             dest.writeTypedObject(mBrandingBitmap, flags);
-            dest.writeLong(mIconAnimationStart);
-            dest.writeLong(mIconAnimationDuration);
+            dest.writeLong(mIconAnimationStartMillis);
+            dest.writeLong(mIconAnimationDurationMillis);
             dest.writeInt(mIconBackground);
         }
 

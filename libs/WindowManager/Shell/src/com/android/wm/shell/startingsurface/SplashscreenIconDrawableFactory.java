@@ -37,14 +37,11 @@ import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.util.PathParser;
 import android.window.SplashScreenView;
 
 import com.android.internal.R;
-
-import java.util.function.Consumer;
 
 /**
  * Creating a lightweight Drawable object used for splash screen.
@@ -133,7 +130,6 @@ public class SplashscreenIconDrawableFactory {
         private Animatable mAnimatableIcon;
         private Animator mIconAnimator;
         private boolean mAnimationTriggered;
-        private long mIconAnimationStart;
 
         AnimatableIconDrawable(@ColorInt int backgroundColor, Drawable foregroundDrawable) {
             mForegroundDrawable = foregroundDrawable;
@@ -150,16 +146,15 @@ public class SplashscreenIconDrawableFactory {
         }
 
         @Override
-        protected boolean prepareAnimate(long duration, Consumer<Long> startListener) {
+        protected boolean prepareAnimate(long duration, Runnable startListener) {
             mAnimatableIcon = (Animatable) mForegroundDrawable;
             mIconAnimator = ValueAnimator.ofInt(0, 1);
             mIconAnimator.setDuration(duration);
             mIconAnimator.addListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    mIconAnimationStart = SystemClock.uptimeMillis();
                     if (startListener != null) {
-                        startListener.accept(mIconAnimationStart);
+                        startListener.run();
                     }
                     mAnimatableIcon.start();
                 }

@@ -56733,18 +56733,19 @@ package android.widget.inline {
 package android.window {
 
   public interface SplashScreen {
-    method public void setOnExitAnimationListener(@Nullable android.window.SplashScreen.OnExitAnimationListener);
+    method public void clearOnExitAnimationListener();
+    method public void setOnExitAnimationListener(@NonNull android.window.SplashScreen.OnExitAnimationListener);
   }
 
   public static interface SplashScreen.OnExitAnimationListener {
-    method public void onSplashScreenExit(@NonNull android.window.SplashScreenView);
+    method @UiThread public void onSplashScreenExit(@NonNull android.window.SplashScreenView);
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {
-    method public long getIconAnimationDurationMillis();
-    method public long getIconAnimationStartMillis();
+    method @Nullable public java.time.Duration getIconAnimationDuration();
+    method @Nullable public java.time.Instant getIconAnimationStart();
     method @Nullable public android.view.View getIconView();
-    method public void remove();
+    method @UiThread public void remove();
   }
 
 }
