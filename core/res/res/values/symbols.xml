@@ -2560,6 +2560,7 @@
   <java-symbol type="array" name="config_biometric_sensors" />
   <java-symbol type="bool" name="allow_test_udfps" />
   <java-symbol type="array" name="config_udfps_sensor_props" />
+  <java-symbol type="bool" name="config_is_powerbutton_fps" />
 
   <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />

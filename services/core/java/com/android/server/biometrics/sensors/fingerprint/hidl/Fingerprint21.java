@@ -119,6 +119,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private int mCurrentUserId = UserHandle.USER_NULL;
     private final boolean mIsUdfps;
     private final int mSensorId;
+    private boolean mIsPowerbuttonFps;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -345,9 +346,18 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         mIsUdfps = !ArrayUtils.isEmpty(
                 mContext.getResources().getIntArray(R.array.config_udfps_sensor_props));
 
-        final @FingerprintSensorProperties.SensorType int sensorType =
-                mIsUdfps ? FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
-                        : FingerprintSensorProperties.TYPE_REAR;
+        // config_is_powerbutton_fps indicates whether device has a power button fingerprint sensor.
+        mIsPowerbuttonFps = mContext.getResources().getBoolean(R.bool.config_is_powerbutton_fps);
+
+        final @FingerprintSensorProperties.SensorType int sensorType;
+        if (mIsUdfps) {
+            sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL;
+        } else if (mIsPowerbuttonFps) {
+            sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON;
+        } else {
+            sensorType = FingerprintSensorProperties.TYPE_REAR;
+        }
+
         // IBiometricsFingerprint@2.1 does not manage timeout below the HAL, so the Gatekeeper HAT
         // cannot be checked
         final boolean resetLockoutRequiresHardwareAuthToken = false;
@@ -835,6 +845,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         try {
             dump.put("service", TAG);
             dump.put("isUdfps", mIsUdfps);
+            dump.put("isPowerbuttonFps", mIsPowerbuttonFps);
 
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
