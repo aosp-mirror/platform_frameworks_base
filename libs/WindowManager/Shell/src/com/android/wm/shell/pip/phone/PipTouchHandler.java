@@ -176,13 +176,13 @@ public class PipTouchHandler {
         mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
                 mMenuController, mPipBoundsAlgorithm.getSnapAlgorithm(), pipTransitionController,
                 floatingContentCoordinator);
-        mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
-                        mMotionHelper, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds, pipUiEventLogger, menuController,
-                        mainExecutor);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
+        mPipResizeGestureHandler =
+                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
+                        mMotionHelper, pipTaskOrganizer, mPipDismissTargetHandler,
+                        this::getMovementBounds, this::updateMovementBounds, pipUiEventLogger,
+                        menuController, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
                 () -> {
                     if (mPipBoundsState.isStashed()) {
