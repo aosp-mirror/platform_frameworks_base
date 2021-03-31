@@ -59,11 +59,23 @@ stubs_defaults {
     name: "framework-doc-stubs-default",
     srcs: [
         ":framework-non-updatable-stub-sources",
-        ":framework-updatable-sources",
-        "test-base/src/**/*.java",
+
+        // Module sources
         ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
+        ":framework-connectivity-sources",
+        ":framework-mediaprovider-sources",
+        ":framework-permission-sources",
+        ":framework-sdkextensions-sources",
+        ":framework-statsd-sources",
+        ":framework-tethering-srcs",
+        ":framework-wifi-updatable-sources",
         ":i18n.module.public.api{.public.stubs.source}",
+        ":ike-srcs",
+        ":updatable-media-srcs",
+
+        // No longer part of the stubs, but are included in the docs.
+        "test-base/src/**/*.java",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
     ],
