@@ -273,7 +273,8 @@ public class PackageDexOptimizer {
                                 options.getCompilationReason(),
                                 newResult,
                                 ArtStatsLogUtils.getApkType(path),
-                                dexCodeIsa);
+                                dexCodeIsa,
+                                path);
                     } finally {
                         Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
                     }
