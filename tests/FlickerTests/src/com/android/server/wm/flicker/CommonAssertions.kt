@@ -101,10 +101,10 @@ fun FlickerTestParameter.noUncoveredRegions(
         }
     } else {
         assertLayersStart {
-            this.coversAtLeast(startingBounds)
+            this.visibleRegion().coversAtLeast(startingBounds)
         }
         assertLayersEnd {
-            this.coversAtLeast(endingBounds)
+            this.visibleRegion().coversAtLeast(endingBounds)
         }
     }
 }
@@ -152,10 +152,10 @@ fun FlickerTestParameter.navBarLayerRotatesAndScales(
     val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
 
     assertLayersStart {
-        this.coversExactly(startingPos, NAV_BAR_LAYER_NAME)
+        this.visibleRegion(NAV_BAR_LAYER_NAME).coversExactly(startingPos)
     }
     assertLayersEnd {
-        this.coversExactly(endingPos, NAV_BAR_LAYER_NAME)
+        this.visibleRegion(NAV_BAR_LAYER_NAME).coversExactly(endingPos)
     }
 }
 
@@ -168,10 +168,10 @@ fun FlickerTestParameter.statusBarLayerRotatesScales(
     val endingPos = WindowUtils.getStatusBarPosition(endRotation)
 
     assertLayersStart {
-        this.coversExactly(startingPos, STATUS_BAR_WINDOW_NAME)
+        this.visibleRegion(STATUS_BAR_WINDOW_NAME).coversExactly(startingPos)
     }
     assertLayersEnd {
-        this.coversExactly(endingPos, STATUS_BAR_WINDOW_NAME)
+        this.visibleRegion(STATUS_BAR_WINDOW_NAME).coversExactly(endingPos)
     }
 }
 

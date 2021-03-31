@@ -116,7 +116,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun pipAppLayerHidesTestApp() {
         testSpec.assertLayersStart {
-            coversExactly(startingBounds, pipApp.defaultWindowName)
+            visibleRegion(pipApp.defaultWindowName).coversExactly(startingBounds)
             isInvisible(testApp.defaultWindowName)
         }
     }
@@ -125,7 +125,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
-            coversExactly(endingBounds, testApp.defaultWindowName)
+            visibleRegion(testApp.defaultWindowName).coversExactly(endingBounds)
         }
     }
 

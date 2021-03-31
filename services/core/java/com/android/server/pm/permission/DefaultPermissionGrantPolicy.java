@@ -278,7 +278,7 @@ final class DefaultPermissionGrantPolicy {
             try {
                 return mContext.getPackageManager().getPermissionInfo(permissionName, 0);
             } catch (NameNotFoundException e) {
-                Slog.e(TAG, "Permission not found: " + permissionName);
+                Slog.w(TAG, "Permission not found: " + permissionName);
                 return null;
             }
         }
@@ -737,10 +737,9 @@ final class DefaultPermissionGrantPolicy {
                 grantPermissionsToSystemPackage(pm, packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(pm, packageName, userId,
-                        ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS,
-                        ACTIVITY_RECOGNITION_PERMISSIONS);
+                        ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
         }
         if (locationExtraPackageNames != null) {

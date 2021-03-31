@@ -456,6 +456,7 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
           DeserializeSourceFromPb(pb_visibility.source(), src_pool, &entry->visibility.source);
         }
         entry->visibility.comment = pb_visibility.comment();
+        entry->visibility.staged_api = pb_visibility.staged_api();
 
         const Visibility::Level level = DeserializeVisibilityFromPb(pb_visibility.level());
         entry->visibility.level = level;

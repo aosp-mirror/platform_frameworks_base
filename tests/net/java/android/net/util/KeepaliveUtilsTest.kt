@@ -101,7 +101,7 @@ class KeepaliveUtilsTest {
 
         // Check valid customization generates expected array.
         val validRes = arrayOf("0,3", "1,0", "4,4")
-        val expectedValidRes = intArrayOf(3, 0, 0, 0, 4, 0, 0, 0)
+        val expectedValidRes = intArrayOf(3, 0, 0, 0, 4, 0, 0, 0, 0)
 
         val mockContext = getMockedContextWithStringArrayRes(
                 R.array.config_networkSupportedKeepaliveCount,

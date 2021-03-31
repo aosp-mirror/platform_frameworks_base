@@ -51,6 +51,11 @@ struct Visibility {
   Level level = Level::kUndefined;
   Source source;
   std::string comment;
+
+  // Indicates that the resource id may change across builds and that the public R.java identifier
+  // for this resource should not be final. This is set to `true` for resources in `staging-group`
+  // tags.
+  bool staged_api = false;
 };
 
 // Represents <add-resource> in an overlay.

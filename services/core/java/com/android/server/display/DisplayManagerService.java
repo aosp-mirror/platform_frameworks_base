@@ -2932,9 +2932,6 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public int getRefreshRateSwitchingType() {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE,
-                    "Permission required read refresh rate switching type.");
             final long token = Binder.clearCallingIdentity();
             try {
                 return getRefreshRateSwitchingTypeInternal();

@@ -112,7 +112,8 @@ public class StartingSurfaceDrawerTests {
         spyOn(context);
         spyOn(realWindowManager);
         try {
-            doReturn(context).when(context).createPackageContext(anyString(), anyInt());
+            doReturn(context).when(context)
+                    .createPackageContextAsUser(anyString(), anyInt(), any());
         } catch (PackageManager.NameNotFoundException e) {
             //
         }

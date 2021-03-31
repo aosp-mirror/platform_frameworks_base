@@ -452,7 +452,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          *         {@link #remove} is called on a group, this should be the number of remaining
          *         fingerprints in the group, and 0 after the last fingerprint is removed.
          */
-        public void onRemovalSucceeded(Fingerprint fp, int remaining) { }
+        public void onRemovalSucceeded(@Nullable Fingerprint fp, int remaining) { }
     }
 
     /**
