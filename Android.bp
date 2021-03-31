@@ -177,7 +177,7 @@ filegroup {
 }
 
 filegroup {
-    name: "framework-graphics-sources",
+    name: "framework-graphics-nonupdatable-sources",
     srcs: [
         "graphics/java/**/*.java",
         "graphics/java/**/*.aidl",
@@ -335,7 +335,7 @@ filegroup {
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
-        ":framework-graphics-sources",
+        ":framework-graphics-nonupdatable-sources",
         ":framework-jobscheduler-sources", // jobscheduler is not a module for R
         ":framework-keystore-sources",
         ":framework-identity-sources",
