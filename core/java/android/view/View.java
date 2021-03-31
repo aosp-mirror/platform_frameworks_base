@@ -29543,6 +29543,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mScrollCaptureInternal;
         }
 
+        ViewRoot getViewRoot() {
+            return mViewRootImpl;
+        }
+
         public void dump(String prefix, PrintWriter writer) {
             String innerPrefix = prefix + "  ";
             writer.println(prefix + "AttachInfo:");
@@ -30929,5 +30933,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Log.e(VIEW_LOG_TAG, "Failed to call generateDisplayHash");
             callback.onDisplayHashError(DISPLAY_HASH_ERROR_UNKNOWN);
         }
+    }
+
+    /**
+     * @return The {@link android.view.ViewRoot} interface for this View. This will only
+     * return a non-null value when called between {@link #onAttachedToWindow} and
+     * {@link #onDetachedFromWindow}.
+     *
+     * The ViewRoot itself is not a View, it is just the interface to the windowing-system
+     * object that contains the entire view hierarchy. For the root View of a given hierarchy
+     * see {@link #getRootView}.
+     */
+    public @Nullable ViewRoot getViewRoot() {
+        if (mAttachInfo != null) {
+            return mAttachInfo.getViewRoot();
+        }
+        return null;
     }
 }
