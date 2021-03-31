@@ -45,6 +45,7 @@ static struct {
     jclass clazz;
 
     jmethodID dispatchInputEventFinished;
+    jmethodID dispatchTimelineReported;
 } gInputEventSenderClassInfo;
 
 
@@ -75,9 +76,10 @@ private:
     }
 
     int handleEvent(int receiveFd, int events, void* data) override;
-    status_t receiveFinishedSignals(JNIEnv* env);
-    bool notifyFinishedSignal(JNIEnv* env, jobject sender, const InputPublisher::Finished& finished,
-                              bool skipCallbacks);
+    status_t processConsumerResponse(JNIEnv* env);
+    bool notifyConsumerResponse(JNIEnv* env, jobject sender,
+                                const InputPublisher::ConsumerResponse& response,
+                                bool skipCallbacks);
 };
 
 NativeInputEventSender::NativeInputEventSender(JNIEnv* env, jobject senderWeak,
@@ -188,12 +190,12 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
     }
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    status_t status = receiveFinishedSignals(env);
+    status_t status = processConsumerResponse(env);
     mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
     return status == OK || status == NO_MEMORY ? 1 : 0;
 }
 
-status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
+status_t NativeInputEventSender::processConsumerResponse(JNIEnv* env) {
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName().c_str());
     }
@@ -206,18 +208,18 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
     }
     bool skipCallbacks = false; // stop calling Java functions after an exception occurs
     for (;;) {
-        Result<InputPublisher::Finished> result = mInputPublisher.receiveFinishedSignal();
+        Result<InputPublisher::ConsumerResponse> result = mInputPublisher.receiveConsumerResponse();
         if (!result.ok()) {
             const status_t status = result.error().code();
             if (status == WOULD_BLOCK) {
                 return OK;
             }
-            ALOGE("channel '%s' ~ Failed to consume finished signals.  status=%d",
+            ALOGE("channel '%s' ~ Failed to process consumer response.  status=%d",
                   getInputChannelName().c_str(), status);
             return status;
         }
 
-        const bool notified = notifyFinishedSignal(env, senderObj.get(), *result, skipCallbacks);
+        const bool notified = notifyConsumerResponse(env, senderObj.get(), *result, skipCallbacks);
         if (!notified) {
             skipCallbacks = true;
         }
@@ -225,16 +227,49 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
 }
 
 /**
- * Invoke the Java function dispatchInputEventFinished for the received "Finished" signal.
- * Set the variable 'skipCallbacks' to 'true' if a Java exception occurred.
+ * Invoke the corresponding Java function for the different variants of response.
+ * If the response is a Finished object, invoke dispatchInputEventFinished.
+ * If the response is a Timeline object, invoke dispatchTimelineReported.
+ * Set 'skipCallbacks' to 'true' if a Java exception occurred.
  * Java function will only be called if 'skipCallbacks' is originally 'false'.
  *
  * Return "false" if an exception occurred while calling the Java function
  *        "true" otherwise
  */
-bool NativeInputEventSender::notifyFinishedSignal(JNIEnv* env, jobject sender,
-                                                  const InputPublisher::Finished& finished,
-                                                  bool skipCallbacks) {
+bool NativeInputEventSender::notifyConsumerResponse(
+        JNIEnv* env, jobject sender, const InputPublisher::ConsumerResponse& response,
+        bool skipCallbacks) {
+    if (std::holds_alternative<InputPublisher::Timeline>(response)) {
+        const InputPublisher::Timeline& timeline = std::get<InputPublisher::Timeline>(response);
+
+        if (kDebugDispatchCycle) {
+            ALOGD("channel '%s' ~ Received timeline, inputEventId=%" PRId32
+                  ", gpuCompletedTime=%" PRId64 ", presentTime=%" PRId64,
+                  getInputChannelName().c_str(), timeline.inputEventId,
+                  timeline.graphicsTimeline[GraphicsTimeline::GPU_COMPLETED_TIME],
+                  timeline.graphicsTimeline[GraphicsTimeline::PRESENT_TIME]);
+        }
+
+        if (skipCallbacks) {
+            ALOGW("Java exception occurred. Skipping dispatchTimelineReported for "
+                  "inputEventId=%" PRId32,
+                  timeline.inputEventId);
+            return true;
+        }
+
+        env->CallVoidMethod(sender, gInputEventSenderClassInfo.dispatchTimelineReported,
+                            timeline.inputEventId, timeline.graphicsTimeline);
+        if (env->ExceptionCheck()) {
+            ALOGE("Exception dispatching timeline, inputEventId=%" PRId32, timeline.inputEventId);
+            return false;
+        }
+
+        return true;
+    }
+
+    // Must be a Finished event
+    const InputPublisher::Finished& finished = std::get<InputPublisher::Finished>(response);
+
     auto it = mPublishedSeqMap.find(finished.seq);
     if (it == mPublishedSeqMap.end()) {
         ALOGW("Received 'finished' signal for unknown seq number = %" PRIu32, finished.seq);
@@ -340,6 +375,9 @@ int register_android_view_InputEventSender(JNIEnv* env) {
 
     gInputEventSenderClassInfo.dispatchInputEventFinished = GetMethodIDOrDie(
             env, gInputEventSenderClassInfo.clazz, "dispatchInputEventFinished", "(IZ)V");
+    gInputEventSenderClassInfo.dispatchTimelineReported =
+            GetMethodIDOrDie(env, gInputEventSenderClassInfo.clazz, "dispatchTimelineReported",
+                             "(IJJ)V");
 
     return res;
 }
