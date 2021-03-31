@@ -792,6 +792,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
         proto.write(SensorStateProto.MODALITY, SensorStateProto.FACE);
+        proto.write(SensorStateProto.CURRENT_STRENGTH,
+                Utils.getCurrentStrength(mSensorProperties.sensorId));
         proto.write(SensorStateProto.SCHEDULER, mScheduler.dumpProtoState(clearSchedulerBuffer));
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {

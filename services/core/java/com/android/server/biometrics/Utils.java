@@ -411,6 +411,23 @@ public class Utils {
     }
 
     /**
+     * Returns the sensor's current strength, taking any updated strengths into effect.
+     *
+     * @param sensorId The sensor Id
+     * @return see {@link BiometricManager.Authenticators}
+     */
+    public static @Authenticators.Types int getCurrentStrength(int sensorId) {
+        IBiometricService service = IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+        try {
+            return service.getCurrentStrength(sensorId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException", e);
+            return Authenticators.EMPTY_SET;
+        }
+    }
+
+    /**
      * Checks if a client package matches Keyguard and can perform internal biometric operations.
      *
      * @param context The system context.

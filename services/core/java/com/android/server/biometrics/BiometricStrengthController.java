@@ -84,6 +84,8 @@ public class BiometricStrengthController {
             final int id = sensor.id;
             if (idToStrength.containsKey(id)) {
                 final int newStrength = idToStrength.get(id);
+                Slog.d(TAG, "updateStrengths: update sensorId=" + id + " to newStrength="
+                        + newStrength);
                 sensor.updateStrength(newStrength);
             }
         }
