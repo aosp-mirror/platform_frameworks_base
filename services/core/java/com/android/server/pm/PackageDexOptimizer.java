@@ -272,7 +272,8 @@ public class PackageDexOptimizer {
                                 dexMetadataPath,
                                 options.getCompilationReason(),
                                 newResult,
-                                ArtStatsLogUtils.getApkType(path),
+                                ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
+                                        pkg.getSplitCodePaths()),
                                 dexCodeIsa,
                                 path);
                     } finally {
