@@ -16,6 +16,7 @@
 
 package android.graphics.fonts;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 
@@ -212,6 +213,16 @@ public final class FontFamilyUpdateRequest {
         @NonNull
         public List<FontVariationAxis> getAxes() {
             return mAxes;
+        }
+
+        /**
+         * Returns the index of collection
+         *
+         * TODO(183752879): Make font index configurable and make this SystemApi.
+         * @hide
+         */
+        public @IntRange(from = 0) int getIndex() {
+            return 0;
         }
     }
 

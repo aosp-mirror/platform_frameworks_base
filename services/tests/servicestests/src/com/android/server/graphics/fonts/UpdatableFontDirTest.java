@@ -699,7 +699,7 @@ public final class UpdatableFontDirTest {
                             + "  <font>test.ttf</font>"
                             + "</family>")));
             fail("Expect NullPointerException");
-        } catch (NullPointerException e) {
+        } catch (FontManagerService.SystemFontException e) {
             // Expect
         }
     }
@@ -797,8 +797,18 @@ public final class UpdatableFontDirTest {
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
         parser.setInput(is, "UTF-8");
         parser.nextTag();
+
         FontConfig.FontFamily fontFamily = FontListParser.readFamily(parser, "", null);
-        return new FontUpdateRequest(fontFamily);
+        List<FontUpdateRequest.Font> fonts = new ArrayList<>();
+        for (FontConfig.Font font : fontFamily.getFontList()) {
+            String name = font.getFile().getName();
+            String psName = name.substring(0, name.length() - 4);  // drop suffix
+            FontUpdateRequest.Font updateFont = new FontUpdateRequest.Font(
+                    psName, font.getStyle(), font.getTtcIndex(), font.getFontVariationSettings());
+            fonts.add(updateFont);
+        }
+        FontUpdateRequest.Family family = new FontUpdateRequest.Family(fontFamily.getName(), fonts);
+        return new FontUpdateRequest(family);
     }
 
     private void writeConfig(PersistentSystemFontConfig.Config config,
