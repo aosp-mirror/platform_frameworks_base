@@ -412,7 +412,6 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"طلوع آفتاب تک"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"آن ہوگی بوقت <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> تک"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"چمک کم کریں"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC غیر فعال ہے"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال ہے"</string>
@@ -541,8 +540,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"پالیسیاں دیکھیں"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"کنٹرولز دیکھیں"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"‏یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے۔\n\nآپ کا IT منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کی نگرانی اور ان کا نظم کر سکتا ہے۔\n\nمزید معلومات کے لیے اپنے IT منتظم سے رابطہ کریں۔"</string>
-    <!-- no translation found for monitoring_financed_description_named_management (6108439201399938668) -->
-    <skip />
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> اس آلے سے وابستہ ڈیٹا تک رسائی حاصل، ایپس کا نظم اور ان آلات کی ترتیبات کو تبدیل کر سکتا ہے۔\n\nاگر آپ سوالات پوچھنا چاہتے ہیں تو <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> سے رابطہ کریں۔"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"‏یہ آلہ آپ کی تنظیم کا ہے۔\n\nآپ کا IT منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کی نگرانی اور ان کا نظم کر سکتا ہے۔\n\nمزید معلومات کے لیے اپنے IT منتظم سے رابطہ کریں۔"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"آپ کی تنظیم نے اس آلے پر ایک سرٹیفکیٹ کی اتھارٹی کو انسٹال کیا ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"آپ کی تنظیم نے آپ کے دفتری پروفائل میں ایک سرٹیفکیٹ کی اتھارٹی کو انسٹال کیا ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
@@ -653,10 +651,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ڈیمو موڈ دکھائیں"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ایتھرنیٹ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"الارم"</string>
-    <!-- no translation found for wallet_title (5369767670735827105) -->
-    <skip />
-    <!-- no translation found for wallet_secondary_label (2017028770884957543) -->
-    <skip />
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_secondary_label" msgid="2017028770884957543">"تیار ہے"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"دفتری پروفائل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ہوائی جہاز وضع"</string>
     <string name="add_tile" msgid="6239678623873086686">"ٹائل شامل کریں"</string>
@@ -1017,8 +1013,7 @@
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"بائیں منتقل کریں"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"دائیں منتقل کریں"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"میگنیفکیشن پر سوئچ کریں"</string>
-    <!-- no translation found for magnification_mode_switch_state_full_screen (5229653514979530561) -->
-    <skip />
+    <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"فُل اسکرین کو بڑا کریں"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"اسکرین کا حصہ بڑا کریں"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"سوئچ کریں"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ایکسیسبیلٹی بٹن کو ایکسیسبیلٹی اشارے سے بدل دیا گیا\n\n"<annotation id="link">"ترتیبات دیکھیں"</annotation></string>

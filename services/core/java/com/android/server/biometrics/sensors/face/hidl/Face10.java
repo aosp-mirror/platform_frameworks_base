@@ -398,7 +398,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     private synchronized IBiometricsFace getDaemon() {
         if (mTestHalEnabled) {
-            final TestHal testHal = new TestHal();
+            final TestHal testHal = new TestHal(mContext, mSensorId);
             testHal.setCallback(mHalResultController);
             return testHal;
         }

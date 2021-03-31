@@ -1567,7 +1567,7 @@ public class PackageInstaller {
         /** {@hide} */
         public boolean forceQueryableOverride;
         /** {@hide} */
-        public Boolean requireUserAction;
+        public int requireUserAction = SessionInfo.USER_ACTION_UNSPECIFIED;
 
         /**
          * Construct parameters for a new package install session.
@@ -1610,12 +1610,7 @@ public class PackageInstaller {
                 dataLoaderParams = new DataLoaderParams(dataLoaderParamsParcel);
             }
             rollbackDataPolicy = source.readInt();
-            int requireUserActionInt = source.readInt();
-            requireUserAction = requireUserActionInt == 0
-                    ? Boolean.FALSE
-                    : requireUserActionInt == 1
-                            ? Boolean.TRUE : null;
-
+            requireUserAction = source.readInt();
         }
 
         /** {@hide} */
@@ -2048,31 +2043,34 @@ public class PackageInstaller {
          * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES android.permission
          * #REQUEST_INSTALL_PACKAGES} permission, and {@code false} otherwise. When {@code true},
          * installers will receive a {@link #STATUS_PENDING_USER_ACTION} callback once the
-         * session is committed, indicating that the user is required for the install to proceed.
+         * session is committed, indicating that user action is required for the install to proceed.
          * <p>
-         * For installers using the {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES
-         * android.permission.REQUEST_INSTALL_PACKAGES} permission, user action will not be
-         * required when the following conditions are met:
+         * For installers that have been granted the
+         * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES android.permission
+         * .REQUEST_INSTALL_PACKAGES} permission, user action will not be required when all of
+         * the following conditions are met:
          *
          * <ul>
          *     <li>{@code requireUserAction} is set to {@code false}.</li>
-         *     <li>The being installed targets {@link android.os.Build.VERSION_CODES#Q API 29} or
-         *     higher.</li>
+         *     <li>The app being installed targets {@link android.os.Build.VERSION_CODES#Q API 29}
+         *     or higher.</li>
          *     <li>The installer is the {@link InstallSourceInfo#getInstallingPackageName()
          *     installer of record} of an existing version of the app (i.e.: this install session
-         *     is an app update or the installer is updating itself).</li>
+         *     is an app update) or the installer is updating itself.</li>
          *     <li>The installer declares the
          *     {@link android.Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION android
          *     .permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION} permission.</li>
          * </ul>
          * <p>
          * Note: The target API level requirement will advance in future Android versions.
-         * Session owners should always be prepared to handle {@link #STATUS_PENDING_USER_ACTION}
+         * Session owners should always be prepared to handle {@link #STATUS_PENDING_USER_ACTION}.
          *
          * @param requireUserAction whether user action should be required.
          */
         public void setRequireUserAction(boolean requireUserAction) {
-            this.requireUserAction = requireUserAction;
+            this.requireUserAction = requireUserAction
+                    ? SessionInfo.USER_ACTION_REQUIRED
+                    : SessionInfo.USER_ACTION_NOT_REQUIRED;
         }
 
         /**
@@ -2105,7 +2103,7 @@ public class PackageInstaller {
             pw.printPair("isMultiPackage", isMultiPackage);
             pw.printPair("isStaged", isStaged);
             pw.printPair("forceQueryable", forceQueryableOverride);
-            pw.printPair("requireUserAction", requireUserAction);
+            pw.printPair("requireUserAction", SessionInfo.userActionToString(requireUserAction));
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
             pw.printPair("dataLoaderParams", dataLoaderParams);
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
@@ -2147,10 +2145,7 @@ public class PackageInstaller {
                 dest.writeParcelable(null, flags);
             }
             dest.writeInt(rollbackDataPolicy);
-            dest.writeInt(requireUserAction == Boolean.TRUE
-                    ? 1
-                    : requireUserAction == Boolean.FALSE
-                            ? 0 : 2);
+            dest.writeInt(requireUserAction);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -2227,7 +2222,7 @@ public class PackageInstaller {
         public @interface UserActionRequirement {}
 
         /**
-         * The installer did not calling {@link SessionParams#setRequireUserAction(boolean)} to
+         * The installer did not call {@link SessionParams#setRequireUserAction(boolean)} to
          * specify whether user action should be required for the install.
          */
         public static final int USER_ACTION_UNSPECIFIED = 0;
@@ -2241,6 +2236,17 @@ public class PackageInstaller {
          * {@code false} to request that user action not be required for this install.
          */
         public static final int USER_ACTION_NOT_REQUIRED = 2;
+
+        private static String userActionToString(int requireUserAction) {
+            switch(requireUserAction) {
+                case SessionInfo.USER_ACTION_REQUIRED:
+                    return "REQUIRED";
+                case SessionInfo.USER_ACTION_NOT_REQUIRED:
+                    return "NOT_REQUIRED";
+                default:
+                    return "UNSPECIFIED";
+            }
+        }
 
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -2334,7 +2340,7 @@ public class PackageInstaller {
         public int rollbackDataPolicy;
 
         /** {@hide} */
-        public Boolean requireUserAction;
+        public int requireUserAction;
 
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -2385,11 +2391,7 @@ public class PackageInstaller {
             isCommitted = source.readBoolean();
             rollbackDataPolicy = source.readInt();
             createdMillis = source.readLong();
-            int requireUserActionInt = source.readInt();
-            requireUserAction = requireUserActionInt == 0
-                    ? Boolean.FALSE
-                    : requireUserActionInt == 1
-                            ? Boolean.TRUE : null;
+            requireUserAction = source.readInt();
         }
 
         /**
@@ -2901,11 +2903,7 @@ public class PackageInstaller {
          */
         @UserActionRequirement
         public int getRequireUserAction() {
-            return requireUserAction == null
-                    ? USER_ACTION_UNSPECIFIED
-                    : requireUserAction == Boolean.TRUE
-                            ? USER_ACTION_REQUIRED
-                            : USER_ACTION_NOT_REQUIRED;
+            return requireUserAction;
         }
 
         @Override
@@ -2953,10 +2951,7 @@ public class PackageInstaller {
             dest.writeBoolean(isCommitted);
             dest.writeInt(rollbackDataPolicy);
             dest.writeLong(createdMillis);
-            dest.writeInt(requireUserAction == Boolean.TRUE
-                    ? 1
-                    : requireUserAction == Boolean.FALSE
-                            ? 0 : 2);
+            dest.writeInt(requireUserAction);
         }
 
         public static final Parcelable.Creator<SessionInfo>

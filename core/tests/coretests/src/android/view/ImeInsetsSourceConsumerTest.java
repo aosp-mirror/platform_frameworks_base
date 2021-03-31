@@ -97,7 +97,7 @@ public class ImeInsetsSourceConsumerTest {
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // test if setVisibility can show IME
-            mImeConsumer.onWindowFocusGained();
+            mImeConsumer.onWindowFocusGained(true);
             mController.show(WindowInsets.Type.ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -116,7 +116,7 @@ public class ImeInsetsSourceConsumerTest {
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // Request IME visible before control is available.
-            mImeConsumer.onWindowFocusGained();
+            mImeConsumer.onWindowFocusGained(true);
             mController.show(WindowInsets.Type.ime(), true /* fromIme */);
 
             // set control and verify visibility is applied.
@@ -132,24 +132,58 @@ public class ImeInsetsSourceConsumerTest {
     }
 
     @Test
-    public void testImeGetAndClearSkipAnimationOnce() {
+    public void testImeGetAndClearSkipAnimationOnce_expectSkip() {
+        // Expect IME animation will skipped when the IME is visible at first place.
+        verifyImeGetAndClearSkipAnimationOnce(true /* hasWindowFocus */, true /* hasViewFocus */,
+                true /* expectSkipAnim */);
+    }
+
+    @Test
+    public void testImeGetAndClearSkipAnimationOnce_expectNoSkip() {
+        // Expect IME animation will not skipped if previously no view focused when gained the
+        // window focus and requesting the IME visible next time.
+        verifyImeGetAndClearSkipAnimationOnce(true /* hasWindowFocus */, false /* hasViewFocus */,
+                false /* expectSkipAnim */);
+    }
+
+    private void verifyImeGetAndClearSkipAnimationOnce(boolean hasWindowFocus, boolean hasViewFocus,
+            boolean expectSkipAnim) {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // Request IME visible before control is available.
-            mImeConsumer.onWindowFocusGained();
-            mController.show(WindowInsets.Type.ime(), true /* fromIme */);
+            mImeConsumer.onWindowFocusGained(hasWindowFocus);
+            final boolean imeVisible = hasWindowFocus && hasViewFocus;
+            if (imeVisible) {
+                mController.show(WindowInsets.Type.ime(), true /* fromIme */);
+            }
 
             // set control and verify visibility is applied.
             InsetsSourceControl control = Mockito.spy(
                     new InsetsSourceControl(ITYPE_IME, mLeash, new Point(), Insets.NONE));
             // Simulate IME source control set this flag when the target has starting window.
             control.setSkipAnimationOnce(true);
-            mController.onControlsChanged(new InsetsSourceControl[] { control });
-            // Verify IME show animation should be triggered when control becomes available and
-            // the animation will be skipped by getAndClearSkipAnimationOnce invoked.
-            verify(control).getAndClearSkipAnimationOnce();
-            verify(mController).applyAnimation(
-                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
-                    eq(true) /* skipAnim */);
+
+            if (imeVisible) {
+                // Verify IME applyAnimation should be triggered when control becomes available,
+                // and expect skip animation state after getAndClearSkipAnimationOnce invoked.
+                mController.onControlsChanged(new InsetsSourceControl[]{ control });
+                verify(control).getAndClearSkipAnimationOnce();
+                verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
+                        eq(true) /* show */, eq(false) /* fromIme */,
+                        eq(expectSkipAnim) /* skipAnim */);
+            }
+
+            // If previously hasViewFocus is false, verify when requesting the IME visible next
+            // time will not skip animation.
+            if (!hasViewFocus) {
+                mController.show(WindowInsets.Type.ime(), true);
+                mController.onControlsChanged(new InsetsSourceControl[]{ control });
+                // Verify IME show animation should be triggered when control becomes available and
+                // the animation will be skipped by getAndClearSkipAnimationOnce invoked.
+                verify(control).getAndClearSkipAnimationOnce();
+                verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
+                        eq(true) /* show */, eq(true) /* fromIme */,
+                        eq(false) /* skipAnim */);
+            }
         });
     }
 }

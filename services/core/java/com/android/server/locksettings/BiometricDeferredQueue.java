@@ -52,7 +52,8 @@ public class BiometricDeferredQueue {
 
     // Entries added by LockSettingsService once a user's synthetic password is known. At this point
     // things are still keyed by userId.
-    @NonNull private final ArrayList<UserAuthInfo> mPendingResetLockouts;
+    @NonNull private final ArrayList<UserAuthInfo> mPendingResetLockoutsForFingerprint;
+    @NonNull private final ArrayList<UserAuthInfo> mPendingResetLockoutsForFace;
 
     /**
      * Authentication info for a successful user unlock via Synthetic Password. This can be used to
@@ -151,7 +152,8 @@ public class BiometricDeferredQueue {
         mContext = context;
         mSpManager = spManager;
         mHandler = handler;
-        mPendingResetLockouts = new ArrayList<>();
+        mPendingResetLockoutsForFingerprint = new ArrayList<>();
+        mPendingResetLockoutsForFace = new ArrayList<>();
     }
 
     public void systemReady(@Nullable FingerprintManager fingerprintManager,
@@ -173,17 +175,34 @@ public class BiometricDeferredQueue {
      */
     void addPendingLockoutResetForUser(int userId, @NonNull byte[] gatekeeperPassword) {
         mHandler.post(() -> {
-            Slog.d(TAG, "addPendingLockoutResetForUser: " + userId);
-            mPendingResetLockouts.add(new UserAuthInfo(userId, gatekeeperPassword));
+            if (mFaceManager != null && mFaceManager.hasEnrolledTemplates(userId)) {
+                Slog.d(TAG, "Face addPendingLockoutResetForUser: " + userId);
+                mPendingResetLockoutsForFace.add(new UserAuthInfo(userId, gatekeeperPassword));
+            }
+
+            if (mFingerprintManager != null
+                    && mFingerprintManager.hasEnrolledFingerprints(userId)) {
+                Slog.d(TAG, "Fingerprint addPendingLockoutResetForUser: " + userId);
+                mPendingResetLockoutsForFingerprint.add(new UserAuthInfo(userId,
+                        gatekeeperPassword));
+            }
         });
     }
 
     void processPendingLockoutResets() {
         mHandler.post(() -> {
-            Slog.d(TAG, "processPendingLockoutResets: " + mPendingResetLockouts.size());
-            processPendingLockoutsForFingerprint(new ArrayList<>(mPendingResetLockouts));
-            processPendingLockoutsForFace(new ArrayList<>(mPendingResetLockouts));
-            mPendingResetLockouts.clear();
+            if (!mPendingResetLockoutsForFace.isEmpty()) {
+                Slog.d(TAG, "Processing pending resetLockout for face");
+                processPendingLockoutsForFace(new ArrayList<>(mPendingResetLockoutsForFace));
+                mPendingResetLockoutsForFace.clear();
+            }
+
+            if (!mPendingResetLockoutsForFingerprint.isEmpty()) {
+                Slog.d(TAG, "Processing pending resetLockout for fingerprint");
+                processPendingLockoutsForFingerprint(
+                        new ArrayList<>(mPendingResetLockoutsForFingerprint));
+                mPendingResetLockoutsForFingerprint.clear();
+            }
         });
     }
 

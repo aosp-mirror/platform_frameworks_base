@@ -761,11 +761,18 @@ public abstract class WallpaperService extends Service {
         public void notifyLocalColorsChanged(@NonNull List<RectF> regions,
                 @NonNull List<WallpaperColors> colors)
                 throws RuntimeException {
-            for (int i = 0; i < regions.size() && i < colors.size() && colors.get(i) != null; i++) {
+            for (int i = 0; i < regions.size() && i < colors.size(); i++) {
+                WallpaperColors color = colors.get(i);
+                RectF area = regions.get(i);
+                if (color == null || area == null) {
+                    Log.wtf(TAG, "notifyLocalColorsChanged null values. color: "
+                            + color + " area " + area);
+                    continue;
+                }
                 try {
                     mConnection.onLocalWallpaperColorsChanged(
-                            regions.get(i),
-                            colors.get(i),
+                            area,
+                            color,
                             mDisplayContext.getDisplayId()
                     );
                 } catch (RemoteException e) {
@@ -1355,7 +1362,8 @@ public abstract class WallpaperService extends Service {
                         + xOffsetStep);
             }
             //below is the default implementation
-            if (xOffset % xOffsetStep > MIN_PAGE_ALLOWED_MARGIN) return;
+            if (xOffset % xOffsetStep > MIN_PAGE_ALLOWED_MARGIN
+                    || !mSurfaceHolder.getSurface().isValid()) return;
             int xPage;
             int xPages;
             if (!validStep(xOffsetStep)) {
@@ -1671,6 +1679,10 @@ public abstract class WallpaperService extends Service {
             }
             for (int i = 0; i < areas.size(); i++) {
                 RectF currentArea = areas.get(i);
+                if (currentArea == null || !isValid(currentArea)) {
+                    Log.wtf(TAG, "invalid local area " + currentArea);
+                    continue;
+                }
                 EngineWindowPage page;
                 RectF area;
                 int pageIndx;

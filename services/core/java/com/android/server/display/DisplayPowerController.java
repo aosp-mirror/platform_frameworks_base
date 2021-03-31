@@ -874,6 +874,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void cleanupHandlerThreadAfterStop() {
         setProximitySensorEnabled(false);
         mHandler.removeCallbacksAndMessages(null);
+        if (mUnfinishedBusiness) {
+            mCallbacks.releaseSuspendBlocker();
+            mUnfinishedBusiness = false;
+        }
         if (mPowerState != null) {
             mPowerState.stop();
             mPowerState = null;
@@ -1701,12 +1705,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private final Runnable mCleanListener = new Runnable() {
-        @Override
-        public void run() {
-            sendUpdatePowerState();
-        }
-    };
+    private final Runnable mCleanListener = this::sendUpdatePowerState;
 
     private void setProximitySensorEnabled(boolean enable) {
         if (enable) {

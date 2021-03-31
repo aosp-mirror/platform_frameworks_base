@@ -922,7 +922,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final boolean forcePermissionPrompt =
                 (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0
-                        || params.requireUserAction == Boolean.TRUE;
+                        || params.requireUserAction == SessionInfo.USER_ACTION_REQUIRED;
         if (forcePermissionPrompt) {
             return USER_ACTION_REQUIRED;
         }
@@ -971,7 +971,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return USER_ACTION_REQUIRED;
         }
 
-        if (params.requireUserAction == Boolean.FALSE
+        if (params.requireUserAction == SessionInfo.USER_ACTION_NOT_REQUIRED
                 && isUpdateWithoutUserActionPermissionGranted
                 && (isInstallerOfRecord || isSelfUpdate)) {
             return USER_ACTION_PENDING_APK_PARSING;

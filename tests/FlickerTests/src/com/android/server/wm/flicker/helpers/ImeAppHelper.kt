@@ -51,17 +51,17 @@ open class ImeAppHelper @JvmOverloads constructor(
                 "was left in an unknown state (e.g. in split screen)"
         }
         editText.click()
-        waitAndAssertIMEShown(device, wmHelper)
+        waitIMEShown(device, wmHelper)
     }
 
-    protected fun waitAndAssertIMEShown(
+    protected fun waitIMEShown(
         device: UiDevice,
         wmHelper: WindowManagerStateHelper? = null
     ) {
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            require(wmHelper.waitImeWindowShown()) { "IME did not appear" }
+            wmHelper.waitImeWindowShown()
         }
     }
 
@@ -78,7 +78,7 @@ open class ImeAppHelper @JvmOverloads constructor(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            require(wmHelper.waitImeWindowGone()) { "IME did did not close" }
+            wmHelper.waitImeWindowGone()
         }
     }
 }

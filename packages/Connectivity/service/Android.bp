@@ -72,7 +72,7 @@ java_library {
         "ServiceConnectivityResources",
     ],
     static_libs: [
-        "dnsresolver_aidl_interface-V7-java",
+        "dnsresolver_aidl_interface-V8-java",
         "modules-utils-os",
         "net-utils-device-common",
         "net-utils-framework-common",

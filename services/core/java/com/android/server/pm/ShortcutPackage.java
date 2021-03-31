@@ -2187,6 +2187,10 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void saveShortcut(@NonNull final Collection<ShortcutInfo> shortcuts) {
         Objects.requireNonNull(shortcuts);
+        if (shortcuts.isEmpty()) {
+            // No need to invoke AppSearch when there's nothing to save.
+            return;
+        }
         ConcurrentUtils.waitForFutureNoInterrupt(
                 runInAppSearch(session -> {
                     final AndroidFuture<Boolean> future = new AndroidFuture<>();

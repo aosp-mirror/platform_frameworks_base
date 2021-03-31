@@ -87,6 +87,10 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 attrs, R.styleable.PagedTileLayout, 0, 0);
         mSideLabels = t.getBoolean(R.styleable.PagedTileLayout_sideLabels, false);
         t.recycle();
+        if (mSideLabels) {
+            setPageMargin(context.getResources().getDimensionPixelOffset(
+                    R.dimen.qs_tile_margin_horizontal));
+        }
     }
     private int mLastMaxHeight = -1;
 
@@ -341,6 +345,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         // Update bottom padding, useful for removing extra space once the panel page indicator is
         // hidden.
         Resources res = getContext().getResources();
+        if (mSideLabels) {
+            setPageMargin(res.getDimensionPixelOffset(R.dimen.qs_tile_margin_horizontal));
+        }
         setPadding(0, 0, 0,
                 getContext().getResources().getDimensionPixelSize(
                         R.dimen.qs_paged_tile_layout_padding_bottom));

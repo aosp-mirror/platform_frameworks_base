@@ -38,6 +38,7 @@ import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
@@ -346,6 +347,37 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
 
+
+    /** @hide */
+    @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {
+            MATCH_CONTENT_FRAMERATE_UNKNOWN,
+            MATCH_CONTENT_FRAMERATE_NEVER,
+            MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY,
+            MATCH_CONTENT_FRAMERATE_ALWAYS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MatchContentFrameRateType {}
+
+    /**
+     * Match content frame rate user preference is unknown.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_UNKNOWN = -1;
+
+    /**
+     * No mode switching is allowed.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_NEVER = 0;
+
+    /**
+     * Only refresh rate switches without visual interruptions are allowed.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY = 1;
+
+    /**
+     * Refresh rate switches between all refresh rates are allowed even if they have visual
+     * interruptions for the user.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_ALWAYS = 2;
 
     /** @hide */
     @IntDef(prefix = {"SWITCHING_TYPE_"}, value = {
@@ -1076,14 +1108,36 @@ public final class DisplayManager {
     }
 
     /**
-     * Returns the refresh rate switching type.
-     *
-     * @hide
+     * Returns the user preference for "Match content frame rate".
+     * <p>
+     * Never: Even if the app requests it, the device will never try to match its output to the
+     * original frame rate of the content.
+     * </p><p>
+     * Seamless: If the app requests it, the device will match its output to the original frame
+     * rate of the content, ONLY if the display can transition seamlessly.
+     * </p><p>
+     * Always: If the app requests it, the device will match its output to the original
+     * frame rate of the content. This may cause the screen to go blank for a
+     * second when exiting or entering a video playback.
+     * </p>
      */
-    @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE)
-    @SwitchingType public int getRefreshRateSwitchingType() {
-        return mGlobal.getRefreshRateSwitchingType();
+    @MatchContentFrameRateType public int getMatchContentFrameRateUserPreference() {
+        return toMatchContentFrameRateSetting(mGlobal.getRefreshRateSwitchingType());
+    }
+
+    @MatchContentFrameRateType
+    private int toMatchContentFrameRateSetting(@SwitchingType int switchingType) {
+        switch (switchingType) {
+            case SWITCHING_TYPE_NONE:
+                return MATCH_CONTENT_FRAMERATE_NEVER;
+            case SWITCHING_TYPE_WITHIN_GROUPS:
+                return MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY;
+            case SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:
+                return MATCH_CONTENT_FRAMERATE_ALWAYS;
+            default:
+                Slog.e(TAG, switchingType + " is not a valid value of switching type.");
+                return MATCH_CONTENT_FRAMERATE_UNKNOWN;
+        }
     }
 
     /**

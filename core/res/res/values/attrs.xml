@@ -3579,6 +3579,12 @@
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
         <attr name="suppressesSpellChecker" format="boolean" />
+        <!-- Specifies whether the IME wants to be shown in the Input Method picker. Defaults to
+             true. Set this to false if the IME is intended to be accessed programmatically.
+             <p>
+             Note: This functions as a hint to the system, which may choose to ignore this
+             preference in certain situations or in future releases.-->
+        <attr name="showInInputMethodPicker" format="boolean" />
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (for example, en_US and
@@ -9539,4 +9545,10 @@
     <attr name="iconfactoryBadgeSize" format="dimension"/>
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
+
+    <declare-styleable name="DisplayHasherService">
+        <!-- The throttle duration for display hash requests
+             @hide @SystemApi -->
+        <attr name="throttleDurationMillis" format="integer" />
+    </declare-styleable>
 </resources>

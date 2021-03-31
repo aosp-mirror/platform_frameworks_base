@@ -201,6 +201,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
 
+    // Delay between when the network is disconnected and when the native network is destroyed.
+    public int teardownDelayMs;
+
     // Captive portal info of the network from RFC8908, if any.
     // Obtained by ConnectivityService and merged into NetworkAgent-provided information.
     public CaptivePortalData capportApiData;
@@ -589,13 +592,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     }
 
     /**
-     * Notify the NetworkAgent that the network is disconnected and destroyed.
+     * Notify the NetworkAgent that the native network has been destroyed.
      */
-    public void onNetworkDisconnected() {
+    public void onNetworkDestroyed() {
         try {
-            networkAgent.onNetworkDisconnected();
+            networkAgent.onNetworkDestroyed();
         } catch (RemoteException e) {
-            Log.e(TAG, "Error sending network disconnected event", e);
+            Log.e(TAG, "Error sending network destroyed event", e);
         }
     }
 
@@ -674,6 +677,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         public void sendQosCallbackError(final int qosCallbackId,
                 @QosCallbackException.ExceptionType final int exceptionType) {
             mQosCallbackTracker.sendEventQosCallbackError(qosCallbackId, exceptionType);
+        }
+
+        @Override
+        public void sendTeardownDelayMs(int teardownDelayMs) {
+            mHandler.obtainMessage(NetworkAgent.EVENT_TEARDOWN_DELAY_CHANGED,
+                    teardownDelayMs, 0, new Pair<>(NetworkAgentInfo.this, null)).sendToTarget();
         }
     }
 

@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
+import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
@@ -717,6 +718,9 @@ public class ConnectivityServiceTest {
         private int mProbesSucceeded;
         private String mNmValidationRedirectUrl = null;
         private boolean mNmProvNotificationRequested = false;
+        private Runnable mCreatedCallback;
+        private Runnable mUnwantedCallback;
+        private Runnable mDisconnectedCallback;
 
         private final ConditionVariable mNetworkStatusReceived = new ConditionVariable();
         // Contains the redirectUrl from networkStatus(). Before reading, wait for
@@ -770,6 +774,24 @@ public class ConnectivityServiceTest {
                 public void networkStatus(int status, String redirectUrl) {
                     mRedirectUrl = redirectUrl;
                     mNetworkStatusReceived.open();
+                }
+
+                @Override
+                public void onNetworkCreated() {
+                    super.onNetworkCreated();
+                    if (mCreatedCallback != null) mCreatedCallback.run();
+                }
+
+                @Override
+                public void onNetworkUnwanted() {
+                    super.onNetworkUnwanted();
+                    if (mUnwantedCallback != null) mUnwantedCallback.run();
+                }
+
+                @Override
+                public void onNetworkDestroyed() {
+                    super.onNetworkDestroyed();
+                    if (mDisconnectedCallback != null) mDisconnectedCallback.run();
                 }
             };
 
@@ -971,6 +993,18 @@ public class ConnectivityServiceTest {
             p.detectionMethod = DATA_STALL_DETECTION_METHOD;
             p.timestampMillis = DATA_STALL_TIMESTAMP;
             mNmCallbacks.notifyDataStallSuspected(p);
+        }
+
+        public void setCreatedCallback(Runnable r) {
+            mCreatedCallback = r;
+        }
+
+        public void setUnwantedCallback(Runnable r) {
+            mUnwantedCallback = r;
+        }
+
+        public void setDisconnectedCallback(Runnable r) {
+            mDisconnectedCallback = r;
         }
     }
 
@@ -2441,8 +2475,7 @@ public class ConnectivityServiceTest {
     public void networkCallbacksSanitizationTest_Sanitize() throws Exception {
         mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
                 PERMISSION_DENIED);
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
-                PERMISSION_DENIED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_DENIED);
         doNetworkCallbacksSanitizationTest(true /* sanitized */);
     }
 
@@ -2450,7 +2483,7 @@ public class ConnectivityServiceTest {
     public void networkCallbacksSanitizationTest_NoSanitize_NetworkStack() throws Exception {
         mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
                 PERMISSION_GRANTED);
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS, PERMISSION_DENIED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_DENIED);
         doNetworkCallbacksSanitizationTest(false /* sanitized */);
     }
 
@@ -2458,7 +2491,7 @@ public class ConnectivityServiceTest {
     public void networkCallbacksSanitizationTest_NoSanitize_Settings() throws Exception {
         mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
                 PERMISSION_DENIED);
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
         doNetworkCallbacksSanitizationTest(false /* sanitized */);
     }
 
@@ -2798,6 +2831,94 @@ public class ConnectivityServiceTest {
 
         // Clean up.
         mCm.unregisterNetworkCallback(defaultCallback);
+        mCm.unregisterNetworkCallback(callback);
+    }
+
+    @Test
+    public void testNetworkAgentCallbacks() throws Exception {
+        // Keeps track of the order of events that happen in this test.
+        final LinkedBlockingQueue<String> eventOrder = new LinkedBlockingQueue<>();
+
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        final AtomicReference<Network> wifiNetwork = new AtomicReference<>();
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+
+        // Expectations for state when various callbacks fire. These expectations run on the handler
+        // thread and not on the test thread because they need to prevent the handler thread from
+        // advancing while they examine state.
+
+        // 1. When onCreated fires, netd has been told to create the network.
+        mWiFiNetworkAgent.setCreatedCallback(() -> {
+            eventOrder.offer("onNetworkCreated");
+            wifiNetwork.set(mWiFiNetworkAgent.getNetwork());
+            assertNotNull(wifiNetwork.get());
+            try {
+                verify(mMockNetd).networkCreatePhysical(wifiNetwork.get().getNetId(),
+                        INetd.PERMISSION_NONE);
+            } catch (RemoteException impossible) {
+                fail();
+            }
+        });
+
+        // 2. onNetworkUnwanted isn't precisely ordered with respect to any particular events. Just
+        //    check that it is fired at some point after disconnect.
+        mWiFiNetworkAgent.setUnwantedCallback(() -> eventOrder.offer("onNetworkUnwanted"));
+
+        // 3. While the teardown timer is running, connectivity APIs report the network is gone, but
+        //    netd has not yet been told to destroy it.
+        final Runnable duringTeardown = () -> {
+            eventOrder.offer("timePasses");
+            assertNull(mCm.getLinkProperties(wifiNetwork.get()));
+            try {
+                verify(mMockNetd, never()).networkDestroy(wifiNetwork.get().getNetId());
+            } catch (RemoteException impossible) {
+                fail();
+            }
+        };
+
+        // 4. After onNetworkDisconnected is called, connectivity APIs report the network is gone,
+        // and netd has been told to destroy it.
+        mWiFiNetworkAgent.setDisconnectedCallback(() -> {
+            eventOrder.offer("onNetworkDisconnected");
+            assertNull(mCm.getLinkProperties(wifiNetwork.get()));
+            try {
+                verify(mMockNetd).networkDestroy(wifiNetwork.get().getNetId());
+            } catch (RemoteException impossible) {
+                fail();
+            }
+        });
+
+        // Connect a network, and file a request for it after it has come up, to ensure the nascent
+        // timer is cleared and the test does not have to wait for it. Filing the request after the
+        // network has come up is necessary because ConnectivityService does not appear to clear the
+        // nascent timer if the first request satisfied by the network was filed before the network
+        // connected.
+        // TODO: fix this bug, file the request before connecting, and remove the waitForIdle.
+        mWiFiNetworkAgent.connectWithoutInternet();
+        waitForIdle();
+        mCm.requestNetwork(request, callback);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+
+        // Set teardown delay and make sure CS has processed it.
+        mWiFiNetworkAgent.getNetworkAgent().setTeardownDelayMs(300);
+        waitForIdle();
+
+        // Post the duringTeardown lambda to the handler so it fires while teardown is in progress.
+        // The delay must be long enough it will run after the unregisterNetworkCallback has torn
+        // down the network and started the teardown timer, and short enough that the lambda is
+        // scheduled to run before the teardown timer.
+        final Handler h = new Handler(mCsHandlerThread.getLooper());
+        h.postDelayed(duringTeardown, 150);
+
+        // Disconnect the network and check that events happened in the right order.
+        mCm.unregisterNetworkCallback(callback);
+        assertEquals("onNetworkCreated", eventOrder.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertEquals("onNetworkUnwanted", eventOrder.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertEquals("timePasses", eventOrder.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertEquals("onNetworkDisconnected", eventOrder.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
         mCm.unregisterNetworkCallback(callback);
     }
 
@@ -3494,8 +3615,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testCaptivePortalApi() throws Exception {
-        mServiceContext.setPermission(
-                android.Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final TestNetworkCallback captivePortalCallback = new TestNetworkCallback();
         final NetworkRequest captivePortalRequest = new NetworkRequest.Builder()
@@ -3529,8 +3649,7 @@ public class ConnectivityServiceTest {
     private TestNetworkCallback setupNetworkCallbackAndConnectToWifi() throws Exception {
         // Grant NETWORK_SETTINGS permission to be able to receive LinkProperties change callbacks
         // with sensitive (captive portal) data
-        mServiceContext.setPermission(
-                android.Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final TestNetworkCallback captivePortalCallback = new TestNetworkCallback();
         final NetworkRequest captivePortalRequest = new NetworkRequest.Builder()
@@ -3964,8 +4083,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testRegisterDefaultNetworkCallback() throws Exception {
         // NETWORK_SETTINGS is necessary to call registerSystemDefaultNetworkCallback.
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
-                PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(defaultNetworkCallback);
@@ -4124,8 +4242,7 @@ public class ConnectivityServiceTest {
                 () -> mCm.registerDefaultNetworkCallbackAsUid(APP1_UID, callback, handler));
         callback.assertNoCallback();
 
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
-                PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
         mCm.registerSystemDefaultNetworkCallback(callback, handler);
         callback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
         mCm.unregisterNetworkCallback(callback);
@@ -5495,10 +5612,11 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testNetworkCallbackMaximum() {
+    public void testNetworkCallbackMaximum() throws Exception {
         final int MAX_REQUESTS = 100;
         final int CALLBACKS = 89;
         final int INTENTS = 11;
+        final int SYSTEM_ONLY_MAX_REQUESTS = 250;
         assertEquals(MAX_REQUESTS, CALLBACKS + INTENTS);
 
         NetworkRequest networkRequest = new NetworkRequest.Builder().build();
@@ -5547,6 +5665,33 @@ public class ConnectivityServiceTest {
                                 new Intent("d"), FLAG_IMMUTABLE))
         );
 
+        // The system gets another SYSTEM_ONLY_MAX_REQUESTS slots.
+        final Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
+        withPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, () -> {
+            ArrayList<NetworkCallback> systemRegistered = new ArrayList<>();
+            for (int i = 0; i < SYSTEM_ONLY_MAX_REQUESTS - 1; i++) {
+                NetworkCallback cb = new NetworkCallback();
+                if (i % 2 == 0) {
+                    mCm.registerDefaultNetworkCallbackAsUid(1000000 + i, cb, handler);
+                } else {
+                    mCm.registerNetworkCallback(networkRequest, cb);
+                }
+                systemRegistered.add(cb);
+            }
+            waitForIdle();
+
+            assertThrows(TooManyRequestsException.class, () ->
+                    mCm.registerDefaultNetworkCallbackAsUid(1001042, new NetworkCallback(),
+                            handler));
+            assertThrows(TooManyRequestsException.class, () ->
+                    mCm.registerNetworkCallback(networkRequest, new NetworkCallback()));
+
+            for (NetworkCallback callback : systemRegistered) {
+                mCm.unregisterNetworkCallback(callback);
+            }
+            waitForIdle();  // Wait for requests to be unregistered before giving up the permission.
+        });
+
         for (Object o : registered) {
             if (o instanceof NetworkCallback) {
                 mCm.unregisterNetworkCallback((NetworkCallback)o);
@@ -5570,6 +5715,30 @@ public class ConnectivityServiceTest {
             mCm.registerNetworkCallback(networkRequest, networkCallback);
             mCm.unregisterNetworkCallback(networkCallback);
         }
+        waitForIdle();
+
+        for (int i = 0; i < MAX_REQUESTS; i++) {
+            NetworkCallback networkCallback = new NetworkCallback();
+            mCm.registerDefaultNetworkCallback(networkCallback);
+            mCm.unregisterNetworkCallback(networkCallback);
+        }
+        waitForIdle();
+
+        for (int i = 0; i < MAX_REQUESTS; i++) {
+            NetworkCallback networkCallback = new NetworkCallback();
+            mCm.registerDefaultNetworkCallback(networkCallback);
+            mCm.unregisterNetworkCallback(networkCallback);
+        }
+        waitForIdle();
+
+        withPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, () -> {
+            for (int i = 0; i < MAX_REQUESTS; i++) {
+                NetworkCallback networkCallback = new NetworkCallback();
+                mCm.registerDefaultNetworkCallbackAsUid(1000000 + i, networkCallback,
+                        new Handler(ConnectivityThread.getInstanceLooper()));
+                mCm.unregisterNetworkCallback(networkCallback);
+            }
+        });
         waitForIdle();
 
         for (int i = 0; i < MAX_REQUESTS; i++) {
@@ -6565,8 +6734,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testVpnNetworkActive() throws Exception {
         // NETWORK_SETTINGS is necessary to call registerSystemDefaultNetworkCallback.
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
-                PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final int uid = Process.myUid();
 
@@ -7058,8 +7226,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testRestrictedProfileAffectsVpnUidRanges() throws Exception {
         // NETWORK_SETTINGS is necessary to see the UID ranges in NetworkCapabilities.
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
-                PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final NetworkRequest request = new NetworkRequest.Builder()
                 .removeCapability(NET_CAPABILITY_NOT_VPN)
@@ -7145,8 +7312,7 @@ public class ConnectivityServiceTest {
         mServiceContext.setPermission(
                 Manifest.permission.CONTROL_VPN, PERMISSION_GRANTED);
         // Necessary to see the UID ranges in NetworkCapabilities.
-        mServiceContext.setPermission(
-                Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final NetworkRequest request = new NetworkRequest.Builder()
                 .removeCapability(NET_CAPABILITY_NOT_VPN)
@@ -7634,8 +7800,7 @@ public class ConnectivityServiceTest {
                 Manifest.permission.CONTROL_ALWAYS_ON_VPN, PERMISSION_GRANTED);
         mServiceContext.setPermission(
                 Manifest.permission.CONTROL_VPN, PERMISSION_GRANTED);
-        mServiceContext.setPermission(
-                Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final TestNetworkCallback callback = new TestNetworkCallback();
         final NetworkRequest request = new NetworkRequest.Builder()
@@ -7871,8 +8036,7 @@ public class ConnectivityServiceTest {
         mServiceContext.setPermission(
                 Manifest.permission.CONTROL_VPN, PERMISSION_GRANTED);
         // For LockdownVpnTracker to call registerSystemDefaultNetworkCallback.
-        mServiceContext.setPermission(
-                Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
         final TestNetworkCallback callback = new TestNetworkCallback();
@@ -9002,8 +9166,7 @@ public class ConnectivityServiceTest {
     private void denyAllLocationPrivilegedPermissions() {
         mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
                 PERMISSION_DENIED);
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
-                PERMISSION_DENIED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_DENIED);
         mServiceContext.setPermission(Manifest.permission.NETWORK_STACK,
                 PERMISSION_DENIED);
         mServiceContext.setPermission(Manifest.permission.NETWORK_SETUP_WIZARD,
@@ -9259,7 +9422,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testCreateForCallerWithLocalMacAddressSanitizedWithSettingsPermission()
             throws Exception {
-        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final TransportInfo transportInfo = mock(TransportInfo.class);
         when(transportInfo.getApplicableRedactions())
@@ -10655,8 +10818,7 @@ public class ConnectivityServiceTest {
 
     private void registerDefaultNetworkCallbacks() {
         // Using Manifest.permission.NETWORK_SETTINGS for registerSystemDefaultNetworkCallback()
-        mServiceContext.setPermission(
-                Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_GRANTED);
         mSystemDefaultNetworkCallback = new TestNetworkCallback();
         mDefaultNetworkCallback = new TestNetworkCallback();
         mProfileDefaultNetworkCallback = new TestNetworkCallback();
@@ -10666,8 +10828,7 @@ public class ConnectivityServiceTest {
         registerDefaultNetworkCallbackAsUid(mProfileDefaultNetworkCallback,
                 TEST_WORK_PROFILE_APP_UID);
         // TODO: test using ConnectivityManager#registerDefaultNetworkCallbackAsUid as well.
-        mServiceContext.setPermission(
-                Manifest.permission.NETWORK_SETTINGS, PERMISSION_DENIED);
+        mServiceContext.setPermission(NETWORK_SETTINGS, PERMISSION_DENIED);
     }
 
     private void unregisterDefaultNetworkCallbacks() {
@@ -10822,7 +10983,7 @@ public class ConnectivityServiceTest {
         defaultNetworkCallback.assertNoCallback();
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
-        withPermission(Manifest.permission.NETWORK_SETTINGS, () ->
+        withPermission(NETWORK_SETTINGS, () ->
                 mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
@@ -10870,7 +11031,7 @@ public class ConnectivityServiceTest {
         defaultNetworkCallback.assertNoCallback();
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
-        withPermission(Manifest.permission.NETWORK_SETTINGS, () ->
+        withPermission(NETWORK_SETTINGS, () ->
                 mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
@@ -10912,7 +11073,7 @@ public class ConnectivityServiceTest {
         defaultNetworkCallback.assertNoCallback();
 
         final TestNetworkCallback otherUidDefaultCallback = new TestNetworkCallback();
-        withPermission(Manifest.permission.NETWORK_SETTINGS, () ->
+        withPermission(NETWORK_SETTINGS, () ->
                 mCm.registerDefaultNetworkCallbackAsUid(TEST_PACKAGE_UID, otherUidDefaultCallback,
                         new Handler(ConnectivityThread.getInstanceLooper())));
 
