@@ -2024,7 +2024,9 @@ public final class CameraManager {
                 // Tell listeners that the cameras and torch modes are unavailable and schedule a
                 // reconnection to camera service. When camera service is reconnected, the camera
                 // and torch statuses will be updated.
-                for (int i = 0; i < mDeviceStatus.size(); i++) {
+                // Iterate from the end to the beginning befcause onStatusChangedLocked removes
+                // entries from the ArrayMap.
+                for (int i = mDeviceStatus.size() - 1; i >= 0; i--) {
                     String cameraId = mDeviceStatus.keyAt(i);
                     onStatusChangedLocked(ICameraServiceListener.STATUS_NOT_PRESENT, cameraId);
                 }
