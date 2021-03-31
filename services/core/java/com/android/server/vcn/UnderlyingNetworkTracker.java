@@ -118,7 +118,7 @@ public class UnderlyingNetworkTracker {
         if (!mIsQuitting) {
             mRouteSelectionCallback = new RouteSelectionCallback();
             mConnectivityManager.requestBackgroundNetwork(
-                    getBaseNetworkRequestBuilder().build(), mHandler, mRouteSelectionCallback);
+                    getRouteSelectionRequest(), mHandler, mRouteSelectionCallback);
 
             mWifiBringupCallback = new NetworkBringupCallback();
             mConnectivityManager.requestBackgroundNetwork(
@@ -149,12 +149,48 @@ public class UnderlyingNetworkTracker {
         }
     }
 
-    private NetworkRequest getWifiNetworkRequest() {
+    /**
+     * Builds the Route selection request
+     *
+     * <p>This request is guaranteed to select carrier-owned, non-VCN underlying networks by virtue
+     * of a populated set of subIds as expressed in NetworkCapabilities#getSubIds(). Only carrier
+     * owned networks may be selected, as the request specifies only subIds in the VCN's
+     * subscription group, while the VCN networks are excluded by virtue of not having subIds set on
+     * the VCN-exposed networks.
+     */
+    private NetworkRequest getRouteSelectionRequest() {
         return getBaseNetworkRequestBuilder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .setSubIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
                 .build();
     }
 
+    /**
+     * Builds the WiFi bringup request
+     *
+     * <p>This request is built specifically to match only carrier-owned WiFi networks, but is also
+     * built to ONLY keep Carrier WiFi Networks alive (but never bring them up). This is a result of
+     * the WifiNetworkFactory not advertising a list of subIds, and therefore not accepting this
+     * request. As such, it will bind to a Carrier WiFi Network that has already been brought up,
+     * but will NEVER bring up a Carrier WiFi network itself.
+     */
+    private NetworkRequest getWifiNetworkRequest() {
+        return getBaseNetworkRequestBuilder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .setSubIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))
+                .build();
+    }
+
+    /**
+     * Builds a Cellular bringup request for a given subId
+     *
+     * <p>This request is filed in order to ensure that the Telephony stack always has a
+     * NetworkRequest to bring up a VCN underlying cellular network. It is required in order to
+     * ensure that even when a VCN (appears as Cellular) satisfies the default request, Telephony
+     * will bring up additional underlying Cellular networks.
+     *
+     * <p>Since this request MUST make it to the TelephonyNetworkFactory, subIds are not specified
+     * in the NetworkCapabilities, but rather in the TelephonyNetworkSpecifier.
+     */
     private NetworkRequest getCellNetworkRequestForSubId(int subId) {
         return getBaseNetworkRequestBuilder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
@@ -164,20 +200,13 @@ public class UnderlyingNetworkTracker {
 
     /**
      * Builds and returns a NetworkRequest builder common to all Underlying Network requests
-     *
-     * <p>This request is guaranteed to select carrier-owned, non-VCN underlying networks by virtue
-     * of a populated set of subIds as expressed in NetworkCapabilities#getSubIds(). Only carrier
-     * owned networks may be selected, as the request specifies only subIds in the VCN's
-     * subscription group, while the VCN networks are excluded by virtue of not having subIds set on
-     * the VCN-exposed networks.
      */
     private NetworkRequest.Builder getBaseNetworkRequestBuilder() {
         return new NetworkRequest.Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
-                .setSubIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup));
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
     }
 
     /**
