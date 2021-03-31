@@ -338,6 +338,7 @@ enum RuntimeFlags : uint32_t {
     GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
     GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
     NATIVE_HEAP_ZERO_INIT = 1 << 23,
+    PROFILEABLE = 1 << 24,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {

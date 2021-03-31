@@ -2559,6 +2559,7 @@ public final class Settings implements Watchable, Snappable {
                 // gids       - supplementary gids this app launches with
                 // profileableFromShellFlag  - 0 or 1 if the package is profileable from shell.
                 // longVersionCode - integer version of the package.
+                // profileable - 0 or 1 if the package is profileable by the platform.
                 //
                 // NOTE: We prefer not to expose all ApplicationInfo flags for now.
                 //
@@ -2589,6 +2590,8 @@ public final class Settings implements Watchable, Snappable {
                 sb.append(pkg.pkg.isProfileableByShell() ? "1" : "0");
                 sb.append(" ");
                 sb.append(pkg.pkg.getLongVersionCode());
+                sb.append(" ");
+                sb.append(pkg.pkg.isProfileable() ? "1" : "0");
                 sb.append("\n");
                 writer.append(sb);
             }
