@@ -1220,6 +1220,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void updateUidState(int uid, int procState) {
         synchronized (mLock) {
+            final int prevPriority = mUidPriorityOverride.get(uid, JobInfo.PRIORITY_DEFAULT);
             if (procState == ActivityManager.PROCESS_STATE_TOP) {
                 // Only use this if we are exactly the top app.  All others can live
                 // with just the foreground priority.  This means that persistent processes
@@ -1231,6 +1232,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mUidPriorityOverride.put(uid, JobInfo.PRIORITY_BOUND_FOREGROUND_SERVICE);
             } else {
                 mUidPriorityOverride.delete(uid);
+            }
+            final int newPriority = mUidPriorityOverride.get(uid, JobInfo.PRIORITY_DEFAULT);
+            if (prevPriority != newPriority) {
+                if (DEBUG) {
+                    Slog.d(TAG, "UID " + uid + " priority changed from " + prevPriority
+                            + " to " + newPriority);
+                }
+                for (int c = 0; c < mControllers.size(); ++c) {
+                    mControllers.get(c).onUidPriorityChangedLocked(uid, newPriority);
+                }
             }
         }
     }

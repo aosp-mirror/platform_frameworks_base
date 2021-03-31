@@ -1139,11 +1139,6 @@ public final class JobStatus {
                 && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
     }
 
-    boolean shouldIgnoreNetworkBlocking() {
-        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
-                || (shouldTreatAsExpeditedJob() || startedAsExpeditedJob);
-    }
-
     /** @return true if the constraint was changed, false otherwise. */
     boolean setChargingConstraintSatisfied(final long nowElapsed, boolean state) {
         return setConstraintSatisfied(CONSTRAINT_CHARGING, nowElapsed, state);

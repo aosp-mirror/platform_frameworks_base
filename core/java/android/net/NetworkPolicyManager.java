@@ -794,7 +794,7 @@ public class NetworkPolicyManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
     public static String blockedReasonsToString(int blockedReasons) {
-        return DebugUtils.flagsToString(NetworkPolicyManager.class, "BLOCKED_", blockedReasons);
+        return DebugUtils.flagsToString(ConnectivityManager.class, "BLOCKED_", blockedReasons);
     }
 
     /**

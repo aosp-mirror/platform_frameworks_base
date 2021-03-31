@@ -654,7 +654,7 @@ public class ConnectivityControllerTest {
             generalCallback.onCapabilitiesChanged(net, caps);
             if (uidCallback != null) {
                 uidCallback.onAvailable(net);
-                uidCallback.onBlockedStatusChanged(net, false);
+                uidCallback.onBlockedStatusChanged(net, ConnectivityManager.BLOCKED_REASON_NONE);
                 uidCallback.onCapabilitiesChanged(net, caps);
             }
         }
