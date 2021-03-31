@@ -56,6 +56,7 @@ open class QSTileViewHorizontal(
         addView(mIcon, 0, LayoutParams(iconSize, iconSize))
 
         mColorLabelActive = ColorStateList.valueOf(getColorForState(getContext(), STATE_ACTIVE))
+        changeLabelColor(getLabelColor(mState)) // Matches the default state of the tile
     }
 
     override fun createLabel() {
@@ -113,13 +114,11 @@ open class QSTileViewHorizontal(
         if (allowAnimations) {
             animateBackground(newColor)
         } else {
-            if (newColor != paintColor) {
-                clearBackgroundAnimator()
-                colorBackgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))?.also {
-                    paintColor = newColor
-                }
+            clearBackgroundAnimator()
+            colorBackgroundDrawable?.setTintList(ColorStateList.valueOf(newColor))?.also {
                 paintColor = newColor
             }
+            paintColor = newColor
         }
     }
 
