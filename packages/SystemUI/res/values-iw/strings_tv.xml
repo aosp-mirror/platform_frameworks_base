@@ -24,5 +24,5 @@
     <string name="pip_close" msgid="5775212044472849930">"‏סגירת PIP"</string>
     <string name="pip_fullscreen" msgid="3877997489869475181">"מסך מלא"</string>
     <string name="mic_active" msgid="5766614241012047024">"המיקרופון פעיל"</string>
-    <string name="app_accessed_mic" msgid="2754428675130470196">"‏%1$s קיבלה גישה למיקרופון שלך"</string>
+    <string name="app_accessed_mic" msgid="2754428675130470196">"‏לאפליקציה %1$s יש גישה למיקרופון שלך"</string>
 </resources>
