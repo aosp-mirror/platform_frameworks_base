@@ -35,12 +35,13 @@ open class QSTileViewHorizontal(
     context: Context,
     icon: QSIconView,
     collapsed: Boolean
-) : QSTileView(context, icon, collapsed) {
+) : QSTileView(context, icon, collapsed), HeightOverrideable {
 
     protected var colorBackgroundDrawable: Drawable? = null
     private var paintColor = Color.WHITE
     private var paintAnimator: ValueAnimator? = null
     private var labelAnimator: ValueAnimator? = null
+    override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
 
     init {
         orientation = HORIZONTAL
@@ -56,6 +57,13 @@ open class QSTileViewHorizontal(
         addView(mIcon, 0, LayoutParams(iconSize, iconSize))
 
         mColorLabelActive = ColorStateList.valueOf(getColorForState(getContext(), STATE_ACTIVE))
+    }
+
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        super.onLayout(changed, l, t, r, b)
+        if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
+            bottom = top + heightOverride
+        }
     }
 
     override fun createLabel() {
