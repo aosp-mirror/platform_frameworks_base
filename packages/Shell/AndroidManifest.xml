@@ -359,6 +359,9 @@
     <!-- Permission needed for CTS test - CtsHdmiCecHostTestCases -->
     <uses-permission android:name="android.permission.HDMI_CEC" />
 
+    <!-- Permission needed for CTS test - MediaPlayerTest -->
+    <uses-permission android:name="android.permission.BIND_IMS_SERVICE" />
+
     <!-- Permission needed for CTS test - WifiManagerTest -->
     <uses-permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
     <uses-permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
