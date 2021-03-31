@@ -925,6 +925,11 @@ public class DomainVerificationService extends SystemService
             sendBroadcast = false;
         } else {
             pkgState = mSettings.removeRestoredState(pkgName);
+            if (pkgState != null && !Objects.equals(pkgState.getBackupSignatureHash(),
+                    PackageUtils.computeSignaturesSha256Digest(newPkgSetting.getSignatures()))) {
+                // If restoring and the signatures don't match, drop the state
+                pkgState = null;
+            }
         }
 
         AndroidPackage pkg = newPkgSetting.getPkg();

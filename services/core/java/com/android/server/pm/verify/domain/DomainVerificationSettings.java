@@ -157,16 +157,20 @@ class DomainVerificationSettings {
                     // mergePkgState runs, without the merge part.
                     ArrayMap<String, Integer> stateMap = newState.getStateMap();
                     int size = stateMap.size();
-                    for (int index = 0; index < size; index++) {
+                    for (int index = size - 1; index >= 0; index--) {
                         Integer stateInteger = stateMap.valueAt(index);
                         if (stateInteger != null) {
                             int state = stateInteger;
                             if (state == DomainVerificationState.STATE_SUCCESS
                                     || state == DomainVerificationState.STATE_RESTORED) {
-                                stateMap.setValueAt(index, state);
+                                stateMap.setValueAt(index, DomainVerificationState.STATE_RESTORED);
+                            } else {
+                                stateMap.removeAt(index);
                             }
                         }
                     }
+
+                    mRestoredPkgStates.put(pkgName, newState);
                 }
             }
         }
