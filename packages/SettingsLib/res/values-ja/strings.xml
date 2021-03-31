@@ -501,6 +501,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"短くします。"</string>
     <string name="cancel" msgid="5665114069455378395">"キャンセル"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"アラームとリマインダー"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"アラームやリマインダーの設定を許可"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"アラームとリマインダー"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"このアプリに、アラームやその他のタイミング ベースのイベントをスケジュールすることを許可します。これにより、ユーザーがデバイスを使用していないときでも、アプリが復帰して実行できるようになります。この権限を取り消すと、アプリの動作不良が発生することがあります。特に、アプリがスケジュールしたアラームはすべて動作しなくなります。"</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"スケジュール, アラーム, リマインダー, イベント"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ON にする"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"サイレント モードを ON にする"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"なし"</string>
@@ -579,7 +584,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"モバイルデータ OFF"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"データを使用するように設定されていません"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"電波状態:なし"</string>
