@@ -298,8 +298,10 @@ public class VibratorControllerTest {
         VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
                 Float.NaN, Float.NaN, Float.NaN, Float.NaN, null);
         when(mNativeWrapperMock.getInfo(/* suggestedFrequencyRange= */ 100)).thenReturn(
-                new VibratorInfo(VIBRATOR_ID, capabilities, null, null, null, Float.NaN,
-                        frequencyMapping));
+                new VibratorInfo.Builder(VIBRATOR_ID)
+                        .setCapabilities(capabilities)
+                        .setFrequencyMapping(frequencyMapping)
+                        .build());
     }
 
     private PrebakedSegment createPrebaked(int effectId, int effectStrength) {

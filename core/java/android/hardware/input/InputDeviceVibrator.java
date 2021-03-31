@@ -20,11 +20,13 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.Context;
+import android.hardware.vibrator.IVibrator;
 import android.os.Binder;
 import android.os.IVibratorStateListener;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -41,7 +43,7 @@ final class InputDeviceVibrator extends Vibrator {
 
     // mDeviceId represents InputDevice ID the vibrator belongs to
     private final int mDeviceId;
-    private final int mVibratorId;
+    private final VibratorInfo mVibratorInfo;
     private final Binder mToken;
     private final InputManager mInputManager;
 
@@ -52,7 +54,13 @@ final class InputDeviceVibrator extends Vibrator {
     InputDeviceVibrator(InputManager inputManager, int deviceId, int vibratorId) {
         mInputManager = inputManager;
         mDeviceId = deviceId;
-        mVibratorId = vibratorId;
+        mVibratorInfo = new VibratorInfo.Builder(vibratorId)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                // Set predefined support to empty as we know input devices do not support them.
+                .setSupportedEffects()
+                .setSupportedPrimitives()
+                .setSupportedBraking()
+                .build();
         mToken = new Binder();
     }
 
@@ -74,8 +82,8 @@ final class InputDeviceVibrator extends Vibrator {
     }
 
     @Override
-    public int getId() {
-        return mVibratorId;
+    protected VibratorInfo getInfo() {
+        return mVibratorInfo;
     }
 
     @Override
@@ -159,7 +167,7 @@ final class InputDeviceVibrator extends Vibrator {
 
     @Override
     public boolean hasAmplitudeControl() {
-        return true;
+        return mVibratorInfo.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL);
     }
 
     /**

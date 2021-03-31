@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,12 +27,13 @@ import android.annotation.SystemService;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.util.Log;
+import android.util.Range;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 /**
@@ -156,6 +158,11 @@ public abstract class Vibrator {
         return ctx != null ? ctx.getResources().getInteger(resId) : VIBRATION_INTENSITY_MEDIUM;
     }
 
+    /** @hide */
+    protected VibratorInfo getInfo() {
+        return VibratorInfo.EMPTY_VIBRATOR_INFO;
+    }
+
     /**
      * Get the default vibration intensity for haptic feedback.
      *
@@ -190,7 +197,7 @@ public abstract class Vibrator {
      * service, or -1 this service is not attached to any physical vibrator.
      */
     public int getId() {
-        return -1;
+        return getInfo().getId();
     }
 
     /**
@@ -208,14 +215,26 @@ public abstract class Vibrator {
     public abstract boolean hasAmplitudeControl();
 
     /**
+     * Check whether the vibrator has independent frequency control.
+     *
+     * @return True if the hardware can control the frequency of the vibrations, otherwise false.
+     * @hide
+     */
+    public boolean hasFrequencyControl() {
+        // We currently can only control frequency of the vibration using the compose PWLE method.
+        return getInfo().hasCapability(
+                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+    }
+
+    /**
      * Gets the resonant frequency of the vibrator.
      *
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown or
-     *         this vibrator is a composite of multiple physical devices.
+     * this vibrator is a composite of multiple physical devices.
      * @hide
      */
     public float getResonantFrequency() {
-        return Float.NaN;
+        return getInfo().getResonantFrequency();
     }
 
     /**
@@ -226,7 +245,44 @@ public abstract class Vibrator {
      * @hide
      */
     public float getQFactor() {
-        return Float.NaN;
+        return getInfo().getQFactor();
+    }
+
+    /**
+     * Return a range of relative frequency values supported by the vibrator.
+     *
+     * <p>These values can be used to create waveforms that controls the vibration frequency via
+     * {@link VibrationEffect.WaveformBuilder}.
+     *
+     * @return A range of relative frequency values supported. The range will always contain the
+     * value 0, representing the device resonant frequency. Devices without frequency control will
+     * return the range [0,0]. Devices with frequency control will always return a range containing
+     * the safe range [-1, 1].
+     * @hide
+     */
+    public Range<Float> getRelativeFrequencyRange() {
+        return getInfo().getFrequencyRange();
+    }
+
+    /**
+     * Return the maximum amplitude the vibrator can play at given relative frequency.
+     *
+     * <p>Devices without frequency control will return 1 for the input zero (resonant frequency),
+     * and 0 to any other input.
+     *
+     * <p>Devices with frequency control will return the supported value, for input in
+     * {@link #getRelativeFrequencyRange()}, and 0 for any other input.
+     *
+     * <p>These values can be used to create waveforms that plays vibrations outside the resonant
+     * frequency via {@link VibrationEffect.WaveformBuilder}.
+     *
+     * @return a value in [0,1] representing the maximum amplitude the device can play at given
+     * relative frequency.
+     * @hide
+     */
+    @FloatRange(from = 0, to = 1)
+    public float getMaximumAmplitude(float relativeFrequency) {
+        return getInfo().getMaxAmplitude(relativeFrequency);
     }
 
     /**
@@ -414,9 +470,12 @@ public abstract class Vibrator {
     @VibrationEffectSupport
     public int[] areEffectsSupported(
             @NonNull @VibrationEffect.EffectType int... effectIds) {
-        final int[] support = new int[effectIds.length];
-        Arrays.fill(support, VIBRATION_EFFECT_SUPPORT_NO);
-        return support;
+        VibratorInfo info = getInfo();
+        int[] supported = new int[effectIds.length];
+        for (int i = 0; i < effectIds.length; i++) {
+            supported[i] = info.isEffectSupported(effectIds[i]);
+        }
+        return supported;
     }
 
     /**
@@ -468,7 +527,12 @@ public abstract class Vibrator {
     @NonNull
     public boolean[] arePrimitivesSupported(
             @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
-        return new boolean[primitiveIds.length];
+        VibratorInfo info = getInfo();
+        boolean[] supported = new boolean[primitiveIds.length];
+        for (int i = 0; i < primitiveIds.length; i++) {
+            supported[i] = info.isPrimitiveSupported(primitiveIds[i]);
+        }
+        return supported;
     }
 
     /**
