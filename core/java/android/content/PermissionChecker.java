@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -845,7 +846,7 @@ public final class PermissionChecker {
             boolean forDataDelivery, boolean fromDatasource) {
         final int op = AppOpsManager.permissionToOpCode(permission);
         if (op < 0) {
-            Slog.wtf(LOG_TAG, "Appop permission " + permission + "with no app op defined:!");
+            Slog.wtf(LOG_TAG, "Appop permission " + permission + " with no app op defined!");
             return PERMISSION_HARD_DENIED;
         }
 
@@ -933,7 +934,15 @@ public final class PermissionChecker {
             }
 
             if (op < 0) {
-                Slog.wtf(LOG_TAG, "Runtime permission " + permission + "with no app op defined:!");
+                // Bg location is one-off runtime modifier permission and has no app op
+                if (sPlatformPermissions.contains(permission)
+                        && !Manifest.permission.ACCESS_BACKGROUND_LOCATION.equals(permission)) {
+                    Slog.wtf(LOG_TAG, "Platform runtime permission " + permission
+                            + " with no app op defined!");
+                }
+                if (next == null) {
+                    return PERMISSION_GRANTED;
+                }
                 current = next;
                 continue;
             }
