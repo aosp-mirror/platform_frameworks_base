@@ -2538,7 +2538,11 @@ class ActivityStarter {
 
     private void resumeTargetStackIfNeeded() {
         if (mDoResume) {
-            mRootWindowContainer.resumeFocusedStacksTopActivities(mTargetStack, null, mOptions);
+            if (mTargetStack.isFocusable()) {
+                mRootWindowContainer.resumeFocusedStacksTopActivities(mTargetStack, null, mOptions);
+            } else {
+                mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+            }
         } else {
             ActivityOptions.abort(mOptions);
         }
