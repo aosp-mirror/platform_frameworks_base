@@ -309,23 +309,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final String mOriginalInstallerPackageName;
 
     /** Uid of the owner of the installer session */
-    @GuardedBy("mLock")
-    private int mInstallerUid;
+    private volatile int mInstallerUid;
 
     /** Where this install request came from */
     @GuardedBy("mLock")
     private InstallSource mInstallSource;
 
-    @GuardedBy("mLock")
+    private final Object mProgressLock = new Object();
+
+    @GuardedBy("mProgressLock")
     private float mClientProgress = 0;
-    @GuardedBy("mLock")
+    @GuardedBy("mProgressLock")
     private float mInternalProgress = 0;
 
-    @GuardedBy("mLock")
+    @GuardedBy("mProgressLock")
     private float mProgress = 0;
-    @GuardedBy("mLock")
+    @GuardedBy("mProgressLock")
     private float mReportedProgress = -1;
-    @GuardedBy("mLock")
+    @GuardedBy("mProgressLock")
     private float mIncrementalProgress = 0;
 
     /** State of the session. */
@@ -571,7 +572,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
          */
         @Override
         public void installSession(IntentSender statusReceiver) {
-            assertCallerIsOwnerOrRootOrSystemLocked();
+            assertCallerIsOwnerOrRootOrSystem();
             assertNotChildLocked("StagedSession#installSession");
             Preconditions.checkArgument(isCommitted() && isSessionReady());
 
@@ -670,7 +671,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final Runnable r;
             synchronized (mLock) {
                 assertNotChildLocked("StagedSession#abandon");
-                assertCallerIsOwnerOrRootLocked();
+                assertCallerIsOwnerOrRoot();
                 if (isInTerminalState()) {
                     // We keep the session in the database if it's in a finalized state. It will be
                     // removed by PackageInstallerService when the last update time is old enough.
@@ -738,7 +739,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
          */
         @Override
         public void verifySession() {
-            assertCallerIsOwnerOrRootOrSystemLocked();
+            assertCallerIsOwnerOrRootOrSystem();
             Preconditions.checkArgument(isCommitted());
             Preconditions.checkArgument(!mSessionApplied && !mSessionFailed);
             notifyStartPreRebootVerification();
@@ -1224,7 +1225,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("mProgressLock")
     private void setClientProgressLocked(float progress) {
         // Always publish first staging movement
         final boolean forcePublish = (mClientProgress == 0);
@@ -1234,21 +1235,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void setClientProgress(float progress) {
-        synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+        assertCallerIsOwnerOrRoot();
+        synchronized (mProgressLock) {
             setClientProgressLocked(progress);
         }
     }
 
     @Override
     public void addClientProgress(float progress) {
-        synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+        assertCallerIsOwnerOrRoot();
+        synchronized (mProgressLock) {
             setClientProgressLocked(mClientProgress + progress);
         }
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("mProgressLock")
     private void computeProgressLocked(boolean forcePublish) {
         if (!mCommitted) {
             mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
@@ -1273,8 +1274,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public String[] getNames() {
+        assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotCommittedOrDestroyedLocked("getNames");
 
             return getNamesLocked();
@@ -1357,8 +1358,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotCommittedOrDestroyedLocked("addChecksums");
 
             if (mChecksums.containsKey(name)) {
@@ -1379,8 +1380,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new IllegalStateException("Must specify package name to remove a split");
         }
 
+        assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotCommittedOrDestroyedLocked("removeSplit");
 
             try {
@@ -1426,8 +1427,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new IllegalStateException(
                     "Cannot write regular files in a data loader installation session.");
         }
+        assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotSealedLocked("assertCanWrite");
         }
         if (reverseMode) {
@@ -1600,8 +1601,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new IllegalStateException(
                     "Cannot read regular files in a data loader installation session.");
         }
+        assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotCommittedOrDestroyedLocked("openRead");
             try {
                 return openReadInternalLocked(name);
@@ -1629,8 +1630,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Check if the caller is the owner of this session. Otherwise throw a
      * {@link SecurityException}.
      */
-    @GuardedBy("mLock")
-    private void assertCallerIsOwnerOrRootLocked() {
+    private void assertCallerIsOwnerOrRoot() {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID && callingUid != mInstallerUid) {
             throw new SecurityException("Session does not belong to uid " + callingUid);
@@ -1641,8 +1641,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Check if the caller is the owner of this session. Otherwise throw a
      * {@link SecurityException}.
      */
-    @GuardedBy("mLock")
-    private void assertCallerIsOwnerOrRootOrSystemLocked() {
+    private void assertCallerIsOwnerOrRootOrSystem() {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID && callingUid != mInstallerUid
                 && callingUid != Process.SYSTEM_UID) {
@@ -1924,9 +1923,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private boolean markAsSealed(@NonNull IntentSender statusReceiver, boolean forTransfer) {
         Objects.requireNonNull(statusReceiver);
+        assertCallerIsOwnerOrRoot();
 
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotDestroyedLocked("commit of session " + sessionId);
             assertNoWriteFileTransfersOpenLocked();
 
@@ -1999,9 +1998,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             "Session destroyed");
                 }
                 if (!isIncrementalInstallation()) {
-                    // For non-incremental installs, client staging is fully done at this point
-                    mClientProgress = 1f;
-                    computeProgressLocked(true);
+                    synchronized (mProgressLock) {
+                        // For non-incremental installs, client staging is fully done at this point
+                        mClientProgress = 1f;
+                        computeProgressLocked(true);
+                    }
                 }
 
                 // This ongoing commit should keep session active, even though client
@@ -2184,7 +2185,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+            assertCallerIsOwnerOrRoot();
             assertPreparedAndNotSealedLocked("transfer");
 
             try {
@@ -2364,8 +2365,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (result != null) {
                 mPackageLite = result;
                 if (!isApexSession()) {
-                    mInternalProgress = 0.5f;
-                    computeProgressLocked(true);
+                    synchronized (mProgressLock) {
+                        mInternalProgress = 0.5f;
+                        computeProgressLocked(true);
+                    }
 
                     extractNativeLibraries(
                             mPackageLite, stageDir, params.abiOverride, mayInheritNativeLibs());
@@ -3549,7 +3552,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         int activeCount;
         synchronized (mLock) {
             if (checkCaller) {
-                assertCallerIsOwnerOrRootLocked();
+                assertCallerIsOwnerOrRoot();
             }
 
             activeCount = mActiveCount.decrementAndGet();
@@ -3588,7 +3591,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void abandonNonStaged() {
         synchronized (mLock) {
             assertNotChildLocked("abandonNonStaged");
-            assertCallerIsOwnerOrRootLocked();
+            assertCallerIsOwnerOrRoot();
             if (mRelinquished) {
                 if (LOGD) Slog.d(TAG, "Ignoring abandon after commit relinquished control");
                 return;
@@ -3654,7 +3657,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+            assertCallerIsOwnerOrRoot();
             assertPreparedAndNotSealedLocked("addFile");
 
             if (!mFiles.add(new FileEntry(mFiles.size(),
@@ -3675,7 +3678,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+            assertCallerIsOwnerOrRoot();
             assertPreparedAndNotSealedLocked("removeFile");
 
             if (!mFiles.add(new FileEntry(mFiles.size(),
@@ -3888,7 +3891,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         new IPackageLoadingProgressCallback.Stub() {
                             @Override
                             public void onPackageLoadingProgressChanged(float progress) {
-                                synchronized (mLock) {
+                                synchronized (mProgressLock) {
                                     mIncrementalProgress = progress;
                                     computeProgressLocked(true);
                                 }
@@ -3988,7 +3991,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         + " as it is in an invalid state.");
             }
             synchronized (mLock) {
-                assertCallerIsOwnerOrRootLocked();
+                assertCallerIsOwnerOrRoot();
                 assertPreparedAndNotSealedLocked("addChildSessionId");
 
                 final int indexOfSession = mChildSessions.indexOfKey(childSessionId);
@@ -4007,7 +4010,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void removeChildSessionId(int sessionId) {
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+            assertCallerIsOwnerOrRoot();
             assertPreparedAndNotSealedLocked("removeChildSessionId");
 
             final int indexOfSession = mChildSessions.indexOfKey(sessionId);
