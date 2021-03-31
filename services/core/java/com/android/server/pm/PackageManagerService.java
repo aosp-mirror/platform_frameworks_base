@@ -4217,8 +4217,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // aware/unaware components they want to see, so fall through and
                 // give them what they want
             } else {
+                final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
                 // Caller expressed no opinion, so match based on user state
-                if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
+                if (umInternal.isUserUnlockingOrUnlocked(userId)) {
                     flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
                 } else {
                     flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -15253,7 +15254,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
-            if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+            if (umInternal.isUserUnlockingOrUnlocked(userId)) {
                 Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
                 if (includeStopped) {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
