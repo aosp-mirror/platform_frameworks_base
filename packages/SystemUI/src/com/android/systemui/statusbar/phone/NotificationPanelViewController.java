@@ -3538,7 +3538,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     mStatusBarStateController,
                     mUpdateMonitor,
                     mAuthController,
-                    mStatusBarKeyguardViewManager);
+                    mStatusBarKeyguardViewManager,
+                    mKeyguardStateController);
             mDisabledUdfpsController.init();
         } else if (mDisabledUdfpsController != null && !udfpsEnrolled) {
             mDisabledUdfpsController.destroy();

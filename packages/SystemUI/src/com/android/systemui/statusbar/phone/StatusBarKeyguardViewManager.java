@@ -479,7 +479,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (mAlternateAuthInterceptor != null) {
                 mAfterKeyguardGoneAction = r;
                 mKeyguardGoneCancelAction = cancelAction;
-                if (mAlternateAuthInterceptor.showAlternativeAuthMethod()) {
+                if (mAlternateAuthInterceptor.showAlternateAuthBouncer()) {
                     mStatusBar.updateScrimController();
                 }
                 return;
@@ -529,7 +529,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Stop showing any alternate auth methods
      */
     public void resetAlternateAuth() {
-        if (mAlternateAuthInterceptor != null && mAlternateAuthInterceptor.resetForceShow()) {
+        if (mAlternateAuthInterceptor != null
+                && mAlternateAuthInterceptor.hideAlternateAuthBouncer()) {
             mStatusBar.updateScrimController();
         }
     }
@@ -1141,12 +1142,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public boolean isShowingAlternateAuth() {
         return mAlternateAuthInterceptor != null
-                && mAlternateAuthInterceptor.isShowingAlternateAuth();
+                && mAlternateAuthInterceptor.isShowingAlternateAuthBouncer();
     }
 
     public boolean isShowingAlternateAuthOrAnimating() {
         return mAlternateAuthInterceptor != null
-                && (mAlternateAuthInterceptor.isShowingAlternateAuth()
+                && (mAlternateAuthInterceptor.isShowingAlternateAuthBouncer()
                 || mAlternateAuthInterceptor.isAnimating());
     }
 
@@ -1167,24 +1168,25 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     /**
      * Delegate used to send show/reset events to an alternate authentication method instead of the
-     * bouncer.
+     * regular pin/pattern/password bouncer.
      */
     public interface AlternateAuthInterceptor {
         /**
-         * @return whether alternative auth method was newly shown
+         * Show alternate authentication bouncer.
+         * @return whether alternate auth method was newly shown
          */
-        boolean showAlternativeAuthMethod();
+        boolean showAlternateAuthBouncer();
 
         /**
-         * reset the state to the default (only keyguard showing, no auth methods showing)
-         * @return whether alternative auth method was newly hidden
+         * Hide alternate authentication bouncer
+         * @return whether the alternate auth method was newly hidden
          */
-        boolean resetForceShow();
+        boolean hideAlternateAuthBouncer();
 
         /**
-         * @return true if alternative auth method is showing
+         * @return true if the alternate auth bouncer is showing
          */
-        boolean isShowingAlternateAuth();
+        boolean isShowingAlternateAuthBouncer();
 
         /**
          * print information for the alternate auth interceptor registered
@@ -1192,12 +1194,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         void dump(PrintWriter pw);
 
         /**
-         * @return true if the new auth method is currently animating in or out.
+         * @return true if the new auth method bouncer is currently animating in or out.
          */
         boolean isAnimating();
 
         /**
-         * Set whether qs is currently expanded
+         * Set whether qs is currently expanded.
          */
         void setQsExpanded(boolean expanded);
     }

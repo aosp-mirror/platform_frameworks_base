@@ -606,6 +606,21 @@
     <!-- Determines whether the shell features all run on another thread. -->
     <bool name="config_enableShellMainThread">false</bool>
 
+    <!-- Default udfps icon. Same path as ic_fingerprint.xml -->
+    <string name="config_udfpsIcon" translatable="false">
+        M25.5,16.3283C28.47,14.8433 31.9167,14 35.5834,14C39.2501,14 42.6968,14.8433 45.6668,16.3283
+        M20,28.6669C22.7683,24.3402 28.7084,21.3335 35.5834,21.3335C42.4585,21.3335 48.3985,
+        24.3402 51.1669,28.6669
+        M22.8607,47.0002C21.834,44.3235 21.834,41.5002 21.834,41.5002C21.834,
+        34.4051 27.7374,28.6667 35.5841,28.6667C43.4308,28.6667 49.3341,34.4051 49.3341,41.5002
+        M49.3344,41.5003V42.0319C49.3344,44.7636 47.1161,47.0003 44.3661,47.0003C41.9461,
+        47.0003 39.8744,45.2403 39.471,42.857L38.9577,
+        39.7769C38.591,37.5953 36.7027,36.0002 34.5027,
+        36.0002C26.5826,36.0002 29.846,49.1087 35.291,50.6487
+        M44.9713,54.6267C42.5513,56.7167 39.2879,58.0001 35.5846,58.0001C32.2296,
+        58.0001 29.2229,56.9551 26.8945,55.195
+    </string>
+
     <!-- package name of a built-in camera app to use to restrict implicit intent resolution
          when the double-press power gesture is used. Ignored if empty. -->
     <string translatable="false" name="config_cameraGesturePackage"></string>

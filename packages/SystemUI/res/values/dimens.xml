@@ -1085,7 +1085,7 @@
 
     <!-- The maximum offset for the under-display fingerprint sensor (UDFPS) icon in either
          direction that elements aer moved to prevent burn-in on AOD-->
-    <dimen name="udfps_burn_in_offset_x">8dp</dimen>
+    <dimen name="udfps_burn_in_offset_x">2dp</dimen>
     <dimen name="udfps_burn_in_offset_y">8dp</dimen>
 
     <dimen name="corner_size">8dp</dimen>
@@ -1400,6 +1400,9 @@
     <dimen name="rounded_slider_track_width">8dp</dimen>
     <!-- rounded_slider_track_width / 2 -->
     <dimen name="rounded_slider_track_corner_radius">4dp</dimen>
+
+    <!-- inset for ic_lock_open within a DisabledUdfpsView -->
+    <dimen name="udfps_unlock_icon_inset">16dp</dimen>
 
     <!-- Location on the screen of the center of the physical power button. This is a reasonable
     default that should be overridden by device-specific overlays. -->
