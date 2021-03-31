@@ -95,8 +95,7 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatus(int, int,
-     * IVoidResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatusAsync(int, int}.
      *
      * @param vis visibility flags
      * @param backDisposition disposition flags
@@ -107,15 +106,13 @@ public final class InputMethodPrivilegedOperations {
      * @see android.inputmethodservice.InputMethodService#BACK_DISPOSITION_ADJUST_NOTHING
      */
     @AnyThread
-    public void setImeWindowStatus(int vis, int backDisposition) {
+    public void setImeWindowStatusAsync(int vis, int backDisposition) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.setImeWindowStatus(vis, backDisposition, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.setImeWindowStatusAsync(vis, backDisposition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
