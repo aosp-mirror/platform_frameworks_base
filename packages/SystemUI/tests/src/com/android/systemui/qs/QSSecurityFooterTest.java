@@ -196,7 +196,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNetworkLoggingEnabled() {
+    public void testNetworkLoggingEnabled_deviceOwner() {
         when(mSecurityController.isDeviceManaged()).thenReturn(true);
         when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
         mFooter.refreshState();
@@ -219,6 +219,18 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                              R.string.quick_settings_disclosure_named_management_monitoring,
                              MANAGING_ORGANIZATION),
                      mFooterText.getText());
+    }
+
+    @Test
+    public void testNetworkLoggingEnabled_managedProfileOwner() {
+        when(mSecurityController.hasWorkProfile()).thenReturn(true);
+        when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+        assertEquals(mContext.getString(
+                R.string.quick_settings_disclosure_managed_profile_network_activity),
+                mFooterText.getText());
     }
 
     @Test
