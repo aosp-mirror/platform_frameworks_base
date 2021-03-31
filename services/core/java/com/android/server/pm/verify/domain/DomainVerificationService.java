@@ -43,6 +43,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.PackageUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -842,7 +843,8 @@ public class DomainVerificationService extends SystemService
                         + ", new pkg = " + newPkg, new Exception());
 
                 DomainVerificationPkgState newPkgState = new DomainVerificationPkgState(
-                        pkgName, newDomainSetId, true, newStateMap, newUserStates);
+                        pkgName, newDomainSetId, true, newStateMap, newUserStates,
+                        null /* signature */);
                 mAttachedPkgStates.put(pkgName, newDomainSetId, newPkgState);
                 return;
             }
@@ -894,7 +896,8 @@ public class DomainVerificationService extends SystemService
             sendBroadcast = hasAutoVerifyDomains && needsBroadcast;
 
             mAttachedPkgStates.put(pkgName, newDomainSetId, new DomainVerificationPkgState(
-                    pkgName, newDomainSetId, hasAutoVerifyDomains, newStateMap, newUserStates));
+                    pkgName, newDomainSetId, hasAutoVerifyDomains, newStateMap, newUserStates,
+                    null /* signature */));
         }
 
         if (sendBroadcast) {
@@ -1019,9 +1022,22 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public void writeSettings(@NonNull TypedXmlSerializer serializer) throws IOException {
-        synchronized (mLock) {
-            mSettings.writeSettings(serializer, mAttachedPkgStates);
-        }
+        mConnection.withPackageSettingsThrowing(pkgSettings -> {
+            synchronized (mLock) {
+                mSettings.writeSettings(serializer, mAttachedPkgStates, pkgName -> {
+                    PackageSetting pkgSetting = pkgSettings.apply(pkgName);
+                    if (pkgSetting == null) {
+                        // If querying for a user restored package that isn't installed on the
+                        // device yet, there will be no signature to write out. In that case,
+                        // it's expected that this returns null and it falls back to the restored
+                        // state's stored signature if it exists.
+                        return null;
+                    }
+
+                    return PackageUtils.computeSignaturesSha256Digest(pkgSetting.getSignatures());
+                });
+            }
+        });
 
         mLegacySettings.writeSettings(serializer);
     }

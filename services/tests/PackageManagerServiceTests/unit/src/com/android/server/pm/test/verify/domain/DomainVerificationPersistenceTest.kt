@@ -18,6 +18,7 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.pm.verify.domain.DomainVerificationState
 import android.util.ArrayMap
+import android.util.SparseArray
 import android.util.TypedXmlPullParser
 import android.util.TypedXmlSerializer
 import android.util.Xml
@@ -84,23 +85,32 @@ class DomainVerificationPersistenceTest {
     @JvmField
     val tempFolder = TemporaryFolder()
 
-    @Test
-    fun writeAndReadBackNormal() {
+    private fun mockWriteValues(
+        pkgNameToSignature: (String) -> String? = { null }
+    ): Triple<DomainVerificationStateMap<DomainVerificationPkgState>,
+            ArrayMap<String, DomainVerificationPkgState>,
+            ArrayMap<String, DomainVerificationPkgState>> {
         val attached = DomainVerificationStateMap<DomainVerificationPkgState>().apply {
-            mockPkgState(0).let { put(it.packageName, it.id, it) }
-            mockPkgState(1).let { put(it.packageName, it.id, it) }
+            mockPkgState(0, pkgNameToSignature).let { put(it.packageName, it.id, it) }
+            mockPkgState(1, pkgNameToSignature).let { put(it.packageName, it.id, it) }
         }
         val pending = ArrayMap<String, DomainVerificationPkgState>().apply {
-            mockPkgState(2).let { put(it.packageName, it) }
-            mockPkgState(3).let { put(it.packageName, it) }
+            mockPkgState(2, pkgNameToSignature).let { put(it.packageName, it) }
+            mockPkgState(3, pkgNameToSignature).let { put(it.packageName, it) }
         }
         val restored = ArrayMap<String, DomainVerificationPkgState>().apply {
-            mockPkgState(4).let { put(it.packageName, it) }
-            mockPkgState(5).let { put(it.packageName, it) }
+            mockPkgState(4, pkgNameToSignature).let { put(it.packageName, it) }
+            mockPkgState(5, pkgNameToSignature).let { put(it.packageName, it) }
         }
 
+        return Triple(attached, pending, restored)
+    }
+
+    @Test
+    fun writeAndReadBackNormal() {
+        val (attached, pending, restored) = mockWriteValues()
         val file = tempFolder.newFile().writeXml {
-            DomainVerificationPersistence.writeToXml(it, attached, pending, restored)
+            DomainVerificationPersistence.writeToXml(it, attached, pending, restored, null)
         }
 
         val xml = file.readText()
@@ -115,8 +125,56 @@ class DomainVerificationPersistenceTest {
     }
 
     @Test
+    fun writeAndReadBackWithSignature() {
+        val (attached, pending, restored) = mockWriteValues()
+        val file = tempFolder.newFile().writeXml {
+            DomainVerificationPersistence.writeToXml(it, attached, pending, restored) {
+                "SIGNATURE_$it"
+            }
+        }
+
+        val (readActive, readRestored) = file.readXml {
+            DomainVerificationPersistence.readFromXml(it)
+        }
+
+        // Assign the signatures to a fresh set of data structures, to ensure the previous write
+        // call did not use the signatures from the data structure. This is because the method is
+        // intended to optionally append signatures, regardless of if the existing data structures
+        // contain them or not.
+        val (attached2, pending2, restored2) = mockWriteValues { "SIGNATURE_$it" }
+
+        assertThat(readActive.values)
+            .containsExactlyElementsIn(attached2.values() + pending2.values)
+        assertThat(readRestored.values).containsExactlyElementsIn(restored2.values)
+
+        (readActive + readRestored).forEach { (_, value) ->
+            assertThat(value.backupSignatureHash).isEqualTo("SIGNATURE_${value.packageName}")
+        }
+    }
+
+    @Test
+    fun writeStateSignatureIfFunctionReturnsNull() {
+        val (attached, pending, restored) = mockWriteValues  { "SIGNATURE_$it" }
+        val file = tempFolder.newFile().writeXml {
+            DomainVerificationPersistence.writeToXml(it, attached, pending, restored) { null }
+        }
+
+        val (readActive, readRestored) = file.readXml {
+            DomainVerificationPersistence.readFromXml(it)
+        }
+
+        assertThat(readActive.values)
+            .containsExactlyElementsIn(attached.values() + pending.values)
+        assertThat(readRestored.values).containsExactlyElementsIn(restored.values)
+
+        (readActive + readRestored).forEach { (_, value) ->
+            assertThat(value.backupSignatureHash).isEqualTo("SIGNATURE_${value.packageName}")
+        }
+    }
+
+    @Test
     fun readMalformed() {
-        val stateZero = mockEmptyPkgState(0).apply {
+        val stateZero = mockEmptyPkgState(0, pkgNameToSignature = { "ACTIVE" }).apply {
             stateMap["example.com"] = DomainVerificationState.STATE_SUCCESS
             stateMap["example.org"] = DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED
 
@@ -128,7 +186,7 @@ class DomainVerificationPersistenceTest {
                 isLinkHandlingAllowed = true
             }
         }
-        val stateOne = mockEmptyPkgState(1).apply {
+        val stateOne = mockEmptyPkgState(1, pkgNameToSignature = { "RESTORED" }).apply {
             // It's valid to have a user selection without any autoVerify domains
             userStates[1] = DomainVerificationInternalUserState(1).apply {
                 addHosts(setOf("example-user1.com", "example-user1.org"))
@@ -156,6 +214,7 @@ class DomainVerificationPersistenceTest {
                         packageName="${stateZero.packageName}"
                         id="${stateZero.id}"
                         hasAutoVerifyDomains="true"
+                        signature="ACTIVE"
                         >
                         <state>
                             <domain name="example.com" state="${
@@ -191,6 +250,7 @@ class DomainVerificationPersistenceTest {
                         packageName="${stateOne.packageName}"
                         id="${stateOne.id}"
                         hasAutoVerifyDomains="true"
+                        signature="RESTORED"
                         >
                         <state/>
                         <user-states>
@@ -226,20 +286,30 @@ class DomainVerificationPersistenceTest {
 
     private fun mockEmptyPkgState(
         id: Int,
-        hasAutoVerifyDomains: Boolean = true
+        hasAutoVerifyDomains: Boolean = true,
+        pkgNameToSignature: (String) -> String? = { null }
     ): DomainVerificationPkgState {
         val pkgName = pkgName(id)
         val domainSetId = UUID(0L, id.toLong())
-        return DomainVerificationPkgState(pkgName, domainSetId, hasAutoVerifyDomains)
+        return DomainVerificationPkgState(
+            pkgName,
+            domainSetId,
+            hasAutoVerifyDomains,
+            ArrayMap(),
+            SparseArray(),
+            pkgNameToSignature(pkgName)
+        )
     }
 
-    private fun mockPkgState(id: Int) = mockEmptyPkgState(id).apply {
-        stateMap["$packageName.com"] = id
-        userStates[id] = DomainVerificationInternalUserState(id).apply {
-            addHosts(setOf("$packageName-user.com"))
-            isLinkHandlingAllowed = true
-        }
-    }
+    private fun mockPkgState(id: Int, pkgNameToSignature: (String) -> String? = { null }) =
+        mockEmptyPkgState(id, pkgNameToSignature = pkgNameToSignature)
+            .apply {
+                stateMap["$packageName.com"] = id
+                userStates[id] = DomainVerificationInternalUserState(id).apply {
+                    addHosts(setOf("$packageName-user.com"))
+                    isLinkHandlingAllowed = true
+                }
+            }
 
     private fun pkgName(id: Int) = "$PKG_PREFIX.pkg$id"
 }

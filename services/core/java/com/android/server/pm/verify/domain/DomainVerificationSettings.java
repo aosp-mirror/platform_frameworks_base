@@ -36,6 +36,7 @@ import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 class DomainVerificationSettings {
 
@@ -68,18 +69,19 @@ class DomainVerificationSettings {
 
 
     public void writeSettings(@NonNull TypedXmlSerializer xmlSerializer,
-            @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState)
-            throws IOException {
+            @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
+            @NonNull Function<String, String> pkgSignatureFunction) throws IOException {
         synchronized (mLock) {
             DomainVerificationPersistence.writeToXml(xmlSerializer, liveState,
-                    mPendingPkgStates, mRestoredPkgStates);
+                    mPendingPkgStates, mRestoredPkgStates, pkgSignatureFunction);
         }
     }
 
     /**
      * Parses a previously stored set of states and merges them with {@param liveState}, directly
      * mutating the values. This is intended for reading settings written by {@link
-     * #writeSettings(TypedXmlSerializer, DomainVerificationStateMap)} on the same device setup.
+     * #writeSettings(TypedXmlSerializer, DomainVerificationStateMap, Function)} on the same device
+     * setup.
      */
     public void readSettings(@NonNull TypedXmlPullParser parser,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState)
