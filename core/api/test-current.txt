@@ -21,6 +21,7 @@ package android {
     field public static final String NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
     field public static final String OVERRIDE_DISPLAY_MODE_REQUESTS = "android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS";
+    field public static final String QUERY_AUDIO_STATE = "android.permission.QUERY_AUDIO_STATE";
     field public static final String QUERY_USERS = "android.permission.QUERY_USERS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
