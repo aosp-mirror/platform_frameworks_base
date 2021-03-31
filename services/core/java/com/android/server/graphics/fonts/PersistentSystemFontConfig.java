@@ -17,8 +17,7 @@
 package com.android.server.graphics.fonts;
 
 import android.annotation.NonNull;
-import android.graphics.FontListParser;
-import android.text.FontConfig;
+import android.graphics.fonts.FontUpdateRequest;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -48,7 +47,7 @@ import java.util.Set;
     /* package */ static class Config {
         public long lastModifiedMillis;
         public final Set<String> updatedFontDirs = new ArraySet<>();
-        public final List<FontConfig.FontFamily> fontFamilies = new ArrayList<>();
+        public final List<FontUpdateRequest.Family> fontFamilies = new ArrayList<>();
     }
 
     /**
@@ -81,8 +80,8 @@ import java.util.Set;
                     case TAG_FAMILY:
                         // updatableFontMap is not ready here. We get the base file names by passing
                         // empty fontDir, and resolve font paths later.
-                        out.fontFamilies.add(FontListParser.readFamily(
-                                parser, "" /* fontDir */, null /* updatableFontMap */));
+                        out.fontFamilies.add(FontUpdateRequest.Family.readFromXml(parser));
+                        break;
                     default:
                         Slog.w(TAG, "Skipping unknown tag: " + tag);
                 }
@@ -108,11 +107,11 @@ import java.util.Set;
             out.attribute(null, ATTR_VALUE, dir);
             out.endTag(null, TAG_UPDATED_FONT_DIR);
         }
-        List<FontConfig.FontFamily> fontFamilies = config.fontFamilies;
+        List<FontUpdateRequest.Family> fontFamilies = config.fontFamilies;
         for (int i = 0; i < fontFamilies.size(); i++) {
-            FontConfig.FontFamily fontFamily = fontFamilies.get(i);
+            FontUpdateRequest.Family fontFamily = fontFamilies.get(i);
             out.startTag(null, TAG_FAMILY);
-            FontListParser.writeFamily(out, fontFamily);
+            FontUpdateRequest.Family.writeFamilyToXml(out, fontFamily);
             out.endTag(null, TAG_FAMILY);
         }
         out.endTag(null, TAG_ROOT);
