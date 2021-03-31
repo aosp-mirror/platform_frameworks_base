@@ -502,7 +502,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Sve aplikacije i podaci ovog korisnika bit će izbrisani."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Ukloni"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Uključena je Ušteda baterije"</string>
-    <string name="battery_saver_notification_text" msgid="2617841636449016951">"Minimizira rad i prijenos podataka u pozadini"</string>
+    <string name="battery_saver_notification_text" msgid="2617841636449016951">"Smanjuje performanse i prijenos podataka u pozadini"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Isključi Uštedu baterije"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> će imati pristup svim informacijama koje se prikazuju na ekranu ili koje se reproduciraju s vašeg uređaja za vrijeme snimanja ili emitiranja. To obuhvata informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Usluga koja pruža ovu funkciju će imati pristup svim informacijama koje se prikazuju na ekranu ili koje se reproduciraju s vašeg uređaja za vrijeme snimanja ili emitiranja. To obuhvata informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
@@ -773,7 +773,7 @@
     <string name="battery_panel_title" msgid="5931157246673665963">"Potrošnja baterije"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Ušteda baterije je isključena prilikom punjenja"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Ušteda baterije"</string>
-    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Ograničava rad i prijenos podataka u pozadini"</string>
+    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Smanjuje performanse i prijenos podataka u pozadini"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Dugme <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Tipka za početak"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Nazad"</string>

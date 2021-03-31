@@ -767,7 +767,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"বেটাৰিৰ ব্যৱহাৰ"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"চ্চাৰ্জ কৰি থকাৰ সময়ত বেটাৰি সঞ্চয়কাৰী উপলব্ধ নহয়।"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"বেটাৰি সঞ্চয়কাৰী"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"বেটাৰী সঞ্চয়কাৰী"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"কাৰ্যদক্ষতা আৰু নেপথ্য ডেটা হ্ৰাস কৰে"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> বুটাম"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"হ\'ম"</string>
