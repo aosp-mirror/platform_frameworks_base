@@ -131,7 +131,7 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
                     .getConfigNonRotationTests(
                             repetitions = 3,
                             supportedNavigationModes = listOf(
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY,
+                                    WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
                                     WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                             )
                     )
