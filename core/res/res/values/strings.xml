@@ -1576,7 +1576,7 @@
     <!-- Name for an app setting that lets the user authenticate for that app with their screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=30] -->
     <string name="screen_lock_app_setting_name">Use screen lock</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
-    <string name="screen_lock_dialog_default_subtitle">Enter your device credential to continue</string>
+    <string name="screen_lock_dialog_default_subtitle">Enter your screen lock to continue</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Partial fingerprint detected. Please try again.</string>
@@ -1740,7 +1740,7 @@
     <!-- Name for an app setting that lets the user authenticate for that app with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
     <string name="face_or_screen_lock_app_setting_name">Use face or screen lock</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face. [CHAR LIMIT=70] -->
-    <string name="face_dialog_default_subtitle">Use face unlock to continue</string>
+    <string name="face_dialog_default_subtitle">Use your face to continue</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=90] -->
     <string name="face_or_screen_lock_dialog_default_subtitle">Use your face or screen lock to continue</string>
 
