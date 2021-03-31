@@ -27,15 +27,14 @@ import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.os.ParcelUuid;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -59,9 +58,9 @@ public class UnderlyingNetworkTracker {
     @NonNull private final Handler mHandler;
     @NonNull private final ConnectivityManager mConnectivityManager;
 
-    @NonNull private final Map<Integer, NetworkCallback> mCellBringupCallbacks = new ArrayMap<>();
-    @NonNull private final NetworkCallback mWifiBringupCallback = new NetworkBringupCallback();
-    @NonNull private final NetworkCallback mRouteSelectionCallback = new RouteSelectionCallback();
+    @NonNull private final List<NetworkCallback> mCellBringupCallbacks = new ArrayList<>();
+    @Nullable private NetworkCallback mWifiBringupCallback;
+    @Nullable private NetworkCallback mRouteSelectionCallback;
 
     @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
     private boolean mIsQuitting = false;
@@ -105,36 +104,59 @@ public class UnderlyingNetworkTracker {
 
         mConnectivityManager = mVcnContext.getContext().getSystemService(ConnectivityManager.class);
 
-        registerNetworkRequests();
+        registerOrUpdateNetworkRequests();
     }
 
-    private void registerNetworkRequests() {
-        // register bringup requests for underlying Networks
-        mConnectivityManager.requestBackgroundNetwork(
-                getWifiNetworkRequest(), mHandler, mWifiBringupCallback);
-        updateSubIdsAndCellularRequests();
+    private void registerOrUpdateNetworkRequests() {
+        NetworkCallback oldRouteSelectionCallback = mRouteSelectionCallback;
+        NetworkCallback oldWifiCallback = mWifiBringupCallback;
+        List<NetworkCallback> oldCellCallbacks = new ArrayList<>(mCellBringupCallbacks);
+        mCellBringupCallbacks.clear();
 
-        // Register Network-selection request used to decide selected underlying Network. All
-        // underlying networks must be VCN managed in order to be used.
-        mConnectivityManager.requestBackgroundNetwork(
-                getBaseNetworkRequest(true /* requireVcnManaged */).build(),
-                mHandler,
-                mRouteSelectionCallback);
+        // Register new callbacks. Make-before-break; always register new callbacks before removal
+        // of old callbacks
+        if (!mIsQuitting) {
+            mRouteSelectionCallback = new RouteSelectionCallback();
+            mConnectivityManager.requestBackgroundNetwork(
+                    getBaseNetworkRequestBuilder().build(), mHandler, mRouteSelectionCallback);
+
+            mWifiBringupCallback = new NetworkBringupCallback();
+            mConnectivityManager.requestBackgroundNetwork(
+                    getWifiNetworkRequest(), mHandler, mWifiBringupCallback);
+
+            for (final int subId : mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup)) {
+                final NetworkBringupCallback cb = new NetworkBringupCallback();
+                mCellBringupCallbacks.add(cb);
+
+                mConnectivityManager.requestBackgroundNetwork(
+                        getCellNetworkRequestForSubId(subId), mHandler, cb);
+            }
+        } else {
+            mRouteSelectionCallback = null;
+            mWifiBringupCallback = null;
+            // mCellBringupCallbacks already cleared above.
+        }
+
+        // Unregister old callbacks (as necessary)
+        if (oldRouteSelectionCallback != null) {
+            mConnectivityManager.unregisterNetworkCallback(oldRouteSelectionCallback);
+        }
+        if (oldWifiCallback != null) {
+            mConnectivityManager.unregisterNetworkCallback(oldWifiCallback);
+        }
+        for (NetworkCallback cellBringupCallback : oldCellCallbacks) {
+            mConnectivityManager.unregisterNetworkCallback(cellBringupCallback);
+        }
     }
 
     private NetworkRequest getWifiNetworkRequest() {
-        // Request exclusively VCN managed networks to ensure that we only ever keep carrier wifi
-        // alive.
-        return getBaseNetworkRequest(true /* requireVcnManaged */)
+        return getBaseNetworkRequestBuilder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .build();
     }
 
     private NetworkRequest getCellNetworkRequestForSubId(int subId) {
-        // Do not request NOT_VCN_MANAGED to ensure that the TelephonyNetworkFactory has a
-        // fulfillable request to bring up underlying cellular Networks even if the VCN is already
-        // connected.
-        return getBaseNetworkRequest(false /* requireVcnManaged */)
+        return getBaseNetworkRequestBuilder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                 .setNetworkSpecifier(new TelephonyNetworkSpecifier(subId))
                 .build();
@@ -143,67 +165,19 @@ public class UnderlyingNetworkTracker {
     /**
      * Builds and returns a NetworkRequest builder common to all Underlying Network requests
      *
-     * <p>A NetworkRequest may either (1) Require the presence of a capability by using
-     * addCapability(), (2) require the absence of a capability using unwanted capabilities, or (3)
-     * allow any state. Underlying networks are never desired to have the NOT_VCN_MANAGED
-     * capability, and only cases (2) and (3) are used.
-     *
-     * @param requireVcnManaged whether the underlying network is required to be VCN managed to
-     *     match this request. If {@code true}, the NOT_VCN_MANAGED capability will be set as
-     *     unwanted. Else, the NOT_VCN_MANAGED capability will be removed, and any state is
-     *     acceptable.
+     * <p>This request is guaranteed to select carrier-owned, non-VCN underlying networks by virtue
+     * of a populated set of subIds as expressed in NetworkCapabilities#getSubIds(). Only carrier
+     * owned networks may be selected, as the request specifies only subIds in the VCN's
+     * subscription group, while the VCN networks are excluded by virtue of not having subIds set on
+     * the VCN-exposed networks.
      */
-    private NetworkRequest.Builder getBaseNetworkRequest(boolean requireVcnManaged) {
-        NetworkRequest.Builder requestBase =
-                new NetworkRequest.Builder()
-                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
-                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
-
-        for (int capability : mRequiredUnderlyingNetworkCapabilities) {
-            requestBase.addCapability(capability);
-        }
-
-        if (requireVcnManaged) {
-            requestBase.addUnwantedCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
-        }
-
-        return requestBase;
-    }
-
-    /**
-     * Update the current subIds and Cellular bringup requests for this UnderlyingNetworkTracker.
-     */
-    private void updateSubIdsAndCellularRequests() {
-        mVcnContext.ensureRunningOnLooperThread();
-
-        // Don't bother re-filing NetworkRequests if this Tracker has been torn down.
-        if (mIsQuitting) {
-            return;
-        }
-
-        final Set<Integer> subIdsInSubGroup = mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup);
-
-        // new subIds to track = (updated list of subIds) - (currently tracked subIds)
-        final Set<Integer> subIdsToRegister = new ArraySet<>(subIdsInSubGroup);
-        subIdsToRegister.removeAll(mCellBringupCallbacks.keySet());
-
-        // subIds to stop tracking = (currently tracked subIds) - (updated list of subIds)
-        final Set<Integer> subIdsToUnregister = new ArraySet<>(mCellBringupCallbacks.keySet());
-        subIdsToUnregister.removeAll(subIdsInSubGroup);
-
-        for (final int subId : subIdsToRegister) {
-            final NetworkBringupCallback cb = new NetworkBringupCallback();
-            mCellBringupCallbacks.put(subId, cb);
-
-            mConnectivityManager.requestBackgroundNetwork(
-                    getCellNetworkRequestForSubId(subId), mHandler, cb);
-        }
-
-        for (final int subId : subIdsToUnregister) {
-            final NetworkCallback cb = mCellBringupCallbacks.remove(subId);
-            mConnectivityManager.unregisterNetworkCallback(cb);
-        }
+    private NetworkRequest.Builder getBaseNetworkRequestBuilder() {
+        return new NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
+                .setSubIds(mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup));
     }
 
     /**
@@ -217,22 +191,16 @@ public class UnderlyingNetworkTracker {
         Objects.requireNonNull(snapshot, "Missing snapshot");
 
         mLastSnapshot = snapshot;
-        updateSubIdsAndCellularRequests();
+        registerOrUpdateNetworkRequests();
     }
 
     /** Tears down this Tracker, and releases all underlying network requests. */
     public void teardown() {
         mVcnContext.ensureRunningOnLooperThread();
-
-        mConnectivityManager.unregisterNetworkCallback(mWifiBringupCallback);
-        mConnectivityManager.unregisterNetworkCallback(mRouteSelectionCallback);
-
-        for (final NetworkCallback cb : mCellBringupCallbacks.values()) {
-            mConnectivityManager.unregisterNetworkCallback(cb);
-        }
-        mCellBringupCallbacks.clear();
-
         mIsQuitting = true;
+
+        // Will unregister all existing callbacks, but not register new ones due to quitting flag.
+        registerOrUpdateNetworkRequests();
     }
 
     /** Returns whether the currently selected Network matches the given network. */
