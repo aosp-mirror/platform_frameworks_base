@@ -497,6 +497,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
         <!-- Permission required for CTS test - ResourceObserverNativeTest -->
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
+        <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+        <permission name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
