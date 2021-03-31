@@ -373,12 +373,12 @@ public abstract class ViewStructure {
     public void setImportantForAutofill(@AutofillImportance int mode) {}
 
     /**
-     * Sets the MIME types accepted by this view. See {@link View#getOnReceiveContentMimeTypes()}.
+     * Sets the MIME types accepted by this view. See {@link View#getReceiveContentMimeTypes()}.
      *
      * <p>Should only be set when the node is used for Autofill or Content Capture purposes - it
      * will be ignored when used for Assist.
      */
-    public void setOnReceiveContentMimeTypes(
+    public void setReceiveContentMimeTypes(
             @SuppressLint("NullableCollection") @Nullable String[] mimeTypes) {}
 
     /**

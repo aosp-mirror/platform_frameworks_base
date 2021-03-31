@@ -114,7 +114,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
     private String[] mAutofillHints;
     private AutofillValue mAutofillValue;
     private CharSequence[] mAutofillOptions;
-    private String[] mOnReceiveContentMimeTypes;
+    private String[] mReceiveContentMimeTypes;
 
     /** @hide */
     public ViewNode() {
@@ -172,7 +172,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
             mLocaleList = parcel.readParcelable(null);
         }
         if ((nodeFlags & FLAGS_HAS_MIME_TYPES) != 0) {
-            mOnReceiveContentMimeTypes = parcel.readStringArray();
+            mReceiveContentMimeTypes = parcel.readStringArray();
         }
         if ((nodeFlags & FLAGS_HAS_INPUT_TYPE) != 0) {
             mInputType = parcel.readInt();
@@ -470,8 +470,8 @@ public final class ViewNode extends AssistStructure.ViewNode {
 
     @Override
     @Nullable
-    public String[] getOnReceiveContentMimeTypes() {
-        return mOnReceiveContentMimeTypes;
+    public String[] getReceiveContentMimeTypes() {
+        return mReceiveContentMimeTypes;
     }
 
     @Nullable
@@ -519,7 +519,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
         if (mLocaleList != null) {
             nodeFlags |= FLAGS_HAS_LOCALE_LIST;
         }
-        if (mOnReceiveContentMimeTypes != null) {
+        if (mReceiveContentMimeTypes != null) {
             nodeFlags |= FLAGS_HAS_MIME_TYPES;
         }
         if (mInputType != 0) {
@@ -599,7 +599,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
             parcel.writeParcelable(mLocaleList, 0);
         }
         if ((nodeFlags & FLAGS_HAS_MIME_TYPES) != 0) {
-            parcel.writeStringArray(mOnReceiveContentMimeTypes);
+            parcel.writeStringArray(mReceiveContentMimeTypes);
         }
         if ((nodeFlags & FLAGS_HAS_INPUT_TYPE) != 0) {
             parcel.writeInt(mInputType);
@@ -929,8 +929,8 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
 
         @Override
-        public void setOnReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
-            mNode.mOnReceiveContentMimeTypes = mimeTypes;
+        public void setReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
+            mNode.mReceiveContentMimeTypes = mimeTypes;
         }
 
         @Override

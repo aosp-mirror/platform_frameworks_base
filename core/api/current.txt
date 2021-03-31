@@ -7712,7 +7712,7 @@ package android.app.assist {
     method public int getMaxTextEms();
     method public int getMaxTextLength();
     method public int getMinTextEms();
-    method @Nullable public String[] getOnReceiveContentMimeTypes();
+    method @Nullable public String[] getReceiveContentMimeTypes();
     method public int getScrollX();
     method public int getScrollY();
     method @Nullable public CharSequence getText();
@@ -48648,7 +48648,6 @@ package android.view {
     method @IdRes public int getNextFocusRightId();
     method @IdRes public int getNextFocusUpId();
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
-    method @Nullable public String[] getOnReceiveContentMimeTypes();
     method @ColorInt public int getOutlineAmbientShadowColor();
     method public android.view.ViewOutlineProvider getOutlineProvider();
     method @ColorInt public int getOutlineSpotShadowColor();
@@ -48665,6 +48664,7 @@ package android.view {
     method public float getPivotX();
     method public float getPivotY();
     method public android.view.PointerIcon getPointerIcon();
+    method @Nullable public String[] getReceiveContentMimeTypes();
     method public android.content.res.Resources getResources();
     method public final boolean getRevealOnFocusHint();
     method public final int getRight();
@@ -49844,8 +49844,8 @@ package android.view {
     method public void setMaxTextEms(int);
     method public void setMaxTextLength(int);
     method public void setMinTextEms(int);
-    method public void setOnReceiveContentMimeTypes(@Nullable String[]);
     method public abstract void setOpaque(boolean);
+    method public void setReceiveContentMimeTypes(@Nullable String[]);
     method public abstract void setSelected(boolean);
     method public abstract void setText(CharSequence);
     method public abstract void setText(CharSequence, int, int);
