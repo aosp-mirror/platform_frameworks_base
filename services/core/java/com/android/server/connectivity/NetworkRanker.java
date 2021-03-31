@@ -26,6 +26,7 @@ import static android.net.NetworkScore.POLICY_YIELD_TO_BAD_WIFI;
 
 import static com.android.server.connectivity.FullScore.POLICY_ACCEPT_UNVALIDATED;
 import static com.android.server.connectivity.FullScore.POLICY_EVER_USER_SELECTED;
+import static com.android.server.connectivity.FullScore.POLICY_EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD;
 import static com.android.server.connectivity.FullScore.POLICY_IS_INVINCIBLE;
 import static com.android.server.connectivity.FullScore.POLICY_IS_VALIDATED;
 import static com.android.server.connectivity.FullScore.POLICY_IS_VPN;
@@ -161,7 +162,7 @@ public class NetworkRanker {
         // Yield to bad wifi policy : if any wifi has ever been validated, keep only networks
         // that don't yield to such a wifi network.
         final boolean anyWiFiEverValidated = CollectionUtils.any(candidates,
-                nai -> nai.getScore().hasPolicy(POLICY_EVER_USER_SELECTED)
+                nai -> nai.getScore().hasPolicy(POLICY_EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD)
                         && nai.getCaps().hasTransport(TRANSPORT_WIFI));
         if (anyWiFiEverValidated) {
             partitionInto(candidates, nai -> !nai.getScore().hasPolicy(POLICY_YIELD_TO_BAD_WIFI),

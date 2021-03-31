@@ -707,7 +707,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
             @NonNull final NetworkCapabilities nc) {
         final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
-        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig, yieldToBadWiFi());
+        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig, everValidatedForYield(),
+                yieldToBadWiFi());
         final NetworkMonitorManager nm = mNetworkMonitor;
         if (nm != null) {
             nm.notifyNetworkCapabilitiesChanged(nc);
@@ -919,7 +920,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
      */
     public void setScore(final NetworkScore score) {
         mScore = FullScore.fromNetworkScore(score, networkCapabilities, networkAgentConfig,
-                yieldToBadWiFi());
+                everValidatedForYield(), yieldToBadWiFi());
     }
 
     /**
@@ -927,8 +928,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
      *
      * Call this after updating the network agent config.
      */
-    public void updateScoreForNetworkAgentConfigUpdate() {
-        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig, yieldToBadWiFi());
+    public void updateScoreForNetworkAgentUpdate() {
+        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig,
+                everValidatedForYield(), yieldToBadWiFi());
+    }
+
+    private boolean everValidatedForYield() {
+        return everValidated && !avoidUnvalidated;
     }
 
     /**
