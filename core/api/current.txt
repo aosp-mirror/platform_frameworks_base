@@ -32064,6 +32064,7 @@ package android.os {
     method @NonNull public boolean[] arePrimitivesSupported(@NonNull int...);
     method @RequiresPermission(android.Manifest.permission.VIBRATE) public abstract void cancel();
     method public int getId();
+    method @NonNull public int[] getPrimitiveDurations(@NonNull int...);
     method public abstract boolean hasAmplitudeControl();
     method public abstract boolean hasVibrator();
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long);
