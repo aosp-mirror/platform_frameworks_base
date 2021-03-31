@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Батареяны үнемдеу режимін қосу керек пе?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Батареяны үнемдеу режимі туралы ақпарат"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Қосу"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Battery saver функциясын қосу"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Батареяны үнемдеу режимін қосу"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Параметрлер"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Авто айналатын экран"</string>
@@ -500,7 +500,7 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Жою"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Батареяны үнемдеу режимі қосулы"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Өнімділікті және фондық деректерді азайтады"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Battery saver функциясын өшіру"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Батареяны үнемдеу режимін өшіру"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> жазу не трансляциялау кезінде экранда көрсетілетін немесе дыбысталатын барлық ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және аудиоматериалдар кіреді."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Осы функцияны ұсынатын қызмет жазу не трансляциялау кезінде экранда көрсетілетін немесе құрылғыда дыбысталатын ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және аудиоматериалдар кіреді."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Жазу немесе трансляциялау басталсын ба?"</string>
@@ -985,8 +985,8 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Түймені түртіп, Батареяны үнемдеу режимін реттеңіз"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Батареяның заряды бітуге жақындағанда қосыңыз."</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Жоқ, рақмет"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Battery Saver кестесі қосылды"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Батарея заряды <xliff:g id="PERCENTAGE">%d</xliff:g>%% деңгейінен төмендегенде, Battery Saver автоматты түрде қосылады."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Батареяны үнемдеу кестесі қосылды"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Батарея заряды <xliff:g id="PERCENTAGE">%d</xliff:g>%% деңгейінен төмендегенде, Батареяны үнемдеу режимі автоматты түрде қосылады."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Параметрлер"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Түсінікті"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
