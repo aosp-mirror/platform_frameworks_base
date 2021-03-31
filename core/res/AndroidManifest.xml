@@ -4117,6 +4117,11 @@
     <permission android:name="android.permission.MODIFY_AUDIO_ROUTING"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @TestApi Allows an application to query audio related state.
+         @hide -->
+    <permission android:name="android.permission.QUERY_AUDIO_STATE"
+                android:protectionLevel="signature" />
+
     <!-- Allows an application to modify what effects are applied to all audio
          (matching certain criteria) from any application.
          <p>Not for use by third-party applications.</p>
