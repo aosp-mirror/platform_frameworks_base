@@ -17,7 +17,7 @@
 package com.android.wm.shell.onehanded;
 
 import android.content.Context;
-import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Log;
@@ -30,6 +30,7 @@ import android.window.DisplayAreaOrganizer;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.content.ContextCompat;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.wm.shell.R;
@@ -50,8 +51,7 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
 
     private final Object mLock = new Object();
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
-    private final float[] mColor;
-    private final float mAlpha;
+    private final float[] mDefaultColor;
     private final Executor mMainExecutor;
     private final OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
@@ -88,16 +88,15 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
     public OneHandedBackgroundPanelOrganizer(Context context, DisplayLayout displayLayout,
             Executor executor) {
         super(executor);
-        final Resources res = context.getResources();
-        final float defaultRGB = res.getFloat(R.dimen.config_one_handed_background_rgb);
-        mColor = new float[]{defaultRGB, defaultRGB, defaultRGB};
-        mAlpha = res.getFloat(R.dimen.config_one_handed_background_alpha);
         // Ensure the mBkgBounds is portrait, due to OHM only support on portrait
         if (displayLayout.height() > displayLayout.width()) {
             mBkgBounds = new Rect(0, 0, displayLayout.width(), displayLayout.height());
         } else {
             mBkgBounds = new Rect(0, 0, displayLayout.height(), displayLayout.width());
         }
+        final int defaultColor = ContextCompat.getColor(context, R.color.GM2_grey_800);
+        mDefaultColor = new float[]{Color.red(defaultColor) / 255.0f,
+                Color.green(defaultColor) / 255.0f, Color.blue(defaultColor) / 255.0f};
         mMainExecutor = executor;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
     }
@@ -153,8 +152,8 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
                         .setParent(mParentLeash)
                         .setBufferSize(mBkgBounds.width(), mBkgBounds.height())
                         .setColorLayer()
-                        .setFormat(PixelFormat.RGBA_8888)
-                        .setOpaque(false)
+                        .setFormat(PixelFormat.RGB_888)
+                        .setOpaque(true)
                         .setName("one-handed-background-panel")
                         .setCallsite("OneHandedBackgroundPanelOrganizer")
                         .build();
@@ -178,8 +177,7 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
             SurfaceControl.Transaction transaction =
                     mSurfaceControlTransactionFactory.getTransaction();
             transaction.setLayer(mBackgroundSurface, -1 /* at bottom-most layer */)
-                    .setColor(mBackgroundSurface, mColor)
-                    .setAlpha(mBackgroundSurface, mAlpha)
+                    .setColor(mBackgroundSurface, mDefaultColor)
                     .show(mBackgroundSurface)
                     .apply();
             transaction.close();
@@ -210,5 +208,7 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
         pw.println(mIsShowing);
         pw.print(innerPrefix + "mBkgBounds=");
         pw.println(mBkgBounds);
+        pw.print(innerPrefix + "mDefaultColor=");
+        pw.println(mDefaultColor);
     }
 }
