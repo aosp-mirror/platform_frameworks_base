@@ -131,6 +131,7 @@ java_sdk_library {
         "//packages/modules/Connectivity/Tethering/tests:__subpackages__",
         "//packages/modules/Connectivity/tests:__subpackages__",
         "//packages/modules/NetworkStack/tests:__subpackages__",
+        "//packages/modules/Wifi/service/tests/wifitests",
     ],
     apex_available: [
         "com.android.tethering",
