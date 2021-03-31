@@ -37,8 +37,7 @@ open class AssistLogger @Inject constructor(
     protected val context: Context,
     protected val uiEventLogger: UiEventLogger,
     private val assistUtils: AssistUtils,
-    private val phoneStateMonitor: PhoneStateMonitor,
-    private val assistHandleBehaviorController: AssistHandleBehaviorController
+    private val phoneStateMonitor: PhoneStateMonitor
 ) {
 
     private val instanceIdSequence = InstanceIdSequence(INSTANCE_ID_MAX)
@@ -82,7 +81,7 @@ open class AssistLogger @Inject constructor(
                 assistComponentFinal.flattenToString(),
                 getOrCreateInstanceId().id,
                 deviceStateFinal,
-                assistHandleBehaviorController.areHandlesShowing())
+                false)
         reportAssistantInvocationExtraData()
     }
 
