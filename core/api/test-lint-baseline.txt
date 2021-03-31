@@ -71,6 +71,10 @@ ActionValue: android.telephony.mbms.vendor.VendorUtils#EXTRA_TEMP_LIST:
     
 
 
+AllUpper: android.media.audiopolicy.AudioProductStrategy#sDefaultAttributes:
+    Constant field names must be named with only upper case characters: `android.media.audiopolicy.AudioProductStrategy#sDefaultAttributes`, should be `S_DEFAULT_ATTRIBUTES`?
+
+
 ArrayReturn: android.app.UiAutomation#executeShellCommandRw(String):
     
 ArrayReturn: android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel#KeyphraseSoundModel(java.util.UUID, java.util.UUID, byte[], android.hardware.soundtrigger.SoundTrigger.Keyphrase[]) parameter #3:
@@ -539,6 +543,8 @@ InterfaceConstant: android.telecom.PhoneAccountSuggestionService#SERVICE_INTERFA
     
 
 
+InternalField: android.media.audiopolicy.AudioProductStrategy#sDefaultAttributes:
+    Internal field sDefaultAttributes must not be exposed
 InternalField: android.telephony.ims.ImsConferenceState#mParticipants:
     
 
@@ -1091,8 +1097,14 @@ MissingNullability: android.location.LocationManager#getTestProviderCurrentReque
     
 MissingNullability: android.location.LocationRequest#writeToParcel(android.os.Parcel, int) parameter #0:
     
+MissingNullability: android.media.AudioAttributes#SDK_USAGES:
+    Missing nullability on field `SDK_USAGES` in class `class android.media.AudioAttributes`
+MissingNullability: android.media.AudioAttributes#getSdkUsages():
+    Missing nullability on method `getSdkUsages` return
 MissingNullability: android.media.AudioFocusInfo#writeToParcel(android.os.Parcel, int) parameter #0:
     
+MissingNullability: android.media.AudioManager#getPublicStreamTypes():
+    Missing nullability on method `getPublicStreamTypes` return
 MissingNullability: android.media.AudioRecordingConfiguration#AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String) parameter #3:
     
 MissingNullability: android.media.AudioRecordingConfiguration#AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String) parameter #4:
@@ -1109,6 +1121,8 @@ MissingNullability: android.media.AudioRecordingConfiguration#AudioRecordingConf
     
 MissingNullability: android.media.AudioRecordingConfiguration#AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String, int, boolean, int, android.media.audiofx.AudioEffect.Descriptor[], android.media.audiofx.AudioEffect.Descriptor[]) parameter #6:
     
+MissingNullability: android.media.AudioSystem#streamToString(int):
+    Missing nullability on method `streamToString` return
 MissingNullability: android.media.PlaybackParams#setAudioStretchMode(int):
     
 MissingNullability: android.media.audiofx.AudioEffect#EFFECT_TYPE_NULL:

@@ -334,6 +334,14 @@ public final class AudioAttributes implements Parcelable {
     };
 
     /**
+     * @hide
+     */
+    @TestApi
+    public static int[] getSdkUsages() {
+        return SDK_USAGES;
+    }
+
+    /**
      * Flag defining a behavior where the audibility of the sound will be ensured by the system.
      */
     public final static int FLAG_AUDIBILITY_ENFORCED = 0x1 << 0;
