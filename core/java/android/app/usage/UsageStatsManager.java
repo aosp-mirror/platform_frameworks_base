@@ -1272,7 +1272,6 @@ public final class UsageStatsManager {
             android.Manifest.permission.INTERACT_ACROSS_USERS,
             android.Manifest.permission.PACKAGE_USAGE_STATS})
     public long getLastTimeAnyComponentUsed(@NonNull String packageName) {
-        // TODO(b/183462940): This usage data is not persisted to disk yet.
         try {
             return mService.getLastTimeAnyComponentUsed(packageName);
         } catch (RemoteException re) {
