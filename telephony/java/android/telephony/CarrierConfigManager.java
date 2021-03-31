@@ -3298,6 +3298,14 @@ public class CarrierConfigManager {
     public static final String KEY_USE_CALLER_ID_USSD_BOOL = "use_caller_id_ussd_bool";
 
     /**
+     * Call waiting uses USSD command without SS command.
+     * When {@code true}, the call waiting query/set by ussd command.
+     * When {@code false}, doesn't use USSD to query/set call waiting.
+     * @hide
+     */
+    public static final String KEY_USE_CALL_WAITING_USSD_BOOL = "use_call_waiting_ussd_bool";
+
+    /**
      * Specifies the service class for call waiting service.
      * Default value is
      * {@link com.android.internal.telephony.CommandsInterface#SERVICE_CLASS_VOICE}.
@@ -5367,6 +5375,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL, true);
         sDefaults.putBoolean(KEY_USE_CALL_FORWARDING_USSD_BOOL, false);
         sDefaults.putBoolean(KEY_USE_CALLER_ID_USSD_BOOL, false);
+        sDefaults.putBoolean(KEY_USE_CALL_WAITING_USSD_BOOL, false);
         sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G,not_restricted_rrc_idle:5G,"
