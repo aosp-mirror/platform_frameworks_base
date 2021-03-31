@@ -91,6 +91,7 @@
     <uses-permission android:name="android.permission.VIBRATE_ALWAYS_ON"/>
     <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE"/>
     <uses-permission android:name="android.permission.READ_PROJECTION_STATE"/>
+    <uses-permission android:name="android.permission.KILL_UID"/>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
