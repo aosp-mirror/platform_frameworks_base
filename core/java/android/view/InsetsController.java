@@ -1131,7 +1131,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 continue;
             }
             final InsetsSourceControl control = consumer.getControl();
-            if (control != null) {
+            if (control != null && control.getLeash() != null) {
                 controls.put(consumer.getType(), new InsetsSourceControl(control));
                 typesReady |= toPublicType(consumer.getType());
             } else if (animationType == ANIMATION_TYPE_SHOW) {

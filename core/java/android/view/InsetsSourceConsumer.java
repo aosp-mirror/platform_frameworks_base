@@ -33,6 +33,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.imetracing.ImeTracing;
@@ -240,10 +241,6 @@ public class InsetsSourceConsumer {
         mHasWindowFocus = false;
     }
 
-    boolean hasWindowFocus() {
-        return mHasWindowFocus;
-    }
-
     boolean hasViewFocusWhenWindowFocusGain() {
         return mHasViewFocusWhenWindowFocusGain;
     }
@@ -366,7 +363,16 @@ public class InsetsSourceConsumer {
     protected void setRequestedVisible(boolean requestedVisible) {
         if (mRequestedVisible != requestedVisible) {
             mRequestedVisible = requestedVisible;
-            mIsAnimationPending = false;
+
+            // We need an animation later if the leash of a real control (which has an insets hint)
+            // is not ready. The !mIsAnimationPending check is in case that the requested visibility
+            // is changed twice before playing the animation -- we don't need an animation in this
+            // case.
+            mIsAnimationPending = !mIsAnimationPending
+                    && mSourceControl != null
+                    && mSourceControl.getLeash() == null
+                    && !Insets.NONE.equals(mSourceControl.getInsetsHint());
+
             mController.onRequestedVisibilityChanged(this);
             if (DEBUG) Log.d(TAG, "setRequestedVisible: " + requestedVisible);
         }
