@@ -766,7 +766,7 @@
       <item quantity="one">%d minuto</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Uso de batería"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"A función de aforro da batería non está dispoñible durante a carga"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"A función de aforro de batería non está dispoñible durante a carga"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Aforro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Reduce o rendemento e os datos en segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
