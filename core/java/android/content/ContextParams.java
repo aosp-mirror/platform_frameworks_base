@@ -53,10 +53,11 @@ public final class ContextParams {
 
     private ContextParams(@Nullable String attributionTag,
             @Nullable AttributionSource next,
-            @NonNull Set<String> renouncedPermissions) {
+            @Nullable Set<String> renouncedPermissions) {
         mAttributionTag = attributionTag;
         mNext = next;
-        mRenouncedPermissions = renouncedPermissions;
+        mRenouncedPermissions = (renouncedPermissions != null)
+                ? renouncedPermissions : Collections.emptySet();
     }
 
     /**
@@ -149,8 +150,8 @@ public final class ContextParams {
          * @see AttributionSource
          */
         @NonNull
-        public Builder setNextAttributionSource(@NonNull AttributionSource next) {
-            mNext = Objects.requireNonNull(next);
+        public Builder setNextAttributionSource(@Nullable AttributionSource next) {
+            mNext = next;
             return this;
         }
 
@@ -177,9 +178,8 @@ public final class ContextParams {
         @SystemApi
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
         public @NonNull Builder setRenouncedPermissions(
-                @NonNull Set<String> renouncedPermissions) {
-            mRenouncedPermissions = Collections.unmodifiableSet(
-                    Objects.requireNonNull(renouncedPermissions));
+                @Nullable Set<String> renouncedPermissions) {
+            mRenouncedPermissions = renouncedPermissions;
             return this;
         }
 
