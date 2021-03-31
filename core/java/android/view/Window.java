@@ -2717,4 +2717,14 @@ public abstract class Window {
     public @Nullable WindowInsetsController getInsetsController() {
         return null;
     }
+
+    /**
+     * This will be null before a content view is added, e.g. via
+     * {@link #setContentView} or {@link #addContentView}.
+     *
+     * @return The {@link android.view.ViewRoot} interface for this Window
+     */
+    public @Nullable ViewRoot getViewRoot() {
+        return null;
+    }
 }
