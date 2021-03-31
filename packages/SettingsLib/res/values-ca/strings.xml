@@ -501,6 +501,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menys temps"</string>
     <string name="cancel" msgid="5665114069455378395">"Cancel·la"</string>
     <string name="okay" msgid="949938843324579502">"D\'acord"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes i recordatoris"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Permet configurar alarmes o recordatoris"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmes i recordatoris"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Permet que aquesta aplicació programi alarmes o altres esdeveniments basats en el temps. Això permetrà que l\'aplicació s\'activi i s\'executi fins i tot quan no utilitzes el dispositiu. Si revoques aquest permís, pot ser que l\'aplicació no funcioni correctament; concretament, no sonarà cap alarma que hagi programat l\'aplicació."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"programació, alarma, recordatori, esdeveniment"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activa el mode No molestis"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Mai"</string>
@@ -579,7 +584,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"S\'han desactivat les dades mòbils"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"No s\'ha definit per utilitzar dades"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"No hi ha senyal de telèfon."</string>
