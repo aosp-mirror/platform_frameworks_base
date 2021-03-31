@@ -31,6 +31,7 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
 
@@ -52,7 +53,6 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     private final BrightnessSliderView mBrightnessSliderView;
     private BrightnessMirrorController mMirrorController;
     private boolean mTracking;
-    private final boolean mUseMirror;
     private final FalsingManager mFalsingManager;
 
     private final Gefingerpoken mOnInterceptListener = new Gefingerpoken() {
@@ -75,11 +75,9 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     BrightnessSlider(
             View rootView,
             BrightnessSliderView brightnessSliderView,
-            boolean useMirror,
             FalsingManager falsingManager) {
         super(rootView);
         mBrightnessSliderView = brightnessSliderView;
-        mUseMirror = useMirror;
         mFalsingManager = falsingManager;
     }
 
@@ -152,7 +150,6 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
      */
     @Override
     public void setMirrorControllerAndMirror(BrightnessMirrorController c) {
-        if (!mUseMirror) return;
         mMirrorController = c;
         if (c != null) {
             setMirror(c.getToggleSlider());
@@ -264,16 +261,16 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     /**
      * Creates a {@link BrightnessSlider} with its associated view.
      *
-     * The views inflated are determined by {@link BrightnessControllerSettings#useThickSlider()}.
+     * The views inflated are determined by {@link FeatureFlags#useNewBrightnessSlider()}.
      */
     public static class Factory {
 
-        BrightnessControllerSettings mSettings;
+        final FeatureFlags mFeatureFlags;
         private final FalsingManager mFalsingManager;
 
         @Inject
-        public Factory(BrightnessControllerSettings settings, FalsingManager falsingManager) {
-            mSettings = settings;
+        public Factory(FeatureFlags featureFlags, FalsingManager falsingManager) {
+            mFeatureFlags = featureFlags;
             mFalsingManager = falsingManager;
         }
 
@@ -288,18 +285,18 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
             int layout = getLayout();
             ViewGroup root = (ViewGroup) LayoutInflater.from(context)
                     .inflate(layout, viewRoot, false);
-            return fromTree(root, mSettings.useMirrorOnThickSlider());
+            return fromTree(root);
         }
 
-        private BrightnessSlider fromTree(ViewGroup root, boolean useMirror) {
+        private BrightnessSlider fromTree(ViewGroup root) {
             BrightnessSliderView v = root.requireViewById(R.id.brightness_slider);
 
-            return new BrightnessSlider(root, v, useMirror, mFalsingManager);
+            return new BrightnessSlider(root, v, mFalsingManager);
         }
 
         /** Get the layout to inflate based on what slider to use */
         private int getLayout() {
-            return mSettings.useThickSlider()
+            return mFeatureFlags.useNewBrightnessSlider()
                     ? R.layout.quick_settings_brightness_dialog_thick
                     : R.layout.quick_settings_brightness_dialog;
         }
