@@ -30759,10 +30759,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view.
      * @param supportedFormats the supported translation formats. For now, the only possible value
      * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
-     * @param requestsCollector a {@link ViewTranslationRequest} collector that will be called
+     * @param requestsCollector a {@link ViewTranslationRequest} collector that can be called
      * multiple times to collect the information to be translated in the virtual view. One
      * {@link ViewTranslationRequest} per virtual child. The {@link ViewTranslationRequest} must
-     * contains the {@link AutofillId} corresponding to the virtualChildIds.
+     * contains the {@link AutofillId} corresponding to the virtualChildIds. Do not keep this
+     * Consumer after the method returns.
      */
     @SuppressLint("NullableCollection")
     public void onCreateTranslationRequests(@NonNull long[] virtualChildIds,
@@ -30835,7 +30836,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * ui translation, the system will call this method to traverse the view hierarchy to call
      * {@link View#onCreateTranslationRequest} to build {@link ViewTranslationRequest}s and create a
      * {@link android.view.translation.Translator} to translate the requests. All the
-     * {@link ViewTranslationRequest}s will be added when the traversal is done.
+     * {@link ViewTranslationRequest}s must be added when the traversal is done.
      *
      * <p> The default implementation will call {@link View#onCreateTranslationRequest} to build
      * {@link ViewTranslationRequest} if the view should be translated. </p>
