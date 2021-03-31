@@ -49,6 +49,7 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
@@ -1200,6 +1201,11 @@ public class AppStandbyController
 
         if (isHeadlessSystemApp(packageName)) {
             return STANDBY_BUCKET_ACTIVE;
+        }
+
+        if (mPackageManager.checkPermission(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                packageName) == PERMISSION_GRANTED) {
+            return STANDBY_BUCKET_FREQUENT;
         }
 
         return STANDBY_BUCKET_NEVER;

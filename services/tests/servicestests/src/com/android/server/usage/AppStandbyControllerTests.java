@@ -44,6 +44,8 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.server.usage.AppStandbyController.DEFAULT_ELAPSED_TIME_THRESHOLDS;
 import static com.android.server.usage.AppStandbyController.DEFAULT_SCREEN_TIME_THRESHOLDS;
@@ -56,6 +58,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.AdditionalMatchers.not;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -124,6 +128,8 @@ public class AppStandbyControllerTests {
     private static final int UID_SYSTEM_HEADLESS = 10003;
     private static final String PACKAGE_WELLBEING = "com.example.wellbeing";
     private static final int UID_WELLBEING = 10004;
+    private static final String PACKAGE_BACKGROUND_LOCATION = "com.example.backgroundLocation";
+    private static final int UID_BACKGROUND_LOCATION = 10005;
     private static final int USER_ID = 0;
     private static final int USER_ID2 = 10;
     private static final UserHandle USER_HANDLE_USER2 = new UserHandle(USER_ID2);
@@ -376,7 +382,14 @@ public class AppStandbyControllerTests {
         piw.packageName = PACKAGE_WELLBEING;
         packages.add(piw);
 
+        PackageInfo pib = new PackageInfo();
+        pib.applicationInfo = new ApplicationInfo();
+        pib.applicationInfo.uid = UID_BACKGROUND_LOCATION;
+        pib.packageName = PACKAGE_BACKGROUND_LOCATION;
+        packages.add(pib);
+
         doReturn(packages).when(mockPm).getInstalledPackagesAsUser(anyInt(), anyInt());
+
         try {
             for (int i = 0; i < packages.size(); ++i) {
                 PackageInfo pkg = packages.get(i);
@@ -387,6 +400,18 @@ public class AppStandbyControllerTests {
                         .getPackageUidAsUser(eq(pkg.packageName), anyInt(), anyInt());
                 doReturn(pkg.applicationInfo).when(mockPm)
                         .getApplicationInfo(eq(pkg.packageName), anyInt());
+
+                if (pkg.packageName.equals(PACKAGE_BACKGROUND_LOCATION)) {
+                    doReturn(PERMISSION_GRANTED).when(mockPm).checkPermission(
+                            eq(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                            eq(pkg.packageName));
+                    doReturn(PERMISSION_DENIED).when(mockPm).checkPermission(
+                            not(eq(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)),
+                            eq(pkg.packageName));
+                } else {
+                    doReturn(PERMISSION_DENIED).when(mockPm).checkPermission(anyString(),
+                            eq(pkg.packageName));
+                }
             }
         } catch (PackageManager.NameNotFoundException nnfe) {}
     }
@@ -1785,6 +1810,24 @@ public class AppStandbyControllerTests {
         assertEquals(62 * DAY_MS, mController.mAppStandbyScreenThresholds[2]);
         assertEquals(DEFAULT_SCREEN_TIME_THRESHOLDS[3], mController.mAppStandbyScreenThresholds[3]);
         assertEquals(93 * DAY_MS, mController.mAppStandbyScreenThresholds[4]);
+    }
+
+    /**
+     * Package with ACCESS_BACKGROUND_LOCATION permission has minimum bucket
+     * STANDBY_BUCKET_FREQUENT.
+     * @throws Exception
+     */
+    @Test
+    public void testBackgroundLocationBucket() throws Exception {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime,
+                PACKAGE_BACKGROUND_LOCATION);
+        assertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_BACKGROUND_LOCATION);
+
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+        // Make sure PACKAGE_BACKGROUND_LOCATION does not get lowered than STANDBY_BUCKET_FREQUENT.
+        mController.setAppStandbyBucket(PACKAGE_BACKGROUND_LOCATION, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_FREQUENT, PACKAGE_BACKGROUND_LOCATION);
     }
 
     private String getAdminAppsStr(int userId) {
