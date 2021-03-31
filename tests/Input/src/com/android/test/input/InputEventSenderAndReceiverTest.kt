@@ -75,15 +75,25 @@ class TestInputEventReceiver(channel: InputChannel, looper: Looper) :
 class TestInputEventSender(channel: InputChannel, looper: Looper) :
         InputEventSender(channel, looper) {
     data class FinishedSignal(val seq: Int, val handled: Boolean)
+    data class Timeline(val inputEventId: Int, val gpuCompletedTime: Long, val presentTime: Long)
 
     private val mFinishedSignals = LinkedBlockingQueue<FinishedSignal>()
+    private val mTimelines = LinkedBlockingQueue<Timeline>()
 
     override fun onInputEventFinished(seq: Int, handled: Boolean) {
         mFinishedSignals.put(FinishedSignal(seq, handled))
     }
 
+    override fun onTimelineReported(inputEventId: Int, gpuCompletedTime: Long, presentTime: Long) {
+        mTimelines.put(Timeline(inputEventId, gpuCompletedTime, presentTime))
+    }
+
     fun getFinishedSignal(): FinishedSignal {
         return getEvent(mFinishedSignals)
+    }
+
+    fun getTimeline(): Timeline {
+        return getEvent(mTimelines)
     }
 }
 
@@ -124,5 +134,15 @@ class InputEventSenderAndReceiverTest {
 
         // Check sender
         assertEquals(TestInputEventSender.FinishedSignal(seq, handled = true), finishedSignal)
+    }
+
+    // The timeline case is slightly unusual because it goes from InputConsumer to InputPublisher.
+    @Test
+    fun testSendAndReceiveTimeline() {
+        val sent = TestInputEventSender.Timeline(
+            inputEventId = 1, gpuCompletedTime = 2, presentTime = 3)
+        mReceiver.reportTimeline(sent.inputEventId, sent.gpuCompletedTime, sent.presentTime)
+        val received = mSender.getTimeline()
+        assertEquals(sent, received)
     }
 }
