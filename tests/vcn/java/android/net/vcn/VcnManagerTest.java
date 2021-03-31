@@ -211,7 +211,7 @@ public class VcnManagerTest {
                 "exception_message");
         verify(mMockStatusCallback)
                 .onGatewayConnectionError(
-                        any(int[].class),
+                        eq(GATEWAY_CONNECTION_NAME),
                         eq(VcnManager.VCN_ERROR_CODE_NETWORK_ERROR),
                         any(UnknownHostException.class));
     }
