@@ -809,10 +809,24 @@ public final class DeviceConfig {
     }
 
     /**
-     * Reset properties to their default values.
+     * Reset properties to their default values by removing the underlying values.
      * <p>
      * The method accepts an optional namespace parameter. If provided, only properties set within
      * that namespace will be reset. Otherwise, all properties will be reset.
+     * <p>
+     * Note: This method should only be used by {@link com.android.server.RescueParty}. It was
+     * designed to be used in the event of boot or crash loops caused by flag changes. It does not
+     * revert flag values to defaults - instead it removes the property entirely which causes the
+     * consumer of the flag to use hardcoded defaults upon retrieval.
+     * <p>
+     * To clear values for a namespace without removing the underlying properties, construct a
+     * {@link Properties} object with the caller's namespace and either an empty flag map, or some
+     * snapshot of flag values. Then use {@link #setProperties(Properties)} to remove all flags
+     * under the namespace, or set them to the values in the snapshot.
+     * <p>
+     * To revert values for testing, one should mock DeviceConfig using
+     * {@link com.android.server.testables.TestableDeviceConfig} where possible. Otherwise, fallback
+     * to using {@link #setProperties(Properties)} as outlined above.
      *
      * @param resetMode The reset mode to use.
      * @param namespace Optionally, the specific namespace which resets will be limited to.
