@@ -31,6 +31,7 @@ import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -590,6 +591,15 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float t = valueAnimator.getAnimatedFraction();
+                final int viewCount = mViews.size();
+                int height = (Integer) valueAnimator.getAnimatedValue();
+                for (int i = 0; i < viewCount; i++) {
+                    View v = mViews.get(i);
+                    v.setBottom(v.getTop() + height);
+                    if (v instanceof HeightOverrideable) {
+                        ((HeightOverrideable) v).setHeightOverride(height);
+                    }
+                }
                 if (t == 0f) {
                     mListener.onAnimationAtStart();
                 } else if (t == 1f) {
@@ -598,12 +608,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     mListener.onAnimationStarted();
                 }
                 mLastT = t;
-                final int viewCount = mViews.size();
-                int height = (Integer) valueAnimator.getAnimatedValue();
-                for (int i = 0; i < viewCount; i++) {
-                    View v = mViews.get(i);
-                    v.setBottom(v.getTop() + height);
-                }
             }
         };
 
@@ -632,6 +636,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             for (int i = 0; i < viewsCount; i++) {
                 View v = mViews.get(i);
                 v.setBottom(v.getTop() + v.getMeasuredHeight());
+                if (v instanceof HeightOverrideable) {
+                    ((HeightOverrideable) v).resetOverride();
+                }
             }
         }
     }
