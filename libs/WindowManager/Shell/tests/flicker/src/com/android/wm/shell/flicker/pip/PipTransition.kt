@@ -131,13 +131,13 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
                     removeAllTasksButHome()
                     if (!eachRun) {
                         pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
-                        wmHelper.waitPipWindowShown()
+                        wmHelper.waitFor { it.wmState.hasPipWindow() }
                     }
                 }
                 eachRun {
                     if (eachRun) {
                         pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
-                        wmHelper.waitPipWindowShown()
+                        wmHelper.waitFor { it.wmState.hasPipWindow() }
                     }
                 }
             }
