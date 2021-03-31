@@ -167,7 +167,7 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     private final List<UidStats> mSortedStats = new ArrayList<>();
 
-    private static final int MSG_REEVALUATE_JOBS = 2;
+    private static final int MSG_ADJUST_CALLBACKS = 0;
 
     private final Handler mHandler;
 
@@ -230,7 +230,7 @@ public final class ConnectivityController extends RestrictingController implemen
                 uidStats.numRunning--;
             }
             maybeRevokeStandbyExceptionLocked(jobStatus);
-            maybeAdjustRegisteredCallbacksLocked();
+            postAdjustCallbacks();
         }
     }
 
@@ -451,7 +451,7 @@ public final class ConnectivityController extends RestrictingController implemen
                 mUidStats.removeAt(u);
             }
         }
-        maybeAdjustRegisteredCallbacksLocked();
+        postAdjustCallbacks();
     }
 
     private boolean isUsable(NetworkCapabilities capabilities) {
@@ -598,8 +598,7 @@ public final class ConnectivityController extends RestrictingController implemen
             mSortedStats.add(uidStats);
         }
         if (mCurrentDefaultNetworkCallbacks.size() >= MAX_NETWORK_CALLBACKS) {
-            // TODO: offload to handler
-            maybeAdjustRegisteredCallbacksLocked();
+            postAdjustCallbacks();
             return;
         }
         registerPendingUidCallbacksLocked();
@@ -632,14 +631,21 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     }
 
+    private void postAdjustCallbacks() {
+        mHandler.obtainMessage(MSG_ADJUST_CALLBACKS).sendToTarget();
+    }
+
     @GuardedBy("mLock")
     private void maybeAdjustRegisteredCallbacksLocked() {
+        mHandler.removeMessages(MSG_ADJUST_CALLBACKS);
+
         final int count = mUidStats.size();
         if (count == mCurrentDefaultNetworkCallbacks.size()) {
             // All of them are registered and there are no blocked UIDs.
             // No point evaluating all UIDs.
             return;
         }
+
         final long nowElapsed = sElapsedRealtimeClock.millis();
         mSortedStats.clear();
 
@@ -898,7 +904,7 @@ public final class ConnectivityController extends RestrictingController implemen
             synchronized (mLock) {
                 mAvailableNetworks.put(network, capabilities);
                 updateTrackedJobsLocked(-1, network);
-                maybeAdjustRegisteredCallbacksLocked();
+                postAdjustCallbacks();
             }
         }
 
@@ -916,7 +922,7 @@ public final class ConnectivityController extends RestrictingController implemen
                     }
                 }
                 updateTrackedJobsLocked(-1, network);
-                maybeAdjustRegisteredCallbacksLocked();
+                postAdjustCallbacks();
             }
         }
     };
@@ -930,8 +936,10 @@ public final class ConnectivityController extends RestrictingController implemen
         public void handleMessage(Message msg) {
             synchronized (mLock) {
                 switch (msg.what) {
-                    case MSG_REEVALUATE_JOBS:
-                        updateTrackedJobsLocked(-1, null);
+                    case MSG_ADJUST_CALLBACKS:
+                        synchronized (mLock) {
+                            maybeAdjustRegisteredCallbacksLocked();
+                        }
                         break;
                 }
             }
