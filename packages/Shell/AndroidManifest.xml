@@ -122,6 +122,8 @@
     <uses-permission android:name="android.permission.CREATE_USERS" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
+    <uses-permission android:name="android.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS" />
+    <uses-permission android:name="android.permission.CLEAR_FREEZE_PERIOD" />
     <uses-permission android:name="android.permission.QUERY_USERS" />
     <uses-permission android:name="android.permission.MODIFY_QUIET_MODE" />
     <uses-permission android:name="android.permission.ACCESS_LOWPAN_STATE"/>
