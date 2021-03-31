@@ -57,6 +57,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
+import android.system.VmSocketAddress;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -78,8 +82,11 @@ import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.FileDescriptor;
+import java.io.InterruptedIOException;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -91,10 +98,10 @@ class HostClipboardMonitor implements Runnable {
         void onHostClipboardUpdated(String contents);
     }
 
-    private RandomAccessFile mPipe = null;
+    private FileDescriptor mPipe = null;
     private HostClipboardCallback mHostClipboardCallback;
     private static final String PIPE_NAME = "pipe:clipboard";
-    private static final String PIPE_DEVICE = "/dev/qemu_pipe";
+    private static final int HOST_PORT = 5000;
 
     private static byte[] createOpenHandshake() {
         // String.getBytes doesn't include the null terminator,
@@ -108,40 +115,57 @@ class HostClipboardMonitor implements Runnable {
 
     private boolean openPipe() {
         try {
-            final RandomAccessFile pipe = new RandomAccessFile(PIPE_DEVICE, "rw");
+            final FileDescriptor fd = Os.socket(OsConstants.AF_VSOCK, OsConstants.SOCK_STREAM, 0);
+
             try {
-                pipe.write(createOpenHandshake());
-                mPipe = pipe;
+                Os.connect(fd, new VmSocketAddress(HOST_PORT, OsConstants.VMADDR_CID_HOST));
+
+                final byte[] handshake = createOpenHandshake();
+                Os.write(fd, handshake, 0, handshake.length);
+                mPipe = fd;
                 return true;
-            } catch (IOException ignore) {
-                pipe.close();
+            } catch (ErrnoException | SocketException | InterruptedIOException e) {
+                Os.close(fd);
             }
-        } catch (IOException ignore) {
+        } catch (ErrnoException e) {
         }
+
         return false;
     }
 
     private void closePipe() {
         try {
-            final RandomAccessFile pipe = mPipe;
+            final FileDescriptor fd = mPipe;
             mPipe = null;
-            if (pipe != null) {
-                pipe.close();
+            if (fd != null) {
+                Os.close(fd);
             }
-        } catch (IOException ignore) {
+        } catch (ErrnoException ignore) {
         }
     }
 
-    private byte[] receiveMessage() throws IOException {
-        final int size = Integer.reverseBytes(mPipe.readInt());
-        final byte[] receivedData = new byte[size];
-        mPipe.readFully(receivedData);
-        return receivedData;
+    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException {
+        final byte[] lengthBits = new byte[4];
+        Os.read(mPipe, lengthBits, 0, lengthBits.length);
+
+        final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        final int msgLen = bb.getInt();
+
+        final byte[] msg = new byte[msgLen];
+        Os.read(mPipe, msg, 0, msg.length);
+
+        return msg;
     }
 
-    private void sendMessage(byte[] message) throws IOException {
-        mPipe.writeInt(Integer.reverseBytes(message.length));
-        mPipe.write(message);
+    private void sendMessage(byte[] msg) throws ErrnoException, InterruptedIOException {
+        final byte[] lengthBits = new byte[4];
+        final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.putInt(msg.length);
+
+        Os.write(mPipe, lengthBits, 0, lengthBits.length);
+        Os.write(mPipe, msg, 0, msg.length);
     }
 
     public HostClipboardMonitor(HostClipboardCallback cb) {
@@ -150,7 +174,7 @@ class HostClipboardMonitor implements Runnable {
 
     @Override
     public void run() {
-        while(!Thread.interrupted()) {
+        while (!Thread.interrupted()) {
             try {
                 // There's no guarantee that QEMU pipes will be ready at the moment
                 // this method is invoked. We simply try to get the pipe open and
@@ -162,9 +186,10 @@ class HostClipboardMonitor implements Runnable {
                 final byte[] receivedData = receiveMessage();
                 mHostClipboardCallback.onHostClipboardUpdated(
                     new String(receivedData));
-            } catch (IOException e) {
+            } catch (ErrnoException | InterruptedIOException e) {
                 closePipe();
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
         }
     }
 
@@ -173,7 +198,7 @@ class HostClipboardMonitor implements Runnable {
             if (mPipe != null) {
                 sendMessage(content.getBytes());
             }
-        } catch(IOException e) {
+        } catch (ErrnoException | InterruptedIOException e) {
             Slog.e("HostClipboardMonitor",
                    "Failed to set host clipboard " + e.getMessage());
         }
