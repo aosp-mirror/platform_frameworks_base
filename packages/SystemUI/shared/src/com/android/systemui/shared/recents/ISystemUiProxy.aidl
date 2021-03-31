@@ -134,5 +134,10 @@ interface ISystemUiProxy {
      */
     void expandNotificationPanel() = 29;
 
-    // Next id = 44
+    /**
+     * Notifies SystemUI to invoke Back.
+     */
+    void onBackPressed() = 44;
+
+    // Next id = 45
 }
