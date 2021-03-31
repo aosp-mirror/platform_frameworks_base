@@ -4707,6 +4707,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAreBubblesEnabled() throws Exception {
+        assertTrue(mBinderService.areBubblesEnabled(UserHandle.getUserHandleForUid(mUid)));
+    }
+
+    @Test
+    public void testAreBubblesEnabled_false() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.NOTIFICATION_BUBBLES, 0);
+        mService.mPreferencesHelper.updateBubblesEnabled();
+        assertFalse(mBinderService.areBubblesEnabled(UserHandle.getUserHandleForUid(mUid)));
+    }
+
+    @Test
+    public void testAreBubblesEnabled_exception() throws Exception {
+        try {
+            assertTrue(mBinderService.areBubblesEnabled(
+                    UserHandle.getUserHandleForUid(mUid + UserHandle.PER_USER_RANGE)));
+            fail("Cannot call cross user without permission");
+        } catch (SecurityException e) {
+            // pass
+        }
+        // cross user, with permission, no problem
+        enableInteractAcrossUsers();
+        assertTrue(mBinderService.areBubblesEnabled(
+                UserHandle.getUserHandleForUid(mUid + UserHandle.PER_USER_RANGE)));
+    }
+
+    @Test
     public void testIsCallerInstantApp_primaryUser() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
