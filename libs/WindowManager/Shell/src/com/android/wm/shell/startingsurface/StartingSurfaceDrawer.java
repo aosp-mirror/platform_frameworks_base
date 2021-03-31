@@ -382,14 +382,16 @@ public class StartingSurfaceDrawer {
                     Slog.v(TAG, "Removing splash screen window for task: " + taskId);
                 }
                 if (record.mContentView != null) {
-                    final HandleExitFinish exitFinish = new HandleExitFinish(record.mDecorView);
                     if (leash != null || playRevealAnimation) {
                         mSplashscreenContentDrawer.applyExitAnimation(record.mContentView,
-                                leash, frame, record.isEarlyExit(), exitFinish);
+                                leash, frame, record.isEarlyExit(),
+                                () -> removeWindowInner(record.mDecorView, true));
                     } else {
+                        // TODO(183004107) Always hide decorView when playRevealAnimation is enabled
+                        //  from TaskOrganizerController#removeStartingWindow
                         // the SplashScreenView has been copied to client, skip default exit
                         // animation
-                        exitFinish.run();
+                        removeWindowInner(record.mDecorView, false);
                     }
                 }
             }
@@ -403,23 +405,13 @@ public class StartingSurfaceDrawer {
         }
     }
 
-    private static class HandleExitFinish implements Runnable {
-        private View mDecorView;
-
-        HandleExitFinish(View decorView) {
-            mDecorView = decorView;
+    private void removeWindowInner(View decorView, boolean hideView) {
+        if (hideView) {
+            decorView.setVisibility(View.GONE);
         }
-
-        @Override
-        public void run() {
-            if (mDecorView == null) {
-                return;
-            }
-            final WindowManager wm = mDecorView.getContext().getSystemService(WindowManager.class);
-            if (wm != null) {
-                wm.removeView(mDecorView);
-            }
-            mDecorView = null;
+        final WindowManager wm = decorView.getContext().getSystemService(WindowManager.class);
+        if (wm != null) {
+            wm.removeView(decorView);
         }
     }
 
