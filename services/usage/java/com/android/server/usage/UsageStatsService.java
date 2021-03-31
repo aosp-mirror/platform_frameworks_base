@@ -75,6 +75,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -142,6 +143,10 @@ public class UsageStatsService extends SystemService implements
     // For migration purposes, indicates whether to keep the legacy usage stats directory or not
     private static final boolean KEEP_LEGACY_DIR = false;
 
+    private static final File COMMON_USAGE_STATS_DE_DIR =
+            new File(Environment.getDataSystemDeDirectory(), "usagestats");
+    private static final String GLOBAL_COMPONENT_USAGE_FILE_NAME = "globalcomponentusage";
+
     private static final char TOKEN_DELIMITER = '/';
 
     // Handler message types.
@@ -152,6 +157,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_REPORT_EVENT_TO_ALL_USERID = 4;
     static final int MSG_UNLOCKED_USER = 5;
     static final int MSG_PACKAGE_REMOVED = 6;
+    static final int MSG_ON_START = 7;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -293,6 +299,8 @@ public class UsageStatsService extends SystemService implements
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishLocalService(AppStandbyInternal.class, mAppStandby);
         publishBinderServices();
+
+        mHandler.obtainMessage(MSG_ON_START).sendToTarget();
     }
 
     @VisibleForTesting
@@ -716,6 +724,7 @@ public class UsageStatsService extends SystemService implements
             // orderly shutdown, the last event is DEVICE_SHUTDOWN.
             reportEventToAllUserId(event);
             flushToDiskLocked();
+            persistGlobalComponentUsageLocked();
         }
 
         mAppStandby.flushToDisk();
@@ -789,6 +798,60 @@ public class UsageStatsService extends SystemService implements
         } catch (Exception e) {
             Slog.e(TAG, "Failed to write " + pendingEventsFile.getAbsolutePath()
                     + " for user " + userId);
+        } finally {
+            af.failWrite(fos); // when fos is null (successful write), this will no-op
+        }
+    }
+
+    private void loadGlobalComponentUsageLocked() {
+        final File[] packageUsageFile = COMMON_USAGE_STATS_DE_DIR.listFiles(
+                (dir, name) -> TextUtils.equals(name, GLOBAL_COMPONENT_USAGE_FILE_NAME));
+        if (packageUsageFile == null || packageUsageFile.length == 0) {
+            return;
+        }
+
+        final AtomicFile af = new AtomicFile(packageUsageFile[0]);
+        final Map<String, Long> tmpUsage = new ArrayMap<>();
+        try {
+            try (FileInputStream in = af.openRead()) {
+                UsageStatsProtoV2.readGlobalComponentUsage(in, tmpUsage);
+            }
+            // only add to in memory map if the read was successful
+            final Map.Entry<String, Long>[] entries =
+                    (Map.Entry<String, Long>[]) tmpUsage.entrySet().toArray();
+            final int size = entries.length;
+            for (int i = 0; i < size; ++i) {
+                // In memory data is usually the most up-to-date, so skip the packages which already
+                // have usage data.
+                mLastTimeComponentUsedGlobal.putIfAbsent(
+                        entries[i].getKey(), entries[i].getValue());
+            }
+        } catch (Exception e) {
+            // Most likely trying to read a corrupted file - log the failure
+            Slog.e(TAG, "Could not read " + packageUsageFile[0]);
+        }
+    }
+
+    private void persistGlobalComponentUsageLocked() {
+        if (mLastTimeComponentUsedGlobal.isEmpty()) {
+            return;
+        }
+
+        if (!COMMON_USAGE_STATS_DE_DIR.mkdirs() && !COMMON_USAGE_STATS_DE_DIR.exists()) {
+            throw new IllegalStateException("Common usage stats DE directory does not exist: "
+                    + COMMON_USAGE_STATS_DE_DIR.getAbsolutePath());
+        }
+        final File lastTimePackageFile = new File(COMMON_USAGE_STATS_DE_DIR,
+                GLOBAL_COMPONENT_USAGE_FILE_NAME);
+        final AtomicFile af = new AtomicFile(lastTimePackageFile);
+        FileOutputStream fos = null;
+        try {
+            fos = af.startWrite();
+            UsageStatsProtoV2.writeGlobalComponentUsage(fos, mLastTimeComponentUsedGlobal);
+            af.finishWrite(fos);
+            fos = null;
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to write " + lastTimePackageFile.getAbsolutePath());
         } finally {
             af.failWrite(fos); // when fos is null (successful write), this will no-op
         }
@@ -1483,7 +1546,11 @@ public class UsageStatsService extends SystemService implements
                     }
                     break;
                 }
-
+                case MSG_ON_START:
+                    synchronized (mLock) {
+                        loadGlobalComponentUsageLocked();
+                    }
+                    break;
                 default:
                     super.handleMessage(msg);
                     break;
