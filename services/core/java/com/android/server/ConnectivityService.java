@@ -1329,7 +1329,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
 
         mMultinetworkPolicyTracker = mDeps.makeMultinetworkPolicyTracker(
-                mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
+                mContext, mHandler, () -> updateAvoidBadWifi());
         mMultinetworkPolicyTracker.start();
 
         mDnsManager = new DnsManager(mContext, mDnsResolver);
@@ -4389,8 +4389,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return avoidBadWifi();
     }
 
-    // TODO : this function is now useless.
-    private void rematchForAvoidBadWifiUpdate() {
+    private void updateAvoidBadWifi() {
+        for (final NetworkAgentInfo nai : mNetworkAgentInfos) {
+            nai.updateScoreForNetworkAgentConfigUpdate();
+        }
         rematchAllNetworksAndRequests();
     }
 
