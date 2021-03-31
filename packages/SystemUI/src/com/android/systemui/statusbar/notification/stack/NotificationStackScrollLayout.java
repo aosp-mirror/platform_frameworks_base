@@ -1245,7 +1245,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
 
         if (mAmbientState.isHiddenAtAll()) {
-            clipToOutline = true;
+            clipToOutline = false;
             invalidateOutline();
             if (isFullyHidden()) {
                 setClipBounds(null);
