@@ -41,9 +41,7 @@ java_library {
     installable: true,
 
     sdk_version: "module_current",
-    libs: [
-        "framework_media_annotation",
-    ],
+    libs: ["framework-annotations-lib"],
     static_libs: [
         "exoplayer2-extractor"
     ],
@@ -107,18 +105,7 @@ java_sdk_library {
     srcs: [
         ":updatable-media-srcs",
     ],
-
-    libs: [
-        "framework_media_annotation",
-    ],
     impl_library_visibility: ["//frameworks/av/apex:__subpackages__"],
-}
-
-java_library {
-    name: "framework_media_annotation",
-    srcs: [":framework-media-annotation-srcs"],
-    installable: false,
-    sdk_version: "core_current",
 }
 
 cc_library_shared {
