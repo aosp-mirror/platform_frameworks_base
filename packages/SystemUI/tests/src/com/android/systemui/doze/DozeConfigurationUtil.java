@@ -39,6 +39,9 @@ public class DozeConfigurationUtil {
         when(params.getProxCheckBeforePulse()).thenReturn(true);
         when(params.doubleTapReportsTouchCoordinates()).thenReturn(false);
         when(params.getDisplayNeedsBlanking()).thenReturn(false);
+        when(params.getSelectivelyRegisterSensorsUsingProx()).thenReturn(false);
+        when(params.singleTapUsesProx()).thenReturn(true);
+        when(params.longPressUsesProx()).thenReturn(true);
 
         doneHolder[0] = true;
         return params;
