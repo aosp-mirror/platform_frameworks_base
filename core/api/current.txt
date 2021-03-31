@@ -41987,6 +41987,7 @@ package android.telephony {
   public final class PreciseDataConnectionState implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.telephony.data.ApnSetting getApnSetting();
+    method public int getId();
     method public int getLastCauseCode();
     method @Nullable public android.net.LinkProperties getLinkProperties();
     method public int getNetworkType();
