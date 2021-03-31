@@ -196,8 +196,6 @@ public class ButtonDispatcher {
         if (animate) {
             setVisibility(View.VISIBLE);
             mFadeAnimator = ValueAnimator.ofFloat(getAlpha(), alpha);
-            mFadeAnimator.setStartDelay(
-                    mAssistManager.getAssistHandleShowAndGoRemainingDurationMs());
             mFadeAnimator.setDuration(duration);
             mFadeAnimator.setInterpolator(LINEAR);
             mFadeAnimator.addListener(mFadeListener);
