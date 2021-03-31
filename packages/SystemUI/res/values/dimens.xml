@@ -486,6 +486,8 @@
 
     <dimen name="volume_dialog_elevation">9dp</dimen>
 
+    <dimen name="volume_dialog_background_blur_radius">0dp</dimen>
+
     <dimen name="volume_tool_tip_right_margin">76dp</dimen>
 
     <dimen name="volume_tool_tip_bottom_margin">32dp</dimen>
