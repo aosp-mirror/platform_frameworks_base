@@ -393,8 +393,15 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
         .SetAllowMangled(true);
 
     if (entry->flags & ResTable_entry::FLAG_PUBLIC) {
-      res_builder.SetVisibility(Visibility{Visibility::Level::kPublic});
+      Visibility visibility{Visibility::Level::kPublic};
 
+      auto spec_flags = entry_type_spec_flags_.find(res_id);
+      if (spec_flags != entry_type_spec_flags_.end() &&
+          spec_flags->second & ResTable_typeSpec::SPEC_STAGED_API) {
+        visibility.staged_api = true;
+      }
+
+      res_builder.SetVisibility(visibility);
       // Erase the ID from the map once processed, so that we don't mark the same symbol more than
       // once.
       entry_type_spec_flags_.erase(res_id);
