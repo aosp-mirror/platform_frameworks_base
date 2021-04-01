@@ -1150,6 +1150,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 || mAlternateAuthInterceptor.isAnimating());
     }
 
+    /** Update keyguard position based on a tapped X coordinate. */
+    public void updateKeyguardPosition(float x) {
+        if (mBouncer != null) {
+            mBouncer.updateKeyguardPosition(x);
+        }
+    }
+
     private static class DismissWithActionRequest {
         final OnDismissAction dismissAction;
         final Runnable cancelAction;

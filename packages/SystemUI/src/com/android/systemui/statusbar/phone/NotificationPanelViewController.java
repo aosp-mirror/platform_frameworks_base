@@ -3494,6 +3494,12 @@ public class NotificationPanelViewController extends PanelViewController {
                     updateHorizontalPanelPosition(event.getX());
                     handled = true;
                 }
+
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyExpanded()
+                        && mStatusBarKeyguardViewManager.isShowing()) {
+                    mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
+                }
+
                 handled |= super.onTouch(v, event);
                 return !mDozing || mPulsing || handled || showingOrAnimatingAltAuth;
             }
