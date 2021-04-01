@@ -63,7 +63,7 @@ import java.util.function.Consumer;
 
 /**
  * Controller for a specific inset source on the server. It's called provider as it provides the
- * {@link InsetsSource} to the client that uses it in {@link InsetsSourceConsumer}.
+ * {@link InsetsSource} to the client that uses it in {@link android.view.InsetsSourceConsumer}.
  */
 class InsetsSourceProvider {
 
@@ -452,40 +452,36 @@ class InsetsSourceProvider {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "InsetsSourceProvider");
-        pw.print(prefix + " mSource="); mSource.dump(prefix + "  ", pw);
+        pw.println(prefix + getClass().getSimpleName());
+        prefix = prefix + "  ";
+        pw.print(prefix + "mSource="); mSource.dump("", pw);
         if (mControl != null) {
-            pw.print(prefix + " mControl=");
-            mControl.dump(prefix + "  ", pw);
+            pw.print(prefix + "mControl=");
+            mControl.dump("", pw);
         }
-        pw.print(prefix + " mFakeControl="); mFakeControl.dump(prefix + "  ", pw);
-        pw.print(" mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
-        pw.print(" mImeOverrideFrame="); pw.print(mImeOverrideFrame.toString());
+        pw.print(prefix);
+        pw.print("mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
+        pw.print(" mImeOverrideFrame="); pw.print(mImeOverrideFrame.toShortString());
+        pw.println();
         if (mWin != null) {
-            pw.print(prefix + " mWin=");
-            mWin.dump(pw, prefix + "  ", false /* dumpAll */);
+            pw.print(prefix + "mWin=");
+            pw.println(mWin);
         }
         if (mAdapter != null) {
-            pw.print(prefix + " mAdapter=");
-            mAdapter.dump(pw, prefix + "  ");
+            pw.print(prefix + "mAdapter=");
+            mAdapter.dump(pw, "");
         }
         if (mControlTarget != null) {
-            pw.print(prefix + " mControlTarget=");
-            if (mControlTarget.getWindow() != null) {
-                mControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
-            }
+            pw.print(prefix + "mControlTarget=");
+            pw.println(mControlTarget.getWindow());
         }
         if (mPendingControlTarget != null) {
-            pw.print(prefix + " mPendingControlTarget=");
-            if (mPendingControlTarget.getWindow() != null) {
-                mPendingControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
-            }
+            pw.print(prefix + "mPendingControlTarget=");
+            pw.println(mPendingControlTarget.getWindow());
         }
         if (mFakeControlTarget != null) {
-            pw.print(prefix + " mFakeControlTarget=");
-            if (mFakeControlTarget.getWindow() != null) {
-                mFakeControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
-            }
+            pw.print(prefix + "mFakeControlTarget=");
+            pw.println(mFakeControlTarget.getWindow());
         }
     }
 
@@ -575,8 +571,9 @@ class InsetsSourceProvider {
 
         @Override
         public void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + "ControlAdapter");
-            pw.print(prefix + " mCapturedLeash="); pw.print(mCapturedLeash);
+            pw.print(prefix + "ControlAdapter mCapturedLeash=");
+            pw.print(mCapturedLeash);
+            pw.println();
         }
 
         @Override
