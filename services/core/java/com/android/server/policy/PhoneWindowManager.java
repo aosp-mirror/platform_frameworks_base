@@ -273,6 +273,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int VERY_LONG_PRESS_POWER_NOTHING = 0;
     static final int VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
 
+    // must match: config_keyChordPowerVolumeUp in config.xml
+    static final int POWER_VOLUME_UP_BEHAVIOR_NOTHING = 0;
+    static final int POWER_VOLUME_UP_BEHAVIOR_MUTE = 1;
+    static final int POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS = 2;
+
     // must match: config_doublePressOnPowerBehavior in config.xml
     static final int MULTI_PRESS_POWER_NOTHING = 0;
     static final int MULTI_PRESS_POWER_THEATER_MODE = 1;
@@ -488,6 +493,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLongPressOnBackBehavior;
     int mShortPressOnSleepBehavior;
     int mShortPressOnWindowBehavior;
+    int mPowerVolUpBehavior;
     boolean mHasSoftInput = false;
     boolean mHapticTextHandleEnabled;
     boolean mUseTvRouting;
@@ -726,6 +732,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POWER_BUTTON_VERY_LONG_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.KEY_CHORD_POWER_VOLUME_UP), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE), false, this,
@@ -1265,6 +1274,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // since it took two seconds of long press to bring this up,
         // poke the wake lock so they have some time to see the dialog.
         mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
+    }
+
+    private void cancelGlobalActionsAction() {
+        mHandler.removeMessages(MSG_DISPATCH_SHOW_GLOBAL_ACTIONS);
     }
 
     boolean isDeviceProvisioned() {
@@ -1835,20 +1848,48 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 });
 
+        // Volume up + power can either be the "ringer toggle chord" or as another way to
+        // launch GlobalActions. This behavior can change at runtime so we must check behavior
+        // inside the TwoKeysCombinationRule.
         mKeyCombinationManager.addRule(
                 new TwoKeysCombinationRule(KEYCODE_VOLUME_UP, KEYCODE_POWER) {
                     @Override
                     boolean preCondition() {
-                        return mRingerToggleChord != VOLUME_HUSH_OFF;
+                        switch (mPowerVolUpBehavior) {
+                            case POWER_VOLUME_UP_BEHAVIOR_MUTE:
+                                return mRingerToggleChord != VOLUME_HUSH_OFF;
+                            default:
+                                return true;
+                        }
                     }
                     @Override
                     void execute() {
-                        mPowerKeyHandled = true;
-                        interceptRingerToggleChord();
+                        switch (mPowerVolUpBehavior) {
+                            case POWER_VOLUME_UP_BEHAVIOR_MUTE:
+                                // no haptic feedback here since
+                                interceptRingerToggleChord();
+                                mPowerKeyHandled = true;
+                                break;
+                            case POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS:
+                                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, false,
+                                        "Power + Volume Up - Global Actions");
+                                showGlobalActions();
+                                mPowerKeyHandled = true;
+                                break;
+                            default:
+                                break;
+                        }
                     }
                     @Override
                     void cancel() {
-                        cancelPendingRingerToggleChordAction();
+                        switch (mPowerVolUpBehavior) {
+                            case POWER_VOLUME_UP_BEHAVIOR_MUTE:
+                                cancelPendingRingerToggleChordAction();
+                                break;
+                            case POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS:
+                                cancelGlobalActionsAction();
+                                break;
+                        }
                     }
                 });
 
@@ -2054,6 +2095,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Global.POWER_BUTTON_VERY_LONG_PRESS,
                     mContext.getResources().getInteger(
                             com.android.internal.R.integer.config_veryLongPressOnPowerBehavior));
+            mPowerVolUpBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_keyChordPowerVolumeUp));
         }
         if (updateRotation) {
             updateRotation(true);
@@ -5205,6 +5250,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print("mTriplePressOnPowerBehavior=");
                 pw.println(multiPressOnPowerBehaviorToString(mTriplePressOnPowerBehavior));
         pw.print(prefix);
+        pw.print("mPowerVolUpBehavior=");
+        pw.println(powerVolumeUpBehaviorToString(mPowerVolUpBehavior));
+        pw.print(prefix);
                 pw.print("mShortPressOnSleepBehavior=");
                 pw.println(shortPressOnSleepBehaviorToString(mShortPressOnSleepBehavior));
         pw.print(prefix);
@@ -5373,6 +5421,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return "VERY_LONG_PRESS_POWER_NOTHING";
             case VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS:
                 return "VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS";
+            default:
+                return Integer.toString(behavior);
+        }
+    }
+
+    private static String powerVolumeUpBehaviorToString(int behavior) {
+        switch (behavior) {
+            case POWER_VOLUME_UP_BEHAVIOR_NOTHING:
+                return "POWER_VOLUME_UP_BEHAVIOR_NOTHING";
+            case POWER_VOLUME_UP_BEHAVIOR_MUTE:
+                return "POWER_VOLUME_UP_BEHAVIOR_MUTE";
+            case POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS:
+                return "POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS";
             default:
                 return Integer.toString(behavior);
         }
