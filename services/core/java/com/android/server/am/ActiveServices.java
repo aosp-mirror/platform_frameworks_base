@@ -191,6 +191,15 @@ public final class ActiveServices {
     // calling startForeground() before we ANR + stop it.
     static final int SERVICE_START_FOREGROUND_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
+    // Foreground service types that always get immediate notification display,
+    // expressed in the same bitmask format that ServiceRecord.foregroundServiceType
+    // uses.
+    static final int FGS_IMMEDIATE_DISPLAY_MASK =
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
+
     final ActivityManagerService mAm;
 
     // Maximum number of services that we allow to start in the background
@@ -2020,15 +2029,12 @@ public final class ActiveServices {
                 }
                 // or is this an type of FGS that always shows immediately?
                 if (!showNow) {
-                    switch (r.foregroundServiceType) {
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL:
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:
-                            if (DEBUG_FOREGROUND_SERVICE) {
-                                Slog.d(TAG_SERVICE, "FGS " + r
-                                        + " type gets immediate display");
-                            }
-                            showNow = true;
+                    if ((r.foregroundServiceType & FGS_IMMEDIATE_DISPLAY_MASK) != 0) {
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.d(TAG_SERVICE, "FGS " + r
+                                    + " type gets immediate display");
+                        }
+                        showNow = true;
                     }
                 }
             } else {
