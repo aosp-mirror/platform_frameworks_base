@@ -27093,12 +27093,13 @@ package android.net.vcn {
 
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
+    method @NonNull public String getGatewayConnectionName();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
     method @NonNull public long[] getRetryInterval();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull android.net.vcn.VcnControlPlaneConfig);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.vcn.VcnControlPlaneConfig);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
@@ -27122,7 +27123,7 @@ package android.net.vcn {
 
   public abstract static class VcnManager.VcnStatusCallback {
     ctor public VcnManager.VcnStatusCallback();
-    method public abstract void onGatewayConnectionError(@NonNull int[], int, @Nullable Throwable);
+    method public abstract void onGatewayConnectionError(@NonNull String, int, @Nullable Throwable);
     method public abstract void onStatusChanged(int);
   }
 
