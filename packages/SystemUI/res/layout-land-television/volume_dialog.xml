@@ -40,14 +40,15 @@
             android:translationZ="@dimen/volume_dialog_elevation"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:background="@drawable/tv_volume_dialog_background">
+            android:background="@android:color/transparent">
 
             <LinearLayout
                 android:id="@+id/volume_dialog_rows"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:background="@drawable/tv_volume_dialog_background">
                 <!-- volume rows added and removed here! :-) -->
             </LinearLayout>
 

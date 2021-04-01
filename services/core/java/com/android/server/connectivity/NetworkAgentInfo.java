@@ -17,6 +17,7 @@
 package com.android.server.connectivity;
 
 import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.transportNamesOf;
 
 import android.annotation.NonNull;
@@ -362,9 +363,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         linkProperties = lp;
         networkCapabilities = nc;
         networkAgentConfig = config;
-        setScore(score); // uses members networkCapabilities and networkAgentConfig
-        clatd = new Nat464Xlat(this, netd, dnsResolver, deps);
         mConnService = connService;
+        setScore(score); // uses members connService, networkCapabilities and networkAgentConfig
+        clatd = new Nat464Xlat(this, netd, dnsResolver, deps);
         mContext = context;
         mHandler = handler;
         this.factorySerialNumber = factorySerialNumber;
@@ -706,12 +707,17 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             @NonNull final NetworkCapabilities nc) {
         final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
-        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig);
+        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig, yieldToBadWiFi());
         final NetworkMonitorManager nm = mNetworkMonitor;
         if (nm != null) {
             nm.notifyNetworkCapabilitiesChanged(nc);
         }
         return oldNc;
+    }
+
+    private boolean yieldToBadWiFi() {
+        // Only cellular networks yield to bad wifi
+        return networkCapabilities.hasTransport(TRANSPORT_CELLULAR) && !mConnService.avoidBadWifi();
     }
 
     public ConnectivityService connService() {
@@ -884,15 +890,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return isVPN();
     }
 
-    // Return true on devices configured to ignore score penalty for wifi networks
-    // that become unvalidated (b/31075769).
-    private boolean ignoreWifiUnvalidationPenalty() {
-        boolean isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
-                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        boolean avoidBadWifi = mConnService.avoidBadWifi() || avoidUnvalidated;
-        return isWifi && !avoidBadWifi && everValidated;
-    }
-
     public FullScore getScore() {
         return mScore;
     }
@@ -913,7 +910,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      * Mix-in the ConnectivityService-managed bits in the score.
      */
     public void setScore(final NetworkScore score) {
-        mScore = FullScore.fromNetworkScore(score, networkCapabilities, networkAgentConfig);
+        mScore = FullScore.fromNetworkScore(score, networkCapabilities, networkAgentConfig,
+                yieldToBadWiFi());
     }
 
     /**
@@ -922,7 +920,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      * Call this after updating the network agent config.
      */
     public void updateScoreForNetworkAgentConfigUpdate() {
-        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig);
+        mScore = mScore.mixInScore(networkCapabilities, networkAgentConfig, yieldToBadWiFi());
     }
 
     /**
@@ -1085,7 +1083,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return "NetworkAgentInfo{"
                 + "network{" + network + "}  handle{" + network.getNetworkHandle() + "}  ni{"
                 + networkInfo.toShortString() + "} "
-                + "  Score{" + getCurrentScore() + "} "
+                + mScore + " "
                 + (isNascent() ? " nascent" : (isLingering() ? " lingering" : ""))
                 + (everValidated ? " everValidated" : "")
                 + (lastValidated ? " lastValidated" : "")

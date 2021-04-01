@@ -37,6 +37,7 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
+import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
@@ -123,11 +124,12 @@ public class WMShellModule {
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
+            Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(context, displayController,
                 pipAppOpsListener, pipBoundsAlgorithm, pipBoundsState, pipMediaController,
                 phonePipMenuController, pipTaskOrganizer, pipTouchHandler, pipTransitionController,
-                windowManagerShellWrapper, taskStackListener, mainExecutor));
+                windowManagerShellWrapper, taskStackListener, oneHandedController, mainExecutor));
     }
 
     @WMSingleton

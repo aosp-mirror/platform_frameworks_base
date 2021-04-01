@@ -50,7 +50,6 @@ per-file fd_utils.* = file:/ZYGOTE_OWNERS
 per-file Android.bp = file:platform/build/soong:/OWNERS
 per-file android_animation_* = file:/core/java/android/animation/OWNERS
 per-file android_app_admin_* = file:/core/java/android/app/admin/OWNERS
-per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
 per-file android_hardware_Usb* = file:/services/usb/OWNERS
 per-file android_hardware_display_* = file:/core/java/android/hardware/display/OWNERS
 per-file android_hardware_input_* = file:/core/java/android/hardware/input/OWNERS
@@ -63,3 +62,11 @@ per-file android_se_* = file:/core/java/android/se/OWNERS
 per-file android_security_* = file:/core/java/android/security/OWNERS
 per-file android_view_* = file:/core/java/android/view/OWNERS
 per-file com_android_internal_net_* = file:/services/core/java/com/android/server/net/OWNERS
+
+### Graphics ###
+per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
+# These are highly common-use files
+per-file Android.bp = file:/graphics/java/android/graphics/OWNERS
+per-file AndroidRuntime.cpp = file:/graphics/java/android/graphics/OWNERS
+# Although marked "view" this is mostly graphics stuff
+per-file android_view_* = file:/graphics/java/android/graphics/OWNERS

@@ -6126,9 +6126,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // in the same security/privacy sandbox.
                 final AndroidPackage androidPackage = mPackageManagerInt
                         .getPackage(Binder.getCallingUid());
-                if (androidPackage == null) {
-                    return null;
-                }
                 final AttributionSource attributionSource = new AttributionSource(
                         Binder.getCallingUid(), androidPackage.getPackageName(), null);
                 pfd = cph.provider.openFile(attributionSource, uri, "r", null);
@@ -8392,6 +8389,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAppProfiler.setMemFactorOverrideLocked(level);
             // Kick off an oom adj update since we forced a mem factor update.
             updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+        }
+    }
+
+    /**
+     * Toggle service restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    void setServiceRestartBackoffEnabled(@NonNull String packageName, boolean enable,
+            @NonNull String reason) {
+        synchronized (this) {
+            mServices.setServiceRestartBackoffEnabledLocked(packageName, enable, reason);
+        }
+    }
+
+    /**
+     * @return {@code false} if the given package has been disable from enforcing the service
+     * restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    boolean isServiceRestartBackoffEnabled(@NonNull String packageName) {
+        synchronized (this) {
+            return mServices.isServiceRestartBackoffEnabledLocked(packageName);
         }
     }
 

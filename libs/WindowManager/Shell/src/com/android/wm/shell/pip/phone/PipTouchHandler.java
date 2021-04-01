@@ -176,13 +176,13 @@ public class PipTouchHandler {
         mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
                 mMenuController, mPipBoundsAlgorithm.getSnapAlgorithm(), pipTransitionController,
                 floatingContentCoordinator);
-        mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
-                        mMotionHelper, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds, pipUiEventLogger, menuController,
-                        mainExecutor);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
+        mPipResizeGestureHandler =
+                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
+                        mMotionHelper, pipTaskOrganizer, mPipDismissTargetHandler,
+                        this::getMovementBounds, this::updateMovementBounds, pipUiEventLogger,
+                        menuController, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
                 () -> {
                     if (mPipBoundsState.isStashed()) {
@@ -664,7 +664,7 @@ public class PipTouchHandler {
         } else if (menuState == MENU_STATE_NONE && mMenuState == MENU_STATE_FULL) {
             // Try and restore the PiP to the closest edge, using the saved snap fraction
             // if possible
-            if (resize) {
+            if (resize && !mPipResizeGestureHandler.isResizing()) {
                 if (mDeferResizeToNormalBoundsUntilRotation == -1) {
                     // This is a very special case: when the menu is expanded and visible,
                     // navigating to another activity can trigger auto-enter PiP, and if the
@@ -1011,6 +1011,10 @@ public class PipTouchHandler {
         return mPipBoundsState.getMotionBoundsState().isInMotion()
                 ? mPipBoundsState.getMotionBoundsState().getBoundsInMotion()
                 : mPipBoundsState.getBounds();
+    }
+
+    void setOhmOffset(int offset) {
+        mPipResizeGestureHandler.setOhmOffset(offset);
     }
 
     public void dump(PrintWriter pw, String prefix) {

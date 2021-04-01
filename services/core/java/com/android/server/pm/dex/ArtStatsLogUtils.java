@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 /** Utils class to report ART metrics to statsd. */
@@ -150,7 +152,8 @@ public class ArtStatsLogUtils {
             int compilationReason,
             int result,
             int apkType,
-            String isa) {
+            String isa,
+            String apkPath) {
         int dexMetadataType = getDexMetadataType(dexMetadataPath);
         logger.write(
                 sessionId,
@@ -159,6 +162,16 @@ public class ArtStatsLogUtils {
                 compilerFilter,
                 ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_RESULT_CODE,
                 result,
+                dexMetadataType,
+                apkType,
+                isa);
+        logger.write(
+                sessionId,
+                uid,
+                compilationReason,
+                compilerFilter,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_BYTES,
+                getDexBytes(apkPath),
                 dexMetadataType,
                 apkType,
                 isa);
@@ -179,6 +192,37 @@ public class ArtStatsLogUtils {
             return ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE;
         }
         return ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_SPLIT;
+    }
+
+    private static long getDexBytes(String apkPath) {
+        StrictJarFile jarFile = null;
+        long dexBytes = 0;
+        try {
+            jarFile = new StrictJarFile(apkPath,
+                    /*verify=*/ false,
+                    /*signatureSchemeRollbackProtectionsEnforced=*/ false);
+            Iterator<ZipEntry> it = jarFile.iterator();
+            Pattern p = Pattern.compile("classes(\\d)*[.]dex");
+            Matcher m = p.matcher("");
+            while (it.hasNext()) {
+                ZipEntry entry = it.next();
+                m.reset(entry.getName());
+                if (m.matches()) {
+                    dexBytes += entry.getSize();
+                }
+            }
+            return dexBytes;
+        } catch (IOException ignore) {
+            Slog.e(TAG, "Error when parsing APK " + apkPath);
+            return -1L;
+        } finally {
+            try {
+                if (jarFile != null) {
+                    jarFile.close();
+                }
+            } catch (IOException ignore) {
+            }
+        }
     }
 
     private static int getDexMetadataType(String dexMetadataPath) {

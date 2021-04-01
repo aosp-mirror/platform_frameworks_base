@@ -318,6 +318,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runRefreshSettingsCache();
                 case "memory-factor":
                     return runMemoryFactor(pw);
+                case "service-restart-backoff":
+                    return runServiceRestartBackoff(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3095,6 +3097,28 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int runServiceRestartBackoff(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
+                "runServiceRestartBackoff()");
+
+        final String opt = getNextArgRequired();
+        switch (opt) {
+            case "enable":
+                mInternal.setServiceRestartBackoffEnabled(getNextArgRequired(), true, "shell");
+                return 0;
+            case "disable":
+                mInternal.setServiceRestartBackoffEnabled(getNextArgRequired(), false, "shell");
+                return 0;
+            case "show":
+                pw.println(mInternal.isServiceRestartBackoffEnabled(getNextArgRequired())
+                        ? "enabled" : "disabled");
+                return 0;
+            default:
+                getErrPrintWriter().println("Error: unknown command '" + opt + "'");
+                return -1;
+        }
+    }
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -3418,6 +3442,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("            Shows the existing memory pressure factor");
             pw.println("         reset");
             pw.println("            Removes existing override for memory pressure factor");
+            pw.println("  service-restart-backoff <COMMAND> [...]: sub-commands to toggle service restart backoff policy.");
+            pw.println("         enable|disable <PACKAGE_NAME>");
+            pw.println("            Toggles the restart backoff policy on/off for <PACKAGE_NAME>.");
+            pw.println("         show <PACKAGE_NAME>");
+            pw.println("            Shows the restart backoff policy state for <PACKAGE_NAME>.");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

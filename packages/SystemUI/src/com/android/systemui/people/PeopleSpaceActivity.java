@@ -27,28 +27,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.Outline;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
+import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-/**
- * Shows the user their tiles for their priority People (go/live-status).
- */
+/** People Tile Widget configuration activity that shows the user their conversation tiles. */
 public class PeopleSpaceActivity extends Activity {
 
     private static final String TAG = "PeopleSpaceActivity";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
-    private ViewGroup mPeopleSpaceLayout;
     private IPeopleManager mPeopleManager;
     private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     private INotificationManager mNotificationManager;
@@ -70,8 +75,6 @@ public class PeopleSpaceActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.people_space_activity);
-        mPeopleSpaceLayout = findViewById(R.id.people_space_layout);
         mContext = getApplicationContext();
         mNotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
@@ -79,27 +82,67 @@ public class PeopleSpaceActivity extends Activity {
         mPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
         mLauncherApps = mContext.getSystemService(LauncherApps.class);
-        setTileViewsWithPriorityConversations();
         mAppWidgetId = getIntent().getIntExtra(EXTRA_APPWIDGET_ID,
                 INVALID_APPWIDGET_ID);
         setResult(RESULT_CANCELED);
     }
 
-    /**
-     * Retrieves all priority conversations and sets a {@link PeopleSpaceTileView}s for each
-     * priority conversation.
-     */
-    private void setTileViewsWithPriorityConversations() {
+    /** Builds the conversation selection activity. */
+    private void buildActivity() {
+        List<PeopleSpaceTile> priorityTiles = new ArrayList<>();
+        List<PeopleSpaceTile> recentTiles = new ArrayList<>();
         try {
-            List<PeopleSpaceTile> tiles = PeopleSpaceUtils.getTiles(mContext, mNotificationManager,
+            priorityTiles = PeopleSpaceUtils.getPriorityTiles(mContext, mNotificationManager,
                     mPeopleManager, mLauncherApps, mNotificationEntryManager);
-            for (PeopleSpaceTile tile : tiles) {
-                PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext, mPeopleSpaceLayout,
-                        tile.getId());
-                setTileView(tileView, tile);
-            }
+            recentTiles = PeopleSpaceUtils.getRecentTiles(mContext, mNotificationManager,
+                    mPeopleManager, mLauncherApps, mNotificationEntryManager);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve conversations", e);
+        }
+
+        // If no conversations, render activity without conversations
+        if (recentTiles.isEmpty() && priorityTiles.isEmpty()) {
+            setContentView(R.layout.people_space_activity_no_conversations);
+
+            // The Tile preview has colorBackground as its background. Change it so it's different
+            // than the activity's background.
+            LinearLayout item = findViewById(R.id.item);
+            GradientDrawable shape = (GradientDrawable) item.getBackground();
+            final TypedArray ta = mContext.obtainStyledAttributes(
+                    new int[] {android.R.attr.colorBackgroundFloating});
+            shape.setColor(ta.getColor(0, Color.WHITE));
+            return;
+        }
+
+        setContentView(R.layout.people_space_activity);
+        setTileViews(R.id.priority, R.id.priority_tiles, priorityTiles);
+        setTileViews(R.id.recent, R.id.recent_tiles, recentTiles);
+    }
+
+    private ViewOutlineProvider mViewOutlineProvider = new ViewOutlineProvider() {
+        @Override
+        public void getOutline(View view, Outline outline) {
+            outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(),
+                    mContext.getResources().getDimension(R.dimen.people_space_widget_radius));
+        }
+    };
+
+    /** Sets a {@link PeopleSpaceTileView}s for each conversation. */
+    private void setTileViews(int viewId, int tilesId, List<PeopleSpaceTile> tiles) {
+        if (tiles.isEmpty()) {
+            LinearLayout view = findViewById(viewId);
+            view.setVisibility(View.GONE);
+            return;
+        }
+
+        ViewGroup layout = findViewById(tilesId);
+        layout.setClipToOutline(true);
+        layout.setOutlineProvider(mViewOutlineProvider);
+        for (int i = 0; i < tiles.size(); ++i) {
+            PeopleSpaceTile tile = tiles.get(i);
+            PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext,
+                    layout, tile.getId(), i == (tiles.size() - 1));
+            setTileView(tileView, tile);
         }
     }
 
@@ -107,10 +150,6 @@ public class PeopleSpaceActivity extends Activity {
     private void setTileView(PeopleSpaceTileView tileView, PeopleSpaceTile tile) {
         try {
             String pkg = tile.getPackageName();
-            String status =
-                    PeopleSpaceUtils.getLastInteractionString(mContext,
-                            tile.getLastInteractionTimestamp());
-            tileView.setStatus(status);
 
             tileView.setName(tile.getUserName().toString());
             tileView.setPackageIcon(mPackageManager.getApplicationIcon(pkg));
@@ -141,6 +180,12 @@ public class PeopleSpaceActivity extends Activity {
         finish();
     }
 
+    /** Finish activity without choosing a widget. */
+    public void dismissActivity(View v) {
+        if (DEBUG) Log.d(TAG, "Activity dismissed with no widgets added!");
+        finish();
+    }
+
     private void setActivityResult(int result) {
         Intent resultValue = new Intent();
         resultValue.putExtra(EXTRA_APPWIDGET_ID, mAppWidgetId);
@@ -151,6 +196,12 @@ public class PeopleSpaceActivity extends Activity {
     protected void onResume() {
         super.onResume();
         // Refresh tile views to sync new conversations.
-        setTileViewsWithPriorityConversations();
+        buildActivity();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
     }
 }

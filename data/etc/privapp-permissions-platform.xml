@@ -468,6 +468,8 @@ applications that come with the platform
         <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
         <permission name="android.permission.HDMI_CEC"/>
+        <!-- Permission required for CTS test - MediaPlayerTest -->
+        <permission name="android.permission.BIND_IMS_SERVICE" />
         <!-- Permission needed for CTS test - WifiManagerTest -->
         <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
@@ -497,6 +499,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
         <!-- Permission required for CTS test - ResourceObserverNativeTest -->
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
+        <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+        <permission name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -527,6 +531,11 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.vpndialogs">
         <permission name="android.permission.CONTROL_VPN"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.wallpaper.livepicker">
+        <permission name="android.permission.SET_WALLPAPER_COMPONENT"/>
+        <permission name="android.permission.BIND_WALLPAPER"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.dynsystem">

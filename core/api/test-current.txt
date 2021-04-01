@@ -2904,6 +2904,10 @@ package android.view.inputmethod {
     method @NonNull public static android.view.inputmethod.InlineSuggestionsResponse newInlineSuggestionsResponse(@NonNull java.util.List<android.view.inputmethod.InlineSuggestion>);
   }
 
+  public final class InputMethodInfo implements android.os.Parcelable {
+    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
+  }
+
   public final class InputMethodManager {
     method public int getDisplayId();
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);

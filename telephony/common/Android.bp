@@ -1,0 +1,20 @@
+filegroup {
+    name: "framework-telephony-common-sources",
+    srcs: [
+        "**/*.java",
+        ":statslog-telephony-common-java-gen",
+    ],
+    visibility: [
+        "//frameworks/base",
+        "//frameworks/base/tests/TelephonyCommonTests",
+    ],
+}
+
+genrule {
+    name: "statslog-telephony-common-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module telephony_common" +
+        " --javaPackage com.android.internal.telephony --javaClass TelephonyCommonStatsLog",
+    out: ["com/android/internal/telephony/TelephonyCommonStatsLog.java"],
+    visibility: ["//visibility:private"],
+}

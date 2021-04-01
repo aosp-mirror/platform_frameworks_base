@@ -63,6 +63,7 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -131,7 +132,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final PipAnimationController mPipAnimationController;
     private final PipTransitionController mPipTransitionController;
     private final PipUiEventLogger mPipUiEventLoggerLogger;
-    private final int mEnterExitAnimationDuration;
+    private final int mEnterAnimationDuration;
+    private final int mExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<LegacySplitScreenController> mSplitScreenOptional;
     protected final ShellTaskOrganizer mTaskOrganizer;
@@ -225,8 +227,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipBoundsAlgorithm = boundsHandler;
         mPipMenuController = pipMenuController;
         mPipTransitionController = pipTransitionController;
-        mEnterExitAnimationDuration = context.getResources()
-                .getInteger(R.integer.config_pipResizeAnimationDuration);
+        mEnterAnimationDuration = context.getResources()
+                .getInteger(R.integer.config_pipEnterAnimationDuration);
+        mExitAnimationDuration = context.getResources()
+                .getInteger(R.integer.config_pipExitAnimationDuration);
         mSurfaceTransactionHelper = surfaceTransactionHelper;
         mPipAnimationController = pipAnimationController;
         mPipUiEventLoggerLogger = pipUiEventLogger;
@@ -378,12 +382,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         // removePipImmediately is expected when the following animation finishes.
-        mPipAnimationController
+        ValueAnimator animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, mPipBoundsState.getBounds(), 1f, 0f)
                 .setTransitionDirection(TRANSITION_DIRECTION_REMOVE_STACK)
-                .setPipAnimationCallback(mPipAnimationCallback)
-                .setDuration(mEnterExitAnimationDuration)
-                .start();
+                .setPipAnimationCallback(mPipAnimationCallback);
+        animator.setDuration(mExitAnimationDuration);
+        animator.setInterpolator(Interpolators.ALPHA_OUT);
+        animator.start();
         mState = State.EXITING_PIP;
     }
 
@@ -465,11 +470,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             final Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
                     info.pictureInPictureParams, currentBounds);
             scheduleAnimateResizePip(currentBounds, destinationBounds, 0 /* startingAngle */,
-                    sourceHintRect, TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration,
+                    sourceHintRect, TRANSITION_DIRECTION_TO_PIP, mEnterAnimationDuration,
                     null /* updateBoundsCallback */);
             mState = State.ENTERING_PIP;
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
-            enterPipWithAlphaAnimation(destinationBounds, mEnterExitAnimationDuration);
+            enterPipWithAlphaAnimation(destinationBounds, mEnterAnimationDuration);
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
         } else {
             throw new RuntimeException("Unrecognized animation type: " + mOneShotAnimationType);
@@ -553,7 +558,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
-        if (!mState.isInPip()) {
+        if (mState == State.UNDEFINED) {
             return;
         }
         final WindowContainerToken token = info.token;
@@ -596,7 +601,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect destinationBounds = mPipBoundsAlgorithm.getAdjustedDestinationBounds(
                 mPipBoundsState.getBounds(), mPipBoundsState.getAspectRatio());
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
-        scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration,
+        scheduleAnimateResizePip(destinationBounds, mEnterAnimationDuration,
                 null /* updateBoundsCallback */);
     }
 
@@ -946,6 +951,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 || direction == TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
         // Animate with a cross-fade if enabled and seamless resize is disables by the app.
         final boolean animateCrossFadeResize = mayAnimateFinishResize
+                && mPictureInPictureParams != null
                 && !mPictureInPictureParams.isSeamlessResizeEnabled();
         if (animateCrossFadeResize) {
             // Take a snapshot of the PIP task and hide it. We'll show it and fade it out after
@@ -965,7 +971,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mMainExecutor.execute(() -> {
                     // Start animation to fade out the snapshot.
                     final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
-                    animator.setDuration(mEnterExitAnimationDuration);
+                    animator.setDuration(mEnterAnimationDuration);
                     animator.addUpdateListener(animation -> {
                         final float alpha = (float) animation.getAnimatedValue();
                         final SurfaceControl.Transaction transaction =

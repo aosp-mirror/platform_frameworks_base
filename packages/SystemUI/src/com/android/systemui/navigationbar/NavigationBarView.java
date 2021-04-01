@@ -69,7 +69,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.ContextualButton;
@@ -1357,14 +1356,6 @@ public class NavigationBarView extends FrameLayout implements
         setClipChildren(shouldClip);
         setClipToPadding(shouldClip);
 
-        NavigationBarController navigationBarController =
-                Dependency.get(NavigationBarController.class);
-        AssistHandleViewController controller =
-                navigationBarController == null
-                        ? null : navigationBarController.getAssistHandlerViewController();
-        if (controller != null) {
-            controller.setBottomOffset(insets.getSystemWindowInsetBottom());
-        }
         return super.onApplyWindowInsets(insets);
     }
 

@@ -6202,6 +6202,7 @@ package android.app {
   public class NotificationManager {
     method public String addAutomaticZenRule(android.app.AutomaticZenRule);
     method @Deprecated public boolean areBubblesAllowed();
+    method public boolean areBubblesEnabled();
     method public boolean areNotificationsEnabled();
     method public boolean areNotificationsPaused();
     method public boolean canNotifyAsPackage(@NonNull String);
@@ -7711,7 +7712,7 @@ package android.app.assist {
     method public int getMaxTextEms();
     method public int getMaxTextLength();
     method public int getMinTextEms();
-    method @Nullable public String[] getOnReceiveContentMimeTypes();
+    method @Nullable public String[] getReceiveContentMimeTypes();
     method public int getScrollX();
     method public int getScrollY();
     method @Nullable public CharSequence getText();
@@ -10684,7 +10685,7 @@ package android.content {
     ctor public ContextParams.Builder(@NonNull android.content.ContextParams);
     method @NonNull public android.content.ContextParams build();
     method @NonNull public android.content.ContextParams.Builder setAttributionTag(@Nullable String);
-    method @NonNull public android.content.ContextParams.Builder setNextAttributionSource(@NonNull android.content.AttributionSource);
+    method @NonNull public android.content.ContextParams.Builder setNextAttributionSource(@Nullable android.content.AttributionSource);
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -48230,11 +48231,13 @@ package android.view {
     method public android.graphics.Canvas lockHardwareCanvas();
     method public void readFromParcel(android.os.Parcel);
     method public void release();
-    method public void setFrameRate(@FloatRange(from=0.0) float, int, boolean);
+    method public void setFrameRate(@FloatRange(from=0.0) float, int, int);
     method public void setFrameRate(@FloatRange(from=0.0) float, int);
     method @Deprecated public void unlockCanvas(android.graphics.Canvas);
     method public void unlockCanvasAndPost(android.graphics.Canvas);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CHANGE_FRAME_RATE_ALWAYS = 1; // 0x1
+    field public static final int CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS = 0; // 0x0
     field @NonNull public static final android.os.Parcelable.Creator<android.view.Surface> CREATOR;
     field public static final int FRAME_RATE_COMPATIBILITY_DEFAULT = 0; // 0x0
     field public static final int FRAME_RATE_COMPATIBILITY_FIXED_SOURCE = 1; // 0x1
@@ -48278,7 +48281,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction setAlpha(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0, to=1.0) float);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferSize(@NonNull android.view.SurfaceControl, @IntRange(from=0) int, @IntRange(from=0) int);
     method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int);
-    method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int, boolean);
+    method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int, int);
     method @NonNull public android.view.SurfaceControl.Transaction setGeometry(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect, @Nullable android.graphics.Rect, int);
     method @NonNull public android.view.SurfaceControl.Transaction setLayer(@NonNull android.view.SurfaceControl, @IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) int);
     method @NonNull public android.view.SurfaceControl.Transaction setVisibility(@NonNull android.view.SurfaceControl, boolean);
@@ -48645,7 +48648,6 @@ package android.view {
     method @IdRes public int getNextFocusRightId();
     method @IdRes public int getNextFocusUpId();
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
-    method @Nullable public String[] getOnReceiveContentMimeTypes();
     method @ColorInt public int getOutlineAmbientShadowColor();
     method public android.view.ViewOutlineProvider getOutlineProvider();
     method @ColorInt public int getOutlineSpotShadowColor();
@@ -48662,6 +48664,7 @@ package android.view {
     method public float getPivotX();
     method public float getPivotY();
     method public android.view.PointerIcon getPointerIcon();
+    method @Nullable public String[] getReceiveContentMimeTypes();
     method public android.content.res.Resources getResources();
     method public final boolean getRevealOnFocusHint();
     method public final int getRight();
@@ -48711,6 +48714,7 @@ package android.view {
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarThumbDrawable();
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarTrackDrawable();
     method public int getVerticalScrollbarWidth();
+    method @Nullable public android.view.ViewRoot getViewRoot();
     method @Nullable public android.view.translation.ViewTranslationCallback getViewTranslationCallback();
     method public android.view.ViewTreeObserver getViewTreeObserver();
     method public int getVisibility();
@@ -49787,6 +49791,11 @@ package android.view {
     method public android.view.ViewPropertyAnimator zBy(float);
   }
 
+  @UiThread public interface ViewRoot {
+    method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
+    method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
+  }
+
   public abstract class ViewStructure {
     ctor public ViewStructure();
     method public abstract int addChildCount(int);
@@ -49835,8 +49844,8 @@ package android.view {
     method public void setMaxTextEms(int);
     method public void setMaxTextLength(int);
     method public void setMinTextEms(int);
-    method public void setOnReceiveContentMimeTypes(@Nullable String[]);
     method public abstract void setOpaque(boolean);
+    method public void setReceiveContentMimeTypes(@Nullable String[]);
     method public abstract void setSelected(boolean);
     method public abstract void setText(CharSequence);
     method public abstract void setText(CharSequence, int, int);
@@ -49982,6 +49991,7 @@ package android.view {
     method @NonNull public java.util.List<android.graphics.Rect> getSystemGestureExclusionRects();
     method public long getTransitionBackgroundFadeDuration();
     method public android.transition.TransitionManager getTransitionManager();
+    method @Nullable public android.view.ViewRoot getViewRoot();
     method public abstract int getVolumeControlStream();
     method public android.view.WindowManager getWindowManager();
     method public final android.content.res.TypedArray getWindowStyle();
@@ -51913,6 +51923,7 @@ package android.view.inputmethod {
     method public int describeContents();
     method public void dump(android.util.Printer, String);
     method public android.content.ComponentName getComponent();
+    method public int getConfigChanges();
     method public String getId();
     method public int getIsDefaultResourceId();
     method public String getPackageName();
@@ -52914,8 +52925,9 @@ package android.view.translation {
 
   public static final class ViewTranslationRequest.Builder {
     ctor public ViewTranslationRequest.Builder(@NonNull android.view.autofill.AutofillId);
+    ctor public ViewTranslationRequest.Builder(@NonNull android.view.autofill.AutofillId, long);
     method @NonNull public android.view.translation.ViewTranslationRequest build();
-    method public android.view.translation.ViewTranslationRequest.Builder setValue(String, android.view.translation.TranslationRequestValue);
+    method @NonNull public android.view.translation.ViewTranslationRequest.Builder setValue(@NonNull String, @NonNull android.view.translation.TranslationRequestValue);
   }
 
   public final class ViewTranslationResponse implements android.os.Parcelable {

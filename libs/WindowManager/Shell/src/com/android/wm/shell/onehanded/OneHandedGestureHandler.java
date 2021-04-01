@@ -63,7 +63,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback {
     private boolean mIsEnabled;
     private int mNavGestureHeight;
     private boolean mIsThreeButtonModeEnabled;
-    private int mRotation;
+    private int mRotation = Surface.ROTATION_0;
 
     @VisibleForTesting
     InputMonitor mInputMonitor;

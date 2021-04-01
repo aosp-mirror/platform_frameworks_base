@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.assist;
+package com.android.systemui.shared.system;
 
-public enum AssistHandleBehavior {
+import android.view.SurfaceControl;
+import android.window.TransitionInfo;
 
-    TEST,
-    OFF,
-    LIKE_HOME,
-    REMINDER_EXP;
+/** Interface for something that runs a remote transition animation. */
+public interface RemoteTransitionRunner {
+    /**
+     * Starts a transition animation. Once complete, the implementation should call
+     * `finishCallback`.
+     */
+    void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+            Runnable finishCallback);
 }

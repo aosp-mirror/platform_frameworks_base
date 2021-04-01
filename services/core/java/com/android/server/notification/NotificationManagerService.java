@@ -3306,6 +3306,20 @@ public class NotificationManagerService extends SystemService {
                     == BUBBLE_PREFERENCE_ALL;
         }
 
+        /**
+         * @return true if this user has bubbles enabled at the feature-level.
+         */
+        @Override
+        public boolean areBubblesEnabled(UserHandle user) {
+            if (UserHandle.getCallingUserId() != user.getIdentifier()) {
+                getContext().enforceCallingPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        "areBubblesEnabled for user " + user.getIdentifier());
+            }
+            // TODO: incorporate uid / per-user prefs once settings moves off global table.
+            return mPreferencesHelper.bubblesEnabled();
+        }
+
         @Override
         public int getBubblePreferenceForPackage(String pkg, int uid) {
             enforceSystemOrSystemUIOrSamePackage(pkg,

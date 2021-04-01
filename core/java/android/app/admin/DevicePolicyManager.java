@@ -306,10 +306,12 @@ public class DevicePolicyManager {
      * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
      * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
      *
-     * @deprecated admin apps must now implement activities with intent filters for the {@link
-     * #ACTION_GET_PROVISIONING_MODE} and {@link #ACTION_ADMIN_POLICY_COMPLIANCE} intent actions;
-     * using {@link #ACTION_PROVISION_MANAGED_DEVICE} to start provisioning will cause the
-     * provisioning to fail.
+     * @deprecated to support {@link android.os.Build.VERSION_CODES#S} and later, admin apps must
+     * implement activities with intent filters for the {@link #ACTION_GET_PROVISIONING_MODE} and
+     * {@link #ACTION_ADMIN_POLICY_COMPLIANCE} intent actions; using {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE} to start provisioning will cause the provisioning to fail;
+     * to additionally support pre-{@link android.os.Build.VERSION_CODES#S}, admin apps must also
+     * continue to use this constant.
      */
     @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -1275,6 +1277,13 @@ public class DevicePolicyManager {
     /**
      * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
      * trigger is persistent device owner enrollment.
+     * <p>This constant is meant to represent a specific type of managed account provisioning which
+     * provisions a device to a device owner by invoking the standard provisioning flow (where
+     * the ManagedProvisioning component downloads and installs the admin app), as opposed to
+     * relying on the provisioning trigger to handle download and install of the admin app.
+     * <p>As of {@link android.os.Build.VERSION_CODES#S}, this constant is no longer used in favor
+     * of the more general {@link #PROVISIONING_TRIGGER_MANAGED_ACCOUNT} which handles all managed
+     * account provisioning types.
      * @deprecated Use the broader {@link #PROVISIONING_TRIGGER_MANAGED_ACCOUNT} instead
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
@@ -1288,6 +1297,7 @@ public class DevicePolicyManager {
     /**
      * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
      * trigger is managed account enrollment.
+     * <p>
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
@@ -2704,7 +2714,13 @@ public class DevicePolicyManager {
     public static final int PROVISIONING_MODE_MANAGED_PROFILE = 2;
 
     /**
-     * The provisioning mode for a work profile on a personal device.
+     * The provisioning mode for a managed profile on a personal device.
+     * <p>This mode is only available when the provisioning initiator has explicitly instructed the
+     * provisioning flow to support managed profile on a personal device provisioning. In that case,
+     * {@link #PROVISIONING_MODE_MANAGED_PROFILE} corresponds to an organization-owned managed
+     * profile, whereas this constant corresponds to a personally-owned managed profile.
+     *
+     * @see #EXTRA_PROVISIONING_MODE
      */
     public static final int PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE = 3;
 

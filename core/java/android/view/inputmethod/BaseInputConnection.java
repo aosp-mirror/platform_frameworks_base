@@ -938,12 +938,12 @@ public class BaseInputConnection implements InputConnection {
 
     /**
      * Default implementation which invokes {@link View#performReceiveContent} on the target
-     * view if the view {@link View#getOnReceiveContentMimeTypes allows} content insertion;
+     * view if the view {@link View#getReceiveContentMimeTypes allows} content insertion;
      * otherwise returns false without any side effects.
      */
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         ClipDescription description = inputContentInfo.getDescription();
-        if (mTargetView.getOnReceiveContentMimeTypes() == null) {
+        if (mTargetView.getReceiveContentMimeTypes() == null) {
             if (DEBUG) {
                 Log.d(TAG, "Can't insert content from IME: content=" + description);
             }

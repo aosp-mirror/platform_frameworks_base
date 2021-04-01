@@ -77,7 +77,7 @@
 
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_gray">#ffcccccc</color>
-    <color name="biometric_dialog_accent">#ff80cbc4</color> <!-- light teal -->
+    <color name="biometric_dialog_accent">@android:color/system_accent1_300</color>
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
 
     <!-- UDFPS colors -->

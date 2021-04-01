@@ -87,7 +87,7 @@ class BrightnessSliderTest : SysuiTestCase() {
         whenever(mirrorController.toggleSlider).thenReturn(mirror)
         whenever(motionEvent.copy()).thenReturn(motionEvent)
 
-        mController = BrightnessSlider(rootView, brightnessSliderView, true, mFalsingManager)
+        mController = BrightnessSlider(rootView, brightnessSliderView, mFalsingManager)
         mController.init()
         mController.setOnChangedListener(listener)
     }
@@ -158,21 +158,6 @@ class BrightnessSliderTest : SysuiTestCase() {
         verify(mirror).isChecked = checked
         verify(mirror).value = progress
         verify(brightnessSliderView).setOnDispatchTouchEventListener(notNull())
-    }
-
-    @Test
-    fun testSettingMirrorWhenNotUseMirrorIsNoOp() {
-        val otherController = BrightnessSlider(
-                rootView, brightnessSliderView, false, mFalsingManager)
-        otherController.init()
-
-        otherController.setMirrorControllerAndMirror(mirrorController)
-
-        verify(brightnessSliderView, never()).max
-        verify(brightnessSliderView, never()).value
-        verify(brightnessSliderView, never()).isChecked
-        verify(brightnessSliderView, never()).setOnDispatchTouchEventListener(
-                any(BrightnessSliderView.DispatchTouchEventListener::class.java))
     }
 
     @Test

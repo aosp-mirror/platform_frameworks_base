@@ -202,6 +202,7 @@ cc_library_shared {
                 "com_android_internal_content_om_OverlayConfig.cpp",
                 "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
+                "com_android_internal_os_DmabufInfoReader.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
                 "com_android_internal_os_KernelCpuBpfTracking.cpp",
                 "com_android_internal_os_KernelCpuTotalBpfMapReader.cpp",

@@ -83,7 +83,7 @@ static void EmitDiffLine(const Source& source, const StringPiece& message) {
 }
 
 static bool IsSymbolVisibilityDifferent(const Visibility& vis_a, const Visibility& vis_b) {
-  return vis_a.level != vis_b.level;
+  return vis_a.level != vis_b.level || vis_a.staged_api != vis_b.staged_api;
 }
 
 template <typename Id>
@@ -176,17 +176,23 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
       diff = true;
     } else {
       const auto& entry_a = *entry_a_iter;
-      const auto& entry_b = *entry_a_iter;
+      const auto& entry_b = *entry_b_iter;
       if (IsSymbolVisibilityDifferent(entry_a->visibility, entry_b->visibility)) {
         std::stringstream str_stream;
         str_stream << pkg_a.name << ":" << type_a.type << "/" << entry_a->name
                    << " has different visibility (";
+        if (entry_b->visibility.staged_api) {
+          str_stream << "STAGED ";
+        }
         if (entry_b->visibility.level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
         }
         str_stream << " vs ";
+        if (entry_a->visibility.staged_api) {
+          str_stream << "STAGED ";
+        }
         if (entry_a->visibility.level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
@@ -218,6 +224,12 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
       diff |= EmitResourceEntryDiff(context, apk_a, pkg_a, type_a, entry_a, apk_b, pkg_b, type_b,
                                     entry_b);
     }
+    if (entry_a_iter != type_a.entries.end()) {
+      ++entry_a_iter;
+    }
+    if (entry_b_iter != type_b.entries.end()) {
+      ++entry_b_iter;
+    }
   }
   return diff;
 }
@@ -242,16 +254,18 @@ static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
-      if (type_a_iter->visibility_level != type_b_iter->visibility_level) {
+      const auto& type_a = *type_a_iter;
+      const auto& type_b = *type_b_iter;
+      if (type_a.visibility_level != type_b.visibility_level) {
         std::stringstream str_stream;
-        str_stream << pkg_a.name << ":" << type_a_iter->type << " has different visibility (";
-        if (type_b_iter->visibility_level == Visibility::Level::kPublic) {
+        str_stream << pkg_a.name << ":" << type_a.type << " has different visibility (";
+        if (type_b.visibility_level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
         }
         str_stream << " vs ";
-        if (type_a_iter->visibility_level == Visibility::Level::kPublic) {
+        if (type_a.visibility_level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
@@ -259,18 +273,17 @@ static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
         str_stream << ")";
         EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
-      } else if (IsIdDiff(type_a_iter->visibility_level, type_a_iter->id,
-                          type_b_iter->visibility_level, type_b_iter->id)) {
+      } else if (IsIdDiff(type_a.visibility_level, type_a.id, type_b.visibility_level, type_b.id)) {
         std::stringstream str_stream;
-        str_stream << pkg_a.name << ":" << type_a_iter->type << " has different public ID (";
-        if (type_b_iter->id) {
-          str_stream << "0x" << std::hex << type_b_iter->id.value();
+        str_stream << pkg_a.name << ":" << type_a.type << " has different public ID (";
+        if (type_b.id) {
+          str_stream << "0x" << std::hex << type_b.id.value();
         } else {
           str_stream << "none";
         }
         str_stream << " vs ";
-        if (type_a_iter->id) {
-          str_stream << "0x " << std::hex << type_a_iter->id.value();
+        if (type_a.id) {
+          str_stream << "0x " << std::hex << type_a.id.value();
         } else {
           str_stream << "none";
         }
@@ -278,7 +291,13 @@ static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
         EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
       }
-      diff |= EmitResourceTypeDiff(context, apk_a, pkg_a, *type_a_iter, apk_b, pkg_b, *type_b_iter);
+      diff |= EmitResourceTypeDiff(context, apk_a, pkg_a, type_a, apk_b, pkg_b, type_b);
+    }
+    if (type_a_iter != pkg_a.types.end()) {
+      ++type_a_iter;
+    }
+    if (type_b_iter != pkg_b.types.end()) {
+      ++type_b_iter;
     }
   }
   return diff;
@@ -305,17 +324,19 @@ static bool EmitResourceTableDiff(IAaptContext* context, LoadedApk* apk_a, Loade
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
-      if (package_a_iter->id != package_b_iter->id) {
+      const auto& package_a = *package_a_iter;
+      const auto& package_b = *package_b_iter;
+      if (package_a.id != package_b.id) {
         std::stringstream str_stream;
-        str_stream << "package '" << package_a_iter->name << "' has different id (";
-        if (package_b_iter->id) {
-          str_stream << "0x" << std::hex << package_b_iter->id.value();
+        str_stream << "package '" << package_a.name << "' has different id (";
+        if (package_b.id) {
+          str_stream << "0x" << std::hex << package_b.id.value();
         } else {
           str_stream << "none";
         }
         str_stream << " vs ";
-        if (package_a_iter->id) {
-          str_stream << "0x" << std::hex << package_b_iter->id.value();
+        if (package_a.id) {
+          str_stream << "0x" << std::hex << package_b.id.value();
         } else {
           str_stream << "none";
         }
@@ -323,7 +344,13 @@ static bool EmitResourceTableDiff(IAaptContext* context, LoadedApk* apk_a, Loade
         EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
       }
-      diff |= EmitResourcePackageDiff(context, apk_a, *package_a_iter, apk_b, *package_b_iter);
+      diff |= EmitResourcePackageDiff(context, apk_a, package_a, apk_b, package_b);
+    }
+    if (package_a_iter != table_a.packages.end()) {
+      ++package_a_iter;
+    }
+    if (package_b_iter != table_b.packages.end()) {
+      ++package_b_iter;
     }
   }
 
