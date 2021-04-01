@@ -1887,6 +1887,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return selectedTheme;
     }
 
+    // Whether this activity launched from system or Home or SystemUI
+    private boolean launchedFromSystemSurface() {
+        return launchedFromUid == Process.SYSTEM_UID || launchedFromUid == Process.ROOT_UID
+                || launchedFromHomeProcess
+                || mAtmService.getSysUiServiceComponentLocked().getPackageName().equals(
+                        launchedFromPackage);
+    }
+
     private boolean validateStartingWindowTheme(String pkg, int theme) {
         // If this is a translucent window, then don't show a starting window -- the current
         // effect (a full-screen opaque starting window that fades away to the real contents
@@ -1913,7 +1921,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     "Translucent=%s Floating=%s ShowWallpaper=%s Disable=%s",
                     windowIsTranslucent, windowIsFloating, windowShowWallpaper,
                     windowDisableStarting);
-            if (windowIsTranslucent || windowIsFloating || windowDisableStarting) {
+            // If this activity is launched from system surface, ignore windowDisableStarting
+            if (windowIsTranslucent || windowIsFloating
+                    || (windowDisableStarting && !launchedFromSystemSurface())) {
                 return false;
             }
             if (windowShowWallpaper
