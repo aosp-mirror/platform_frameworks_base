@@ -143,7 +143,7 @@ import java.util.TreeSet;
 // the network is no longer considered "lingering". After the linger timer expires, if the network
 // is satisfying one or more background NetworkRequests it is kept up in the background. If it is
 // not, ConnectivityService disconnects the NetworkAgent's AsyncChannel.
-public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
+public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRanker.Scoreable {
 
     @NonNull public NetworkInfo networkInfo;
     // This Network object should always be used if possible, so as to encourage reuse of the
@@ -890,7 +890,15 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return isVPN();
     }
 
-    public FullScore getScore() {
+    // Caller must not mutate. This method is called frequently and making a defensive copy
+    // would be too expensive. This is used by NetworkRanker.Scoreable, so it can be compared
+    // against other scoreables.
+    @Override public NetworkCapabilities getCaps() {
+        return networkCapabilities;
+    }
+
+    // NetworkRanker.Scoreable
+    @Override public FullScore getScore() {
         return mScore;
     }
 
