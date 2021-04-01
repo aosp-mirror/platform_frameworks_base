@@ -292,6 +292,11 @@ public class NotificationShadeWindowViewController {
             }
 
             @Override
+            public void dispatchTouchEventComplete() {
+                mFalsingCollector.onMotionEventComplete();
+            }
+
+            @Override
             public boolean shouldInterceptTouchEvent(MotionEvent ev) {
                 if (mStatusBarStateController.isDozing() && !mService.isPulsing()
                         && !mDockManager.isDocked()) {
