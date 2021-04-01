@@ -788,6 +788,14 @@ filegroup {
     path: "core/java",
 }
 
+filegroup {
+    name: "activity_manager_procstate_aidl",
+    srcs: [
+        // internal only
+    ],
+    path: "core/java",
+}
+
 aidl_interface {
     name: "libincremental_aidl",
     unstable: true,
