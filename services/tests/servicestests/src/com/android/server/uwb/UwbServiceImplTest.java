@@ -16,6 +16,8 @@
 
 package com.android.server.uwb;
 
+import static android.Manifest.permission.UWB_PRIVILEGED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
@@ -24,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -295,5 +298,17 @@ public class UwbServiceImplTest {
         verify(cb).onRangingClosed(
                 eq(sessionHandle), eq(RangingSession.Callback.REASON_UNKNOWN),
                 argThat((p) -> p.isEmpty()));
+    }
+
+    @Test
+    public void testThrowSecurityExceptionWhenCalledWithoutUwbPrivilegedPermission()
+            throws Exception {
+        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
+                eq(UWB_PRIVILEGED), any());
+        final IUwbAdapterStateCallbacks cb = mock(IUwbAdapterStateCallbacks.class);
+        try {
+            mUwbServiceImpl.registerAdapterStateCallbacks(cb);
+            fail();
+        } catch (SecurityException e) { /* pass */ }
     }
 }
