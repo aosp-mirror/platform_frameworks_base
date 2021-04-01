@@ -16,35 +16,27 @@
 
 package com.android.systemui.people;
 
-import android.app.people.IPeopleManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.android.systemui.Dependency;
+import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.shared.system.PeopleProviderUtils;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 /** API that returns a People Tile preview. */
 public class PeopleProvider extends ContentProvider {
-
-    LauncherApps mLauncherApps;
-    IPeopleManager mPeopleManager;
-    NotificationEntryManager mNotificationEntryManager;
-
     private static final String TAG = "PeopleProvider";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
     private static final String EMPTY_STRING = "";
+
+    PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
 
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
@@ -83,17 +75,11 @@ public class PeopleProvider extends ContentProvider {
             throw new IllegalArgumentException("Null user handle");
         }
 
-        // If services are not set as mocks in tests, fetch them now.
-        mPeopleManager = mPeopleManager != null ? mPeopleManager
-                : IPeopleManager.Stub.asInterface(
-                        ServiceManager.getService(Context.PEOPLE_SERVICE));
-        mLauncherApps = mLauncherApps != null ? mLauncherApps
-                : getContext().getSystemService(LauncherApps.class);
-        mNotificationEntryManager = mNotificationEntryManager != null ? mNotificationEntryManager
-                : Dependency.get(NotificationEntryManager.class);
-
-        RemoteViews view = PeopleSpaceUtils.getPreview(getContext(), mPeopleManager, mLauncherApps,
-                mNotificationEntryManager, shortcutId, userHandle, packageName, extras);
+        if (mPeopleSpaceWidgetManager == null) {
+            mPeopleSpaceWidgetManager = new PeopleSpaceWidgetManager(getContext());
+        }
+        RemoteViews view =
+                mPeopleSpaceWidgetManager.getPreview(shortcutId, userHandle, packageName, extras);
         if (view == null) {
             if (DEBUG) Log.d(TAG, "No preview available for shortcutId: " + shortcutId);
             return null;
