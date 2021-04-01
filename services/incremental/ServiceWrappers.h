@@ -56,8 +56,8 @@ public:
     virtual binder::Status bindMount(const std::string& sourceDir,
                                      const std::string& targetDir) const = 0;
     virtual binder::Status setIncFsMountOptions(
-            const os::incremental::IncrementalFileSystemControlParcel& control,
-            bool enableReadLogs) const = 0;
+            const os::incremental::IncrementalFileSystemControlParcel& control, bool enableReadLogs,
+            bool enableReadTimeouts) const = 0;
 };
 
 class DataLoaderManagerWrapper {
@@ -117,7 +117,7 @@ public:
     virtual ErrorCode reserveSpace(const Control& control, FileId id, IncFsSize size) const = 0;
     virtual WaitResult waitForPendingReads(
             const Control& control, std::chrono::milliseconds timeout,
-            std::vector<incfs::ReadInfo>* pendingReadsBuffer) const = 0;
+            std::vector<incfs::ReadInfoWithUid>* pendingReadsBuffer) const = 0;
     virtual ErrorCode setUidReadTimeouts(
             const Control& control,
             const std::vector<::android::os::incremental::PerUidReadTimeouts>& perUidReadTimeouts)
