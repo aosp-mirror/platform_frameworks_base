@@ -35,15 +35,8 @@
 
             <ImageView
                 android:id="@+id/tile_view_person_icon"
-                android:layout_width="48dp"
-                android:layout_height="48dp" />
-
-            <ImageView
-                android:id="@+id/tile_view_package_icon"
-                android:layout_width="16dp"
-                android:layout_marginStart="-8dp"
-                android:layout_marginTop="32dp"
-                android:layout_height="16dp" />
+                android:layout_width="52dp"
+                android:layout_height="52dp" />
 
             <LinearLayout
                 android:orientation="horizontal"
