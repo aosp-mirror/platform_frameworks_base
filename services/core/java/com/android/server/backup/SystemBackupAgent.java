@@ -94,7 +94,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         mUserId = user.getIdentifier();
 
         addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this, mUserId));
-        addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
+        addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper(mUserId));
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(mUserId));
         addHelper(PERMISSION_HELPER, new PermissionBackupHelper(mUserId));
         addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(this));
