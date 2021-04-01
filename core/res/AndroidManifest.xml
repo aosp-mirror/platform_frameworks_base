@@ -2758,8 +2758,12 @@
     <permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
         android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier" />
 
-    <!-- Allows an application to start foreground services from background, can only be granted to
-         privileged apps or app that is SMS/EMERGENCY/SYSTEM GALLERY roles. -->
+    <!-- Allows an application to start foreground services from the background at any time.
+         <em>This permission is not for use by third-party applications</em>,
+         with the only exception being if the app is the default SMS app.
+         Otherwise, it's only usable by privileged apps, app verifier app, and apps with
+         any of the EMERGENCY or SYSTEM GALLERY roles.
+         -->
     <permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
                 android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier|role"/>
 
