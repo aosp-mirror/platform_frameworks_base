@@ -956,7 +956,6 @@ public abstract class NetworkAgent {
      * Must be called by the agent to update the score of this network.
      *
      * @param score the new score.
-     * @hide TODO : unhide when impl is complete
      */
     public final void sendNetworkScore(@NonNull NetworkScore score) {
         Objects.requireNonNull(score);
