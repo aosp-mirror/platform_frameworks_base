@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
 import android.os.Build;
@@ -60,7 +61,7 @@ public class NotificationTest {
     public void testColorizedByPermission() {
         Notification n = new Notification.Builder(mContext, "test")
                 .setFlag(Notification.FLAG_CAN_COLORIZE, true)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertTrue(n.isColorized());
 
@@ -71,7 +72,7 @@ public class NotificationTest {
 
         n = new Notification.Builder(mContext, "test")
                 .setFlag(Notification.FLAG_CAN_COLORIZE, false)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertFalse(n.isColorized());
     }
@@ -80,7 +81,7 @@ public class NotificationTest {
     public void testColorizedByForeground() {
         Notification n = new Notification.Builder(mContext, "test")
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertTrue(n.isColorized());
 
@@ -91,7 +92,7 @@ public class NotificationTest {
 
         n = new Notification.Builder(mContext, "test")
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, false)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertFalse(n.isColorized());
     }
