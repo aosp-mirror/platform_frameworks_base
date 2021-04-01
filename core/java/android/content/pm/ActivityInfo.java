@@ -901,6 +901,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     @ChangeId
+    @Overridable
     @Disabled
     @TestApi
     public static final long FORCE_RESIZE_APP = 174042936L; // buganizer id
@@ -910,6 +911,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     @ChangeId
+    @Overridable
     @Disabled
     @TestApi
     public static final long FORCE_NON_RESIZE_APP = 181136395L; // buganizer id
