@@ -210,6 +210,7 @@ public class QSDetail extends LinearLayout {
             mDetailAdapter = adapter;
             listener = mHideGridContentWhenDone;
             setVisibility(View.VISIBLE);
+            updateDetailText();
         } else {
             if (wasShowingDetail) {
                 Dependency.get(MetricsLogger.class).hidden(mDetailAdapter.getMetricsCategory());
@@ -223,7 +224,6 @@ public class QSDetail extends LinearLayout {
             mQsPanelController.setGridContentVisibility(true);
             mQsPanelCallback.onScanStateChanged(false);
         }
-        updateDetailText();
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
 
         if (mShouldAnimate) {
