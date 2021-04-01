@@ -17,6 +17,7 @@
 package com.android.server.uwb;
 
 import android.annotation.NonNull;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.PersistableBundle;
@@ -60,13 +61,16 @@ public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRec
      * Access to these callbacks are synchronized.
      */
     private class UwbRangingCallbacksWrapper extends IUwbRangingCallbacks.Stub
-            implements IBinder.DeathRecipient{
+            implements IBinder.DeathRecipient {
+        private final AttributionSource mAttributionSource;
         private final SessionHandle mSessionHandle;
         private final IUwbRangingCallbacks mExternalCb;
         private boolean mIsValid;
 
-        UwbRangingCallbacksWrapper(@NonNull SessionHandle sessionHandle,
+        UwbRangingCallbacksWrapper(@NonNull AttributionSource attributionSource,
+                @NonNull SessionHandle sessionHandle,
                 @NonNull IUwbRangingCallbacks externalCb) {
+            mAttributionSource = attributionSource;
             mSessionHandle = sessionHandle;
             mExternalCb = externalCb;
             mIsValid = true;
@@ -167,7 +171,12 @@ public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRec
                 RangingReport rangingReport)
                 throws RemoteException {
             if (!mIsValid) return;
-            // TODO: Perform runtime permission checks and noteOp.
+            if (!mUwbInjector.checkUwbRangingPermissionForDataDelivery(
+                    mAttributionSource, "uwb ranging result")) {
+                Log.e(TAG, "Not delivering ranging result because of permission denial"
+                        + mSessionHandle);
+                return;
+            }
             mExternalCb.onRangingResult(sessionHandle, rangingReport);
         }
 
@@ -261,22 +270,24 @@ public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRec
     }
 
     @Override
-    public void openRanging(SessionHandle sessionHandle, IUwbRangingCallbacks rangingCallbacks,
+    public void openRanging(AttributionSource attributionSource,
+            SessionHandle sessionHandle, IUwbRangingCallbacks rangingCallbacks,
             PersistableBundle parameters) throws RemoteException {
         enforceUwbPrivilegedPermission();
+        mUwbInjector.enforceUwbRangingPermissionForPreflight(attributionSource);
+
         UwbRangingCallbacksWrapper wrapperCb =
-                new UwbRangingCallbacksWrapper(sessionHandle, rangingCallbacks);
+                new UwbRangingCallbacksWrapper(attributionSource, sessionHandle, rangingCallbacks);
         synchronized (mCallbacksMap) {
             mCallbacksMap.put(sessionHandle, wrapperCb);
         }
-        getVendorUwbAdapter().openRanging(sessionHandle, wrapperCb, parameters);
+        getVendorUwbAdapter().openRanging(attributionSource, sessionHandle, wrapperCb, parameters);
     }
 
     @Override
     public void startRanging(SessionHandle sessionHandle, PersistableBundle parameters)
             throws RemoteException {
         enforceUwbPrivilegedPermission();
-        // TODO: Perform runtime apermission checks.
         getVendorUwbAdapter().startRanging(sessionHandle, parameters);
     }
 

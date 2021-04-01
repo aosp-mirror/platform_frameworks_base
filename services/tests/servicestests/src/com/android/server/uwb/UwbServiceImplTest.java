@@ -32,6 +32,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.PersistableBundle;
@@ -61,6 +62,11 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @Presubmit
 public class UwbServiceImplTest {
+    private static final int UID = 343453;
+    private static final String PACKAGE_NAME = "com.uwb.test";
+    private static final AttributionSource ATTRIBUTION_SOURCE =
+            new AttributionSource.Builder(UID).setPackageName(PACKAGE_NAME).build();
+
     @Mock private IUwbAdapter mVendorService;
     @Mock private IBinder mVendorServiceBinder;
     @Mock private Context mContext;
@@ -75,6 +81,7 @@ public class UwbServiceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mUwbInjector.getVendorService()).thenReturn(mVendorService);
+        when(mUwbInjector.checkUwbRangingPermissionForDataDelivery(any(), any())).thenReturn(true);
         when(mVendorService.asBinder()).thenReturn(mVendorServiceBinder);
         mUwbServiceImpl = new UwbServiceImpl(mContext, mUwbInjector);
     }
@@ -132,10 +139,11 @@ public class UwbServiceImplTest {
         final IBinder cbBinder = mock(IBinder.class);
         when(cb.asBinder()).thenReturn(cbBinder);
 
-        mUwbServiceImpl.openRanging(sessionHandle, cb, parameters);
+        mUwbServiceImpl.openRanging(ATTRIBUTION_SOURCE, sessionHandle, cb, parameters);
 
         verify(mVendorService).openRanging(
-                eq(sessionHandle), mRangingCbCaptor.capture(), eq(parameters));
+                eq(ATTRIBUTION_SOURCE), eq(sessionHandle), mRangingCbCaptor.capture(),
+                eq(parameters));
         assertThat(mRangingCbCaptor.getValue()).isNotNull();
     }
 
@@ -185,10 +193,11 @@ public class UwbServiceImplTest {
         final IBinder cbBinder = mock(IBinder.class);
         when(cb.asBinder()).thenReturn(cbBinder);
 
-        mUwbServiceImpl.openRanging(sessionHandle, cb, parameters);
+        mUwbServiceImpl.openRanging(ATTRIBUTION_SOURCE, sessionHandle, cb, parameters);
 
         verify(mVendorService).openRanging(
-                eq(sessionHandle), mRangingCbCaptor.capture(), eq(parameters));
+                eq(ATTRIBUTION_SOURCE), eq(sessionHandle), mRangingCbCaptor.capture(),
+                eq(parameters));
         assertThat(mRangingCbCaptor.getValue()).isNotNull();
 
         // Invoke vendor service callbacks and ensure that the corresponding app callback is
@@ -245,10 +254,11 @@ public class UwbServiceImplTest {
         final IBinder cbBinder = mock(IBinder.class);
         when(cb.asBinder()).thenReturn(cbBinder);
 
-        mUwbServiceImpl.openRanging(sessionHandle, cb, parameters);
+        mUwbServiceImpl.openRanging(ATTRIBUTION_SOURCE, sessionHandle, cb, parameters);
 
         verify(mVendorService).openRanging(
-                eq(sessionHandle), mRangingCbCaptor.capture(), eq(parameters));
+                eq(ATTRIBUTION_SOURCE), eq(sessionHandle), mRangingCbCaptor.capture(),
+                eq(parameters));
         assertThat(mRangingCbCaptor.getValue()).isNotNull();
 
         verify(cbBinder).linkToDeath(mClientDeathCaptor.capture(), anyInt());
@@ -278,13 +288,14 @@ public class UwbServiceImplTest {
         final IBinder cbBinder = mock(IBinder.class);
         when(cb.asBinder()).thenReturn(cbBinder);
 
-        mUwbServiceImpl.openRanging(sessionHandle, cb, parameters);
+        mUwbServiceImpl.openRanging(ATTRIBUTION_SOURCE, sessionHandle, cb, parameters);
 
         verify(mVendorServiceBinder).linkToDeath(mVendorServiceDeathCaptor.capture(), anyInt());
         assertThat(mVendorServiceDeathCaptor.getValue()).isNotNull();
 
         verify(mVendorService).openRanging(
-                eq(sessionHandle), mRangingCbCaptor.capture(), eq(parameters));
+                eq(ATTRIBUTION_SOURCE), eq(sessionHandle), mRangingCbCaptor.capture(),
+                eq(parameters));
         assertThat(mRangingCbCaptor.getValue()).isNotNull();
 
         clearInvocations(cb);
@@ -310,5 +321,45 @@ public class UwbServiceImplTest {
             mUwbServiceImpl.registerAdapterStateCallbacks(cb);
             fail();
         } catch (SecurityException e) { /* pass */ }
+    }
+
+    @Test
+    public void testThrowSecurityExceptionWhenOpenRangingCalledWithoutUwbRangingPermission()
+            throws Exception {
+        doThrow(new SecurityException()).when(mUwbInjector).enforceUwbRangingPermissionForPreflight(
+                any());
+
+        final SessionHandle sessionHandle = new SessionHandle(5);
+        final IUwbRangingCallbacks cb = mock(IUwbRangingCallbacks.class);
+        final PersistableBundle parameters = new PersistableBundle();
+        final IBinder cbBinder = mock(IBinder.class);
+        when(cb.asBinder()).thenReturn(cbBinder);
+        try {
+            mUwbServiceImpl.openRanging(ATTRIBUTION_SOURCE, sessionHandle, cb, parameters);
+            fail();
+        } catch (SecurityException e) { /* pass */ }
+    }
+
+    @Test
+    public void testOnRangingResultCallbackNotSentWithoutUwbRangingPermission() throws Exception {
+        final SessionHandle sessionHandle = new SessionHandle(5);
+        final IUwbRangingCallbacks cb = mock(IUwbRangingCallbacks.class);
+        final PersistableBundle parameters = new PersistableBundle();
+        final IBinder cbBinder = mock(IBinder.class);
+        when(cb.asBinder()).thenReturn(cbBinder);
+
+        mUwbServiceImpl.openRanging(ATTRIBUTION_SOURCE, sessionHandle, cb, parameters);
+
+        verify(mVendorService).openRanging(
+                eq(ATTRIBUTION_SOURCE), eq(sessionHandle), mRangingCbCaptor.capture(),
+                eq(parameters));
+        assertThat(mRangingCbCaptor.getValue()).isNotNull();
+
+        when(mUwbInjector.checkUwbRangingPermissionForDataDelivery(any(), any())).thenReturn(false);
+
+        // Ensure the ranging cb is not delivered to the client.
+        final RangingReport rangingReport = new RangingReport.Builder().build();
+        mRangingCbCaptor.getValue().onRangingResult(sessionHandle, rangingReport);
+        verify(cb, never()).onRangingResult(sessionHandle, rangingReport);
     }
 }
