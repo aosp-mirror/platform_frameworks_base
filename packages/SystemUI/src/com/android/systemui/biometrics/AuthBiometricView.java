@@ -379,7 +379,9 @@ public abstract class AuthBiometricView extends LinearLayout {
                     } else {
                         mNegativeButton.setVisibility(View.VISIBLE);
                     }
-                    mTryAgainButton.setVisibility(View.VISIBLE);
+                    if (supportsManualRetry()) {
+                        mTryAgainButton.setVisibility(View.VISIBLE);
+                    }
 
                     if (!TextUtils.isEmpty(mSubtitleView.getText())) {
                         mSubtitleView.setVisibility(View.VISIBLE);
@@ -460,6 +462,10 @@ public abstract class AuthBiometricView extends LinearLayout {
             Log.e(TAG, "Unknown transition from: " + mSize + " to: " + newSize);
         }
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
+    }
+
+    protected boolean supportsManualRetry() {
+        return false;
     }
 
     public void updateState(@BiometricState int newState) {
@@ -749,7 +755,9 @@ public abstract class AuthBiometricView extends LinearLayout {
         for (int i = 0; i < numChildren; i++) {
             final View child = getChildAt(i);
 
-            if (child.getId() == R.id.space_above_icon) {
+            if (child.getId() == R.id.space_above_icon
+                    || child.getId() == R.id.space_below_icon
+                    || child.getId() == R.id.button_bar) {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
@@ -765,11 +773,6 @@ public abstract class AuthBiometricView extends LinearLayout {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
-            }  else if (child.getId() == R.id.button_bar) {
-                child.measure(
-                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
-                                MeasureSpec.EXACTLY));
             } else {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
