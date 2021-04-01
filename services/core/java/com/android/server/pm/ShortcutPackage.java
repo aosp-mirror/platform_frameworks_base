@@ -56,7 +56,6 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.ArrayUtils;
@@ -116,6 +115,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_NAME = "name";
     private static final String ATTR_CALL_COUNT = "call-count";
     private static final String ATTR_LAST_RESET = "last-reset";
+    private static final String ATTR_SCHEMA_VERSON = "schema-version";
     private static final String ATTR_ID = "id";
     private static final String ATTR_ACTIVITY = "activity";
     private static final String ATTR_TITLE = "title";
@@ -188,8 +188,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
 
-    @GuardedBy("mLock")
-    private AppSearchSession mAppSearchSession;
+    private boolean mIsInitilized;
 
     private ShortcutPackage(ShortcutUser shortcutUser,
             int packageUserId, String packageName, ShortcutPackageInfo spi) {
@@ -1685,6 +1684,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_NAME, getPackageName());
         ShortcutService.writeAttr(out, ATTR_CALL_COUNT, mApiCallCount);
         ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
+        if (!forBackup) {
+            /**
+             * Schema version should not be included in the backup because:
+             * 1. Schemas in AppSearch are created from scratch on new device
+             * 2. Shortcuts are restored from xml file (as opposed to from AppSearch) on new device
+             */
+            ShortcutService.writeAttr(out, ATTR_SCHEMA_VERSON, (mIsInitilized)
+                    ? AppSearchShortcutInfo.SCHEMA_VERSION : 0);
+        }
         getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
 
         if (forBackup) {
@@ -1882,6 +1890,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         final ShortcutPackage ret = new ShortcutPackage(shortcutUser,
                 shortcutUser.getUserId(), packageName);
 
+        ret.mIsInitilized = ShortcutService.parseIntAttribute(parser, ATTR_SCHEMA_VERSON, 0) > 0;
         ret.mApiCallCount =
                 ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
         ret.mLastResetTime =
@@ -2231,7 +2240,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         } else {
             mPackageIdentifiers.remove(packageName);
         }
-        resetAppSearch(session -> AndroidFuture.completedFuture(true));
+        awaitInAppSearch(true, "Update visibility",
+                session -> AndroidFuture.completedFuture(true));
     }
 
     void mutateShortcut(@NonNull final String id, @Nullable final ShortcutInfo shortcut,
@@ -2262,28 +2272,26 @@ class ShortcutPackage extends ShortcutPackageItem {
             // No need to invoke AppSearch when there's nothing to save.
             return;
         }
-        ConcurrentUtils.waitForFutureNoInterrupt(
-                runInAppSearch(session -> {
-                    final AndroidFuture<Boolean> future = new AndroidFuture<>();
-                    session.put(new PutDocumentsRequest.Builder()
-                                    .addGenericDocuments(
-                                            AppSearchShortcutInfo.toGenericDocuments(shortcuts))
-                                    .build(),
-                            mShortcutUser.mExecutor,
-                            result -> {
-                                if (!result.isSuccess()) {
-                                    for (AppSearchResult<Void> k : result.getFailures().values()) {
-                                        Slog.e(TAG, k.getErrorMessage());
-                                    }
-                                    future.completeExceptionally(new RuntimeException(
-                                            "Failed to save shortcuts"));
-                                    return;
-                                }
-                                future.complete(true);
-                            });
-                    return future;
-                }),
-                "Saving shortcut");
+        awaitInAppSearch("Saving shortcut", session -> {
+            final AndroidFuture<Boolean> future = new AndroidFuture<>();
+            session.put(new PutDocumentsRequest.Builder()
+                            .addGenericDocuments(
+                                    AppSearchShortcutInfo.toGenericDocuments(shortcuts))
+                            .build(),
+                    mShortcutUser.mExecutor,
+                    result -> {
+                        if (!result.isSuccess()) {
+                            for (AppSearchResult<Void> k : result.getFailures().values()) {
+                                Slog.e(TAG, k.getErrorMessage());
+                            }
+                            future.completeExceptionally(new RuntimeException(
+                                    "Failed to save shortcuts"));
+                            return;
+                        }
+                        future.complete(true);
+                    });
+            return future;
+        });
     }
 
     /**
@@ -2447,67 +2455,39 @@ class ShortcutPackage extends ShortcutPackageItem {
     private <T> T awaitInAppSearch(
             @NonNull final String description,
             @NonNull final Function<AppSearchSession, CompletableFuture<T>> cb) {
-        return ConcurrentUtils.waitForFutureNoInterrupt(runInAppSearch(cb), description);
+        return awaitInAppSearch(false, description, cb);
     }
 
     @Nullable
-    private <T> CompletableFuture<T> runInAppSearch(
+    private <T> T awaitInAppSearch(
+            final boolean forceReset,
+            @NonNull final String description,
             @NonNull final Function<AppSearchSession, CompletableFuture<T>> cb) {
         synchronized (mLock) {
             final StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
-            try {
+            final long callingIdentity = Binder.clearCallingIdentity();
+            final AppSearchManager.SearchContext searchContext =
+                    new AppSearchManager.SearchContext.Builder(getPackageName()).build();
+            try (AppSearchSession session = ConcurrentUtils.waitForFutureNoInterrupt(
+                    mShortcutUser.getAppSearch(searchContext), "Resetting app search")) {
                 StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                         .detectAll()
                         .penaltyLog() // TODO: change this to penaltyDeath to fix the call-site
                         .build());
-                if (mAppSearchSession != null) {
-                    final long callingIdentity = Binder.clearCallingIdentity();
-                    try {
-                        return AndroidFuture.supply(() -> mAppSearchSession).thenCompose(cb);
-                    } finally {
-                        Binder.restoreCallingIdentity(callingIdentity);
-                    }
-                } else {
-                    return resetAppSearch(cb);
+                if (!mIsInitilized || forceReset) {
+                    ConcurrentUtils.waitForFutureNoInterrupt(
+                            setupSchema(session), "Setting up schema");
                 }
+                mIsInitilized = true;
+                return ConcurrentUtils.waitForFutureNoInterrupt(cb.apply(session), description);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to initiate app search for shortcut package "
+                        + getPackageName() + " user " + mShortcutUser.getUserId(), e);
+                return null;
             } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
                 StrictMode.setThreadPolicy(oldPolicy);
             }
-        }
-    }
-
-    private <T> CompletableFuture<T> resetAppSearch(
-            @NonNull final Function<AppSearchSession, CompletableFuture<T>> cb) {
-        final long callingIdentity = Binder.clearCallingIdentity();
-        final AppSearchManager.SearchContext searchContext =
-                new AppSearchManager.SearchContext.Builder(getPackageName()).build();
-        final AppSearchSession session;
-        try {
-            session = ConcurrentUtils.waitForFutureNoInterrupt(
-                    mShortcutUser.getAppSearch(searchContext), "Resetting app search");
-            ConcurrentUtils.waitForFutureNoInterrupt(setupSchema(session), "Setting up schema");
-            mAppSearchSession = session;
-            return cb.apply(mAppSearchSession);
-        } catch (Exception e) {
-            Slog.e(TAG, "Failed to initiate app search for shortcut package "
-                    + getPackageName() + " user " + mShortcutUser.getUserId(), e);
-            return AndroidFuture.completedFuture(null);
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentity);
-        }
-    }
-
-    void closeAppSearchSession() {
-        synchronized (mLock) {
-            if (mAppSearchSession != null) {
-                final long callingIdentity = Binder.clearCallingIdentity();
-                try {
-                    mAppSearchSession.close();
-                } finally {
-                    Binder.restoreCallingIdentity(callingIdentity);
-                }
-            }
-            mAppSearchSession = null;
         }
     }
 
