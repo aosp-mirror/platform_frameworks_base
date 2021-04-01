@@ -110,7 +110,6 @@ cc_defaults {
         "libhardware",
         "libhardware_legacy",
         "libhidlbase",
-        "libkeystore_binder",
         "libmtp",
         "libnativehelper",
         "libprocessgroup",
