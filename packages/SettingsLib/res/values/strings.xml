@@ -1405,6 +1405,8 @@
     <string name="user_switch_to_user">Switch to <xliff:g id="user_name" example="John Doe">%s</xliff:g></string>
     <!-- Dialog message when creating a new user [CHAR LIMIT=40] -->
     <string name="creating_new_user_dialog_message">Creating new user…</string>
+    <!-- Text shown to notify that the creation of new user has failed. [CHAR LIMIT=40] -->
+    <string name="add_user_failed">Failed to create a new user</string>
 
     <!-- Title for the preference to enter the nickname of the user to display in the user switcher [CHAR LIMIT=25]-->
     <string name="user_nickname">Nickname</string>
