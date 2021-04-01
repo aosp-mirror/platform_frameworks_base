@@ -108,7 +108,8 @@ public final class ArtStatsLogUtilsTest {
                     COMPILATION_REASON,
                     RESULT_CODE,
                     ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
-                    INSTRUCTION_SET);
+                    INSTRUCTION_SET,
+                    apk.toString());
 
             // Assert
             verifyWrites(ArtStatsLog.
@@ -139,7 +140,8 @@ public final class ArtStatsLogUtilsTest {
                     COMPILATION_REASON,
                     RESULT_CODE,
                     ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
-                    INSTRUCTION_SET);
+                    INSTRUCTION_SET,
+                    apk.toString());
 
             // Assert
             verifyWrites(ArtStatsLog.
@@ -170,7 +172,8 @@ public final class ArtStatsLogUtilsTest {
                     COMPILATION_REASON,
                     RESULT_CODE,
                     ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
-                    INSTRUCTION_SET);
+                    INSTRUCTION_SET,
+                    apk.toString());
 
             // Assert
             verifyWrites(ArtStatsLog.
@@ -199,7 +202,8 @@ public final class ArtStatsLogUtilsTest {
                     COMPILATION_REASON,
                     RESULT_CODE,
                     ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
-                    INSTRUCTION_SET);
+                    INSTRUCTION_SET,
+                    apk.toString());
 
             // Assert
             verifyWrites(ArtStatsLog.
@@ -229,7 +233,8 @@ public final class ArtStatsLogUtilsTest {
                     COMPILATION_REASON,
                     RESULT_CODE,
                     ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
-                    INSTRUCTION_SET);
+                    INSTRUCTION_SET,
+                    apk.toString());
 
             // Assert
             verifyWrites(ArtStatsLog.
@@ -259,6 +264,16 @@ public final class ArtStatsLogUtilsTest {
                 COMPILER_FILTER,
                 ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_RESULT_CODE,
                 RESULT_CODE,
+                dexMetadataType,
+                ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
+                INSTRUCTION_SET);
+        inorder.verify(mockLogger).write(
+                SESSION_ID,
+                UID,
+                COMPILATION_REASON,
+                COMPILER_FILTER,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_BYTES,
+                DEX_CONTENT.length,
                 dexMetadataType,
                 ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
                 INSTRUCTION_SET);

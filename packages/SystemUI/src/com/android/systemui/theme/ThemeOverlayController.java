@@ -19,9 +19,9 @@ import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_AC
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SYSTEM_PALETTE;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
+import android.app.WallpaperManager.OnColorsChangedListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -49,8 +49,10 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.json.JSONException;
@@ -92,8 +94,9 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private final Executor mMainExecutor;
     private final Handler mBgHandler;
     private final WallpaperManager mWallpaperManager;
-    private final KeyguardStateController mKeyguardStateController;
     private final boolean mIsMonetEnabled;
+    private final UserTracker mUserTracker;
+    private DeviceProvisionedController mDeviceProvisionedController;
     private WallpaperColors mSystemColors;
     // If fabricated overlays were already created for the current theme.
     private boolean mNeedsOverlayCreation;
@@ -107,17 +110,76 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private FabricatedOverlay mNeutralOverlay;
     // If wallpaper color event will be accepted and change the UI colors.
     private boolean mAcceptColorEvents = true;
+    // Defers changing themes until Setup Wizard is done.
+    private boolean mDeferredThemeEvaluation;
+
+    private final DeviceProvisionedListener mDeviceProvisionedListener =
+            new DeviceProvisionedListener() {
+                @Override
+                public void onUserSetupChanged() {
+                    if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+                        return;
+                    }
+                    if (!mDeferredThemeEvaluation) {
+                        return;
+                    }
+                    Log.i(TAG, "Applying deferred theme");
+                    mDeferredThemeEvaluation = false;
+                    reevaluateSystemTheme(true /* forceReload */);
+                }
+            };
+
+    private final OnColorsChangedListener mOnColorsChangedListener = (wallpaperColors, which) -> {
+        if (!mAcceptColorEvents) {
+            Log.i(TAG, "Wallpaper color event rejected: " + wallpaperColors);
+            return;
+        }
+        if (wallpaperColors != null) {
+            mAcceptColorEvents = false;
+        }
+
+        if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
+            mSystemColors = wallpaperColors;
+            if (DEBUG) {
+                Log.d(TAG, "got new lock colors: " + wallpaperColors + " where: " + which);
+            }
+        }
+
+        if (mDeviceProvisionedController != null
+                && !mDeviceProvisionedController.isCurrentUserSetup()) {
+            Log.i(TAG, "Wallpaper color event deferred until setup is finished: "
+                    + wallpaperColors);
+            mDeferredThemeEvaluation = true;
+            return;
+        }
+        reevaluateSystemTheme(false /* forceReload */);
+    };
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())
+                    || Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction())) {
+                if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
+                reevaluateSystemTheme(true /* forceReload */);
+            } else if (Intent.ACTION_WALLPAPER_CHANGED.equals(intent.getAction())) {
+                mAcceptColorEvents = true;
+                Log.i(TAG, "Allowing color events again");
+            }
+        }
+    };
 
     @Inject
     public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher,
             @Background Handler bgHandler, @Main Executor mainExecutor,
             @Background Executor bgExecutor, ThemeOverlayApplier themeOverlayApplier,
             SecureSettings secureSettings, WallpaperManager wallpaperManager,
-            UserManager userManager, KeyguardStateController keyguardStateController,
-            DumpManager dumpManager, FeatureFlags featureFlags) {
+            UserManager userManager, DeviceProvisionedController deviceProvisionedController,
+            UserTracker userTracker, DumpManager dumpManager, FeatureFlags featureFlags) {
         super(context);
 
         mIsMonetEnabled = featureFlags.isMonetEnabled();
+        mDeviceProvisionedController = deviceProvisionedController;
         mBroadcastDispatcher = broadcastDispatcher;
         mUserManager = userManager;
         mBgExecutor = bgExecutor;
@@ -126,7 +188,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         mThemeManager = themeOverlayApplier;
         mSecureSettings = secureSettings;
         mWallpaperManager = wallpaperManager;
-        mKeyguardStateController = keyguardStateController;
+        mUserTracker = userTracker;
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -137,19 +199,8 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
-        mBroadcastDispatcher.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())
-                        || Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction())) {
-                    if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
-                    reevaluateSystemTheme(true /* forceReload */);
-                } else if (Intent.ACTION_WALLPAPER_CHANGED.equals(intent.getAction())) {
-                    mAcceptColorEvents = true;
-                    Log.i(TAG, "Allowing color events again");
-                }
-            }
-        }, filter, mMainExecutor, UserHandle.ALL);
+        mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
+                UserHandle.ALL);
         mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
                 false,
@@ -158,12 +209,19 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                     public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
                             int userId) {
                         if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
-                        if (ActivityManager.getCurrentUser() == userId) {
-                            reevaluateSystemTheme(true /* forceReload */);
+                        if (mUserTracker.getUserId() != userId) {
+                            return;
                         }
+                        if (!mDeviceProvisionedController.isUserSetup(userId)) {
+                            Log.i(TAG, "Theme application deferred when setting changed.");
+                            mDeferredThemeEvaluation = true;
+                            return;
+                        }
+                        reevaluateSystemTheme(true /* forceReload */);
                     }
                 },
                 UserHandle.USER_ALL);
+        mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
 
         // Upon boot, make sure we have the most up to date colors
         mBgExecutor.execute(() -> {
@@ -174,23 +232,8 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                 reevaluateSystemTheme(false /* forceReload */);
             });
         });
-        mWallpaperManager.addOnColorsChangedListener((wallpaperColors, which) -> {
-            if (!mAcceptColorEvents) {
-                Log.i(TAG, "Wallpaper color event rejected: " + wallpaperColors);
-                return;
-            }
-            if (wallpaperColors != null && mAcceptColorEvents) {
-                mAcceptColorEvents = false;
-            }
-
-            if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
-                mSystemColors = wallpaperColors;
-                if (DEBUG) {
-                    Log.d(TAG, "got new lock colors: " + wallpaperColors + " where: " + which);
-                }
-            }
-            reevaluateSystemTheme(false /* forceReload */);
-        }, null, UserHandle.USER_ALL);
+        mWallpaperManager.addOnColorsChangedListener(mOnColorsChangedListener, null,
+                UserHandle.USER_ALL);
     }
 
     private void reevaluateSystemTheme(boolean forceReload) {
@@ -252,7 +295,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     }
 
     private void updateThemeOverlays() {
-        final int currentUser = ActivityManager.getCurrentUser();
+        final int currentUser = mUserTracker.getUserId();
         final String overlayPackageJson = mSecureSettings.getStringForUser(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 currentUser);
@@ -360,5 +403,6 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         pw.println("mIsMonetEnabled=" + mIsMonetEnabled);
         pw.println("mNeedsOverlayCreation=" + mNeedsOverlayCreation);
         pw.println("mAcceptColorEvents=" + mAcceptColorEvents);
+        pw.println("mDeferredThemeEvaluation=" + mDeferredThemeEvaluation);
     }
 }

@@ -101,11 +101,12 @@ public interface InputMethod {
      * @param privilegedOperations IPC endpoint to do some privileged
      *                             operations that are allowed only to the
      *                             current IME.
+     * @param configChanges {@link InputMethodInfo#getConfigChanges()} declared by IME.
      * @hide
      */
     @MainThread
     default void initializeInternal(IBinder token, int displayId,
-            IInputMethodPrivilegedOperations privilegedOperations) {
+            IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
         updateInputMethodDisplay(displayId);
         attachToken(token);
     }

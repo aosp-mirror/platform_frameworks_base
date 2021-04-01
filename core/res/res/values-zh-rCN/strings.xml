@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"应用正在运行中"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"消耗电量的应用"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"放大功能"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"无障碍服务安全政策"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g>正在消耗电量"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 个应用正在消耗电量"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"点按即可详细了解电量和流量消耗情况"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"获取您的身体活动数据"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"相机"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"拍摄照片和录制视频"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"附近的蓝牙设备"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"发现并连接到附近的蓝牙设备"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"通话记录"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"读取和写入手机通话记录"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"电话"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"允许该应用查看平板电脑上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"允许应用查看 Android TV 设备上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"允许该应用查看手机上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"发现附近的蓝牙设备并与其配对"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"允许该应用发现附近的蓝牙设备并与其配对"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"连接到已配对的蓝牙设备"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"允许该应用连接到已配对的蓝牙设备"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首选 NFC 付款服务信息"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允许应用获取首选 NFC 付款服务信息，例如注册的应用标识符和路线目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距离通信"</string>
@@ -567,18 +574,28 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"进行身份验证时出错"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"使用屏幕锁定凭据"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"输入您的设备凭据才能继续"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"仅检测到部分指纹，请重试。"</string>
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"无法处理指纹，请重试。"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"指纹传感器有脏污。请擦拭干净，然后重试。"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"手指移动太快，请重试。"</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"手指移动太慢，请重试。"</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"已验证指纹"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"面孔已验证"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"面孔已验证，请按确认按钮"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指纹硬件无法使用。"</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"无法存储指纹。请移除一个现有的指纹。"</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"指纹录入操作超时，请重试。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指纹操作已取消。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"用户取消了指纹操作。"</string>
@@ -603,6 +620,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"人脸解锁"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"重新注册您的面孔"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"要提升识别精确度，请重新注册您的面孔"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"无法捕获准确的人脸数据，请重试。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"亮度过高，请尝试使用较柔和的亮度。"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"亮度不足，请尝试将光线调亮。"</string>
@@ -1006,6 +1031,12 @@
     <string name="copied" msgid="4675902854553014676">"已复制"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴从<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>复制的内容"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>已粘贴剪贴板中的内容"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"更多"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"MENU+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1689,7 +1720,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快捷方式"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"颜色反转"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色彩校正"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"超暗"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"极暗"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已开启。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已关闭。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"同时按住两个音量键 3 秒钟即可使用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2110,20 +2141,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"工作"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"个人视图"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"工作视图"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"无法通过工作应用分享此内容"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"您的 IT 管理员不允许您通过工作资料中的应用分享此内容"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"无法通过工作应用打开此内容"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"您的 IT 管理员不允许您通过工作资料中的应用打开此内容"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"无法通过个人应用分享此内容"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"您的 IT 管理员不允许您通过个人资料中的应用分享此内容"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"无法通过个人应用打开此内容"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"您的 IT 管理员不允许您通过个人资料中的应用打开此内容"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"工作资料已被暂停"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"开启"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"任何工作应用都不支持此内容"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"任何工作应用都无法打开此内容"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"任何个人应用都不支持此内容"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"任何个人应用都无法打开此内容"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 网络解锁 PIN 码"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 网络子集解锁 PIN 码"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 企业解锁 PIN 码"</string>
@@ -2236,8 +2278,10 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"放大局部屏幕"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"现在，您可以放大整个屏幕或特定区域，也可以在这两个选项之间切换。"</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
+    <skip />
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"在“设置”中开启"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"关闭"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"如要继续操作，请向&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;授予设备的麦克风使用权。"</string>

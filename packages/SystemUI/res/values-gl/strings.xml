@@ -89,8 +89,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"A aplicación ou a túa organización non permite realizar capturas de pantalla"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editar"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editar a captura de pantalla"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Desprazarse"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Realizar unha captura de pantalla continua"</string>
+    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
+    <skip />
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignorar a captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Vista previa da captura de pantalla"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Bordo superior"</string>
@@ -178,6 +178,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Ignorar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca o sensor de impresión dixital"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Icona de impresión dixital"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Buscándote…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Icona de cara"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Botón de zoom de compatibilidade"</string>
@@ -378,7 +384,11 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverter cores"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modo de corrección de cor"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Máis opcións"</string>
+    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
+    <skip />
     <string name="quick_settings_done" msgid="2163641301648855793">"Feito"</string>
+    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
+    <skip />
     <string name="quick_settings_connected" msgid="3873605509184830379">"Conectado"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Dispositivo conectado. Nivel de batería: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Conectando..."</string>
@@ -523,6 +533,8 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e está conectado a varias VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"A túa organización pode controlar o tráfico de rede do teu perfil de traballo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> pode controlar o tráfico de rede do teu perfil de traballo"</string>
+    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
+    <skip />
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"É posible que se controle a rede"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Este dispositivo está conectado a varias VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"O teu perfil de traballo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -777,7 +789,7 @@
       <item quantity="one">%d minuto</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Uso de batería"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"A función de aforro da batería non está dispoñible durante a carga"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"A función de aforro de batería non está dispoñible durante a carga"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Aforro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Reduce o rendemento e os datos en segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -1102,6 +1114,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"Amigos"</string>
     <string name="empty_status" msgid="5938893404951307749">"Chateamos á noite?"</string>
     <string name="missed_call" msgid="4228016077700161689">"Chamada perdida"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+ de <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Consulta as mensaxes recentes, as chamadas perdidas e as actualizacións dos estados"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversa"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Produciuse un problema ao ler o medidor da batería"</string>

@@ -69,7 +69,14 @@ public final class UpdatableFontDirTest {
      */
     private static class FakeFontFileParser implements UpdatableFontDir.FontFileParser {
         @Override
-        public String getCanonicalFileName(File file) throws IOException {
+        public String getPostScriptName(File file) throws IOException {
+            String content = FileUtils.readTextFile(file, 100, "");
+            String filename = content.split(",")[0];
+            return filename.substring(0, filename.length() - 4);
+        }
+
+        @Override
+        public String buildFontFileName(File file) throws IOException {
             String content = FileUtils.readTextFile(file, 100, "");
             return content.split(",")[0];
         }
@@ -77,6 +84,7 @@ public final class UpdatableFontDirTest {
         @Override
         public long getRevision(File file) throws IOException {
             String content = FileUtils.readTextFile(file, 100, "");
+            android.util.Log.e("Debug", "content: " + content);
             return Long.parseLong(content.split(",")[1]);
         }
     }
@@ -549,8 +557,14 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs,
                 new UpdatableFontDir.FontFileParser() {
+
                     @Override
-                    public String getCanonicalFileName(File file) throws IOException {
+                    public String getPostScriptName(File file) throws IOException {
+                        return null;
+                    }
+
+                    @Override
+                    public String buildFontFileName(File file) throws IOException {
                         return null;
                     }
 
@@ -579,7 +593,12 @@ public final class UpdatableFontDirTest {
                 mUpdatableFontFilesDir, mPreinstalledFontDirs,
                 new UpdatableFontDir.FontFileParser() {
                     @Override
-                    public String getCanonicalFileName(File file) throws IOException {
+                    public String getPostScriptName(File file) throws IOException {
+                        throw new IOException();
+                    }
+
+                    @Override
+                    public String buildFontFileName(File file) throws IOException {
                         throw new IOException();
                     }
 
@@ -699,7 +718,7 @@ public final class UpdatableFontDirTest {
                             + "  <font>test.ttf</font>"
                             + "</family>")));
             fail("Expect NullPointerException");
-        } catch (NullPointerException e) {
+        } catch (FontManagerService.SystemFontException e) {
             // Expect
         }
     }
@@ -797,8 +816,18 @@ public final class UpdatableFontDirTest {
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
         parser.setInput(is, "UTF-8");
         parser.nextTag();
+
         FontConfig.FontFamily fontFamily = FontListParser.readFamily(parser, "", null);
-        return new FontUpdateRequest(fontFamily);
+        List<FontUpdateRequest.Font> fonts = new ArrayList<>();
+        for (FontConfig.Font font : fontFamily.getFontList()) {
+            String name = font.getFile().getName();
+            String psName = name.substring(0, name.length() - 4);  // drop suffix
+            FontUpdateRequest.Font updateFont = new FontUpdateRequest.Font(
+                    psName, font.getStyle(), font.getTtcIndex(), font.getFontVariationSettings());
+            fonts.add(updateFont);
+        }
+        FontUpdateRequest.Family family = new FontUpdateRequest.Family(fontFamily.getName(), fonts);
+        return new FontUpdateRequest(family);
     }
 
     private void writeConfig(PersistentSystemFontConfig.Config config,

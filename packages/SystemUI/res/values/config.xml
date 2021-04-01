@@ -174,6 +174,23 @@
     <!-- Doze: check proximity sensor before pulsing? -->
     <bool name="doze_proximity_check_before_pulse">true</bool>
 
+    <!-- Doze: only register sensors that use prox when device is in certain Display states. This
+     delays registering sensors when device first shows dozing UI but the
+     Display & Power state hasn't changed to low-power mode yet. -->
+    <bool name="doze_selectively_register_prox">false</bool>
+
+    <!-- Doze: whether the single tap sensor uses the proximity sensor.
+     If both this parameter and doze_selectively_register_prox are true, registration for the
+     sensor will be delayed when the device first enters dozing but the device has not entered its
+     low powered state yet. -->
+    <bool name="doze_single_tap_uses_prox">true</bool>
+
+    <!-- Doze: whether the long press sensor uses the proximity sensor.
+     If both this parameter and doze_selectively_register_prox are true, registration for the
+     sensor will be delayed when the device first enters dozing but the device has not entered its
+     low powered state yet. -->
+    <bool name="doze_long_press_uses_prox">true</bool>
+
     <!-- Doze: should notifications be used as a pulse signal? -->
     <bool name="doze_pulse_on_notifications">true</bool>
 
@@ -589,6 +606,10 @@
     <!-- Determines whether the shell features all run on another thread. -->
     <bool name="config_enableShellMainThread">false</bool>
 
+    <!-- package name of a built-in camera app to use to restrict implicit intent resolution
+         when the double-press power gesture is used. Ignored if empty. -->
+    <string translatable="false" name="config_cameraGesturePackage"></string>
+
     <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
     <bool name="allow_force_nav_bar_handle_opaque">true</bool>
 
@@ -599,4 +620,7 @@
     <!-- Whether a transition of ACTIVITY_TYPE_ASSISTANT to the home app should play a home sound
          effect -->
     <bool name="config_playHomeSoundAfterAssistant">false</bool>
+
+    <!-- Whether to use window background blur for the volume dialog. -->
+    <bool name="config_volumeDialogUseBackgroundBlur">false</bool>
 </resources>

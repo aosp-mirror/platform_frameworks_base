@@ -89,8 +89,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'aplicació o la teva organització no permeten fer captures de pantalla"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edita"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Edita la captura de pantalla"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Desplaça"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Captura de pantalla lliscant"</string>
+    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
+    <skip />
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignora la captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Previsualització de la captura de pantalla"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Marge superior"</string>
@@ -178,6 +178,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Ignora"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor d\'empremtes dactilars"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Icona d\'empremta digital"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"S\'està cercant la teva cara…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Icona facial"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Botó de zoom de compatibilitat."</string>
@@ -378,7 +384,11 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverteix colors"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Mode de correcció de color"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Més opcions"</string>
+    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
+    <skip />
     <string name="quick_settings_done" msgid="2163641301648855793">"Fet"</string>
+    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
+    <skip />
     <string name="quick_settings_connected" msgid="3873605509184830379">"Connectat"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Connectat (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria)"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"S\'està connectant..."</string>
@@ -523,6 +533,8 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Aquest dispositiu pertany a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i està connectat a xarxes VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"És possible que la teva organització supervisi el trànsit de xarxa al teu perfil de treball"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"És possible que <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> supervisi el trànsit de xarxa del teu perfil de treball"</string>
+    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
+    <skip />
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"És possible que la xarxa estigui supervisada"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Aquest dispositiu està connectat a xarxes VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"El teu perfil de treball està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -1102,6 +1114,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"Amics"</string>
     <string name="empty_status" msgid="5938893404951307749">"Parlem aquesta nit!"</string>
     <string name="missed_call" msgid="4228016077700161689">"Trucada perduda"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Consulta els missatges recents, les trucades perdudes i les actualitzacions d\'estat"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversa"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Hi ha hagut un problema en llegir el mesurador de la bateria"</string>

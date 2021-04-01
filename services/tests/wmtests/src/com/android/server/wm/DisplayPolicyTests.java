@@ -227,7 +227,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertEquals(mAppWindow, policy.getTopFullscreenOpaqueWindow());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testMainAppWindowDisallowFitSystemWindowTypes() {
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         final WindowState activity = createBaseApplicationWindow();

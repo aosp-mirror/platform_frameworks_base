@@ -73,8 +73,9 @@ import java.util.concurrent.TimeUnit;
 public class ActivityManagerTest {
     private static final String TAG = "ActivityManagerTest";
 
-    private static final String TEST_APP = "com.android.servicestests.apps.simpleservicetestapp";
-    private static final String TEST_CLASS = TEST_APP + ".SimpleService";
+    private static final String TEST_APP = "com.android.servicestests.apps.simpleservicetestapp1";
+    private static final String TEST_CLASS =
+            "com.android.servicestests.apps.simpleservicetestapp.SimpleService";
     private static final int TEST_LOOPS = 100;
     private static final long AWAIT_TIMEOUT = 2000;
     private static final long CHECK_INTERVAL = 100;

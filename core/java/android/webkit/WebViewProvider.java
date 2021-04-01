@@ -365,7 +365,6 @@ public interface WebViewProvider {
         }
 
         @SuppressLint("NullableCollection")
-        @Nullable
         default void onCreateTranslationRequests(
                 @NonNull @SuppressWarnings("unused") long[] virtualChildIds,
                 @NonNull @SuppressWarnings("unused") @DataFormat int[] supportedFormats,

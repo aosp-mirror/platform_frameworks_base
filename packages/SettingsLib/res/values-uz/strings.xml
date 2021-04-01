@@ -501,6 +501,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kamroq vaqt."</string>
     <string name="cancel" msgid="5665114069455378395">"Bekor qilish"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signal va eslatmalar"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Signal va eslatmalar belgilashga ruxsat berish"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Signal va eslatmalar"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Bu ilovaga signallarni va boshqa vaqtga asoslangan tadbirlarni rejalashtirishga ruxsat berish. Qurilmadan foydalanmasangiz ham ilova uyqu rejimidan chiqadi va ishga tushadi. Bu ruxsatni bekor qilsangiz, ilova ishlamaydi va u oʻrnatgan barcha signallar oʻchiriladi."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"reja, signal, eslatma, tadbir"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Yoqish"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Bezovta qilinmasin rejimini yoqing"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Hech qachon"</string>
@@ -579,7 +584,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Mobil internet yoqilmagan"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Maʼlumotlardan foydalanish uchun sozlanmagan"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Signal yo‘q."</string>

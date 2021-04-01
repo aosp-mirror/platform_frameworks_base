@@ -65,7 +65,7 @@ final class RippleShader extends RuntimeShader {
             + "  float currentRadius = radius * progress;\n"
             + "  float circle_outer = softCircle(uv, xy, currentRadius + thickness, blur);\n"
             + "  float circle_inner = softCircle(uv, xy, currentRadius - thickness, blur);\n"
-            + "  return clamp(circle_outer - circle_inner, 0., 1.);\n"
+            + "  return saturate(circle_outer - circle_inner);\n"
             + "}\n"
             + "float subProgress(float start, float end, float progress) {\n"
             + "    float sub = clamp(progress, start, end);\n"
@@ -133,7 +133,7 @@ final class RippleShader extends RuntimeShader {
     }
 
     public void setResolution(float w, float h, int density) {
-        float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 0.5f;
+        float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE;
         setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
         setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
     }

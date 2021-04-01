@@ -13,5 +13,5 @@
     <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Herstarten"</string>
     <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Dynamisch systeem niet opgeslagen"</string>
     <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Kan dynamisch systeem niet opnieuw opstarten of laden"</string>
-    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"Kan dynamisch systeem niet uitschakelen"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"Kan dynamisch systeem niet uitzetten"</string>
 </resources>

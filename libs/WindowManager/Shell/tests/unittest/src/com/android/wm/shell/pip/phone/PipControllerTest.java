@@ -42,6 +42,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
@@ -53,6 +54,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 /**
  * Unit tests for {@link PipController}
@@ -75,6 +78,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private PipBoundsState mMockPipBoundsState;
     @Mock private TaskStackListenerImpl mMockTaskStackListener;
     @Mock private ShellExecutor mMockExecutor;
+    @Mock private Optional<OneHandedController> mMockOneHandedController;
 
     @Before
     public void setUp() throws RemoteException {
@@ -83,7 +87,7 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
                 mMockPipMediaController, mMockPhonePipMenuController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
-                mMockTaskStackListener, mMockExecutor);
+                mMockTaskStackListener, mMockOneHandedController, mMockExecutor);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
@@ -116,7 +120,7 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
                 mMockPipMediaController, mMockPhonePipMenuController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
-                mMockTaskStackListener, mMockExecutor));
+                mMockTaskStackListener, mMockOneHandedController, mMockExecutor));
     }
 
     @Test
