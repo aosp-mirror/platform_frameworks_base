@@ -32,6 +32,7 @@ import static com.android.server.VcnManagementService.VDBG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.IpSecManager;
@@ -1457,6 +1458,10 @@ public class VcnGatewayConnection extends StateMachine {
                     buildNetworkCapabilities(mConnectionConfig, mUnderlying);
             final LinkProperties lp =
                     buildConnectedLinkProperties(mConnectionConfig, tunnelIface, childConfig);
+            final NetworkAgentConfig nac =
+                    new NetworkAgentConfig.Builder()
+                            .setLegacyType(ConnectivityManager.TYPE_MOBILE)
+                            .build();
 
             final NetworkAgent agent =
                     mDeps.newNetworkAgent(
@@ -1465,7 +1470,7 @@ public class VcnGatewayConnection extends StateMachine {
                             caps,
                             lp,
                             Vcn.getNetworkScore(),
-                            new NetworkAgentConfig.Builder().build(),
+                            nac,
                             mVcnContext.getVcnNetworkProvider(),
                             () -> {
                                 Slog.d(TAG, "NetworkAgent was unwanted");

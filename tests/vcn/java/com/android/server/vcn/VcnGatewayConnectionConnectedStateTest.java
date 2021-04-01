@@ -32,6 +32,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
@@ -217,7 +219,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         ncCaptor.capture(),
                         lpCaptor.capture(),
                         anyInt(),
-                        any(),
+                        argThat(nac -> nac.getLegacyType() == ConnectivityManager.TYPE_MOBILE),
                         any(),
                         any(),
                         any());
