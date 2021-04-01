@@ -43,6 +43,12 @@ import org.mockito.stubbing.Answer;
 import java.util.Arrays;
 
 public class BatteryUsageStatsRule implements TestRule {
+    public static final BatteryUsageStatsQuery POWER_PROFILE_MODEL_ONLY =
+            new BatteryUsageStatsQuery.Builder()
+                    .powerProfileModeledOnly()
+                    .includePowerModels()
+                    .build();
+
     private final PowerProfile mPowerProfile;
     private final MockClocks mMockClocks = new MockClocks();
     private final MockBatteryStatsImpl mBatteryStats = new MockBatteryStatsImpl(mMockClocks) {
@@ -156,7 +162,8 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     BatteryUsageStats apply(PowerCalculator... calculators) {
-        return apply(BatteryUsageStatsQuery.DEFAULT, calculators);
+        return apply(new BatteryUsageStatsQuery.Builder().includePowerModels().build(),
+                calculators);
     }
 
     BatteryUsageStats apply(BatteryUsageStatsQuery query, PowerCalculator... calculators) {
@@ -165,8 +172,10 @@ public class BatteryUsageStatsRule implements TestRule {
         final int customMeasuredEnergiesCount = customMeasuredEnergiesMicroJoules != null
                 ? customMeasuredEnergiesMicroJoules.length
                 : 0;
+        final boolean includePowerModels = (query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                customMeasuredEnergiesCount, 0);
+                customMeasuredEnergiesCount, 0, includePowerModels);
         SparseArray<? extends BatteryStats.Uid> uidStats = mBatteryStats.getUidStats();
         for (int i = 0; i < uidStats.size(); i++) {
             builder.getOrCreateUidBatteryConsumerBuilder(uidStats.valueAt(i));
