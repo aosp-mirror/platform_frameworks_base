@@ -33,6 +33,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 
@@ -300,11 +301,11 @@ public class MediaMetadataRetriever implements AutoCloseable {
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IllegalArgumentException  {
-        FileDescriptor modernFd = FileUtils.convertToModernFd(fd);
+        ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(fd);
         if (modernFd == null) {
             _setDataSource(fd, offset, length);
         } else {
-            _setDataSource(modernFd, offset, length);
+            _setDataSource(modernFd.getFileDescriptor(), offset, length);
         }
     }
 
