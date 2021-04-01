@@ -38,6 +38,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.hardware.SensorPrivacyManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -115,6 +116,7 @@ public class AttentionManagerService extends SystemService {
     private static String sTestAttentionServicePackage;
     private final Context mContext;
     private final PowerManager mPowerManager;
+    private final SensorPrivacyManager mPrivacyManager;
     private final Object mLock;
     @GuardedBy("mLock")
     @VisibleForTesting
@@ -146,6 +148,7 @@ public class AttentionManagerService extends SystemService {
         mPowerManager = powerManager;
         mLock = lock;
         mAttentionHandler = handler;
+        mPrivacyManager = SensorPrivacyManager.getInstance(context);
     }
 
     @Override
@@ -246,6 +249,11 @@ public class AttentionManagerService extends SystemService {
 
         if (!isServiceAvailable()) {
             Slog.w(LOG_TAG, "Service is not available at this moment.");
+            return false;
+        }
+
+        if (mPrivacyManager.isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA)) {
+            Slog.w(LOG_TAG, "Camera is locked by a toggle.");
             return false;
         }
 

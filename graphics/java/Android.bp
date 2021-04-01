@@ -1,0 +1,8 @@
+filegroup {
+    name: "framework-graphics-nonupdatable-sources",
+    srcs: [
+        "**/*.java",
+        "**/*.aidl",
+    ],
+    visibility: ["//frameworks/base"],
+}

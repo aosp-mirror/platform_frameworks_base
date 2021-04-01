@@ -160,7 +160,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(packageName);
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
@@ -187,7 +187,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(packageName);
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUid = Binder.getCallingUid();
             int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {

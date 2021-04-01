@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"এপ্ চলি আছে"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"বেটাৰি খৰচ কৰা এপসমূহ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"বিবৰ্ধন"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"সাধ্য সুবিধাৰ সুৰক্ষা নীতি"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ বেটাৰি ব্যৱহাৰ কৰি আছে"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g>টা এপে বেটাৰি ব্যৱহাৰ কৰি আছে"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"বেটাৰি আৰু ডেটাৰ ব্যৱহাৰৰ বিষয়ে বিশদভাৱে জানিবলৈ টিপক"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"শাৰীৰিক কাৰ্যকলাপ এক্সেছ কৰা"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"কেমেৰা"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ফট\' তুলিব আৰু ভিডিঅ\' ৰেকৰ্ড কৰিব পাৰে"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"নিকটৱৰ্তী ব্লুটুথ ডিভাইচ"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"নিকটৱৰ্তী ব্লুটুথ ডিভাইচ বিচাৰি উলিয়াওক আৰু সেইসমূহৰ সৈতে সংযোগ কৰক"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"কল লগসমূহ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ফ\'নৰ কল লগ পঢ়ক আৰু লিখক"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ফ’ন"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"টেবলেটত ব্লুটুথৰ কনফিগাৰেশ্বন চাবলৈ আৰু যোৰা লগোৱা ডিভাইচসমূহৰ জৰিয়তে সংযোগ কৰিবলৈ আৰু সংযোগৰ অনুৰোধ স্বীকাৰ কৰিবলৈ এপটোক অনুমতি দিয়ে৷"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"এপ্‌টোক আপোনাৰ Android TV ডিভাইচটোত ব্লুটুথৰ কনফিগাৰেশ্বন চাবলৈ আৰু পেয়াৰ কৰি থোৱা ডিভাইচসমূহৰ সৈতে সংযোগ কৰিবলৈ আৰু গ্ৰহণ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ফ\'নটোত ব্লুটুথৰ কনফিগাৰেশ্বন চাবলৈ আৰু যোৰা লগোৱা ডিভাইচসমূহৰ জৰিয়তে সংযোগ কৰিবলৈ আৰু সংযোগৰ অনুৰোধ স্বীকাৰ কৰিবলৈ এপটোক অনুমতি দিয়ে৷"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"নিকটৱৰ্তী ব্লুটুথ ডিভাইচ বিচাৰক আৰু তাৰ সৈতে সংযোগ কৰক"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচ বিচাৰি উলিয়াবলৈ আৰু সেইসমূহৰ সৈতে পেয়াৰ কৰিবলৈ অনুমতি দিয়ে"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰক"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"এপ্‌টোক পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"অগ্ৰাধিকাৰ দিয়া NFC পৰিশোধ সেৱাৰ তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়েৰ ফিল্ড কমিউনিকেশ্বন নিয়ন্ত্ৰণ কৰক"</string>
@@ -567,18 +574,28 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"আসোঁৱাহৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰি থকা হৈছে"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্ৰীন ল\'ক ব্যৱহাৰ কৰক"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"অব্যাহত ৰাখিবলৈ আপোনাৰ ডিভাইচৰ ক্ৰেডেনশ্বিয়েল দিয়ক"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ফিংগাৰপ্ৰিণ্ট আংশিকভাৱে চিনাক্ত কৰা হৈছে। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ফিগাৰপ্ৰিণ্টৰ প্ৰক্ৰিয়া সম্পাদন কৰিবপৰা নগ\'ল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো লেতেৰা হৈ আছে। অনুগ্ৰহ কৰি পৰিষ্কাৰ কৰি আকৌ চেষ্টা কৰক।"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"আঙুলিৰ গতি অতি ক্ষিপ্ৰ আছিল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙুলিৰ গতি অতি মন্থৰ আছিল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ফিংগাৰপ্ৰিণ্টৰ সত্যাপন কৰা হ’ল"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল, অনুগ্ৰহ কৰি ‘নিশ্চিত কৰক’ বুটামটো টিপক"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ নাই।"</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"ফিংগাৰপ্ৰিণ্ট সঞ্চয় কৰিব পৰা নগ\'ল। পূর্বে সঞ্চিত ফিংগাৰপ্ৰিণ্ট এটা আঁতৰাওক।"</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ফিংগাৰপ্ৰিণ্ট গ্ৰহণৰ সময়সীমা উকলি গৈছে। আকৌ চেষ্টা কৰক।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ফিংগাৰপ্ৰিণ্ট কাৰ্য বাতিল কৰা হ’ল।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যৱহাৰকাৰীয়ে ফিংগাৰপ্ৰিণ্ট ক্ৰিয়া বাতিল কৰিছে।"</string>
@@ -603,6 +620,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"মুখাৱয়বৰদ্বাৰা আনলক কৰা সুবিধা"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ণ কৰক"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"চিনাক্তকৰণৰ সুবিধাটো উন্নত কৰিবলৈ, অনুগ্ৰহ কৰি আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ন কৰক"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"সঠিক মুখমণ্ডলৰ ডেটা কেপচাৰ নহ’ল। আকৌ চেষ্টা কৰক।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"অতি উজ্জ্বল। ইয়াতকৈ কম পোহৰৰ উৎস ব্যৱহাৰ কৰক।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"অতি আন্ধাৰ। উজ্জ্বল লাইট ব্যৱহাৰ কৰক।"</string>
@@ -1006,6 +1031,12 @@
     <string name="copied" msgid="4675902854553014676">"প্ৰতিলিপি কৰা হ’ল"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>ৰ পৰা <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> পে’ষ্ট কৰা হৈছে"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"ক্লিপব’ৰ্ডৰ পৰা <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> পে’ষ্ট কৰা হৈছে"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"অধিক"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"মেনু+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"মেটা+"</string>
@@ -1689,7 +1720,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"শ্বৰ্টকাট ব্যৱহাৰ কৰক"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ৰং বিপৰীতকৰণ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ৰং শুধৰণী"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিৰিক্তভাৱে অনুজ্জ্বল"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"এক্সট্ৰা ডিম"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কীসমূহ ধৰি ৰাখক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধৰি ৰাখিছিল। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অফ কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবলৈ দুয়োটা ভলিউম বুটাম তিনি ছেকেণ্ডৰ বাবে হেঁচি ৰাখক"</string>
@@ -2055,7 +2086,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ৰুটিন ম’ডৰ তথ্য জাননী"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"চ্চাৰ্জ কৰাৰ সচৰাচৰ সময়ৰ আগতেই বেটাৰি শেষ হ’ব পাৰে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"বেটাৰিৰ খৰচ কমাবলৈ বেটাৰি সঞ্চয়কাৰী অন কৰা হৈছে"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"বেটাৰি সঞ্চয়কাৰী"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"বেটাৰী সঞ্চয়কাৰী"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"বেটাৰি সঞ্চয়কাৰী অফ কৰা হ’ল"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ফ\'নটোত পর্যাপ্ত পৰিমাণে চার্জ আছে। সুবিধাবোৰ আৰু সীমাবদ্ধ কৰা নাই।"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"টেবলেটটোত পর্যাপ্ত পৰিমাণে চার্জ আছে। সুবিধাবোৰ আৰু সীমাবদ্ধ কৰা নাই।"</string>
@@ -2110,20 +2141,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"কৰ্মস্থান"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ব্যক্তিগত ভিউ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"কৰ্মস্থানৰ ভিউ"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"কৰ্মস্থানৰ এপ্‌সমূহৰ সৈতে এইটো শ্বেয়াৰ কৰিব নোৱাৰি"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"আপোনাৰ আইটি প্ৰশাসকে আপোনাক আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলত থকা এপ্‌সমূহৰ সৈতে এই সমলটো শ্বেয়াৰ কৰিবলৈ নিদিয়ে"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"কৰ্মস্থানৰ এপ্‌সমূহৰ জৰিয়তে এইটো খুলিব কৰিব নোৱাৰি"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"আপোনাৰ আইটি প্ৰশাসকে আপোনাক আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলত থকা এপ্‌সমূহৰ জৰিয়তে এই সমলটো খুলিবলৈ নিদিয়ে"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ব্যক্তিগত এপ্‌সমূহৰ সৈতে এইটো শ্বেয়াৰ কৰিব নোৱাৰি"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"আপোনাৰ আইটি প্ৰশাসকে আপোনাক আপোনাৰ ব্যক্তিগত প্ৰ\'ফাইলত থকা এপ্‌সমূহৰ সৈতে এই সমলটো শ্বেয়াৰ কৰিবলৈ নিদিয়ে"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ব্যক্তিগত এপ্‌সমূহৰ জৰিয়তে এইটো খুলিব কৰিব নোৱাৰি"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"আপোনাৰ আইটি প্ৰশাসকে আপোনাক আপোনাৰ ব্যক্তিগত প্ৰ\'ফাইলত থকা এপ্‌সমূহৰ জৰিয়তে এই সমলটো খুলিবলৈ নিদিয়ে"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"কৰ্মস্থানৰ প্ৰ\'ফাইলটো পজ কৰা আছে"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"অন কৰক"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"কোনো কর্মস্থানৰ এপে এই সমলটো সমর্থন কৰিব নোৱাৰে"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"কোনো কর্মস্থানৰ এপে এই সমলটো খুলিব নোৱাৰে"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"কোনো ব্যক্তিগত এপে এই সমলটো সমর্থন কৰিব নোৱাৰে"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"কোনো ব্যক্তিগত এপে এই সমলটো খুলিব নোৱাৰে"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ছিম নেটৱৰ্ক আনলক কৰা পিন"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"ছিম নেটৱৰ্ক আনলক কৰা পিন"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"ছিম কৰ্পৰে\'ট আনলক কৰা পিন"</string>
@@ -2236,8 +2278,10 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"আপোনাৰ স্ক্ৰীনখনৰ এটা অংশ বিবৰ্ধন কৰক"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"আপুনি এতিয়া আপোনাৰ পূৰ্ণ স্ক্ৰীন, কোনো নিৰ্দিষ্ট অংশ বিবৰ্ধন কৰিব পাৰে অথবা দুয়োটা বিকল্পৰ মাজত সলনা-সলনি কৰিব পাৰে।"</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
+    <skip />
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ছেটিঙত অন কৰক"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"অগ্ৰাহ্য কৰক"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"অব্যাহত ৰাখিবলৈ &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;এ আপোনাৰ ডিভাইচৰ মাইক্ৰ’ফ’ন এক্সেছ কৰাৰ আৱশ্যক।"</string>

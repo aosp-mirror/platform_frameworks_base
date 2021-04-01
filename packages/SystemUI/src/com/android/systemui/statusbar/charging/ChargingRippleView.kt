@@ -41,7 +41,7 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         set(value) { rippleShader.radius = value }
     var origin: PointF = PointF()
         set(value) { rippleShader.origin = value }
-    var duration: Long = 1500
+    var duration: Long = 1750
 
     init {
         rippleShader.color = defaultColor
@@ -59,9 +59,10 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         animator.duration = duration
         animator.addUpdateListener { animator ->
             val now = animator.currentPlayTime
-            val phase = now / 30000f
-            rippleShader.progress = animator.animatedValue as Float
-            rippleShader.noisePhase = phase
+            val progress = animator.animatedValue as Float
+            rippleShader.progress = progress
+            rippleShader.distortionStrength = 1 - progress
+            rippleShader.time = now.toFloat()
             invalidate()
         }
         animator.addListener(object : AnimatorListenerAdapter() {

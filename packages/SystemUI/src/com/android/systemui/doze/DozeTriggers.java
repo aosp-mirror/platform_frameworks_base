@@ -17,7 +17,6 @@
 package com.android.systemui.doze;
 
 import android.annotation.Nullable;
-import android.app.AlarmManager;
 import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -42,7 +41,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.dagger.DozeScope;
@@ -101,15 +99,16 @@ public class DozeTriggers implements DozeMachine.Part {
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final AuthController mAuthController;
     private final DelayableExecutor mMainExecutor;
-    private final DelayableExecutor mBgExecutor;
 
     private long mNotificationPulseTime;
     private boolean mPulsePending;
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    private boolean mWantProx;
-    private boolean mWantSensors;
+
+    /** see {@link #onProximityFar} prox for callback */
+    private boolean mWantProxSensor;
     private boolean mWantTouchScreenSensors;
+    private boolean mWantSensors;
 
     @VisibleForTesting
     public enum DozingUpdateUiEvent implements UiEventLogger.UiEventEnum {
@@ -177,13 +176,13 @@ public class DozeTriggers implements DozeMachine.Part {
 
     @Inject
     public DozeTriggers(Context context, DozeHost dozeHost,
-            AlarmManager alarmManager, AmbientDisplayConfiguration config,
+            AmbientDisplayConfiguration config,
             DozeParameters dozeParameters, AsyncSensorManager sensorManager,
             WakeLock wakeLock, DockManager dockManager,
             ProximitySensor proximitySensor, ProximitySensor.ProximityCheck proxCheck,
             DozeLog dozeLog, BroadcastDispatcher broadcastDispatcher,
             SecureSettings secureSettings, AuthController authController,
-            @Main DelayableExecutor mainExecutor, @Background DelayableExecutor bgExecutor) {
+            @Main DelayableExecutor mainExecutor) {
         mContext = context;
         mDozeHost = dozeHost;
         mConfig = config;
@@ -201,7 +200,6 @@ public class DozeTriggers implements DozeMachine.Part {
         mBroadcastDispatcher = broadcastDispatcher;
         mAuthController = authController;
         mMainExecutor = mainExecutor;
-        mBgExecutor = bgExecutor;
     }
 
     @Override
@@ -459,7 +457,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 break;
             case DOZE:
             case DOZE_AOD:
-                mWantProx = newState != DozeMachine.State.DOZE;
+                mWantProxSensor = newState != DozeMachine.State.DOZE;
                 mWantSensors = true;
                 mWantTouchScreenSensors = true;
                 if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
@@ -468,15 +466,15 @@ public class DozeTriggers implements DozeMachine.Part {
                 break;
             case DOZE_AOD_PAUSED:
             case DOZE_AOD_PAUSING:
-                mWantProx = true;
+                mWantProxSensor = true;
                 break;
             case DOZE_PULSING:
             case DOZE_PULSING_BRIGHT:
-                mWantProx = true;
+                mWantProxSensor = true;
                 mWantTouchScreenSensors = false;
                 break;
             case DOZE_AOD_DOCKED:
-                mWantProx = false;
+                mWantProxSensor = false;
                 mWantTouchScreenSensors = false;
                 break;
             case DOZE_PULSE_DONE:
@@ -490,7 +488,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 mDozeSensors.setListening(false, false);
                 mDozeSensors.setProxListening(false);
                 mWantSensors = false;
-                mWantProx = false;
+                mWantProxSensor = false;
                 mWantTouchScreenSensors = false;
                 break;
             default:
@@ -501,10 +499,10 @@ public class DozeTriggers implements DozeMachine.Part {
     @Override
     public void onScreenState(int state) {
         mDozeSensors.onScreenState(state);
-        mDozeSensors.setProxListening(mWantProx && (state == Display.STATE_DOZE
-                || state == Display.STATE_DOZE_SUSPEND
-                || state == Display.STATE_OFF));
-        mDozeSensors.setListening(mWantSensors, mWantTouchScreenSensors);
+        final boolean lowPowerStateOrOff = state == Display.STATE_DOZE
+                || state == Display.STATE_DOZE_SUSPEND || state == Display.STATE_OFF;
+        mDozeSensors.setProxListening(mWantProxSensor && lowPowerStateOrOff);
+        mDozeSensors.setListening(mWantSensors, mWantTouchScreenSensors, lowPowerStateOrOff);
     }
 
     /**

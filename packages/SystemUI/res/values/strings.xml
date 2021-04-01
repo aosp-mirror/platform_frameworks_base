@@ -2848,6 +2848,14 @@
     <string name="select_conversation_title">Conversation widgets</string>
     <!--Text explaining to tap a conversation to select it show in their Conversation widget [CHAR LIMIT=180] -->
     <string name="select_conversation_text">Tap a conversation to add it to your Home screen</string>
+    <!--Text explaining there are no existing conversations to show in their Conversation widget [CHAR LIMIT=100] -->
+    <string name="no_conversations_text">Check back here once you get some messages</string>
+    <!--Text header for priority conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->
+    <string name="priority_conversations">Priority conversations</string>
+    <!--Text header for recent conversation tiles available to be added to the home screen [CHAR LIMIT=100] -->
+    <string name="recent_conversations">Recent conversations</string>
+    <!-- Text for button dismissing configuration activity with no conversations [CHAR LIMIT=20] -->
+    <string name="okay">Okay</string>
     <!-- Timestamp for notification with exact time [CHAR LIMIT=25] -->
     <string name="timestamp"><xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
     <!-- Timestamp for notification when less than a certain time window [CHAR LIMIT=25] -->

@@ -128,6 +128,12 @@ class ActivityMetricsLogger {
     private static final int WINDOW_STATE_INVALID = -1;
 
     /**
+     * If a launching activity isn't visible within this duration when the device is sleeping, e.g.
+     * keyguard is locked, its transition info will be dropped.
+     */
+    private static final long UNKNOWN_VISIBILITY_CHECK_DELAY_MS = 3000;
+
+    /**
      * The flag for {@link #notifyActivityLaunching} to skip associating a new launch with an active
      * transition, in the case the launch is standalone (e.g. from recents).
      */
@@ -300,8 +306,7 @@ class ActivityMetricsLogger {
         }
 
         /** @return {@code true} if the activity matches a launched activity in this transition. */
-        boolean contains(WindowContainer wc) {
-            final ActivityRecord r = AppTransitionController.getAppFromContainer(wc);
+        boolean contains(ActivityRecord r) {
             return r != null && (r == mLastLaunchedActivity || mPendingDrawActivities.contains(r));
         }
 
@@ -473,10 +478,10 @@ class ActivityMetricsLogger {
 
     /** @return Non-null {@link TransitionInfo} if the activity is found in an active transition. */
     @Nullable
-    private TransitionInfo getActiveTransitionInfo(WindowContainer wc) {
+    private TransitionInfo getActiveTransitionInfo(ActivityRecord r) {
         for (int i = mTransitionInfoList.size() - 1; i >= 0; i--) {
             final TransitionInfo info = mTransitionInfoList.get(i);
-            if (info.contains(wc)) {
+            if (info.contains(r)) {
                 return info;
             }
         }
@@ -587,8 +592,8 @@ class ActivityMetricsLogger {
             return;
         }
 
-        if (info != null
-                && info.mLastLaunchedActivity.mDisplayContent == launchedActivity.mDisplayContent) {
+        final DisplayContent targetDisplay = launchedActivity.mDisplayContent;
+        if (info != null && info.mLastLaunchedActivity.mDisplayContent == targetDisplay) {
             // If we are already in an existing transition on the same display, only update the
             // activity name, but not the other attributes.
 
@@ -615,6 +620,13 @@ class ActivityMetricsLogger {
         } else {
             // As abort for no process switch.
             launchObserverNotifyIntentFailed();
+        }
+        if (targetDisplay.isSleeping()) {
+            // It is unknown whether the activity can be drawn or not, e.g. ut depends on the
+            // keyguard states and the attributes or flags set by the activity. If the activity
+            // keeps invisible in the grace period, the tracker will be cancelled so it won't get
+            // a very long launch time that takes unlocking as the end of launch.
+            scheduleCheckActivityToBeDrawn(launchedActivity, UNKNOWN_VISIBILITY_CHECK_DELAY_MS);
         }
     }
 
@@ -667,12 +679,15 @@ class ActivityMetricsLogger {
      *                         ActivityTaskManagerInternal.APP_TRANSITION_* reasons.
      */
     void notifyTransitionStarting(ArrayMap<WindowContainer, Integer> activityToReason) {
-        if (DEBUG_METRICS) Slog.i(TAG, "notifyTransitionStarting");
+        if (DEBUG_METRICS) Slog.i(TAG, "notifyTransitionStarting " + activityToReason);
 
         final long timestampNs = SystemClock.elapsedRealtimeNanos();
         for (int index = activityToReason.size() - 1; index >= 0; index--) {
-            final WindowContainer wc = activityToReason.keyAt(index);
-            final TransitionInfo info = getActiveTransitionInfo(wc);
+            final WindowContainer<?> wc = activityToReason.keyAt(index);
+            final ActivityRecord activity = wc.asActivityRecord();
+            final ActivityRecord r = activity != null ? activity
+                    : wc.getTopActivity(false /* includeFinishing */, true /* includeOverlays */);
+            final TransitionInfo info = getActiveTransitionInfo(r);
             if (info == null || info.mLoggedTransitionStarting) {
                 // Ignore any subsequent notifyTransitionStarting.
                 continue;
@@ -717,26 +732,32 @@ class ActivityMetricsLogger {
             Slog.i(TAG, "notifyVisibilityChanged " + r + " visible=" + r.mVisibleRequested
                     + " state=" + r.getState() + " finishing=" + r.finishing);
         }
-        if (!r.mVisibleRequested || r.finishing) {
-            info.removePendingDrawActivity(r);
-        }
-        if (info.mLastLaunchedActivity != r) {
+        if (r.isState(Task.ActivityState.RESUMED) && r.mDisplayContent.isSleeping()) {
+            // The activity may be launching while keyguard is locked. The keyguard may be dismissed
+            // after the activity finished relayout, so skip the visibility check to avoid aborting
+            // the tracking of launch event.
             return;
         }
-        // The activity and its task are passed separately because the activity may be removed from
-        // the task later.
-        r.mAtmService.mH.sendMessage(PooledLambda.obtainMessage(
-                ActivityMetricsLogger::checkVisibility, this, r.getTask(), r));
+        if (!r.mVisibleRequested || r.finishing) {
+            info.removePendingDrawActivity(r);
+            if (info.mLastLaunchedActivity == r) {
+                // Check if the tracker can be cancelled because the last launched activity may be
+                // no longer visible.
+                scheduleCheckActivityToBeDrawn(r, 0 /* delay */);
+            }
+        }
     }
 
-    /** @return {@code true} if the given task has an activity will be drawn. */
-    private static boolean hasActivityToBeDrawn(Task t) {
-        return t.forAllActivities(r -> r.mVisibleRequested && !r.isReportedDrawn() && !r.finishing);
+    private void scheduleCheckActivityToBeDrawn(@NonNull ActivityRecord r, long delay) {
+        // The activity and its task are passed separately because it is possible that the activity
+        // is removed from the task later.
+        r.mAtmService.mH.sendMessageDelayed(PooledLambda.obtainMessage(
+                ActivityMetricsLogger::checkActivityToBeDrawn, this, r.getTask(), r), delay);
     }
 
-    private void checkVisibility(Task t, ActivityRecord r) {
+    /** Cancels the tracking of launch if there won't be an activity to be drawn. */
+    private void checkActivityToBeDrawn(Task t, ActivityRecord r) {
         synchronized (mSupervisor.mService.mGlobalLock) {
-
             final TransitionInfo info = getActiveTransitionInfo(r);
 
             // If we have an active transition that's waiting on a certain activity that will be
@@ -757,13 +778,14 @@ class ActivityMetricsLogger {
             // window drawn event should report later to complete the transition. Otherwise all
             // activities in this task may be finished, invisible or drawn, so the transition event
             // should be cancelled.
-            if (hasActivityToBeDrawn(t)) {
+            if (t.forAllActivities(
+                    a -> a.mVisibleRequested && !a.isReportedDrawn() && !a.finishing)) {
                 return;
             }
 
-            if (DEBUG_METRICS) Slog.i(TAG, "notifyVisibilityChanged to invisible activity=" + r);
+            if (DEBUG_METRICS) Slog.i(TAG, "checkActivityToBeDrawn cancels activity=" + r);
             logAppTransitionCancel(info);
-            abort(info, "notifyVisibilityChanged to invisible");
+            abort(info, "checkActivityToBeDrawn (invisible or drawn already)");
         }
     }
 

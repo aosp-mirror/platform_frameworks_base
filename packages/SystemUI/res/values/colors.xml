@@ -177,7 +177,7 @@
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_dim_color">#80000000</color>              <!-- 50% black -->
     <color name="biometric_dialog_gray">#ff757575</color>
-    <color name="biometric_dialog_accent">#ff008577</color>                 <!-- dark teal -->
+    <color name="biometric_dialog_accent">@android:color/system_accent1_600</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
 
     <!-- UDFPS colors -->
@@ -242,6 +242,10 @@
     <!-- Window magnification colors -->
     <color name="magnification_border_color">#FF9900</color>
     <color name="magnification_switch_button_color">#7F000000</color>
+
+    <!-- Volume dialog colors -->
+    <color name="volume_dialog_background_color">@android:color/transparent</color>
+    <color name="volume_dialog_background_color_above_blur">@android:color/transparent</color>
 
     <!-- media -->
     <color name="media_disabled">#80ffffff</color>

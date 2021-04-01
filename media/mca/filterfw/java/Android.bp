@@ -1,0 +1,5 @@
+filegroup {
+    name: "framework-mca-filterfw-sources",
+    srcs: ["**/*.java"],
+    visibility: ["//frameworks/base"],
+}

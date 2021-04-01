@@ -33,7 +33,7 @@ namespace {
 
 constexpr char kRobotoVariable[] = "/system/fonts/Roboto-Regular.ttf";
 
-constexpr char kRegularFont[] = "/system/fonts/NotoSerif.ttf";
+constexpr char kRegularFont[] = "/system/fonts/NotoSerif-Regular.ttf";
 constexpr char kBoldFont[] = "/system/fonts/NotoSerif-Bold.ttf";
 constexpr char kItalicFont[] = "/system/fonts/NotoSerif-Italic.ttf";
 constexpr char kBoldItalicFont[] = "/system/fonts/NotoSerif-BoldItalic.ttf";

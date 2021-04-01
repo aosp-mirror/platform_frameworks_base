@@ -818,16 +818,18 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
+     * <p>
      * Returns whether cross-window blur is currently enabled. This affects both window blur behind
      * (see {@link LayoutParams#setBlurBehindRadius}) and window background blur (see
      * {@link Window#setBackgroundBlurRadius}).
-     *
+     * </p><p>
      * Cross-window blur might not be supported by some devices due to GPU limitations. It can also
      * be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
      * when minimal post processing is requested. In such situations, no blur will be computed or
      * drawn, so the blur target area will not be blurred. To handle this, the app might want to
      * change its theme to one that does not use blurs. To listen for cross-window blur
      * enabled/disabled events, use {@link #addCrossWindowBlurEnabledListener}.
+     * </p>
      *
      * @see #addCrossWindowBlurEnabledListener
      * @see LayoutParams#setBlurBehindRadius
@@ -838,21 +840,22 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
+     * <p>
      * Adds a listener, which will be called when cross-window blurs are enabled/disabled at
      * runtime. This affects both window blur behind (see {@link LayoutParams#setBlurBehindRadius})
      * and window background blur (see {@link Window#setBackgroundBlurRadius}).
-     *
+     * </p><p>
      * Cross-window blur might not be supported by some devices due to GPU limitations. It can also
      * be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
      * when minimal post processing is requested. In such situations, no blur will be computed or
      * drawn, so the blur target area will not be blurred. To handle this, the app might want to
      * change its theme to one that does not use blurs.
-     *
+     * </p><p>
      * The listener will be called on the main thread.
-     *
+     * </p><p>
      * If the listener is added successfully, it will be called immediately with the current
      * cross-window blur enabled state.
-     *
+     * </p>
      *
      * @param listener the listener to be added. It will be called back with a boolean parameter,
      *                 which is true if cross-window blur is enabled and false if it is disabled
@@ -866,18 +869,20 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
+     * <p>
      * Adds a listener, which will be called when cross-window blurs are enabled/disabled at
      * runtime. This affects both window blur behind (see {@link LayoutParams#setBlurBehindRadius})
      * and window background blur (see {@link Window#setBackgroundBlurRadius}).
-     *
+     * </p><p>
      * Cross-window blur might not be supported by some devices due to GPU limitations. It can also
      * be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
      * when minimal post processing is requested. In such situations, no blur will be computed or
      * drawn, so the blur target area will not be blurred. To handle this, the app might want to
      * change its theme to one that does not use blurs.
-     *
+     * </p><p>
      * If the listener is added successfully, it will be called immediately with the current
      * cross-window blur enabled state.
+     * </p>
      *
      * @param executor {@link Executor} to handle the listener callback
      * @param listener the listener to be added. It will be called back with a boolean parameter,
@@ -3627,21 +3632,22 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
+         * <p>
          * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
          * but instead of dimmed, the content behind the window will be blurred (or combined with
          * the dim amount, if such is specified).
-         *
+         * </p><p>
          * The density of the blur is set by the blur radius. The radius defines the size
          * of the neighbouring area, from which pixels will be averaged to form the final
          * color for each pixel. The operation approximates a Gaussian blur.
          * A radius of 0 means no blur. The higher the radius, the denser the blur.
-         *
+         * </p><p>
          * Note the difference with {@link android.view.Window#setBackgroundBlurRadius},
          * which blurs only within the bounds of the window. Blur behind blurs the whole screen
          * behind the window.
-         *
+         * </p><p>
          * Requires {@link #FLAG_BLUR_BEHIND} to be set.
-         *
+         * </p><p>
          * Cross-window blur might not be supported by some devices due to GPU limitations. It can
          * also be disabled at runtime, e.g. during battery saving mode, when multimedia tunneling
          * is used or when minimal post processing is requested. In such situations, no blur will
@@ -3649,7 +3655,7 @@ public interface WindowManager extends ViewManager {
          * and the content behind it. To avoid this, the app might want to use more
          * {@link #dimAmount} on its window. To listen for cross-window blur enabled/disabled
          * events, use {@link #addCrossWindowBlurEnabledListener}.
-         *
+         * </p>
          * @param blurBehindRadius The blur radius to use for blur behind in pixels
          *
          * @see #FLAG_BLUR_BEHIND

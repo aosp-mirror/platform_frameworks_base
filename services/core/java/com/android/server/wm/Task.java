@@ -6060,12 +6060,10 @@ class Task extends WindowContainer<WindowContainer> {
                 int idx = mChildren.size() - 1;
                 while (idx >= 0) {
                     final Task child = (Task) getChildAt(idx--);
-                    if (!child.isFocusableAndVisible()) {
-                        break;
+                    if (!child.isTopActivityFocusable()) {
+                        continue;
                     }
-
-                    // Only allow one activity to be resumed among sibling tasks in split-screen.
-                    if (inSplitScreenWindowingMode() && someActivityResumed) {
+                    if (child.getVisibility(null /* starting */) != TASK_VISIBILITY_VISIBLE) {
                         break;
                     }
 

@@ -252,7 +252,7 @@
     <item msgid="3474333938380896988">"Deuteranomaly का लागि क्षेत्रहरू देखाउनुहोस्"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="794656271086646068">"मानक सीमा"</item>
+    <item msgid="794656271086646068">"डिफल्ट सीमा"</item>
     <item msgid="8628438298170567201">"कुनै पृष्ठभूमि प्रक्रियाहरू छैनन्"</item>
     <item msgid="915752993383950932">"बढीमा १ प्रक्रिया"</item>
     <item msgid="8554877790859095133">"बढीमा २ प्रक्रियाहरू"</item>
