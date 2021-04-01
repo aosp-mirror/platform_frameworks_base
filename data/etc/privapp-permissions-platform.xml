@@ -499,6 +499,8 @@ applications that come with the platform
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
         <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
         <permission name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
+        <!-- Permission required for CTS test - SystemMediaRouter2Test -->
+        <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
