@@ -19,6 +19,7 @@ package com.android.systemui.people;
 import static android.app.Notification.CATEGORY_MISSED_CALL;
 import static android.app.Notification.EXTRA_MESSAGES;
 
+import android.annotation.NonNull;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.people.ConversationChannel;
@@ -126,8 +127,9 @@ public class PeopleSpaceUtils {
         }
     }
 
-    /** Returns a list of map entries corresponding to user's conversations. */
-    public static List<PeopleSpaceTile> getTiles(
+    /** Returns a list of map entries corresponding to user's priority conversations. */
+    @NonNull
+    public static List<PeopleSpaceTile> getPriorityTiles(
             Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
             LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
             throws Exception {
@@ -139,11 +141,23 @@ public class PeopleSpaceUtils {
                 .filter(c -> c.getNotificationChannel() != null
                         && c.getNotificationChannel().isImportantConversation())
                 .map(c -> c.getShortcutInfo());
-        List<PeopleSpaceTile> tiles = getSortedTiles(peopleManager, launcherApps,
+        List<PeopleSpaceTile> priorityTiles = getSortedTiles(peopleManager, launcherApps,
                 priorityConversations);
+        priorityTiles = augmentTilesFromVisibleNotifications(
+                context, priorityTiles, notificationEntryManager);
+        return priorityTiles;
+    }
 
-        // Sort and then add recent and non priority conversations to tiles list.
+    /** Returns a list of map entries corresponding to user's recent conversations. */
+    @NonNull
+    public static List<PeopleSpaceTile> getRecentTiles(
+            Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
+            LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
+            throws Exception {
         if (DEBUG) Log.d(TAG, "Add recent conversations");
+        List<ConversationChannelWrapper> conversations =
+                notificationManager.getConversations(
+                        false).getList();
         Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
                 .filter(c -> c.getNotificationChannel() == null
                         || !c.getNotificationChannel().isImportantConversation())
@@ -159,10 +173,10 @@ public class PeopleSpaceUtils {
                 recentConversations);
         List<PeopleSpaceTile> recentTiles =
                 getSortedTiles(peopleManager, launcherApps, mergedStream);
-        tiles.addAll(recentTiles);
 
-        tiles = augmentTilesFromVisibleNotifications(context, tiles, notificationEntryManager);
-        return tiles;
+        recentTiles = augmentTilesFromVisibleNotifications(
+                context, recentTiles, notificationEntryManager);
+        return recentTiles;
     }
 
     /** Returns stored widgets for the conversation specified. */

@@ -472,8 +472,7 @@ public class AlarmManagerService extends SystemService {
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WINDOW = 60 * 60 * 1000; // 1 hour.
         private static final long DEFAULT_ALLOW_WHILE_IDLE_COMPAT_WINDOW = 9 * 60 * 1000; // 9 mins.
 
-        // TODO (b/171306433): Change to true by default.
-        private static final boolean DEFAULT_CRASH_NON_CLOCK_APPS = false;
+        private static final boolean DEFAULT_CRASH_NON_CLOCK_APPS = true;
 
         private static final long DEFAULT_PRIORITY_ALARM_DELAY = 9 * 60_000;
 

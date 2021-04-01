@@ -876,8 +876,6 @@ public class BubbleStackView extends FrameLayout
         mTaskbarScrim.setVisibility(GONE);
 
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
-            mBubbleController.onImeVisibilityChanged(
-                    insets.getInsets(WindowInsets.Type.ime()).bottom > 0);
             if (!mIsExpanded || mIsExpansionAnimating) {
                 return view.onApplyWindowInsets(insets);
             }

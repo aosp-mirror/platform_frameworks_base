@@ -194,7 +194,7 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
      * non-text content.
      */
     private static boolean isUsageOfImeCommitContentEnabled(@NonNull View view) {
-        if (view.getOnReceiveContentMimeTypes() != null) {
+        if (view.getReceiveContentMimeTypes() != null) {
             if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
                 Log.v(LOG_TAG, "Fallback to commitContent disabled (custom callback is set)");
             }

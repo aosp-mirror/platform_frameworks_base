@@ -76,6 +76,7 @@ import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
@@ -95,6 +96,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -115,6 +117,7 @@ import com.android.systemui.util.RoundedCornerProgressDrawable;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Visual presentation of the volume dialog.
@@ -214,6 +217,10 @@ public class VolumeDialogImpl implements VolumeDialog,
     private ViewStub mODICaptionsTooltipViewStub;
     private View mODICaptionsTooltipView = null;
 
+    private final boolean mUseBackgroundBlur;
+    private Consumer<Boolean> mCrossWindowBlurEnabledListener;
+    private BackgroundBlurDrawable mDialogRowsViewBackground;
+
     public VolumeDialogImpl(Context context) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
@@ -233,6 +240,20 @@ public class VolumeDialogImpl implements VolumeDialog,
             mContext.getResources().getInteger(R.integer.config_dialogShowAnimationDurationMs);
         mDialogHideAnimationDurationMs =
             mContext.getResources().getInteger(R.integer.config_dialogHideAnimationDurationMs);
+        mUseBackgroundBlur =
+            mContext.getResources().getBoolean(R.bool.config_volumeDialogUseBackgroundBlur);
+
+        if (mUseBackgroundBlur) {
+            final int dialogRowsViewColorAboveBlur = mContext.getColor(
+                    R.color.volume_dialog_background_color_above_blur);
+            final int dialogRowsViewColorNoBlur = mContext.getColor(
+                    R.color.volume_dialog_background_color);
+            mCrossWindowBlurEnabledListener = (enabled) -> {
+                mDialogRowsViewBackground.setColor(
+                        enabled ? dialogRowsViewColorAboveBlur : dialogRowsViewColorNoBlur);
+                mDialogRowsView.invalidate();
+            };
+        }
         mRingerDrawerItemSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.volume_ringer_drawer_item_size);
         mShowVibrate = mController.hasVibrator();
@@ -356,6 +377,32 @@ public class VolumeDialogImpl implements VolumeDialog,
         });
 
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
+        if (mUseBackgroundBlur) {
+            mDialogView.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    mWindow.getWindowManager().addCrossWindowBlurEnabledListener(
+                            mCrossWindowBlurEnabledListener);
+
+                    mDialogRowsViewBackground = v.getViewRootImpl().createBackgroundBlurDrawable();
+
+                    final Resources resources = mContext.getResources();
+                    mDialogRowsViewBackground.setCornerRadius(
+                            mContext.getResources().getDimensionPixelSize(Utils.getThemeAttr(
+                                    mContext, android.R.attr.dialogCornerRadius)));
+                    mDialogRowsViewBackground.setBlurRadius(resources.getDimensionPixelSize(
+                            R.dimen.volume_dialog_background_blur_radius));
+                    mDialogRowsView.setBackground(mDialogRowsViewBackground);
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    mWindow.getWindowManager().removeCrossWindowBlurEnabledListener(
+                            mCrossWindowBlurEnabledListener);
+                }
+            });
+        }
+
         mRinger = mDialog.findViewById(R.id.ringer);
         if (mRinger != null) {
             mRingerIcon = mRinger.findViewById(R.id.ringer_icon);

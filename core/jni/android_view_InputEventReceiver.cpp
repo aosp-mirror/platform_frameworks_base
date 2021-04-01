@@ -27,6 +27,7 @@
 #include <input/InputTransport.h>
 #include <log/log.h>
 #include <utils/Looper.h>
+#include <variant>
 #include <vector>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
@@ -80,6 +81,7 @@ public:
     status_t initialize();
     void dispose();
     status_t finishInputEvent(uint32_t seq, bool handled);
+    status_t reportTimeline(int32_t inputEventId, nsecs_t gpuCompletedTime, nsecs_t presentTime);
     status_t consumeEvents(JNIEnv* env, bool consumeBatches, nsecs_t frameTime,
             bool* outConsumedBatch);
     std::string dump(const char* prefix);
@@ -93,13 +95,19 @@ private:
         bool handled;
     };
 
+    struct Timeline {
+        int32_t inputEventId;
+        std::array<nsecs_t, GraphicsTimeline::SIZE> timeline;
+    };
+    typedef std::variant<Finish, Timeline> OutboundEvent;
+
     jobject mReceiverWeakGlobal;
     InputConsumer mInputConsumer;
     sp<MessageQueue> mMessageQueue;
     PreallocatedInputEventFactory mInputEventFactory;
     bool mBatchedInputEventPending;
     int mFdEvents;
-    std::vector<Finish> mFinishQueue;
+    std::vector<OutboundEvent> mOutboundQueue;
 
     void setFdEvents(int events);
 
@@ -152,7 +160,23 @@ status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) 
             .seq = seq,
             .handled = handled,
     };
-    mFinishQueue.push_back(finish);
+    mOutboundQueue.push_back(finish);
+    return processOutboundEvents();
+}
+
+status_t NativeInputEventReceiver::reportTimeline(int32_t inputEventId, nsecs_t gpuCompletedTime,
+                                                  nsecs_t presentTime) {
+    if (kDebugDispatchCycle) {
+        ALOGD("channel '%s' ~ %s", getInputChannelName().c_str(), __func__);
+    }
+    std::array<nsecs_t, GraphicsTimeline::SIZE> graphicsTimeline;
+    graphicsTimeline[GraphicsTimeline::GPU_COMPLETED_TIME] = gpuCompletedTime;
+    graphicsTimeline[GraphicsTimeline::PRESENT_TIME] = presentTime;
+    Timeline timeline{
+            .inputEventId = inputEventId,
+            .timeline = graphicsTimeline,
+    };
+    mOutboundQueue.push_back(timeline);
     return processOutboundEvents();
 }
 
@@ -170,7 +194,7 @@ void NativeInputEventReceiver::setFdEvents(int events) {
 
 /**
  * Receiver's primary role is to receive input events, but it has an additional duty of sending
- * 'ack' for events (using the call 'finishInputEvent').
+ * 'ack' for events (using the call 'finishInputEvent') and reporting input event timeline.
  *
  * If we are looking at the communication between InputPublisher and InputConsumer, we can say that
  * from the InputConsumer's perspective, InputMessage's that are sent from publisher to consumer are
@@ -178,19 +202,31 @@ void NativeInputEventReceiver::setFdEvents(int events) {
  * InputPublisher are 'outbound / outgoing' events.
  *
  * NativeInputEventReceiver owns (and acts like) an InputConsumer. So the finish events are outbound
- * from InputEventReceiver (and will be sent to the InputPublisher).
+ * from InputEventReceiver (and will be sent to the InputPublisher). Likewise, timeline events are
+ * outbound events.
  *
- * In this function, send as many events from 'mFinishQueue' as possible across the socket to the
+ * In this function, send as many events from 'mOutboundQueue' as possible across the socket to the
  * InputPublisher. If no events are remaining, let the looper know so that it doesn't wake up
  * unnecessarily.
  */
 status_t NativeInputEventReceiver::processOutboundEvents() {
-    while (!mFinishQueue.empty()) {
-        const Finish& finish = *mFinishQueue.begin();
-        status_t status = mInputConsumer.sendFinishedSignal(finish.seq, finish.handled);
+    while (!mOutboundQueue.empty()) {
+        OutboundEvent& outbound = *mOutboundQueue.begin();
+        status_t status;
+
+        if (std::holds_alternative<Finish>(outbound)) {
+            const Finish& finish = std::get<Finish>(outbound);
+            status = mInputConsumer.sendFinishedSignal(finish.seq, finish.handled);
+        } else if (std::holds_alternative<Timeline>(outbound)) {
+            const Timeline& timeline = std::get<Timeline>(outbound);
+            status = mInputConsumer.sendTimeline(timeline.inputEventId, timeline.timeline);
+        } else {
+            LOG_ALWAYS_FATAL("Unexpected event type in std::variant");
+            status = BAD_VALUE;
+        }
         if (status == OK) {
             // Successful send. Erase the entry and keep trying to send more
-            mFinishQueue.erase(mFinishQueue.begin());
+            mOutboundQueue.erase(mOutboundQueue.begin());
             continue;
         }
 
@@ -198,7 +234,7 @@ status_t NativeInputEventReceiver::processOutboundEvents() {
         if (status == WOULD_BLOCK) {
             if (kDebugDispatchCycle) {
                 ALOGD("channel '%s' ~ Remaining outbound events: %zu.",
-                      getInputChannelName().c_str(), mFinishQueue.size());
+                      getInputChannelName().c_str(), mOutboundQueue.size());
             }
             setFdEvents(ALOOPER_EVENT_INPUT | ALOOPER_EVENT_OUTPUT);
             return WOULD_BLOCK; // try again later
@@ -425,12 +461,23 @@ std::string NativeInputEventReceiver::dump(const char* prefix) {
 
     out += android::base::StringPrintf("mBatchedInputEventPending: %s\n",
                                        toString(mBatchedInputEventPending));
-    out = out + "mFinishQueue:\n";
-    for (const Finish& finish : mFinishQueue) {
-        out += android::base::StringPrintf("  seq=%" PRIu32 " handled=%s\n", finish.seq,
-                                           toString(finish.handled));
+    out = out + "mOutboundQueue:\n";
+    for (const OutboundEvent& outbound : mOutboundQueue) {
+        if (std::holds_alternative<Finish>(outbound)) {
+            const Finish& finish = std::get<Finish>(outbound);
+            out += android::base::StringPrintf("  Finish: seq=%" PRIu32 " handled=%s\n", finish.seq,
+                                               toString(finish.handled));
+        } else if (std::holds_alternative<Timeline>(outbound)) {
+            const Timeline& timeline = std::get<Timeline>(outbound);
+            out += android::base::
+                    StringPrintf("  Timeline: inputEventId=%" PRId32 " gpuCompletedTime=%" PRId64
+                                 ", presentTime=%" PRId64 "\n",
+                                 timeline.inputEventId,
+                                 timeline.timeline[GraphicsTimeline::GPU_COMPLETED_TIME],
+                                 timeline.timeline[GraphicsTimeline::PRESENT_TIME]);
+        }
     }
-    if (mFinishQueue.empty()) {
+    if (mOutboundQueue.empty()) {
         out = out + "  <empty>\n";
     }
     return addPrefix(out, prefix);
@@ -489,6 +536,25 @@ static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jlong receiverPtr,
     }
 }
 
+static void nativeReportTimeline(JNIEnv* env, jclass clazz, jlong receiverPtr, jint inputEventId,
+                                 jlong gpuCompletedTime, jlong presentTime) {
+    if (IdGenerator::getSource(inputEventId) != IdGenerator::Source::INPUT_READER) {
+        // skip this event, it did not originate from hardware
+        return;
+    }
+    sp<NativeInputEventReceiver> receiver =
+            reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
+    status_t status = receiver->reportTimeline(inputEventId, gpuCompletedTime, presentTime);
+    if (status == OK || status == WOULD_BLOCK) {
+        return; // normal operation
+    }
+    if (status != DEAD_OBJECT) {
+        std::string message = android::base::StringPrintf("Failed to send timeline.  status=%s(%d)",
+                                                          strerror(-status), status);
+        jniThrowRuntimeException(env, message.c_str());
+    }
+}
+
 static jboolean nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jlong receiverPtr,
         jlong frameTimeNanos) {
     sp<NativeInputEventReceiver> receiver =
@@ -520,6 +586,7 @@ static const JNINativeMethod gMethods[] = {
          (void*)nativeInit},
         {"nativeDispose", "(J)V", (void*)nativeDispose},
         {"nativeFinishInputEvent", "(JIZ)V", (void*)nativeFinishInputEvent},
+        {"nativeReportTimeline", "(JIJJ)V", (void*)nativeReportTimeline},
         {"nativeConsumeBatchedInputEvents", "(JJ)Z", (void*)nativeConsumeBatchedInputEvents},
         {"nativeDump", "(JLjava/lang/String;)Ljava/lang/String;", (void*)nativeDump},
 };

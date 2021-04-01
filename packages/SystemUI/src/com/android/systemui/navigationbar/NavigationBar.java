@@ -116,7 +116,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
-import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -275,11 +274,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             return mId;
         }
     }
-
-    /** Only for default display */
-    @Nullable
-    AssistHandleViewController mAssistHandlerViewController;
-
 
     private final AutoHideUiElement mAutoHideUiElement = new AutoHideUiElement() {
         @Override
@@ -630,11 +624,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mDisabledFlags2 |= StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS;
         }
         setDisabled2Flags(mDisabledFlags2);
-        if (mIsOnDefaultDisplay) {
-            mAssistHandlerViewController =
-                    new AssistHandleViewController(mHandler, mNavigationBarView);
-            getBarTransitions().addDarkIntensityListener(mAssistHandlerViewController);
-        }
 
         initSecondaryHomeHandleForRotation();
 
@@ -664,11 +653,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     @Override
     public void onViewDetachedFromWindow(View v) {
         if (mNavigationBarView != null) {
-            if (mIsOnDefaultDisplay) {
-                mNavigationBarView.getBarTransitions()
-                        .removeDarkIntensityListener(mAssistHandlerViewController);
-                mAssistHandlerViewController = null;
-            }
             mNavigationBarView.getBarTransitions().destroy();
             mNavigationBarView.getLightTransitionsController().destroy(mContext);
         }
@@ -1594,11 +1578,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavigationBarView.setLayoutTransitionsEnabled(false);
         mNavigationBarView.postDelayed(() -> mNavigationBarView.setLayoutTransitionsEnabled(true),
                 delay + StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE);
-    }
-
-    @Nullable
-    public AssistHandleViewController getAssistHandlerViewController() {
-        return mAssistHandlerViewController;
     }
 
     /**

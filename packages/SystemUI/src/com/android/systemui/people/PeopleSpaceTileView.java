@@ -37,11 +37,10 @@ public class PeopleSpaceTileView extends LinearLayout {
 
     private View mTileView;
     private TextView mNameView;
-    private TextView mStatusView;
     private ImageView mPackageIconView;
     private ImageView mPersonIconView;
 
-    public PeopleSpaceTileView(Context context, ViewGroup view, String shortcutId) {
+    public PeopleSpaceTileView(Context context, ViewGroup view, String shortcutId, boolean isLast) {
         super(context);
         mTileView = view.findViewWithTag(shortcutId);
         if (mTileView == null) {
@@ -50,9 +49,13 @@ public class PeopleSpaceTileView extends LinearLayout {
             view.addView(mTileView, LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT);
             mTileView.setTag(shortcutId);
+
+            // If it's not the last conversation in this section, add a divider.
+            if (!isLast) {
+                inflater.inflate(R.layout.people_space_activity_list_divider, view, true);
+            }
         }
         mNameView = mTileView.findViewById(R.id.tile_view_name);
-        mStatusView = mTileView.findViewById(R.id.tile_view_status);
         mPackageIconView = mTileView.findViewById(R.id.tile_view_package_icon);
         mPersonIconView = mTileView.findViewById(R.id.tile_view_person_icon);
     }
@@ -60,11 +63,6 @@ public class PeopleSpaceTileView extends LinearLayout {
     /** Sets the name text on the tile. */
     public void setName(String name) {
         mNameView.setText(name);
-    }
-
-    /** Sets the status text on the tile. */
-    public void setStatus(String status) {
-        mStatusView.setText(status);
     }
 
     /** Sets the package drawable on the tile. */

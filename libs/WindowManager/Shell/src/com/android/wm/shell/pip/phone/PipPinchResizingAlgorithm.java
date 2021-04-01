@@ -16,111 +16,115 @@
 package com.android.wm.shell.pip.phone;
 
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 
 /**
  * Helper class to calculate the new size given two-fingers pinch to resize.
  */
 public class PipPinchResizingAlgorithm {
-    private static final Rect TMP_RECT = new Rect();
+
+    private static final int PINCH_RESIZE_MAX_ANGLE_ROTATION = 45;
+    private static final float OVERROTATE_DAMP_FACTOR = 0.4f;
+    private static final float ANGLE_THRESHOLD = 5f;
+
+    private final PointF mTmpDownVector = new PointF();
+    private final PointF mTmpLastVector = new PointF();
+    private final PointF mTmpDownCentroid = new PointF();
+    private final PointF mTmpLastCentroid = new PointF();
+
     /**
-     * Given inputs and requirements and current PiP bounds, return the new size.
-     *
-     * @param x0 x-coordinate of the primary input.
-     * @param y0 y-coordinate of the primary input.
-     * @param x1 x-coordinate of the secondary input.
-     * @param y1 y-coordinate of the secondary input.
-     * @param downx0 x-coordinate of the original down point of the primary input.
-     * @param downy0 y-coordinate of the original down ponit of the primary input.
-     * @param downx1 x-coordinate of the original down point of the secondary input.
-     * @param downy1 y-coordinate of the original down point of the secondary input.
-     * @param currentPipBounds current PiP bounds.
-     * @param minVisibleWidth minimum visible width.
-     * @param minVisibleHeight minimum visible height.
-     * @param maxSize max size.
-     * @return The new resized PiP bounds, sharing the same center.
+     * Updates {@param resizeBoundsOut} with the new bounds of the PIP, and returns the angle in
+     * degrees that the PIP should be rotated.
      */
-    public static Rect pinchResize(float x0, float y0, float x1, float y1,
-            float downx0, float downy0, float downx1, float downy1, Rect currentPipBounds,
-            int minVisibleWidth, int minVisibleHeight, Point maxSize) {
+    public float calculateBoundsAndAngle(PointF downPoint, PointF downSecondPoint,
+            PointF lastPoint, PointF lastSecondPoint, Point minSize, Point maxSize,
+            Rect initialBounds, Rect resizeBoundsOut) {
+        float downDist = (float) Math.hypot(downSecondPoint.x - downPoint.x,
+                downSecondPoint.y - downPoint.y);
+        float dist = (float) Math.hypot(lastSecondPoint.x - lastPoint.x,
+                lastSecondPoint.y - lastPoint.y);
+        float minScale = getMinScale(initialBounds, minSize);
+        float maxScale = getMaxScale(initialBounds, maxSize);
+        float scale = Math.max(minScale, Math.min(maxScale, dist / downDist));
 
-        int width = currentPipBounds.width();
-        int height = currentPipBounds.height();
-        int left = currentPipBounds.left;
-        int top = currentPipBounds.top;
-        int right = currentPipBounds.right;
-        int bottom = currentPipBounds.bottom;
-        final float aspect = (float) width / (float) height;
-        final int widthDelta = Math.round(Math.abs(x0 - x1) - Math.abs(downx0 - downx1));
-        final int heightDelta = Math.round(Math.abs(y0 - y1) - Math.abs(downy0 - downy1));
-        final int dx = (int) ((x0 - downx0 + x1 - downx1) / 2);
-        final int dy = (int) ((y0 - downy0 + y1 - downy1) / 2);
+        // Scale the bounds by the change in distance between the points
+        resizeBoundsOut.set(initialBounds);
+        scaleRectAboutCenter(resizeBoundsOut, scale);
 
-        width = Math.max(minVisibleWidth, Math.min(width + widthDelta, maxSize.x));
-        height = Math.max(minVisibleHeight, Math.min(height + heightDelta, maxSize.y));
+        // Translate by the centroid movement
+        getCentroid(downPoint, downSecondPoint, mTmpDownCentroid);
+        getCentroid(lastPoint, lastSecondPoint, mTmpLastCentroid);
+        resizeBoundsOut.offset((int) (mTmpLastCentroid.x - mTmpDownCentroid.x),
+                (int) (mTmpLastCentroid.y - mTmpDownCentroid.y));
 
-        // Calculate 2 rectangles fulfilling all requirements for either X or Y being the major
-        // drag axis. What ever is producing the bigger rectangle will be chosen.
-        int width1;
-        int width2;
-        int height1;
-        int height2;
-        if (aspect > 1.0f) {
-            // Assuming that the width is our target we calculate the height.
-            width1 = Math.max(minVisibleWidth, Math.min(maxSize.x, width));
-            height1 = Math.round((float) width1 / aspect);
-            if (height1 < minVisibleHeight) {
-                // If the resulting height is too small we adjust to the minimal size.
-                height1 = minVisibleHeight;
-                width1 = Math.max(minVisibleWidth,
-                        Math.min(maxSize.x, Math.round((float) height1 * aspect)));
-            }
-            // Assuming that the height is our target we calculate the width.
-            height2 = Math.max(minVisibleHeight, Math.min(maxSize.y, height));
-            width2 = Math.round((float) height2 * aspect);
-            if (width2 < minVisibleWidth) {
-                // If the resulting width is too small we adjust to the minimal size.
-                width2 = minVisibleWidth;
-                height2 = Math.max(minVisibleHeight,
-                        Math.min(maxSize.y, Math.round((float) width2 / aspect)));
-            }
-        } else {
-            // Assuming that the width is our target we calculate the height.
-            width1 = Math.max(minVisibleWidth, Math.min(maxSize.x, width));
-            height1 = Math.round((float) width1 / aspect);
-            if (height1 < minVisibleHeight) {
-                // If the resulting height is too small we adjust to the minimal size.
-                height1 = minVisibleHeight;
-                width1 = Math.max(minVisibleWidth,
-                        Math.min(maxSize.x, Math.round((float) height1 * aspect)));
-            }
-            // Assuming that the height is our target we calculate the width.
-            height2 = Math.max(minVisibleHeight, Math.min(maxSize.y, height));
-            width2 = Math.round((float) height2 * aspect);
-            if (width2 < minVisibleWidth) {
-                // If the resulting width is too small we adjust to the minimal size.
-                width2 = minVisibleWidth;
-                height2 = Math.max(minVisibleHeight,
-                        Math.min(maxSize.y, Math.round((float) width2 / aspect)));
-            }
+        // Calculate the angle
+        mTmpDownVector.set(downSecondPoint.x - downPoint.x,
+                downSecondPoint.y - downPoint.y);
+        mTmpLastVector.set(lastSecondPoint.x - lastPoint.x,
+                lastSecondPoint.y - lastPoint.y);
+        float angle = (float) Math.atan2(cross(mTmpDownVector, mTmpLastVector),
+                dot(mTmpDownVector, mTmpLastVector));
+        return constrainRotationAngle((float) Math.toDegrees(angle));
+    }
+
+    private float getMinScale(Rect bounds, Point minSize) {
+        return Math.max((float) minSize.x / bounds.width(), (float) minSize.y / bounds.height());
+    }
+
+    private float getMaxScale(Rect bounds, Point maxSize) {
+        return Math.min((float) maxSize.x / bounds.width(), (float) maxSize.y / bounds.height());
+    }
+
+    private float constrainRotationAngle(float angle) {
+        // Remove some degrees so that user doesn't immediately start rotating until a threshold
+        return Math.signum(angle) * Math.max(0, (Math.abs(dampedRotate(angle)) - ANGLE_THRESHOLD));
+    }
+
+    /**
+     * Given the current rotation angle, dampen it so that as it approaches the maximum angle,
+     * dampen it.
+     */
+    private float dampedRotate(float amount) {
+        if (Float.compare(amount, 0) == 0) return 0;
+
+        float f = amount / PINCH_RESIZE_MAX_ANGLE_ROTATION;
+        f = f / (Math.abs(f)) * (overRotateInfluenceCurve(Math.abs(f)));
+
+        // Clamp this factor, f, to -1 < f < 1
+        if (Math.abs(f) >= 1) {
+            f /= Math.abs(f);
         }
+        return OVERROTATE_DAMP_FACTOR * f * PINCH_RESIZE_MAX_ANGLE_ROTATION;
+    }
 
-        // Use the bigger of the two rectangles if the major change was positive, otherwise
-        // do the opposite.
-        final boolean grows = width > (right - left) || height > (bottom - top);
-        if (grows == (width1 * height1 > width2 * height2)) {
-            width = width1;
-            height = height1;
-        } else {
-            width = width2;
-            height = height2;
+    /**
+     * Returns a value that corresponds to y = (f - 1)^3 + 1.
+     */
+    private float overRotateInfluenceCurve(float f) {
+        f -= 1.0f;
+        return f * f * f + 1.0f;
+    }
+
+    private void getCentroid(PointF p1, PointF p2, PointF centroidOut) {
+        centroidOut.set((p2.x + p1.x) / 2, (p2.y + p1.y) / 2);
+    }
+
+    private float dot(PointF p1, PointF p2) {
+        return p1.x * p2.x + p1.y * p2.y;
+    }
+
+    private float cross(PointF p1, PointF p2) {
+        return p1.x * p2.y - p1.y * p2.x;
+    }
+
+    private void scaleRectAboutCenter(Rect r, float scale) {
+        if (scale != 1.0f) {
+            int cx = r.centerX();
+            int cy = r.centerY();
+            r.offset(-cx, -cy);
+            r.scale(scale);
+            r.offset(cx, cy);
         }
-
-        TMP_RECT.set(currentPipBounds.centerX() - width / 2,
-                currentPipBounds.centerY() - height / 2,
-                currentPipBounds.centerX() + width / 2,
-                currentPipBounds.centerY() + height / 2);
-        TMP_RECT.offset(dx, dy);
-        return TMP_RECT;
     }
 }

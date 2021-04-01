@@ -16,6 +16,8 @@
 
 package com.android.systemui.shared.system;
 
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+
 import android.app.PictureInPictureParams;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
@@ -57,6 +59,7 @@ public class RemoteAnimationTargetCompat {
     public final Rect contentInsets;
     public final PictureInPictureParams pictureInPictureParams;
     public final int rotationChange;
+    public final int windowType;
 
     private final SurfaceControl mStartLeash;
 
@@ -78,6 +81,7 @@ public class RemoteAnimationTargetCompat {
         rotationChange = 0;
 
         mStartLeash = app.startLeash;
+        windowType = app.windowType;
     }
 
     private static int newModeToLegacyMode(int newMode) {
@@ -118,6 +122,7 @@ public class RemoteAnimationTargetCompat {
         pictureInPictureParams = null;
         mStartLeash = null;
         rotationChange = change.getEndRotation() - change.getStartRotation();
+        windowType = INVALID_WINDOW_TYPE;
     }
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {

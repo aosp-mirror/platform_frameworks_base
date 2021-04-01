@@ -60,9 +60,8 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         animator.duration = RIPPLE_ANIMATION_DURATION
         animator.addUpdateListener { animator ->
             val now = animator.currentPlayTime
-            val phase = now / 30000f
             rippleShader.progress = animator.animatedValue as Float
-            rippleShader.noisePhase = phase
+            rippleShader.time = now.toFloat()
             invalidate()
         }
         animator.addListener(object : AnimatorListenerAdapter() {

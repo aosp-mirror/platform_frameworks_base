@@ -1326,7 +1326,6 @@ public class NotificationManager {
         }
     }
 
-
     /**
      * Gets whether all notifications posted by this app can appear outside of the
      * notification shade, floating over other apps' content.
@@ -1342,6 +1341,21 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.areBubblesAllowed(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether bubbles are enabled at the feature level for the current user. When enabled,
+     * notifications able to bubble will display an affordance allowing the user to bubble them.
+     *
+     * @see Notification.Builder#setBubbleMetadata(Notification.BubbleMetadata)
+     */
+    public boolean areBubblesEnabled() {
+        INotificationManager service = getService();
+        try {
+            return service.areBubblesEnabled(mContext.getUser());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

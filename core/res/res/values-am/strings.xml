@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"APP እየሠራ ነው"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ባትሪ በመፍጀት ላይ ያሉ መተግበሪያዎች"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ማጉላት"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"የተደራሽነት ደህንነት መመሪያ"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ባትሪ እየተጠቀመ ነው"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> መተግበሪያዎች ባትሪ እየተጠቀሙ ነው"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"በባትሪ እና ውሂብ አጠቃቀም ላይ ዝርዝሮችን ለማግኘት መታ ያድርጉ"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"የእርስዎን አካላዊ እንቅስቃሴ ይድረሱበት"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ካሜራ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ስዕሎች ያንሱ እና ቪዲዮ ይቅረጹ"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"በአቅራቢያ ያሉ የብሉቱዝ መሣሪያዎች"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"በአቅራቢያ ያሉ የብሉቱዝ መሣሪያዎችን ያግኙ እና ያገናኙ"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"የጥሪ ምዝገባ ማስታወሻዎች"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"የስልክ ጥሪ ምዝግባ ማስታወሻን ያንብቡ እና ይጻፉ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ስልክ"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"መተግበሪያው በጡባዊ ተኮው ላይ ያለውን የብሉቱዝ ውቅር እንዲያይ እና ከተጣመሩ መሳሪያዎች ጋር ግንኙነቶችን እንዲያደርግና እንዲቀበል ይፈቅድለታል።"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"በእርስዎ የ Android TV መሣሪያ የብሉቱዝ ውቅረት ለማየት፣ እና ከተጣመረው መሣሪያ ጋር ግንኙነት ለመቀበል እንዲችል ለመተግበሪያው ይፈቅዳል።"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"መተግበሪያው በስልኩ ላይ ያለውን የብሉቱዝ ውቅር እንዲያይ እና ከተጣመሩ መሳሪያዎች ጋር ግንኙነቶችን እንዲያደርግና እንዲቀበል ይፈቅድለታል።"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"በአቅራቢያ ያሉ የብሉቱዝ መሣሪያዎችን ያግኙ እና ያጣምሩ"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"መተግበሪያው በአቅራቢያ ያሉ የብሉቱዝ መሣሪያዎችን እንዲያገኝ እና እንዲጣመር ይፈቅድለታል"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ከተጣመሩ የብሉቱዝ መሣሪያዎች ጋር ያገናኙ"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"መተግበሪያው ከተጣመሩ የብሉቱዝ መሣሪያዎች ጋር እንዲገናኝ ይፈቅድለታል"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ተመራጭ NFC የክፍያ አገልግሎት መረጃ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"እንደ የተመዘገቡ እርዳታዎች እና የጉዞ መሥመር መዳረሻ የመሳሰለ ተመራጭ nfc የክፍያ አገልግሎት መረጃን ለማግኘት ለመተግበሪያው ያፈቅድለታል።"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ቅርብ የግኑኙነትመስክ (NFC) ተቆጣጠር"</string>
@@ -567,18 +574,28 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"ማረጋገጥ ላይ ስህተት"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"የማያ ገጽ መቆለፊን ይጠቀሙ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"ለመቀጠል የመሣሪያዎን የመግቢያ ማስረጃ ያስገቡ"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"ከፊል የጣት አሻራ ተገኝቷል። እባክዎ እንደገና ይሞክሩ።"</string>
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ጣት አሻራን መስራት አልተቻለም። እባክዎ እንደገና ይሞክሩ።"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"የጣት አሻራ ዳሳሽ ቆሽሿል። እባክዎ ያጽዱት እና እንደገና ይሞክሩ።"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"ጣት ከልክ በላይ ቶሎ ተንቀሳቅሷል። እባክዎ እንደገና ይሞክሩ።"</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ጣት ከልክ በላይ ተንቀራፎ ተንቀሳቅሷል። እባክዎ እንደገና ይሞክሩ።"</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"የጣት አሻራ ትክክለኛነት ተረጋግጧል"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ፊት ተረጋግጧል"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ፊት ተረጋግጧል፣ እባክዎ አረጋግጥን ይጫኑ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"የጣት አሻራ ሃርድዌር አይገኝም።"</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"የጣት አሻራ ሊከማች አይችልም። እባክዎ አሁን ያለውን የጣት አሻራ ያስወግዱ።"</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"የጣት አሻራ ማብቂያ ጊዜ ደርሷል። እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"የጣት አሻራ ስርዓተ ክወና ተትቷል።"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"የጣት አሻራ ክወና በተጠቃሚ ተሰርዟል።"</string>
@@ -603,6 +620,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"በመልክ መክፈት"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"የእርስዎን ፊት ዳግመኛ ያስመዝግቡ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ማንነትን ለይቶ ማወቅን ለማሻሻል፣ እባክዎ የእርስዎን ፊት ዳግም ያስመዝግቡ"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ትክክለኛ የፊት ውሂብ ማንሳት አልተቻለም። እንደገና ይሞክሩ።"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ከልክ በላይ ፈካ ያለ። ይበልጥ ረጋ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ከልክ በላይ ጨለማ ነው። ከዚህ ፈካ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>
@@ -1006,6 +1031,12 @@
     <string name="copied" msgid="4675902854553014676">"ተቀድቷል"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ተለጥፏል"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ከቅንጣብ ሰሌዳ ተለጥፏል"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"ተጨማሪ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"ምናሌ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1689,7 +1720,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"አቋራጭ ይጠቀሙ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ተቃራኒ ቀለም"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"የቀለም ማስተካከያ"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"የበለጠ ደብዛዛ"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ተጨማሪ ደብዛዛ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"የድምፅ ቁልፎችን ይዟል። <xliff:g id="SERVICE_NAME">%1$s</xliff:g> በርቷል።"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"የድምፅ ቁልፎችን ይዟል። <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ጠፍተዋል።"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ን ለመጠቀም ለሦስት ሰከንዶች ሁለቱንም የድምፅ ቁልፎች ተጭነው ይያዙ"</string>
@@ -2110,20 +2141,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ሥራ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"የግል እይታ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"የስራ እይታ"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"ይህን በሥራ መተግበሪያዎች ማጋራት አይቻልም"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"የእርስዎ አይቲ አስተዳዳሪ ይህን ይዘት በእርስዎ የሥራ መገለጫ ላይ ባሉ መተግበሪያዎች ማጋራትን አይፈቅድም"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"ይህን በሥራ መተግበሪያዎች መክፈት አይቻልም"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"የእርስዎ አይቲ አስተዳዳሪ ይህን ይዘት በእርስዎ የሥራ መገለጫ ላይ ባሉ መተግበሪያዎች መክፈትን አይፈቅድም"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ይህን በግል መተግበሪያዎች ማጋራት አይቻልም"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"የእርስዎ አይቲ አስተዳዳሪ ይህን ይዘት በእርስዎ የግል መገለጫ ላይ ባሉ መተግበሪያዎች ማጋራትን አይፈቅድም"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ይህን በግል መተግበሪያዎች መክፈት አይቻልም"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"የእርስዎ አይቲ አስተዳዳሪ ይህን ይዘት በእርስዎ የግል መገለጫ ላይ ባሉ መተግበሪያዎች መክፈትን አይፈቅድም"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"የሥራ መገለጫ ባለበት ቆሟል"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"አብራ"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"ምንም የሥራ መተግበሪያዎች ይህን ይዘት መደገፍ አይችሉም"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ምንም የሥራ መተግበሪያዎችን ይህን ይዘት መክፈት አይችሉም"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"ምንም የግል መተግበሪያዎች ይህን ይዘት መደገፍ አይችሉም"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"ምንም የግል መተግበሪያዎችን ይህን ይዘት መክፈት አይችሉም"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"የሲም አውታረ መረብ መክፈቻ ፒን"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"የሲም አውታረ መረብ ንኡስ ስብስብ መክፈቻ ፒን"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"የሲም ኮርፖሬት መክፈቻ ፒን"</string>
@@ -2236,8 +2278,10 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"የማያ ገጽዎን ክፍል ያጉሉ"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"አሁን የእርስዎን የሙሉ ገጽ እይታ፣ አንድ የተወሰነ ቦታ ማጉላት ወይም በሁለቱም አማራጮች መካከል መቀያየር ይችላሉ።"</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
+    <skip />
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"በቅንብሮች ውስጥ ያብሩ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"አሰናብት"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ለመቀጠል፣ &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ወደ መሳሪያዎ ማይክሮፎን መድረስ ይፈልጋል።"</string>

@@ -25,5 +25,6 @@
 
     <style name="volume_dialog_theme" parent="qs_theme">
         <item name="android:colorAccent">@color/tv_volume_dialog_accent</item>
+        <item name="android:dialogCornerRadius">@dimen/volume_dialog_panel_width_half</item>
     </style>
 </resources>
