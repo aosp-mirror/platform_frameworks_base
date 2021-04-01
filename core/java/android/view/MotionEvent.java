@@ -2674,7 +2674,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_X
      */
     public final float getRawX() {
-        Compatibility.reportChange(APP_USES_RAW_INPUT_COORDS);
+        Compatibility.reportUnconditionalChange(APP_USES_RAW_INPUT_COORDS);
         return nativeGetRawAxisValue(mNativePtr, AXIS_X, 0, HISTORY_CURRENT);
     }
 
@@ -2688,7 +2688,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public final float getRawY() {
-        Compatibility.reportChange(APP_USES_RAW_INPUT_COORDS);
+        Compatibility.reportUnconditionalChange(APP_USES_RAW_INPUT_COORDS);
         return nativeGetRawAxisValue(mNativePtr, AXIS_Y, 0, HISTORY_CURRENT);
     }
 
@@ -2705,7 +2705,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_X
      */
     public float getRawX(int pointerIndex) {
-        Compatibility.reportChange(APP_USES_RAW_INPUT_COORDS);
+        Compatibility.reportUnconditionalChange(APP_USES_RAW_INPUT_COORDS);
         return nativeGetRawAxisValue(mNativePtr, AXIS_X, pointerIndex, HISTORY_CURRENT);
     }
 
@@ -2722,7 +2722,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #AXIS_Y
      */
     public float getRawY(int pointerIndex) {
-        Compatibility.reportChange(APP_USES_RAW_INPUT_COORDS);
+        Compatibility.reportUnconditionalChange(APP_USES_RAW_INPUT_COORDS);
         return nativeGetRawAxisValue(mNativePtr, AXIS_Y, pointerIndex, HISTORY_CURRENT);
     }
 
