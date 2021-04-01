@@ -538,43 +538,6 @@ public final class NetworkCapabilities implements Parcelable {
             | (1 << NET_CAPABILITY_NOT_VPN);
 
     /**
-     * Capabilities that suggest that a network is restricted.
-     * {@see #maybeMarkCapabilitiesRestricted}, {@see #FORCE_RESTRICTED_CAPABILITIES}
-     */
-    @VisibleForTesting
-    /* package */ static final long RESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_CBS)
-            | (1 << NET_CAPABILITY_DUN)
-            | (1 << NET_CAPABILITY_EIMS)
-            | (1 << NET_CAPABILITY_FOTA)
-            | (1 << NET_CAPABILITY_IA)
-            | (1 << NET_CAPABILITY_IMS)
-            | (1 << NET_CAPABILITY_MCX)
-            | (1 << NET_CAPABILITY_RCS)
-            | (1 << NET_CAPABILITY_VEHICLE_INTERNAL)
-            | (1 << NET_CAPABILITY_XCAP)
-            | (1 << NET_CAPABILITY_ENTERPRISE);
-
-    /**
-     * Capabilities that force network to be restricted.
-     * {@see #maybeMarkCapabilitiesRestricted}.
-     */
-    private static final long FORCE_RESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_OEM_PAID)
-            | (1 << NET_CAPABILITY_OEM_PRIVATE);
-
-    /**
-     * Capabilities that suggest that a network is unrestricted.
-     * {@see #maybeMarkCapabilitiesRestricted}.
-     */
-    @VisibleForTesting
-    /* package */ static final long UNRESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_INTERNET)
-            | (1 << NET_CAPABILITY_MMS)
-            | (1 << NET_CAPABILITY_SUPL)
-            | (1 << NET_CAPABILITY_WIFI_P2P);
-
-    /**
      * Capabilities that are managed by ConnectivityService.
      */
     private static final long CONNECTIVITY_MANAGED_CAPABILITIES =
@@ -811,37 +774,12 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Deduces that all the capabilities it provides are typically provided by restricted networks
-     * or not.
-     *
-     * @return {@code true} if the network should be restricted.
-     * @hide
-     */
-    public boolean deduceRestrictedCapability() {
-        // Check if we have any capability that forces the network to be restricted.
-        final boolean forceRestrictedCapability =
-                (mNetworkCapabilities & FORCE_RESTRICTED_CAPABILITIES) != 0;
-
-        // Verify there aren't any unrestricted capabilities.  If there are we say
-        // the whole thing is unrestricted unless it is forced to be restricted.
-        final boolean hasUnrestrictedCapabilities =
-                (mNetworkCapabilities & UNRESTRICTED_CAPABILITIES) != 0;
-
-        // Must have at least some restricted capabilities.
-        final boolean hasRestrictedCapabilities =
-                (mNetworkCapabilities & RESTRICTED_CAPABILITIES) != 0;
-
-        return forceRestrictedCapability
-                || (hasRestrictedCapabilities && !hasUnrestrictedCapabilities);
-    }
-
-    /**
-     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if deducing the network is restricted.
+     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if inferring the network is restricted.
      *
      * @hide
      */
     public void maybeMarkCapabilitiesRestricted() {
-        if (deduceRestrictedCapability()) {
+        if (NetworkCapabilitiesUtils.inferRestrictedCapability(this)) {
             removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
     }
