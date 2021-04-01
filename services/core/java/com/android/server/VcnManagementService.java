@@ -931,7 +931,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         /** Called by a Vcn to signal that an error occurred. */
         void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage);
@@ -960,7 +960,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         @Override
         public void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage) {
@@ -976,7 +976,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         Binder.withCleanCallingIdentity(
                                 () ->
                                         cbInfo.mCallback.onGatewayConnectionError(
-                                                networkCapabilities,
+                                                gatewayConnectionName,
                                                 errorCode,
                                                 exceptionClass,
                                                 exceptionMessage));
