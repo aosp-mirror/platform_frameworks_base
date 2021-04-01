@@ -2625,8 +2625,7 @@ public class NotificationPanelViewController extends PanelViewController {
             return;
         }
         mSectionPadding = padding;
-        mQsFrame.setTranslationY(padding);
-        mNotificationStackScrollLayoutController.setSectionPadding(padding);
+        // TODO(b/172289889) update overscroll to spec
     }
 
     @Override
