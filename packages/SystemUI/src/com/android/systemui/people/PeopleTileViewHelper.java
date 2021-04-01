@@ -192,7 +192,11 @@ class PeopleTileViewHelper {
     }
 
     private int getSizeInDp(int dimenResourceId) {
-        return (int) (mContext.getResources().getDimension(dimenResourceId) / mDensity);
+        return getSizeInDp(mContext, dimenResourceId, mDensity);
+    }
+
+    public static int getSizeInDp(Context context, int dimenResourceId, float density) {
+        return (int) (context.getResources().getDimension(dimenResourceId) / density);
     }
 
     private int getContentHeightForLayout(int lineHeight) {
@@ -278,24 +282,11 @@ class PeopleTileViewHelper {
             } else {
                 views.setViewVisibility(R.id.availability, View.GONE);
             }
-            boolean hasNewStory =
-                    mTile.getStatuses() != null && mTile.getStatuses().stream().anyMatch(
-                            c -> c.getActivity() == ACTIVITY_NEW_STORY);
+
             views.setTextViewText(R.id.name, mTile.getUserName().toString());
             views.setBoolean(R.id.image, "setClipToOutline", true);
-
-            Icon icon = mTile.getUserIcon();
-            PeopleStoryIconFactory storyIcon = new PeopleStoryIconFactory(mContext,
-                    mContext.getPackageManager(),
-                    IconDrawableFactory.newInstance(mContext, false),
-                    maxAvatarSize);
-            Drawable drawable = icon.loadDrawable(mContext);
-            Drawable personDrawable = storyIcon.getPeopleTileDrawable(drawable,
-                    mTile.getPackageName(), getUserId(mTile), mTile.isImportantConversation(),
-                    hasNewStory);
-            Bitmap bitmap = convertDrawableToBitmap(personDrawable);
-            views.setImageViewBitmap(R.id.person_icon, bitmap);
-
+            views.setImageViewBitmap(R.id.person_icon,
+                    getPersonIconBitmap(mContext, mTile, maxAvatarSize));
             return views;
         } catch (Exception e) {
             Log.e(TAG, "Failed to set common fields: " + e);
@@ -582,5 +573,24 @@ class PeopleTileViewHelper {
             default:
                 return R.layout.people_tile_small;
         }
+    }
+
+    /** Returns a bitmap with the user icon and package icon. */
+    public static Bitmap getPersonIconBitmap(
+            Context context, PeopleSpaceTile tile, int maxAvatarSize) {
+        boolean hasNewStory =
+                tile.getStatuses() != null && tile.getStatuses().stream().anyMatch(
+                        c -> c.getActivity() == ACTIVITY_NEW_STORY);
+
+        Icon icon = tile.getUserIcon();
+        PeopleStoryIconFactory storyIcon = new PeopleStoryIconFactory(context,
+                context.getPackageManager(),
+                IconDrawableFactory.newInstance(context, false),
+                maxAvatarSize);
+        Drawable drawable = icon.loadDrawable(context);
+        Drawable personDrawable = storyIcon.getPeopleTileDrawable(drawable,
+                tile.getPackageName(), getUserId(tile), tile.isImportantConversation(),
+                hasNewStory);
+        return convertDrawableToBitmap(personDrawable);
     }
 }
