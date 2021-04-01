@@ -85,7 +85,6 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
     @Override
     public boolean dozeTimeTick() {
-        // TODO: burnin
         mFingerprintDrawable.dozeTimeTick();
         return true;
     }
@@ -100,13 +99,16 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
     void onDozeAmountChanged(float linear, float eased) {
         mFingerprintDrawable.onDozeAmountChanged(linear, eased);
-        invalidate();
+    }
+
+    void animateHint() {
+        mFingerprintDrawable.animateHint();
     }
 
     /**
      * Animates in the bg protection circle behind the fp icon to highlight the icon.
      */
-    void animateHighlightFp() {
+    void animateUdfpsBouncer() {
         if (mBgProtection.getVisibility() == View.VISIBLE && mBgProtection.getAlpha() == 1f) {
             // already fully highlighted, don't re-animate
             return;
@@ -154,7 +156,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     /**
      * Animates out the bg protection circle behind the fp icon to unhighlight the icon.
      */
-    void animateUnhighlightFp(@Nullable Runnable onEndAnimation) {
+    void animateAwayUdfpsBouncer(@Nullable Runnable onEndAnimation) {
         if (mBgProtection.getVisibility() == View.GONE) {
             // already hidden
             return;
