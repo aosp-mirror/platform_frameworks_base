@@ -7404,6 +7404,32 @@ public class AppOpsManager {
     }
 
     /**
+     * Resolves special UID's pakcages such as root, shell, media, etc.
+     *
+     * @param uid The uid to resolve.
+     * @param packageName Optional package. If caller system  and null returns "android"
+     * @return The resolved package name.
+     *
+     * @hide
+     */
+    public static @Nullable String resolvePackageName(int uid, @Nullable String packageName)  {
+        if (uid == Process.ROOT_UID) {
+            return "root";
+        } else if (uid == Process.SHELL_UID) {
+            return "com.android.shell";
+        } else if (uid == Process.MEDIA_UID) {
+            return "media";
+        } else if (uid == Process.AUDIOSERVER_UID) {
+            return "audioserver";
+        } else if (uid == Process.CAMERASERVER_UID) {
+            return "cameraserver";
+        } else if (uid == Process.SYSTEM_UID && packageName == null) {
+            return "android";
+        }
+        return packageName;
+    }
+
+    /**
      * Monitor for changes to the operating mode for the given op in the given app package.
      * You can watch op changes only for your UID.
      *

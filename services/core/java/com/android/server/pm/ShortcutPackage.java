@@ -2419,6 +2419,20 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
+    void closeAppSearchSession() {
+        synchronized (mLock) {
+            if (mAppSearchSession != null) {
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mAppSearchSession.close();
+                } finally {
+                    Binder.restoreCallingIdentity(callingIdentity);
+                }
+            }
+            mAppSearchSession = null;
+        }
+    }
+
     @NonNull
     private AndroidFuture<AppSearchSession> setupSchema(
             @NonNull final AppSearchSession session) {
