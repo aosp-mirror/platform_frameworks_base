@@ -77,6 +77,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     private boolean mIsVisible = false;
     private final MagnificationGestureDetector mGestureDetector;
     private boolean mSingleTapDetected = false;
+    private boolean mToLeftScreenEdge = false;
 
     MagnificationModeSwitch(@UiContext Context context) {
         this(context, createView(context), new SfVsyncFrameCallbackProvider());
@@ -156,9 +157,10 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         mParams.height = size;
         mParams.width = size;
         if (mIsVisible) {
-            mWindowManager.updateViewLayout(mImageView, mParams);
-            // Exclude magnification switch button from system gesture area.
-            setSystemGestureExclusion();
+            stickToScreenEdge(mToLeftScreenEdge);
+            // Reset button to make its window layer always above the mirror window.
+            removeButton();
+            showButton(mMagnificationMode, /* resetPosition= */false);
         }
     }
 
@@ -190,11 +192,23 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
 
     @Override
     public boolean onFinish(float xOffset, float yOffset) {
+        if (mIsVisible) {
+            final int windowWidth = mWindowManager.getCurrentWindowMetrics().getBounds().width();
+            final int halfWindowWidth = windowWidth / 2;
+            mToLeftScreenEdge = (mParams.x < halfWindowWidth);
+            stickToScreenEdge(mToLeftScreenEdge);
+        }
         if (!mSingleTapDetected) {
             showButton(mMagnificationMode);
         }
         mSingleTapDetected = false;
         return true;
+    }
+
+    private void stickToScreenEdge(boolean toLeftScreenEdge) {
+        mParams.x = toLeftScreenEdge
+                ? mDraggableWindowBounds.left : mDraggableWindowBounds.right;
+        updateButtonViewLayoutIfNeeded();
     }
 
     private void moveButton(float offsetX, float offsetY) {
@@ -241,6 +255,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                 mDraggableWindowBounds.set(getDraggableWindowBounds());
                 mParams.x = mDraggableWindowBounds.right;
                 mParams.y = mDraggableWindowBounds.bottom;
+                mToLeftScreenEdge = false;
             }
             mWindowManager.addView(mImageView, mParams);
             // Exclude magnification switch button from system gesture area.
@@ -283,7 +298,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
             return;
         }
         mDraggableWindowBounds.set(newBounds);
-        updateButtonViewLayoutIfNeeded();
+        stickToScreenEdge(mToLeftScreenEdge);
     }
 
     private void updateButtonViewLayoutIfNeeded() {

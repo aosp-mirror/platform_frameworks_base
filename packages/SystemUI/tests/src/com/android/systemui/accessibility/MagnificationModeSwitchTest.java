@@ -80,6 +80,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -204,7 +205,10 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
 
         mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
 
-        verify(mWindowManager).updateViewLayout(eq(mSpyImageView), any());
+        InOrder inOrder = Mockito.inOrder(mWindowManager);
+        inOrder.verify(mWindowManager).updateViewLayout(eq(mSpyImageView), any());
+        inOrder.verify(mWindowManager).removeView(eq(mSpyImageView));
+        inOrder.verify(mWindowManager).addView(eq(mSpyImageView), any());
         verify(mSpyImageView).setSystemGestureExclusionRects(any(List.class));
     }
 
@@ -217,7 +221,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
 
         verify(mWindowManager).updateViewLayout(eq(mSpyImageView),
                 any(WindowManager.LayoutParams.class));
-        assertLayoutPosition();
+        assertLayoutPosition(/* toLeftScreenEdge= */ false);
     }
 
     @Test
@@ -231,6 +235,26 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mSpyImageView.onApplyWindowInsets(WindowInsets.CONSUMED);
 
         assertNotEquals(oldDraggableBounds, mMagnificationModeSwitch.mDraggableWindowBounds);
+    }
+
+    @Test
+    public void onDraggingGestureFinish_buttonIsShowing_stickToRightEdge() {
+        final int windowHalfWidth =
+                mWindowManager.getCurrentWindowMetrics().getBounds().width() / 2;
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        // Drag button to right side on screen
+        final int offset = ViewConfiguration.get(mContext).getScaledTouchSlop() + 10;
+        final long downTime = SystemClock.uptimeMillis();
+        mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
+                downTime, 0, ACTION_DOWN, 100, 100));
+        mTouchListener.onTouch(mSpyImageView,
+                obtainMotionEvent(downTime, downTime, ACTION_MOVE, windowHalfWidth - offset, 100));
+
+        mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
+                downTime, downTime, ACTION_UP, windowHalfWidth - offset, 100));
+
+        assertLayoutPosition(/* toLeftScreenEdge= */false);
     }
 
     @Test
@@ -416,7 +440,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     private void assertShowFadingAnimation(float alpha) {
-        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         if (alpha == FADE_IN_ALPHA) { // Fade-in
             verify(mSpyImageView).postOnAnimation(runnableCaptor.capture());
         } else { // Fade-out
@@ -490,8 +514,10 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mFadeOutAnimation = null;
     }
 
-    private void assertLayoutPosition() {
-        final int expectedX = mMagnificationModeSwitch.mDraggableWindowBounds.right;
+    private void assertLayoutPosition(boolean toLeftScreenEdge) {
+        final int expectedX =
+                toLeftScreenEdge ? mMagnificationModeSwitch.mDraggableWindowBounds.left
+                        : mMagnificationModeSwitch.mDraggableWindowBounds.right;
         final int expectedY = mMagnificationModeSwitch.mDraggableWindowBounds.bottom;
         final WindowManager.LayoutParams layoutParams =
                 mWindowManager.getLayoutParamsFromAttachedView();
