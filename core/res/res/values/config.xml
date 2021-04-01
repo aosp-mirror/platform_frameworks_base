@@ -1946,6 +1946,8 @@
     <string name="config_systemTelevisionNotificationHandler" translatable="false"></string>
     <!-- The name of the package that will hold the system activity recognizer role. -->
     <string name="config_systemActivityRecognizer" translatable="false"></string>
+    <!-- The name of the package that will hold the system ui role -->
+    <string name="config_systemUi" translatable="false">com.android.systemui</string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>

@@ -379,6 +379,7 @@ package android {
     field public static final int config_systemSpeechRecognizer;
     field public static final int config_systemTelevisionNotificationHandler;
     field public static final int config_systemTextIntelligence;
+    field public static final int config_systemUi;
     field public static final int config_systemUiIntelligence;
     field public static final int config_systemVisualIntelligence;
     field public static final int config_systemWellbeing;
