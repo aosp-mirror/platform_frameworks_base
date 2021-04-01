@@ -527,6 +527,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
+    public boolean isLaunchingActivity() {
+        return mCurrentState.mLaunchingActivity;
+    }
+
+    @Override
     public void setScrimsVisibility(int scrimsVisibility) {
         mCurrentState.mScrimsVisibility = scrimsVisibility;
         apply(mCurrentState);

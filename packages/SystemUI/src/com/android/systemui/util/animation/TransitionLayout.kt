@@ -50,6 +50,8 @@ class TransitionLayout @JvmOverloads constructor(
 
     private var desiredMeasureWidth = 0
     private var desiredMeasureHeight = 0
+    private var transitionVisibility = View.VISIBLE
+
     /**
      * The measured state of this view which is the one we will lay ourselves out with. This
      * may differ from the currentState if there is an external animation or transition running.
@@ -79,6 +81,13 @@ class TransitionLayout @JvmOverloads constructor(
             applyCurrentState()
             return true
         }
+    }
+
+    override fun setTransitionVisibility(visibility: Int) {
+        // We store the last transition visibility assigned to this view to restore it later if
+        // necessary.
+        super.setTransitionVisibility(visibility)
+        transitionVisibility = visibility
     }
 
     override fun onFinishInflate() {
@@ -162,7 +171,16 @@ class TransitionLayout @JvmOverloads constructor(
         updateBounds()
         translationX = currentState.translation.x
         translationY = currentState.translation.y
+
         CrossFadeHelper.fadeIn(this, currentState.alpha)
+
+        // CrossFadeHelper#fadeIn will change this view visibility, which overrides the transition
+        // visibility. We set the transition visibility again to make sure that this view plays well
+        // with GhostView, which sets the transition visibility and is used for activity launch
+        // animations.
+        if (transitionVisibility != View.VISIBLE) {
+            setTransitionVisibility(transitionVisibility)
+        }
     }
 
     private fun applyCurrentStateOnPredraw() {
