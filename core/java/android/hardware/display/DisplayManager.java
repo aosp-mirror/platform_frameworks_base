@@ -62,6 +62,9 @@ public final class DisplayManager {
      * {@link #EXTRA_WIFI_DISPLAY_STATUS} extra.
      * </p><p>
      * This broadcast is only sent to registered receivers and can only be sent by the system.
+     * </p><p>
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission is required to
+     * receive this broadcast.
      * </p>
      * @hide
      */
