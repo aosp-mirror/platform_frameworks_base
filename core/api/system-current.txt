@@ -400,6 +400,7 @@ package android {
     field public static final int config_systemAmbientAudioIntelligence = 17039411; // 0x1040033
     field public static final int config_systemAppProtectionService;
     field public static final int config_systemAudioIntelligence = 17039412; // 0x1040034
+    field public static final int config_systemAutomotiveCalendarSyncManager;
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemCompanionDeviceProvider = 17039417; // 0x1040039

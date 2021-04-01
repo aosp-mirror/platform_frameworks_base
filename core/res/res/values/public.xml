@@ -3270,6 +3270,8 @@
     <public name="config_deviceManager" />
     <!-- @hide @SystemApi -->
     <public name="config_systemAppProtectionService" />
+    <!-- @hide @SystemApi @TestApi -->
+    <public name="config_systemAutomotiveCalendarSyncManager" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">

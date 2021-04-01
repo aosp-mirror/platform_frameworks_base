@@ -2125,6 +2125,8 @@
     <string name="config_deviceManager" translatable="false"></string>
     <!-- The name of the package that will hold the app protection service role. -->
     <string name="config_systemAppProtectionService" translatable="false"></string>
+    <!-- The name of the package that will hold the system calendar sync manager role. -->
+    <string name="config_systemAutomotiveCalendarSyncManager" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
