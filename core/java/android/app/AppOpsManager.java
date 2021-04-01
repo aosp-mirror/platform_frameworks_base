@@ -6996,6 +6996,20 @@ public class AppOpsManager {
             }
             result.add(entry);
         }
+        nAccesses = result.size();
+        int i = 0;
+        for (int j = 0, k = 0; j < nAccesses; i++, j = k) {
+            long currentAccessTime = result.get(j).getLastAccessTime(OP_FLAGS_ALL);
+            k = j + 1;
+            while(k < nAccesses &&
+                    result.get(k).getLastAccessTime(OP_FLAGS_ALL) == currentAccessTime) {
+                k++;
+            }
+            result.set(i, mergeAttributedOpEntries(result.subList(j, k)));
+        }
+        for (; i < nAccesses; i++) {
+            result.remove(result.size() - 1);
+        }
         return result;
     }
 
@@ -9818,5 +9832,36 @@ public class AppOpsManager {
                 // Swallow error, only meant for logging ops, should not affect flow of the code
             }
         }
+    }
+
+    private static AttributedOpEntry mergeAttributedOpEntries(List<AttributedOpEntry> opEntries) {
+        if (opEntries.size() == 1) {
+            return opEntries.get(0);
+        }
+        LongSparseArray<AppOpsManager.NoteOpEvent> accessEvents = new LongSparseArray<>();
+        LongSparseArray<AppOpsManager.NoteOpEvent> rejectEvents = new LongSparseArray<>();
+        int opCount = opEntries.size();
+        for (int i = 0; i < opCount; i++) {
+            AttributedOpEntry a = opEntries.get(i);
+            ArraySet<Long> keys = a.collectKeys();
+            final int keyCount = keys.size();
+            for (int k = 0; k < keyCount; k++) {
+                final long key = keys.valueAt(k);
+
+                final int uidState = extractUidStateFromKey(key);
+                final int flags = extractFlagsFromKey(key);
+
+                NoteOpEvent access = a.getLastAccessEvent(uidState, uidState, flags);
+                NoteOpEvent reject = a.getLastRejectEvent(uidState, uidState, flags);
+
+                if (access != null) {
+                    accessEvents.append(key, access);
+                }
+                if (reject != null) {
+                    rejectEvents.append(key, reject);
+                }
+            }
+        }
+        return new AttributedOpEntry(opEntries.get(0).mOp, false, accessEvents, rejectEvents);
     }
 }
