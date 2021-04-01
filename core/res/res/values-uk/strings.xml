@@ -300,7 +300,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Працює додаток"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Додатки, що використовують заряд акумулятора"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Збільшення"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Правила щодо безпеки спеціальних можливостей"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує заряд акумулятора"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Додатків, що використовують заряд акумулятора: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
@@ -325,6 +326,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"переглядати дані про фізичну активність"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"фотографувати та записувати відео"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Пристрої з Bluetooth поблизу"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"знаходити поблизу пристрої з Bluetooth і підключатися до них"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Журнали викликів"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"перегляд і запис журналу викликів телефона"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
@@ -538,6 +541,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Дозволяє програмі переглядати конфігурацію Bluetooth на планшетному ПК, а також створювати та приймати з’єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Дозволяє додатку зчитувати конфігурацію Bluetooth на вашому пристрої Android TV, а також створювати та приймати з\'єднання зі спареними пристроями."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Дозволяє програмі переглядати конфігурацію Bluetooth на телефоні, а також створювати та приймати з’єднання зі спареними пристроями."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"знаходити пристрої з Bluetooth і створювати пару"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дозволяє додатку знаходити поблизу пристрої Bluetooth і створювати з ними пару"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"підключатися до пристроїв із Bluetooth, з якими є пара"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дозволяє додатку підключатися до пристроїв із Bluetooth, з якими створено пару"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Використання інформації з платіжного NFC-сервісу"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
@@ -572,19 +579,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Не вказано PIN-код, ключ або пароль"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Помилка автентифікації"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Доступ розблокуванням екрана"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Щоб продовжити, введіть дані для розблокування екрана пристрою"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Відбиток пальця розпізнано частково. Повторіть спробу."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не вдалось обробити відбиток пальця. Повторіть спробу."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Датчик відбитків пальців забруднився. Очистьте його та повторіть спробу."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Ви забрали палець надто швидко. Повторіть спробу."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Ви провели пальцем надто повільно. Повторіть спробу."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Відбиток пальця автентифіковано"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Обличчя автентифіковано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Обличчя автентифіковано. Натисніть \"Підтвердити\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Сканер відбитків пальців недоступний."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Не вдалося зберегти відбиток пальця. Видаліть наявний відбиток."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Час очікування відбитка пальця минув. Повторіть спробу."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Дію з відбитком пальця скасовано."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Користувач скасував дію з відбитком пальця."</string>
@@ -609,6 +627,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Повторно проскануйте обличчя"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Повторно проскануйте обличчя для ефективнішого розпізнавання"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Налаштуйте фейсконтроль"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Ви зможете розблоковувати телефон, подивившись на нього"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Налаштуйте більше способів розблокування"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Натисніть, щоб додати відбиток пальця"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не вдалося чітко зняти обличчя. Повторіть спробу."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Занадто яскраво. Потрібно менше світла."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Занадто темно. Потрібно більше світла."</string>
@@ -645,7 +667,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Доступ через фейсконтроль"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Використовувати фейсконтроль або дані для розблокування екрана"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Щоб продовжити, скористайтеся фейсконтролем"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Щоб продовжити, скористайтеся фейсконтролем або даними для розблокування екрана"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1012,6 +1035,9 @@
     <string name="copied" msgid="4675902854553014676">"Скопійовано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Дані з додатка <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> вставлено в <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"Дані з буфера обміну вставлено в <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"Скопійований текст вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"Скопійоване зображення вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_content" msgid="646276353060777131">"Скопійований контент вставлено в додатку <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Більше"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Меню+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2178,20 +2204,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Робоче"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Особистий перегляд"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Робочий перегляд"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Цей контент не можна надсилати в робочих додатках"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Ваш ІТ-адміністратор не дозволяє надсилати цей контент у додатках у робочому профілі"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Цей контент не можна відкривати в робочих додатках"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Ваш ІТ-адміністратор не дозволяє відкривати цей контент у додатках у робочому профілі"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Цей контент не можна надсилати в особистих додатках"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Ваш ІТ-адміністратор не дозволяє надсилати цей контент у додатках в особистому профілі"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Цей контент не можна відкривати в особистих додатках"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Ваш ІТ-адміністратор не дозволяє відкривати цей контент у додатках в особистому профілі"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Заблоковано адміністратором"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Цим контентом не можна ділитися в робочих додатках"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Цей контент не можна відкривати в робочих додатках"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Цим контентом не можна ділитися в особистих додатках"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Цей контент не можна відкривати в особистих додатках"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Робочий профіль призупинено"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Увімкнути"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Немає робочих додатків для цього контенту"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Немає робочих додатків, щоб відкрити цей контент"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Особисті додатки не можуть підтримувати цей контент"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Особисті додатки не можуть відкривати цей контент"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Торкніться, щоб увімкнути"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Немає робочих додатків"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Відкрити в додатку <xliff:g id="APP">%s</xliff:g> в особистому профілі?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Відкрити в додатку <xliff:g id="APP">%s</xliff:g> у робочому профілі?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використовувати особистий веб-переглядач"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використовувати робочий веб-переглядач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код розблокування підгрупи мереж SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код розблокування корпоративної SIM-карти"</string>
@@ -2304,8 +2329,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Збільшення частини екрана"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Тепер ви можете збільшувати весь екран чи певну область, а також переходити між цими режимами."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Нові налаштування збільшення"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Тепер можна збільшувати частину екрана"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Увімкнути в налаштуваннях"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Закрити"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Щоб продовжити, надайте додатку &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; доступ до мікрофона пристрою."</string>

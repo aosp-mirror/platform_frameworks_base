@@ -300,7 +300,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Działa aplikacja"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacje zużywające baterię"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Powiększenie"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Zasady bezpieczeństwa związane z ułatwieniami dostępu"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> zużywa baterię"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Liczba aplikacji zużywających baterię: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i użycia danych"</string>
@@ -325,6 +326,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"dostęp do aktywności fizycznej"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Aparat"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"robienie zdjęć i nagrywanie filmów"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Urządzenia Bluetooth w pobliżu"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"wykrywanie urządzeń Bluetooth w pobliżu i łączenie się z nimi"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Rejestry połączeń"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"odczytywanie i zapisywanie rejestru połączeń telefonicznych"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -538,6 +541,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Pozwala aplikacji na dostęp do konfiguracji Bluetooth na tablecie oraz na nawiązywanie i akceptowanie połączeń ze sparowanych urządzeń."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Pozwala aplikacji odczytywać konfigurację Bluetootha na urządzeniu z Androidem TV oraz nawiązywać i akceptować połączenia ze sparowanymi urządzeniami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Pozwala aplikacji na dostęp do konfiguracji Bluetooth na telefonie oraz na nawiązywanie i akceptowanie połączeń ze sparowanych urządzeń."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"wykrywanie i parowanie urządzeń Bluetooth w pobliżu"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Zezwala na wykrywanie i parowanie przez aplikację urządzeń Bluetooth w pobliżu"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"łączenie ze sparowanymi urządzeniami Bluetooth"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Zezwala na łączenie aplikacji ze sparowanymi urządzeniami Bluetooth"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacje o preferowanych usługach płatniczych NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pozwala aplikacji uzyskiwać informacje o preferowanych usługach płatniczych NFC, np. zarejestrowanych pomocach i miejscach docelowych tras."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolowanie łączności Near Field Communication"</string>
@@ -572,19 +579,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nie ustawiono kodu PIN, wzoru ani hasła"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Podczas uwierzytelniania wystąpił błąd"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Używaj blokady ekranu"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Podaj dane logowania do urządzenia, aby kontynuować"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Odcisk palca został odczytany tylko częściowo. Spróbuj ponownie."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Czytnik linii papilarnych jest zabrudzony. Wyczyść go i spróbuj ponownie."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Palec został podniesiony zbyt wcześnie. Spróbuj jeszcze raz."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Palec został obrócony zbyt wolno. Spróbuj ponownie."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Uwierzytelniono odciskiem palca"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Twarz rozpoznana"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Twarz rozpoznana, kliknij Potwierdź"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Czytnik linii papilarnych nie jest dostępny."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Nie można zapisać odcisku palca. Usuń istniejący odcisk palca."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Osiągnięto limit czasu odczytu odcisków palców. Spróbuj ponownie."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Odczyt odcisku palca został anulowany przez użytkownika."</string>
@@ -609,6 +627,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Rozpoznawanie twarzy"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Zarejestruj swoją twarz ponownie"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Aby poprawić rozpoznawanie, ponownie zarejestruj swoją twarz"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nie udało się zarejestrować danych twarzy. Spróbuj ponownie."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zbyt jasno. Spróbuj przy słabszym świetle."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Zbyt ciemno. Spróbuj w jaśniejszym świetle."</string>
@@ -645,7 +671,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Twarz <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Używaj rozpoznawania twarzy"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Używaj rozpoznawania twarzy lub blokady ekranu"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Użyj rozpoznawania twarzy, aby kontynuować"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Aby kontynuować, użyj rozpoznawania twarzy lub blokady ekranu"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1012,6 +1039,12 @@
     <string name="copied" msgid="4675902854553014676">"Skopiowano"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła dane z aplikacji <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"Aplikacja <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> wkleiła dane ze schowka"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"Więcej"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2178,20 +2211,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Służbowe"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Widok osobisty"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Widok służbowy"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nie można udostępnić aplikacjom służbowym"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Administrator IT nie pozwala na udostępnianie tej zawartości w profilu służbowym"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nie można otworzyć w aplikacjach służbowych"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Administrator IT nie pozwala na otwieranie tej zawartości w profilu służbowym"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Nie można udostępnić aplikacjom osobistym"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Administrator IT nie pozwala na udostępnianie tej zawartości w profilu osobistym"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Nie można otworzyć w aplikacjach osobistych"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Administrator IT nie pozwala na otwieranie tej zawartości w profilu osobistym"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Działanie profilu służbowego jest wstrzymane"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Włącz"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Brak aplikacji służbowych, które obsługują tę zawartość"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Brak aplikacji służbowych, które mogą otworzyć tę zawartość"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Brak aplikacji osobistych, które obsługują tę zawartość"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Brak aplikacji osobistych, które mogą otworzyć tę zawartość"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kod PIN do karty SIM odblokowujący sieć"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Kod PIN odblokowujący podzbiór sieci na karcie SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Kod PIN odblokowujący dane korporacyjne na karcie SIM"</string>
@@ -2304,8 +2348,9 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Powiększ część ekranu"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Możesz powiększyć ekran lub konkretny obszar bądź przełączać się między tymi opcjami."</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Możesz teraz powiększyć część ekranu"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Włącz w Ustawieniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odrzuć"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Aby kontynuować, musisz przyznać aplikacji „<xliff:g id="APP">%s</xliff:g>” dostęp do mikrofonu urządzenia."</string>
