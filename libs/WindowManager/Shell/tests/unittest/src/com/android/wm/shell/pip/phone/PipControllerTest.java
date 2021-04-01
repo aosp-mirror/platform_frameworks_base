@@ -83,15 +83,15 @@ public class PipControllerTest extends ShellTestCase {
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mMockExecutor).execute(any());
         mPipController = new PipController(mContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
                 mMockPipMediaController, mMockPhonePipMenuController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mMockOneHandedController, mMockExecutor);
-        doAnswer(invocation -> {
-            ((Runnable) invocation.getArgument(0)).run();
-            return null;
-        }).when(mMockExecutor).execute(any());
     }
 
     @Test
