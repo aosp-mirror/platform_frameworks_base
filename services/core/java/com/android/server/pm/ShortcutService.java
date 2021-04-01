@@ -1306,7 +1306,7 @@ public class ShortcutService extends IShortcutService.Stub {
             mUsers.put(userId, userPackages);
 
             // Also when a user's data is first accessed, scan all packages.
-            checkPackageChanges(userId);
+            injectPostToHandler(() -> checkPackageChanges(userId));
         }
         return userPackages;
     }
@@ -3006,9 +3006,18 @@ public class ShortcutService extends IShortcutService.Stub {
                     ((queryFlags & ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER) != 0);
             queryFlags |= (getPinnedByAnyLauncher ? ShortcutQuery.FLAG_MATCH_PINNED : 0);
 
+            final boolean matchPinnedOnly =
+                    ((queryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0)
+                            && ((queryFlags & ShortcutQuery.FLAG_MATCH_CACHED) == 0)
+                            && ((queryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) == 0)
+                            && ((queryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) == 0);
+
             final Predicate<ShortcutInfo> filter = getFilterFromQuery(ids, locusIds, changedSince,
                     componentName, queryFlags, getPinnedByAnyLauncher);
-            if (ids != null && !ids.isEmpty()) {
+            if (matchPinnedOnly) {
+                p.findAllPinned(ret, filter, cloneFlag, callingPackage, launcherUserId,
+                        getPinnedByAnyLauncher);
+            } else if (ids != null && !ids.isEmpty()) {
                 p.findAllByIds(ret, ids, filter, cloneFlag, callingPackage, launcherUserId,
                         getPinnedByAnyLauncher);
             } else {

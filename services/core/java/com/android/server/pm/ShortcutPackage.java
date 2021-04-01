@@ -160,7 +160,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * An temp in-memory copy of shortcuts for this package that was loaded from xml, keyed on IDs.
      */
-    final ArraySet<ShortcutInfo> mShortcuts = new ArraySet<>();
+    final ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
 
     /**
      * All the share targets from the package
@@ -830,6 +830,26 @@ class ShortcutPackage extends ShortcutPackageItem {
             filter(result, query, cloneFlag, callingLauncher, pinnedByCallerSet,
                     getPinnedByAnyLauncher, si);
         }
+    }
+
+    /**
+     * Find all pinned shortcuts that match {@code query}.
+     */
+    public void findAllPinned(@NonNull List<ShortcutInfo> result,
+            @Nullable Predicate<ShortcutInfo> query, int cloneFlag,
+            @Nullable String callingLauncher, int launcherUserId, boolean getPinnedByAnyLauncher) {
+        if (getPackageInfo().isShadow()) {
+            // Restored and the app not installed yet, so don't return any.
+            return;
+        }
+        final ShortcutService s = mShortcutUser.mService;
+
+        // Set of pinned shortcuts by the calling launcher.
+        final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
+                : s.getLauncherShortcutsLocked(callingLauncher, getPackageUserId(), launcherUserId)
+                        .getPinnedShortcutIds(getPackageName(), getPackageUserId());
+        mShortcuts.values().forEach(si -> filter(result, query, cloneFlag, callingLauncher,
+                pinnedByCallerSet, getPinnedByAnyLauncher, si));
     }
 
     private void filter(@NonNull final List<ShortcutInfo> result,
@@ -1672,10 +1692,10 @@ class ShortcutPackage extends ShortcutPackageItem {
     @Override
     public void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
-        final int size = getShortcutCount();
+        final int size = mShortcuts.size();
         final int shareTargetSize = mShareTargets.size();
 
-        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0) {
+        if (size == 0 && shareTargetSize == 0 && mApiCallCount == 0 && getShortcutCount() == 0) {
             return; // nothing to write.
         }
 
@@ -1695,15 +1715,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
 
-        if (forBackup) {
-            // Shortcuts are persisted in AppSearch, xml is only needed for backup.
-            forEachShortcut(AppSearchShortcutInfo.QUERY_IS_PINNED_AND_ENABLED, si -> {
-                try {
-                    saveShortcut(out, si, forBackup, getPackageInfo().isBackupAllowed());
-                } catch (IOException | XmlPullParserException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        for (int j = 0; j < size; j++) {
+            saveShortcut(out, mShortcuts.valueAt(j), forBackup, getPackageInfo().isBackupAllowed());
         }
 
         if (!forBackup) {
@@ -1916,7 +1929,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                         final ShortcutInfo si = parseShortcut(parser, packageName,
                                 shortcutUser.getUserId(), fromBackup);
                         // Don't use addShortcut(), we don't need to save the icon.
-                        ret.mShortcuts.add(si);
+                        ret.mShortcuts.put(si.getId(), si);
                         continue;
                     case TAG_SHARE_TARGET:
                         ret.mShareTargets.add(ShareTargetInfo.loadFromXml(parser));
@@ -2268,11 +2281,23 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void saveShortcut(@NonNull final Collection<ShortcutInfo> shortcuts) {
         Objects.requireNonNull(shortcuts);
+        shortcuts.forEach(si -> {
+            if (si.isPinned()) {
+                mShortcuts.put(si.getId(), si);
+            } else {
+                mShortcuts.remove(si.getId());
+            }
+        });
+        saveToAppSearch(shortcuts);
+    }
+
+    private void saveToAppSearch(@NonNull final Collection<ShortcutInfo> shortcuts) {
+        Objects.requireNonNull(shortcuts);
         if (shortcuts.isEmpty()) {
             // No need to invoke AppSearch when there's nothing to save.
             return;
         }
-        awaitInAppSearch("Saving shortcut", session -> {
+        awaitInAppSearch("Saving shortcuts", session -> {
             final AndroidFuture<Boolean> future = new AndroidFuture<>();
             session.put(new PutDocumentsRequest.Builder()
                             .addGenericDocuments(
@@ -2314,6 +2339,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void removeShortcut(@NonNull final String id) {
         Objects.requireNonNull(id);
+        mShortcuts.remove(id);
         awaitInAppSearch("Removing shortcut with id=" + id, session -> {
             final AndroidFuture<Boolean> future = new AndroidFuture<>();
             session.remove(new RemoveByUriRequest.Builder(getPackageName()).addUris(id).build(),
@@ -2474,11 +2500,15 @@ class ShortcutPackage extends ShortcutPackageItem {
                         .detectAll()
                         .penaltyLog() // TODO: change this to penaltyDeath to fix the call-site
                         .build());
-                if (!mIsInitilized || forceReset) {
+                final boolean wasInitialized = mIsInitilized;
+                if (!wasInitialized || forceReset) {
                     ConcurrentUtils.waitForFutureNoInterrupt(
                             setupSchema(session), "Setting up schema");
                 }
                 mIsInitilized = true;
+                if (!wasInitialized) {
+                    restoreParsedShortcuts(false);
+                }
                 return ConcurrentUtils.waitForFutureNoInterrupt(cb.apply(session), description);
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to initiate app search for shortcut package "
@@ -2526,13 +2556,17 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
-     * Merge/replace shortcuts parsed from xml file.
+     * Replace shortcuts parsed from xml file.
      */
-    void restoreParsedShortcuts(final boolean replace) {
+    void restoreParsedShortcuts() {
+        restoreParsedShortcuts(true);
+    }
+
+    private void restoreParsedShortcuts(final boolean replace) {
         if (replace) {
             removeShortcuts();
         }
-        saveShortcut(mShortcuts);
+        saveToAppSearch(mShortcuts.values());
     }
 
     private boolean verifyRanksSequential(List<ShortcutInfo> list) {
