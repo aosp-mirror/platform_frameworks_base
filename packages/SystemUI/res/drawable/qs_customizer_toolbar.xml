@@ -16,8 +16,5 @@
 <inset xmlns:android="http://schemas.android.com/apk/res/android">
     <shape>
         <solid android:color="?android:attr/colorBackgroundFloating"/>
-        <corners
-            android:topLeftRadius="?android:attr/dialogCornerRadius"
-            android:topRightRadius="?android:attr/dialogCornerRadius" />
     </shape>
 </inset>
