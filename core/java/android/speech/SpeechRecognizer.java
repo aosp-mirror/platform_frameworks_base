@@ -205,6 +205,17 @@ public class SpeechRecognizer {
      * command to the created {@code SpeechRecognizer}, otherwise no notifications will be
      * received.
      *
+     * <p>For apps targeting Android 11 (API level 30) interaction with a speech recognition
+     * service requires <queries> element to be added to the manifest file:
+     * <pre>{@code
+     * <queries>
+     *   <intent>
+     *     <action
+     *        android:name="android.speech.RecognitionService" />
+     *   </intent>
+     * </queries>
+     * }</pre>
+     *
      * @param context in which to create {@code SpeechRecognizer}
      * @return a new {@code SpeechRecognizer}
      */
@@ -222,7 +233,18 @@ public class SpeechRecognizer {
      * {@link SpeechRecognizer} to. Normally you would not use this; use
      * {@link #createSpeechRecognizer(Context)} instead to use the system default recognition
      * service.
-     * 
+     *
+     * <p>For apps targeting Android 11 (API level 30) interaction with a speech recognition
+     * service requires <queries> element to be added to the manifest file:
+     * <pre>{@code
+     * <queries>
+     *   <intent>
+     *     <action
+     *        android:name="android.speech.RecognitionService" />
+     *   </intent>
+     * </queries>
+     * }</pre>
+     *
      * @param context in which to create {@code SpeechRecognizer}
      * @param serviceComponent the {@link ComponentName} of a specific service to direct this
      *        {@code SpeechRecognizer} to
