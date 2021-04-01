@@ -1126,9 +1126,9 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
-    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until charged</string>
+    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> until charged</string>
+    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
     <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Optimizing for battery health</string>
 
@@ -1145,7 +1145,7 @@
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_not_charging">Plugged in, can\'t charge right now</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
-    <string name="battery_info_status_full">Full</string>
+    <string name="battery_info_status_full">Charged</string>
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
