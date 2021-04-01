@@ -1231,7 +1231,7 @@ public class AudioService extends IAudioService.Stub
         // Restore call state
         synchronized (mDeviceBroker.mSetModeLock) {
             onUpdateAudioMode(AudioSystem.MODE_CURRENT, android.os.Process.myPid(),
-                    mContext.getPackageName());
+                    mContext.getPackageName(), true /*force*/);
         }
         final int forSys;
         synchronized (mSettingsLock) {
@@ -4614,7 +4614,8 @@ public class AudioService extends IAudioService.Stub
     }
 
     @GuardedBy("mDeviceBroker.mSetModeLock")
-    void onUpdateAudioMode(int requestedMode, int requesterPid, String requesterPackage) {
+    void onUpdateAudioMode(int requestedMode, int requesterPid, String requesterPackage,
+                           boolean force) {
         if (requestedMode == AudioSystem.MODE_CURRENT) {
             requestedMode = getMode();
         }
@@ -4631,7 +4632,7 @@ public class AudioService extends IAudioService.Stub
             Log.v(TAG, "onUpdateAudioMode() new mode: " + mode + ", current mode: "
                     + mMode.get() + " requested mode: " + requestedMode);
         }
-        if (mode != mMode.get()) {
+        if (mode != mMode.get() || force) {
             final long identity = Binder.clearCallingIdentity();
             int status = mAudioSystem.setPhoneState(mode, uid);
             Binder.restoreCallingIdentity(identity);
@@ -7402,8 +7403,8 @@ public class AudioService extends IAudioService.Stub
                         h.setPlaybackActive(mPlaybackMonitor.isPlaybackActiveForUid(h.getUid()));
                         h.setRecordingActive(mRecordMonitor.isRecordingActiveForUid(h.getUid()));
                         if (wasActive != h.isActive()) {
-                            onUpdateAudioMode(AudioSystem.MODE_CURRENT,
-                                    android.os.Process.myPid(), mContext.getPackageName());
+                            onUpdateAudioMode(AudioSystem.MODE_CURRENT, android.os.Process.myPid(),
+                                    mContext.getPackageName(), false /*force*/);
                         }
                     }
                     break;
@@ -7428,7 +7429,7 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_UPDATE_AUDIO_MODE:
                     synchronized (mDeviceBroker.mSetModeLock) {
-                        onUpdateAudioMode(msg.arg1, msg.arg2, (String) msg.obj);
+                        onUpdateAudioMode(msg.arg1, msg.arg2, (String) msg.obj, false /*force*/);
                     }
                     break;
             }
