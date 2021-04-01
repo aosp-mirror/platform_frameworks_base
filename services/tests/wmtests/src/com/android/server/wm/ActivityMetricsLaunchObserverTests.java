@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 
 import android.app.ActivityOptions;
@@ -248,6 +249,19 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         mActivityMetricsLogger.notifyVisibilityChanged(noDrawnActivity);
 
         verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(noDrawnActivity));
+    }
+
+    @Test
+    public void testOnActivityLaunchWhileSleeping() {
+        notifyActivityLaunching(mTopActivity.intent);
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+        doReturn(true).when(mTopActivity.mDisplayContent).isSleeping();
+        mTopActivity.setState(Task.ActivityState.RESUMED, "test");
+        mTopActivity.setVisibility(false);
+        waitHandlerIdle(mAtm.mH);
+        // Not cancel immediately because in one of real cases, the keyguard may be going away or
+        // occluded later, then the activity can be drawn.
+        verify(mLaunchObserver, never()).onActivityLaunchCancelled(eqProto(mTopActivity));
     }
 
     @Test

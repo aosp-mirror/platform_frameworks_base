@@ -1329,7 +1329,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
 
         mMultinetworkPolicyTracker = mDeps.makeMultinetworkPolicyTracker(
-                mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
+                mContext, mHandler, () -> updateAvoidBadWifi());
         mMultinetworkPolicyTracker.start();
 
         mDnsManager = new DnsManager(mContext, mDnsResolver);
@@ -4389,8 +4389,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return avoidBadWifi();
     }
 
-    // TODO : this function is now useless.
-    private void rematchForAvoidBadWifiUpdate() {
+    private void updateAvoidBadWifi() {
+        for (final NetworkAgentInfo nai : mNetworkAgentInfos) {
+            nai.updateScoreForNetworkAgentConfigUpdate();
+        }
         rematchAllNetworksAndRequests();
     }
 
@@ -6326,8 +6328,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // Request used to optionally keep vehicle internal network always active
     private final NetworkRequest mDefaultVehicleRequest;
 
-    // TODO replace with INetd.DUMMY_NET_ID when available.
-    private static final int NO_SERVICE_NET_ID = 51;
+    // TODO replace with INetd.UNREACHABLE_NET_ID when available.
+    private static final int NO_SERVICE_NET_ID = 52;
     // Sentinel NAI used to direct apps with default networks that should have no connectivity to a
     // network with no service. This NAI should never be matched against, nor should any public API
     // ever return the associated network. For this reason, this NAI is not in the list of available

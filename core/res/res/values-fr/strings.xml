@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Application en cours d\'exécution"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Applications utilisant la batterie"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Agrandissement"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Règlement sur la sécurité de l\'accessibilité"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise la batterie"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> applications utilisent la batterie"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Appuyer pour obtenir des informations sur l\'utilisation de la batterie et des données"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder aux données d\'activité physique"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et enregistrer des vidéos"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Appareils Bluetooth à proximité"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"détecter les appareils Bluetooth à proximité et s\'y connecter"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Journaux d\'appels"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"Consulter et modifier les journaux d\'appels du téléphone"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Téléphone"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permet à l\'application d\'accéder à la configuration du Bluetooth sur la tablette, et d\'établir et accepter des connexions avec les appareils associés."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permet à l\'application d\'afficher la configuration du Bluetooth sur votre appareil Android TV, de se connecter à des appareils associés et d\'accepter leur connexion."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permet à l\'application d\'accéder à la configuration du Bluetooth sur le téléphone, et d\'établir et accepter des connexions avec les appareils associés."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"détecter/associer appareils Bluetooth à proximité"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Autorise l\'appli à détecter et à associer les appareils Bluetooth à proximité"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"se connecter aux appareils Bluetooth associés"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Autorise l\'appli à se connecter à des appareils Bluetooth associés"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informations sur le service de paiement NFC préféré"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir des informations sur le service de paiement NFC préféré, y compris les ID d\'applications et les destinations de routage enregistrés."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"contrôler la communication en champ proche"</string>
@@ -567,18 +574,28 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erreur d\'authentification"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utiliser verrouillage écran"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Saisissez l\'identifiant de l\'appareil pour continuer"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Empreinte digitale partiellement détectée. Veuillez réessayer."</string>
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Le lecteur d\'empreinte digitale est sale. Veuillez le nettoyer, puis réessayer."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Vous avez déplacé votre doigt trop rapidement. Veuillez réessayer."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Vous avez déplacé votre doigt trop lentement. Veuillez réessayer."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur \"Confirmer\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Matériel d\'empreinte digitale indisponible."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Impossible d\'enregistrer l\'empreinte digitale. Veuillez en supprimer une autre."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Délai de détection de l\'empreinte digitale expiré. Veuillez réessayer."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Opération d\'empreinte digitale annulée."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Opération d\'authentification par empreinte digitale annulée par l\'utilisateur."</string>
@@ -603,6 +620,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Enregistrer à nouveau votre visage"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Capture du visage impossible. Réessayez."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Trop lumineux. Essayez de baisser la lumière."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Trop sombre. Essayez une éclairage plus lumineux."</string>
@@ -1006,6 +1031,12 @@
     <string name="copied" msgid="4675902854553014676">"Copie effectuée"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> collé depuis <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> collé depuis le presse-papiers"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"Plus"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Méta+"</string>
@@ -2110,20 +2141,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Professionnel"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Vue personnelle"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Vue professionnelle"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Impossible de partager ce contenu avec les applications professionnelles"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Votre administrateur informatique ne vous autorise pas à partager ce contenu avec les applications de votre profil professionnel"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Impossible d\'ouvrir ce contenu avec les applications professionnelles"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Votre administrateur informatique ne vous autorise pas à ouvrir ce contenu avec les applications de votre profil professionnel"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Impossible de partager ce contenu avec les applications personnelles"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Votre administrateur informatique ne vous autorise pas à partager ce contenu avec les applications de votre profil personnel"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Impossible d\'ouvrir ce contenu avec les applications personnelles"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Votre administrateur informatique ne vous autorise pas à ouvrir ce contenu avec les applications de votre profil personnel"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profil professionnel en pause"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Activer"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Aucune application professionnelle ne prend en charge ce contenu"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Aucune application professionnelle ne peut ouvrir ce contenu"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Aucune application personnelle ne prend en charge ce contenu"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Aucune application personnelle ne peut ouvrir ce contenu"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Code PIN de déblocage du réseau SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Code PIN de déblocage du sous-ensemble du réseau SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Code PIN de déblocage de la carte SIM d\'entreprise"</string>
@@ -2236,8 +2278,10 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Agrandissez une partie de l\'écran"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Vous pouvez agrandir tout ou partie de l\'écran, ou basculer entre ces deux options."</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
+    <skip />
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activer dans les paramètres"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Fermer"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Pour continuer, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; a besoin d\'accéder au micro de votre appareil."</string>

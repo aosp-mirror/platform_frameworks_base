@@ -81,6 +81,10 @@ public class DozeSensors {
     private boolean mSettingRegistered;
     private boolean mListening;
     private boolean mListeningTouchScreenSensors;
+    private boolean mListeningProxSensors;
+
+    // whether to only register sensors that use prox when the display state is dozing or off
+    private boolean mSelectivelyRegisterProxSensors;
 
     @VisibleForTesting
     public enum DozeSensorsUiEvent implements UiEventLogger.UiEventEnum {
@@ -112,6 +116,8 @@ public class DozeSensors {
         mSecureSettings = secureSettings;
         mCallback = callback;
         mProximitySensor = proximitySensor;
+        mSelectivelyRegisterProxSensors = dozeParameters.getSelectivelyRegisterSensorsUsingProx();
+        mListeningProxSensors = !mSelectivelyRegisterProxSensors;
 
         boolean udfpsEnrolled =
                 authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser());
@@ -131,6 +137,7 @@ public class DozeSensors {
                         DozeLog.REASON_SENSOR_PICKUP, false /* touchCoords */,
                         false /* touchscreen */,
                         false /* ignoresSetting */,
+                        false /* requires prox */,
                         dozeLog),
                 new TriggerSensor(
                         findSensorWithType(config.doubleTapSensorType()),
@@ -143,10 +150,13 @@ public class DozeSensors {
                 new TriggerSensor(
                         findSensorWithType(config.tapSensorType()),
                         Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+                        true /* settingDef */,
                         true /* configured */,
                         DozeLog.REASON_SENSOR_TAP,
                         false /* reports touch coordinates */,
                         true /* touchscreen */,
+                        false /* ignoresSetting */,
+                        dozeParameters.singleTapUsesProx() /* requiresProx */,
                         dozeLog),
                 new TriggerSensor(
                         findSensorWithType(config.longPressSensorType()),
@@ -156,6 +166,8 @@ public class DozeSensors {
                         DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
+                        false /* ignoresSetting */,
+                        dozeParameters.longPressUsesProx() /* requiresProx */,
                         dozeLog),
                 new TriggerSensor(
                         findSensorWithType(config.udfpsLongPressSensorType()),
@@ -165,6 +177,8 @@ public class DozeSensors {
                         DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */,
+                        false /* ignoresSetting */,
+                        dozeParameters.longPressUsesProx(),
                         dozeLog),
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
@@ -255,13 +269,31 @@ public class DozeSensors {
     }
 
     /**
+     * If sensors should be registered and sending signals.
+     */
+    public void setListening(boolean listen, boolean includeTouchScreenSensors,
+            boolean lowPowerStateOrOff) {
+        final boolean shouldRegisterProxSensors =
+                !mSelectivelyRegisterProxSensors || lowPowerStateOrOff;
+        if (mListening == listen && mListeningTouchScreenSensors == includeTouchScreenSensors
+                && mListeningProxSensors == shouldRegisterProxSensors) {
+            return;
+        }
+        mListening = listen;
+        mListeningTouchScreenSensors = includeTouchScreenSensors;
+        mListeningProxSensors = shouldRegisterProxSensors;
+        updateListening();
+    }
+
+    /**
      * Registers/unregisters sensors based on internal state.
      */
     private void updateListening() {
         boolean anyListening = false;
         for (TriggerSensor s : mSensors) {
             boolean listen = mListening
-                    && (!s.mRequiresTouchscreen || mListeningTouchScreenSensors);
+                    && (!s.mRequiresTouchscreen || mListeningTouchScreenSensors)
+                    && (!s.mRequiresProx || mListeningProxSensors);
             s.setListening(listen);
             if (listen) {
                 anyListening = true;
@@ -337,6 +369,8 @@ public class DozeSensors {
     public void dump(PrintWriter pw) {
         pw.println("mListening=" + mListening);
         pw.println("mListeningTouchScreenSensors=" + mListeningTouchScreenSensors);
+        pw.println("mSelectivelyRegisterProxSensors=" + mSelectivelyRegisterProxSensors);
+        pw.println("mListeningProxSensors=" + mListeningProxSensors);
         IndentingPrintWriter idpw = new IndentingPrintWriter(pw);
         idpw.increaseIndent();
         for (TriggerSensor s : mSensors) {
@@ -361,6 +395,7 @@ public class DozeSensors {
         private final boolean mReportsTouchCoordinates;
         private final boolean mSettingDefault;
         private final boolean mRequiresTouchscreen;
+        private final boolean mRequiresProx;
 
         protected boolean mRequested;
         protected boolean mRegistered;
@@ -378,12 +413,14 @@ public class DozeSensors {
                 boolean configured, int pulseReason, boolean reportsTouchCoordinates,
                 boolean requiresTouchscreen, DozeLog dozeLog) {
             this(sensor, setting, settingDef, configured, pulseReason, reportsTouchCoordinates,
-                    requiresTouchscreen, false /* ignoresSetting */, dozeLog);
+                    requiresTouchscreen, false /* ignoresSetting */,
+                    false /* requiresProx */, dozeLog);
         }
 
         private TriggerSensor(Sensor sensor, String setting, boolean settingDef,
                 boolean configured, int pulseReason, boolean reportsTouchCoordinates,
-                boolean requiresTouchscreen, boolean ignoresSetting, DozeLog dozeLog) {
+                boolean requiresTouchscreen, boolean ignoresSetting, boolean requiresProx,
+                DozeLog dozeLog) {
             mSensor = sensor;
             mSetting = setting;
             mSettingDefault = settingDef;
@@ -392,6 +429,7 @@ public class DozeSensors {
             mReportsTouchCoordinates = reportsTouchCoordinates;
             mRequiresTouchscreen = requiresTouchscreen;
             mIgnoresSetting = ignoresSetting;
+            mRequiresProx = requiresProx;
             mDozeLog = dozeLog;
         }
 

@@ -89,8 +89,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"उक्त एप वा तपाईंको संगठनले स्क्रिनसटहरू लिन दिँदैन"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"सम्पादन गर्नुहोस्"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रिनसट सम्पादन गर्नुहोस्"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"स्क्रोल गर्नुहोस्"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"स्क्रिनसट स्क्रोल गर्नुहोस्"</string>
+    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
+    <skip />
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रिनसट हटाउनुहोस्"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रिनसटको पूर्वावलोकन"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"सिरानको सीमा"</string>
@@ -178,6 +178,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"हटाउनुहोस्"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फिंगरप्रिन्ट सेन्सरमा छुनुहोस्‌"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"फिंगरप्रिन्ट जनाउने आइकन"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"तपाईंलाई खोज्दै…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"अनुहारको आइकन"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"मिलाउने जुम बटन।"</string>
@@ -378,7 +384,11 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"रंग उल्टाउनुहोस्"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"रङ्ग सुधार मोड"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"थप सेटिङहरू"</string>
+    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
+    <skip />
     <string name="quick_settings_done" msgid="2163641301648855793">"भयो"</string>
+    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
+    <skip />
     <string name="quick_settings_connected" msgid="3873605509184830379">"जोडिएको"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"यन्त्र जडान भयो, ब्याट्रीको चार्ज स्तर <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"जडान हुँदै..."</string>
@@ -523,6 +533,8 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"यो यन्त्र <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> को स्वामित्वमा छ र VPN हरूमा कनेक्ट गरिएको छ"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा नेटवर्कको ट्राफिकको अनुगमन गर्न पनि सक्छ"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलमा नेटवर्क ट्राफिकको अनुगमन गर्न पनि सक्छ"</string>
+    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
+    <skip />
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"नेटवर्कको अनुगमन हुनसक्छ"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"यो यन्त्र VPN हरूमा कनेक्ट गरिएको छ"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"तपाईंको कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> मा कनेक्ट गरिएको छ"</string>
@@ -1102,6 +1114,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"साथीहरू"</string>
     <string name="empty_status" msgid="5938893404951307749">"आज राति च्याट गरौँ!"</string>
     <string name="missed_call" msgid="4228016077700161689">"मिस कल"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"हालसालैका म्यासेज, मिस कल र स्ट्याटस अपडेट हेर्नुहोस्"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"वार्तालाप"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"यन्त्रको ब्याट्रीको मिटर रिडिङ क्रममा समस्या भयो"</string>

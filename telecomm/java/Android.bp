@@ -1,0 +1,8 @@
+filegroup {
+    name: "framework-telecomm-sources",
+    srcs: [
+        "**/*.java",
+        "**/*.aidl",
+    ],
+    visibility: ["//frameworks/base"],
+}

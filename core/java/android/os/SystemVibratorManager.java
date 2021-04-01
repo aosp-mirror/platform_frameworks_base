@@ -199,6 +199,16 @@ public class SystemVibratorManager extends VibratorManager {
             return mVibratorInfo.hasAmplitudeControl();
         }
 
+        @Override
+        public float getResonantFrequency() {
+            return mVibratorInfo.getResonantFrequency();
+        }
+
+        @Override
+        public float getQFactor() {
+            return mVibratorInfo.getQFactor();
+        }
+
         @NonNull
         @Override
         public int[] areEffectsSupported(@NonNull int... effectIds) {

@@ -150,6 +150,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -2662,6 +2663,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {
             pw.print("  "); pw.print(entry.getKey()); pw.print("="); pw.println(entry.getValue());
         }
+
+        pw.println("Camera gesture intents:");
+        pw.println("   Insecure camera: " + CameraIntents.getInsecureCameraIntent(mContext));
+        pw.println("   Secure camera: " + CameraIntents.getSecureCameraIntent(mContext));
+        pw.println("   Override package: "
+                + String.valueOf(CameraIntents.getOverrideCameraPackage(mContext)));
     }
 
     public static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
@@ -2734,7 +2741,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     null /* remoteAnimation */));
             options.setDisallowEnterPictureInPictureWhileLaunching(
                     disallowEnterPictureInPictureWhileLaunching);
-            if (intent == KeyguardBottomAreaView.INSECURE_CAMERA_INTENT) {
+            if (CameraIntents.isInsecureCameraIntent(intent)) {
                 // Normally an activity will set it's requested rotation
                 // animation on its window. However when launching an activity
                 // causes the orientation to change this is too late. In these cases
@@ -2964,7 +2971,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         mPowerButtonReveal = new PowerButtonReveal(mContext.getResources().getDimensionPixelSize(
-                R.dimen.global_actions_top_padding));
+                com.android.systemui.R.dimen.physical_power_button_center_screen_location_y));
     }
 
     // Visibility reporting
@@ -4023,7 +4030,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         if (!mStatusBarKeyguardViewManager.isShowing()) {
-            startActivityDismissingKeyguard(KeyguardBottomAreaView.INSECURE_CAMERA_INTENT,
+            final Intent cameraIntent = CameraIntents.getInsecureCameraIntent(mContext);
+            startActivityDismissingKeyguard(cameraIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0);
         } else {

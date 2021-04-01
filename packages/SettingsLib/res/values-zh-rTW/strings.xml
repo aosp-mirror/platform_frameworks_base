@@ -501,6 +501,16 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"減少時間。"</string>
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
     <string name="okay" msgid="949938843324579502">"確定"</string>
+    <!-- no translation found for alarms_and_reminders_label (6918395649731424294) -->
+    <skip />
+    <!-- no translation found for alarms_and_reminders_switch_title (186992351401152744) -->
+    <skip />
+    <!-- no translation found for alarms_and_reminders_title (2988400785896875237) -->
+    <skip />
+    <!-- no translation found for alarms_and_reminders_footer_title (5882788882647778753) -->
+    <skip />
+    <!-- no translation found for keywords_alarms_and_reminders (8882739572152019456) -->
+    <skip />
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「零打擾」模式"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"永不"</string>
@@ -579,7 +589,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"行動數據已關閉"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"並未設為使用行動數據"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"沒有電話訊號。"</string>

@@ -1,0 +1,5 @@
+filegroup {
+    name: "framework-mca-filterpacks-sources",
+    srcs: ["**/*.java"],
+    visibility: ["//frameworks/base"],
+}

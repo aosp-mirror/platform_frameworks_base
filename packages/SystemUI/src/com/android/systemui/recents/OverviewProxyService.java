@@ -58,9 +58,12 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.InputMonitor;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -237,6 +240,36 @@ public class OverviewProxyService extends CurrentUserTracker implements
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public void onBackPressed() throws RemoteException {
+            if (!verifyCaller("onBackPressed")) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> {
+                    sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+                    sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
+
+                    notifyBackAction(true, -1, -1, true, false);
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        private boolean sendEvent(int action, int code) {
+            long when = SystemClock.uptimeMillis();
+            final KeyEvent ev = new KeyEvent(when, when, action, code, 0 /* repeat */,
+                    0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
+                    KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                    InputDevice.SOURCE_KEYBOARD);
+
+            ev.setDisplayId(mContext.getDisplay().getDisplayId());
+            return InputManager.getInstance()
+                    .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         }
 
         @Override

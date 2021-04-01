@@ -800,7 +800,7 @@ class LockSettingsStorage {
 
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
-            setWriteAheadLoggingEnabled(true);
+            setWriteAheadLoggingEnabled(false);
             // Memory optimization - close idle connections after 30s of inactivity
             setIdleConnectionTimeout(IDLE_CONNECTION_TIMEOUT_MS);
         }

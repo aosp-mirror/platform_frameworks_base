@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -30,6 +31,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -293,6 +296,44 @@ public class ShellTransitionTests {
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
         verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any(), any());
+    }
+
+    @Test
+    public void testOneShotRemoteHandler() {
+        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
+                mMainExecutor, mAnimExecutor);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        final boolean[] remoteCalled = new boolean[]{false};
+        final WindowContainerTransaction remoteFinishWCT = new WindowContainerTransaction();
+        IRemoteTransition testRemote = new IRemoteTransition.Stub() {
+            @Override
+            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+                    IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
+                remoteCalled[0] = true;
+                finishCallback.onTransitionFinished(remoteFinishWCT);
+            }
+        };
+
+        final int transitType = TRANSIT_FIRST_CUSTOM + 1;
+
+        OneShotRemoteHandler oneShot = new OneShotRemoteHandler(mMainExecutor, testRemote);
+        // Verify that it responds to the remote but not other things.
+        IBinder transitToken = new Binder();
+        assertNotNull(oneShot.handleRequest(transitToken,
+                new TransitionRequestInfo(transitType, null, testRemote)));
+        assertNull(oneShot.handleRequest(transitToken,
+                new TransitionRequestInfo(transitType, null, null)));
+
+        Transitions.TransitionFinishCallback testFinish =
+                mock(Transitions.TransitionFinishCallback.class);
+        // Verify that it responds to animation properly
+        oneShot.setTransition(transitToken);
+        IBinder anotherToken = new Binder();
+        assertFalse(oneShot.startAnimation(anotherToken, new TransitionInfo(transitType, 0),
+                mock(SurfaceControl.Transaction.class), testFinish));
+        assertTrue(oneShot.startAnimation(transitToken, new TransitionInfo(transitType, 0),
+                mock(SurfaceControl.Transaction.class), testFinish));
     }
 
     class TransitionInfoBuilder {

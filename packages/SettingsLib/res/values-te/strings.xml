@@ -389,7 +389,7 @@
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"సచేతనం (డిఫాల్ట్)"</item>
     <item msgid="9112200311983078311">"సహజం"</item>
-    <item msgid="6564241960833766170">"ప్రామాణికం"</item>
+    <item msgid="6564241960833766170">"స్టాండర్డ్"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"మెరుగైన రంగులు"</item>
@@ -424,8 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ప్రొటానోమలీ (ఎరుపు-ఆకుపచ్చ రంగు)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ట్రైటనోమలీ (నీలం-పసుపు రంగు)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"కలర్ సరిచేయడం"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (2333641630205214702) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"మీ పరికరంపై రంగులు కనిపించే విధానాన్ని అడ్జస్ట్ చేయండి. ఇటువంటి సందర్భాలలో ఇది మీకు సహాయకరంగా ఉంటుంది:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;మరింత ఖచ్చితంగా రంగులను చూడాలనుకున్నప్పుడు&lt;/li&gt; &lt;li&gt;&amp;nbsp; ఫోకస్ చేయడంలో మీకు సహాయపడటానికి రంగులను తీసివేయాలనుకున్నప్పుడు&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
@@ -502,6 +501,16 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"తక్కువ సమయం."</string>
     <string name="cancel" msgid="5665114069455378395">"రద్దు చేయి"</string>
     <string name="okay" msgid="949938843324579502">"సరే"</string>
+    <!-- no translation found for alarms_and_reminders_label (6918395649731424294) -->
+    <skip />
+    <!-- no translation found for alarms_and_reminders_switch_title (186992351401152744) -->
+    <skip />
+    <!-- no translation found for alarms_and_reminders_title (2988400785896875237) -->
+    <skip />
+    <!-- no translation found for alarms_and_reminders_footer_title (5882788882647778753) -->
+    <skip />
+    <!-- no translation found for keywords_alarms_and_reminders (8882739572152019456) -->
+    <skip />
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"అంతరాయం కలిగించవద్దును ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ఎప్పటికీ వ‌ద్దు"</string>
@@ -580,7 +589,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"మొబైల్ డేటా ఆఫ్‌లో ఉంది"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"డేటాను ఉపయోగించే విధంగా సెట్ చేయలేదు"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"ఫోన్ లేదు."</string>

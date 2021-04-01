@@ -452,6 +452,9 @@
     <!-- Permission required for CTS test - android.widget.cts.ToastTest -->
     <uses-permission android:name="android.permission.UNLIMITED_TOASTS" />
 
+    <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+    <uses-permission android:name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

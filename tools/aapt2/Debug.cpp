@@ -300,6 +300,10 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
             break;
         }
 
+        if (entry->visibility.staged_api) {
+          printer->Print(" STAGED");
+        }
+
         if (entry->overlayable_item) {
           printer->Print(" OVERLAYABLE");
         }

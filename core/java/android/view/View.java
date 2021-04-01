@@ -5255,7 +5255,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mUnbufferedInputSource = InputDevice.SOURCE_CLASS_NONE;
 
     @Nullable
-    private String[] mOnReceiveContentMimeTypes;
+    private String[] mReceiveContentMimeTypes;
 
     @Nullable
     private ViewTranslationCallback mViewTranslationCallback;
@@ -8847,7 +8847,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setAutofillValue(getAutofillValue());
             }
             structure.setImportantForAutofill(getImportantForAutofill());
-            structure.setOnReceiveContentMimeTypes(getOnReceiveContentMimeTypes());
+            structure.setReceiveContentMimeTypes(getReceiveContentMimeTypes());
         }
 
         int ignoredParentLeft = 0;
@@ -9066,7 +9066,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Preconditions.checkArgument(Arrays.stream(mimeTypes).noneMatch(t -> t.startsWith("*")),
                     "A MIME type set here must not start with *: " + Arrays.toString(mimeTypes));
         }
-        mOnReceiveContentMimeTypes = ArrayUtils.isEmpty(mimeTypes) ? null : mimeTypes;
+        mReceiveContentMimeTypes = ArrayUtils.isEmpty(mimeTypes) ? null : mimeTypes;
         getListenerInfo().mOnReceiveContentListener = listener;
     }
 
@@ -9134,8 +9134,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @SuppressLint("NullableCollection")
     @Nullable
-    public String[] getOnReceiveContentMimeTypes() {
-        return mOnReceiveContentMimeTypes;
+    public String[] getReceiveContentMimeTypes() {
+        return mReceiveContentMimeTypes;
     }
 
     /**
@@ -29543,6 +29543,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mScrollCaptureInternal;
         }
 
+        ViewRoot getViewRoot() {
+            return mViewRootImpl;
+        }
+
         public void dump(String prefix, PrintWriter writer) {
             String innerPrefix = prefix + "  ";
             writer.println(prefix + "AttachInfo:");
@@ -30755,10 +30759,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view.
      * @param supportedFormats the supported translation formats. For now, the only possible value
      * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
-     * @param requestsCollector a {@link ViewTranslationRequest} collector that will be called
+     * @param requestsCollector a {@link ViewTranslationRequest} collector that can be called
      * multiple times to collect the information to be translated in the virtual view. One
      * {@link ViewTranslationRequest} per virtual child. The {@link ViewTranslationRequest} must
-     * contains the {@link AutofillId} corresponding to the virtualChildIds.
+     * contains the {@link AutofillId} corresponding to the virtualChildIds. Do not keep this
+     * Consumer after the method returns.
      */
     @SuppressLint("NullableCollection")
     public void onCreateTranslationRequests(@NonNull long[] virtualChildIds,
@@ -30831,7 +30836,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * ui translation, the system will call this method to traverse the view hierarchy to call
      * {@link View#onCreateTranslationRequest} to build {@link ViewTranslationRequest}s and create a
      * {@link android.view.translation.Translator} to translate the requests. All the
-     * {@link ViewTranslationRequest}s will be added when the traversal is done.
+     * {@link ViewTranslationRequest}s must be added when the traversal is done.
      *
      * <p> The default implementation will call {@link View#onCreateTranslationRequest} to build
      * {@link ViewTranslationRequest} if the view should be translated. </p>
@@ -30929,5 +30934,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Log.e(VIEW_LOG_TAG, "Failed to call generateDisplayHash");
             callback.onDisplayHashError(DISPLAY_HASH_ERROR_UNKNOWN);
         }
+    }
+
+    /**
+     * @return The {@link android.view.ViewRoot} interface for this View. This will only
+     * return a non-null value when called between {@link #onAttachedToWindow} and
+     * {@link #onDetachedFromWindow}.
+     *
+     * The ViewRoot itself is not a View, it is just the interface to the windowing-system
+     * object that contains the entire view hierarchy. For the root View of a given hierarchy
+     * see {@link #getRootView}.
+     */
+    public @Nullable ViewRoot getViewRoot() {
+        if (mAttachInfo != null) {
+            return mAttachInfo.getViewRoot();
+        }
+        return null;
     }
 }

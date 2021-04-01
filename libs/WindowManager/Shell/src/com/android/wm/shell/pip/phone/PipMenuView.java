@@ -76,7 +76,6 @@ public class PipMenuView extends FrameLayout {
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_FADE_DURATION = 125;
-    private static final long MENU_SLOW_FADE_DURATION = 175;
     private static final long MENU_SHOW_ON_EXPAND_START_DELAY = 30;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
@@ -253,9 +252,7 @@ public class PipMenuView extends FrameLayout {
                 mMenuContainerAnimator.playTogether(dismissAnim, resizeAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
-            mMenuContainerAnimator.setDuration(menuState == MENU_STATE_CLOSE
-                    ? MENU_FADE_DURATION
-                    : MENU_SLOW_FADE_DURATION);
+            mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
             if (allowMenuTimeout) {
                 mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override

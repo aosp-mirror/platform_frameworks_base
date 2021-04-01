@@ -1,0 +1,8 @@
+filegroup {
+    name: "framework-lowpan-sources",
+    srcs: [
+        "**/*.java",
+        "**/*.aidl",
+    ],
+    visibility: ["//frameworks/base"],
+}
