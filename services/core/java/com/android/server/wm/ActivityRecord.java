@@ -114,8 +114,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
@@ -324,7 +322,6 @@ import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
-import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
@@ -2384,7 +2381,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return occludesParent(false /* includingFinishing */);
     }
 
-    private boolean occludesParent(boolean includingFinishing) {
+    @VisibleForTesting
+    boolean occludesParent(boolean includingFinishing) {
         if (!includingFinishing && finishing) {
             return false;
         }
@@ -2822,7 +2820,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
-            final int transit = endTask ? TRANSIT_OLD_TASK_CLOSE : TRANSIT_OLD_ACTIVITY_CLOSE;
             if (newTransition != null) {
                 mAtmService.getTransitionController().requestStartTransition(newTransition,
                         endTask ? task : null, null /* remote */);
@@ -2879,7 +2876,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (!isState(PAUSING)) {
                 if (mVisibleRequested) {
                     // Prepare and execute close transition.
-                    prepareActivityHideTransitionAnimation(transit);
+                    prepareActivityHideTransitionAnimation();
                 }
 
                 final boolean removedActivity = completeFinishing("finishIfPossible") == null;
@@ -2897,11 +2894,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // In this case, we can set the visibility of all the task overlay activities when
                 // we detect the last one is finishing to keep them in sync.
                 if (task.onlyHasTaskOverlayActivities(false /* includeFinishing */)) {
-                    final PooledConsumer c = PooledLambda.obtainConsumer(
-                            ActivityRecord::prepareActivityHideTransitionAnimationIfOvarlay,
-                            PooledLambda.__(ActivityRecord.class), transit);
-                    task.forAllActivities(c);
-                    c.recycle();
+                    task.forAllActivities((r) -> {
+                        r.prepareActivityHideTransitionAnimationIfOvarlay();
+                    });
                 }
                 return removedActivity ? FINISH_RESULT_REMOVED : FINISH_RESULT_REQUESTED;
             } else {
@@ -2914,17 +2909,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    private void prepareActivityHideTransitionAnimationIfOvarlay(@TransitionOldType int transit) {
+    private void prepareActivityHideTransitionAnimationIfOvarlay() {
         if (mTaskOverlay) {
-            prepareActivityHideTransitionAnimation(transit);
+            prepareActivityHideTransitionAnimation();
         }
     }
 
-    private void prepareActivityHideTransitionAnimation(@TransitionOldType int transit) {
+    private void prepareActivityHideTransitionAnimation() {
         final DisplayContent dc = mDisplayContent;
         dc.prepareAppTransition(TRANSIT_CLOSE);
         setVisibility(false);
         dc.executeAppTransition();
+    }
+
+    ActivityRecord completeFinishing(String reason) {
+        return completeFinishing(true /* updateVisibility */, reason);
     }
 
     /**
@@ -2932,10 +2931,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * pausing we will wait for it to complete its transition. If the activity that should appear in
      * place of this one is not visible yet - we'll wait for it first. Otherwise - activity can be
      * destroyed right away.
+     * @param updateVisibility Indicate if need to update activity visibility.
      * @param reason Reason for finishing the activity.
      * @return Flag indicating whether the activity was removed from history.
      */
-    ActivityRecord completeFinishing(String reason) {
+    ActivityRecord completeFinishing(boolean updateVisibility, String reason) {
         if (!finishing || isState(RESUMED)) {
             throw new IllegalArgumentException(
                     "Activity must be finishing and not resumed to complete, r=" + this
@@ -2947,13 +2947,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return this;
         }
 
-        final boolean isCurrentVisible = mVisibleRequested || isState(PAUSED);
-        if (isCurrentVisible) {
-            final Task rootTask = getRootTask();
-            final ActivityRecord activity = rootTask.getResumedActivity();
+        final boolean isCurrentVisible = mVisibleRequested || isState(PAUSED, STARTED);
+        if (updateVisibility && isCurrentVisible) {
             boolean ensureVisibility = false;
-            if (activity != null && !activity.occludesParent()) {
-                // If the resume activity is not opaque, we need to make sure the visibilities of
+            if (occludesParent(true /* includingFinishing */)) {
+                // If the current activity is not opaque, we need to make sure the visibilities of
                 // activities be updated, they may be seen by users.
                 ensureVisibility = true;
             } else if (mTaskSupervisor.getKeyguardController().isKeyguardLocked()

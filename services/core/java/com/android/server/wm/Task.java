@@ -5828,8 +5828,13 @@ class Task extends WindowContainer<WindowContainer> {
             final boolean wasStopping = prev.isState(STOPPING);
             prev.setState(PAUSED, "completePausedLocked");
             if (prev.finishing) {
+                // We will update the activity visibility later, no need to do in
+                // completeFinishing(). Updating visibility here might also making the next
+                // activities to be resumed, and could result in wrong app transition due to
+                // lack of previous activity information.
                 ProtoLog.v(WM_DEBUG_STATES, "Executing finish of activity: %s", prev);
-                prev = prev.completeFinishing("completePausedLocked");
+                prev = prev.completeFinishing(false /* updateVisibility */,
+                        "completePausedLocked");
             } else if (prev.hasProcess()) {
                 ProtoLog.v(WM_DEBUG_STATES, "Enqueue pending stop if needed: %s "
                         + "wasStopping=%b visibleRequested=%b",  prev,  wasStopping,
