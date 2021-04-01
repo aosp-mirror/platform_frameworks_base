@@ -444,12 +444,6 @@
     <string name="sensor_notification_service">Sensor Notification Service</string>
     <!-- Attribution for Twilight service. [CHAR LIMIT=NONE]-->
     <string name="twilight_service">Twilight Service</string>
-    <!-- Attribution for the Offline LocationTimeZoneProvider service, i.e. the service capable of
-         performing time zone detection using time zone geospatial information held on the device.
-         This text is shown in UIs related to an application name to help users and developers to
-         understand which sub-unit of an application is requesting permissions and using power.
-         [CHAR LIMIT=NONE]-->
-    <string name="offline_location_time_zone_detection_service_attribution">Time Zone Detector (No connectivity)</string>
     <!-- Attribution for Gnss Time Update service. [CHAR LIMIT=NONE]-->
     <string name="gnss_time_update_service">GNSS Time Update Service</string>
 
