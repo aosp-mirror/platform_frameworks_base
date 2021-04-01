@@ -8133,12 +8133,12 @@ public class ConnectivityServiceTest {
         assertExtraInfoFromCmPresent(mWiFiNetworkAgent);
 
         b1 = expectConnectivityAction(TYPE_WIFI, DetailedState.DISCONNECTED);
+        b2 = expectConnectivityAction(TYPE_VPN, DetailedState.DISCONNECTED);
         mWiFiNetworkAgent.disconnect();
         callback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         systemDefaultCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         b1.expectBroadcast();
         callback.expectCapabilitiesThat(mMockVpn, nc -> !nc.hasTransport(TRANSPORT_WIFI));
-        b2 = expectConnectivityAction(TYPE_VPN, DetailedState.DISCONNECTED);
         mMockVpn.expectStopVpnRunnerPrivileged();
         callback.expectCallback(CallbackEntry.LOST, mMockVpn);
         b2.expectBroadcast();
