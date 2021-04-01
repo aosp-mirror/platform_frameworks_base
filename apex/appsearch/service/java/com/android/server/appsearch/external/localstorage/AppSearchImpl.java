@@ -412,11 +412,6 @@ public final class AppSearchImpl implements Closeable {
 
             String prefix = createPrefix(packageName, databaseName);
             GetSchemaResponse.Builder responseBuilder = new GetSchemaResponse.Builder();
-            if (!fullSchema.getTypesList().isEmpty()) {
-                // TODO(b/183050495) find a place to store the version for the database, rather
-                // than read from a schema.
-                responseBuilder.setVersion(fullSchema.getTypes(0).getVersion());
-            }
             for (int i = 0; i < fullSchema.getTypesCount(); i++) {
                 String typePrefix = getPrefix(fullSchema.getTypes(i).getSchemaType());
                 if (!prefix.equals(typePrefix)) {
@@ -444,6 +439,10 @@ public final class AppSearchImpl implements Closeable {
 
                 AppSearchSchema schema =
                         SchemaToProtoConverter.toAppSearchSchema(typeConfigBuilder);
+
+                // TODO(b/183050495) find a place to store the version for the database, rather
+                // than read from a schema.
+                responseBuilder.setVersion(fullSchema.getTypes(i).getVersion());
                 responseBuilder.addSchema(schema);
             }
             return responseBuilder.build();
