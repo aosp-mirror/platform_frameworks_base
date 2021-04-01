@@ -772,8 +772,10 @@ public class MtpDatabase implements AutoCloseable {
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteStream);
 
-            if (byteStream.size() > MAX_THUMB_SIZE)
+            if (byteStream.size() > MAX_THUMB_SIZE) {
+                Log.w(TAG, "getThumbnailProcess: size=" + byteStream.size());
                 return null;
+            }
 
             byte[] byteArray = byteStream.toByteArray();
 
@@ -803,7 +805,15 @@ public class MtpDatabase implements AutoCloseable {
                     outLongs[0] = thumbOffsetAndSize != null ? thumbOffsetAndSize[1] : 0;
                     outLongs[1] = exif.getAttributeInt(ExifInterface.TAG_PIXEL_X_DIMENSION, 0);
                     outLongs[2] = exif.getAttributeInt(ExifInterface.TAG_PIXEL_Y_DIMENSION, 0);
-                    return true;
+                    if (exif.getThumbnailRange() != null) {
+                        if ((outLongs[0] == 0) || (outLongs[1] == 0) || (outLongs[2] == 0)) {
+                            Log.d(TAG, "getThumbnailInfo: check thumb info:"
+                                    + thumbOffsetAndSize[0] + "," + thumbOffsetAndSize[1]
+                                    + "," + outLongs[1] + "," + outLongs[2]);
+                        }
+
+                        return true;
+                    }
                 } catch (IOException e) {
                     // ignore and fall through
                 }
@@ -836,7 +846,9 @@ public class MtpDatabase implements AutoCloseable {
             case MtpConstants.FORMAT_JFIF:
                 try {
                     ExifInterface exif = new ExifInterface(path);
-                    return exif.getThumbnail();
+
+                    if (exif.getThumbnailRange() != null)
+                        return exif.getThumbnail();
                 } catch (IOException e) {
                     // ignore and fall through
                 }
