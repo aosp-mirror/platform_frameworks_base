@@ -570,6 +570,10 @@
 
     <!-- Max number of columns for power menu -->
     <integer name="power_menu_max_columns">3</integer>
+    <!-- Max number of columns for power menu lite -->
+    <integer name="power_menu_lite_max_columns">2</integer>
+    <!-- Max number of rows for power menu lite -->
+    <integer name="power_menu_lite_max_rows">4</integer>
 
     <!-- If the dp width of the available space is <= this value, potentially adjust the number
          of columns-->
