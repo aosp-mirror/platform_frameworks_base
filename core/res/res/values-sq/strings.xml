@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikacioni është në ekzekutim"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacionet që konsumojnë baterinë"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Zmadhimi"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Politika e sigurisë e qasshmërisë"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> po përdor baterinë"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikacione po përdorin baterinë"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Trokit për detaje mbi baterinë dhe përdorimin e të dhënave"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"qasje në aktivitetin tënd fizik"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"bëj fotografi dhe regjistro video"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Pajisjet me Bluetooth në afërsi"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"të zbulojë dhe të lidhet me pajisjet me Bluetooth në afërsi"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Evidencat e telefonatave"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"lexo dhe shkruaj evidencën e telefonatave"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefoni"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Lejon aplikacionin të shikojë konfigurimin e \"bluetooth-it\" në tablet, të kryejë dhe të pranojë lidhje me pajisjet e çiftuara."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Lejon aplikacionin të shikojë konfigurimin e Bluetooth-it në pajisjen tënde Android TV dhe të kryejë dhe të pranojë lidhje me pajisjet e çiftuara."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Lejon aplikacionin të shohë konfigurimin e \"bluetooth-it\" në telefon dhe të kryejë e pranojë lidhje me pajisjet e çiftuara."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"të zbulojë dhe të çiftohet me pajisjet me Bluetooth në afërsi"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Lejon që aplikacioni të zbulojë dhe të çiftohet me pajisjet me Bluetooth në afërsi"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"të lidhet me pajisjet e çiftuara me Bluetooth"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Lejon që aplikacioni të lidhet me pajisjet e çiftuara me Bluetooth"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacionet për shërbimin e preferuar të pagesës me NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lejon aplikacionin të marrë informacione për shërbimin e preferuar të pagesës me NFC si p.sh. ndihmat e regjistruara dhe destinacionin e itinerarit."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nuk është vendosur kod PIN, motiv ose fjalëkalim"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Gabim gjatë vërtetimit"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Përdor kyçjen e ekranit"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Fut kredencialet e pajisjes për të vazhduar"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"U zbulua një gjurmë gishti e pjesshme. Provo përsëri."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Gjurma e gishtit nuk mund të përpunohej. Provo përsëri."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Sensori i gjurmës së gishtit nuk është i pastër. Pastroje dhe provo përsëri."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Gishti lëvizi shumë shpejt. Provo përsëri."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Gishti lëvizi shumë ngadalë. Provo përsëri."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Gjurma e gishtit u vërtetua"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Fytyra u vërtetua"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Fytyra u vërtetua, shtyp \"Konfirmo\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardueri i gjurmës së gishtit nuk mundësohet."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Gjurma e gishtit nuk mund të ruhet. Hiq një gjurmë gishti ekzistuese."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Koha e veprimit për gjurmën e gishtit skadoi. Provo përsëri."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operacioni i gjurmës së gishtit u anulua."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Veprimi i gjurmës së gishtit u anulua nga përdoruesi."</string>
@@ -603,6 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Shkyçja me fytyrë"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Regjistro përsëri fytyrën tënde"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Për të përmirësuar njohjen, regjistro përsëri fytyrën tënde"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Konfiguro shkyçjen me fytyrë"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Shkyçe telefonin duke parë tek ai"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguri më shumë mënyra për të shkyçur"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Trokit për të shtuar një gjurmë gishti"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"S\'mund të regjistroheshin të dhëna të sakta të fytyrës. Provo përsëri."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Me shumë ndriçim. Provo një ndriçim më të butë."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Shumë i errët. Provo një ndriçim më të fortë."</string>
@@ -639,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Fytyra <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Përdor shkyçjen me fytyrë"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Përdor kyçjen me fytyrë ose kyçjen e ekranit"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Përdor shkyçjen me fytyrë për të vazhduar"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Përdor fytyrën tënde ose kyçjen e ekranit për të vazhduar"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -702,7 +725,7 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"nis përdorimin e lejes për shikimin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lejon që mbajtësi të nisë përdorimin e lejeve për një aplikacion. Nuk duhet të nevojitet asnjëherë për aplikacionet normale."</string>
-    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"qasu te të dhënat e sensorit me një shpejtësi më të lartë shembulli"</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"qasu te të dhënat e sensorit me një shpejtësi kampionimi më të lartë"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Lejon aplikacionin të mbledhë shembujt e të dhënave të sensorit me shpejtësi më të lartë se 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
@@ -1006,6 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"U kopjua"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> u ngjit nga <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> u ngjit nga kujtesa e fragmenteve"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ngjiti një tekst që kopjove"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ngjiti një imazh që kopjove"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ngjiti një përmbajtje që kopjove"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Më shumë"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menyja+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1689,7 +1715,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Përdor shkurtoren"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kthimi i ngjyrës"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korrigjimi i ngjyrës"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Tejet i errët"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Shumë më i zbehtë"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Shtyp dhe mbaj shtypur të dy butonat e volumit për tre sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2110,20 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Puna"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Pamja personale"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Pamja e punës"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nuk mund ta ndash këtë me aplikacionet e punës"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Administratori yt i teknologjisë së informacionit nuk të lejon ta ndash këtë përmbajtje me aplikacionet në profilin tënd të punës"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nuk mund ta hapësh këtë me aplikacionet e punës"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Administratori yt i teknologjisë së informacionit nuk të lejon ta hapësh këtë përmbajtje me aplikacionet në profilin tënd të punës"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Nuk mund ta ndash këtë me aplikacionet personale"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Administratori yt i teknologjisë së informacionit nuk të lejon ta ndash këtë përmbajtje me aplikacionet në profilin tënd personal"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Nuk mund ta hapësh këtë me aplikacionet personale"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Administratori yt i teknologjisë së informacionit nuk të lejon ta hapësh këtë përmbajtje me aplikacionet në profilin tënd personal"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Bllokuar nga administratori yt i teknologjisë së informacionit"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Kjo përmbajtje nuk mund të shpërndahet me aplikacione pune"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Kjo përmbajtje nuk mund të hapet me aplikacione pune"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Kjo përmbajtje nuk mund të shpërndahet me aplikacione personale"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Kjo përmbajtje nuk mund të hapet me aplikacione personale"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profili i punës është në pauzë"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktivizo"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Asnjë aplikacion pune nuk mund ta mbështesë këtë përmbajtje"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Asnjë aplikacion pune nuk mund ta hapë këtë përmbajtje"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Asnjë aplikacion personal nuk mund ta mbështesë këtë përmbajtje"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Asnjë aplikacion personal nuk mund ta hapë këtë përmbajtje"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Trokit për ta aktivizuar"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nuk ka aplikacione pune"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nuk ka aplikacione personale"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Të hapet në <xliff:g id="APP">%s</xliff:g> te profili personal?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Të hapet në <xliff:g id="APP">%s</xliff:g> te profili i punës?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Përdor shfletuesin personal"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Përdor shfletuesin e punës"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kodi PIN i shkyçjes së rrjetit të kartës SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Kodi PIN i shkyçjes së nënrenditjes së rrjetit të kartës SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Kodi PIN i shkyçjes së kartës SIM të korporatës"</string>
@@ -2236,8 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Zmadho pjesën e ekranit tënd"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Tani mund të zmadhosh ekranin tënd të plotë, një zonë specifike ose kalo mes dy opsioneve."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Cilësimet e reja të zmadhimit"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Tani mund të zmadhosh pjesë të ekranit tënd"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aktivizo te \"Cilësimet\""</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Hiq"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Për të vazhduar, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ka nevojë të qaset në mikrofonin e pajisjes sate."</string>

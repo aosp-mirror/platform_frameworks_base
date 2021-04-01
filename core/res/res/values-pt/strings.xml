@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"App em execução"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apps que estão consumindo a bateria"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ampliação"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Política de segurança de acessibilidade"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está consumindo a bateria"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> apps estão consumindo a bateria"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"acessar sua atividade física"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Câmera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"tire fotos e grave vídeos"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Dispositivos Bluetooth por perto"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"descobrir e se conectar a dispositivos Bluetooth por perto"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registro de chamadas"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ler e gravar o registro de chamadas telefônicas"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefone"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite que o app acesse a configuração do Bluetooth no tablet, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que o app acesse a configuração do Bluetooth no dispositivo Android TV, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite que o app acesse a configuração do Bluetooth no telefone, além de fazer e aceitar conexões com dispositivos pareados."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"descobrir e se parear a disp. Bluetooth por perto"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que o app descubra e se pareie a dispositivos Bluetooth por perto"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conecte-se a dispositivos Bluetooth pareados"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que o app se conecte a dispositivos Bluetooth pareados"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informações preferidas de serviço de pagamento por NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que o app acesse as informações preferidas de serviço de pagamento por NFC, como auxílios registrados ou destinos de trajetos."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar a comunicação a curta distância"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nenhum PIN, padrão ou senha configurado"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erro na autenticação"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueio de tela"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Insira as credenciais do dispositivo para continuar"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Impressão digital parcial detectada. Tente novamente."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Não foi possível processar a impressão digital. Tente novamente."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"O sensor de impressão digital está sujo. Limpe-o e tente novamente."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"O dedo foi retirado rápido demais. Tente novamente."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"O movimento do dedo está muito lento. Tente novamente."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Impressão digital autenticada"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Rosto autenticado"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Rosto autenticado, pressione \"Confirmar\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware de impressão digital não disponível."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Não foi possível armazenar a impressão digital. Remova uma impressão digital já existente."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Tempo máximo para captura da impressão digital atingido. Tente novamente."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operação de impressão digital cancelada."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operação de impressão digital cancelada pelo usuário."</string>
@@ -603,6 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueio facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registre seu rosto novamente"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para melhorar o reconhecimento, registre seu rosto novamente"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Configure o desbloqueio facial"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloqueie o smartphone olhando para ele"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configure mais formas de desbloquear a tela"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toque para adicionar uma impressão digital"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Dados precisos não capturados. Tente novamente."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Muito iluminado. Diminua a iluminação."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Muito escuro. Use uma iluminação mais clara."</string>
@@ -639,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueio facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar reconhecimento facial ou bloqueio de tela"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Use o desbloqueio facial para continuar"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Use seu rosto ou o bloqueio de tela para continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"Copiado"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Dados do app <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> colados no app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"Dados da área de transferência colados no app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o texto copiado"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou uma imagem copiada"</string>
+    <string name="pasted_content" msgid="646276353060777131">"O app <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> colou o conteúdo copiado"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Mais"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2110,20 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabalho"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visualização pessoal"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Visualização de trabalho"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Não é possível compartilhar este conteúdo com apps de trabalho"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Seu administrador de TI não permite que você compartilhe este conteúdo com apps no seu perfil de trabalho"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Não é possível abrir usando apps de trabalho"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Seu administrador de TI não permite que você abra este conteúdo usando apps do seu perfil de trabalho"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Não é possível compartilhar este conteúdo com apps pessoais"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Seu administrador de TI não permite que você compartilhe este conteúdo com apps no seu perfil pessoal"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Não é possível abrir este conteúdo com apps pessoais"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Seu administrador de TI não permite que você abra este conteúdo usando apps do seu perfil pessoal"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Compartilhamento bloqueado pelo administrador de TI"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Não é possível compartilhar esse conteúdo com apps de trabalho"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Não é possível abrir esse conteúdo com apps de trabalho"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Não é possível compartilhar esse conteúdo com apps pessoais"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Não é possível abrir esse conteúdo com apps pessoais"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"O perfil de trabalho está pausado"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Ativar"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Apps de trabalho não são compatíveis com este conteúdo"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Apps de trabalho não podem abrir este conteúdo"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Apps pessoais não são compatíveis com este conteúdo"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Apps pessoais não podem abrir este conteúdo"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Toque para ativar"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nenhum app de trabalho"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nenhum app pessoal"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Abrir no perfil pessoal do app <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Abrir no perfil de trabalho de app <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar o navegador pessoal"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar o navegador de trabalho"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para desbloqueio da rede do chip"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN para desbloqueio do subconjunto de rede do chip"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN para desbloqueio do chip corporativo"</string>
@@ -2236,8 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Ampliar parte da tela"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Agora você pode ampliar toda a tela, uma área específica ou alternar entre as duas opções."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Novas configurações de ampliação"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Agora você pode ampliar parte da tela"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ativar nas Configurações"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Dispensar"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Para continuar, o app &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa acessar o microfone do dispositivo."</string>

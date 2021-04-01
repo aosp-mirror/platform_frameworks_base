@@ -300,7 +300,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikácia je spustená"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikácie spotrebúvajúce batériu"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Zväčšenie"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Pravidlá pre zabezpečenie dostupnosti"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> používa batériu"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Aplikácie (<xliff:g id="NUMBER">%1$d</xliff:g>) používajú batériu"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Klepnutím zobrazíte podrobnosti o batérii a spotrebe dát"</string>
@@ -325,6 +326,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"prístup k vašej fyzickej aktivite"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotenie a natáčanie videí"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Zariadenia Bluetooth nablízku"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"objaviť a pripojiť sa k zariadeniam s rozhraním Bluetooth nablízku"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Zoznam hovorov"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"čítať a zapisovať do zoznamu hovorov"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefón"</string>
@@ -538,6 +541,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na tablete. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Umožňuje aplikácii zobraziť konfiguráciu rozhrania Bluetooth v zariadení Android TV, ako aj nadväzovať a prijímať pripojenia so spárovanými zariadeniami."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Umožňuje aplikácii zobraziť informácie o konfigurácii Bluetooth na telefóne. Taktiež jej umožňuje nadväzovať a akceptovať spojenia so spárovanými zariadeniami."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"objaviť zariad. Bluetooth nablízku a spárovať sa"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Umožňuje aplikácii objaviť zariadenia s rozhraním Bluetooth nablízku a spárovať sa s nimi"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"pripojiť sa k spárovaným zariadeniam Bluetooth"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Umožňuje aplikácii pripojiť sa k spárovaným zariadeniam s rozhraním Bluetooth"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferované informácie platenej služby NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikácii získavať preferované informácie platenej služby NFC, napríklad o registrovanej pomoci a trasách k cieľu."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládať technológiu NFC"</string>
@@ -572,19 +579,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nie je nastavený PIN, vzor ani heslo"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Chyba overenia"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použiť zámku obrazovky"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Ak chcete pokračovať, zadajte prihlasovacie údaje zariadenia"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Podarilo sa rozpoznať iba časť odtlačku prsta. Skúste to znova."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Očistite senzor odtlačkov prstov a skúste to znova."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Pohli ste prstom príliš rýchlo. Skúste to znova."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Odtlačok prsta bol overený"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Tvár bola overená"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Tvár bola overená, stlačte tlačidlo potvrdenia"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardvér na snímanie odtlačku prsta nie je k dispozícii"</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Odtlačok prsta nie je možné uložiť. Odstráňte existujúci odtlačok."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Časový limit rozpoznania odtlačku prsta vypršal. Skúste to znova."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operácia týkajúca sa odtlačku prsta bola zrušená"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Overenie odtlačku prsta zrušil používateľ."</string>
@@ -609,6 +627,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Odomknutie tvárou"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Znova zaregistrujte svoju tvár"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Znova zaregistrujte svoju tvár, aby sa zlepšilo rozpoznávanie"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Nastavte odomknutie tvárou"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Odomykajte telefón tak, že sa naň pozriete"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Nastavte viac spôsobov odomknutia"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Klepnutím pridajte odtlačok prsta"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nepodarilo sa nasnímať presné údaje o tvári. Skúste to znova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Príliš veľa svetla. Skúste jemnejšie osvetlenie."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Príliš veľká tma. Skúste lepšie osvetlenie."</string>
@@ -645,7 +667,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Tvár <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Použiť odomknutie tvárou"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Použiť tvár alebo zámku obrazovky"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Ak chcete pokračovať, použite odomknutie tvárou"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Pokračujte použitím tváre alebo zámky obrazovky"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1012,6 +1035,9 @@
     <string name="copied" msgid="4675902854553014676">"Skopírované"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila údaje z aplikácie <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila údaje zo schránky"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila text, ktorý ste skopírovali"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"Aplik. <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila obrázok, ktorý ste skopírovali"</string>
+    <string name="pasted_content" msgid="646276353060777131">"Aplikácia <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> prilepila obsah, ktorý ste skopírovali"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Viac"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2178,20 +2204,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Práca"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Osobné zobrazenie"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Pracovné zobrazenie"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nedá sa zdieľať s pracovnými aplikáciami"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Váš správca IT vám zakázal zdieľať tento obsah pomocou aplikácií v pracovnom profile"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nedá sa otvoriť pomocou pracovných aplikácií"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Váš správca IT vám zakázal otvárať tento obsah pomocou aplikácií v pracovnom profile"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Nedá sa zdieľať pomocou osobných aplikácií"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Váš správca IT vám zakázal zdieľať tento obsah pomocou aplikácií v osobnom profile"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Nedá sa otvoriť pomocou osobných aplikácií"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Váš správca IT vám zakázal otvárať tento obsah pomocou aplikácií v osobnom profile"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Blokované vaším správcom IT"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Tento obsah sa nedá zdieľať pomocou pracovných aplikácií"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tento obsah sa nedá otvoriť pomocou pracovných aplikácií"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tento obsah sa nedá zdieľať pomocou osobných aplikácií"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tento obsah sa nedá otvoriť pomocou osobných aplikácií"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Pracovný profil je pozastavený"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Zapnúť"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Tento obsah nepodporujú žiadne pracovné aplikácie"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Tento obsah neotvoria žiadne pracovné aplikácie"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Tento obsah nepodporujú žiadne osobné aplikácie"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Tento obsah neotvoria žiadne osobné aplikácie"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Zapnúť klepnutím"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žiadne pracovné aplikácie"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žiadne osobné aplikácie"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Chcete otvoriť <xliff:g id="APP">%s</xliff:g> v osobnom profile?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Chcete otvoriť <xliff:g id="APP">%s</xliff:g> v pracovnom profile?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Použiť osobný prehliadač"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Použiť pracovný prehliadač"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN na odomknutie siete pre SIM kartu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN na odomknutie podmnožiny siete pre SIM kartu"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN na odomknutie podnikovej SIM karty"</string>
@@ -2304,8 +2329,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Zväčšite časť obrazovky"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Teraz môžete zväčšiť celú obrazovku, jej konkrétnu časť alebo prepínať medzi oboma možnosťami."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nové nastavenia zväčšenia"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Teraz môžete zväčšiť časť obrazovky"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Zapnúť v Nastaveniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Zavrieť"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Ak chcete pokračovať, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; požaduje prístup k mikrofónu zariadenia."</string>

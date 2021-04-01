@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Jelenleg futó alkalmazás"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Akkumulátort használó alkalmazások"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Nagyítás"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Kisegítő lehetőségek biztonsági házirendje"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás használja az akkumulátort"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> alkalmazás használja az akkumulátort"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Koppintson az akkumulátor- és adathasználat részleteinek megtekintéséhez"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"hozzáférés a testmozgási adatokhoz"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotók és videók készítése"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Közeli Bluetooth-eszközök"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"közeli Bluetooth-eszközök felfedezése és csatlakozás hozzájuk"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Hívásnaplók"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"hívásnapló olvasása és írása"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Lehetővé teszi az alkalmazás számára a táblagépen lévő Bluetooth beállításainak megtekintését, valamint kapcsolatok kezdeményezését és fogadását a párosított eszközökkel."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Lehetővé teszi az alkalmazás számára az Android TV eszköz Bluetooth-konfigurációjának megtekintését, valamint párosított eszközökkel való kapcsolatok kezdeményezését és fogadását."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Lehetővé teszi az alkalmazás számára a telefonon lévő Bluetooth beállításainak megtekintését, valamint kapcsolatok kezdeményezését és fogadását a párosított eszközökkel."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"közeli Bluetooth-eszközök felfedezése és párosítás"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Lehetővé teszi az alkalmazás számára a közeli Bluetooth-eszközök felfedezését és a velük való párosítást."</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"csatlakozás párosított Bluetooth-eszközökhöz"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Lehetővé teszi az alkalmazás számára a párosított Bluetooth-eszközökhöz való csatlakozást."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferált NFC fizetési szolgáltatási információk"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lehetővé teszi az alkalmazás számára preferált NFC fizetési szolgáltatási információk (pl. regisztrált alkalmazásazonosítók és útvonali cél) lekérését."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC technológia vezérlése"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nem állított be PIN-kódot, mintát vagy jelszót."</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Hiba történt a hitelesítés közben"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Képernyőzár használata"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"A folytatáshoz adja meg az eszköz hitelesítési adatait"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"A rendszer az ujjlenyomatnak csak egy részletét érzékelte. Próbálkozzon újra."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nem sikerült feldolgozni az ujjlenyomatot. Próbálkozzon újra."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Az ujjlenyomat-olvasó koszos. Tisztítsa meg, majd próbálkozzon újra."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Túl hamar vette el az ujját. Próbálkozzon újra."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Túl lassan húzta az ujját. Próbálkozzon újra."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Ujjlenyomat hitelesítve"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Arc hitelesítve"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Arc hitelesítve; nyomja meg a Megerősítés lehetőséget"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Az ujjlenyomathoz szükséges hardver nem érhető el."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Az ujjlenyomat nem tárolható. Távolítson el egy meglévő ujjlenyomatot."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Az ujjlenyomat-beolvasási műveletkor időtúllépés történt. Próbálkozzon újra."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Ujjlenyomattal kapcsolatos művelet megszakítva"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Az ujjlenyomattal kapcsolatos műveletet a felhasználó megszakította."</string>
@@ -603,6 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Arcalapú feloldás"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Rögzítsen újra képet az arcáról"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"A felismerés javítása érdekében rögzítsen újra az arcáról készített képet"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Az arcalapú feloldás beállítása"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Feloldhatja a zárolást úgy, hogy ránéz a telefonra"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"További feloldási módszerek beállítása"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Koppintson ide ujjlenyomat hozzáadásához"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Sikertelen az arc pontos rögzítése. Próbálja újra."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Túl világos. Próbálja kevésbé erős világítással."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Túl sötét. Próbálja jobb megvilágítás mellett."</string>
@@ -639,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> arc"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Arcalapú feloldás használata"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"A folytatás arcalapú feloldással vagy képernyőzárral lehetséges"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"A folytatás arcalapú feloldással lehetséges"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"A folytatás arcalapú feloldással vagy a képernyőzár feloldásával lehetséges"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"Átmásolva"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> tartalmat másolt vágólapra a(z) <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> appból"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a vágólapon lévő tartalmat"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt szöveget"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt képet"</string>
+    <string name="pasted_content" msgid="646276353060777131">"A(z) <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> beillesztette a másolt tartalmat"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Egyebek"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menü+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1825,7 +1851,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"PIN-kód kérése a rögzítés feloldásához"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"PIN-kód kérése a kitűzés feloldásához"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Feloldási minta kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Jelszó kérése a rögzítés feloldásához"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"A rendszergazda által telepítve"</string>
@@ -2110,20 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Munka"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Személyes nézet"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Munkanézet"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Ez a tartalom nem osztható meg munkahelyi alkalmazásokkal"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Rendszergazdája nem engedélyezi, hogy ezt a tartalmat a munkaprofiljában lévő alkalmazásokkal ossza meg"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Ez a tartalom nem nyitható meg munkahelyi alkalmazásokkal"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Rendszergazdája nem engedélyezi, hogy ezt a tartalmat a munkaprofiljában lévő alkalmazásokkal nyissa meg"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Ez a tartalom nem osztható meg személyes alkalmazásokkal"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Rendszergazdája nem engedélyezi, hogy ezt a tartalmat a személyes profiljában lévő alkalmazásokkal ossza meg"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Ez a tartalom nem nyitható meg személyes alkalmazásokkal"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Rendszergazdája nem engedélyezi, hogy ezt a tartalmat a személyes profiljában lévő alkalmazásokkal nyissa meg"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Rendszergazda által letiltva"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Ez a tartalom nem osztható meg munkahelyi alkalmazásokkal"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Ez a tartalom nem nyitható meg munkahelyi alkalmazásokkal"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Ez a tartalom nem osztható meg személyes alkalmazásokkal"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Ez a tartalom nem nyitható meg személyes alkalmazásokkal"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"A munkaprofil használata szünetel"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Bekapcsolás"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"A munkahelyi alkalmazások nem támogatják ezt a tartalmat"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Munkahelyi alkalmazásokkal nem nyitható meg ez a tartalom"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"A személyes alkalmazások nem támogatják ezt a tartalmat"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Személyes alkalmazásokkal nem nyitható meg ez a tartalom"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Koppintson a bekapcsoláshoz"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nincs munkahelyi alkalmazás"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nincs személyes alkalmazás"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Megnyitja a(z) <xliff:g id="APP">%s</xliff:g> alkalmazásban a személyes profilja használatával?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Megnyitja a(z) <xliff:g id="APP">%s</xliff:g> alkalmazásban a munkaprofilja használatával?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Személyes böngésző használata"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Munkahelyi böngésző használata"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Hálózati SIM feloldó PIN-kódja"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Hálózati SIM alkészletének feloldó PIN-kódja"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Vállalati SIM feloldó PIN-kódja"</string>
@@ -2236,8 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"A képernyő egy részének felnagyítása"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Mostantól felnagyíthatja a teljes képernyőt vagy a kívánt területet, valamint válthat a két lehetőség között."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Új nagyítási beállítások"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Mostantól kinagyíthatja a képernyő egy részét"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Bekapcsolás a Beállításokban"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Elvetés"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"A folytatáshoz a(z) &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; alkalmazásnak hozzáférésre van szüksége az eszköze mikrofonjához."</string>

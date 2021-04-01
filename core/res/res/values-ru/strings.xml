@@ -300,7 +300,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Приложение активно"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Приложения, расходующие заряд"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увеличение"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Политика безопасности для специальных возможностей"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" расходует заряд"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Несколько приложений (<xliff:g id="NUMBER">%1$d</xliff:g>) расходуют заряд"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Нажмите, чтобы проверить энергопотребление и трафик"</string>
@@ -325,6 +326,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"доступ к данным о физической активности"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"снимать фото и видео"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Устройства Bluetooth поблизости"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"находить устройства Bluetooth поблизости и подключаться к ним"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Список вызовов"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"чтение и запись телефонных звонков"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
@@ -538,6 +541,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Приложение сможет просматривать конфигурацию Bluetooth на планшетном ПК, а также запрашивать и подтверждать соединение с другими устройствами."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Приложение сможет просматривать конфигурацию Bluetooth на устройстве Android TV, а также запрашивать и подтверждать соединение с другими устройствами."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Приложение сможет просматривать конфигурацию Bluetooth на телефоне, а также запрашивать и подтверждать соединение с другими устройствами."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"находить устройства Bluetooth поблизости и подключаться к ним"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Приложение сможет находить устройства Bluetooth поблизости и подключаться к ним."</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"доступ к подключенным устройствам Bluetooth"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"У приложения будет доступ к подключенным устройствам Bluetooth."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сведения о предпочтительном платежном сервисе NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Приложение сможет получать сведения о предпочтительном платежном сервисе NFC (например, зарегистрированные идентификаторы AID и конечный пункт маршрута)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Управление NFC-модулем"</string>
@@ -572,19 +579,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Укажите PIN-код, пароль или графический ключ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ошибка аутентификации."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Использовать блокировку экрана"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Чтобы продолжить, введите учетные данные устройства."</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Отсканирована только часть отпечатка. Повторите попытку."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не удалось распознать отпечаток. Повторите попытку."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Очистите сканер и повторите попытку."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Вы слишком быстро убрали палец. Повторите попытку."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Вы перемещали палец слишком медленно. Повторите попытку."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечаток пальца проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицо распознано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицо распознано, нажмите кнопку \"Подтвердить\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Сканер недоступен"</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Чтобы сохранить новый отпечаток, удалите существующий."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Превышено время ожидания. Повторите попытку."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Операция с отпечатком отменена."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Операция с отпечатком пальца отменена пользователем."</string>
@@ -609,6 +627,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Зарегистрируйте лицо ещё раз"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Чтобы улучшить распознавание лица, зарегистрируйте его ещё раз"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не удалось собрать данные. Повторите попытку."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Слишком светло. Сделайте освещение менее ярким."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Слишком темно. Сделайте освещение ярче."</string>
@@ -645,7 +671,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Лицо <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Использовать фейсконтроль"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Использовать фейсконтроль или блокировку экрана"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Чтобы продолжить, используйте фейсконтроль."</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Чтобы продолжить, посмотрите на экран или используйте данные для разблокировки."</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1012,6 +1039,12 @@
     <string name="copied" msgid="4675902854553014676">"Скопировано"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Данные из приложения \"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>\" вставлены в приложение \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"Данные из буфера обмена вставлены в приложение \"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>\"."</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"Ещё"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Меню+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta +"</string>
@@ -1207,10 +1240,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Открыть с помощью приложения:"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Открыть с помощью приложения \"%1$s\""</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Открыть"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Открывать ссылки вида <xliff:g id="HOST">%1$s</xliff:g> с помощью:"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Открывать ссылки <xliff:g id="HOST">%1$s</xliff:g> с помощью:"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Открывать ссылки с помощью:"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Открывать ссылки в браузере <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Открывать ссылки вида <xliff:g id="HOST">%1$s</xliff:g> в браузере <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Открывать ссылки <xliff:g id="HOST">%1$s</xliff:g> в браузере <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Открыть доступ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Редактировать с помощью приложения \"%1$s\""</string>
@@ -2178,20 +2211,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Рабочее"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Просмотр личных данных"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Просмотр рабочих данных"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Этим контентом нельзя делиться с рабочими приложениями"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Системный администратор запретил делиться этим контентом с приложениями из рабочего профиля."</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Этот контент нельзя открывать в рабочих приложениях"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Системный администратор запретил открывать этот контент, используя приложения из рабочего профиля."</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Этим контентом нельзя делиться с личными приложениями"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Системный администратор запретил делиться этим контентом с приложениями из личного профиля."</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Этот контент нельзя открывать в личных приложениях"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Системный администратор запретил открывать этот контент, используя приложения из личного профиля."</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Действие рабочего профиля приостановлено."</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Включить"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Нет рабочих приложений, поддерживающих этот контент."</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Нет рабочих приложений, с помощью которых можно открыть этот контент."</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Нет личных приложений, поддерживающих этот контент."</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Нет личных приложений, с помощью которых можно открыть этот контент."</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код для разблокировки сети SIM-карты"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код для разблокировки подмножества сети SIM-карты"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код для разблокировки корпоративной SIM-карты"</string>
@@ -2304,8 +2348,9 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Увеличьте часть экрана"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Теперь вы можете увеличить весь экран или его часть либо переключаться между этими вариантами."</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Теперь можно увеличивать часть экрана."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Включить в настройках"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Закрыть"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Чтобы продолжить, предоставьте приложению &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; доступ к микрофону устройства."</string>
