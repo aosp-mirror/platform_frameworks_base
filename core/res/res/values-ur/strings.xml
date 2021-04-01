@@ -573,7 +573,8 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"کوئی پن، پیٹرن، یا پاس ورڈ سیٹ نہیں ہے"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"خرابی کی توثیق ہو رہی ہے"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"اسکرین لاک استعمال کریں"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"جاری رکھنے کیلئے اپنے آلے کی سند درج کریں"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"فنگر پرنٹ پر کارروائی نہیں کی جا سکی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
@@ -664,7 +665,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"چہرہ <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"چہرے کے ذریعے غیر مقفل کرنا استعمال کریں"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"چہرہ یا اسکرین لاک استعمال کریں"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"جاری رکھنے کیلئے چہرے کے ذریعے غیر مقفل کرنا استعمال کریں"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"جاری رکھنے کے لیے اپنے چہرے یا اسکرین لاک کا استعمال کریں"</string>
   <string-array name="face_error_vendor">
   </string-array>
