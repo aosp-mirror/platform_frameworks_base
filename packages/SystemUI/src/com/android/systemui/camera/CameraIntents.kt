@@ -23,11 +23,11 @@ import android.text.TextUtils
 
 import com.android.systemui.R
 
-interface CameraIntents {
+class CameraIntents {
     companion object {
-        const val DEFAULT_SECURE_CAMERA_INTENT_ACTION =
+        val DEFAULT_SECURE_CAMERA_INTENT_ACTION =
                 MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
-        const val DEFAULT_INSECURE_CAMERA_INTENT_ACTION =
+        val DEFAULT_INSECURE_CAMERA_INTENT_ACTION =
                 MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
 
         @JvmStatic
@@ -59,13 +59,13 @@ interface CameraIntents {
         }
 
         @JvmStatic
-        fun isSecureCameraIntent(intent: Intent): Boolean {
-            return intent.getAction().equals(DEFAULT_SECURE_CAMERA_INTENT_ACTION)
+        fun isSecureCameraIntent(intent: Intent?): Boolean {
+            return intent?.getAction()?.equals(DEFAULT_SECURE_CAMERA_INTENT_ACTION) ?: false
         }
 
         @JvmStatic
-        fun isInsecureCameraIntent(intent: Intent): Boolean {
-            return intent.getAction().equals(DEFAULT_INSECURE_CAMERA_INTENT_ACTION)
+        fun isInsecureCameraIntent(intent: Intent?): Boolean {
+            return intent?.getAction()?.equals(DEFAULT_INSECURE_CAMERA_INTENT_ACTION) ?: false
         }
     }
 }
