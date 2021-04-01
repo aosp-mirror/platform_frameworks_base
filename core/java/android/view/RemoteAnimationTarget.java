@@ -34,7 +34,8 @@ import static android.view.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 
 import android.annotation.IntDef;
-import android.app.PictureInPictureParams;
+import android.app.ActivityManager;
+import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Point;
@@ -189,12 +190,11 @@ public class RemoteAnimationTarget implements Parcelable {
     public boolean isNotInRecents;
 
     /**
-     * {@link PictureInPictureParams} to allow launcher to determine if an app should
-     * automatically enter PiP on swiping up to home.
+     * {@link TaskInfo} to allow the controller to identify information about the task.
      *
      * TODO: add this to proto dump
      */
-    public PictureInPictureParams pictureInPictureParams;
+    public ActivityManager.RunningTaskInfo taskInfo;
 
     /**
      * The {@link android.view.WindowManager.LayoutParams.WindowType} of this window. It's only used
@@ -206,11 +206,10 @@ public class RemoteAnimationTarget implements Parcelable {
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
             Rect localBounds, Rect screenSpaceBounds,
             WindowConfiguration windowConfig, boolean isNotInRecents,
-            SurfaceControl startLeash, Rect startBounds,
-            PictureInPictureParams pictureInPictureParams) {
+            SurfaceControl startLeash, Rect startBounds, ActivityManager.RunningTaskInfo taskInfo) {
         this(taskId, mode, leash, isTranslucent, clipRect, contentInsets, prefixOrderIndex,
                 position, localBounds, screenSpaceBounds, windowConfig, isNotInRecents, startLeash,
-                startBounds, pictureInPictureParams, INVALID_WINDOW_TYPE);
+                startBounds, taskInfo, INVALID_WINDOW_TYPE);
     }
 
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
@@ -218,7 +217,7 @@ public class RemoteAnimationTarget implements Parcelable {
             Rect localBounds, Rect screenSpaceBounds,
             WindowConfiguration windowConfig, boolean isNotInRecents,
             SurfaceControl startLeash, Rect startBounds,
-            PictureInPictureParams pictureInPictureParams,
+            ActivityManager.RunningTaskInfo taskInfo,
             @WindowManager.LayoutParams.WindowType int windowType) {
         this.mode = mode;
         this.taskId = taskId;
@@ -235,7 +234,7 @@ public class RemoteAnimationTarget implements Parcelable {
         this.isNotInRecents = isNotInRecents;
         this.startLeash = startLeash;
         this.startBounds = startBounds == null ? null : new Rect(startBounds);
-        this.pictureInPictureParams = pictureInPictureParams;
+        this.taskInfo = taskInfo;
         this.windowType = windowType;
     }
 
@@ -255,7 +254,7 @@ public class RemoteAnimationTarget implements Parcelable {
         isNotInRecents = in.readBoolean();
         startLeash = in.readTypedObject(SurfaceControl.CREATOR);
         startBounds = in.readTypedObject(Rect.CREATOR);
-        pictureInPictureParams = in.readTypedObject(PictureInPictureParams.CREATOR);
+        taskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
         windowType = in.readInt();
     }
 
@@ -281,7 +280,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeBoolean(isNotInRecents);
         dest.writeTypedObject(startLeash, 0 /* flags */);
         dest.writeTypedObject(startBounds, 0 /* flags */);
-        dest.writeTypedObject(pictureInPictureParams, 0 /* flags */);
+        dest.writeTypedObject(taskInfo, 0 /* flags */);
         dest.writeInt(windowType);
     }
 
@@ -299,7 +298,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.println();
         pw.print(prefix); pw.print("windowConfiguration="); pw.println(windowConfiguration);
         pw.print(prefix); pw.print("leash="); pw.println(leash);
-        pw.print(prefix); pw.print("pictureInPictureParams="); pw.println(pictureInPictureParams);
+        pw.print(prefix); pw.print("taskInfo="); pw.println(taskInfo);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
     }
 
