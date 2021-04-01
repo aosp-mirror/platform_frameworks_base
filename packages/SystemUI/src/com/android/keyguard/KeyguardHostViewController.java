@@ -492,4 +492,11 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
             mKeyguardSecurityContainerController.updateResources();
         }
     }
+
+    /** Update keyguard position based on a tapped X coordinate. */
+    public void updateKeyguardPosition(float x) {
+        if (mKeyguardSecurityContainerController != null) {
+            mKeyguardSecurityContainerController.updateKeyguardPosition(x);
+        }
+    }
 }
