@@ -16,34 +16,29 @@
 
 package com.android.systemui.screenshot;
 
+import static com.google.common.util.concurrent.Futures.getUnchecked;
+import static com.google.common.util.concurrent.Futures.immediateFuture;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static java.lang.Math.abs;
+
 import android.content.Context;
-import android.graphics.Rect;
-import android.hardware.HardwareBuffer;
-import android.media.Image;
 import android.testing.AndroidTestingRunner;
 import android.view.ScrollCaptureResponse;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.screenshot.ScrollCaptureClient.Session;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * Tests for ScrollCaptureController which manages sequential image acquisition for long
@@ -53,169 +48,177 @@ import java.util.concurrent.ExecutionException;
 @RunWith(AndroidTestingRunner.class)
 public class ScrollCaptureControllerTest extends SysuiTestCase {
 
-    private static class FakeSession implements ScrollCaptureClient.Session {
-        public int availableTop = Integer.MIN_VALUE;
-        public int availableBottom = Integer.MAX_VALUE;
-        // If true, return an empty rect any time a partial result would have been returned.
-        public boolean emptyInsteadOfPartial = false;
-        private int mPreviousTopRequested = 0;
+    private static final ScrollCaptureResponse EMPTY_RESPONSE =
+            new ScrollCaptureResponse.Builder().build();
 
-        @Override
-        public ListenableFuture<ScrollCaptureClient.CaptureResult> requestTile(int top) {
-            // Ensure we don't request a tile more than a tile away.
-            assertTrue(Math.abs(top - mPreviousTopRequested) <= getTileHeight());
-            mPreviousTopRequested = top;
-            Rect requested = new Rect(0, top, getPageWidth(), top + getTileHeight());
-            Rect fullContent = new Rect(0, availableTop, getPageWidth(), availableBottom);
-            Rect captured = new Rect(requested);
-            assertTrue(captured.intersect(fullContent));
-            if (emptyInsteadOfPartial && captured.height() != getTileHeight()) {
-                captured = new Rect();
+    @Test
+    public void testInfinite() {
+        ScrollCaptureController controller = new TestScenario()
+                .withPageHeight(100)
+                .withMaxPages(2.5f)
+                .withTileHeight(10)
+                .withAvailableRange(Integer.MIN_VALUE, Integer.MAX_VALUE)
+                .createController(mContext);
+
+        ScrollCaptureController.LongScreenshot screenshot =
+                getUnchecked(controller.run(EMPTY_RESPONSE));
+
+        assertEquals("top", -90, screenshot.getTop());
+        assertEquals("bottom", 160, screenshot.getBottom());
+
+        // Test that top portion is >= getTargetTopSizeRatio()
+        // (Due to tileHeight, top will almost always be larger than the target)
+        float topPortion = abs(screenshot.getTop()) / abs((float) screenshot.getBottom());
+        if (topPortion < controller.getTargetTopSizeRatio()) {
+            fail("expected top portion > "
+                    + (controller.getTargetTopSizeRatio() * 100) + "%"
+                    + " but was " + (topPortion * 100));
+        }
+    }
+
+    @Test
+    public void testLimitedBottom() {
+        ScrollCaptureController controller = new TestScenario()
+                .withPageHeight(100)
+                .withMaxPages(2.5f)
+                .withTileHeight(10)
+                .withAvailableRange(Integer.MIN_VALUE, 150)
+                .createController(mContext);
+
+        ScrollCaptureController.LongScreenshot screenshot =
+                getUnchecked(controller.run(EMPTY_RESPONSE));
+
+        assertEquals("top", -100, screenshot.getTop());
+        assertEquals("bottom", 150, screenshot.getBottom());
+    }
+
+    @Test
+    public void testLimitedTopAndBottom() {
+        ScrollCaptureController controller = new TestScenario()
+                .withPageHeight(100)
+                .withMaxPages(2.5f)
+                .withTileHeight(10)
+                .withAvailableRange(-50, 150)
+                .createController(mContext);
+
+        ScrollCaptureController.LongScreenshot screenshot =
+                getUnchecked(controller.run(EMPTY_RESPONSE));
+
+        assertEquals("top", -50, screenshot.getTop());
+        assertEquals("bottom", 150, screenshot.getBottom());
+    }
+
+    @Test
+    public void testVeryLimitedTopInfiniteBottom() {
+        ScrollCaptureController controller = new TestScenario()
+                .withPageHeight(100)
+                .withMaxPages(2.5f)
+                .withTileHeight(10)
+                .withAvailableRange(-10, Integer.MAX_VALUE)
+                .createController(mContext);
+
+        ScrollCaptureController.LongScreenshot screenshot =
+                getUnchecked(controller.run(EMPTY_RESPONSE));
+
+        assertEquals("top", -10, screenshot.getTop());
+        assertEquals("bottom", 240, screenshot.getBottom());
+    }
+
+    @Test
+    public void testVeryLimitedTopLimitedBottom() {
+        ScrollCaptureController controller = new TestScenario()
+                .withPageHeight(100)
+                .withMaxPages(2.5f)
+                .withTileHeight(10)
+                .withAvailableRange(-10, 200)
+                .createController(mContext);
+
+        ScrollCaptureController.LongScreenshot screenshot =
+                getUnchecked(controller.run(EMPTY_RESPONSE));
+
+        assertEquals("top", -10, screenshot.getTop());
+        assertEquals("bottom", 200, screenshot.getBottom());
+    }
+
+    /**
+     * Build and configure a stubbed controller for each test case.
+     */
+    private static class TestScenario {
+        private int mPageHeight = -1;
+        private int mTileHeight = -1;
+        private boolean mAvailableRangeSet;
+        private int mAvailableTop;
+        private int mAvailableBottom;
+        private int mLocalVisibleTop;
+        private int mLocalVisibleBottom = -1;
+        private float mMaxPages = -1;
+
+        TestScenario withPageHeight(int pageHeight) {
+            if (pageHeight < 0) {
+                throw new IllegalArgumentException("pageHeight must be positive");
             }
-            Image image = mock(Image.class);
-            when(image.getHardwareBuffer()).thenReturn(mock(HardwareBuffer.class));
-            ScrollCaptureClient.CaptureResult result =
-                    new ScrollCaptureClient.CaptureResult(image, requested, captured);
-            return Futures.immediateFuture(result);
+            mPageHeight = pageHeight;
+            return this;
         }
 
-        public int getMaxHeight() {
-            return getTileHeight() * getMaxTiles();
+        TestScenario withTileHeight(int tileHeight) {
+            if (tileHeight < 0) {
+                throw new IllegalArgumentException("tileHeight must be positive");
+            }
+            mTileHeight = tileHeight;
+            return this;
         }
 
-        @Override
-        public int getMaxTiles() {
-            return 10;
+        TestScenario withAvailableRange(int top, int bottom) {
+            mAvailableRangeSet = true;
+            mAvailableTop = top;
+            mAvailableBottom = bottom;
+            return this;
         }
 
-        @Override
-        public int getTileHeight() {
-            return 50;
+        TestScenario withMaxPages(float maxPages) {
+            if (maxPages < 0) {
+                throw new IllegalArgumentException("maxPages must be positive");
+            }
+            mMaxPages = maxPages;
+            return this;
         }
 
-        @Override
-        public int getPageHeight() {
-            return 100;
+        TestScenario withPageVisibleRange(int top, int bottom) {
+            if (top < 0 || bottom < 0) {
+                throw new IllegalArgumentException("top and bottom must be positive");
+            }
+            mLocalVisibleTop = top;
+            mLocalVisibleBottom = bottom;
+            return this;
         }
 
-        @Override
-        public int getPageWidth() {
-            return 100;
+
+        ScrollCaptureController createController(Context context) {
+            if (mTileHeight < 0) {
+                throw new IllegalArgumentException("tileHeight not set");
+            }
+            if (!mAvailableRangeSet) {
+                throw new IllegalArgumentException("availableRange not set");
+            }
+            if (mPageHeight < 0) {
+                throw new IllegalArgumentException("pageHeight not set");
+            }
+
+            if (mMaxPages < 0) {
+                throw new IllegalArgumentException("maxPages not set");
+            }
+            // Default: page fully visible
+            if (mLocalVisibleBottom < 0) {
+                mLocalVisibleBottom = mPageHeight;
+            }
+            Session session = new FakeSession(mPageHeight, mMaxPages, mTileHeight,
+                    mLocalVisibleTop, mLocalVisibleBottom, mAvailableTop, mAvailableBottom);
+            ScrollCaptureClient client = mock(ScrollCaptureClient.class);
+            when(client.start(/* response */ any(), /* maxPages */ anyFloat()))
+                    .thenReturn(immediateFuture(session));
+            return new ScrollCaptureController(context, context.getMainExecutor(),
+                    client, new ImageTileSet(context.getMainThreadHandler()));
         }
-
-        @Override
-        public Rect getWindowBounds() {
-            return null;
-        }
-
-        @Override
-        public ListenableFuture<Void> end() {
-            return Futures.immediateVoidFuture();
-        }
-
-        @Override
-        public void release() {
-        }
-    }
-
-    private ScrollCaptureController mController;
-    private FakeSession mSession;
-    private ScrollCaptureClient mScrollCaptureClient;
-
-    @Before
-    public void setUp() {
-        Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        mSession = new FakeSession();
-        mScrollCaptureClient = mock(ScrollCaptureClient.class);
-        when(mScrollCaptureClient.request(anyInt(), anyInt())).thenReturn(
-                Futures.immediateFuture(new ScrollCaptureResponse.Builder().build()));
-        when(mScrollCaptureClient.start(any(), anyFloat())).thenReturn(
-                Futures.immediateFuture(mSession));
-        mController = new ScrollCaptureController(context, context.getMainExecutor(),
-                mScrollCaptureClient, new ImageTileSet(context.getMainThreadHandler()));
-    }
-
-    @Test
-    public void testInfinite() throws ExecutionException, InterruptedException {
-        ScrollCaptureController.LongScreenshot screenshot =
-                mController.run(new ScrollCaptureResponse.Builder().build()).get();
-        assertEquals(mSession.getMaxHeight(), screenshot.getHeight());
-        // TODO: the top and bottom ratio in the infinite case should be extracted and tested.
-        assertEquals(-150, screenshot.getTop());
-        assertEquals(350, screenshot.getBottom());
-    }
-
-    @Test
-    public void testLimitedBottom() throws ExecutionException, InterruptedException {
-        // We hit the bottom of the content, so expect it to scroll back up and go above the -150
-        // default top position
-        mSession.availableBottom = 275;
-        ScrollCaptureController.LongScreenshot screenshot =
-                mController.run(new ScrollCaptureResponse.Builder().build()).get();
-        // Bottom tile will be 25px tall, 10 tiles total
-        assertEquals(mSession.getMaxHeight() - 25, screenshot.getHeight());
-        assertEquals(-200, screenshot.getTop());
-        assertEquals(mSession.availableBottom, screenshot.getBottom());
-    }
-
-    @Test
-    public void testLimitedTopAndBottom() throws ExecutionException, InterruptedException {
-        mSession.availableBottom = 275;
-        mSession.availableTop = -200;
-        ScrollCaptureController.LongScreenshot screenshot =
-                mController.run(new ScrollCaptureResponse.Builder().build()).get();
-        assertEquals(mSession.availableBottom - mSession.availableTop, screenshot.getHeight());
-        assertEquals(mSession.availableTop, screenshot.getTop());
-        assertEquals(mSession.availableBottom, screenshot.getBottom());
-    }
-
-    @Test
-    public void testVeryLimitedTopInfiniteBottom() throws ExecutionException, InterruptedException {
-        // Hit the boundary before the "headroom" is hit in the up direction, then go down
-        // infinitely.
-        mSession.availableTop = -55;
-        ScrollCaptureController.LongScreenshot screenshot =
-                mController.run(new ScrollCaptureResponse.Builder().build()).get();
-        // The top tile will be 5px tall, so subtract 45px from the theoretical max.
-        assertEquals(mSession.getMaxHeight() - 45, screenshot.getHeight());
-        assertEquals(mSession.availableTop, screenshot.getTop());
-        assertEquals(mSession.availableTop + mSession.getMaxHeight() - 45, screenshot.getBottom());
-    }
-
-    @Test
-    public void testVeryLimitedTopLimitedBottom() throws ExecutionException, InterruptedException {
-        mSession.availableBottom = 275;
-        mSession.availableTop = -55;
-        ScrollCaptureController.LongScreenshot screenshot =
-                mController.run(new ScrollCaptureResponse.Builder().build()).get();
-        assertEquals(mSession.availableBottom - mSession.availableTop, screenshot.getHeight());
-        assertEquals(mSession.availableTop, screenshot.getTop());
-        assertEquals(mSession.availableBottom, screenshot.getBottom());
-    }
-
-    @Test
-    public void testLimitedTopAndBottomWithEmpty() throws ExecutionException, InterruptedException {
-        mSession.emptyInsteadOfPartial = true;
-        mSession.availableBottom = 275;
-        mSession.availableTop = -167;
-        ScrollCaptureController.LongScreenshot screenshot =
-                mController.run(new ScrollCaptureResponse.Builder().build()).get();
-        // Expecting output from -150 to 250
-        assertEquals(400, screenshot.getHeight());
-        assertEquals(-150, screenshot.getTop());
-        assertEquals(250, screenshot.getBottom());
-    }
-
-    @Test
-    public void testVeryLimitedTopWithEmpty() throws ExecutionException, InterruptedException {
-        // Hit the boundary before the "headroom" is hit in the up direction, then go down
-        // infinitely.
-        mSession.availableTop = -55;
-        mSession.emptyInsteadOfPartial = true;
-        ScrollCaptureController.LongScreenshot screenshot =
-                mController.run(new ScrollCaptureResponse.Builder().build()).get();
-        assertEquals(mSession.getMaxHeight(), screenshot.getHeight());
-        assertEquals(-50, screenshot.getTop());
-        assertEquals(-50 + mSession.getMaxHeight(), screenshot.getBottom());
     }
 }
