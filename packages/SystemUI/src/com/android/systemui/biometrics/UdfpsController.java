@@ -327,8 +327,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mStatusBar.setSensorRect(getSensorLocation());
 
         mCoreLayoutParams = new WindowManager.LayoutParams(
-                // TODO(b/152419866): Use the UDFPS window type when it becomes available.
-                WindowManager.LayoutParams.TYPE_BOOT_PROGRESS,
+                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
