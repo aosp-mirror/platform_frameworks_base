@@ -17,32 +17,53 @@
 package com.android.systemui.biometrics;
 
 import android.annotation.NonNull;
+import android.hardware.biometrics.BiometricSourceType;
 
+import androidx.annotation.Nullable;
+
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
  * Class that coordinates non-HBM animations during keyguard authentication.
+ *
+ * Highlights the udfps icon when:
+ * - Face authentication has failed
+ * - Face authentication has been run for > 2 seconds
  */
 public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<UdfpsKeyguardView> {
-    @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
+    private static final long AFTER_FACE_AUTH_HINT_DELAY = 2000;
 
-    private boolean mForceShow;
+    @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
+    @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @NonNull private final DelayableExecutor mExecutor;
+
+    @Nullable private Runnable mCancelRunnable;
+    private boolean mShowBouncer;
     private boolean mQsExpanded;
+    private boolean mFaceDetectRunning;
+    private boolean mHintShown;
 
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull StatusBar statusBar,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
+            @NonNull DelayableExecutor mainDelayableExecutor,
             @NonNull DumpManager dumpManager) {
         super(view, statusBarStateController, statusBar, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mExecutor = mainDelayableExecutor;
     }
 
     @Override
@@ -53,6 +74,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
+        mHintShown = false;
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
+        updateFaceDetectRunning(mKeyguardUpdateMonitor.isFaceDetectionRunning());
 
         final float dozeAmount = mStatusBarStateController.getDozeAmount();
         mStatusBarStateController.addCallback(mStateListener);
@@ -64,31 +88,40 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
+        mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
+        mFaceDetectRunning = false;
+
         mStatusBarStateController.removeCallback(mStateListener);
-        mAlternateAuthInterceptor.resetForceShow();
+        mAlternateAuthInterceptor.hideAlternateAuthBouncer();
         mKeyguardViewManager.setAlternateAuthInterceptor(null);
+
+        if (mCancelRunnable != null) {
+            mCancelRunnable.run();
+            mCancelRunnable = null;
+        }
     }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dump(fd, pw, args);
-        pw.println("mForceShow=" + mForceShow);
+        pw.println("mShowBouncer=" + mShowBouncer);
+        pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
     }
 
     /**
-     * Overrides non-force show logic in shouldPauseAuth to still auth.
+     * Overrides non-bouncer show logic in shouldPauseAuth to still auth.
      */
-    private void forceShow(boolean forceShow) {
-        if (mForceShow == forceShow) {
+    private void showBouncer(boolean forceShow) {
+        if (mShowBouncer == forceShow) {
             return;
         }
 
-        mForceShow = forceShow;
+        mShowBouncer = forceShow;
         updatePauseAuth();
-        if (mForceShow) {
-            mView.animateHighlightFp();
+        if (mShowBouncer) {
+            mView.animateUdfpsBouncer();
         } else {
-            mView.animateUnhighlightFp(() -> mKeyguardViewManager.cancelPostAuthActions());
+            mView.animateAwayUdfpsBouncer(() -> mKeyguardViewManager.cancelPostAuthActions());
         }
     }
 
@@ -98,7 +131,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
      * is expanded, so this can be overridden with the forceShow method.
      */
     public boolean shouldPauseAuth() {
-        if (mForceShow) {
+        if (mShowBouncer) {
             return false;
         }
 
@@ -109,12 +142,42 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         return super.shouldPauseAuth();
     }
 
+    private void cancelDelayedHint() {
+        if (mCancelRunnable != null) {
+            mCancelRunnable.run();
+            mCancelRunnable = null;
+        }
+    }
+
+    private void updateFaceDetectRunning(boolean running) {
+        if (mFaceDetectRunning == running) {
+            return;
+        }
+
+        // show udfps hint a few seconds after face auth started running
+        if (!mFaceDetectRunning && running && !mHintShown && mCancelRunnable == null) {
+            // Face detect started running, show udfps hint after a delay
+            mCancelRunnable = mExecutor.executeDelayed(() -> showHint(false),
+                    AFTER_FACE_AUTH_HINT_DELAY);
+        }
+
+        mFaceDetectRunning = running;
+    }
+
+    private void showHint(boolean forceShow) {
+        cancelDelayedHint();
+        if (!mHintShown || forceShow) {
+            mHintShown = true;
+            mView.animateHint();
+        }
+    }
+
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
         @Override
         public void onDozeAmountChanged(float linear, float eased) {
             mView.onDozeAmountChanged(linear, eased);
-            if (linear != 0) forceShow(false);
+            if (linear != 0) showBouncer(false);
         }
 
         @Override
@@ -123,31 +186,56 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
     };
 
+    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                public void onBiometricRunningStateChanged(boolean running,
+                        BiometricSourceType biometricSourceType) {
+                    if (biometricSourceType == BiometricSourceType.FACE) {
+                        updateFaceDetectRunning(running);
+                    }
+                }
+
+                public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) {
+                    if (biometricSourceType == BiometricSourceType.FACE) {
+                        // show udfps hint when face auth fails
+                        showHint(true);
+                    }
+                }
+
+                public void onBiometricAuthenticated(int userId,
+                        BiometricSourceType biometricSourceType, boolean isStrongBiometric) {
+                    if (biometricSourceType == BiometricSourceType.FACE) {
+                        // cancel delayed hint if face auth succeeded
+                        cancelDelayedHint();
+                    }
+                }
+            };
+
     private final StatusBarKeyguardViewManager.AlternateAuthInterceptor mAlternateAuthInterceptor =
             new StatusBarKeyguardViewManager.AlternateAuthInterceptor() {
                 @Override
-                public boolean showAlternativeAuthMethod() {
-                    if (mForceShow) {
+                public boolean showAlternateAuthBouncer() {
+                    if (mShowBouncer) {
                         return false;
                     }
 
-                    forceShow(true);
+                    showBouncer(true);
                     return true;
                 }
 
                 @Override
-                public boolean resetForceShow() {
-                    if (!mForceShow) {
+                public boolean hideAlternateAuthBouncer() {
+                    if (!mShowBouncer) {
                         return false;
                     }
 
-                    forceShow(false);
+                    showBouncer(false);
                     return true;
                 }
 
                 @Override
-                public boolean isShowingAlternateAuth() {
-                    return mForceShow;
+                public boolean isShowingAlternateAuthBouncer() {
+                    return mShowBouncer;
                 }
 
                 @Override
