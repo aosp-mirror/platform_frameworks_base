@@ -64,7 +64,7 @@ public final class ServerFlags {
     @interface DeviceConfigKey {}
 
     /**
-     * Controls whether the location time zone manager service will started. Only observed if
+     * Controls whether the location time zone manager service will be started. Only observed if
      * the device build is configured to support location-based time zone detection. See
      * {@link ServiceConfigAccessor#isGeoTimeZoneDetectionFeatureSupportedInConfig()} and {@link
      * ServiceConfigAccessor#isGeoTimeZoneDetectionFeatureSupported()}.
