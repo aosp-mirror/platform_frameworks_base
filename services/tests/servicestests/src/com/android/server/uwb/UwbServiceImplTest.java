@@ -19,17 +19,25 @@ package com.android.server.uwb;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.uwb.IUwbAdapter;
 import android.uwb.IUwbAdapterStateCallbacks;
 import android.uwb.IUwbRangingCallbacks;
+import android.uwb.RangingReport;
+import android.uwb.RangingSession;
 import android.uwb.SessionHandle;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -37,6 +45,8 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -50,6 +60,9 @@ public class UwbServiceImplTest {
     @Mock private IUwbAdapter mVendorService;
     @Mock private Context mContext;
     @Mock private UwbInjector mUwbInjector;
+    @Captor private ArgumentCaptor<IUwbRangingCallbacks> mRangingCbCaptor;
+    @Captor private ArgumentCaptor<IBinder.DeathRecipient> mClientDeathCaptor;
+    @Captor private ArgumentCaptor<IBinder.DeathRecipient> mVendorServiceDeathCaptor;
 
     private UwbServiceImpl mUwbServiceImpl;
 
@@ -152,5 +165,98 @@ public class UwbServiceImplTest {
         mUwbServiceImpl.closeRanging(sessionHandle);
 
         verify(mVendorService).closeRanging(sessionHandle);
+    }
+
+    @Test
+    public void testRangingCallbacks() throws Exception {
+        final SessionHandle sessionHandle = new SessionHandle(5);
+        final IUwbRangingCallbacks cb = mock(IUwbRangingCallbacks.class);
+        final PersistableBundle parameters = new PersistableBundle();
+        final IBinder cbBinder = mock(IBinder.class);
+        when(cb.asBinder()).thenReturn(cbBinder);
+
+        mUwbServiceImpl.openRanging(sessionHandle, cb, parameters);
+
+        verify(mVendorService).openRanging(
+                eq(sessionHandle), mRangingCbCaptor.capture(), eq(parameters));
+        assertThat(mRangingCbCaptor.getValue()).isNotNull();
+
+        // Invoke vendor service callbacks and ensure that the corresponding app callback is
+        // invoked.
+        mRangingCbCaptor.getValue().onRangingOpened(sessionHandle);
+        verify(cb).onRangingOpened(sessionHandle);
+
+        mRangingCbCaptor.getValue().onRangingOpenFailed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+        verify(cb).onRangingOpenFailed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+
+        mRangingCbCaptor.getValue().onRangingStarted(sessionHandle, parameters);
+        verify(cb).onRangingStarted(sessionHandle, parameters);
+
+        mRangingCbCaptor.getValue().onRangingStartFailed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+        verify(cb).onRangingStartFailed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+
+        mRangingCbCaptor.getValue().onRangingReconfigured(sessionHandle, parameters);
+        verify(cb).onRangingReconfigured(sessionHandle, parameters);
+
+        mRangingCbCaptor.getValue().onRangingReconfigureFailed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+        verify(cb).onRangingReconfigureFailed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+
+        mRangingCbCaptor.getValue().onRangingStopped(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+        verify(cb).onRangingStopped(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+
+        mRangingCbCaptor.getValue().onRangingStopFailed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+        verify(cb).onRangingStopFailed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+
+        final RangingReport rangingReport = new RangingReport.Builder().build();
+        mRangingCbCaptor.getValue().onRangingResult(sessionHandle, rangingReport);
+        verify(cb).onRangingResult(sessionHandle, rangingReport);
+
+        mRangingCbCaptor.getValue().onRangingClosed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+        verify(cb).onRangingClosed(
+                sessionHandle, RangingSession.Callback.REASON_GENERIC_ERROR, parameters);
+    }
+
+    @Test
+    public void testHandleClientDeath() throws Exception {
+        final SessionHandle sessionHandle = new SessionHandle(5);
+        final IUwbRangingCallbacks cb = mock(IUwbRangingCallbacks.class);
+        final PersistableBundle parameters = new PersistableBundle();
+        final IBinder cbBinder = mock(IBinder.class);
+        when(cb.asBinder()).thenReturn(cbBinder);
+
+        mUwbServiceImpl.openRanging(sessionHandle, cb, parameters);
+
+        verify(mVendorService).openRanging(
+                eq(sessionHandle), mRangingCbCaptor.capture(), eq(parameters));
+        assertThat(mRangingCbCaptor.getValue()).isNotNull();
+
+        verify(cbBinder).linkToDeath(mClientDeathCaptor.capture(), anyInt());
+        assertThat(mClientDeathCaptor.getValue()).isNotNull();
+
+        clearInvocations(cb);
+
+        // Invoke cb, ensure it reaches the client.
+        mRangingCbCaptor.getValue().onRangingOpened(sessionHandle);
+        verify(cb).onRangingOpened(sessionHandle);
+
+        // Trigger client death and ensure the session is stopped.
+        mClientDeathCaptor.getValue().binderDied();
+        verify(mVendorService).stopRanging(sessionHandle);
+        verify(mVendorService).closeRanging(sessionHandle);
+
+        // Invoke cb, it should be ignored.
+        mRangingCbCaptor.getValue().onRangingStarted(sessionHandle, parameters);
+        verify(cb, never()).onRangingStarted(any(), any());
     }
 }
