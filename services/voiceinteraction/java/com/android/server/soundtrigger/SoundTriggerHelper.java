@@ -466,7 +466,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
             ModelData modelData = getKeyphraseModelDataLocked(keyphraseId);
             if (modelData == null || !modelData.isKeyphraseModel()) {
-                Slog.e(TAG, "No model exists for given keyphrase Id " + keyphraseId);
+                Slog.w(TAG, "No model exists for given keyphrase Id " + keyphraseId);
                 return STATUS_ERROR;
             }
 
