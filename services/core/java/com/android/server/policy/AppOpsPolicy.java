@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
+import android.app.SyncNotedAppOp;
 import android.content.AttributionSource;
 import android.location.LocationManagerInternal;
 import android.os.IBinder;
@@ -116,20 +117,21 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public int noteOperation(int code, int uid, @Nullable String packageName,
+    public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
             @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp, @Nullable
             String message, boolean shouldCollectMessage, @NonNull HeptFunction<Integer, Integer,
-                    String, String, Boolean, String, Boolean, Integer> superImpl) {
+                    String, String, Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
         return superImpl.apply(resolveOpCode(code, uid, packageName, attributionTag), uid,
                 packageName, attributionTag, shouldCollectAsyncNotedOp,
                 message, shouldCollectMessage);
     }
 
     @Override
-    public int noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
+    public SyncNotedAppOp noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, @Nullable String message,
             boolean shouldCollectMessage, boolean skipProxyOperation, @NonNull HexFunction<Integer,
-                    AttributionSource, Boolean, String, Boolean, Boolean, Integer> superImpl) {
+                    AttributionSource, Boolean, String, Boolean, Boolean,
+            SyncNotedAppOp> superImpl) {
         return superImpl.apply(resolveOpCode(code, attributionSource.getUid(),
                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
                 attributionSource, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
@@ -137,11 +139,11 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public int startProxyOperation(IBinder token, int code,
+    public SyncNotedAppOp startProxyOperation(IBinder token, int code,
             @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation, @NonNull OctFunction<IBinder, Integer, AttributionSource,
-                    Boolean, Boolean, String, Boolean, Boolean, Integer> superImpl) {
+                    Boolean, Boolean, String, Boolean, Boolean, SyncNotedAppOp> superImpl) {
         return superImpl.apply(token, resolveOpCode(code, attributionSource.getUid(),
                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
                 attributionSource, startIfModeDefault, shouldCollectAsyncNotedOp, message,

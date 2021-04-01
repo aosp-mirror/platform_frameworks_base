@@ -33,6 +33,7 @@ import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -50,7 +51,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.content.AttributionSource;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -8015,18 +8015,18 @@ public class AppOpsManager {
                 }
             }
 
-            int mode = mService.noteOperation(op, uid, packageName, attributionTag,
+            SyncNotedAppOp syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
                     collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
 
-            if (mode == MODE_ALLOWED) {
+            if (syncOp.getOpMode()== MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
-                    collectNotedOpForSelf(op, attributionTag);
+                    collectNotedOpForSelf(syncOp);
                 } else if (collectionMode == COLLECT_SYNC) {
-                    collectNotedOpSync(op, attributionTag);
+                    collectNotedOpSync(syncOp);
                 }
             }
 
-            return mode;
+            return syncOp.getOpMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8183,23 +8183,23 @@ public class AppOpsManager {
                 }
             }
 
-            int mode = mService.noteProxyOperation(op, attributionSource,
+            SyncNotedAppOp syncOp = mService.noteProxyOperation(op, attributionSource,
                     collectionMode == COLLECT_ASYNC, message,
                     shouldCollectMessage, skipProxyOperation);
 
-            if (mode == MODE_ALLOWED) {
+            if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
-                    collectNotedOpForSelf(op, attributionSource.getNextAttributionTag());
+                    collectNotedOpForSelf(syncOp);
                 } else if (collectionMode == COLLECT_SYNC
                         // Only collect app-ops when the proxy is trusted
                         && (mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
                         myUid) == PackageManager.PERMISSION_GRANTED ||
                             Binder.getCallingUid() == attributionSource.getNextUid())) {
-                    collectNotedOpSync(op, attributionSource.getNextAttributionTag());
+                    collectNotedOpSync(syncOp);
                 }
             }
 
-            return mode;
+            return syncOp.getOpMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8496,19 +8496,19 @@ public class AppOpsManager {
                 }
             }
 
-            int mode = mService.startOperation(getClientId(), op, uid, packageName,
+            SyncNotedAppOp syncOp = mService.startOperation(getClientId(), op, uid, packageName,
                     attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC, message,
                     shouldCollectMessage);
 
-            if (mode == MODE_ALLOWED) {
+            if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
-                    collectNotedOpForSelf(op, attributionTag);
+                    collectNotedOpForSelf(syncOp);
                 } else if (collectionMode == COLLECT_SYNC) {
-                    collectNotedOpSync(op, attributionTag);
+                    collectNotedOpSync(syncOp);
                 }
             }
 
-            return mode;
+            return syncOp.getOpMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8611,24 +8611,23 @@ public class AppOpsManager {
                 }
             }
 
-            int mode = mService.startProxyOperation(getClientId(), op,
+            SyncNotedAppOp syncOp = mService.startProxyOperation(getClientId(), op,
                     attributionSource, false, collectionMode == COLLECT_ASYNC, message,
                     shouldCollectMessage, skipProxyOperation);
 
-            if (mode == MODE_ALLOWED) {
+            if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
-                    collectNotedOpForSelf(op,
-                            attributionSource.getNextAttributionTag());
+                    collectNotedOpForSelf(syncOp);
                 } else if (collectionMode == COLLECT_SYNC
                         // Only collect app-ops when the proxy is trusted
                         && (mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
                         Process.myUid()) == PackageManager.PERMISSION_GRANTED
                         || Binder.getCallingUid() == attributionSource.getNextUid())) {
-                    collectNotedOpSync(op, attributionSource.getNextAttributionTag());
+                    collectNotedOpSync(syncOp);
                 }
             }
 
-            return mode;
+            return syncOp.getOpMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8869,13 +8868,13 @@ public class AppOpsManager {
      * @param op The noted op
      * @param attributionTag The attribution tag the op is noted for
      */
-    private void collectNotedOpForSelf(int op, @Nullable String attributionTag) {
+    private void collectNotedOpForSelf(SyncNotedAppOp syncOp) {
         synchronized (sLock) {
             if (sOnOpNotedCallback != null) {
-                sOnOpNotedCallback.onSelfNoted(new SyncNotedAppOp(op, attributionTag));
+                sOnOpNotedCallback.onSelfNoted(syncOp);
             }
         }
-        sMessageCollector.onSelfNoted(new SyncNotedAppOp(op, attributionTag));
+        sMessageCollector.onSelfNoted(syncOp);
     }
 
     /**
@@ -8883,23 +8882,23 @@ public class AppOpsManager {
      *
      * <p> Delivered to caller via {@link #prefixParcelWithAppOpsIfNeeded}
      *
-     * @param op The noted op
-     * @param attributionTag The attribution tag the op is noted for
+     * @param syncOp the op and attribution tag to note for
      */
-    private void collectNotedOpSync(int op, @Nullable String attributionTag) {
+    private void collectNotedOpSync(@NonNull SyncNotedAppOp syncOp) {
         // If this is inside of a two-way binder call:
         // We are inside of a two-way binder call. Delivered to caller via
         // {@link #prefixParcelWithAppOpsIfNeeded}
+        int op = sOpStrToOp.get(syncOp.getOp());
         ArrayMap<String, long[]> appOpsNoted = sAppOpsNotedInThisBinderTransaction.get();
         if (appOpsNoted == null) {
             appOpsNoted = new ArrayMap<>(1);
             sAppOpsNotedInThisBinderTransaction.set(appOpsNoted);
         }
 
-        long[] appOpsNotedForAttribution = appOpsNoted.get(attributionTag);
+        long[] appOpsNotedForAttribution = appOpsNoted.get(syncOp.getAttributionTag());
         if (appOpsNotedForAttribution == null) {
             appOpsNotedForAttribution = new long[2];
-            appOpsNoted.put(attributionTag, appOpsNotedForAttribution);
+            appOpsNoted.put(syncOp.getAttributionTag(), appOpsNotedForAttribution);
         }
 
         if (op < 64) {

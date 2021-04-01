@@ -179,6 +179,7 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.PropertyInvalidatedCache;
+import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
@@ -344,7 +345,6 @@ import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.DeviceIdleInternal;
@@ -2744,7 +2744,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private boolean hasUsageStatsPermission(String callingPackage) {
         final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
-                Binder.getCallingUid(), callingPackage, null, false, "", false);
+                Binder.getCallingUid(), callingPackage, null, false, "", false).getOpMode();
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
                     == PackageManager.PERMISSION_GRANTED;
@@ -5244,7 +5244,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // TODO moltmann: Allow to specify featureId
             return mActivityManagerService.mAppOpsService
                     .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName, null,
-                            false, "", false);
+                            false, "", false).getOpMode();
         }
 
         @Override
@@ -16595,11 +16595,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int noteOperation(int code, int uid, @Nullable String packageName,
+        public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
                 @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
-                        Integer> superImpl) {
+                        SyncNotedAppOp> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
@@ -16616,11 +16616,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
-                boolean shouldCollectAsyncNotedOp, @Nullable String message,
-                boolean shouldCollectMessage, boolean skiProxyOperation,
+        public SyncNotedAppOp noteProxyOperation(int code,
+                @NonNull AttributionSource attributionSource, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage, boolean skiProxyOperation,
                 @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
-                                Boolean, Integer> superImpl) {
+                                Boolean, SyncNotedAppOp> superImpl) {
             if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(
                         attributionSource.getUid()), Process.SHELL_UID);
@@ -16640,12 +16640,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int startProxyOperation(IBinder token, int code,
+        public SyncNotedAppOp startProxyOperation(IBinder token, int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
                 boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
                 boolean skipProsyOperation, @NonNull OctFunction<IBinder, Integer,
                         AttributionSource, Boolean, Boolean, String, Boolean, Boolean,
-                        Integer> superImpl) {
+                        SyncNotedAppOp> superImpl) {
             if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(
                         attributionSource.getUid()), Process.SHELL_UID);

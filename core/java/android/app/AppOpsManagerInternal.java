@@ -76,11 +76,11 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        int noteOperation(int code, int uid, @Nullable String packageName,
+        SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
                 @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
-                        Integer> superImpl);
+                        SyncNotedAppOp> superImpl);
 
         /**
          * Allows overriding note proxy operation behavior.
@@ -94,11 +94,11 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        int noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
+        SyncNotedAppOp noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
                 boolean shouldCollectAsyncNotedOp, @Nullable String message,
                 boolean shouldCollectMessage, boolean skipProxyOperation,
                 @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
-                        Boolean, Integer> superImpl);
+                        Boolean, SyncNotedAppOp> superImpl);
 
         /**
          * Allows overriding start proxy operation behavior.
@@ -113,12 +113,12 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        int startProxyOperation(IBinder token, int code,
+        SyncNotedAppOp startProxyOperation(IBinder token, int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
                 boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
                 boolean skipProxyOperation, @NonNull OctFunction<IBinder, Integer,
                         AttributionSource, Boolean, Boolean, String, Boolean, Boolean,
-                        Integer> superImpl);
+                        SyncNotedAppOp> superImpl);
 
         /**
          * Allows overriding finish proxy op.
