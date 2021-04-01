@@ -13828,6 +13828,12 @@ public final class Settings {
         public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3;
 
         /**
+         * The maximum value for surround sound output mode in Android S.
+         * @hide
+         */
+        public static final int ENCODED_SURROUND_SC_MAX = ENCODED_SURROUND_OUTPUT_MANUAL;
+
+        /**
          * Set to ENCODED_SURROUND_OUTPUT_AUTO,
          * ENCODED_SURROUND_OUTPUT_NEVER,
          * ENCODED_SURROUND_OUTPUT_ALWAYS or

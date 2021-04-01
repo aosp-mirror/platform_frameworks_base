@@ -20470,6 +20470,7 @@ package android.media {
     field public static final int ENCODED_SURROUND_OUTPUT_AUTO = 0; // 0x0
     field public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3; // 0x3
     field public static final int ENCODED_SURROUND_OUTPUT_NEVER = 1; // 0x1
+    field public static final int ENCODED_SURROUND_OUTPUT_UNKNOWN = -1; // 0xffffffff
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_DEAD_OBJECT = -6; // 0xfffffffa
     field public static final String EXTRA_AUDIO_PLUG_STATE = "android.media.extra.AUDIO_PLUG_STATE";

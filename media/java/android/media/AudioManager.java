@@ -569,6 +569,7 @@ public class AudioManager {
 
     /** @hide */
     @IntDef(prefix = {"ENCODED_SURROUND_OUTPUT_"}, value = {
+            ENCODED_SURROUND_OUTPUT_UNKNOWN,
             ENCODED_SURROUND_OUTPUT_AUTO,
             ENCODED_SURROUND_OUTPUT_NEVER,
             ENCODED_SURROUND_OUTPUT_ALWAYS,
@@ -576,6 +577,11 @@ public class AudioManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncodedSurroundOutputMode {}
+
+    /**
+     * The mode for surround sound formats is unknown.
+     */
+    public static final int ENCODED_SURROUND_OUTPUT_UNKNOWN = -1;
 
     /**
      * The surround sound formats are available for use if they are detected. This is the default
@@ -6873,7 +6879,8 @@ public class AudioManager {
     @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS)
     public @EncodedSurroundOutputMode int getEncodedSurroundMode() {
         try {
-            return getService().getEncodedSurroundMode();
+            return getService().getEncodedSurroundMode(
+                    getContext().getApplicationInfo().targetSdkVersion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
