@@ -38,12 +38,14 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelUuid;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -853,8 +855,8 @@ public final class BluetoothAdapter {
         }
         synchronized (mLock) {
             if (sBluetoothLeScanner == null) {
-                sBluetoothLeScanner = new BluetoothLeScanner(mManagerService, getOpPackageName(),
-                        getAttributionTag());
+                sBluetoothLeScanner =
+                        new BluetoothLeScanner(mManagerService, getAttributionSource());
             }
         }
         return sBluetoothLeScanner;
@@ -1664,13 +1666,11 @@ public final class BluetoothAdapter {
         return ActivityThread.currentOpPackageName();
     }
 
-    private String getAttributionTag() {
-        // Workaround for legacy API for getting a BluetoothAdapter not
-        // passing a context
+    private AttributionSource getAttributionSource() {
         if (mContext != null) {
-            return mContext.getAttributionTag();
+            return mContext.getAttributionSource();
         }
-        return null;
+        return new AttributionSource(Process.myUid(), ActivityThread.currentOpPackageName(), null);
     }
 
     /**
@@ -1710,7 +1710,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.startDiscovery(getOpPackageName(), getAttributionTag());
+                return mService.startDiscovery(getAttributionSource());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
