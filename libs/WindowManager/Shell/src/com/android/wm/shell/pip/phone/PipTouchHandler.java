@@ -782,7 +782,6 @@ public class PipTouchHandler {
         private final Point mStartPosition = new Point();
         private final PointF mDelta = new PointF();
         private boolean mShouldHideMenuAfterFling;
-        private float mDownSavedFraction = -1f;
 
         @Override
         public void onDown(PipTouchState touchState) {
@@ -796,7 +795,6 @@ public class PipTouchHandler {
             mMovementWithinDismiss = touchState.getDownTouchPosition().y
                     >= mPipBoundsState.getMovementBounds().bottom;
             mMotionHelper.setSpringingToTouch(false);
-            mDownSavedFraction = mPipBoundsAlgorithm.getSnapFraction(mPipBoundsState.getBounds());
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it
@@ -867,9 +865,12 @@ public class PipTouchHandler {
                 if (mEnableStash && shouldStash(vel, getPossiblyMotionBounds())) {
                     mMotionHelper.stashToEdge(vel.x, vel.y, this::stashEndAction /* endAction */);
                 } else {
-                    mPipUiEventLogger.log(
-                            PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_UNSTASHED);
-                    mPipBoundsState.setStashed(STASH_TYPE_NONE);
+                    if (mPipBoundsState.isStashed()) {
+                        // Reset stashed state if previously stashed
+                        mPipUiEventLogger.log(
+                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_UNSTASHED);
+                        mPipBoundsState.setStashed(STASH_TYPE_NONE);
+                    }
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                             this::flingEndAction /* endAction */);
                 }
@@ -896,19 +897,19 @@ public class PipTouchHandler {
                     mMotionHelper.expandLeavePip();
                 }
             } else if (mMenuState != MENU_STATE_FULL) {
-                if (!mTouchState.isWaitingForDoubleTap()) {
-                    if (mPipBoundsState.isStashed()) {
-                        animateToUnStashedState();
-                        mPipUiEventLogger.log(
-                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_UNSTASHED);
-                        mPipBoundsState.setStashed(STASH_TYPE_NONE);
-                    } else {
-                        // User has stalled long enough for this not to be a drag or a double tap,
-                        // just expand the menu
-                        mMenuController.showMenu(MENU_STATE_FULL, mPipBoundsState.getBounds(),
-                                true /* allowMenuTimeout */, willResizeMenu(),
-                                shouldShowResizeHandle());
-                    }
+                if (mPipBoundsState.isStashed()) {
+                    // Unstash immediately if stashed, and don't wait for the double tap timeout
+                    animateToUnStashedState();
+                    mPipUiEventLogger.log(
+                            PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_UNSTASHED);
+                    mPipBoundsState.setStashed(STASH_TYPE_NONE);
+                    mTouchState.removeDoubleTapTimeoutCallback();
+                } else if (!mTouchState.isWaitingForDoubleTap()) {
+                    // User has stalled long enough for this not to be a drag or a double tap,
+                    // just expand the menu
+                    mMenuController.showMenu(MENU_STATE_FULL, mPipBoundsState.getBounds(),
+                            true /* allowMenuTimeout */, willResizeMenu(),
+                            shouldShowResizeHandle());
                 } else {
                     // Next touch event _may_ be the second tap for the double-tap, schedule a
                     // fallback runnable to trigger the menu if no touch event occurs before the
@@ -916,7 +917,6 @@ public class PipTouchHandler {
                     mTouchState.scheduleDoubleTapTimeoutCallback();
                 }
             }
-            mDownSavedFraction = -1f;
             return true;
         }
 
@@ -932,6 +932,7 @@ public class PipTouchHandler {
                         PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_RIGHT);
                 mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
             }
+            mMenuController.hideMenu();
         }
 
         private void flingEndAction() {
