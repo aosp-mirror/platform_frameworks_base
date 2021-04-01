@@ -19,6 +19,7 @@ package com.android.server.vcn;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
 
@@ -133,6 +134,7 @@ public class VcnTest {
     private void startVcnGatewayWithCapabilities(
             NetworkRequestListener requestListener, int... netCapabilities) {
         final NetworkRequest.Builder requestBuilder = new NetworkRequest.Builder();
+        requestBuilder.addTransportType(TRANSPORT_CELLULAR);
         for (final int netCapability : netCapabilities) {
             requestBuilder.addCapability(netCapability);
         }

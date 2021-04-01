@@ -17,6 +17,7 @@
 package com.android.server.vcn;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
@@ -395,6 +396,7 @@ public class Vcn extends Handler {
     private boolean isRequestSatisfiedByGatewayConnectionConfig(
             @NonNull NetworkRequest request, @NonNull VcnGatewayConnectionConfig config) {
         final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
+        builder.addTransportType(TRANSPORT_CELLULAR);
         builder.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
         for (int cap : config.getAllExposedCapabilities()) {
             builder.addCapability(cap);
