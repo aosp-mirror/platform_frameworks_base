@@ -44,7 +44,7 @@
     <FrameLayout
         android:id="@+id/biometric_icon_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal">
 
         <ImageView
@@ -80,7 +80,7 @@
         android:layout_height="88dp"
         style="?android:attr/buttonBarStyle"
         android:orientation="horizontal"
-        android:paddingTop="16dp">
+        android:paddingTop="24dp">
 
         <Space android:id="@+id/leftSpacer"
             android:layout_width="8dp"
