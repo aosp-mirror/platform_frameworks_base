@@ -268,7 +268,7 @@ public class BubbleStackView extends FrameLayout
     private boolean mIsDraggingStack = false;
 
     /** Whether the expanded view has been hidden, because we are dragging out a bubble. */
-    private boolean mExpandedViewHidden = false;
+    private boolean mExpandedViewTemporarilyHidden = false;
 
     /** Animator for animating the expanded view's alpha (including the TaskView inside it). */
     private final ValueAnimator mExpandedViewAlphaAnimator = ValueAnimator.ofFloat(0f, 1f);
@@ -968,7 +968,13 @@ public class BubbleStackView extends FrameLayout
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+                if (mExpandedBubble != null
+                        && mExpandedBubble.getExpandedView() != null
+                        // The surface needs to be Z ordered on top for alpha values to work on the
+                        // TaskView, and if we're temporarily hidden, we are still on the screen
+                        // with alpha = 0f until we animate back. Stay Z ordered on top so the alpha
+                        // = 0f remains in effect.
+                        && !mExpandedViewTemporarilyHidden) {
                     mExpandedBubble.getExpandedView().setSurfaceZOrderedOnTop(false);
                     mExpandedBubble.getExpandedView().setAlphaAnimating(false);
                 }
@@ -983,7 +989,7 @@ public class BubbleStackView extends FrameLayout
         mAnimatingOutSurfaceAlphaAnimator.setDuration(EXPANDED_VIEW_ALPHA_ANIMATION_DURATION);
         mAnimatingOutSurfaceAlphaAnimator.setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED);
         mAnimatingOutSurfaceAlphaAnimator.addUpdateListener(valueAnimator -> {
-            if (!mExpandedViewHidden) {
+            if (!mExpandedViewTemporarilyHidden) {
                 mAnimatingOutSurfaceView.setAlpha((float) valueAnimator.getAnimatedValue());
             }
         });
@@ -1596,7 +1602,7 @@ public class BubbleStackView extends FrameLayout
         // If we're expanded, screenshot the currently expanded bubble (before expanding the newly
         // selected bubble) so we can animate it out.
         if (mIsExpanded && mExpandedBubble != null && mExpandedBubble.getExpandedView() != null
-                && !mExpandedViewHidden) {
+                && !mExpandedViewTemporarilyHidden) {
             if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                 // Before screenshotting, have the real ActivityView show on top of other surfaces
                 // so that the screenshot doesn't flicker on top of it.
@@ -1722,13 +1728,13 @@ public class BubbleStackView extends FrameLayout
 
     /** Animate the expanded view hidden. This is done while we're dragging out a bubble. */
     private void hideExpandedViewIfNeeded() {
-        if (mExpandedViewHidden
+        if (mExpandedViewTemporarilyHidden
                 || mExpandedBubble == null
                 || mExpandedBubble.getExpandedView() == null) {
             return;
         }
 
-        mExpandedViewHidden = true;
+        mExpandedViewTemporarilyHidden = true;
 
         // Scale down.
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
@@ -1752,11 +1758,11 @@ public class BubbleStackView extends FrameLayout
      * Animate the expanded view visible again. This is done when we're done dragging out a bubble.
      */
     private void showExpandedViewIfNeeded() {
-        if (!mExpandedViewHidden) {
+        if (!mExpandedViewTemporarilyHidden) {
             return;
         }
 
-        mExpandedViewHidden = false;
+        mExpandedViewTemporarilyHidden = false;
 
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
                 .spring(AnimatableScaleMatrix.SCALE_X,
@@ -2085,7 +2091,7 @@ public class BubbleStackView extends FrameLayout
                         mExpandedViewContainer.setAnimationMatrix(mExpandedViewContainerMatrix);
                     })
                     .withEndActions(() -> {
-                        mExpandedViewHidden = false;
+                        mExpandedViewTemporarilyHidden = false;
                         mIsBubbleSwitchAnimating = false;
                     })
                     .start();
