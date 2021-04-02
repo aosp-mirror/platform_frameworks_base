@@ -303,7 +303,7 @@ package android {
     field public static final int allowAudioPlaybackCapture = 16844289; // 0x1010601
     field public static final int allowBackup = 16843392; // 0x1010280
     field public static final int allowClearUserData = 16842757; // 0x1010005
-    field public static final int allowClickWhenDisabled = 16844312; // 0x1010618
+    field public static final int allowClickWhenDisabled;
     field public static final int allowEmbedded = 16843765; // 0x10103f5
     field public static final int allowNativeHeapPointerTagging = 16844306; // 0x1010612
     field public static final int allowParallelSyncs = 16843570; // 0x1010332
@@ -334,7 +334,7 @@ package android {
     field public static final int apiKey = 16843281; // 0x1010211
     field public static final int appCategory = 16844101; // 0x1010545
     field public static final int appComponentFactory = 16844154; // 0x101057a
-    field public static final int attributionTags = 16844354; // 0x1010642
+    field public static final int attributionTags;
     field public static final int author = 16843444; // 0x10102b4
     field public static final int authorities = 16842776; // 0x1010018
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
@@ -400,7 +400,7 @@ package android {
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canControlMagnification = 16844039; // 0x1010507
-    field public static final int canPauseRecording = 16844314; // 0x101061a
+    field public static final int canPauseRecording;
     field public static final int canPerformGestures = 16844045; // 0x101050d
     field public static final int canRecord = 16844060; // 0x101051c
     field @Deprecated public static final int canRequestEnhancedWebAccessibility = 16843736; // 0x10103d8
@@ -442,7 +442,7 @@ package android {
     field public static final int clickable = 16842981; // 0x10100e5
     field public static final int clipChildren = 16842986; // 0x10100ea
     field public static final int clipOrientation = 16843274; // 0x101020a
-    field public static final int clipToOutline = 16844328; // 0x1010628
+    field public static final int clipToOutline;
     field public static final int clipToPadding = 16842987; // 0x10100eb
     field public static final int closeIcon = 16843905; // 0x1010481
     field @Deprecated public static final int codes = 16843330; // 0x1010242
@@ -512,7 +512,7 @@ package android {
     field public static final int dashGap = 16843175; // 0x10101a7
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
-    field public static final int dataExtractionRules = 16844350; // 0x101063e
+    field public static final int dataExtractionRules;
     field public static final int datePickerDialogTheme = 16843948; // 0x10104ac
     field public static final int datePickerMode = 16843955; // 0x10104b3
     field public static final int datePickerStyle = 16843612; // 0x101035c
@@ -534,8 +534,8 @@ package android {
     field public static final int detailSocialSummary = 16843428; // 0x10102a4
     field public static final int detailsElementBackground = 16843598; // 0x101034e
     field public static final int dial = 16843010; // 0x1010102
-    field public static final int dialTint = 16844342; // 0x1010636
-    field public static final int dialTintMode = 16844343; // 0x1010637
+    field public static final int dialTint;
+    field public static final int dialTintMode;
     field public static final int dialogCornerRadius = 16844145; // 0x1010571
     field public static final int dialogIcon = 16843252; // 0x10101f4
     field public static final int dialogLayout = 16843255; // 0x10101f7
@@ -583,7 +583,7 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
-    field public static final int edgeEffectType = 16844329; // 0x1010629
+    field public static final int edgeEffectType;
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -669,7 +669,7 @@ package android {
     field @Deprecated public static final int fontProviderCerts = 16844125; // 0x101055d
     field @Deprecated public static final int fontProviderPackage = 16844119; // 0x1010557
     field @Deprecated public static final int fontProviderQuery = 16844113; // 0x1010551
-    field public static final int fontProviderSystemFontFamily = 16844322; // 0x1010622
+    field public static final int fontProviderSystemFontFamily;
     field public static final int fontStyle = 16844095; // 0x101053f
     field public static final int fontVariationSettings = 16844144; // 0x1010570
     field public static final int fontWeight = 16844083; // 0x1010533
@@ -733,14 +733,14 @@ package android {
     field public static final int groupIndicator = 16843019; // 0x101010b
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
-    field public static final int hand_hourTint = 16844344; // 0x1010638
-    field public static final int hand_hourTintMode = 16844345; // 0x1010639
+    field public static final int hand_hourTint;
+    field public static final int hand_hourTintMode;
     field public static final int hand_minute = 16843012; // 0x1010104
-    field public static final int hand_minuteTint = 16844346; // 0x101063a
-    field public static final int hand_minuteTintMode = 16844347; // 0x101063b
-    field public static final int hand_second = 16844323; // 0x1010623
-    field public static final int hand_secondTint = 16844348; // 0x101063c
-    field public static final int hand_secondTintMode = 16844349; // 0x101063d
+    field public static final int hand_minuteTint;
+    field public static final int hand_minuteTintMode;
+    field public static final int hand_second;
+    field public static final int hand_secondTint;
+    field public static final int hand_secondTintMode;
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -824,7 +824,7 @@ package android {
     field public static final int installLocation = 16843447; // 0x10102b7
     field public static final int interactiveUiTimeout = 16844181; // 0x1010595
     field public static final int interpolator = 16843073; // 0x1010141
-    field public static final int isAccessibilityTool = 16844353; // 0x1010641
+    field public static final int isAccessibilityTool;
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
     field public static final int isAsciiCapable = 16843753; // 0x10103e9
     field public static final int isAuxiliary = 16843647; // 0x101037f
@@ -866,8 +866,8 @@ package android {
     field public static final int keyboardNavigationCluster = 16844096; // 0x1010540
     field public static final int keycode = 16842949; // 0x10100c5
     field public static final int killAfterRestore = 16843420; // 0x101029c
-    field public static final int knownCerts = 16844330; // 0x101062a
-    field public static final int lStar = 16844359; // 0x1010647
+    field public static final int knownCerts;
+    field public static final int lStar;
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
     field @Deprecated public static final int labelTextSize = 16843317; // 0x1010235
@@ -977,8 +977,8 @@ package android {
     field public static final int maxLines = 16843091; // 0x1010153
     field public static final int maxLongVersionCode = 16844163; // 0x1010583
     field public static final int maxRecents = 16843846; // 0x1010446
-    field public static final int maxResizeHeight = 16844339; // 0x1010633
-    field public static final int maxResizeWidth = 16844338; // 0x1010632
+    field public static final int maxResizeHeight;
+    field public static final int maxResizeWidth;
     field public static final int maxRows = 16843059; // 0x1010133
     field public static final int maxSdkVersion = 16843377; // 0x1010271
     field public static final int maxWidth = 16843039; // 0x101011f
@@ -987,7 +987,7 @@ package android {
     field public static final int measureWithLargestChild = 16843476; // 0x10102d4
     field public static final int mediaRouteButtonStyle = 16843693; // 0x10103ad
     field public static final int mediaRouteTypes = 16843694; // 0x10103ae
-    field public static final int memtagMode = 16844324; // 0x1010624
+    field public static final int memtagMode;
     field public static final int menuCategory = 16843230; // 0x10101de
     field public static final int mimeGroup = 16844309; // 0x1010615
     field public static final int mimeType = 16842790; // 0x1010026
@@ -1011,7 +1011,7 @@ package android {
     field public static final int multiArch = 16843918; // 0x101048e
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
-    field public static final int nativeHeapZeroInitialized = 16844325; // 0x1010625
+    field public static final int nativeHeapZeroInitialized;
     field public static final int navigationBarColor = 16843858; // 0x1010452
     field public static final int navigationBarDividerColor = 16844141; // 0x101056d
     field public static final int navigationContentDescription = 16843969; // 0x10104c1
@@ -1081,13 +1081,13 @@ package android {
     field public static final int panelTextAppearance = 16842850; // 0x1010062
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
-    field public static final int passwordsActivity = 16844351; // 0x101063f
+    field public static final int passwordsActivity;
     field public static final int path = 16842794; // 0x101002a
-    field public static final int pathAdvancedPattern = 16844320; // 0x1010620
+    field public static final int pathAdvancedPattern;
     field public static final int pathData = 16843781; // 0x1010405
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
-    field public static final int pathSuffix = 16844318; // 0x101061e
+    field public static final int pathSuffix;
     field public static final int patternPathData = 16843978; // 0x10104ca
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionFlags = 16843719; // 0x10103c7
@@ -1124,7 +1124,7 @@ package android {
     field public static final int presentationTheme = 16843712; // 0x10103c0
     field public static final int preserveLegacyExternalStorage = 16844308; // 0x1010614
     field public static final int previewImage = 16843482; // 0x10102da
-    field public static final int previewLayout = 16844327; // 0x1010627
+    field public static final int previewLayout;
     field public static final int primaryContentAlpha = 16844114; // 0x1010552
     field public static final int priority = 16842780; // 0x101001c
     field public static final int privateImeOptions = 16843299; // 0x1010223
@@ -1181,8 +1181,8 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int requestLegacyExternalStorage = 16844291; // 0x1010603
-    field public static final int requestOptimizedExternalStorageAccess = 16844357; // 0x1010645
-    field public static final int requireDeviceScreenOn = 16844317; // 0x101061d
+    field public static final int requestOptimizedExternalStorageAccess;
+    field public static final int requireDeviceScreenOn;
     field public static final int requireDeviceUnlock = 16843756; // 0x10103ec
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
@@ -1207,7 +1207,7 @@ package android {
     field public static final int right = 16843183; // 0x10101af
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
     field public static final int ringtoneType = 16843257; // 0x10101f9
-    field public static final int rollbackDataPolicy = 16844311; // 0x1010617
+    field public static final int rollbackDataPolicy;
     field public static final int rotation = 16843558; // 0x1010326
     field public static final int rotationAnimation = 16844090; // 0x101053a
     field public static final int rotationX = 16843559; // 0x1010327
@@ -1268,7 +1268,7 @@ package android {
     field public static final int segmentedButtonStyle = 16843568; // 0x1010330
     field public static final int selectAllOnFocus = 16843102; // 0x101015e
     field public static final int selectable = 16843238; // 0x10101e6
-    field public static final int selectableAsDefault = 16844352; // 0x1010640
+    field public static final int selectableAsDefault;
     field public static final int selectableItemBackground = 16843534; // 0x101030e
     field public static final int selectableItemBackgroundBorderless = 16843868; // 0x101045c
     field @Deprecated public static final int selectedDateVerticalBar = 16843591; // 0x1010347
@@ -1296,7 +1296,7 @@ package android {
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
     field public static final int showForAllUsers = 16844015; // 0x10104ef
-    field public static final int showInInputMethodPicker = 16844361; // 0x1010649
+    field public static final int showInInputMethodPicker;
     field public static final int showMetadataInPreview = 16844079; // 0x101052f
     field @Deprecated public static final int showOnLockScreen = 16843721; // 0x10103c9
     field public static final int showSilent = 16843259; // 0x10101fb
@@ -1319,17 +1319,17 @@ package android {
     field public static final int spinnerMode = 16843505; // 0x10102f1
     field public static final int spinnerStyle = 16842881; // 0x1010081
     field public static final int spinnersShown = 16843595; // 0x101034b
-    field public static final int splashScreenTheme = 16844337; // 0x1010631
+    field public static final int splashScreenTheme;
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int splitName = 16844105; // 0x1010549
     field public static final int splitTrack = 16843852; // 0x101044c
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
-    field public static final int sspAdvancedPattern = 16844321; // 0x1010621
+    field public static final int sspAdvancedPattern;
     field public static final int sspPattern = 16843749; // 0x10103e5
     field public static final int sspPrefix = 16843748; // 0x10103e4
-    field public static final int sspSuffix = 16844319; // 0x101061f
+    field public static final int sspSuffix;
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int stackViewStyle = 16843838; // 0x101043e
     field public static final int starStyle = 16842882; // 0x1010082
@@ -1402,7 +1402,7 @@ package android {
     field public static final int supportsRtl = 16843695; // 0x10103af
     field public static final int supportsSwitchingToNextInputMethod = 16843755; // 0x10103eb
     field public static final int supportsUploading = 16843419; // 0x101029b
-    field public static final int suppressesSpellChecker = 16844355; // 0x1010643
+    field public static final int suppressesSpellChecker;
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
     field public static final int switchPreferenceStyle = 16843629; // 0x101036d
@@ -1417,8 +1417,8 @@ package android {
     field public static final int tabWidgetStyle = 16842883; // 0x1010083
     field public static final int tag = 16842961; // 0x10100d1
     field public static final int targetActivity = 16843266; // 0x1010202
-    field public static final int targetCellHeight = 16844341; // 0x1010635
-    field public static final int targetCellWidth = 16844340; // 0x1010634
+    field public static final int targetCellHeight;
+    field public static final int targetCellWidth;
     field public static final int targetClass = 16842799; // 0x101002f
     field @Deprecated public static final int targetDescriptions = 16843680; // 0x10103a0
     field public static final int targetId = 16843740; // 0x10103dc
@@ -1588,7 +1588,7 @@ package android {
     field public static final int useLevel = 16843167; // 0x101019f
     field public static final int userVisible = 16843409; // 0x1010291
     field public static final int usesCleartextTraffic = 16844012; // 0x10104ec
-    field public static final int usesPermissionFlags = 16844356; // 0x1010644
+    field public static final int usesPermissionFlags;
     field public static final int value = 16842788; // 0x1010024
     field public static final int valueFrom = 16843486; // 0x10102de
     field public static final int valueTo = 16843487; // 0x10102df
@@ -1643,10 +1643,10 @@ package android {
     field public static final int windowAllowReturnTransitionOverlap = 16843835; // 0x101043b
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
-    field public static final int windowBackgroundBlurRadius = 16844331; // 0x101062b
+    field public static final int windowBackgroundBlurRadius;
     field public static final int windowBackgroundFallback = 16844035; // 0x1010503
-    field public static final int windowBlurBehindEnabled = 16844316; // 0x101061c
-    field public static final int windowBlurBehindRadius = 16844315; // 0x101061b
+    field public static final int windowBlurBehindEnabled;
+    field public static final int windowBlurBehindRadius;
     field public static final int windowClipToOutline = 16843947; // 0x10104ab
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
     field public static final int windowContentOverlay = 16842841; // 0x1010059
@@ -1665,7 +1665,7 @@ package android {
     field public static final int windowHideAnimation = 16842935; // 0x10100b7
     field public static final int windowIsFloating = 16842839; // 0x1010057
     field public static final int windowIsTranslucent = 16842840; // 0x1010058
-    field public static final int windowLayoutAffinity = 16844313; // 0x1010619
+    field public static final int windowLayoutAffinity;
     field public static final int windowLayoutInDisplayCutoutMode = 16844166; // 0x1010586
     field public static final int windowLightNavigationBar = 16844140; // 0x101056c
     field public static final int windowLightStatusBar = 16844000; // 0x10104e0
@@ -1684,11 +1684,11 @@ package android {
     field public static final int windowShowAnimation = 16842934; // 0x10100b6
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
-    field public static final int windowSplashScreenAnimatedIcon = 16844333; // 0x101062d
-    field public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
-    field public static final int windowSplashScreenBackground = 16844332; // 0x101062c
-    field public static final int windowSplashScreenBrandingImage = 16844335; // 0x101062f
-    field public static final int windowSplashScreenIconBackgroundColor = 16844336; // 0x1010630
+    field public static final int windowSplashScreenAnimatedIcon;
+    field public static final int windowSplashScreenAnimationDuration;
+    field public static final int windowSplashScreenBackground;
+    field public static final int windowSplashScreenBrandingImage;
+    field public static final int windowSplashScreenIconBackgroundColor;
     field @Deprecated public static final int windowSplashscreenContent = 16844132; // 0x1010564
     field @Deprecated public static final int windowSwipeToDismiss = 16843763; // 0x10103f3
     field public static final int windowTitleBackgroundStyle = 16842844; // 0x101005c
@@ -1736,66 +1736,66 @@ package android {
     field @Deprecated public static final int secondary_text_dark_nodisable = 17170438; // 0x1060006
     field @Deprecated public static final int secondary_text_light = 17170439; // 0x1060007
     field @Deprecated public static final int secondary_text_light_nodisable = 17170440; // 0x1060008
-    field public static final int system_accent1_0 = 17170485; // 0x1060035
-    field public static final int system_accent1_100 = 17170487; // 0x1060037
-    field public static final int system_accent1_1000 = 17170496; // 0x1060040
-    field public static final int system_accent1_200 = 17170488; // 0x1060038
-    field public static final int system_accent1_300 = 17170489; // 0x1060039
-    field public static final int system_accent1_400 = 17170490; // 0x106003a
-    field public static final int system_accent1_50 = 17170486; // 0x1060036
-    field public static final int system_accent1_500 = 17170491; // 0x106003b
-    field public static final int system_accent1_600 = 17170492; // 0x106003c
-    field public static final int system_accent1_700 = 17170493; // 0x106003d
-    field public static final int system_accent1_800 = 17170494; // 0x106003e
-    field public static final int system_accent1_900 = 17170495; // 0x106003f
-    field public static final int system_accent2_0 = 17170497; // 0x1060041
-    field public static final int system_accent2_100 = 17170499; // 0x1060043
-    field public static final int system_accent2_1000 = 17170508; // 0x106004c
-    field public static final int system_accent2_200 = 17170500; // 0x1060044
-    field public static final int system_accent2_300 = 17170501; // 0x1060045
-    field public static final int system_accent2_400 = 17170502; // 0x1060046
-    field public static final int system_accent2_50 = 17170498; // 0x1060042
-    field public static final int system_accent2_500 = 17170503; // 0x1060047
-    field public static final int system_accent2_600 = 17170504; // 0x1060048
-    field public static final int system_accent2_700 = 17170505; // 0x1060049
-    field public static final int system_accent2_800 = 17170506; // 0x106004a
-    field public static final int system_accent2_900 = 17170507; // 0x106004b
-    field public static final int system_accent3_0 = 17170509; // 0x106004d
-    field public static final int system_accent3_100 = 17170511; // 0x106004f
-    field public static final int system_accent3_1000 = 17170520; // 0x1060058
-    field public static final int system_accent3_200 = 17170512; // 0x1060050
-    field public static final int system_accent3_300 = 17170513; // 0x1060051
-    field public static final int system_accent3_400 = 17170514; // 0x1060052
-    field public static final int system_accent3_50 = 17170510; // 0x106004e
-    field public static final int system_accent3_500 = 17170515; // 0x1060053
-    field public static final int system_accent3_600 = 17170516; // 0x1060054
-    field public static final int system_accent3_700 = 17170517; // 0x1060055
-    field public static final int system_accent3_800 = 17170518; // 0x1060056
-    field public static final int system_accent3_900 = 17170519; // 0x1060057
-    field public static final int system_neutral1_0 = 17170461; // 0x106001d
-    field public static final int system_neutral1_100 = 17170463; // 0x106001f
-    field public static final int system_neutral1_1000 = 17170472; // 0x1060028
-    field public static final int system_neutral1_200 = 17170464; // 0x1060020
-    field public static final int system_neutral1_300 = 17170465; // 0x1060021
-    field public static final int system_neutral1_400 = 17170466; // 0x1060022
-    field public static final int system_neutral1_50 = 17170462; // 0x106001e
-    field public static final int system_neutral1_500 = 17170467; // 0x1060023
-    field public static final int system_neutral1_600 = 17170468; // 0x1060024
-    field public static final int system_neutral1_700 = 17170469; // 0x1060025
-    field public static final int system_neutral1_800 = 17170470; // 0x1060026
-    field public static final int system_neutral1_900 = 17170471; // 0x1060027
-    field public static final int system_neutral2_0 = 17170473; // 0x1060029
-    field public static final int system_neutral2_100 = 17170475; // 0x106002b
-    field public static final int system_neutral2_1000 = 17170484; // 0x1060034
-    field public static final int system_neutral2_200 = 17170476; // 0x106002c
-    field public static final int system_neutral2_300 = 17170477; // 0x106002d
-    field public static final int system_neutral2_400 = 17170478; // 0x106002e
-    field public static final int system_neutral2_50 = 17170474; // 0x106002a
-    field public static final int system_neutral2_500 = 17170479; // 0x106002f
-    field public static final int system_neutral2_600 = 17170480; // 0x1060030
-    field public static final int system_neutral2_700 = 17170481; // 0x1060031
-    field public static final int system_neutral2_800 = 17170482; // 0x1060032
-    field public static final int system_neutral2_900 = 17170483; // 0x1060033
+    field public static final int system_accent1_0;
+    field public static final int system_accent1_100;
+    field public static final int system_accent1_1000;
+    field public static final int system_accent1_200;
+    field public static final int system_accent1_300;
+    field public static final int system_accent1_400;
+    field public static final int system_accent1_50;
+    field public static final int system_accent1_500;
+    field public static final int system_accent1_600;
+    field public static final int system_accent1_700;
+    field public static final int system_accent1_800;
+    field public static final int system_accent1_900;
+    field public static final int system_accent2_0;
+    field public static final int system_accent2_100;
+    field public static final int system_accent2_1000;
+    field public static final int system_accent2_200;
+    field public static final int system_accent2_300;
+    field public static final int system_accent2_400;
+    field public static final int system_accent2_50;
+    field public static final int system_accent2_500;
+    field public static final int system_accent2_600;
+    field public static final int system_accent2_700;
+    field public static final int system_accent2_800;
+    field public static final int system_accent2_900;
+    field public static final int system_accent3_0;
+    field public static final int system_accent3_100;
+    field public static final int system_accent3_1000;
+    field public static final int system_accent3_200;
+    field public static final int system_accent3_300;
+    field public static final int system_accent3_400;
+    field public static final int system_accent3_50;
+    field public static final int system_accent3_500;
+    field public static final int system_accent3_600;
+    field public static final int system_accent3_700;
+    field public static final int system_accent3_800;
+    field public static final int system_accent3_900;
+    field public static final int system_neutral1_0;
+    field public static final int system_neutral1_100;
+    field public static final int system_neutral1_1000;
+    field public static final int system_neutral1_200;
+    field public static final int system_neutral1_300;
+    field public static final int system_neutral1_400;
+    field public static final int system_neutral1_50;
+    field public static final int system_neutral1_500;
+    field public static final int system_neutral1_600;
+    field public static final int system_neutral1_700;
+    field public static final int system_neutral1_800;
+    field public static final int system_neutral1_900;
+    field public static final int system_neutral2_0;
+    field public static final int system_neutral2_100;
+    field public static final int system_neutral2_1000;
+    field public static final int system_neutral2_200;
+    field public static final int system_neutral2_300;
+    field public static final int system_neutral2_400;
+    field public static final int system_neutral2_50;
+    field public static final int system_neutral2_500;
+    field public static final int system_neutral2_600;
+    field public static final int system_neutral2_700;
+    field public static final int system_neutral2_800;
+    field public static final int system_neutral2_900;
     field public static final int tab_indicator_text = 17170441; // 0x1060009
     field @Deprecated public static final int tertiary_text_dark = 17170448; // 0x1060010
     field @Deprecated public static final int tertiary_text_light = 17170449; // 0x1060011
@@ -1811,9 +1811,9 @@ package android {
     field public static final int dialog_min_width_minor = 17104900; // 0x1050004
     field public static final int notification_large_icon_height = 17104902; // 0x1050006
     field public static final int notification_large_icon_width = 17104901; // 0x1050005
-    field public static final int system_app_widget_background_radius = 17104904; // 0x1050008
-    field public static final int system_app_widget_inner_radius = 17104905; // 0x1050009
-    field public static final int system_app_widget_internal_padding = 17104906; // 0x105000a
+    field public static final int system_app_widget_background_radius;
+    field public static final int system_app_widget_inner_radius;
+    field public static final int system_app_widget_internal_padding;
     field public static final int thumbnail_height = 17104897; // 0x1050001
     field public static final int thumbnail_width = 17104898; // 0x1050002
   }
@@ -27092,12 +27092,13 @@ package android.net.vcn {
 
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
+    method @NonNull public String getGatewayConnectionName();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
     method @NonNull public long[] getRetryInterval();
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder(@NonNull android.net.vcn.VcnControlPlaneConfig);
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.vcn.VcnControlPlaneConfig);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
@@ -27121,7 +27122,7 @@ package android.net.vcn {
 
   public abstract static class VcnManager.VcnStatusCallback {
     ctor public VcnManager.VcnStatusCallback();
-    method public abstract void onGatewayConnectionError(@NonNull int[], int, @Nullable Throwable);
+    method public abstract void onGatewayConnectionError(@NonNull String, int, @Nullable Throwable);
     method public abstract void onStatusChanged(int);
   }
 
@@ -41987,6 +41988,7 @@ package android.telephony {
   public final class PreciseDataConnectionState implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.telephony.data.ApnSetting getApnSetting();
+    method public int getId();
     method public int getLastCauseCode();
     method @Nullable public android.net.LinkProperties getLinkProperties();
     method public int getNetworkType();

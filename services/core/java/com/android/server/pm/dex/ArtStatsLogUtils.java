@@ -29,6 +29,7 @@ import com.android.internal.art.ArtStatsLog;
 import com.android.server.pm.PackageManagerService;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,8 +42,6 @@ public class ArtStatsLogUtils {
     private static final String TAG = ArtStatsLogUtils.class.getSimpleName();
     private static final String PROFILE_DEX_METADATA = "primary.prof";
     private static final String VDEX_DEX_METADATA = "primary.vdex";
-    private static final String BASE_APK= "base.apk";
-
 
     private static final int ART_COMPILATION_REASON_INSTALL_BULK_SECONDARY =
             ART_DATUM_REPORTED__COMPILATION_REASON__ART_COMPILATION_REASON_INSTALL_BULK_SECONDARY;
@@ -187,11 +186,14 @@ public class ArtStatsLogUtils {
                 isa);
     }
 
-    public static int getApkType(String path) {
-        if (path.equals(BASE_APK)) {
+    public static int getApkType(String path, String baseApkPath, String[] splitApkPaths) {
+        if (path.equals(baseApkPath)) {
             return ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE;
+        } else if(Arrays.stream(splitApkPaths).anyMatch(p->p.equals(path))) {
+            return ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_SPLIT;
+        } else{
+            return ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_UNKNOWN;
         }
-        return ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_SPLIT;
     }
 
     private static long getDexBytes(String apkPath) {

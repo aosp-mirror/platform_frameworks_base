@@ -293,8 +293,9 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB সংযোগ"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"অ্যাপ চলছে"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"কিছু অ্যাপ ব্যাটারি ব্যবহার করছে"</string>
-    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"বড় করে দেখুন"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"অ্যাক্সেসিবিলিটি সুরক্ষা নীতি"</string>
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"বড় করে দেখা"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপটি ব্যাটারি ব্যবহার করছে"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g>টি অ্যাপ ব্যাটারি ব্যবহার করছে"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ব্যাটারি এবং ডেটার ব্যবহারের বিশদ বিবরণের জন্য ট্যাপ করুন"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"শারীরিক অ্যাক্টিভিটি অ্যাক্সেস করা"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ক্যামেরা"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ছবি তোলা এবং ভিডিও রেকর্ড"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"কাছাকাছি ব্লুটুথ ডিভাইস"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"কাছাকাছি ব্লুটুথ ডিভাইস খুঁজে দেখুন এবং তার সাথে কানেক্ট করুন"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"কল লগ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ফোন কল লগ পড়ে এবং দেখে"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ফোন"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"ট্যাবলেটের ব্লুটুথ কনফিগারেশন দেখতে, এবং যুক্ত ডিভাইসগুলির সাথে সংযোগ স্থাপন এবং সংযোগের অনুরোধ স্বীকার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"আপনার Android TV ডিভাইসের ব্লুটুথের কনফিগারেশন দেখার এবং পেয়ার করা ডিভাইসের সাথে কানেক্ট করার বা কানেকশন গ্রহণ করার অনুমতি দেয়।"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ফোনের ব্লুটুথ কনফিগারেশন দেখতে, এবং যুক্ত ডিভাইসগুলির সাথে সংযোগ স্থাপন এবং সংযোগের অনুরোধ স্বীকার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"কাছাকাছি ব্লুটুথ ডিভাইস খুঁজে দেখুন এবং তার সাথে পেয়ার করুন"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"অ্যাপটিকে কাছাকাছি ব্লুটুথ ডিভাইস খুঁজে দেখতে এবং তার সাথে পেয়ার করার অনুমতি দেয়"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"পেয়ার করা ব্লুটুথ ডিভাইসের সাথে কানেক্ট করুন"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"অ্যাপটিকে পেয়ার করা ব্লুটুথ ডিভাইসের সাথে কানেক্ট করতে অনুমতি দেয়"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"পছন্দের NFC পেমেন্ট পরিষেবার তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"অ্যাপের মাধ্যমে পছন্দসই এনএফসি পেমেন্ট পরিষেবার তথ্য, যেমন রেজিস্ট্রার করার সহায়তা এবং রুট ডেস্টিনেশন সম্পর্কিত তথ্য অ্যাক্সেস করার অনুমতি দেয়।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়ার ফিল্ড কমিউনিকেশন নিয়ন্ত্রণ করে"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"পিন, প্যাটার্ন অথবা পাসওয়ার্ড সেট করা নেই"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"যাচাইকরণে সমস্যা হয়েছে"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্রিন লক ব্যবহার করুন"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"চালিয়ে যেতে আপনার ডিভাইসের ক্রেডেনশিয়াল ব্যবহার করুন"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"আঙ্গুলের ছাপ আংশিক শনাক্ত করা হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"আঙ্গুলের ছাপ নেওয়ার সেন্সরটি অপরিস্কার৷ পরিষ্কার করে আবার চেষ্টা করুন৷"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"আঙ্গুল অতি দ্রুত সরানো হয়েছে৷ আবার চেষ্টা করুন৷"</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙ্গুল খুব ধীরে সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"আঙ্গুলের ছাপ যাচাই করা হয়েছে"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ফেস যাচাই করা হয়েছে"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ফেস যাচাই করা হয়েছে, \'কনফার্ম করুন\' বোতাম প্রেস করুন"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার অনুপলব্ধ৷"</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"আঙ্গুলের ছাপ সংরক্ষণ করা যাবে না৷ অনুগ্রহ করে একটি বিদ্যমান আঙ্গুলের ছাপ সরান৷"</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"আঙ্গুলের ছাপ নেওয়ার সময়সীমা শেষ হযেছে৷ আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"আঙ্গুলের ছাপ অপারেশন বাতিল করা হয়েছে৷"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যবহারকারী আঙ্গুলের ছাপের অপারেশনটি বাতিল করেছেন।"</string>
@@ -603,6 +621,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"মুখের সাহায্যে আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"আপনার ফেস আবার এনরোল করুন"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"শনাক্তকরণের উন্নতি করতে আপনার ফেস আবার এনরোল করুন"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"মুখের সঠিক ডেটা পাওয়া যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"খুব উজ্জ্বল। আলো কমিয়ে চেষ্টা করে দেখুন।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"খুব অন্ধকার। আরও উজ্জ্বল আলো ব্যবহার করে দেখুন।"</string>
@@ -639,7 +665,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> ফেস"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"মুখের সাহায্যে আনলক ব্যবহার করুন"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"মুখ অথবা স্ক্রিন লক ব্যবহার করুন"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"চালিয়ে যেতে মুখের সাহায্যে আনলক ব্যবহার করুন"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"চালিয়ে যেতে আপনার ফেস বা স্ক্রিন লক ব্যবহার করুন"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1033,12 @@
     <string name="copied" msgid="4675902854553014676">"কপি করা হয়েছে"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> থেকে কপি করা ডেটা <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-এ পেস্ট করা হয়েছে"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"ক্লিপবোর্ডের ডেটা <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>-এ পেস্ট করা হয়েছে"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"আরও"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"মেনু+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2110,20 +2143,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"অফিস"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ব্যক্তিগত ভিউ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"অফিসের ভিউ"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"অফিস অ্যাপের মাধ্যমে শেয়ার করা যাবে না"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"আইটি অ্যাডমিন আপনার অফিস প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট শেয়ার করার অনুমতি দেয় না"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"অফিসের অ্যাপের মাধ্যমে এটি খোলা যাবে না"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"আইটি অ্যাডমিন আপনার অফিস প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট খোলার অনুমতি দেয় না"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"ব্যক্তিগত অ্যাপের মাধ্যমে শেয়ার করা যাবে না"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"আইটি অ্যাডমিন আপনার ব্যক্তিগত প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট শেয়ার করার অনুমতি দেয় না"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"ব্যক্তিগত অ্যাপের মাধ্যমে খোলা যাবে না"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"আইটি অ্যাডমিন আপনার ব্যক্তিগত প্রোফাইল ব্যবহার করে অ্যাপের মাধ্যমে এই কন্টেন্ট খোলার অনুমতি দেয় না"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"অফিস প্রোফাইল বন্ধ করা আছে"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"চালু করুন"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"এই ধরনের কন্টেন্ট অফিস অ্যাপের মাধ্যমে খোলা যাবে না"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"এই ধরনের কন্টেন্ট অফিসের অ্যাপের মাধ্যমে খুলে দেখা যাবে না"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"এই ধরনের কন্টেন্ট ব্যক্তিগত অ্যাপের মাধ্যমে খোলা বা দেখা যাবে না"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"এই ধরনের কন্টেন্ট ব্যক্তিগত অ্যাপের মাধ্যমে খোলা যাবে না"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"সিম নেটওয়ার্ক আনলক পিন"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"সিম নেটওয়ার্ক সাবসেট আনলক পিন"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"কর্পোরেট সিম আনলক পিন"</string>
@@ -2236,8 +2280,9 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"স্ক্রিনের কোনও অংশ বড় করে দেখা"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"এখন আপনি সম্পূর্ণ স্ক্রিন বা এর কোনও অংশ বড় করে দেখতে পারেন অথবা দুটি বিকল্পের মধ্যে পারস্পরিক পরিবর্তন করতে পারেন।"</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"আপনার স্ক্রিনের অংশ এখন আপনি বড় করে দেখতে পারবেন"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"সেটিংস থেকে চালু করুন"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"বাতিল করুন"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"চালিয়ে যেতে, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; আপনার ডিভাইসের মাইক্রোফোন অ্যাক্সেস করতে চায়।"</string>

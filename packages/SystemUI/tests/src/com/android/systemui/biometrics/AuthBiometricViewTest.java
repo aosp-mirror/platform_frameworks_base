@@ -26,11 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
-import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.biometrics.SensorProperties;
-import android.hardware.fingerprint.FingerprintSensorProperties;
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -49,9 +45,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -332,86 +325,6 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL);
-    }
-
-    @Test
-    public void testUdfpsBottomSpacerHeightForPortrait() {
-        final int displayHeightPx = 3000;
-        final int navbarHeightPx = 10;
-        final int dialogBottomMarginPx = 20;
-        final int buttonBarHeightPx = 100;
-        final int textIndicatorHeightPx = 200;
-
-        final int sensorLocationX = 540;
-        final int sensorLocationY = 1600;
-        final int sensorRadius = 100;
-
-        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
-        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
-                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                "00000001" /* serialNumber */, "" /* softwareVersion */));
-        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
-                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                "vendor/version/revision" /* softwareVersion */));
-
-        final FingerprintSensorPropertiesInternal props = new FingerprintSensorPropertiesInternal(
-                0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
-                sensorRadius);
-
-        assertEquals(970,
-                AuthBiometricUdfpsView.calculateBottomSpacerHeightForPortrait(
-                        props, displayHeightPx, textIndicatorHeightPx, buttonBarHeightPx,
-                        dialogBottomMarginPx, navbarHeightPx
-                ));
-    }
-
-    @Test
-    public void testUdfpsBottomSpacerHeightForLandscape() {
-        final int titleHeightPx = 320;
-        final int subtitleHeightPx = 240;
-        final int descriptionHeightPx = 200;
-        final int topSpacerHeightPx = 550;
-        final int textIndicatorHeightPx = 190;
-        final int buttonBarHeightPx = 160;
-        final int navbarBottomInsetPx = 75;
-
-        assertEquals(885,
-                AuthBiometricUdfpsView.calculateBottomSpacerHeightForLandscape(
-                        titleHeightPx, subtitleHeightPx, descriptionHeightPx, topSpacerHeightPx,
-                        textIndicatorHeightPx, buttonBarHeightPx, navbarBottomInsetPx));
-    }
-
-    @Test
-    public void testUdfpsHorizontalSpacerWidthForLandscape() {
-        final int displayWidthPx = 3000;
-        final int dialogMarginPx = 20;
-        final int navbarHorizontalInsetPx = 75;
-
-        final int sensorLocationX = 540;
-        final int sensorLocationY = 1600;
-        final int sensorRadius = 100;
-
-        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
-        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
-                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                "00000001" /* serialNumber */, "" /* softwareVersion */));
-        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
-                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                "vendor/version/revision" /* softwareVersion */));
-
-        final FingerprintSensorPropertiesInternal props = new FingerprintSensorPropertiesInternal(
-                0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
-                sensorRadius);
-
-        assertEquals(1205,
-                AuthBiometricUdfpsView.calculateHorizontalSpacerWidthForLandscape(
-                        props, displayWidthPx, dialogMarginPx, navbarHorizontalInsetPx));
     }
 
     private PromptInfo buildPromptInfo(boolean allowDeviceCredential) {

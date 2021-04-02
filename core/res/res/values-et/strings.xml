@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Rakendus töötab"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Rakendused kasutavad akutoidet"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Suurendus"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Juurdepääsufunktsioonide turvaeeskirjad"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> kasutab akutoidet"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> rakendust kasutab akutoidet"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"juurdepääs teie füüsilisele tegevusele"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kaamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"pildistamine ja video salvestamine"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Lähedalasuvad Bluetooth-seadmed"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"lähedalasuvate Bluetooth-seadmete avastamine ja nendega ühenduse loomine"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Kõnelogid"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefoni kõnelogi lugemine ja kirjutamine"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Võimaldab rakendusel vaadata tahvelarvuti Bluetooth-konfiguratsiooni ning luua ja heaks kiita ühendusi seotud seadmetega."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Võimaldab rakendusel vaadata Android TV seadme Bluetoothi seadistust ning luua ja vastu võtta ühendusi seotud seadmetega."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Võimaldab rakendusel vaadata telefoni Bluetooth-konfiguratsiooni ning luua ja heaks kiita ühendusi seotud seadmetega."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"lähedalasuvate Bluetooth-seadmete avastamine ja nendega sidumine"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Lubab rakendusel avastada lähedalasuvaid Bluetooth-seadmeid ja nendega siduda"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"seotud Bluetooth-seadmetega ühenduse loomine"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Lubab rakendusel luua ühenduse seotud Bluetooth-seadmetega"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Eelistatud NFC-makseteenuse teave"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Võimaldab rakendusel hankida eelistatud NFC-makseteenuse teavet (nt registreeritud abi ja marsruudi sihtkoht)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lähiväljaside juhtimine"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN-koodi, mustrit ega parooli pole määratud"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Viga autentimisel"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekraaniluku kasutamine"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Jätkamiseks sisestage seadme mandaat"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Tuvastati osaline sõrmejälg. Proovige uuesti."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sõrmejälge ei õnnestunud töödelda. Proovige uuesti."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Sõrmejäljeandur on must. Puhastage see ja proovige uuesti."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Sõrm liikus liiga kiiresti. Proovige uuesti."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Sõrm liikus liiga aeglaselt. Proovige uuesti."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sõrmejälg autenditi"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Nägu on autenditud"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Nägu on autenditud, vajutage käsku Kinnita"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Sõrmejälje riistvara pole saadaval."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Sõrmejälge ei saa salvestada. Eemaldage olemasolev sõrmejälg."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Sõrmejälje riistvara taimeri ajalõpp. Proovige uuesti."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Sõrmejälje toiming tühistati."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Kasutaja tühistas sõrmejälje kasutamise."</string>
@@ -603,6 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registreerige oma nägu uuesti"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Tuvastamise parandamiseks registreerige oma nägu uuesti"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Seadistage Face Unlock"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Avage telefon seda vaadates"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Seadistage rohkem viise avamiseks"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Puudutage sõrmejälje lisamiseks"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Näoandmeid ei saanud jäädvustada. Proovige uuesti."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Liiga ere. Proovige hämaramat valgust."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Liiga pime. Proovige parema valgustusega kohas."</string>
@@ -639,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Nägu <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Face Unlocki kasutamine"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Face Unlocki või ekraaniluku kasutamine"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Jätkamiseks kasutage Face Unlocki"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Jätkamiseks kasutage oma nägu või ekraanilukku"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"Kopeeritud"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kleepis rakendusest <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kleepis lõikelaualt"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kleepis teie kopeeritud teksti"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kleepis teie kopeeritud pildi"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kleepis teie kopeeritud sisu"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Rohkem"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menüü+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta +"</string>
@@ -2110,20 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Töö"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Isiklik vaade"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Töövaade"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Seda ei saa töörakendustega jagada"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Teie IT-administraator ei luba seda sisu teie tööprofiilil olevate rakendustega jagada"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Seda ei saa töörakendustega avada"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Teie IT-administraator ei luba seda sisu teie tööprofiilil olevate rakendustega avada"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Seda ei saa isiklike rakendustega jagada"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Teie IT-administraator ei luba seda sisu teie isiklikul profiilil olevate rakendustega jagada"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Seda ei saa isiklike rakendustega avada"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Teie IT-administraator ei luba seda sisu teie isiklikul profiilil olevate rakendustega avada"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Blokeeris teie IT-administraator"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Seda sisu ei saa töörakendustega jagada"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Seda sisu ei saa töörakendustega avada"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Seda sisu ei saa isiklike rakendustega jagada"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Seda sisu ei saa isiklike rakendustega avada"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Tööprofiil on peatatud"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Lülita sisse"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Töörakendused ei toeta seda sisu"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Seda sisu ei saa töörakendustega avada"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Isiklikud rakendused ei toeta seda sisu"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Seda sisu ei saa isiklike rakendustega avada"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Puudutage sisselülitamiseks"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Töörakendusi pole"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Isiklikke rakendusi pole"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Kas avada rakendus <xliff:g id="APP">%s</xliff:g> isiklikul profiilil?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Kas avada rakendus <xliff:g id="APP">%s</xliff:g> tööprofiilil?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kasuta isiklikku brauserit"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Kasuta tööbrauserit"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kaardi võrgu avamise PIN-kood"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM-kaardi võrgu alamhulga avamise PIN-kood"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM-kaardi ettevõtte avamise PIN-kood"</string>
@@ -2236,8 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Ekraanikuva teatud osa suurendamine"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Nüüd on teil võimalik suurendada täisekraani, konkreetset ala või mõlema võimaluse vahel vahetada."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Uued suurendamise seaded"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Saate nüüd suurendada osa oma ekraanikuvast"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Lülitage sisse menüüs Seaded"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Loobu"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Jätkamiseks vajab rakendus &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; juurdepääsu teie seadme mikrofonile."</string>

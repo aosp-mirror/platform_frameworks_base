@@ -5543,12 +5543,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             incrementRequestCountOrThrow(this);
             mCallbackFlags = callbackFlags;
             mCallingAttributionTag = callingAttributionTag;
-
-            try {
-                mBinder.linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                binderDied();
-            }
+            linkDeathRecipient();
         }
 
         NetworkRequestInfo(@NonNull final NetworkRequestInfo nri,
@@ -5586,6 +5581,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             incrementRequestCountOrThrow(this);
             mCallbackFlags = nri.mCallbackFlags;
             mCallingAttributionTag = nri.mCallingAttributionTag;
+            linkDeathRecipient();
         }
 
         NetworkRequestInfo(int asUid, @NonNull final NetworkRequest r) {
@@ -5614,8 +5610,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return Collections.unmodifiableList(tempRequests);
         }
 
+        void linkDeathRecipient() {
+            if (null != mBinder) {
+                try {
+                    mBinder.linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    binderDied();
+                }
+            }
+        }
+
         void unlinkDeathRecipient() {
-            if (mBinder != null) {
+            if (null != mBinder) {
                 mBinder.unlinkToDeath(this, 0);
             }
         }
@@ -7742,7 +7748,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             NetworkAgentInfo bestNetwork = null;
             NetworkRequest bestRequest = null;
             for (final NetworkRequest req : nri.mRequests) {
-                bestNetwork = mNetworkRanker.getBestNetwork(req, nais);
+                bestNetwork = mNetworkRanker.getBestNetwork(req, nais, nri.getSatisfier());
                 // Stop evaluating as the highest possible priority request is satisfied.
                 if (null != bestNetwork) {
                     bestRequest = req;
@@ -7995,7 +8001,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull final NetworkOffer offer, @NonNull final NetworkRanker networkRanker) {
         final NetworkRequest activeRequest = nri.isBeingSatisfied() ? nri.getActiveRequest() : null;
         final NetworkAgentInfo satisfier = null != activeRequest ? nri.getSatisfier() : null;
-        final FullScore satisfierScore = null != satisfier ? satisfier.getScore() : null;
 
         // Multi-layer requests have a currently active request, the one being satisfied.
         // Since the system will try to bring up a better network than is currently satisfying
@@ -8034,7 +8039,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     && satisfier.factorySerialNumber == offer.providerId;
             final boolean newNeeded = (currentlyServing
                     || (activeRequest.canBeSatisfiedBy(offer.caps)
-                            && networkRanker.mightBeat(activeRequest, satisfierScore, offer)));
+                            && networkRanker.mightBeat(activeRequest, satisfier, offer)));
             if (newNeeded != oldNeeded) {
                 if (newNeeded) {
                     offer.onNetworkNeeded(activeRequest);

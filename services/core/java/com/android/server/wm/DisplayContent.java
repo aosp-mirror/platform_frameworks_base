@@ -3750,6 +3750,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     void setImeInputTarget(WindowState target) {
         mImeInputTarget = target;
+        boolean canScreenshot = mImeInputTarget == null || !mImeInputTarget.isSecureLocked();
+        if (mImeWindowsContainer.setCanScreenshot(canScreenshot)) {
+            mWmService.requestTraversal();
+        }
     }
 
     @VisibleForTesting
@@ -3867,7 +3871,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void updateImeInputAndControlTarget(WindowState target) {
         if (mImeInputTarget != target) {
             ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
-            mImeInputTarget = target;
+            setImeInputTarget(target);
             updateImeControlTarget();
         }
     }

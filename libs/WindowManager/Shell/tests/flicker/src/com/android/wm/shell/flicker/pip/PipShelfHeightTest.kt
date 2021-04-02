@@ -18,13 +18,13 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.google.common.truth.Truth
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -33,15 +33,16 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip launch.
- * To run this test: `atest WMShellFlickerTests:PipMovesInAllApps`
+ * Test Pip movement with Launcher shelf height change.
+ * To run this test: `atest WMShellFlickerTests:PipShelfHeightTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class PipMovesInAllApps(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+class PipShelfHeightTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val taplInstrumentation = LauncherInstrumentation()
+    private val testApp = FixedAppHelper(instrumentation)
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = false) {
@@ -49,10 +50,12 @@ class PipMovesInAllApps(testSpec: FlickerTestParameter) : PipTransition(testSpec
                 eachRun {
                     taplInstrumentation.pressHome()
                 }
+                test {
+                    testApp.exit(wmHelper)
+                }
             }
             transitions {
-                taplInstrumentation.pressHome().switchToAllApps()
-                wmHelper.waitForAppTransitionIdle()
+                testApp.launchViaIntent(wmHelper)
             }
         }
 
@@ -68,7 +71,7 @@ class PipMovesInAllApps(testSpec: FlickerTestParameter) : PipTransition(testSpec
         }
     }
 
-    @FlakyTest(bugId = 184050344)
+    @Presubmit
     @Test
     fun pipWindowMovesUp() = testSpec.assertWmEnd {
         val initialState = this.trace?.first()?.wmState

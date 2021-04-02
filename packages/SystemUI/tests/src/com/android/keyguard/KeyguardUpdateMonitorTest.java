@@ -881,6 +881,36 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldNotListenForUdfps_whenTrustEnabled() {
+        // GIVEN a "we should listen for udfps" state
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN trust is enabled (ie: via smartlock)
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
+    public void testShouldNotListenForUdfps_whenFaceAuthenticated() {
+        // GIVEN a "we should listen for udfps" state
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN face authenticated
+        mKeyguardUpdateMonitor.onFaceAuthenticated(
+                KeyguardUpdateMonitor.getCurrentUser(), false);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
     public void testRequireUnlockForNfc_Broadcast() {
         KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
         mKeyguardUpdateMonitor.registerCallback(callback);

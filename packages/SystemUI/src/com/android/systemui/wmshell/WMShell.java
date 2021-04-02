@@ -297,6 +297,11 @@ public final class WMShell extends SystemUI
                 }
                 oneHanded.stopOneHanded();
             }
+
+            @Override
+            public void onUserSwitchComplete(int userId) {
+                oneHanded.onUserSwitch(userId);
+            }
         };
         mKeyguardUpdateMonitor.registerCallback(mOneHandedKeyguardCallback);
 

@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"កម្មវិធី​ដែល​កំពុង​ដំណើរការ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"កម្មវិធីដែល​កំពុងប្រើថ្ម"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ការពង្រីក"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"គោលការណ៍​ស្ដីពី​សុវត្ថិភាព​នៃភាពងាយស្រួល"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងប្រើថ្ម"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"កម្មវិធីចំនួន <xliff:g id="NUMBER">%1$d</xliff:g> កំពុងប្រើថ្ម"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ចូលប្រើ​សកម្មភាព​រាងកាយ​របស់អ្នក"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"កាមេរ៉ា"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ថតរូប និងថតវីដេអូ"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"ឧបករណ៍​ប៊្លូធូសដែលនៅជិត"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ស្វែងរក និងភ្ជាប់ទៅឧបករណ៍​ប៊្លូធូស​ដែលនៅជិត"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"អាន និងសរសេរ​កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ទូរសព្ទ"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"ឲ្យ​កម្មវិធី​មើល​ការ​កំណត់​រចនាសម្ព័ន្ធ​​ប៊្លូធូស​លើ​​កុំព្យូទ័រ​បន្ទះ ព្រម​ទាំង​ធ្វើ​ការ​តភ្ជាប់ និង​ទទួល​​ជា​មួយ​ឧបករណ៍​បាន​ផ្គូផ្គង។"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"អនុញ្ញាតឱ្យ​កម្មវិធី​មើលការកំណត់​រចនាសម្ព័ន្ធប៊្លូធូស​នៅលើឧបករណ៍ Android TV របស់អ្នក ព្រមទាំងធ្វើការតភ្ជាប់ និង​ទទួលយកការតភ្ជាប់ជាមួយ​ឧបករណ៍​ដែលបានផ្គូផ្គង។"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ឲ្យ​កម្មវិធី​មើល​​ការ​កំណត់​រចនាសម្ព័ន្ធ​ប៊្លូធូស​ក្នុង​ទូរស័ព្ទ ដើម្បី​ទទួល និង​តភ្ជាប់​ជា​មួយ​ឧបករណ៍​បាន​ផ្គូផ្គង។"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"ស្វែងរក និងផ្គូផ្គងឧបករណ៍​ប៊្លូធូសដែលនៅជិត"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"អនុញ្ញាតឱ្យកម្មវិធី​ស្វែងរក និងផ្គូផ្គង​ឧបករណ៍​ប៊្លូធូសដែលនៅជិត"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ភ្ជាប់ទៅឧបករណ៍​ប៊្លូធូសដែលបានផ្គូផ្គង"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"អនុញ្ញាតឱ្យ​កម្មវិធីភ្ជាប់ទៅ​ឧបករណ៍​ប៊្លូធូសដែលបានផ្គូផ្គង"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ព័ត៌មានអំពី​សេវាបង់ប្រាក់តាម NFC ជាអាទិភាព"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"អនុញ្ញាតឱ្យ​កម្មវិធី​ទទួលបាន​ព័ត៌មានអំពី​សេវាបង់ប្រាក់តាម nfc ជាអាទិភាព​ដូចជា គោលដៅផ្លូវ និង​ព័ត៌មាន​កំណត់អត្តសញ្ញាណ​កម្មវិធី ដែលបានចុះឈ្មោះ​ជាដើម។"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ពិនិត្យ​ការ​ទាក់ទង​នៅ​ក្បែរ (NFC)"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"គ្មាន​ការកំណត់​កូដ pin លំនាំ ឬពាក្យសម្ងាត់​ទេ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"មានបញ្ហាក្នុង​ការផ្ទៀងផ្ទាត់"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ប្រើ​ការ​ចាក់​សោ​អេក្រង់"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"បញ្ចូល​ព័ត៌មានផ្ទៀងផ្ទាត់​ឧបករណ៍​របស់អ្នក ដើម្បីបន្ត"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ឧបករណ៍ចាប់ស្នាមម្រាមដៃគឺប្រឡាក់។ សូមសម្អាត រួចព្យាយាមម្តងទៀត។"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"ម្រាមដៃផ្លាស់ទីលឿនពេក។ សូមព្យាយាមម្តងទៀត។"</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ចលនាម្រាមដៃយឺតពេកហើយ។ សូមព្យាយាមម្តងទៀត។"</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"បាន​ផ្ទៀង​ផ្ទាត់​ស្នាម​ម្រាមដៃ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"បានផ្ទៀងផ្ទាត់​មុខ សូម​ចុច​បញ្ជាក់"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ផ្នែករឹងស្នាមម្រាមដៃមិនមានទេ។"</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"មិនអាចផ្ទុកស្នាមម្រាមដៃទេ។ សូមយកស្នាមម្រាមដៃដែលមានស្រាប់ចេញ។"</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ស្នាមម្រាមដៃបានអស់ម៉ោង។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"បានបោះបង់ប្រតិបត្តិការស្នាមម្រាមដៃ។"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ប្រតិបត្តិការ​ស្នាម​ម្រាម​ដៃ​ត្រូវ​បាន​បោះ​បង់​ដោយ​អ្នក​ប្រើប្រាស់។"</string>
@@ -603,6 +621,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ដើម្បី​ធ្វើឱ្យ​ការសម្គាល់មុខ​ប្រសើរជាងមុន សូមស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"មិនអាច​ថត​ទិន្នន័យទម្រង់មុខ​បាន​ត្រឹមត្រូវទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ភ្លឺពេក។ សូមសាកល្បង​ប្រើ​ពន្លឺស្រាលជាងនេះ។"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ងងឹតជ្រុល។ សូមសាកល្បង​ប្រើ​ពន្លឺភ្លឺជាងនេះ។"</string>
@@ -639,7 +665,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"ផ្ទៃមុខទី <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"ប្រើការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ប្រើមុខ ឬ​ការចាក់សោអេក្រង់"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"ប្រើការដោះសោ​តាមទម្រង់មុខ ដើម្បីបន្ត"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ប្រើការចាក់សោអេក្រង់ ឬមុខរបស់អ្នក ដើម្បីបន្ត"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1033,12 @@
     <string name="copied" msgid="4675902854553014676">"បា​នចម្លង"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូលពី <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> បានដាក់ចូលពីឃ្លីបបត"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"ច្រើន​ទៀត"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"ម៉ឺនុយ +"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2110,20 +2143,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ការងារ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ទិដ្ឋភាពផ្ទាល់ខ្លួន"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ទិដ្ឋភាព​ការងារ"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"មិនអាចចែករំលែកខ្លឹមសារនេះតាមរយៈ​កម្មវិធី​ការងារបានទេ"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នក​មិនអនុញ្ញាតឱ្យអ្នកចែករំលែក​ខ្លឹមសារនេះ​តាមរយៈកម្មវិធី​នៅក្នុងកម្រងព័ត៌មានការងាររបស់អ្នកទេ"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"មិនអាច​បើកខ្លឹមសារនេះដោយប្រើ​កម្មវិធី​ការងារបានទេ"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នក​មិនអនុញ្ញាតឱ្យអ្នកបើក​ខ្លឹមសារនេះ​ដោយប្រើ​កម្មវិធី​នៅក្នុងកម្រងព័ត៌មាន​ការងាររបស់អ្នកទេ"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"មិនអាចចែករំលែកខ្លឹមសារនេះតាមរយៈ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នក​មិនអនុញ្ញាតឱ្យអ្នកចែករំលែក​ខ្លឹមសារនេះតាមរយៈ​កម្មវិធី​នៅក្នុងកម្រងព័ត៌មាន​ផ្ទាល់ខ្លួនរបស់អ្នកទេ"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"មិនអាច​បើកខ្លឹមសារនេះដោយប្រើ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នក​មិនអនុញ្ញាតឱ្យអ្នកបើក​ខ្លឹមសារនេះ​ដោយប្រើ​កម្មវិធី​នៅក្នុងកម្រងព័ត៌មាន​ផ្ទាល់ខ្លួនរបស់អ្នកទេ"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"កម្រងព័ត៌មានការងារត្រូវបាន​ផ្អាក"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"បើក"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"មិនមានកម្មវិធីការងារដែលអាចប្រើ​ខ្លឹមសារនេះបានទេ"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"មិនមានកម្មវិធីការងារដែលអាចបើក​ខ្លឹមសារនេះបានទេ"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"មិនមានកម្មវិធីផ្ទាល់ខ្លួន​ដែលអាចប្រើ​ខ្លឹមសារនេះបានទេ"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"មិនមានកម្មវិធីផ្ទាល់ខ្លួន​ដែលអាចបើក​ខ្លឹមសារនេះបានទេ"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"កូដ PIN ដោះ​សោ​បណ្ដាញ​ស៊ីម"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"កូដ PIN ដោះសោ​សំណុំរង​នៃ​បណ្ដាញស៊ីម"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"កូដ PIN ដោះសោ​ក្រុមហ៊ុនស៊ីម"</string>
@@ -2236,8 +2280,9 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"ពង្រីកផ្នែកនៃ​អេក្រង់របស់អ្នក"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"ឥឡូវនេះ អ្នកអាចពង្រីក​អេក្រង់ពេញរបស់អ្នក តំបន់ជាក់លាក់ ឬប្ដូររវាងជម្រើសទាំងពីរ។"</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ឥឡូវនេះ អ្នកអាចពង្រីក​ផ្នែកនៃអេក្រង់​របស់អ្នកបានហើយ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"បើកនៅក្នុងការកំណត់"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ច្រានចោល"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ដើម្បីបន្ត &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ត្រូវការសិទ្ធិចូលប្រើ​មីក្រូហ្វូន​របស់ឧបករណ៍អ្នក។"</string>

@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"एप चलिरहेको छ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"एपहरूले ब्याट्री खपत गर्दै छन्"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"जुम इन गर्ने सुविधा"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"सर्वसुलभताको सुरक्षासम्बन्धी नीति"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले ब्याट्री प्रयोग गर्दै छ"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> एपहरूले ब्याट्री प्रयोग गर्दै छन्"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"आफ्नो शारीरिक क्रियाकलापको डेटामाथि पहुँच राख्नु"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"क्यामेरा"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"फोटो खिच्नुका साथै भिडियो रेकर्ड गर्नुहोस्"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"नजिकै रहेका ब्लुटुथ चल्ने यन्त्रहरू"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"नजिकै रहेका ब्लुटुथ चल्ने यन्त्रहरू भेट्टाउने र ती यन्त्रहरूसँग कनेक्ट गर्ने"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"कलका लगहरू"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"फोन कलको लग पढ्नुहोस् र लेख्नुहोस्"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"फोन"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"ट्याब्लेटमा ब्लुटुथको कन्फिगुरेसनलाई हेर्न र बनाउन र जोडी उपकरणहरूसँग जडानहरूलाई स्वीकार गर्न एपलाई अनुमति दिन्छ।"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"एपलाई तपाईंको Android टिभी यन्त्रको ब्लुटुथको कन्फिगुरेसन हेर्ने तथा जोडा बनाइएका यन्त्रहरूसँग जोडिने वा ती यन्त्रहरूले पठाएका जोडिने अनुरोध स्वीकार्ने अनुमति दिन्छ।"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"एपलाई फोनमा ब्लुटुथको कन्फिगरेसन हेर्न र जोडी भएका उपकरणहरूसँग जडानहरू बनाउन र स्वीकार गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"नजिकै रहेका ब्लुटुथ चल्ने यन्त्रहरू भेट्टाउने र ती यन्त्रहरूसँग कनेक्ट गर्ने"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"यो अनुमति दिइएमा एपले नजिकै रहेका ब्लुटुथ चल्ने यन्त्रहरू भेट्टाउन र ती यन्त्रहरूसँग कनेक्ट गर्न सक्छ"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"लिंक गरिएका ब्लुटुथ चल्ने यन्त्रहरूसँग कनेक्ट गर्ने"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"यो अनुमति दिइएमा एपले लिंक गरिएका ब्लुटुथ चल्ने यन्त्रहरूसँग कनेक्ट गर्न सक्छ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC भुक्तानी सेवासम्बन्धी रुचाइएको जानकारी"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"यसले एपलाई दर्ता गरिएका सहायता तथा मार्गको गन्तव्य जस्ता रुचाइएका NFC भुक्तानी सेवासम्बन्धी जानकारी प्राप्त गर्न दिन्छ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नजिक क्षेत्र संचार नियन्त्रणहरू"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"कुनै पनि PIN, ढाँचा वा पासवर्ड सेट गरिएको छैन"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"प्रमाणित गर्ने क्रममा त्रुटि भयो"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रिन लक प्रयोग गर्नुहोस्"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"जारी राख्न आफ्नो यन्त्रको PIN, प्याटर्न वा पासवर्ड हाल्नुहोस्"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"आंशिक फिंगरप्रिन्ट पत्ता लाग्यो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फिंगरप्रिन्ट प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"फिंगरप्रिन्ट सेन्सर फोहोर छ। कृपया सफा गरेर फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"औंला धेरै छिटो चलाइयो। पुन: प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"औंला निकै सुस्त सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिन्ट प्रमाणीकरण गरियो"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"अनुहार प्रमाणीकरण गरियो"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"अनुहार प्रमाणीकरण गरियो, कृपया पुष्टि गर्नुहोस् थिच्नुहोस्"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"औँठाछाप हार्डवेयर उपलब्ध छैन।"</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"फिंगरप्रिन्ट भण्डारण गर्न सकिँदैन। कृपया अहिलेको फिंगरप्रिन्ट हटाउनुहोस्।"</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"फिंगरप्रिन्ट समय सकिएको छ। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिन्ट सञ्चालन रद्द गरियो।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"प्रयोगकर्ताले फिंगरप्रिन्टसम्बन्धी कारबाही रद्द गर्नुभयो।"</string>
@@ -603,6 +621,14 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"फेस अनलक"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"आफ्नो अनुहार पुनः दर्ता गर्नुहोस्"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"अनुहार पहिचानको गुणस्तर सुधार गर्न कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्"</string>
+    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
+    <skip />
+    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
+    <skip />
+    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"अनुहारको सटीक डेटा खिच्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ज्यादै चम्किलो। अझ मधुरो प्रकाश प्रयोग गरी हेर्नु…"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ज्यादै अँध्यारो छ। अझ बढी प्रकाशमा गई हेर्नुहोस्"</string>
@@ -639,7 +665,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"अनुहार <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"फेस अनलक प्रयोग गर्नुहोस्"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"फेस अनलक वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"जारी राख्न फेस अनलक प्रयोग गर्नुहोस्"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"जारी राख्न आफ्नो फेस वा स्क्रिन लक प्रयोग गरी पुष्टि गर्नुहोस्"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1033,12 @@
     <string name="copied" msgid="4675902854553014676">"प्रतिलिपि गरियो"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> मा रहेको डेटा कपी गरी <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> मा पेस्ट गरियो"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"क्लिपबोर्डमा रहेको डेटा कपी गरी <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> मा पेस्ट गरियो"</string>
+    <!-- no translation found for pasted_text (4298871641549173733) -->
+    <skip />
+    <!-- no translation found for pasted_image (4729097394781491022) -->
+    <skip />
+    <!-- no translation found for pasted_content (646276353060777131) -->
+    <skip />
     <string name="more_item_label" msgid="7419249600215749115">"बढी"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"मेनु+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1689,8 +1722,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ्ग सच्याउने सुविधा"</string>
-    <!-- no translation found for reduce_bright_colors_feature_name (3222994553174604132) -->
-    <skip />
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"अझै मधुरो"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अन भयो।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अफ भयो।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
@@ -2111,20 +2143,31 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"काम"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"व्यक्तिगत दृश्य"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"कार्य दृश्य"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"यो सामग्री कामसम्बन्धी अनुप्रयोगहरूमार्फत सेयर गर्न मिल्दैन"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"तपाईंका IT एडमिनले तपाईंलाई तपाईंको कार्य प्रोफाइलमा रहेका अनुप्रयोगहरूमार्फत यो सामग्री सेयर गर्ने अनुमति दिनुभएको छैन"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"यो सामग्री कामसम्बन्धी अनुप्रयोगहरूमार्फत खोल्न मिल्दैन"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"तपाईंका IT एडमिनले तपाईंलाई तपाईंको कार्य प्रोफाइलमा रहेका अनुप्रयोगहरूमार्फत यो सामग्री खोल्ने अनुमति दिनुभएको छैन"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"यो सामग्री व्यक्तिगत अनुप्रयोगहरूमार्फत सेयर गर्न मिल्दैन"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"तपाईंका IT एडमिनले तपाईंलाई तपाईंको व्यक्तिगत प्रोफाइलमा रहेका अनुप्रयोगहरूमार्फत यो सामग्री सेयर गर्ने अनुमति दिनुभएको छैन"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"यो सामग्री व्यक्तिगत अनुप्रयोगहरूमार्फत खोल्न मिल्दैन"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"तपाईंका IT एडमिनले तपाईंलाई तपाईंको व्यक्तिगत प्रोफाइलमा रहेका अनुप्रयोगहरूमार्फत यो सामग्री खोल्ने अनुमति दिनुभएको छैन"</string>
+    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
+    <skip />
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"कार्य प्रोफाइल पज गरिएको छ"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"सक्रिय गर्नुहोस्"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"यो सामग्री कामसम्बन्धी कुनै पनि अनुप्रयोगमार्फत सेयर गर्न मिल्दैन"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"यो सामग्री कामसम्बन्धी कुनै पनि अनुप्रयोगमार्फत खोल्न मिल्दैन"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"यो सामग्री कुनै पनि व्यक्तिगत अनुप्रयोगमार्फत सेयर गर्न मिल्दैन"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"यो सामग्री कुनै पनि व्यक्तिगत अनुप्रयोगमार्फत खोल्न मिल्दैन"</string>
+    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
+    <skip />
+    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
+    <skip />
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM को नेटवर्क अनलक गर्ने PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM को नेटवर्कको सबसेट अनलक गर्ने PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM को कर्पोरेट लक खोल्ने PIN"</string>
@@ -2237,8 +2280,9 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"आफ्नो स्क्रिनको केही भाग जुम इन गर्नुहोस्"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"तपाईं अब आफ्नो स्क्रिनको पूरै भाग वा केही भाग जुम इन गर्न सक्नुहुन्छ वा यी दुई विकल्प अदलबदल गर्न सक्नुहुन्छ।"</string>
+    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
+    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"तपाईं अब स्क्रिनको जुनसुकै भाग जुम इन गर्न सक्नुहुन्छ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"सेटिङमा गई यो सुविधा अन गर्नुहोस्"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"हटाउनुहोस्"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"जारी राख्न &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; लाई तपाईंको यन्त्रको माइक्रोफोन प्रयोग गर्ने अनुमति दिनु पर्ने हुन्छ।"</string>

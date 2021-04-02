@@ -28,8 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.Notification;
-import android.os.Bundle;
+import android.graphics.Color;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
@@ -120,7 +119,8 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
         mEntryBuilder
                 .setFlag(mContext, FLAG_FOREGROUND_SERVICE, true)
                 .setImportance(IMPORTANCE_DEFAULT)
-                .modifyNotification(mContext).setColorized(true);
+                .modifyNotification(mContext)
+                .setColorized(true).setColor(Color.WHITE);
 
         // THEN the entry is in the fgs section
         assertTrue(mFgsSection.isInSection(mEntryBuilder.build()));
@@ -132,7 +132,8 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
         mEntryBuilder
                 .setFlag(mContext, FLAG_FOREGROUND_SERVICE, true)
                 .setImportance(IMPORTANCE_MIN)
-                .modifyNotification(mContext).setColorized(true);
+                .modifyNotification(mContext)
+                .setColorized(true).setColor(Color.WHITE);
 
         // THEN the entry is NOT in the fgs section
         assertFalse(mFgsSection.isInSection(mEntryBuilder.build()));

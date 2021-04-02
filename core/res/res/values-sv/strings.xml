@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"App körs"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Appar som drar batteri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Förstoring"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Säkerhetspolicy för tillgänglighet"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> drar batteri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> appar drar batteri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Tryck för information om batteri- och dataanvändning"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"åtkomst till data om fysisk aktivitet"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ta bilder och spela in video"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Bluetooth-enheter i närheten"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"hitta och ansluta till Bluetooth-enheter i närheten"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Samtalsloggar"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"läsa och skriva samtalslogg"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Tillåter att appen kommer åt pekdatorns Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Tillåter att appen läser Android TV-enhetens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Tillåter att appen kommer åt mobilens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"hitta och parkoppla Bluetooth-enheter i närheten"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Tillåter appen att hitta och parkoppla Bluetooth-enheter i närheten"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ansluta till parkopplade Bluetooth-enheter"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Tillåter appen att ansluta till parkopplade Bluetooth-enheter"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information kopplad till standardtjänsten för NFC-betalning"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillåter att appen hämtar information kopplad till standardtjänsten för NFC-betalning, till exempel registrerade hjälpmedel och ruttdestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollera närfältskommunikationen"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Pinkod, grafiskt lösenord eller lösenord har inte angetts"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ett fel uppstod vid autentiseringen"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Använd skärmlåset"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Fortsätt genom att ange enhetens autentiseringsuppgifter"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Ofullständigt fingeravtryck. Försök igen."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Fingeravtryckssensorn är smutsig. Rengör den och försök igen."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Du rörde fingret för snabbt. Försök igen."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingeravtrycket har autentiserats"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ansiktet har autentiserats"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Det finns ingen maskinvara för fingeravtryck."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Fingeravtrycket kan inte lagras. Ta bort ett befintligt fingeravtryck."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Tidsgränsen för fingeravtrycket har uppnåtts. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrycksåtgärden avbröts."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrycksåtgärden avbröts av användaren."</string>
@@ -603,6 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Ansiktslås"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Registrera ansiktet på nytt"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Gör om registreringen av ansiktet så att ansiktsigenkänningen ska fungera bättre"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Konfigurera ansiktslås"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås upp telefonen genom att titta på den"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurera fler sätt att låsa upp"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tryck för att lägga till ett fingeravtryck"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Det gick inte att fånga ansiktsdata. Försök igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Det är för ljust. Testa lägre belysning."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Det är för mörkt. Testa med bättre belysning."</string>
@@ -639,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Ansikte <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Använd ansiktslåset"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Använd ansiktslåset eller skärmlåset"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Fortsätt med hjälp av ansiktslåset"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Fortsätt med hjälp av ditt ansikte eller skärmlåset"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"Kopierat"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> klistrade in från <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> klistrade in från urklipp"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> klistrade in text som du kopierade"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> klistrade in en bild som du kopierade"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> klistrade in innehåll som du kopierade"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Mer"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta + "</string>
@@ -2110,20 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Jobb"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personlig vy"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Jobbvy"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Det går inte att dela detta med jobbappar"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT-administratören tillåter inte att du delar innehållet med appar i din jobbprofil"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Det går inte att öppna detta med jobbappar"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT-administratören tillåter inte att du öppnar innehållet med appar i din jobbprofil"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Det går inte att dela detta med privata appar"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT-administratören tillåter inte att du delar innehållet med appar i din privata profil"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Det går inte att öppna detta med privata appar"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT-administratören tillåter inte att du öppnar innehållet med appar i din privata profil"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Blockeras av IT-administratören"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Det här innehållet kan inte delas med jobbappar"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Det här innehållet kan inte öppnas med jobbappar"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Det här innehållet kan inte delas med privata appar"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Det här innehållet kan inte öppnas med privata appar"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Jobbprofilen är pausad"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktivera"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Inga jobbappar har stöd för det här innehållet"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Det går inte att öppna innehållet med några jobbappar"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Inga privata appar har stöd för det här innehållet"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Det går inte att öppna innehållet med några privata appar"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tryck för att aktivera"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Inga jobbappar"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Inga privata appar"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Vill du öppna detta i <xliff:g id="APP">%s</xliff:g> i den privata profilen?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Vill du öppna detta i <xliff:g id="APP">%s</xliff:g> i jobbprofilen?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Använd privat webbläsare"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Använd jobbwebbläsare"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkod för upplåsning av nätverk för SIM-kort"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Pinkod för upplåsning av delnätverk för SIM-kort"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Pinkod för upplåsning av företag för SIM-kort"</string>
@@ -2236,8 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Förstora en del av skärmen"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Nu kan du förstora hela skärmen, ett visst område eller växla mellan båda alternativen."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nya inställningar för förstoring"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Nu kan du förstora delar av skärmen"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aktivera i inställningarna"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Stäng"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"&lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; behöver behörighet till enhetens mikrofon för att fortsätta."</string>

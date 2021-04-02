@@ -436,6 +436,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     @Override
     public void abortCurrentGesture() {
         Log.d("b/63783866", "KeyButtonView.abortCurrentGesture");
+        if (mCode != KeyEvent.KEYCODE_UNKNOWN) {
+            sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
+        }
         setPressed(false);
         mRipple.abortDelayedRipple();
         mGestureAborted = true;

@@ -52,7 +52,6 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.InvalidationRequesterClient;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.PerformanceTracker;
@@ -153,7 +152,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             prop.commonProps.maxEnrollmentsPerUser,
                             componentInfo,
                             prop.sensorType,
-                            true /* resetLockoutRequiresHardwareAuthToken */);
+                            true /* resetLockoutRequiresHardwareAuthToken */,
+                            prop.sensorLocations[0].sensorLocationX,
+                            prop.sensorLocations[0].sensorLocationY,
+                            prop.sensorLocations[0].sensorRadius);
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
                     internalProp, gestureAvailabilityDispatcher);
 
@@ -388,7 +390,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleRemove(int sensorId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,
             @NonNull String opPackageName) {
-        scheduleRemoveSpecifiedIds(sensorId, token, new int[] {fingerId}, userId, receiver,
+        scheduleRemoveSpecifiedIds(sensorId, token, new int[]{fingerId}, userId, receiver,
                 opPackageName);
     }
 

@@ -8600,8 +8600,6 @@ public final class ViewRootImpl implements ViewParent,
                 // available, we cannot compute end-to-end input latency metrics.
                 return;
             }
-            final long gpuCompletedTime = data[FrameMetrics.Index.GPU_COMPLETED];
-            mReceiver.reportTimeline(inputEventId, gpuCompletedTime, presentTime);
         }
     }
     HardwareRendererObserver mHardwareRendererObserver;
@@ -10204,9 +10202,6 @@ public final class ViewRootImpl implements ViewParent,
 
         if (useBLAST() && mBlastBufferQueue != null) {
             mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
-        } else {
-            transaction.deferTransactionUntil(surfaceControl, surfaceControl, frameNumber);
-            transaction.apply();
         }
     }
 

@@ -1889,7 +1889,6 @@
   <java-symbol type="bool" name="config_notificationHeaderClickableForExpand" />
   <java-symbol type="bool" name="config_enableNightMode" />
   <java-symbol type="bool" name="config_tintNotificationActionButtons" />
-  <java-symbol type="bool" name="config_tintNotificationsWithTheme" />
   <java-symbol type="bool" name="config_dozeAfterScreenOffByDefault" />
   <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
@@ -2559,6 +2558,7 @@
   <java-symbol type="array" name="config_biometric_sensors" />
   <java-symbol type="bool" name="allow_test_udfps" />
   <java-symbol type="array" name="config_udfps_sensor_props" />
+  <java-symbol type="bool" name="config_is_powerbutton_fps" />
 
   <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />

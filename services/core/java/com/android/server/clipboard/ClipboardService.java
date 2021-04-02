@@ -234,7 +234,6 @@ public class ClipboardService extends SystemService {
     private final AppOpsManager mAppOps;
     private final ContentCaptureManagerInternal mContentCaptureInternal;
     private final AutofillManagerInternal mAutofillInternal;
-    private final TextClassificationManager mTextClassificationManager;
     private final IBinder mPermissionOwner;
     private final HostClipboardMonitor mHostClipboardMonitor;
     private final Handler mWorkerHandler;
@@ -265,8 +264,6 @@ public class ClipboardService extends SystemService {
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mContentCaptureInternal = LocalServices.getService(ContentCaptureManagerInternal.class);
         mAutofillInternal = LocalServices.getService(AutofillManagerInternal.class);
-        mTextClassificationManager = (TextClassificationManager)
-                getContext().getSystemService(Context.TEXT_CLASSIFICATION_SERVICE);
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (IS_EMULATOR) {
@@ -659,12 +656,12 @@ public class ClipboardService extends SystemService {
             }
         }
 
+        final int userId = UserHandle.getUserId(uid);
         if (clip != null) {
-            startClassificationLocked(clip);
+            startClassificationLocked(clip, userId);
         }
 
         // Update this user
-        final int userId = UserHandle.getUserId(uid);
         setPrimaryClipInternalLocked(getClipboardLocked(userId), clip, uid, sourcePackage);
 
         // Update related users
@@ -763,14 +760,15 @@ public class ClipboardService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    private void startClassificationLocked(@NonNull ClipData clip) {
+    private void startClassificationLocked(@NonNull ClipData clip, @UserIdInt int userId) {
         TextClassifier classifier;
         final long ident = Binder.clearCallingIdentity();
         try {
-            classifier = mTextClassificationManager.createTextClassificationSession(
-                    new TextClassificationContext.Builder(
-                            getContext().getPackageName(),
-                            TextClassifier.WIDGET_TYPE_CLIPBOARD
+            classifier = createTextClassificationManagerAsUser(userId)
+                    .createTextClassificationSession(
+                            new TextClassificationContext.Builder(
+                                    getContext().getPackageName(),
+                                    TextClassifier.WIDGET_TYPE_CLIPBOARD
                     ).build()
             );
         } finally {
@@ -1125,4 +1123,8 @@ public class ClipboardService extends SystemService {
                 && item.getIntent() == null;
     }
 
+    private TextClassificationManager createTextClassificationManagerAsUser(@UserIdInt int userId) {
+        Context context = getContext().createContextAsUser(UserHandle.of(userId), /* flags= */ 0);
+        return context.getSystemService(TextClassificationManager.class);
+    }
 }

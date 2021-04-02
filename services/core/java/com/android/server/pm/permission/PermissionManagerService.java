@@ -3125,6 +3125,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             if (sourcePerms != null) {
                 Permission bp = mRegistry.getPermission(newPerm);
+                if (bp == null) {
+                    throw new IllegalStateException("Unknown new permission in split permission: "
+                            + newPerm);
+                }
                 if (bp.isRuntime()) {
 
                     if (!newPerm.equals(Manifest.permission.ACTIVITY_RECOGNITION)) {
@@ -3140,6 +3144,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 sourcePermNum++) {
                             final String sourcePerm = sourcePerms.valueAt(sourcePermNum);
                             Permission sourceBp = mRegistry.getPermission(sourcePerm);
+                            if (sourceBp == null) {
+                                throw new IllegalStateException("Unknown source permission in split"
+                                        + " permission: " + sourcePerm);
+                            }
                             if (!sourceBp.isRuntime()) {
                                 inheritsFromInstallPerm = true;
                                 break;

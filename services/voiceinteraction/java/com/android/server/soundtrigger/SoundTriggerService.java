@@ -56,6 +56,7 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
 import android.media.permission.PermissionUtil;
@@ -141,7 +142,7 @@ public class SoundTriggerService extends SystemService {
             }
 
             if (stat.mIsStarted) {
-                Slog.e(TAG, "error onStart(): Model " + id + " already started");
+                Slog.w(TAG, "error onStart(): Model " + id + " already started");
                 return;
             }
 
@@ -153,12 +154,12 @@ public class SoundTriggerService extends SystemService {
         public synchronized void onStop(UUID id) {
             SoundModelStat stat = mModelStats.get(id);
             if (stat == null) {
-                Slog.e(TAG, "error onStop(): Model " + id + " has no stats available");
+                Slog.w(TAG, "error onStop(): Model " + id + " has no stats available");
                 return;
             }
 
             if (!stat.mIsStarted) {
-                Slog.e(TAG, "error onStop(): Model " + id + " already stopped");
+                Slog.w(TAG, "error onStop(): Model " + id + " already stopped");
                 return;
             }
 
@@ -242,7 +243,7 @@ public class SoundTriggerService extends SystemService {
                 @NonNull IBinder client) {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
-                return new SoundTriggerSessionStub(newSoundTriggerHelper(), client);
+                return new SoundTriggerSessionStub(client);
             }
         }
 
@@ -253,7 +254,7 @@ public class SoundTriggerService extends SystemService {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityIndirect(mContext,
                     SOUNDTRIGGER_DELEGATE_IDENTITY, middlemanIdentity,
                     originatorIdentity)) {
-                return new SoundTriggerSessionStub(newSoundTriggerHelper(), client);
+                return new SoundTriggerSessionStub(client);
             }
         }
     }
@@ -262,14 +263,15 @@ public class SoundTriggerService extends SystemService {
         private final SoundTriggerHelper mSoundTriggerHelper;
         // Used to detect client death.
         private final IBinder mClient;
+        private final Identity mOriginatorIdentity;
         private final TreeMap<UUID, SoundModel> mLoadedModels = new TreeMap<>();
         private final Object mCallbacksLock = new Object();
         private final TreeMap<UUID, IRecognitionStatusCallback> mCallbacks = new TreeMap<>();
 
-        SoundTriggerSessionStub(
-                SoundTriggerHelper soundTriggerHelper, @NonNull IBinder client) {
-            mSoundTriggerHelper = soundTriggerHelper;
+        SoundTriggerSessionStub(@NonNull IBinder client) {
+            mSoundTriggerHelper = newSoundTriggerHelper();
             mClient = client;
+            mOriginatorIdentity = IdentityContext.getNonNull();
             try {
                 mClient.linkToDeath(() -> {
                     clientDied();
@@ -297,464 +299,496 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int startRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback,
                 RecognitionConfig config, boolean runInBatterySaverMode) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (runInBatterySaverMode) {
-                enforceCallingPermission(Manifest.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER);
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (runInBatterySaverMode) {
+                    enforceCallingPermission(Manifest.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER);
+                }
+
+                if (DEBUG) {
+                    Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
+                }
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("startRecognition(): Uuid : "
+                        + parcelUuid));
+
+                GenericSoundModel model = getSoundModel(parcelUuid);
+                if (model == null) {
+                    Slog.w(TAG, "Null model in database for id: " + parcelUuid);
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "startRecognition(): Null model in database for id: " + parcelUuid));
+
+                    return STATUS_ERROR;
+                }
+
+                int ret = mSoundTriggerHelper.startGenericRecognition(parcelUuid.getUuid(), model,
+                        callback, config, runInBatterySaverMode);
+                if (ret == STATUS_OK) {
+                    mSoundModelStatTracker.onStart(parcelUuid.getUuid());
+                }
+                return ret;
             }
-            if (DEBUG) {
-                Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
-            }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("startRecognition(): Uuid : "
-                    + parcelUuid));
-
-            GenericSoundModel model = getSoundModel(parcelUuid);
-            if (model == null) {
-                Slog.e(TAG, "Null model in database for id: " + parcelUuid);
-
-                sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                        "startRecognition(): Null model in database for id: " + parcelUuid));
-
-                return STATUS_ERROR;
-            }
-
-            int ret = mSoundTriggerHelper.startGenericRecognition(parcelUuid.getUuid(), model,
-                    callback, config, runInBatterySaverMode);
-            if (ret == STATUS_OK) {
-                mSoundModelStatTracker.onStart(parcelUuid.getUuid());
-            }
-            return ret;
         }
 
         @Override
         public int stopRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.i(TAG, "stopRecognition(): Uuid : " + parcelUuid);
-            }
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.i(TAG, "stopRecognition(): Uuid : " + parcelUuid);
+                }
 
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("stopRecognition(): Uuid : "
-                    + parcelUuid));
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("stopRecognition(): Uuid : "
+                        + parcelUuid));
 
-            int ret = mSoundTriggerHelper.stopGenericRecognition(parcelUuid.getUuid(), callback);
-            if (ret == STATUS_OK) {
-                mSoundModelStatTracker.onStop(parcelUuid.getUuid());
+                int ret = mSoundTriggerHelper.stopGenericRecognition(parcelUuid.getUuid(),
+                        callback);
+                if (ret == STATUS_OK) {
+                    mSoundModelStatTracker.onStop(parcelUuid.getUuid());
+                }
+                return ret;
             }
-            return ret;
         }
 
         @Override
         public SoundTrigger.GenericSoundModel getSoundModel(ParcelUuid soundModelId) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.i(TAG, "getSoundModel(): id = " + soundModelId);
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.i(TAG, "getSoundModel(): id = " + soundModelId);
+                }
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("getSoundModel(): id = "
+                        + soundModelId));
+
+                SoundTrigger.GenericSoundModel model = mDbHelper.getGenericSoundModel(
+                        soundModelId.getUuid());
+                return model;
             }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("getSoundModel(): id = "
-                    + soundModelId));
-
-            SoundTrigger.GenericSoundModel model = mDbHelper.getGenericSoundModel(
-                    soundModelId.getUuid());
-            return model;
         }
 
         @Override
         public void updateSoundModel(SoundTrigger.GenericSoundModel soundModel) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.i(TAG, "updateSoundModel(): model = " + soundModel);
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.i(TAG, "updateSoundModel(): model = " + soundModel);
+                }
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("updateSoundModel(): model = "
+                        + soundModel));
+
+                mDbHelper.updateGenericSoundModel(soundModel);
             }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("updateSoundModel(): model = "
-                    + soundModel));
-
-            mDbHelper.updateGenericSoundModel(soundModel);
         }
 
         @Override
         public void deleteSoundModel(ParcelUuid soundModelId) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.i(TAG, "deleteSoundModel(): id = " + soundModelId);
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.i(TAG, "deleteSoundModel(): id = " + soundModelId);
+                }
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("deleteSoundModel(): id = "
+                        + soundModelId));
+
+                // Unload the model if it is loaded.
+                mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
+
+                // Stop tracking recognition if it is started.
+                mSoundModelStatTracker.onStop(soundModelId.getUuid());
+
+                mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
             }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("deleteSoundModel(): id = "
-                    + soundModelId));
-
-            // Unload the model if it is loaded.
-            mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
-
-            // Stop tracking recognition if it is started.
-            mSoundModelStatTracker.onStop(soundModelId.getUuid());
-
-            mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
         }
 
         @Override
         public int loadGenericSoundModel(GenericSoundModel soundModel) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (soundModel == null || soundModel.getUuid() == null) {
-                Slog.e(TAG, "Invalid sound model");
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (soundModel == null || soundModel.getUuid() == null) {
+                    Slog.w(TAG, "Invalid sound model");
 
-                sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                        "loadGenericSoundModel(): Invalid sound model"));
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "loadGenericSoundModel(): Invalid sound model"));
 
-                return STATUS_ERROR;
-            }
-            if (DEBUG) {
-                Slog.i(TAG, "loadGenericSoundModel(): id = " + soundModel.getUuid());
-            }
+                    return STATUS_ERROR;
+                }
+                if (DEBUG) {
+                    Slog.i(TAG, "loadGenericSoundModel(): id = " + soundModel.getUuid());
+                }
 
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("loadGenericSoundModel(): id = "
-                    + soundModel.getUuid()));
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("loadGenericSoundModel(): id = "
+                        + soundModel.getUuid()));
 
-            synchronized (mLock) {
-                SoundModel oldModel = mLoadedModels.get(soundModel.getUuid());
-                // If the model we're loading is actually different than what we had loaded, we
-                // should unload that other model now. We don't care about return codes since we
-                // don't know if the other model is loaded.
-                if (oldModel != null && !oldModel.equals(soundModel)) {
-                    mSoundTriggerHelper.unloadGenericSoundModel(soundModel.getUuid());
-                    synchronized (mCallbacksLock) {
-                        mCallbacks.remove(soundModel.getUuid());
+                synchronized (mLock) {
+                    SoundModel oldModel = mLoadedModels.get(soundModel.getUuid());
+                    // If the model we're loading is actually different than what we had loaded, we
+                    // should unload that other model now. We don't care about return codes since we
+                    // don't know if the other model is loaded.
+                    if (oldModel != null && !oldModel.equals(soundModel)) {
+                        mSoundTriggerHelper.unloadGenericSoundModel(soundModel.getUuid());
+                        synchronized (mCallbacksLock) {
+                            mCallbacks.remove(soundModel.getUuid());
+                        }
                     }
+                    mLoadedModels.put(soundModel.getUuid(), soundModel);
                 }
-                mLoadedModels.put(soundModel.getUuid(), soundModel);
-            }
-            return STATUS_OK;
-        }
-
-        @Override
-        public int loadKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (soundModel == null || soundModel.getUuid() == null) {
-                Slog.e(TAG, "Invalid sound model");
-
-                sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                        "loadKeyphraseSoundModel(): Invalid sound model"));
-
-                return STATUS_ERROR;
-            }
-            if (soundModel.getKeyphrases() == null || soundModel.getKeyphrases().length != 1) {
-                Slog.e(TAG, "Only one keyphrase per model is currently supported.");
-
-                sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                        "loadKeyphraseSoundModel(): Only one keyphrase per model"
-                        + " is currently supported."));
-
-                return STATUS_ERROR;
-            }
-            if (DEBUG) {
-                Slog.i(TAG, "loadKeyphraseSoundModel(): id = " + soundModel.getUuid());
-            }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("loadKeyphraseSoundModel(): id = "
-                    + soundModel.getUuid()));
-
-            synchronized (mLock) {
-                SoundModel oldModel = mLoadedModels.get(soundModel.getUuid());
-                // If the model we're loading is actually different than what we had loaded, we
-                // should unload that other model now. We don't care about return codes since we
-                // don't know if the other model is loaded.
-                if (oldModel != null && !oldModel.equals(soundModel)) {
-                    mSoundTriggerHelper.unloadKeyphraseSoundModel(
-                            soundModel.getKeyphrases()[0].getId());
-                    synchronized (mCallbacksLock) {
-                        mCallbacks.remove(soundModel.getUuid());
-                    }
-                }
-                mLoadedModels.put(soundModel.getUuid(), soundModel);
-            }
-            return STATUS_OK;
-        }
-
-        @Override
-        public int startRecognitionForService(ParcelUuid soundModelId, Bundle params,
-            ComponentName detectionService, SoundTrigger.RecognitionConfig config) {
-            Objects.requireNonNull(soundModelId);
-            Objects.requireNonNull(detectionService);
-            Objects.requireNonNull(config);
-
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-
-            enforceDetectionPermissions(detectionService);
-
-            if (DEBUG) {
-                Slog.i(TAG, "startRecognition(): id = " + soundModelId);
-            }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                    "startRecognitionForService(): id = " + soundModelId));
-
-            IRecognitionStatusCallback callback =
-                    new RemoteSoundTriggerDetectionService(soundModelId.getUuid(), params,
-                            detectionService, Binder.getCallingUserHandle(), config);
-
-            synchronized (mLock) {
-                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
-                if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                            "startRecognitionForService():" + soundModelId + " is not loaded"));
-
-                    return STATUS_ERROR;
-                }
-                IRecognitionStatusCallback existingCallback = null;
-                synchronized (mCallbacksLock) {
-                    existingCallback = mCallbacks.get(soundModelId.getUuid());
-                }
-                if (existingCallback != null) {
-                    Slog.e(TAG, soundModelId + " is already running");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                            "startRecognitionForService():"
-                            + soundModelId + " is already running"));
-
-                    return STATUS_ERROR;
-                }
-                int ret;
-                switch (soundModel.getType()) {
-                    case SoundModel.TYPE_GENERIC_SOUND:
-                        ret = mSoundTriggerHelper.startGenericRecognition(soundModel.getUuid(),
-                                (GenericSoundModel) soundModel, callback, config, false);
-                        break;
-                    default:
-                        Slog.e(TAG, "Unknown model type");
-
-                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                                "startRecognitionForService(): Unknown model type"));
-
-                        return STATUS_ERROR;
-                }
-
-                if (ret != STATUS_OK) {
-                    Slog.e(TAG, "Failed to start model: " + ret);
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                            "startRecognitionForService(): Failed to start model:"));
-
-                    return ret;
-                }
-                synchronized (mCallbacksLock) {
-                    mCallbacks.put(soundModelId.getUuid(), callback);
-                }
-
-                mSoundModelStatTracker.onStart(soundModelId.getUuid());
-            }
-            return STATUS_OK;
-        }
-
-        @Override
-        public int stopRecognitionForService(ParcelUuid soundModelId) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.i(TAG, "stopRecognition(): id = " + soundModelId);
-            }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                    "stopRecognitionForService(): id = " + soundModelId));
-
-            synchronized (mLock) {
-                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
-                if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                            "stopRecognitionForService(): " + soundModelId
-                            + " is not loaded"));
-
-                    return STATUS_ERROR;
-                }
-                IRecognitionStatusCallback callback = null;
-                synchronized (mCallbacksLock) {
-                     callback = mCallbacks.get(soundModelId.getUuid());
-                }
-                if (callback == null) {
-                    Slog.e(TAG, soundModelId + " is not running");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                            "stopRecognitionForService(): " + soundModelId
-                            + " is not running"));
-
-                    return STATUS_ERROR;
-                }
-                int ret;
-                switch (soundModel.getType()) {
-                    case SoundModel.TYPE_GENERIC_SOUND:
-                        ret = mSoundTriggerHelper.stopGenericRecognition(
-                                soundModel.getUuid(), callback);
-                        break;
-                    default:
-                        Slog.e(TAG, "Unknown model type");
-
-                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                                "stopRecognitionForService(): Unknown model type"));
-
-                        return STATUS_ERROR;
-                }
-
-                if (ret != STATUS_OK) {
-                    Slog.e(TAG, "Failed to stop model: " + ret);
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                                "stopRecognitionForService(): Failed to stop model: " + ret));
-
-                    return ret;
-                }
-                synchronized (mCallbacksLock) {
-                    mCallbacks.remove(soundModelId.getUuid());
-                }
-
-                mSoundModelStatTracker.onStop(soundModelId.getUuid());
-            }
-            return STATUS_OK;
-        }
-
-        @Override
-        public int unloadSoundModel(ParcelUuid soundModelId) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.i(TAG, "unloadSoundModel(): id = " + soundModelId);
-            }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("unloadSoundModel(): id = "
-                    + soundModelId));
-
-            synchronized (mLock) {
-                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
-                if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                                "unloadSoundModel(): " + soundModelId + " is not loaded"));
-
-                    return STATUS_ERROR;
-                }
-                int ret;
-                switch (soundModel.getType()) {
-                    case SoundModel.TYPE_KEYPHRASE:
-                        ret = mSoundTriggerHelper.unloadKeyphraseSoundModel(
-                                ((KeyphraseSoundModel) soundModel).getKeyphrases()[0].getId());
-                        break;
-                    case SoundModel.TYPE_GENERIC_SOUND:
-                        ret = mSoundTriggerHelper.unloadGenericSoundModel(soundModel.getUuid());
-                        break;
-                    default:
-                        Slog.e(TAG, "Unknown model type");
-
-                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                                "unloadSoundModel(): Unknown model type"));
-
-                        return STATUS_ERROR;
-                }
-                if (ret != STATUS_OK) {
-                    Slog.e(TAG, "Failed to unload model");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                            "unloadSoundModel(): Failed to unload model"));
-
-                    return ret;
-                }
-                mLoadedModels.remove(soundModelId.getUuid());
                 return STATUS_OK;
             }
         }
 
         @Override
-        public boolean isRecognitionActive(ParcelUuid parcelUuid) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            synchronized (mCallbacksLock) {
-                IRecognitionStatusCallback callback = mCallbacks.get(parcelUuid.getUuid());
-                if (callback == null) {
-                    return false;
+        public int loadKeyphraseSoundModel(KeyphraseSoundModel soundModel) {
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (soundModel == null || soundModel.getUuid() == null) {
+                    Slog.w(TAG, "Invalid sound model");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "loadKeyphraseSoundModel(): Invalid sound model"));
+
+                    return STATUS_ERROR;
+                }
+                if (soundModel.getKeyphrases() == null || soundModel.getKeyphrases().length != 1) {
+                    Slog.w(TAG, "Only one keyphrase per model is currently supported.");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "loadKeyphraseSoundModel(): Only one keyphrase per model"
+                                    + " is currently supported."));
+
+                    return STATUS_ERROR;
+                }
+                if (DEBUG) {
+                    Slog.i(TAG, "loadKeyphraseSoundModel(): id = " + soundModel.getUuid());
+                }
+
+                sEventLogger.log(
+                        new SoundTriggerLogger.StringEvent("loadKeyphraseSoundModel(): id = "
+                                + soundModel.getUuid()));
+
+                synchronized (mLock) {
+                    SoundModel oldModel = mLoadedModels.get(soundModel.getUuid());
+                    // If the model we're loading is actually different than what we had loaded, we
+                    // should unload that other model now. We don't care about return codes since we
+                    // don't know if the other model is loaded.
+                    if (oldModel != null && !oldModel.equals(soundModel)) {
+                        mSoundTriggerHelper.unloadKeyphraseSoundModel(
+                                soundModel.getKeyphrases()[0].getId());
+                        synchronized (mCallbacksLock) {
+                            mCallbacks.remove(soundModel.getUuid());
+                        }
+                    }
+                    mLoadedModels.put(soundModel.getUuid(), soundModel);
+                }
+                return STATUS_OK;
+            }
+        }
+
+        @Override
+        public int startRecognitionForService(ParcelUuid soundModelId, Bundle params,
+            ComponentName detectionService, SoundTrigger.RecognitionConfig config) {
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                Objects.requireNonNull(soundModelId);
+                Objects.requireNonNull(detectionService);
+                Objects.requireNonNull(config);
+
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+
+                enforceDetectionPermissions(detectionService);
+
+                if (DEBUG) {
+                    Slog.i(TAG, "startRecognition(): id = " + soundModelId);
+                }
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "startRecognitionForService(): id = " + soundModelId));
+
+                IRecognitionStatusCallback callback =
+                        new RemoteSoundTriggerDetectionService(soundModelId.getUuid(), params,
+                                detectionService, Binder.getCallingUserHandle(), config);
+
+                synchronized (mLock) {
+                    SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                    if (soundModel == null) {
+                        Slog.w(TAG, soundModelId + " is not loaded");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "startRecognitionForService():" + soundModelId + " is not loaded"));
+
+                        return STATUS_ERROR;
+                    }
+                    IRecognitionStatusCallback existingCallback = null;
+                    synchronized (mCallbacksLock) {
+                        existingCallback = mCallbacks.get(soundModelId.getUuid());
+                    }
+                    if (existingCallback != null) {
+                        Slog.w(TAG, soundModelId + " is already running");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "startRecognitionForService():"
+                                        + soundModelId + " is already running"));
+
+                        return STATUS_ERROR;
+                    }
+                    int ret;
+                    switch (soundModel.getType()) {
+                        case SoundModel.TYPE_GENERIC_SOUND:
+                            ret = mSoundTriggerHelper.startGenericRecognition(soundModel.getUuid(),
+                                    (GenericSoundModel) soundModel, callback, config, false);
+                            break;
+                        default:
+                            Slog.e(TAG, "Unknown model type");
+
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                    "startRecognitionForService(): Unknown model type"));
+
+                            return STATUS_ERROR;
+                    }
+
+                    if (ret != STATUS_OK) {
+                        Slog.e(TAG, "Failed to start model: " + ret);
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "startRecognitionForService(): Failed to start model:"));
+
+                        return ret;
+                    }
+                    synchronized (mCallbacksLock) {
+                        mCallbacks.put(soundModelId.getUuid(), callback);
+                    }
+
+                    mSoundModelStatTracker.onStart(soundModelId.getUuid());
+                }
+                return STATUS_OK;
+            }
+        }
+
+        @Override
+        public int stopRecognitionForService(ParcelUuid soundModelId) {
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.i(TAG, "stopRecognition(): id = " + soundModelId);
+                }
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "stopRecognitionForService(): id = " + soundModelId));
+
+                synchronized (mLock) {
+                    SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                    if (soundModel == null) {
+                        Slog.w(TAG, soundModelId + " is not loaded");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "stopRecognitionForService(): " + soundModelId
+                                        + " is not loaded"));
+
+                        return STATUS_ERROR;
+                    }
+                    IRecognitionStatusCallback callback = null;
+                    synchronized (mCallbacksLock) {
+                        callback = mCallbacks.get(soundModelId.getUuid());
+                    }
+                    if (callback == null) {
+                        Slog.w(TAG, soundModelId + " is not running");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "stopRecognitionForService(): " + soundModelId
+                                        + " is not running"));
+
+                        return STATUS_ERROR;
+                    }
+                    int ret;
+                    switch (soundModel.getType()) {
+                        case SoundModel.TYPE_GENERIC_SOUND:
+                            ret = mSoundTriggerHelper.stopGenericRecognition(
+                                    soundModel.getUuid(), callback);
+                            break;
+                        default:
+                            Slog.e(TAG, "Unknown model type");
+
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                    "stopRecognitionForService(): Unknown model type"));
+
+                            return STATUS_ERROR;
+                    }
+
+                    if (ret != STATUS_OK) {
+                        Slog.e(TAG, "Failed to stop model: " + ret);
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "stopRecognitionForService(): Failed to stop model: " + ret));
+
+                        return ret;
+                    }
+                    synchronized (mCallbacksLock) {
+                        mCallbacks.remove(soundModelId.getUuid());
+                    }
+
+                    mSoundModelStatTracker.onStop(soundModelId.getUuid());
+                }
+                return STATUS_OK;
+            }
+        }
+
+        @Override
+        public int unloadSoundModel(ParcelUuid soundModelId) {
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.i(TAG, "unloadSoundModel(): id = " + soundModelId);
+                }
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("unloadSoundModel(): id = "
+                        + soundModelId));
+
+                synchronized (mLock) {
+                    SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                    if (soundModel == null) {
+                        Slog.w(TAG, soundModelId + " is not loaded");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "unloadSoundModel(): " + soundModelId + " is not loaded"));
+
+                        return STATUS_ERROR;
+                    }
+                    int ret;
+                    switch (soundModel.getType()) {
+                        case SoundModel.TYPE_KEYPHRASE:
+                            ret = mSoundTriggerHelper.unloadKeyphraseSoundModel(
+                                    ((KeyphraseSoundModel) soundModel).getKeyphrases()[0].getId());
+                            break;
+                        case SoundModel.TYPE_GENERIC_SOUND:
+                            ret = mSoundTriggerHelper.unloadGenericSoundModel(soundModel.getUuid());
+                            break;
+                        default:
+                            Slog.e(TAG, "Unknown model type");
+
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                    "unloadSoundModel(): Unknown model type"));
+
+                            return STATUS_ERROR;
+                    }
+                    if (ret != STATUS_OK) {
+                        Slog.e(TAG, "Failed to unload model");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "unloadSoundModel(): Failed to unload model"));
+
+                        return ret;
+                    }
+                    mLoadedModels.remove(soundModelId.getUuid());
+                    return STATUS_OK;
                 }
             }
-            return mSoundTriggerHelper.isRecognitionRequested(parcelUuid.getUuid());
+        }
+
+        @Override
+        public boolean isRecognitionActive(ParcelUuid parcelUuid) {
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                synchronized (mCallbacksLock) {
+                    IRecognitionStatusCallback callback = mCallbacks.get(parcelUuid.getUuid());
+                    if (callback == null) {
+                        return false;
+                    }
+                }
+                return mSoundTriggerHelper.isRecognitionRequested(parcelUuid.getUuid());
+            }
         }
 
         @Override
         public int getModelState(ParcelUuid soundModelId) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            int ret = STATUS_ERROR;
-            if (DEBUG) {
-                Slog.i(TAG, "getModelState(): id = " + soundModelId);
-            }
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                int ret = STATUS_ERROR;
+                if (DEBUG) {
+                    Slog.i(TAG, "getModelState(): id = " + soundModelId);
+                }
 
-            sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): id = "
-                    + soundModelId));
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): id = "
+                        + soundModelId));
 
-            synchronized (mLock) {
-                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
-                if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded");
+                synchronized (mLock) {
+                    SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                    if (soundModel == null) {
+                        Slog.w(TAG, soundModelId + " is not loaded");
 
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): "
-                            + soundModelId + " is not loaded"));
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): "
+                                + soundModelId + " is not loaded"));
+
+                        return ret;
+                    }
+                    switch (soundModel.getType()) {
+                        case SoundModel.TYPE_GENERIC_SOUND:
+                            ret = mSoundTriggerHelper.getGenericModelState(soundModel.getUuid());
+                            break;
+                        default:
+                            // SoundModel.TYPE_KEYPHRASE is not supported to increase privacy.
+                            Slog.e(TAG, "Unsupported model type, " + soundModel.getType());
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                    "getModelState(): Unsupported model type, "
+                                            + soundModel.getType()));
+                            break;
+                    }
 
                     return ret;
                 }
-                switch (soundModel.getType()) {
-                    case SoundModel.TYPE_GENERIC_SOUND:
-                        ret = mSoundTriggerHelper.getGenericModelState(soundModel.getUuid());
-                        break;
-                    default:
-                        // SoundModel.TYPE_KEYPHRASE is not supported to increase privacy.
-                        Slog.e(TAG, "Unsupported model type, " + soundModel.getType());
-                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                                "getModelState(): Unsupported model type, "
-                                + soundModel.getType()));
-                        break;
-                }
-
-                return ret;
             }
         }
 
         @Override
         @Nullable
         public ModuleProperties getModuleProperties() {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.i(TAG, "getModuleProperties()");
-            }
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.i(TAG, "getModuleProperties()");
+                }
 
-            synchronized (mLock) {
-                ModuleProperties properties = mSoundTriggerHelper.getModuleProperties();
-                sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                        "getModuleProperties(): " + properties));
-                return properties;
+                synchronized (mLock) {
+                    ModuleProperties properties = mSoundTriggerHelper.getModuleProperties();
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "getModuleProperties(): " + properties));
+                    return properties;
+                }
             }
         }
 
         @Override
         public int setParameter(ParcelUuid soundModelId,
                 @ModelParams int modelParam, int value) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.d(TAG, "setParameter(): id=" + soundModelId
-                        + ", param=" + modelParam
-                        + ", value=" + value);
-            }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                    "setParameter(): id=" + soundModelId
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.d(TAG, "setParameter(): id=" + soundModelId
                             + ", param=" + modelParam
-                            + ", value=" + value));
-
-            synchronized (mLock) {
-                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
-                if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded. Loaded models: "
-                            + mLoadedModels.toString());
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent("setParameter(): "
-                            + soundModelId + " is not loaded"));
-
-                    return STATUS_BAD_VALUE;
+                            + ", value=" + value);
                 }
 
-                return mSoundTriggerHelper.setParameter(soundModel.getUuid(), modelParam, value);
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "setParameter(): id=" + soundModelId
+                                + ", param=" + modelParam
+                                + ", value=" + value));
+
+                synchronized (mLock) {
+                    SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                    if (soundModel == null) {
+                        Slog.w(TAG, soundModelId + " is not loaded. Loaded models: "
+                                + mLoadedModels.toString());
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent("setParameter(): "
+                                + soundModelId + " is not loaded"));
+
+                        return STATUS_BAD_VALUE;
+                    }
+
+                    return mSoundTriggerHelper.setParameter(soundModel.getUuid(), modelParam,
+                            value);
+                }
             }
         }
 
@@ -762,28 +796,30 @@ public class SoundTriggerService extends SystemService {
         public int getParameter(@NonNull ParcelUuid soundModelId,
                 @ModelParams int modelParam)
                 throws UnsupportedOperationException, IllegalArgumentException {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.d(TAG, "getParameter(): id=" + soundModelId
-                        + ", param=" + modelParam);
-            }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                    "getParameter(): id=" + soundModelId
-                            + ", param=" + modelParam));
-
-            synchronized (mLock) {
-                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
-                if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent("getParameter(): "
-                            + soundModelId + " is not loaded"));
-
-                    throw new IllegalArgumentException("sound model is not loaded");
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.d(TAG, "getParameter(): id=" + soundModelId
+                            + ", param=" + modelParam);
                 }
 
-                return mSoundTriggerHelper.getParameter(soundModel.getUuid(), modelParam);
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "getParameter(): id=" + soundModelId
+                                + ", param=" + modelParam));
+
+                synchronized (mLock) {
+                    SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                    if (soundModel == null) {
+                        Slog.w(TAG, soundModelId + " is not loaded");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent("getParameter(): "
+                                + soundModelId + " is not loaded"));
+
+                        throw new IllegalArgumentException("sound model is not loaded");
+                    }
+
+                    return mSoundTriggerHelper.getParameter(soundModel.getUuid(), modelParam);
+                }
             }
         }
 
@@ -791,29 +827,31 @@ public class SoundTriggerService extends SystemService {
         @Nullable
         public ModelParamRange queryParameter(@NonNull ParcelUuid soundModelId,
                 @ModelParams int modelParam) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (DEBUG) {
-                Slog.d(TAG, "queryParameter(): id=" + soundModelId
-                        + ", param=" + modelParam);
-            }
-
-            sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                    "queryParameter(): id=" + soundModelId
-                            + ", param=" + modelParam));
-
-            synchronized (mLock) {
-                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
-                if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded");
-
-                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                            "queryParameter(): "
-                                    + soundModelId + " is not loaded"));
-
-                    return null;
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+                if (DEBUG) {
+                    Slog.d(TAG, "queryParameter(): id=" + soundModelId
+                            + ", param=" + modelParam);
                 }
 
-                return mSoundTriggerHelper.queryParameter(soundModel.getUuid(), modelParam);
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "queryParameter(): id=" + soundModelId
+                                + ", param=" + modelParam));
+
+                synchronized (mLock) {
+                    SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
+                    if (soundModel == null) {
+                        Slog.w(TAG, soundModelId + " is not loaded");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "queryParameter(): "
+                                        + soundModelId + " is not loaded"));
+
+                        return null;
+                    }
+
+                    return mSoundTriggerHelper.queryParameter(soundModel.getUuid(), modelParam);
+                }
             }
         }
 
@@ -822,6 +860,20 @@ public class SoundTriggerService extends SystemService {
             sEventLogger.log(new SoundTriggerLogger.StringEvent(
                     "Client died, cleaning up session."));
             mSoundTriggerHelper.detach();
+        }
+
+        private void enforceCallingPermission(String permission) {
+            PermissionUtil.checkPermissionForPreflight(mContext, mOriginatorIdentity, permission);
+        }
+
+        private void enforceDetectionPermissions(ComponentName detectionService) {
+            PackageManager packageManager = mContext.getPackageManager();
+            String packageName = detectionService.getPackageName();
+            if (packageManager.checkPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(detectionService.getPackageName() + " does not have"
+                        + " permission " + Manifest.permission.CAPTURE_AUDIO_HOTWORD);
+            }
         }
 
         /**
@@ -1574,23 +1626,6 @@ public class SoundTriggerService extends SystemService {
 
             // stats
             mSoundModelStatTracker.dump(pw);
-        }
-    }
-
-    private void enforceCallingPermission(String permission) {
-        if (mContext.checkCallingOrSelfPermission(permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold the permission " + permission);
-        }
-    }
-
-    private void enforceDetectionPermissions(ComponentName detectionService) {
-        PackageManager packageManager = mContext.getPackageManager();
-        String packageName = detectionService.getPackageName();
-        if (packageManager.checkPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(detectionService.getPackageName() + " does not have"
-                    + " permission " + Manifest.permission.CAPTURE_AUDIO_HOTWORD);
         }
     }
 

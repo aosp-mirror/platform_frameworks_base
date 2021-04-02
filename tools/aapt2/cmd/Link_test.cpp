@@ -466,11 +466,19 @@ TEST_F(LinkTest, StagedAndroidApi) {
   const std::string android_r_java = android_java + "/android/R.java";
   std::string android_r_contents;
   ASSERT_TRUE(android::base::ReadFileToString(android_r_java, &android_r_contents));
-  EXPECT_THAT(android_r_contents, HasSubstr(" public static final int finalized_res=0x01010001;"));
-  EXPECT_THAT(android_r_contents, HasSubstr(" public static int staged_s_res=0x01010050;"));
-  EXPECT_THAT(android_r_contents, HasSubstr(" public static int staged_s2_res=0x01ff0049;"));
-  EXPECT_THAT(android_r_contents, HasSubstr(" public static int staged_t_res=0x01fe0063;"));
-  EXPECT_THAT(android_r_contents, HasSubstr(" public static int staged_t_string=0x01fd0072;"));
+  EXPECT_THAT(android_r_contents, HasSubstr("public static final int finalized_res=0x01010001;"));
+  EXPECT_THAT(
+      android_r_contents,
+      HasSubstr("public static final int staged_s_res; static { staged_s_res=0x01010050; }"));
+  EXPECT_THAT(
+      android_r_contents,
+      HasSubstr("public static final int staged_s2_res; static { staged_s2_res=0x01ff0049; }"));
+  EXPECT_THAT(
+      android_r_contents,
+      HasSubstr("public static final int staged_t_res; static { staged_t_res=0x01fe0063; }"));
+  EXPECT_THAT(
+      android_r_contents,
+      HasSubstr("public static final int staged_t_string; static { staged_t_string=0x01fd0072; }"));
 
   // Build an app that uses the framework attribute in a declare-styleable
   const std::string client_res = GetTestPath("app-res");

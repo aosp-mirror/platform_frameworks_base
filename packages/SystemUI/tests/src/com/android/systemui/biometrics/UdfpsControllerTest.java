@@ -43,6 +43,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
@@ -100,6 +101,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private AuthRippleController mAuthRippleController;
     @Mock
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
     private IUdfpsOverlayControllerCallback mUdfpsOverlayControllerCallback;
 
     private FakeExecutor mFgExecutor;
@@ -151,7 +154,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mStatusBar,
                 mStatusBarKeyguardViewManager,
                 mDumpManager,
-                mAuthRippleController);
+                mAuthRippleController,
+                mKeyguardUpdateMonitor);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
 

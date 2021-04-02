@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Апп ажиллаж байна"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Апп батарей ашиглаж байна"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Томруулах"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Хандалтын аюулгүй байдлын бодлого"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> батерей ашиглаж байна"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> апп батерей ашиглаж байна"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"таны биеийн дасгал хөдөлгөөнд хандах"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камер"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"зураг авах, бичлэг хийх"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Ойролцоох Bluetooth төхөөрөмжүүд"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ойролцоох Bluetooth төхөөрөмжүүдийг илрүүлж, холбогдох"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Дуудлагын жагсаалт"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"утасны дуудлагын жагсаалтыг унших болон бичих"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Утас"</string>
@@ -442,7 +445,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"байршилд ард хандах"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Энэ апп нь дурын үед, түүнийг ашиглаагүй байх үед ч байршилд хандах боломжтой."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"Аудио тохиргоо солих"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Апп нь дууны хэмжээ, спикерын гаралтад ашиглагдах глобал аудио тохиргоог өөрчлөх боломжтой."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Апп нь дууны түвшин, спикерын гаралтад ашиглагдах глобал аудио тохиргоог өөрчлөх боломжтой."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"аудио бичих"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Энэ аппыг ашиглаж байх үед энэ нь микрофон ашиглан аудио бичих боломжтой."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ард видео бичих"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Апп нь таблет дээрх блютүүт тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Аппад таны Android TV төхөөрөмж дээрх Bluetooth-н тохируулгыг харах болон хослуулсан төхөөрөмжүүдтэй холболт хийж, холболтыг баталгаажуулахыг зөвшөөрнө."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Апп нь утсан дээрх Bluetooth тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"ойролцоох Bluetooth төхөөрөмжүүдийг илрүүлэх, хослуулах"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Aппыг ойролцоох Bluetooth төхөөрөмжүүдийг илрүүлж, хослуулахыг зөвшөөрдөг"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"хослуулсан Bluetooth төхөөрөмжүүдэд холбогдох"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Аппыг хослуулсан Bluetooth төхөөрөмжүүдэд холбогдохыг зөвшөөрдөг"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сонгосон NFC төлбөрийн үйлчилгээний мэдээлэл"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Бүртгүүлсэн төхөөрөмж болон маршрутын хүрэх цэг зэрэг сонгосон nfc төлбөрийн үйлчилгээний мэдээллийг авахыг аппад зөвшөөрдөг."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ойролцоо талбарын холбоог удирдах"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Тохируулсан пин, хээ эсвэл нууц үг алга"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Баталгаажуулахад алдаа гарлаа"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Дэлгэцийн түгжээг ашиглах"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Үргэлжлүүлэхийн тулд төхөөрөмжийнхөө мандат үнэмлэхийг оруулна уу"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Хурууны хээг дутуу уншуулсан байна. Дахин оролдоно уу."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Хурууны хээ боловсруулж чадахгүй байна. Дахин оролдоно уу."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Хурууны хээ мэдрэгч бохирдсон байна. Цэвэрлэсний дараа дахин оролдоно уу."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Хуруугаа хэт хурдан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Хуруу хэт удаан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Хурууны хээг нотолсон"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Царайг баталгаажууллаа"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Царайг баталгаажууллаа. Баталгаажуулах товчлуурыг дарна уу"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Хурууны хээний төхөөрөмж бэлэн бус байна."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Хурууны хээг хадгалах боломжгүй байна. Одоо байгаа хурууны хээг арилгана уу."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Хурууны хээ оруулах хугацаа өнгөрсөн байна. Дахин оруулна уу."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Хурууны хээний бүртгэл амжилтгүй боллоо."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Хэрэглэгч хурууны хээний баталгаажуулалтыг цуцалсан байна."</string>
@@ -603,6 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Царайгаар тайлах"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Царайгаа дахин бүртгүүлнэ үү"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Танилтыг сайжруулахын тулд царайгаа дахин бүртгүүлнэ үү"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Царайгаар тайлах онцлогийг тохируулна уу"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Утас руугаа харж түгжээг нь тайлна уу"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Түгжээ тайлах илүү олон арга тохируулна уу"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Хурууны хээ нэмэхийн тулд товшино уу"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Царайн өгөгдлийг зөв авч чадсангүй. Дахин оролдоно уу."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Хэт цайвар байна. Гэрэл багатай газар оролдоно уу."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Хэт харанхуй байна. Гэрэлтэй орчинд туршина уу."</string>
@@ -639,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Царай <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Царайгаар тайлахыг ашиглах"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Царай эсвэл дэлгэцийн түгжээ ашиглах"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Үргэлжлүүлэхийн тулд царайгаар тайлахыг ашиглана уу"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Үргэлжлүүлэхийн тулд царай эсвэл дэлгэцийн түгжээгээ ашиглана уу"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"Хуулсан"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>-с буулгасан <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"Түр санах ойгоос буулгасан <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> таны хуулсан текстийг буулгасан"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> таны хуулсан зургийг буулгасан"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> таны хуулсан контентыг буулгасан"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Илүү"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Цэс+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Мета+"</string>
@@ -1254,20 +1280,20 @@
     <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g>-н боловсруулалт санах ойн багтаамжийнхаа хязгаар болох <xliff:g id="SIZE">%2$s</xliff:g>-с хэтэрсэн байна. Та санах ойн агшин зургийг (heap dump) хуваалцах боломжтой. Сануулга: энэ санах ойн агшин зураг таны бичсэн зүйл зэрэг тухайн боловсруулалтын хандах эрхтэй аливаа мэдрэг хувийн мэдээллийг агуулж болно."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Та <xliff:g id="PROC">%1$s</xliff:g>-н боловсруулалтын санах ойн агшин зургийг хуваалцах боломжтой. Сануулга: энэ санах ойн агшин зураг таны бичсэн зүйл зэрэг тухайн боловсруулалтын хандах эрхтэй аливаа мэдрэг хувийн мэдээллийг агуулж болзошгүй."</string>
     <string name="sendText" msgid="493003724401350724">"Текст илгээх үйлдлийг сонгох"</string>
-    <string name="volume_ringtone" msgid="134784084629229029">"Хонхны аяны хэмжээ"</string>
+    <string name="volume_ringtone" msgid="134784084629229029">"Хонхны аяны түвшин"</string>
     <string name="volume_music" msgid="7727274216734955095">"Медиа дууны түвшин"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Блютүүтээр тоглож байна"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Хонхны дууг чимээгүй болгов"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Ирсэн дуудлагын дууны хэмжээ"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth ирсэн дуудлагын дууны хэмжээ"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Ирсэн дуудлагын дууны түвшин"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth ирсэн дуудлагын дууны түвшин"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Сэрүүлгийн дууны түвшин"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Мэдэгдлийн дууны хэмжээ"</string>
-    <string name="volume_unknown" msgid="4041914008166576293">"Дууны хэмжээ"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Мэдэгдлийн дууны түвшин"</string>
+    <string name="volume_unknown" msgid="4041914008166576293">"Дууны түвшин"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Блютүүтын хэмжээ"</string>
-    <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Хонхны дууны хэмжээ"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Дуудлагын дууны хэмжээ"</string>
+    <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Хонхны дууны түвшин"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Дуудлагын дууны түвшин"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Медиа дууны түвшин"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Мэдэгдлийн дууны хэмжээ"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Мэдэгдлийн дууны түвшин"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Үндсэн хонхны ая"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Үндсэн (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Алийг нь ч биш"</string>
@@ -2110,20 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Ажил"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Хувийн харагдах байдал"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Ажлын харагдах байдал"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Ажлын аппаар үүнийг хуваалцах боломжгүй"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Таны IT админ танд ажлын профайл дахь аппуудаа ашиглан энэ контентыг хуваалцахыг зөвшөөрөхгүй байна"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Ажлын аппаар үүнийг нээх боломжгүй"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Таны IT админ танд ажлын профайл дахь аппуудаа ашиглан энэ контентыг нээхийг зөвшөөрөхгүй байна"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Хувийн аппаар үүнийг хуваалцах боломжгүй"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Таны IT админ танд хувийн профайл дахь аппуудаа ашиглан энэ контентыг хуваалцахыг зөвшөөрөхгүй байна"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Хувийн аппаар үүнийг нээх боломжгүй"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Таны IT админ танд хувийн профайл дахь аппуудаа ашиглан энэ контентыг нээхийг зөвшөөрөхгүй байна"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Таны IT админ блоклосон"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Энэ контентыг ажлын аппуудаар хуваалцах боломжгүй"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Энэ контентыг ажлын аппуудаар нээх боломжгүй"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Энэ контентыг хувийн аппуудаар хуваалцах боломжгүй"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Энэ контентыг хувийн аппуудаар нээх боломжгүй"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Ажлын профайлыг түр зогсоосон"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Асаах"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Ажлын ямар ч апп энэ контентыг дэмжих боломжгүй"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Ажлын ямар ч апп энэ контентыг нээх боломжгүй"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Хувийн ямар ч апп энэ контентыг дэмжих боломжгүй"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Хувийн ямар ч апп энэ контентыг нээх боломжгүй"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Асаахын тулд товших"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ямар ч ажлын апп байхгүй байна"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ямар ч хувийн апп байхгүй байна"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Хувийн профайлд <xliff:g id="APP">%s</xliff:g>-д нээх үү?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Ажлын профайлд <xliff:g id="APP">%s</xliff:g>-д нээх үү?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Хувийн хөтөч ашиглах"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Ажлын хөтөч ашиглах"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Сүлжээний SIM-н түгжээг тайлах ПИН"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Сүлжээний дэд олонлогийн SIM-н түгжээг тайлах ПИН"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Байгууллагын SIM-н түгжээг тайлах ПИН"</string>
@@ -2236,8 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Дэлгэцийнхээ хэсгийг томруулаарай"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Та одоо бүтэн дэлгэц, тодорхой хэсгээ томруулах эсвэл аль аль сонголтын хооронд сэлгэх боломжтой."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Томруулах онцлогийн шинэ тохиргоо"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Та одоо дэлгэцийнхээ хэсгийг томруулах боломжтой"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Тохиргоонд асаана уу"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Үл хэрэгсэх"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Үргэлжлүүлэхийн тулд, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; таны төхөөрөмжийн микрофонд хандах шаардлагатай."</string>

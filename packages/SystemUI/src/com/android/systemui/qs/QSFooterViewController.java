@@ -32,6 +32,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
+import com.android.systemui.globalactions.GlobalActionsDialogLite;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
@@ -68,6 +69,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final PageIndicator mPageIndicator;
     private final View mPowerMenuLite;
     private final boolean mShowPMLiteButton;
+    private GlobalActionsDialogLite mGlobalActionsDialog;
 
     private final UserInfoController.OnUserInfoChangedListener mOnUserInfoChangedListener =
             new UserInfoController.OnUserInfoChangedListener() {
@@ -115,6 +117,8 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
                 } else {
                     startSettingsActivity();
                 }
+            } else if (v == mPowerMenuLite) {
+                mGlobalActionsDialog.showOrHideDialog(false, true);
             }
         }
     };
@@ -129,7 +133,8 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
             QSPanelController qsPanelController, QSDetailDisplayer qsDetailDisplayer,
             QuickQSPanelController quickQSPanelController,
             TunerService tunerService, MetricsLogger metricsLogger,
-            @Named(PM_LITE_ENABLED) boolean showPMLiteButton) {
+            @Named(PM_LITE_ENABLED) boolean showPMLiteButton,
+            GlobalActionsDialogLite globalActionsDialog) {
         super(view);
         mUserManager = userManager;
         mUserInfoController = userInfoController;
@@ -149,11 +154,15 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
         mPowerMenuLite = mView.findViewById(R.id.pm_lite);
         mShowPMLiteButton = showPMLiteButton;
+        mGlobalActionsDialog = globalActionsDialog;
     }
 
     @Override
     protected void onViewAttached() {
-        if (!mShowPMLiteButton) {
+        if (mShowPMLiteButton) {
+            mPowerMenuLite.setVisibility(View.VISIBLE);
+            mPowerMenuLite.setOnClickListener(mSettingsOnClickListener);
+        } else {
             mPowerMenuLite.setVisibility(View.GONE);
         }
         mView.addOnLayoutChangeListener(

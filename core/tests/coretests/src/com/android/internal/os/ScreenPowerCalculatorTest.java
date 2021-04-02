@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.ActivityManager;
 import android.os.BatteryConsumer;
-import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
@@ -91,6 +90,8 @@ public class ScreenPowerCalculatorTest {
         // 600000000 uAs * (1 mA / 1000 uA) * (1 h / 3600 s)  = 166.66666 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
                 .isWithin(PRECISION).of(166.66666);
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_USAGE))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
         assertThat(consumer.getConsumedPower())
                 .isWithin(PRECISION).of(166.66666);
         assertThat(consumer.getPowerConsumedByApps())
@@ -105,6 +106,8 @@ public class ScreenPowerCalculatorTest {
         // Uid1 charge = 200000000 + 5 / 45 * 300000000 mAs = 64.81 mAh
         assertThat(uid1.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isWithin(PRECISION).of(64.81481);
+        assertThat(uid1.getPowerModel(BatteryConsumer.POWER_COMPONENT_SCREEN))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
 
         UidBatteryConsumer uid2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
         assertThat(uid2.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
@@ -115,6 +118,8 @@ public class ScreenPowerCalculatorTest {
         // Uid2 charge = 40 / 45 * 300000000 + 100000000 mAs = 101.85 mAh
         assertThat(uid2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isWithin(PRECISION).of(101.85185);
+        assertThat(uid2.getPowerModel(BatteryConsumer.POWER_COMPONENT_SCREEN))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
     }
 
     @Test
@@ -144,8 +149,7 @@ public class ScreenPowerCalculatorTest {
         ScreenPowerCalculator calculator =
                 new ScreenPowerCalculator(mStatsRule.getPowerProfile());
 
-        mStatsRule.apply(new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build(),
-                calculator);
+        mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
 
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_SCREEN);
@@ -153,6 +157,8 @@ public class ScreenPowerCalculatorTest {
                 .isEqualTo(80 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
                 .isWithin(PRECISION).of(92.0);
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_USAGE))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
         assertThat(consumer.getConsumedPower())
                 .isWithin(PRECISION).of(92.0);
         assertThat(consumer.getPowerConsumedByApps())
@@ -166,6 +172,8 @@ public class ScreenPowerCalculatorTest {
         // Uid1 charge = 20 / 80 * 92.0 = 23.0 mAh
         assertThat(uid1.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isWithin(PRECISION).of(23.0);
+        assertThat(uid1.getPowerModel(BatteryConsumer.POWER_COMPONENT_SCREEN))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
 
         UidBatteryConsumer uid2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
         assertThat(uid2.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN))
@@ -175,6 +183,8 @@ public class ScreenPowerCalculatorTest {
         // Uid2 charge = 60 / 80 * 92.0 = 69.0 mAh
         assertThat(uid2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN))
                 .isWithin(PRECISION).of(69.0);
+        assertThat(uid2.getPowerModel(BatteryConsumer.POWER_COMPONENT_SCREEN))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 
     private void setProcState(int uid, int procState, boolean resumed, long realtimeMs,

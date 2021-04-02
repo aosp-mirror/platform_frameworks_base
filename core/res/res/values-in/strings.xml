@@ -294,7 +294,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikasi berjalan"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikasi yang menggunakan baterai"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Pembesaran"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="3350443906017624270">"Kebijakan keamanan aksesibilitas"</string>
+    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang menggunakan baterai"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikasi sedang meggunakan baterai"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Ketuk untuk melihat detail penggunaan baterai dan data"</string>
@@ -319,6 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"mengakses aktivitas fisik Anda"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"mengambil gambar dan merekam video"</string>
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Perangkat Bluetooth di Sekitar"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"temukan dan hubungkan ke perangkat Bluetooth di sekitar"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Log panggilan"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"membaca dan menulis log panggilan telepon"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telepon"</string>
@@ -532,6 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di tablet, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Mengizinkan aplikasi melihat konfigurasi Bluetooth di perangkat Android TV, serta melakukan dan menerima sambungan dengan perangkat yang tersambung."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Memungkinkan aplikasi melihat konfigurasi Bluetooth di ponsel, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"temukan &amp; sambungkan perangkat Bluetooth di sekitar"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Mengizinkan aplikasi menemukan dan menyambungkan perangkat Bluetooth di sekitar"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"hubungkan ke perangkat Bluetooth yang disambungkan"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Mengizinkan aplikasi terhubung ke perangkat Bluetooth yang disambungkan"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informasi Layanan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Mengizinkan aplikasi untuk mendapatkan informasi layanan pembayaran NFC pilihan seperti bantuan terdaftar dan tujuan rute."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrol NFC"</string>
@@ -566,19 +573,30 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Tidak ada PIN, pola, atau sandi yang disetel"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error saat mengautentikasi"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gunakan kunci layar"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Masukkan kredensial perangkat untuk melanjutkan"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Sebagian sidik jari terdeteksi. Coba lagi."</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses sidik jari. Coba lagi."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Sensor sidik jari kotor. Bersihkan dan coba lagi."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Jari digerakkan terlalu cepat. Coba lagi."</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu lambat. Coba lagi."</string>
+    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
+    <skip />
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sidik jari diautentikasi"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Wajah diautentikasi"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Wajah diautentikasi, silakan tekan konfirmasi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware sidik jari tidak tersedia."</string>
-    <string name="fingerprint_error_no_space" msgid="6126456006769817485">"Sidik jari tidak dapat disimpan. Hapus sidik jari yang ada."</string>
+    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
+    <skip />
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Waktu sidik jari habis. Coba lagi."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operasi sidik jari dibatalkan."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operasi sidik jari dibatalkan oleh pengguna."</string>
@@ -603,6 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Daftarkan kembali wajah Anda"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Untuk menyempurnakan pengenalan wajah, daftarkan kembali wajah Anda"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Siapkan face unlock"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci ponsel dengan melihat ke ponsel"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Siapkan lebih banyak cara untuk membuka kunci"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketuk untuk menambahkan sidik jari"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Tidak bisa mengambil data wajah akurat. Coba lagi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Terlalu terang. Coba cahaya yang lebih lembut."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Coba pencahayaan yang lebih cerah."</string>
@@ -639,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> wajah"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Gunakan face unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gunakan face lock atau kunci layar"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Gunakan face unlock untuk melanjutkan"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan face lock atau kunci layar untuk melanjutkan"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1006,6 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"Disalin"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ditempelkan dari <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ditempelkan dari papan klip"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> menempelkan teks yang Anda salin"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> menempelkan gambar yang Anda salin"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> menempelkan konten yang Anda salin"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Lainnya"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1239,7 +1265,7 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Menyiapkan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Memulai aplikasi."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Menyelesaikan boot."</string>
-    <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
+    <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> sedang berjalan"</string>
     <string name="heavy_weight_notification_detail" msgid="6802247239468404078">"Ketuk untuk kembali ke game"</string>
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"Pilih game"</string>
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"Agar performa tetap maksimal, hanya 1 game yang dapat dibuka sekaligus."</string>
@@ -1334,7 +1360,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Tidak perlu izin"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ini mungkin tidak gratis"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"Oke"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Mengisi daya perangkat ini via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Daya perangkat sedang diisi via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Mengisi daya perangkat yang terhubung via USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transfer file USB diaktifkan"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB diaktifkan"</string>
@@ -1949,10 +1975,10 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Ketuk untuk membuka kunci profil kerja"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Terhubung ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Ketuk untuk melihat file"</string>
-    <string name="pin_target" msgid="8036028973110156895">"Pasang pin"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"Pasang pin <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="pin_target" msgid="8036028973110156895">"Sematkan"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"Sematkan <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Lepas pin"</string>
-    <string name="unpin_specific_target" msgid="3859828252160908146">"Lepas pin <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Lepas sematan <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Info aplikasi"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Memulai demo..."</string>
@@ -2110,20 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kerja"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Tampilan pribadi"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Tampilan kerja"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Tidak dapat membagikan konten ini dengan aplikasi kerja"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Admin IT tidak mengizinkan Anda membagikan konten ini dengan aplikasi di profil kerja Anda"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Tidak dapat membuka konten ini dengan aplikasi kerja"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Admin IT tidak mengizinkan Anda membuka konten ini dengan aplikasi di profil kerja Anda"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Tidak dapat membagikan konten ini dengan aplikasi pribadi"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Admin IT tidak mengizinkan Anda membagikan konten ini dengan aplikasi di profil pribadi Anda"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Tidak dapat membuka konten ini dengan aplikasi pribadi"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Admin IT tidak mengizinkan Anda membuka konten ini dengan aplikasi di profil pribadi Anda"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Diblokir oleh admin IT Anda"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Konten ini tidak dapat dibagikan dengan aplikasi kerja"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Konten ini tidak dapat dibuka dengan aplikasi kerja"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Konten ini tidak dapat dibagikan dengan aplikasi pribadi"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Konten ini tidak dapat dibuka dengan aplikasi pribadi"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profil kerja dijeda"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktifkan"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Tidak ada aplikasi kerja yang dapat mendukung konten ini"</string>
-    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Tidak ada aplikasi kerja yang dapat membuka konten ini"</string>
-    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Tidak ada aplikasi pribadi yang dapat mendukung konten ini"</string>
-    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Tidak ada aplikasi pribadi yang dapat membuka konten ini"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Ketuk untuk mengaktifkan"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Tidak ada aplikasi kerja"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Tidak ada aplikasi pribadi"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Buka di <xliff:g id="APP">%s</xliff:g> dengan profil pribadi?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Buka di <xliff:g id="APP">%s</xliff:g> dengan profil kerja?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gunakan browser pribadi"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gunakan browser kerja"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN pembuka kunci SIM network"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN pembuka kunci SIM network subset"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN pembuka kunci SIM corporate"</string>
@@ -2236,8 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="4657040468055863672">"Memperbesar tampilan sebagian layar"</string>
-    <string name="window_magnification_prompt_content" msgid="3549230303326142349">"Anda kini dapat memperbesar layar penuh, area tertentu, atau beralih antara kedua opsi tersebut."</string>
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Setelan pembesaran baru"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Sekarang Anda dapat memperbesar sebagian layar"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aktifkan di Setelan"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Tutup"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Untuk melanjutkan, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; memerlukan akses ke mikrofon perangkat."</string>
