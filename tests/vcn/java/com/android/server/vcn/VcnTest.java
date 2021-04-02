@@ -19,10 +19,12 @@ package com.android.server.vcn;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
@@ -142,7 +144,7 @@ public class VcnTest {
         mTestLooper.dispatchAll();
     }
 
-    private void verifyUpdateSubscriptionSnapshotNotifiesConnectionGateways(boolean isActive) {
+    private void verifyUpdateSubscriptionSnapshotNotifiesGatewayConnections(int status) {
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
         startVcnGatewayWithCapabilities(requestListener, TEST_CAPS[0]);
 
@@ -152,25 +154,25 @@ public class VcnTest {
         final TelephonySubscriptionSnapshot updatedSnapshot =
                 mock(TelephonySubscriptionSnapshot.class);
 
-        mVcn.setIsActive(isActive);
+        mVcn.setStatus(status);
 
         mVcn.updateSubscriptionSnapshot(updatedSnapshot);
         mTestLooper.dispatchAll();
 
         for (final VcnGatewayConnection gateway : gatewayConnections) {
-            verify(gateway, isActive ? times(1) : never())
+            verify(gateway, status == VCN_STATUS_CODE_ACTIVE ? times(1) : never())
                     .updateSubscriptionSnapshot(eq(updatedSnapshot));
         }
     }
 
     @Test
     public void testSubscriptionSnapshotUpdatesVcnGatewayConnections() {
-        verifyUpdateSubscriptionSnapshotNotifiesConnectionGateways(true /* isActive */);
+        verifyUpdateSubscriptionSnapshotNotifiesGatewayConnections(VCN_STATUS_CODE_ACTIVE);
     }
 
     @Test
-    public void testSubscriptionSnapshotUpdatesVcnGatewayConnectionsWhileInactive() {
-        verifyUpdateSubscriptionSnapshotNotifiesConnectionGateways(false /* isActive */);
+    public void testSubscriptionSnapshotUpdatesVcnGatewayConnectionsInSafeMode() {
+        verifyUpdateSubscriptionSnapshotNotifiesGatewayConnections(VCN_STATUS_CODE_SAFE_MODE);
     }
 
     private void triggerVcnRequestListeners(NetworkRequestListener requestListener) {
@@ -201,7 +203,7 @@ public class VcnTest {
     private void verifySafeMode(
             NetworkRequestListener requestListener,
             Set<VcnGatewayConnection> expectedGatewaysTornDown) {
-        assertFalse(mVcn.isActive());
+        assertEquals(VCN_STATUS_CODE_SAFE_MODE, mVcn.getStatus());
         for (final VcnGatewayConnection gatewayConnection : expectedGatewaysTornDown) {
             verify(gatewayConnection).teardownAsynchronously();
         }
@@ -319,7 +321,7 @@ public class VcnTest {
 
         // Registered on start, then re-registered with new configs
         verify(mVcnNetworkProvider, times(2)).registerListener(eq(requestListener));
-        assertTrue(mVcn.isActive());
+        assertEquals(VCN_STATUS_CODE_ACTIVE, mVcn.getStatus());
         for (final int[] caps : TEST_CAPS) {
             // Expect each gateway connection created only on initial startup
             verify(mDeps)
@@ -334,7 +336,7 @@ public class VcnTest {
 
     @Test
     public void testIgnoreNetworkRequestWhileInactive() {
-        mVcn.setIsActive(false /* isActive */);
+        mVcn.setStatus(VCN_STATUS_CODE_INACTIVE);
 
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
         triggerVcnRequestListeners(requestListener);
