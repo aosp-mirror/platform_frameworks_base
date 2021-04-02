@@ -9211,14 +9211,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throw new IllegalArgumentException("Must explicitly specify a user handle ("
                     + "UserHandle.CURRENT not supported)");
         }
-        final UserManager um;
-        try {
-            um = mContext.createContextAsUser(profile, 0 /* flags */)
-                    .getSystemService(UserManager.class);
-        } catch (IllegalStateException e) {
-            throw new IllegalArgumentException("Profile does not exist");
-        }
-        if (!um.isManagedProfile()) {
+        final UserManager um = mContext.getSystemService(UserManager.class);
+        if (!um.isManagedProfile(profile.getIdentifier())) {
             throw new IllegalArgumentException("Profile must be a managed profile");
         }
         // Strictly speaking, mOemNetworkPreferences should only be touched on the
