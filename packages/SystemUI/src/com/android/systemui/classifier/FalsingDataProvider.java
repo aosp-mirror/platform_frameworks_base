@@ -81,8 +81,8 @@ public class FalsingDataProvider {
         }
 
         if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            // Ensure prior gesture was completed. May be a no-op.
             completePriorGesture();
-            mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
         }
         mRecentMotionEvents.addAll(motionEvents);
 
@@ -100,12 +100,23 @@ public class FalsingDataProvider {
         mDirty = true;
     }
 
+    void onMotionEventComplete() {
+        if (mRecentMotionEvents.isEmpty()) {
+            return;
+        }
+        int action = mRecentMotionEvents.get(mRecentMotionEvents.size() - 1).getActionMasked();
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            completePriorGesture();
+        }
+    }
+
     private void completePriorGesture() {
         if (!mRecentMotionEvents.isEmpty()) {
             mGestureFinalizedListeners.forEach(listener -> listener.onGestureFinalized(
                     mRecentMotionEvents.get(mRecentMotionEvents.size() - 1).getEventTime()));
 
             mPriorMotionEvents = mRecentMotionEvents;
+            mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
         }
     }
 

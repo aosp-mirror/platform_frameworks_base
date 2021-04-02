@@ -49,7 +49,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.FloatingToolbar;
 import com.android.systemui.R;
@@ -174,7 +173,11 @@ public class NotificationShadeWindowView extends FrameLayout {
     public boolean dispatchTouchEvent(MotionEvent ev) {
         Boolean result = mInteractionEventHandler.handleDispatchTouchEvent(ev);
 
-        return result != null ? result : super.dispatchTouchEvent(ev);
+        result = result != null ? result : super.dispatchTouchEvent(ev);
+
+        mInteractionEventHandler.dispatchTouchEventComplete();
+
+        return result;
     }
 
     @Override
@@ -344,6 +347,12 @@ public class NotificationShadeWindowView extends FrameLayout {
          * to the super method.
          */
         Boolean handleDispatchTouchEvent(MotionEvent ev);
+
+        /**
+         * Called after all dispatching is done.
+         */
+
+        void dispatchTouchEventComplete();
 
         /**
          * Returns if the view should intercept the touch event.
