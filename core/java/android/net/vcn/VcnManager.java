@@ -437,7 +437,7 @@ public class VcnManager {
          * Invoked when status of the VCN for this callback's subscription group changes.
          *
          * @param statusCode the code for the status change encountered by this {@link
-         *     VcnStatusCallback}'s subscription group.
+         *     VcnStatusCallback}'s subscription group. This value will be one of VCN_STATUS_CODE_*.
          */
         public abstract void onStatusChanged(@VcnStatusCode int statusCode);
 
@@ -449,7 +449,8 @@ public class VcnManager {
          *     encountering an error. This will match the name for exactly one {@link
          *     VcnGatewayConnectionConfig} for the {@link VcnConfig} configured for this callback's
          *     subscription group
-         * @param errorCode the code to indicate the error that occurred
+         * @param errorCode the code to indicate the error that occurred. This value will be one of
+         *     VCN_ERROR_CODE_*.
          * @param detail Throwable to provide additional information about the error, or {@code
          *     null} if none
          */
