@@ -762,11 +762,11 @@ public class HorizontalScrollView extends FrameLayout {
                     if (canOverscroll) {
                         int consumed = 0;
                         if (deltaX < 0 && mEdgeGlowRight.getDistance() != 0f) {
-                            consumed = Math.round(getHeight()
+                            consumed = Math.round(getWidth()
                                     * mEdgeGlowRight.onPullDistance((float) deltaX / getWidth(),
                                     displacement));
                         } else if (deltaX > 0 && mEdgeGlowLeft.getDistance() != 0f) {
-                            consumed = Math.round(-getHeight()
+                            consumed = Math.round(-getWidth()
                                     * mEdgeGlowLeft.onPullDistance((float) -deltaX / getWidth(),
                                     1 - displacement));
                         }
