@@ -22,7 +22,6 @@ import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -50,7 +49,6 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private final String mSlotEthernet;
     private final String mSlotVpn;
     private final String mSlotNoCalling;
-    private final String mSlotCallStrength;
 
     private final Context mContext;
     private final StatusBarIconController mIconController;
@@ -84,8 +82,6 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mSlotEthernet = mContext.getString(com.android.internal.R.string.status_bar_ethernet);
         mSlotVpn      = mContext.getString(com.android.internal.R.string.status_bar_vpn);
         mSlotNoCalling = mContext.getString(com.android.internal.R.string.status_bar_no_calling);
-        mSlotCallStrength =
-                mContext.getString(com.android.internal.R.string.status_bar_call_strength);
         mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
 
         mIconController = iconController;
@@ -211,14 +207,9 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         if (statusIcon.icon == R.drawable.ic_qs_no_calling_sms) {
             state.isNoCalling = statusIcon.visible;
             state.noCallingDescription = statusIcon.contentDescription;
-        } else {
-            state.callStrengthResId = statusIcon.icon;
-            state.callStrengthDescription = statusIcon.contentDescription;
+            mIconController.setNoCallingIcons(mSlotNoCalling,
+                    CallIndicatorIconState.copyStates(mCallIndicatorStates));
         }
-        mIconController.setCallStrengthIcons(mSlotCallStrength,
-                CallIndicatorIconState.copyStates(mCallIndicatorStates));
-        mIconController.setNoCallingIcons(mSlotNoCalling,
-                CallIndicatorIconState.copyStates(mCallIndicatorStates));
     }
 
     @Override
@@ -305,7 +296,6 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
         mIconController.removeAllIconsForSlot(mSlotMobile);
         mIconController.removeAllIconsForSlot(mSlotNoCalling);
-        mIconController.removeAllIconsForSlot(mSlotCallStrength);
         mMobileStates.clear();
         List<CallIndicatorIconState> noCallingStates = new ArrayList<CallIndicatorIconState>();
         noCallingStates.addAll(mCallIndicatorStates);
@@ -420,15 +410,12 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     public static class CallIndicatorIconState {
         public boolean isNoCalling;
         public int noCallingResId;
-        public int callStrengthResId;
         public int subId;
         public String noCallingDescription;
-        public String callStrengthDescription;
 
         private CallIndicatorIconState(int subId) {
             this.subId = subId;
             this.noCallingResId = R.drawable.ic_qs_no_calling_sms;
-            this.callStrengthResId = TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[0];
         }
 
         @Override
@@ -440,26 +427,21 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             CallIndicatorIconState that = (CallIndicatorIconState) o;
             return  isNoCalling == that.isNoCalling
                     && noCallingResId == that.noCallingResId
-                    && callStrengthResId == that.callStrengthResId
                     && subId == that.subId
-                    && noCallingDescription == that.noCallingDescription
-                    && callStrengthDescription == that.callStrengthDescription;
+                    && noCallingDescription == that.noCallingDescription;
 
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(isNoCalling, noCallingResId,
-                    callStrengthResId, subId, noCallingDescription, callStrengthDescription);
+            return Objects.hash(isNoCalling, noCallingResId, subId, noCallingDescription);
         }
 
         private void copyTo(CallIndicatorIconState other) {
             other.isNoCalling = isNoCalling;
             other.noCallingResId = noCallingResId;
-            other.callStrengthResId = callStrengthResId;
             other.subId = subId;
             other.noCallingDescription = noCallingDescription;
-            other.callStrengthDescription = callStrengthDescription;
         }
 
         private static List<CallIndicatorIconState> copyStates(
