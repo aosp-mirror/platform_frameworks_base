@@ -60,8 +60,8 @@ package android.media {
     method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest build();
     method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setClientPid(int);
     method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setClientUid(int);
-    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setDestinationFileDescriptor(android.os.ParcelFileDescriptor);
-    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setSourceFileDescriptor(android.os.ParcelFileDescriptor);
+    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setDestinationFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.media.MediaTranscodeManager.VideoTranscodingRequest.Builder setSourceFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
   }
 
 }
