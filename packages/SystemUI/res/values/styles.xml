@@ -316,7 +316,7 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="Theme.SystemUI" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+    <style name="Theme.SystemUI" parent="@*android:style/Theme.DeviceDefault.SystemUI">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
@@ -375,7 +375,7 @@
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+    <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.SystemUI">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
