@@ -130,6 +130,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected int mSubId;
 
     private NetworkCapabilities mNetCapabilities;
+    private Network mNetwork;
     private ConnectivityManager.NetworkCallback mDefaultCallbackInWifiTracker;
     private ConnectivityManager.NetworkCallback mDefaultCallbackInNetworkController;
     private ConnectivityManager.NetworkCallback mNetworkCallback;
@@ -174,8 +175,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockCm = mock(ConnectivityManager.class);
         mMockBd = mock(BroadcastDispatcher.class);
         mMockNsm = mock(NetworkScoreManager.class);
+        mNetwork = mock(Network.class);
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mNetCapabilities = new NetworkCapabilities();
+        when(mNetwork.getNetId()).thenReturn(0);
         when(mMockTm.isDataCapable()).thenReturn(true);
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
         doAnswer(invocation -> {
@@ -323,7 +326,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mNetCapabilities.setTransportInfo(info);
         setConnectivityCommon(networkType, validated, isConnected);
         mDefaultCallbackInNetworkController.onCapabilitiesChanged(
-                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                mNetwork, new NetworkCapabilities(mNetCapabilities));
     }
 
     public void setConnectivityViaCallbackInNetworkController(
@@ -333,7 +336,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         }
         setConnectivityCommon(networkType, validated, isConnected);
         mDefaultCallbackInNetworkController.onCapabilitiesChanged(
-                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                mNetwork, new NetworkCapabilities(mNetCapabilities));
     }
 
     public void setConnectivityViaCallbackInWifiTracker(
@@ -344,12 +347,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setConnectivityCommon(networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
             if (isConnected) {
-                mNetworkCallback.onAvailable(mock(Network.class),
+                mNetworkCallback.onAvailable(mNetwork,
                         new NetworkCapabilities(mNetCapabilities), new LinkProperties(), false);
                 mNetworkCallback.onCapabilitiesChanged(
-                        mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                        mNetwork, new NetworkCapabilities(mNetCapabilities));
             } else {
-                mNetworkCallback.onLost(mock(Network.class));
+                mNetworkCallback.onLost(mNetwork);
             }
         }
     }
@@ -360,14 +363,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setConnectivityCommon(networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_CELLULAR) {
             if (isConnected) {
-                mNetworkCallback.onAvailable(mock(Network.class),
+                mNetworkCallback.onAvailable(mNetwork,
                         new NetworkCapabilities(mNetCapabilities), new LinkProperties(), false);
                 mNetworkCallback.onCapabilitiesChanged(
-                        mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                        mNetwork, new NetworkCapabilities(mNetCapabilities));
                 mDefaultCallbackInWifiTracker.onCapabilitiesChanged(
-                        mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                        mNetwork, new NetworkCapabilities(mNetCapabilities));
             } else {
-                mNetworkCallback.onLost(mock(Network.class));
+                mNetworkCallback.onLost(mNetwork);
             }
         }
     }
@@ -379,7 +382,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         }
         setConnectivityCommon(networkType, validated, isConnected);
         mDefaultCallbackInWifiTracker.onCapabilitiesChanged(
-                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                mNetwork, new NetworkCapabilities(mNetCapabilities));
     }
 
     private void setConnectivityCommon(
