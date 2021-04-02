@@ -1226,7 +1226,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
-        mChargingRippleAnimationController.setViewHost(mNotificationShadeWindowView);
         updateLightRevealScrimVisibility();
 
         mNotificationPanelViewController.initDependencies(
