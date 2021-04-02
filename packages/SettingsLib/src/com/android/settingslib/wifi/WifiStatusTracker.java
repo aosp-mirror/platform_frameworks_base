@@ -80,6 +80,9 @@ public class WifiStatusTracker {
         @Override
         public void onCapabilitiesChanged(
                 Network network, NetworkCapabilities networkCapabilities) {
+            if (mDefaultNetwork != null && mDefaultNetwork.getNetId() != network.getNetId()) {
+                return;
+            }
             if (!mNetworks.contains(network.getNetId())) {
                 // New network
                 boolean isVcnOverWifi =
@@ -114,6 +117,9 @@ public class WifiStatusTracker {
 
         @Override
         public void onLost(Network network) {
+            if (mDefaultNetwork != null && mDefaultNetwork.getNetId() != network.getNetId()) {
+                return;
+            }
             String log = new StringBuilder()
                     .append(SSDF.format(System.currentTimeMillis())).append(",")
                     .append("onLost: ")
