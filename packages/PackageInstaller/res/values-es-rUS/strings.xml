@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Instalador del paquete"</string>
     <string name="install" msgid="711829760615509273">"Instalar"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Listo"</string>
     <string name="cancel" msgid="1018267193425558088">"Cancelar"</string>
     <string name="installing" msgid="4921993079741206516">"Instalando…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Instalando <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Se instaló la app."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"¿Deseas instalar esta aplicación?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"¿Quieres instalar una actualización de esta app? No se perderán los datos."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"¿Quieres instalar una actualización de esta app integrada? No se perderán los datos."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"No se instaló la app."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Se bloqueó el paquete para impedir la instalación."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"No se instaló la app debido a un conflicto con un paquete."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear no admite las acciones de instalación y desinstalación"</string>
     <string name="message_staging" msgid="8032722385658438567">"Preparando app…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Desconocido"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Por tu seguridad, la tablet no tiene permitido instalar apps desconocidas de esta fuente."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Por tu seguridad, la TV no tiene permitido instalar apps desconocidas de esta fuente."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Por tu seguridad, el teléfono no tiene permitido instalar apps desconocidas de esta fuente."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"El teléfono y tus datos personales son más vulnerables a los ataques de apps desconocidas. Si instalas esta app, serás responsable de los daños que sufra el teléfono y de la pérdida de datos que pueda ocasionar su uso."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"La tablet y tus datos personales son más vulnerables a los ataques de apps desconocidas. Si instalas esta app, serás responsable de los daños que sufra la tablet y de la pérdida de datos que pueda ocasionar su uso."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"La TV y tus datos personales son más vulnerables a los ataques de apps desconocidas. Si instalas esta app, serás responsable de los daños que sufra la TV y de la pérdida de datos que pueda ocasionar su uso."</string>
