@@ -9935,9 +9935,9 @@ package android.content {
   public static final class AttributionSource.Builder {
     ctor public AttributionSource.Builder(int);
     method @NonNull public android.content.AttributionSource build();
-    method @NonNull public android.content.AttributionSource.Builder setAttributionTag(@NonNull String);
-    method @NonNull public android.content.AttributionSource.Builder setNext(@NonNull android.content.AttributionSource);
-    method @NonNull public android.content.AttributionSource.Builder setPackageName(@NonNull String);
+    method @NonNull public android.content.AttributionSource.Builder setAttributionTag(@Nullable String);
+    method @NonNull public android.content.AttributionSource.Builder setNext(@Nullable android.content.AttributionSource);
+    method @NonNull public android.content.AttributionSource.Builder setPackageName(@Nullable String);
   }
 
   public abstract class BroadcastReceiver {
