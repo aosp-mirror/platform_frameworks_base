@@ -2608,7 +2608,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 " (auto: " + UiModeManager.MODE_NIGHT_AUTO +
                 ", yes: " + UiModeManager.MODE_NIGHT_YES +
                 ", no: " + UiModeManager.MODE_NIGHT_NO + ")");
-        final boolean lightWpTheme = mContext.getThemeResId() == R.style.Theme_SystemUI_Light;
+        final boolean lightWpTheme = mContext.getThemeResId()
+                == R.style.Theme_SystemUI_LightWallpaper;
         pw.println("    light wallpaper theme: " + lightWpTheme);
 
         if (mKeyguardIndicationController != null) {
@@ -3489,7 +3490,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
         // to set our default theme.
         final boolean lockDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
-        final int themeResId = lockDarkText ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI;
+        final int themeResId = lockDarkText ? R.style.Theme_SystemUI_LightWallpaper
+                : R.style.Theme_SystemUI;
         if (mContext.getThemeResId() != themeResId) {
             mContext.setTheme(themeResId);
             mConfigurationController.notifyThemeChanged();
