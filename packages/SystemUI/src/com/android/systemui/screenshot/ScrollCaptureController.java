@@ -27,6 +27,7 @@ import android.view.ScrollCaptureResponse;
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.concurrent.futures.CallbackToFutureAdapter.Completer;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
@@ -137,6 +138,11 @@ public class ScrollCaptureController {
         mBgExecutor = bgExecutor;
         mClient = client;
         mImageTileSet = imageTileSet;
+    }
+
+    @VisibleForTesting
+    float getTargetTopSizeRatio() {
+        return IDEAL_PORTION_ABOVE;
     }
 
     /**
