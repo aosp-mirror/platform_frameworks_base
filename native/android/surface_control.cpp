@@ -656,3 +656,17 @@ void ASurfaceTransaction_setFrameRateWithChangeStrategy(ASurfaceTransaction* aSu
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
 }
+
+void ASurfaceTransaction_setEnableBackPressure(ASurfaceTransaction* aSurfaceTransaction,
+                                               ASurfaceControl* aSurfaceControl,
+                                               bool enableBackpressure) {
+    CHECK_NOT_NULL(aSurfaceControl);
+    CHECK_NOT_NULL(aSurfaceTransaction);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    const uint32_t flags = enableBackpressure ?
+                      layer_state_t::eEnableBackpressure : 0;
+    transaction->setFlags(surfaceControl, flags, layer_state_t::eEnableBackpressure);
+}
