@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Pakkeinstallationsprogram"</string>
     <string name="install" msgid="711829760615509273">"Installer"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Udfør"</string>
     <string name="cancel" msgid="1018267193425558088">"Annuller"</string>
     <string name="installing" msgid="4921993079741206516">"Installerer…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Installerer <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Appen er installeret."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Vil du installere denne app?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Vil du installere en opdatering til denne eksisterende app? Du mister ikke dine eksisterende data."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Vil du installere en opdatering til denne indbyggede app? Du mister ikke dine eksisterende data."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Appen blev ikke installeret."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakken blev forhindret i at blive installeret."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen blev ikke installeret, da pakken er i strid med en eksisterende pakke."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Det er ikke muligt at installere/afinstallere på Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Forbereder appen…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Ukendt"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Din tablet har af sikkerhedshensyn ikke tilladelse til at installere ukendte apps fra denne kilde."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Dit fjernsyn har af sikkerhedshensyn ikke tilladelse til at installere ukendte apps fra denne kilde."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Din telefon har af sikkerhedshensyn ikke tilladelse til at installere ukendte apps fra denne kilde."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Din telefon og dine personlige data er mere sårbare over for angreb fra ukendte apps. Når du installerer denne app, accepterer du, at du er ansvarlig for skader på din telefon eller tab af data, der kan skyldes brug af appen."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Din tablet og dine personlige data er mere sårbare over for angreb fra ukendte apps. Når du installerer denne app, accepterer du, at du er ansvarlig for skader på din tablet eller tab af data, der kan skyldes brug af appen."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Dit fjernsyn og dine personlige data er mere sårbare over for angreb fra ukendte apps. Når du installerer denne app, accepterer du, at du er ansvarlig for skader på dit fjernsyn eller tab af data, der kan skyldes brug af appen."</string>

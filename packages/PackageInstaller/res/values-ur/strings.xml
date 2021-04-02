@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"پیکیج انسٹالر"</string>
     <string name="install" msgid="711829760615509273">"انسٹال کریں"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"ہو گیا"</string>
     <string name="cancel" msgid="1018267193425558088">"منسوخ کریں"</string>
     <string name="installing" msgid="4921993079741206516">"انسٹال ہو رہی ہے…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کو انسٹال کیا جا رہا ہے…"</string>
     <string name="install_done" msgid="5987363587661783896">"ایپ انسٹال ہو گئی۔"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"کیا آپ یہ ایپلیکیشن انسٹال کرنا چاہتے ہیں؟"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"کیا آپ اس موجودہ ایپلیکیشن میں ایک اپ ڈیٹ انسٹال کرنا چاہتے ہیں؟ آپ کا موجودہ ڈیٹا ضائع نہیں ہوگا۔"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"کیا آپ پہلے سے شامل اس ایپلیکیشن میں ایک اپ ڈیٹ انسٹال کرنا چاہتے ہیں؟ آپ کا موجودہ ڈیٹا ضائع نہیں ہوگا۔"</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ایپ انسٹال نہیں ہوئی۔"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"پیکج کو انسٹال ہونے سے مسدود کر دیا گیا تھا۔"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ایپ انسٹال نہیں ہوئی کیونکہ پیکج ایک موجودہ پیکیج سے متصادم ہے۔"</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"‏\'انسٹال/اَن انسٹال کی کارروائیاں\' Wear پر تعاون یافتہ نہیں ہیں۔"</string>
     <string name="message_staging" msgid="8032722385658438567">"ایپ کی ٹیسٹنگ ہو رہی ہے…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"نامعلوم"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"آپ کی سیکیورٹی کے مدنظر، آپ کے ٹیبلیٹ کو اس ذریعے سے نامعلوم ایپس انسٹال کرنے کی اجازت نہیں ہے۔"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"‏آپ کی سیکیورٹی کے مدنظر، آپ کے TV کو اس ذریعے سے نامعلوم ایپس انسٹال کرنے کی اجازت نہیں ہے۔"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"آپ کی سیکیورٹی کے مدنظر، آپ کے فون کو اس ذریعے سے نامعلوم ایپس انسٹال کرنے کی اجازت نہیں ہے۔"</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"آپ کے فون اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے فون کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"آپ کے ٹیبلیٹ اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے ٹیبلیٹ کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"‏آپ کے TV اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے TV کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
