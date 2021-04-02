@@ -573,7 +573,8 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No pin, pattern or password set"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error while authenticating"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Use screen lock"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Enter your device credential to continue"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Couldn\'t process fingerprint. Please try again."</string>
@@ -660,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Face <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Use face unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Use face or screen lock"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Use face unlock to continue"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Use your face or screen lock to continue"</string>
   <string-array name="face_error_vendor">
   </string-array>

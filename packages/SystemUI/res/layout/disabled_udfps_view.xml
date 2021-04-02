@@ -16,9 +16,7 @@
   -->
 <com.android.keyguard.DisabledUdfpsView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/disabled_udfps_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/circle_white"
 />

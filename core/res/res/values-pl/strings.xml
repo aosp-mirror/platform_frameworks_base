@@ -579,7 +579,8 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nie ustawiono kodu PIN, wzoru ani hasła"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Podczas uwierzytelniania wystąpił błąd"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Używaj blokady ekranu"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Podaj dane logowania do urządzenia, aby kontynuować"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
@@ -670,7 +671,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Twarz <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Używaj rozpoznawania twarzy"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Używaj rozpoznawania twarzy lub blokady ekranu"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Użyj rozpoznawania twarzy, aby kontynuować"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Aby kontynuować, użyj rozpoznawania twarzy lub blokady ekranu"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -2348,8 +2350,7 @@
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
     <skip />
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Możesz teraz powiększyć część ekranu"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Włącz w Ustawieniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odrzuć"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Aby kontynuować, musisz przyznać aplikacji „<xliff:g id="APP">%s</xliff:g>” dostęp do mikrofonu urządzenia."</string>

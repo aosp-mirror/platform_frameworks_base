@@ -290,7 +290,6 @@ import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.net.module.util.ArrayTrackRecord;
 import com.android.server.ConnectivityService.ConnectivityDiagnosticsCallbackInfo;
-import com.android.server.connectivity.ConnectivityConstants;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
@@ -3033,8 +3032,9 @@ public class ConnectivityServiceTest {
         }
 
         NetworkCapabilities filter = new NetworkCapabilities();
+        filter.addTransportType(TRANSPORT_CELLULAR);
         filter.addCapability(capability);
-        // Add NOT_VCN_MANAGED capability into filter unconditionally since some request will add
+        // Add NOT_VCN_MANAGED capability into filter unconditionally since some requests will add
         // NOT_VCN_MANAGED automatically but not for NetworkCapabilities,
         // see {@code NetworkCapabilities#deduceNotVcnManagedCapability} for more details.
         filter.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
@@ -3063,15 +3063,11 @@ public class ConnectivityServiceTest {
 
         // Now bring in a higher scored network.
         TestNetworkAgentWrapper testAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
-        // Rather than create a validated network which complicates things by registering it's
-        // own NetworkRequest during startup, just bump up the score to cancel out the
-        // unvalidated penalty.
-        testAgent.adjustScore(40);
-
-        // When testAgent connects, because of its 50 score (50 for cell + 40 adjustment score
-        // - 40 penalty for not being validated), it will beat the testFactory's offer, so
-        // the request will be removed.
-        testAgent.connect(false);
+        // When testAgent connects, because of its score (50 legacy int / cell transport)
+        // it will beat or equal the testFactory's offer, so the request will be removed.
+        // Note the agent as validated only if the capability is INTERNET, as it's the only case
+        // where it makes sense.
+        testAgent.connect(NET_CAPABILITY_INTERNET == capability /* validated */);
         testAgent.addCapability(capability);
         testFactory.expectRequestRemove();
         testFactory.assertRequestCountEquals(0);
@@ -3085,17 +3081,18 @@ public class ConnectivityServiceTest {
         testFactory.assertRequestCountEquals(0);
         assertFalse(testFactory.getMyStartRequested());
 
-        // Make the test agent weak enough to have the exact same score as the
-        // factory (50 for cell + 40 adjustment -40 validation penalty - 5 adjustment). Make sure
-        // the factory doesn't see the request.
+        // If using legacy scores, make the test agent weak enough to have the exact same score as
+        // the factory (50 for cell - 5 adjustment). Make sure the factory doesn't see the request.
+        // If not using legacy score, this is a no-op and the "same score removes request" behavior
+        // has already been tested above.
         testAgent.adjustScore(-5);
         expectNoRequestChanged(testFactory);
         assertFalse(testFactory.getMyStartRequested());
 
-        // Make the test agent weak enough to see the two requests (the one that was just sent,
-        // and either the default one or the one sent at the top of this test if the default
-        // won't be seen).
-        testAgent.adjustScore(-45);
+        // Make the test agent weak enough that the factory will see the two requests (the one that
+        // was just sent, and either the default one or the one sent at the top of this test if
+        // the default won't be seen).
+        testAgent.setScore(new NetworkScore.Builder().setLegacyInt(2).setExiting(true).build());
         testFactory.expectRequestAdds(2);
         testFactory.assertRequestCountEquals(2);
         assertTrue(testFactory.getMyStartRequested());
@@ -3127,7 +3124,7 @@ public class ConnectivityServiceTest {
         assertTrue(testFactory.getMyStartRequested());
 
         // Adjust the agent score up again. Expect the request to be withdrawn.
-        testAgent.adjustScore(50);
+        testAgent.setScore(new NetworkScore.Builder().setLegacyInt(50).build());
         testFactory.expectRequestRemove();
         testFactory.assertRequestCountEquals(0);
         assertFalse(testFactory.getMyStartRequested());
@@ -3168,22 +3165,35 @@ public class ConnectivityServiceTest {
     @Test
     public void testRegisterIgnoringScore() throws Exception {
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
-        mWiFiNetworkAgent.adjustScore(30); // score = 60 (wifi) + 30 = 90
+        mWiFiNetworkAgent.setScore(new NetworkScore.Builder().setLegacyInt(90).build());
         mWiFiNetworkAgent.connect(true /* validated */);
 
         // Make sure the factory sees the default network
         final NetworkCapabilities filter = new NetworkCapabilities();
+        filter.addTransportType(TRANSPORT_CELLULAR);
         filter.addCapability(NET_CAPABILITY_INTERNET);
         filter.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
         final HandlerThread handlerThread = new HandlerThread("testNetworkFactoryRequests");
         handlerThread.start();
         final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
                 mServiceContext, "testFactory", filter, mCsHandlerThread);
-        testFactory.registerIgnoringScore();
-        testFactory.expectRequestAdd();
+        testFactory.register();
 
-        mWiFiNetworkAgent.adjustScore(20); // exceed the maximum score
-        expectNoRequestChanged(testFactory); // still seeing the request
+        final MockNetworkFactory testFactoryAll = new MockNetworkFactory(handlerThread.getLooper(),
+                mServiceContext, "testFactoryAll", filter, mCsHandlerThread);
+        testFactoryAll.registerIgnoringScore();
+
+        // The regular test factory should not see the request, because WiFi is stronger than cell.
+        expectNoRequestChanged(testFactory);
+        // With ignoringScore though the request is seen.
+        testFactoryAll.expectRequestAdd();
+
+        // The legacy int will be ignored anyway, set the only other knob to true
+        mWiFiNetworkAgent.setScore(new NetworkScore.Builder().setLegacyInt(110)
+                .setTransportPrimary(true).build());
+
+        expectNoRequestChanged(testFactory); // still not seeing the request
+        expectNoRequestChanged(testFactoryAll); // still seeing the request
 
         mWiFiNetworkAgent.disconnect();
     }
@@ -6047,7 +6057,8 @@ public class ConnectivityServiceTest {
         // called again, it does. For example, connect Ethernet, but with a low score, such that it
         // does not become the default network.
         mEthernetNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_ETHERNET);
-        mEthernetNetworkAgent.adjustScore(-40);
+        mEthernetNetworkAgent.setScore(
+                new NetworkScore.Builder().setLegacyInt(30).setExiting(true).build());
         mEthernetNetworkAgent.connect(false);
         waitForIdle();
         verify(mStatsManager).notifyNetworkStatus(any(List.class),
@@ -6922,8 +6933,6 @@ public class ConnectivityServiceTest {
         callback.expectAvailableCallbacksUnvalidated(mMockVpn);
         callback.assertNoCallback();
 
-        assertTrue(mMockVpn.getAgent().getScore() > mEthernetNetworkAgent.getScore());
-        assertEquals(ConnectivityConstants.VPN_DEFAULT_SCORE, mMockVpn.getAgent().getScore());
         assertEquals(mMockVpn.getNetwork(), mCm.getActiveNetwork());
 
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
@@ -8225,12 +8234,12 @@ public class ConnectivityServiceTest {
         assertExtraInfoFromCmPresent(mWiFiNetworkAgent);
 
         b1 = expectConnectivityAction(TYPE_WIFI, DetailedState.DISCONNECTED);
+        b2 = expectConnectivityAction(TYPE_VPN, DetailedState.DISCONNECTED);
         mWiFiNetworkAgent.disconnect();
         callback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         systemDefaultCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         b1.expectBroadcast();
         callback.expectCapabilitiesThat(mMockVpn, nc -> !nc.hasTransport(TRANSPORT_WIFI));
-        b2 = expectConnectivityAction(TYPE_VPN, DetailedState.DISCONNECTED);
         mMockVpn.expectStopVpnRunnerPrivileged();
         callback.expectCallback(CallbackEntry.LOST, mMockVpn);
         b2.expectBroadcast();
@@ -11645,14 +11654,14 @@ public class ConnectivityServiceTest {
                 new LinkProperties(), oemPaidNc);
         oemPaidAgent.connect(true);
 
-        // The oemPaidAgent has score 50 (default for cell) so it beats what the oemPaidFactory can
+        // The oemPaidAgent has score 50/cell transport, so it beats what the oemPaidFactory can
         // provide, therefore it loses the request.
         oemPaidFactory.expectRequestRemove();
         oemPaidFactory.assertRequestCountEquals(0);
         expectNoRequestChanged(internetFactory);
         internetFactory.assertRequestCountEquals(0);
 
-        oemPaidAgent.adjustScore(-30);
+        oemPaidAgent.setScore(new NetworkScore.Builder().setLegacyInt(20).setExiting(true).build());
         // Now the that the agent is weak, the oemPaidFactory can beat the existing network for the
         // OEM_PAID request. The internet factory however can't beat a network that has OEM_PAID
         // for the preference request, so it doesn't see the request.
@@ -11682,7 +11691,8 @@ public class ConnectivityServiceTest {
         // Now WiFi connects and it's unmetered, but it's weaker than cell.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
-        mWiFiNetworkAgent.adjustScore(-30); // Not the best Internet network, but unmetered
+        mWiFiNetworkAgent.setScore(new NetworkScore.Builder().setLegacyInt(30).setExiting(true)
+                .build()); // Not the best Internet network, but unmetered
         mWiFiNetworkAgent.connect(true);
 
         // The OEM_PAID preference prefers an unmetered network to an OEM_PAID network, so

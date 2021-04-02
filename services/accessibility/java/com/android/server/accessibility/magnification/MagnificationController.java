@@ -53,10 +53,13 @@ import com.android.server.accessibility.AccessibilityManagerService;
  *   is triggered.</li>
  *   <li> 4. {@link #onTripleTapped} updates magnification switch UI depending on magnification
  *   capabilities and magnification active state when triple-tap gesture is detected. </li>
+ *   <li> 4. {@link #onRequestMagnificationSpec} updates magnification switch UI depending on
+ *   magnification capabilities and magnification active state when new magnification spec is
+ *   changed by external request from calling public APIs. </li>
  * </ol>
  *
- *  <b>Note</b>  Updates magnification switch UI when magnification mode transition
- *  is done {@link DisableMagnificationCallback#onResult}.
+ *  <b>Note</b> Updates magnification switch UI when magnification mode transition
+ *  is done and before invoking {@link TransitionCallBack#onResult}.
  */
 public class MagnificationController implements WindowMagnificationManager.Callback,
         MagnificationGestureHandler.Callback,
@@ -205,21 +208,22 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
     @Override
     public void onRequestMagnificationSpec(int displayId, int serviceId) {
+        final WindowMagnificationManager windowMagnificationManager;
         synchronized (mLock) {
             if (serviceId == AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID) {
                 return;
             }
-            if (mWindowMagnificationMgr == null
-                    || !mWindowMagnificationMgr.isWindowMagnifierEnabled(displayId)) {
-                return;
-            }
+            updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+            windowMagnificationManager = mWindowMagnificationMgr;
+        }
+        if (windowMagnificationManager != null) {
             mWindowMagnificationMgr.disableWindowMagnification(displayId, false);
         }
     }
 
     // TODO : supporting multi-display (b/182227245).
     @Override
-    public void onWindowMagnificationActivationState(boolean activated) {
+    public void onWindowMagnificationActivationState(int displayId, boolean activated) {
         if (activated) {
             mWindowModeEnabledTime = SystemClock.uptimeMillis();
 
@@ -227,6 +231,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
             }
             logMagnificationModeWithImeOnIfNeeded();
+            disableFullScreenMagnificationIfNeeded(displayId);
         } else {
             logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
                     SystemClock.uptimeMillis() - mWindowModeEnabledTime);
@@ -234,6 +239,17 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             synchronized (mLock) {
                 mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
             }
+        }
+    }
+
+    private void disableFullScreenMagnificationIfNeeded(int displayId) {
+        final FullScreenMagnificationController fullScreenMagnificationController =
+                getFullScreenMagnificationController();
+        // Internal request may be for transition, so we just need to check external request.
+        final boolean isMagnifyByExternalRequest =
+                fullScreenMagnificationController.getIdOfLastServiceToMagnify(displayId) > 0;
+        if (isMagnifyByExternalRequest) {
+            fullScreenMagnificationController.reset(displayId, false);
         }
     }
 

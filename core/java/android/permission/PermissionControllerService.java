@@ -301,6 +301,29 @@ public abstract class PermissionControllerService extends Service {
     }
 
     /**
+     * Get the platform permissions which belong to a particular permission group
+     *
+     * @param permissionGroupName The permission group whose permissions are desired
+     * @param callback A callback the permission names will be passed to
+     */
+    @BinderThread
+    public void onGetPlatformPermissionsForGroup(@NonNull String permissionGroupName,
+            @NonNull Consumer<List<String>> callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
+    /**
+     * Get the platform group of a particular permission, if the permission is a platform permission
+     *
+     * @param permissionName The permission name whose group is desired
+     * @param callback A callback the group name will be passed to
+     */
+    @BinderThread
+    public void onGetGroupOfPlatformPermission(@NonNull String permissionName,
+            @NonNull Consumer<String> callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+    /**
      * Get a user-readable sentence, describing the set of privileges that are to be granted to a
      * companion app managing a device of the given profile.
      *
@@ -559,6 +582,36 @@ public abstract class PermissionControllerService extends Service {
                     callback.complete(PermissionControllerService
                             .this
                             .getPrivilegesDescriptionStringForProfile(deviceProfileName));
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void getPlatformPermissionsForGroup(
+                    @NonNull String permissionName,
+                    @NonNull AndroidFuture<List<String>> callback) {
+                try {
+                    Objects.requireNonNull(permissionName);
+                    Objects.requireNonNull(callback);
+                    PermissionControllerService.this.onGetPlatformPermissionsForGroup(
+                            permissionName, callback::complete);
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void getGroupOfPlatformPermission(
+                    @NonNull String permissionGroupName,
+                    @NonNull AndroidFuture<String> callback) {
+                try {
+                    Objects.requireNonNull(permissionGroupName);
+                    Objects.requireNonNull(callback);
+                    PermissionControllerService
+                            .this
+                            .onGetGroupOfPlatformPermission(
+                            permissionGroupName, callback::complete);
                 } catch (Throwable t) {
                     callback.completeExceptionally(t);
                 }

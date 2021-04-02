@@ -24,6 +24,8 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
+import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
+import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
 import static android.os.PowerWhitelistManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerWhitelistManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
@@ -188,6 +190,15 @@ public final class ActiveServices {
     // How long the startForegroundService() grace period is to get around to
     // calling startForeground() before we ANR + stop it.
     static final int SERVICE_START_FOREGROUND_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+
+    // Foreground service types that always get immediate notification display,
+    // expressed in the same bitmask format that ServiceRecord.foregroundServiceType
+    // uses.
+    static final int FGS_IMMEDIATE_DISPLAY_MASK =
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
 
     final ActivityManagerService mAm;
 
@@ -2018,15 +2029,12 @@ public final class ActiveServices {
                 }
                 // or is this an type of FGS that always shows immediately?
                 if (!showNow) {
-                    switch (r.foregroundServiceType) {
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL:
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:
-                            if (DEBUG_FOREGROUND_SERVICE) {
-                                Slog.d(TAG_SERVICE, "FGS " + r
-                                        + " type gets immediate display");
-                            }
-                            showNow = true;
+                    if ((r.foregroundServiceType & FGS_IMMEDIATE_DISPLAY_MASK) != 0) {
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.d(TAG_SERVICE, "FGS " + r
+                                    + " type gets immediate display");
+                        }
+                        showNow = true;
                     }
                 }
             } else {
@@ -5862,6 +5870,17 @@ public final class ActiveServices {
                     UserHandle.getUserId(callingUid), callingUid);
             if (isCompanionApp) {
                 ret = REASON_COMPANION_DEVICE_MANAGER;
+            }
+        }
+
+        if (ret == REASON_DENIED) {
+            final AppOpsManager appOpsManager = mAm.getAppOpsManager();
+            if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, callingUid,
+                    callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                ret = REASON_OP_ACTIVATE_VPN;
+            } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
+                    callingUid, callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                ret = REASON_OP_ACTIVATE_PLATFORM_VPN;
             }
         }
 

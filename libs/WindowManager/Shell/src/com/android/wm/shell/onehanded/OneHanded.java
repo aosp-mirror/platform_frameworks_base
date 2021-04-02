@@ -89,4 +89,9 @@ public interface OneHanded {
      * Receive onConfigurationChanged() events
      */
     void onConfigChanged(Configuration newConfig);
+
+    /**
+     * Notifies when user switch complete
+     */
+    void onUserSwitch(int userId);
 }

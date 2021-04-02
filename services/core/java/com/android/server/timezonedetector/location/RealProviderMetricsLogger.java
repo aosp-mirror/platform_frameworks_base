@@ -16,6 +16,21 @@
 
 package com.android.server.timezonedetector.location;
 
+import static com.android.internal.util.FrameworkStatsLog.LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__CERTAIN;
+import static com.android.internal.util.FrameworkStatsLog.LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__DESTROYED;
+import static com.android.internal.util.FrameworkStatsLog.LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__INITIALIZING;
+import static com.android.internal.util.FrameworkStatsLog.LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__PERM_FAILED;
+import static com.android.internal.util.FrameworkStatsLog.LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__STOPPED;
+import static com.android.internal.util.FrameworkStatsLog.LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__UNCERTAIN;
+import static com.android.internal.util.FrameworkStatsLog.LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__UNKNOWN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_UNKNOWN;
+
 import android.annotation.IntRange;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -37,6 +52,28 @@ public class RealProviderMetricsLogger implements ProviderMetricsLogger {
 
     @Override
     public void onProviderStateChanged(@ProviderStateEnum int stateEnum) {
-        // TODO(b/172934905): Implement once the atom has landed.
+        FrameworkStatsLog.write(FrameworkStatsLog.LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED,
+                mProviderIndex,
+                metricsProviderState(stateEnum));
+    }
+
+    private static int metricsProviderState(@ProviderStateEnum int stateEnum) {
+        switch (stateEnum) {
+            case PROVIDER_STATE_STARTED_INITIALIZING:
+                return LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__INITIALIZING;
+            case PROVIDER_STATE_STARTED_UNCERTAIN:
+                return LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__UNCERTAIN;
+            case PROVIDER_STATE_STARTED_CERTAIN:
+                return LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__CERTAIN;
+            case PROVIDER_STATE_STOPPED:
+                return LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__STOPPED;
+            case PROVIDER_STATE_DESTROYED:
+                return LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__DESTROYED;
+            case PROVIDER_STATE_PERM_FAILED:
+                return LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__PERM_FAILED;
+            case PROVIDER_STATE_UNKNOWN:
+            default:
+                return LOCATION_TIME_ZONE_PROVIDER_STATE_CHANGED__STATE__UNKNOWN;
+        }
     }
 }

@@ -1016,10 +1016,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
             wct.scheduleFinishEnterPip(mToken, destinationBounds);
         } else if (isOutPipDirection(direction)) {
-            // If we are animating to fullscreen, then we need to reset the override bounds
-            // on the task to ensure that the task "matches" the parent's bounds.
-            taskBounds = (direction == TRANSITION_DIRECTION_LEAVE_PIP)
-                    ? null : destinationBounds;
+            // If we are animating to fullscreen or split screen, then we need to reset the
+            // override bounds on the task to ensure that the task "matches" the parent's bounds.
+            taskBounds = null;
             applyWindowingModeChangeOnExit(wct, direction);
         } else {
             // Just a resize in PIP

@@ -376,10 +376,13 @@ public class ColorStateList extends ComplexColor implements Parcelable {
             int[] stateSpec = new int[numAttrs];
             for (int i = 0; i < numAttrs; i++) {
                 final int stateResId = attrs.getAttributeNameResource(i);
+                if (stateResId == R.attr.lStar) {
+                    // Non-finalized resource ids cannot be used in switch statements.
+                    continue;
+                }
                 switch (stateResId) {
                     case R.attr.color:
                     case R.attr.alpha:
-                    case R.attr.lStar:
                         // Recognized attribute, ignore.
                         break;
                     default:

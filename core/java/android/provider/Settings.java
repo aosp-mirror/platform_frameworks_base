@@ -6745,9 +6745,8 @@ public final class Settings {
         /**
          * The current location time zone detection enabled state for the user.
          *
-         * See {@link
-         * android.app.timezonedetector.TimeZoneDetector#getCapabilities} for access. See {@link
-         * android.app.timezonedetector.TimeZoneDetector#updateConfiguration} to update.
+         * See {@link android.app.time.TimeManager#getTimeZoneCapabilitiesAndConfig} for access.
+         * See {@link android.app.time.TimeManager#updateTimeZoneConfiguration} to update.
          * @hide
          */
         public static final String LOCATION_TIME_ZONE_DETECTION_ENABLED =

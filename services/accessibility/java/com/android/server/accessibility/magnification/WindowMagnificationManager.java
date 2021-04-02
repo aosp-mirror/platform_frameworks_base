@@ -97,9 +97,10 @@ public class WindowMagnificationManager implements
         /**
          * Called when the state of the magnification activation is changed.
          *
+         * @param displayId The logical display id.
          * @param activated {@code true} if the magnification is activated, otherwise {@code false}.
          */
-        void onWindowMagnificationActivationState(boolean activated);
+        void onWindowMagnificationActivationState(int displayId, boolean activated);
     }
 
     private final Callback mCallback;
@@ -285,7 +286,7 @@ public class WindowMagnificationManager implements
         }
 
         if (enabled) {
-            mCallback.onWindowMagnificationActivationState(true);
+            mCallback.onWindowMagnificationActivationState(displayId, true);
         }
     }
 
@@ -321,7 +322,7 @@ public class WindowMagnificationManager implements
         }
 
         if (disabled) {
-            mCallback.onWindowMagnificationActivationState(false);
+            mCallback.onWindowMagnificationActivationState(displayId, false);
         }
     }
 
