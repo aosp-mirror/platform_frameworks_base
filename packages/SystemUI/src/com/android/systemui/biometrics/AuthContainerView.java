@@ -589,7 +589,7 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void dismissFromSystemServer() {
-        removeWindowIfAttached();
+        animateAway(false /* sendReason */, 0 /* reason */);
     }
 
     @Override
