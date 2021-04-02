@@ -1051,8 +1051,6 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         final ShortcutUser user = getUserShortcutsLocked(userId);
-        // Close AppSearchSession to flush pending changes.
-        user.forAllPackages(ShortcutPackage::closeAppSearchSession);
         user.logSharingShortcutStats(mMetricsLogger);
     }
 
@@ -5079,17 +5077,6 @@ public class ShortcutService extends IShortcutService.Stub {
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
-        }
-    }
-
-    @VisibleForTesting
-    void updatePackageShortcutForTest(String packageName, String shortcutId, int userId,
-            Consumer<ShortcutInfo> cb) {
-        synchronized (mLock) {
-            final ShortcutPackage pkg = getPackageShortcutForTest(packageName, userId);
-            if (pkg == null) return;
-
-            pkg.mutateShortcut(shortcutId, null, cb);
         }
     }
 
