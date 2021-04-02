@@ -185,7 +185,7 @@ static struct {
 } gListMethods;
 
 static jclass gAudioDescriptorClass;
-static jmethodID gAudiODescriptorCstor;
+static jmethodID gAudioDescriptorCstor;
 
 //
 // JNI Initialization for OpenSLES routing
@@ -1364,7 +1364,7 @@ static jint convertAudioPortFromNative(JNIEnv *env, jobject *jAudioPort,
                                 reinterpret_cast<const jbyte *>(extraAudioDescriptor.descriptor));
         jAudioDescriptor =
                 ScopedLocalRef<jobject>(env,
-                                        env->NewObject(gAudioDescriptorClass, gAudiODescriptorCstor,
+                                        env->NewObject(gAudioDescriptorClass, gAudioDescriptorCstor,
                                                        standard, encapsulationType,
                                                        jDescriptor.get()));
         env->CallBooleanMethod(jAudioDescriptors, gArrayListMethods.add, jAudioDescriptor.get());
@@ -3008,7 +3008,7 @@ int register_android_media_AudioSystem(JNIEnv *env)
 
     jclass audioDescriptorClass = FindClassOrDie(env, "android/media/AudioDescriptor");
     gAudioDescriptorClass = MakeGlobalRefOrDie(env, audioDescriptorClass);
-    gAudiODescriptorCstor = GetMethodIDOrDie(env, audioDescriptorClass, "<init>", "(II[B)V");
+    gAudioDescriptorCstor = GetMethodIDOrDie(env, audioDescriptorClass, "<init>", "(II[B)V");
 
     jclass vibratorClass = FindClassOrDie(env, "android/os/Vibrator");
     gVibratorClass = MakeGlobalRefOrDie(env, vibratorClass);
