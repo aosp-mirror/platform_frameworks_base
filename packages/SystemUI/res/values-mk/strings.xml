@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Апликацијата или вашата организација не дозволува снимање слики од екранот"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Измени"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Изменете ја сликата од екранот"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Континуирана слика"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Континуирана слика од екранот"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Сними повеќе"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отфрлете ја сликата од екранот"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Преглед на слика од екранот"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Горна граница"</string>
@@ -178,6 +177,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Отфрли"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Допрете го сензорот за отпечатоци"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Икона за отпечаток"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Ве бараме вас…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Икона за лице"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Копче за компатибилност на зум."</string>
@@ -378,7 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Преврти ги боите"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Режим за корекција на бои"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Повеќе поставки"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Поставки на корисникот"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Затвори"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Поврзано"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Поврзан, ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Се поврзува..."</string>
@@ -523,6 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Уредов е во сопственост на <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> и е поврзан со VPN-мрежи"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Вашата организација може да го следи мрежниот сообраќај на вашиот работен профил"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> може да го следи мрежниот сообраќај на вашиот работен профил"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Мрежната активност на работниот профил е видлива за вашиот IT-администратор"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Мрежата можеби се следи"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Уредов е поврзан со VPN-мрежи"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Вашиот работен профил е поврзан со <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -1088,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"Започни разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виџети за разговор"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Допрете на разговор за да го додадете на вашиот почетен екран"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"Пред <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Пред помалку од <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Пред повеќе од <xliff:g id="DURATION">%1$s</xliff:g>"</string>
@@ -1102,6 +1118,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"Пријатели"</string>
     <string name="empty_status" msgid="5938893404951307749">"Разговарај вечерва!"</string>
     <string name="missed_call" msgid="4228016077700161689">"Пропуштен повик"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Видете ги неодамнешните пораки, пропуштени повици и промени на статусот"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Разговор"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Проблем при читањето на мерачот на батеријата"</string>

@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ஸ்கிரீன் ஷாட்டுகளை எடுப்பதை, ஆப்ஸ் அல்லது உங்கள் நிறுவனம் அனுமதிக்கவில்லை"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"திருத்து"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ஸ்கிரீன்ஷாட்டைத் திருத்தும்"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"ஸ்க்ரோல்"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"ஸ்கிரீன்ஷாட்டைப் பெரிதாக்கும்"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"கூடுதலாகப் படமெடு"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ஸ்கிரீன்ஷாட்டை நிராகரிக்கும்"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ஸ்கிரீன்ஷாட்டின் மாதிரிக்காட்சி"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"மேற்புற எல்லை"</string>
@@ -178,6 +177,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"நிராகரி"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"கைரேகை ஐகான்"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"உங்கள் முகத்தைத் தேடுகிறது…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"முக ஐகான்"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"பொருந்துமாறு அளவை மாற்றும் பட்டன்."</string>
@@ -378,7 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"வண்ணங்களை மாற்று"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"வண்ணத்தைச் சரிப்படுத்தும் முறை"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"அமைப்பில் மாற்று"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"பயனர் அமைப்புகள்"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"முடிந்தது"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"மூடுக"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"இணைக்கப்பட்டது"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"இணைக்கப்பட்டது, பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"இணைக்கிறது..."</string>
@@ -407,7 +414,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> வரை"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"டார்க் தீம்"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"பேட்டரி சேமிப்பான்"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"பேட்டரி சேமிப்பு"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"மாலையில் ஆன் செய்"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"காலை வரை"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
@@ -523,6 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"இந்த சாதனம் <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> நிறுவனத்துக்கு சொந்தமானது, அது VPNகளுடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"உங்கள் நிறுவனம் பணிக் கணக்கில் நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம்"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> உங்கள் பணிக் கணக்கில் நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம்"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"பணிக் கணக்கின் நெட்வொர்க் செயல்பாட்டை IT நிர்வாகியால் பார்க்க முடியும்"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"நெட்வொர்க் கண்காணிக்கப்படலாம்"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"இந்த சாதனம் VPNகளுடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"உங்கள் பணிக் கணக்கு <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது"</string>
@@ -760,7 +768,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"விழிப்பூட்டுகிறது"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"குமிழைக் காட்டு"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"குமிழ்களை அகற்று"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"முகப்புத் திரையில் சேர்"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"முகப்புத் திரையில் சேருங்கள்"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"அறிவிப்பை உறக்கநிலையாக்கும் விருப்பங்கள்"</string>
@@ -778,7 +786,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"பேட்டரி பயன்பாடு"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"சார்ஜ் செய்யும் போது பேட்டரி சேமிப்பானைப் பயன்படுத்த முடியாது"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"பேட்டரி சேமிப்பான்"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"பேட்டரி சேமிப்பு"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"செயல்திறனையும் பின்புலத்தில் தரவு செயலாக்கப்படுவதையும் குறைக்கும்"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> பட்டன்"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"ஹோம்"</string>
@@ -1088,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"உரையாடல் விட்ஜெட்டுகள்"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ஓர் உரையாடலை உங்கள் முகப்புத் திரையில் சேர்க்க அந்த உரையாடலைத் தட்டுங்கள்"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>க்கு முன்பு"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>க்குக் குறைவாக"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>க்கு முன்பு"</string>
@@ -1102,6 +1118,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"நண்பர்கள்"</string>
     <string name="empty_status" msgid="5938893404951307749">"இன்றிரவு உரையாடலாம்!"</string>
     <string name="missed_call" msgid="4228016077700161689">"தவறிய அழைப்பு"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"சமீபத்திய மெசேஜ்களையும் தவறிய அழைப்புகளையும் ஸ்டேட்டஸ் அப்டேட்களையும் பார்க்கலாம்"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"உரையாடல்"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"பேட்டரி அளவை அறிவதில் சிக்கல்"</string>

@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Mengambil screenshot tidak diizinkan oleh aplikasi atau organisasi"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Mengedit screenshot"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Scroll"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Men-scroll screenshot"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Rekam lagi"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Menutup screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pratinjau screenshot"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Batas atas"</string>
@@ -178,6 +177,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Tutup"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sentuh sensor sidik jari"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon sidik jari"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Mencari wajah Anda…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikon wajah"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Tombol perbesar/perkecil kompatibilitas."</string>
@@ -378,7 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inversi warna"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Mode koreksi warna"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Setelan lainnya"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Setelan pengguna"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Selesai"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Tutup"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Tersambung"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Terhubung, baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Menyambung..."</string>
@@ -523,6 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Perangkat ini milik <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dan terhubung ke VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organisasi dapat memantau traffic jaringan di profil kerja"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> mungkin memantau traffic jaringan di profil kerja Anda"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktivitas jaringan profil kerja dapat dilihat oleh admin IT Anda"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Jaringan mungkin dipantau"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Perangkat ini terhubung ke VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profil kerja Anda terhubung ke <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -589,20 +597,20 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktifkan"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"nonaktifkan"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Ganti perangkat keluaran"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikasi dipasangi pin"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Kembali dan Ringkasan untuk melepas pin."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Kembali dan Beranda untuk melepas pin."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Aplikasi akan terus ditampilkan sampai pin dilepas. Geser ke atas dan tahan untuk lepas pin."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Ringkasan untuk melepas pin."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Beranda untuk melepas pin."</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikasi disematkan"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Kembali dan Ringkasan untuk melepas sematan."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Kembali dan Beranda untuk melepas sematan."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Aplikasi akan terus ditampilkan sampai sematan dilepaskan. Geser ke atas dan tahan agar sematan lepas."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Ringkasan untuk melepas sematan."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Beranda untuk melepas sematan."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Data pribadi dapat diakses (seperti kontak dan konten email)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplikasi yang disematkan dapat membuka aplikasi lain."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Untuk melepas pin aplikasi ini, sentuh &amp; lama tombol Kembali dan Ringkasan"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Untuk melepas pin aplikasi ini, sentuh &amp; lama tombol Kembali dan Layar utama"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Untuk melepas pin aplikasi ini, geser ke atas &amp; tahan"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Untuk melepas sematan aplikasi ini, sentuh lama tombol Kembali dan Ringkasan"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Untuk melepas sematan aplikasi ini, sentuh lama tombol Kembali dan Layar utama"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Untuk melepas sematan aplikasi ini, geser ke atas &amp; tahan"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Mengerti"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Lain kali"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikasi dipasangi pin"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikasi disematkan"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikasi dilepas pinnya"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Sembunyikan <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Ini akan muncul kembali saat Anda mengaktifkannya dalam setelan."</string>
@@ -940,7 +948,7 @@
     <string name="notification_channel_storage" msgid="2720725707628094977">"Penyimpanan"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Petunjuk"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Aplikasi Instan"</string>
-    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
+    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> sedang berjalan"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Aplikasi dapat dibuka tanpa perlu diinstal."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Aplikasi dapat dibuka tanpa perlu diinstal. Ketuk untuk mempelajari lebih lanjut."</string>
     <string name="app_info" msgid="5153758994129963243">"Info aplikasi"</string>
@@ -1088,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"Membuka percakapan"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widget Percakapan"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Ketuk percakapan untuk menambahkannya ke Layar utama"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> yang lalu"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Kurang dari <xliff:g id="DURATION">%1$s</xliff:g> yang lalu"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Lebih dari <xliff:g id="DURATION">%1$s</xliff:g> yang lalu"</string>
@@ -1102,6 +1118,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"Teman"</string>
     <string name="empty_status" msgid="5938893404951307749">"Ayo chat malam ini."</string>
     <string name="missed_call" msgid="4228016077700161689">"Panggilan tak terjawab"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Melihat pesan terbaru, panggilan tak terjawab, dan pembaruan status"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Percakapan"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Terjadi masalah saat membaca indikator baterai"</string>
