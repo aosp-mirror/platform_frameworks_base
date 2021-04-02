@@ -302,7 +302,7 @@ public class PermissionUsageHelper {
                     OpUsage usage = new OpUsage(packageName, attributionTag, op, uid,
                             lastAccessTime, isRunning, proxyUsage);
 
-                    Integer packageAttr = usage.getPackageAttrHash();
+                    Integer packageAttr = usage.getPackageIdHash();
                     if (!usages.containsKey(permGroupName)) {
                         ArrayMap<Integer, OpUsage> map = new ArrayMap<>();
                         map.put(packageAttr, usage);
@@ -342,19 +342,19 @@ public class PermissionUsageHelper {
         }
 
         ArrayMap<Integer, OpUsage> allUsages = new ArrayMap<>();
-        // map of uid -> most recent non-proxy-related usage for that uid.
+        // map of packageName and uid hash -> most recent non-proxy-related usage for that uid.
         ArrayMap<Integer, OpUsage> mostRecentUsages = new ArrayMap<>();
-        // set of all uids involved in a proxy usage
-        ArraySet<Integer> proxyUids = new ArraySet<>();
+        // set of all packages involved in a proxy usage
+        ArraySet<Integer> proxyPackages = new ArraySet<>();
         // map of usage -> list of proxy app labels
         ArrayMap<OpUsage, ArrayList<CharSequence>> proxyLabels = new ArrayMap<>();
         // map of usage.proxy hash -> usage hash, telling us if a usage is a proxy
         ArrayMap<Integer, OpUsage> proxies = new ArrayMap<>();
         for (int i = 0; i < usages.size(); i++) {
             OpUsage usage = usages.get(i);
-            allUsages.put(usage.getPackageAttrHash(), usage);
+            allUsages.put(usage.getPackageIdHash(), usage);
             if (usage.proxy != null) {
-                proxies.put(usage.proxy.getPackageAttrHash(), usage);
+                proxies.put(usage.proxy.getPackageIdHash(), usage);
             }
         }
 
@@ -365,25 +365,27 @@ public class PermissionUsageHelper {
                 continue;
             }
 
-            int usageAttr = usage.getPackageAttrHash();
+            int usageAttr = usage.getPackageIdHash();
             // If this usage has a proxy, but is not a proxy, it is the end of a chain.
             if (!proxies.containsKey(usageAttr) && usage.proxy != null) {
                 proxyLabels.put(usage, new ArrayList<>());
-                proxyUids.add(usage.uid);
+                proxyPackages.add(usage.getPackageIdHash());
             }
             // If this usage is not by the system, and is more recent than the next-most recent
-            // for it's uid, save it.
-            if (!usage.packageName.equals(SYSTEM_PKG) && (!mostRecentUsages.containsKey(usage.uid)
-                    || usage.lastAccessTime > mostRecentUsages.get(usage.uid).lastAccessTime)) {
-                mostRecentUsages.put(usage.uid, usage);
+            // for it's uid and package name, save it.
+            int usageId = usage.getPackageIdHash();
+            OpUsage lastMostRecent = mostRecentUsages.get(usageId);
+            if (!usage.packageName.equals(SYSTEM_PKG) && (lastMostRecent == null
+                    || usage.lastAccessTime > lastMostRecent.lastAccessTime)) {
+                mostRecentUsages.put(usageId, usage);
             }
         }
 
         // get all the proxy labels
         for (int numStart = 0; numStart < proxyLabels.size(); numStart++) {
             OpUsage start = proxyLabels.keyAt(numStart);
-            // Remove any non-proxy usage for the starting uid
-            mostRecentUsages.remove(start.uid);
+            // Remove any non-proxy usage for the starting package
+            mostRecentUsages.remove(start.getPackageIdHash());
             OpUsage currentUsage = proxyLabels.keyAt(numStart);
             ArrayList<CharSequence> proxyLabelList = proxyLabels.get(currentUsage);
             if (currentUsage == null || proxyLabelList == null) {
@@ -393,8 +395,8 @@ public class PermissionUsageHelper {
             int maxUsages = allUsages.size();
             while (currentUsage.proxy != null) {
 
-                if (allUsages.containsKey(currentUsage.proxy.getPackageAttrHash())) {
-                    currentUsage = allUsages.get(currentUsage.proxy.getPackageAttrHash());
+                if (allUsages.containsKey(currentUsage.proxy.getPackageIdHash())) {
+                    currentUsage = allUsages.get(currentUsage.proxy.getPackageIdHash());
                 } else {
                     // We are missing the proxy usage. This may be because it's a one-step trusted
                     // proxy. Check if we should show the proxy label, and show it, if so.
@@ -411,12 +413,12 @@ public class PermissionUsageHelper {
 
 
                 if (currentUsage == null || iterNum == maxUsages
-                        || currentUsage.getPackageAttrHash() == start.getPackageAttrHash()) {
+                        || currentUsage.getPackageIdHash() == start.getPackageIdHash()) {
                     // We have an invalid state, or a cycle, so break
                     break;
                 }
 
-                proxyUids.add(currentUsage.uid);
+                proxyPackages.add(currentUsage.getPackageIdHash());
                 // Don't add an app label for the main app, or the system app
                 if (!currentUsage.packageName.equals(start.packageName)
                         && !currentUsage.packageName.equals(SYSTEM_PKG)) {
@@ -440,9 +442,9 @@ public class PermissionUsageHelper {
                     proxyLabelList.isEmpty() ? null : formatLabelList(proxyLabelList));
         }
 
-        for (int uid : mostRecentUsages.keySet()) {
-            if (!proxyUids.contains(uid)) {
-                usagesAndLabels.put(mostRecentUsages.get(uid), null);
+        for (int packageHash : mostRecentUsages.keySet()) {
+            if (!proxyPackages.contains(packageHash)) {
+                usagesAndLabels.put(mostRecentUsages.get(packageHash), null);
             }
         }
 
@@ -490,8 +492,8 @@ public class PermissionUsageHelper {
             return UserHandle.getUserHandleForUid(uid);
         }
 
-        public int getPackageAttrHash() {
-            return Objects.hash(packageName, attributionTag, uid);
+        public int getPackageIdHash() {
+            return Objects.hash(packageName, uid);
         }
 
         @Override
