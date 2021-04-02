@@ -17,7 +17,8 @@ package com.android.server.devicepolicy;
 
 import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
-import android.util.Slog;
+
+import com.android.server.utils.Slogf;
 
 import java.util.concurrent.TimeUnit;
 
@@ -99,7 +100,7 @@ public class DevicePolicyConstants {
         } catch (IllegalArgumentException e) {
             // Failed to parse the settings string, log this and move on
             // with defaults.
-            Slog.e(TAG, "Bad device policy settings: %s", settings);
+            Slogf.e(TAG, "Bad device policy settings: %s", settings);
         }
 
         long dasDiedServiceReconnectBackoffSec = parser.getLong(
