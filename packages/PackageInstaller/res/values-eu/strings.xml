@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Pakete-instalatzailea"</string>
     <string name="install" msgid="711829760615509273">"Instalatu"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Eginda"</string>
     <string name="cancel" msgid="1018267193425558088">"Utzi"</string>
     <string name="installing" msgid="4921993079741206516">"Instalatzen…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> instalatzen…"</string>
     <string name="install_done" msgid="5987363587661783896">"Instalatu da aplikazioa."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Aplikazio hau instalatu nahi duzu?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Aplikazioaren eguneratzea instalatu nahi duzu? Lehendik dauden datuak ez dira galduko."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Aplikazio integratu honen eguneratzea instalatu nahi duzu? Lehendik dauden datuak ez dira galduko."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Ez da instalatu aplikazioa."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketea instalatzeko aukera blokeatu egin da."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Ez da instalatu aplikazioa, gatazka bat sortu delako lehendik dagoen pakete batekin."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Ezin dira gauzatu instalatzeko eta desinstalatzeko ekintzak Wear gailuetan."</string>
     <string name="message_staging" msgid="8032722385658438567">"Aplikazioa prestatzen…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Ezezaguna"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Segurtasuna bermatzeko, ezin dira instalatu iturburu honetako aplikazio ezezagunak tableta honetan."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Segurtasuna bermatzeko, ezin dira instalatu iturburu honetako aplikazio ezezagunak telebista honetan."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Segurtasuna bermatzeko, ezin dira instalatu iturburu honetako aplikazio ezezagunak telefono honetan."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefonoak eta datu pertsonalek aplikazio ezezagunen erasoak jaso ditzakete. Aplikazio hau instalatzen baduzu, onartu egingo duzu zeu zarela hura erabiltzeagatik telefonoak jasan ditzakeen kalteen edo datu-galeren erantzulea."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tabletak eta datu pertsonalek aplikazio ezezagunen erasoak jaso ditzakete. Aplikazio hau instalatzen baduzu, onartu egingo duzu zeu zarela hura erabiltzeagatik tabletak jasan ditzakeen kalteen edo datu-galeren erantzulea."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Telebistak eta datu pertsonalek aplikazio ezezagunen erasoak jaso ditzakete. Aplikazio hau instalatzen baduzu, onartu egingo duzu zeu zarela hura erabiltzeagatik telebistak jasan ditzakeen kalteen edo datu-galeren erantzulea."</string>
