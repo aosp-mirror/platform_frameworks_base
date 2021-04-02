@@ -471,10 +471,9 @@ public final class Settings {
      * <p>
      * Output: Nothing.
      */
-    @SuppressLint("ActionValue")
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS =
-            "com.android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
+            "android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
 
     /**
      * Activity Action: Show trusted credentials settings, opening to the user tab,

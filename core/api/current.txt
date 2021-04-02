@@ -35049,7 +35049,7 @@ package android.provider {
     field public static final String ACTION_APPLICATION_SETTINGS = "android.settings.APPLICATION_SETTINGS";
     field public static final String ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS = "android.settings.APP_NOTIFICATION_BUBBLE_SETTINGS";
     field public static final String ACTION_APP_NOTIFICATION_SETTINGS = "android.settings.APP_NOTIFICATION_SETTINGS";
-    field public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS = "com.android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
+    field public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS = "android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
     field public static final String ACTION_APP_SEARCH_SETTINGS = "android.settings.APP_SEARCH_SETTINGS";
     field public static final String ACTION_APP_USAGE_SETTINGS = "android.settings.action.APP_USAGE_SETTINGS";
     field public static final String ACTION_AUTO_ROTATE_SETTINGS = "android.settings.AUTO_ROTATE_SETTINGS";
