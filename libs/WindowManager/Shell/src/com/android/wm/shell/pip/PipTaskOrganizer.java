@@ -968,28 +968,26 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                         destinationBounds.height());
                 mSurfaceTransactionHelper.scale(t, snapshotSurface, snapshotSrc, snapshotDest);
 
-                mMainExecutor.execute(() -> {
-                    // Start animation to fade out the snapshot.
-                    final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
-                    animator.setDuration(mEnterAnimationDuration);
-                    animator.addUpdateListener(animation -> {
-                        final float alpha = (float) animation.getAnimatedValue();
-                        final SurfaceControl.Transaction transaction =
-                                mSurfaceControlTransactionFactory.getTransaction();
-                        transaction.setAlpha(snapshotSurface, alpha);
-                        transaction.apply();
-                    });
-                    animator.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            final SurfaceControl.Transaction tx =
-                                    mSurfaceControlTransactionFactory.getTransaction();
-                            tx.remove(snapshotSurface);
-                            tx.apply();
-                        }
-                    });
-                    animator.start();
+                // Start animation to fade out the snapshot.
+                final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
+                animator.setDuration(mEnterAnimationDuration);
+                animator.addUpdateListener(animation -> {
+                    final float alpha = (float) animation.getAnimatedValue();
+                    final SurfaceControl.Transaction transaction =
+                            mSurfaceControlTransactionFactory.getTransaction();
+                    transaction.setAlpha(snapshotSurface, alpha);
+                    transaction.apply();
                 });
+                animator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        final SurfaceControl.Transaction tx =
+                                mSurfaceControlTransactionFactory.getTransaction();
+                        tx.remove(snapshotSurface);
+                        tx.apply();
+                    }
+                });
+                animator.start();
             });
         } else {
             applyFinishBoundsResize(wct, direction);
