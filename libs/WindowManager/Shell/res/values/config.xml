@@ -30,6 +30,9 @@
     <!-- Allow PIP to resize to a slightly bigger state upon touch/showing the menu -->
     <bool name="config_pipEnableResizeForMenu">true</bool>
 
+    <!-- Allow PIP to resize via dragging the corner of PiP. -->
+    <bool name="config_pipEnableDragCornerResize">false</bool>
+
     <!-- Allow PIP to enable round corner, see also R.dimen.pip_corner_radius -->
     <bool name="config_pipEnableRoundCorner">false</bool>
 
