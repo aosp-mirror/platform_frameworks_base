@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  */
 @TestApi
 public class BiometricTestSession implements AutoCloseable {
-    private static final String TAG = "BiometricTestSession";
+    private static final String BASE_TAG = "BiometricTestSession";
 
     /**
      * @hide
@@ -66,12 +66,12 @@ public class BiometricTestSession implements AutoCloseable {
     private final ITestSessionCallback mCallback = new ITestSessionCallback.Stub() {
         @Override
         public void onCleanupStarted(int userId) {
-            Log.d(TAG, "onCleanupStarted, sensor: " + mSensorId + ", userId: " + userId);
+            Log.d(getTag(), "onCleanupStarted, sensor: " + mSensorId + ", userId: " + userId);
         }
 
         @Override
         public void onCleanupFinished(int userId) {
-            Log.d(TAG, "onCleanupFinished, sensor: " + mSensorId
+            Log.d(getTag(), "onCleanupFinished, sensor: " + mSensorId
                     + ", userId: " + userId
                     + ", remaining users: " + mUsersCleaningUp.size());
             mUsersCleaningUp.remove(userId);
@@ -107,7 +107,7 @@ public class BiometricTestSession implements AutoCloseable {
     @RequiresPermission(TEST_BIOMETRIC)
     private void setTestHalEnabled(boolean enabled) {
         try {
-            Log.w(TAG, "setTestHalEnabled, sensor: " + mSensorId + " enabled: " + enabled);
+            Log.w(getTag(), "setTestHalEnabled, sensor: " + mSensorId + " enabled: " + enabled);
             mTestSession.setTestHalEnabled(enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -217,7 +217,7 @@ public class BiometricTestSession implements AutoCloseable {
     public void cleanupInternalState(int userId) {
         try {
             if (mUsersCleaningUp.contains(userId)) {
-                Log.w(TAG, "Cleanup already in progress for user: " + userId);
+                Log.w(getTag(), "Cleanup already in progress for user: " + userId);
             }
 
             mUsersCleaningUp.add(userId);
@@ -230,6 +230,7 @@ public class BiometricTestSession implements AutoCloseable {
     @Override
     @RequiresPermission(TEST_BIOMETRIC)
     public void close() {
+        Log.d(getTag(), "Close, mTestedUsers size; " + mTestedUsers.size());
         // Cleanup can be performed using the test HAL, since it always responds to enumerate with
         // zero enrollments.
         if (!mTestedUsers.isEmpty()) {
@@ -239,15 +240,19 @@ public class BiometricTestSession implements AutoCloseable {
             }
 
             try {
-                Log.d(TAG, "Awaiting latch...");
-                mCloseLatch.await(10, TimeUnit.SECONDS);
-                Log.d(TAG, "Finished awaiting");
+                Log.d(getTag(), "Awaiting latch...");
+                mCloseLatch.await(3, TimeUnit.SECONDS);
+                Log.d(getTag(), "Finished awaiting");
             } catch (InterruptedException e) {
-                Log.e(TAG, "Latch interrupted", e);
+                Log.e(getTag(), "Latch interrupted", e);
             }
         }
 
         // Disable the test HAL after the sensor becomes idle.
         setTestHalEnabled(false);
+    }
+
+    private String getTag() {
+        return BASE_TAG + "_" + mSensorId;
     }
 }
