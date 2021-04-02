@@ -298,7 +298,6 @@ package android.net {
     method @Nullable public android.net.NetworkSpecifier getNetworkSpecifier();
     method public int getOwnerUid();
     method public int getSignalStrength();
-    method @NonNull public java.util.Set<java.lang.Integer> getSubIds();
     method @Nullable public android.net.TransportInfo getTransportInfo();
     method public boolean hasCapability(int);
     method public boolean hasTransport(int);
@@ -408,7 +407,6 @@ package android.net {
     method public android.net.NetworkRequest.Builder removeTransportType(int);
     method @Deprecated public android.net.NetworkRequest.Builder setNetworkSpecifier(String);
     method public android.net.NetworkRequest.Builder setNetworkSpecifier(android.net.NetworkSpecifier);
-    method @NonNull public android.net.NetworkRequest.Builder setSubIds(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   public class ParseException extends java.lang.RuntimeException {
