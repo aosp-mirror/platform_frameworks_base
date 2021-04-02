@@ -4217,8 +4217,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // aware/unaware components they want to see, so fall through and
                 // give them what they want
             } else {
+                final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
                 // Caller expressed no opinion, so match based on user state
-                if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
+                if (umInternal.isUserUnlockingOrUnlocked(userId)) {
                     flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
                 } else {
                     flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -6469,20 +6470,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
 
-            // Clean up orphaned packages for which the code path doesn't exist
-            // and they are an update to a system app - caused by bug/32321269
-            final WatchedArrayMap<String, PackageSetting> packageSettings =
-                mSettings.getPackagesLocked();
-            final int packageSettingCount = packageSettings.size();
-            for (int i = packageSettingCount - 1; i >= 0; i--) {
-                PackageSetting ps = packageSettings.valueAt(i);
-                if (!isExternal(ps) && (ps.getPath() == null || !ps.getPath().exists())
-                        && mSettings.getDisabledSystemPkgLPr(ps.name) != null) {
-                    packageSettings.removeAt(i);
-                    mSettings.enableSystemPackageLPw(ps.name);
-                }
-            }
-
             if (!mOnlyCore && mFirstBoot) {
                 requestCopyPreoptedFiles(mInjector);
             }
@@ -6530,6 +6517,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
+
+            final WatchedArrayMap<String, PackageSetting> packageSettings =
+                mSettings.getPackagesLocked();
 
             // Save the names of pre-existing packages prior to scanning, so we can determine
             // which system packages are completely new due to an upgrade.
@@ -8213,9 +8203,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // 11. Free storage service cache
             StorageManagerInternal smInternal =
                     mInjector.getLocalService(StorageManagerInternal.class);
-            // TODO(b/170481432): Decide what value of bytes needs to be sent instead of
-            // sending the bytes parameter of freeStorage
-            smInternal.freeCache(volumeUuid, bytes);
+            long freeBytesRequired = bytes - file.getUsableSpace();
+            if (freeBytesRequired > 0) {
+                smInternal.freeCache(volumeUuid, freeBytesRequired);
+            }
             if (file.getUsableSpace() >= bytes) return;
         } else {
             try {
@@ -15253,7 +15244,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
-            if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+            if (umInternal.isUserUnlockingOrUnlocked(userId)) {
                 Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
                 if (includeStopped) {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);

@@ -20,7 +20,7 @@ package android.net.vcn;
 oneway interface IVcnStatusCallback {
     void onVcnStatusChanged(int statusCode);
     void onGatewayConnectionError(
-            in int[] gatewayNetworkCapabilities,
+            in String gatewayConnectionName,
             int errorCode,
             in String exceptionClass,
             in String exceptionMessage);

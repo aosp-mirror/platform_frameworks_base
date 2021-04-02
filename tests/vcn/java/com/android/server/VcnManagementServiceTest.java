@@ -34,8 +34,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -45,7 +45,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
@@ -63,7 +62,6 @@ import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnConfigTest;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
-import android.net.wifi.WifiInfo;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
@@ -708,22 +706,12 @@ public class VcnManagementServiceTest {
             int subId, ParcelUuid subGrp, boolean isVcnActive, int transport) {
         setupSubscriptionAndStartVcn(subId, subGrp, isVcnActive);
 
-        final NetworkCapabilities.Builder ncBuilder = new NetworkCapabilities.Builder();
-        ncBuilder.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
-        if (transport == TRANSPORT_CELLULAR) {
-            ncBuilder
-                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                    .setNetworkSpecifier(new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID));
-        } else if (transport == TRANSPORT_WIFI) {
-            WifiInfo wifiInfo = mock(WifiInfo.class);
-            when(wifiInfo.makeCopy(anyLong())).thenReturn(wifiInfo);
-            when(mMockDeps.getSubIdForWifiInfo(eq(wifiInfo))).thenReturn(TEST_SUBSCRIPTION_ID);
-
-            ncBuilder
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .setTransportInfo(wifiInfo);
-        } else {
-            throw new IllegalArgumentException("Unknown transport");
+        final NetworkCapabilities.Builder ncBuilder =
+                new NetworkCapabilities.Builder()
+                        .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
+                        .addTransportType(transport);
+        if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            ncBuilder.setSubIds(Collections.singleton(subId));
         }
 
         return mVcnMgmtSvc.getUnderlyingNetworkPolicy(ncBuilder.build(), new LinkProperties());

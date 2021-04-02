@@ -10202,9 +10202,6 @@ public final class ViewRootImpl implements ViewParent,
 
         if (useBLAST() && mBlastBufferQueue != null) {
             mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
-        } else {
-            transaction.deferTransactionUntil(surfaceControl, surfaceControl, frameNumber);
-            transaction.apply();
         }
     }
 

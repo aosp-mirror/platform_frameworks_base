@@ -2625,8 +2625,7 @@ public class NotificationPanelViewController extends PanelViewController {
             return;
         }
         mSectionPadding = padding;
-        mQsFrame.setTranslationY(padding);
-        mNotificationStackScrollLayoutController.setSectionPadding(padding);
+        // TODO(b/172289889) update overscroll to spec
     }
 
     @Override
@@ -3495,6 +3494,12 @@ public class NotificationPanelViewController extends PanelViewController {
                     updateHorizontalPanelPosition(event.getX());
                     handled = true;
                 }
+
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyExpanded()
+                        && mStatusBarKeyguardViewManager.isShowing()) {
+                    mStatusBarKeyguardViewManager.updateKeyguardPosition(event.getX());
+                }
+
                 handled |= super.onTouch(v, event);
                 return !mDozing || mPulsing || handled || showingOrAnimatingAltAuth;
             }
@@ -3538,7 +3543,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     mStatusBarStateController,
                     mUpdateMonitor,
                     mAuthController,
-                    mStatusBarKeyguardViewManager);
+                    mStatusBarKeyguardViewManager,
+                    mKeyguardStateController);
             mDisabledUdfpsController.init();
         } else if (mDisabledUdfpsController != null && !udfpsEnrolled) {
             mDisabledUdfpsController.destroy();

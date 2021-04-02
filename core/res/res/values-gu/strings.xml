@@ -573,7 +573,8 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"કોઈ પિન, પૅટર્ન અથવા પાસવર્ડ સેટ કરેલો નથી"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"પ્રમાણિત કરવામાં ભૂલ આવી"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"ચાલુ રાખવા માટે તમારા ડિવાઇસની લૉગ ઇન વિગત દાખલ કરો"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
@@ -664,7 +665,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"ચહેરાનું <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"ફેસ અનલૉકનો ઉપયોગ કરો"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ફેસ લૉક અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"આગળ વધવા માટે ફેસ અનલૉકનો ઉપયોગ કરો"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ચાલુ રાખવા માટે તમારા ફેસ લૉક અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
   <string-array name="face_error_vendor">
   </string-array>

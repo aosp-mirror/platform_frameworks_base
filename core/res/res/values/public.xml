@@ -3030,12 +3030,12 @@
   <!-- ===============================================================
      Resources added in version S of the platform
 
-     NOTE: add <public> elements within a <public-group> like so:
+     NOTE: add <public> elements within a <staging-public-group> like so:
 
-     <public-group type="attr" first-id="0x01010531">
+     <staging-public-group type="attr" first-id="0x01010531">
          <public name="exampleAttr1" />
          <public name="exampleAttr2" />
-     </public-group>
+     </staging-public-group>
 
      To add a new public-group block, choose an id value that is 1 greater
      than the last of that item above. For example, the last "attr" id
@@ -3044,7 +3044,7 @@
      =============================================================== -->
   <eat-comment />
 
-  <public-group type="attr" first-id="0x01010617">
+  <staging-public-group type="attr" first-id="0x01010617">
     <public name="rollbackDataPolicy" />
     <public name="allowClickWhenDisabled" />
     <public name="windowLayoutAffinity" />
@@ -3099,13 +3099,13 @@
     <!-- @hide @SystemApi -->
     <public name="throttleDurationMillis" />
     <public name="showInInputMethodPicker" />
-  </public-group>
+  </staging-public-group>
 
-  <public-group type="drawable" first-id="0x010800b5">
+  <staging-public-group type="drawable" first-id="0x010800b5">
     <!-- drawable definitions go here -->
-  </public-group>
+  </staging-public-group>
 
-  <public-group type="color" first-id="0x0106001d">
+  <staging-public-group type="color" first-id="0x0106001d">
     <!-- color definitions go here -->
 
     <!-- Material design dynamic system palette:-->
@@ -3171,26 +3171,26 @@
     <public name="system_accent3_800" />
     <public name="system_accent3_900" />
     <public name="system_accent3_1000" />
-  </public-group>
+  </staging-public-group>
 
-  <public-group type="dimen" first-id="0x01050008">
+  <staging-public-group type="dimen" first-id="0x01050008">
     <!-- dimension definitions go here -->
 
     <!-- System-provided dimensions for app widgets. -->
     <public name="system_app_widget_background_radius" />
     <public name="system_app_widget_inner_radius" />
     <public name="system_app_widget_internal_padding" />
-  </public-group>
+  </staging-public-group>
 
-  <public-group type="bool" first-id="0x01110007">
+  <staging-public-group type="bool" first-id="0x01110007">
     <!-- boolean definitions go here -->
-  </public-group>
+  </staging-public-group>
 
-  <public-group type="style" first-id="0x010302e5">
+  <staging-public-group type="style" first-id="0x010302e5">
     <!-- style definitions go here -->
-  </public-group>
+  </staging-public-group>
 
-  <public-group type="string" first-id="0x01040028">
+  <staging-public-group type="string" first-id="0x01040028">
     <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemAutomotiveCluster" />
     <!-- @hide @SystemApi @TestApi -->
@@ -3211,11 +3211,11 @@
     <public name="config_systemWellbeing" />
     <!-- @hide @SystemApi -->
     <public name="config_systemTelevisionNotificationHandler" />
-  </public-group>
+  </staging-public-group>
 
-  <public-group type="id" first-id="0x01020055">
+  <staging-public-group type="id" first-id="0x01020055">
     <!-- id definitions go here -->
-  </public-group>
+  </staging-public-group>
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE

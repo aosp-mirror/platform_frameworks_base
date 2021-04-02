@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‎‏‏‎‏‏‏‏‏‎‎‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎App running‎‏‎‎‏‎"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‎‎‎‎‎‎‏‏‎‎‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‏‏‏‎‏‎‎Apps consuming battery‎‏‎‎‏‎"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‎‏‏‎‎‏‏‏‎‏‏‏‎‏‎‏‎‎‏‏‏‏‎‎‎‏‎‏‏‎‎‏‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‎‏‎‏‎‎‏‎‎Magnification‎‏‎‎‏‎"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‏‎‎‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‏‏‏‎‏‏‎‏‎‏‏‏‎‎‏‎‏‎‎‏‎‎‎‎Accessibility usage‎‏‎‎‏‎"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‏‏‏‏‏‎‎‏‎‏‏‎‎‎‏‎‎‏‎‏‏‎‏‏‎‎‏‎‏‏‎‏‏‏‎‎‏‎‎‎‏‏‏‏‎‎‎‎‎‏‎‏‎‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ is using battery‎‏‎‎‏‎"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‎‎‎‎‏‏‎‎‏‏‏‎‏‏‎‎‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="NUMBER">%1$d</xliff:g>‎‏‎‎‏‏‏‎ apps are using battery‎‏‎‎‏‎"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‏‎‏‎‏‎‏‏‏‎‎‎‎‎‎‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‎‎‏‏‎‏‏‏‏‏‏‎Tap for details on battery and data usage‎‏‎‎‏‎"</string>
@@ -573,29 +572,23 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‎‏‎‎‎‏‎‏‎‎‎No pin, pattern, or password set‎‏‎‎‏‎"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎‏‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‏‏‎Error authenticating‎‏‎‎‏‎"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‎‎‎‏‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎Use screen lock‎‏‎‎‏‎"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‏‏‎‏‏‎‎‎‎‎‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‎‏‎‎‎‏‏‎Enter your device credential to continue‎‏‎‎‏‎"</string>
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
     <skip />
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‏‎‎‎‏‏‏‎‏‏‎‏‎‏‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‏‏‏‎‏‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎‏‏‏‎Partial fingerprint detected‎‏‎‎‏‎"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‏‏‎‎‎‎‎‎‎‏‎‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎Couldn\'t process fingerprint. Please try again.‎‏‎‎‏‎"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‎‏‎‏‏‎‎‏‎‏‎‎‏‏‏‎‎‎‎‎‎‎‎‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎‎‎‏‎‏‎‏‏‏‎Clean the sensor‎‏‎‎‏‎"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎‏‏‎‏‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‎‏‎Finger moved too fast‎‏‎‎‏‎"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‏‎‎‎‎‎‎‏‎‎‏‏‎‎‏‎‎‏‏‎‎‏‏‎‎‎‎‏‏‎‎‏‏‎‎‎‏‎‏‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‎‎Finger moved too slow. Please try again.‎‏‎‎‏‎"</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‎‎‎‏‎‏‎‎‏‎‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‏‎‎‎‎‎‏‎Try another fingerprint‎‏‎‎‏‎"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‎‏‏‏‏‎‎‎‎‏‏‏‏‏‏‎‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‎‏‏‏‎‎‎‎‏‎‏‏‏‎Too bright‎‏‎‎‏‎"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‏‏‎‎‎‏‏‏‏‎‏‎‎‏‎‏‎‎‏‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‎‎‎‏‎‎‎‎‎‎‏‏‎‎‏‎‏‎‏‎‎‎Try adjusting‎‏‎‎‏‎"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‎‎‎‏‏‎‎‏‏‏‎‎‎‎‏‎‎‎‎‎‏‏‎‎‏‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‎Fingerprint authenticated‎‏‎‎‏‎"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‏‎‎‏‎‎‎‏‎‏‎‏‎‏‎‎‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‎‏‏‎‏‎‎‎‎‎‎‏‏‏‎Face authenticated‎‏‎‎‏‎"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‏‏‎‎‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‏‏‎‏‎‏‏‎‏‎‎‏‏‎‏‏‏‎‎‏‏‎‎‎‏‎‎‏‎‏‏‏‎‏‏‎Face authenticated, please press confirm‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‏‎‎‎‏‏‎‏‏‏‏‏‎‎‏‏‎‏‏‎‎‏‏‎‏‎‎‏‎‎‎‏‏‏‎‏‎‎‏‏‏‎‎‏‎‎Fingerprint hardware not available.‎‏‎‎‏‎"</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‏‏‎‏‏‎‎‏‏‏‎‏‎‏‏‏‎‎‏‏‎‎‎‎‎‏‎‏‏‎‎‏‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‎‏‏‏‎‎‎Can’t set up fingerprint‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‎‎‏‎‎‏‎‎‎‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‎‏‏‎‏‏‎‎‏‎‏‏‎‏‏‏‏‎‏‏‎‏‎‏‎‎‏‎‎Fingerprint time out reached. Try again.‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‎‏‏‏‏‏‏‎‏‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‏‏‎‎‎‎‏‏‏‎‏‎‎‏‎‎‎‏‏‎‏‎‏‎‏‎‏‏‏‏‎‎Fingerprint operation canceled.‎‏‎‎‏‎"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‏‎‎‏‎‎‎‎‎‎‎‏‏‏‎‎‏‏‏‏‎‏‏‎‎‎‎‎‏‏‏‏‏‎‎‎‏‎‏‏‎‎‏‎‏‏‏‏‏‏‏‎‎Fingerprint operation canceled by user.‎‏‎‎‏‎"</string>
@@ -660,7 +653,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‏‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‏‎‏‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‏‏‏‎‏‎‏‎‎‎‎‏‏‎‎‏‏‏‎Face ‎‏‎‎‏‏‎<xliff:g id="FACEID">%d</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‎‏‏‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‎Use face unlock‎‏‎‎‏‎"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‎‏‏‎‎‏‎‎Use face or screen lock‎‏‎‎‏‎"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‎‎‏‏‎‏‏‎‎‎‏‎‎‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‎‏‏‏‎‎‎‏‏‏‏‏‎‎‎‎Use face unlock to continue‎‏‎‎‏‎"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‏‏‏‎‏‎‎‎‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‎‎Use your face or screen lock to continue‎‏‎‎‏‎"</string>
   <string-array name="face_error_vendor">
   </string-array>

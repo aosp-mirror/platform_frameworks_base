@@ -538,21 +538,17 @@ class WindowStateAnimator {
                 // The sync transaction will contain the buffer so the bounds change transaction
                 // will only be applied with the buffer.
                 t.merge(task.getMainWindowSizeChangeTransaction());
+                task.setMainWindowSizeChangeTransaction(null);
             } else {
-                // Use pending transaction here instead of the transaction passed in because we
-                // want to ensure the defer transaction is applied on the main transaction and
-                // not on the sync  transaction. This is because the sync transaction could
-                // contain the buffer and we'd defer the transaction that contains the buffer
-                // we're deferring on.
-                SurfaceControl.Transaction pendingTransaction = mWin.getPendingTransaction();
-                pendingTransaction.deferTransactionUntil(
-                        task.getMainWindowSizeChangeTask().getSurfaceControl(),
-                        mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-                pendingTransaction.deferTransactionUntil(mSurfaceController.mSurfaceControl,
-                        mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-                pendingTransaction.merge(task.getMainWindowSizeChangeTransaction());
+                mWin.applyWithNextDraw(finishedFrame -> {
+                      final SurfaceControl.Transaction sizeChangedTransaction =
+                          task.getMainWindowSizeChangeTransaction();
+                      if (sizeChangedTransaction != null) {
+                          finishedFrame.merge(sizeChangedTransaction);
+                          task.setMainWindowSizeChangeTransaction(null);
+                      }
+                });
             }
-            task.setMainWindowSizeChangeTransaction(null);
         }
     }
 

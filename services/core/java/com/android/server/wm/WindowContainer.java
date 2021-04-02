@@ -3321,4 +3321,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @WindowManager.LayoutParams.WindowType int getWindowType() {
         return INVALID_WINDOW_TYPE;
     }
+
+    boolean setCanScreenshot(boolean canScreenshot) {
+        if (mSurfaceControl == null) {
+            return false;
+        }
+        getPendingTransaction().setSecure(mSurfaceControl, !canScreenshot);
+        return true;
+    }
 }

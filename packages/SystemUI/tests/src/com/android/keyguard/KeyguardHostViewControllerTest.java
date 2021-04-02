@@ -124,4 +124,11 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
                 ((FrameLayout.LayoutParams) mKeyguardHostView.getLayoutParams()).gravity,
                 Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
     }
+
+    @Test
+    public void testUpdateKeyguardPositionDelegatesToSecurityContainer() {
+        mKeyguardHostViewController.updateKeyguardPosition(1.0f);
+
+        verify(mKeyguardSecurityContainerController).updateKeyguardPosition(1.0f);
+    }
 }

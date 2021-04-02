@@ -51,7 +51,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -274,11 +276,12 @@ public class VcnTest {
         assertEquals(2, mVcn.getVcnGatewayConnectionConfigMap().size());
 
         // Create VcnConfig with only one VcnGatewayConnectionConfig so a gateway connection is torn
-        // down
-        final VcnGatewayConnectionConfig activeConfig =
-                VcnGatewayConnectionConfigTest.buildTestConfigWithExposedCaps(TEST_CAPS[0]);
-        final VcnGatewayConnectionConfig removedConfig =
-                VcnGatewayConnectionConfigTest.buildTestConfigWithExposedCaps(TEST_CAPS[1]);
+        // down. Reuse existing VcnGatewayConnectionConfig so that the gateway connection name
+        // matches.
+        final List<VcnGatewayConnectionConfig> currentConfigs =
+                new ArrayList<>(mVcn.getVcnGatewayConnectionConfigMap().keySet());
+        final VcnGatewayConnectionConfig activeConfig = currentConfigs.get(0);
+        final VcnGatewayConnectionConfig removedConfig = currentConfigs.get(1);
         final VcnConfig updatedConfig =
                 new VcnConfig.Builder(mContext).addGatewayConnectionConfig(activeConfig).build();
 

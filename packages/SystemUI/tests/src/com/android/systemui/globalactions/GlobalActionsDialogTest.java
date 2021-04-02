@@ -33,12 +33,10 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
-import android.content.ContentResolver;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
@@ -77,6 +75,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -105,9 +104,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private DevicePolicyManager mDevicePolicyManager;
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
-    @Mock private ConnectivityManager mConnectivityManager;
     @Mock private TelephonyListenerManager mTelephonyListenerManager;
-    @Mock private ContentResolver mContentResolver;
+    @Mock private GlobalSettings mGlobalSettings;
     @Mock private Resources mResources;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private ActivityStarter mActivityStarter;
@@ -166,9 +164,9 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mDevicePolicyManager,
                 mLockPatternUtils,
                 mBroadcastDispatcher,
-                mConnectivityManager,
                 mTelephonyListenerManager,
-                mContentResolver,
+                mGlobalSettings,
+                mSecureSettings,
                 null,
                 mResources,
                 mConfigurationController,
@@ -520,7 +518,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
 
         mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
 
-        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        GlobalActionsDialog.ActionsDialog dialog =
+                (GlobalActionsDialog.ActionsDialog) mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.VISIBLE);
 
@@ -543,7 +542,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
 
         mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
 
-        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        GlobalActionsDialog.ActionsDialog dialog =
+                (GlobalActionsDialog.ActionsDialog) mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.GONE);
 
@@ -568,7 +568,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
 
         mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
 
-        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        GlobalActionsDialog.ActionsDialog dialog =
+                (GlobalActionsDialog.ActionsDialog) mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.GONE);
 

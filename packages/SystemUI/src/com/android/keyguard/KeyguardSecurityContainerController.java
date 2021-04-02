@@ -515,6 +515,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
     }
 
+    /** Update keyguard position based on a tapped X coordinate. */
+    public void updateKeyguardPosition(float x) {
+        mView.updateKeyguardPosition(x);
+    }
+
     static class Factory {
 
         private final KeyguardSecurityContainer mView;

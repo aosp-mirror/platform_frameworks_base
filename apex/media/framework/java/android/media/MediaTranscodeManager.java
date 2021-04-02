@@ -629,7 +629,16 @@ public final class MediaTranscodeManager {
         /* Writes the TranscodingRequest to a parcel. */
         private TranscodingRequestParcel writeToParcel(@NonNull Context context) {
             TranscodingRequestParcel parcel = new TranscodingRequestParcel();
-            parcel.priority = mPriority;
+            switch (mPriority) {
+            case PRIORITY_OFFLINE:
+                parcel.priority = TranscodingSessionPriority.kUnspecified;
+                break;
+            case PRIORITY_REALTIME:
+            case PRIORITY_UNKNOWN:
+            default:
+                parcel.priority = TranscodingSessionPriority.kNormal;
+                break;
+            }
             parcel.transcodingType = mType;
             parcel.sourceFilePath = mSourceUri.toString();
             parcel.sourceFd = mSourceFileDescriptor;
@@ -1578,7 +1587,7 @@ public final class MediaTranscodeManager {
                     result = "RESULT_SUCCESS";
                     break;
                 case RESULT_ERROR:
-                    result = "RESULT_ERROR";
+                    result = "RESULT_ERROR(" + mErrorCode + ")";
                     break;
                 case RESULT_CANCELED:
                     result = "RESULT_CANCELED";
