@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"برنامه یا سازمان شما اجازه نمی‌دهند نماگرفت بگیرید."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ویرایش"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ویرایش نماگرفت"</string>
-    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
-    <skip />
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"ضبط محتوای بیشتر"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"رد کردن نماگرفت"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"پیش‌نمایش نماگرفت"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"مرز بالایی"</string>
@@ -384,11 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"برگردان رنگ‌ها"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"حالت تصحیح رنگ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"تنظیمات بیشتر"</string>
-    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"تنظیمات کاربر"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"تمام"</string>
-    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
-    <skip />
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"بستن"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"متصل"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"متصل، باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"در حال اتصال..."</string>
@@ -533,8 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"‏این دستگاه به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> تعلق دارد و به VPN متصل است"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ممکن است سازمان شما ترافیک شبکه را در نمایه کاری‌تان پایش کند"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ممکن است ترافیک شبکه را در نمایه کاری شما پایش کند"</string>
-    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
-    <skip />
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"سرپرست سیستم می‌تواند فعالیت شبکه نمایه کاری را ببیند"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ممکن است شبکه پایش شود"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"‏این دستگاه به شبکه‌های VPN متصل است"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"نمایه کاری به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است"</string>
@@ -952,7 +948,7 @@
     <string name="notification_channel_storage" msgid="2720725707628094977">"فضای ذخیره‌سازی"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"نکات"</string>
     <string name="instant_apps" msgid="8337185853050247304">"برنامه‌های فوری"</string>
-    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> درحال اجرا"</string>
+    <string name="instant_apps_title" msgid="8942706782103036910">"‫‫<xliff:g id="APP">%1$s</xliff:g> درحال اجرا"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"برنامه بدون نصب شدن باز شد."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"برنامه بدون نصب شدن باز شد. برای اطلاعات بیشتر ضربه بزنید."</string>
     <string name="app_info" msgid="5153758994129963243">"اطلاعات برنامه"</string>
@@ -1100,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"باز کردن مکالمه"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ابزارک‌های مکالمه"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"روی مکالمه‌ای ضربه بزنید تا به «صفحه اصلی» اضافه شود"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"‫<xliff:g id="DURATION">%1$s</xliff:g> پیش"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"کمتر از <xliff:g id="DURATION">%1$s</xliff:g> قبل"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"بیش‌از <xliff:g id="DURATION">%1$s</xliff:g> قبل"</string>

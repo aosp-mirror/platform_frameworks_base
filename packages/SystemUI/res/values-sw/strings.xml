@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Programu au shirika lako halikuruhusu kupiga picha za skrini"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Badilisha"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Badilisha picha ya skrini"</string>
-    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
-    <skip />
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Nasa zaidi"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ondoa picha ya skrini"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Onyesho la kukagua picha ya skrini"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Mpaka wa sehemu ya juu"</string>
@@ -384,11 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Pindua rangi"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Hali ya kusahihisha rangi"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Mipangilio zaidi"</string>
-    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Mipangilio ya mtumiaji"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Nimemaliza"</string>
-    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
-    <skip />
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Funga"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Imeunganishwa"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Imeunganishwa, kiwango cha betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Inaunganisha..."</string>
@@ -533,8 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> na kimeunganishwa kwenye VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Huenda shirika lako likafuatilia shughuli kwenye mtandao katika wasifu wako wa kazini"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Huenda <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ikafuatilia shughuli kwenye mtandao katika wasifu wako wa kazini"</string>
-    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
-    <skip />
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Shughuli za mtandao za wasifu wa kazini zinaonekana kwa msimamizi wako wa TEHAMA."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Huenda mtandao unafuatiliwa"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Kifaa hiki kimeunganishwa kwenye VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Wasifu wako wa kazini umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -952,7 +948,7 @@
     <string name="notification_channel_storage" msgid="2720725707628094977">"Hifadhi"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Vidokezo"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Programu Zinazofunguka Papo Hapo"</string>
-    <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> inaendelea kutumika"</string>
+    <string name="instant_apps_title" msgid="8942706782103036910">"Programu ya <xliff:g id="APP">%1$s</xliff:g> inatumika"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Programu inafunguka bila kusakinishwa."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Programu inafunguka bila kusakinishwa. Gusa ili upate maelezo zaidi."</string>
     <string name="app_info" msgid="5153758994129963243">"Maelezo ya programu"</string>
@@ -1100,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"Fungua mazungumzo"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Wijeti za mazungumzo"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Gusa mazungumzo ili uyaweke kwenye Skrini yako ya kwanza"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> zilizopita"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Chini ya <xliff:g id="DURATION">%1$s</xliff:g> zilizopita"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Zaidi ya <xliff:g id="DURATION">%1$s</xliff:g> zilizopita"</string>
