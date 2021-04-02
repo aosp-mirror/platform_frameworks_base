@@ -46,7 +46,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Plaats een simkaart."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"De simkaart ontbreekt of kan niet worden gelezen. Plaats een simkaart."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Onbruikbare simkaart."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"Je simkaart is definitief uitgeschakeld.\n Neem contact op met je mobiele serviceprovider voor een nieuwe simkaart."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"Je simkaart is definitief uitgezet.\n Neem contact op met je mobiele serviceprovider voor een nieuwe simkaart."</string>
     <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"Simkaart is vergrendeld."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"Simkaart is vergrendeld met pukcode."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"Simkaart ontgrendelen…"</string>
@@ -56,9 +56,9 @@
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"Gebied voor pukcode van simkaart"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"Volgende wekker ingesteld voor <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Delete"</string>
-    <string name="disable_carrier_button_text" msgid="7153361131709275746">"Simkaart uitschakelen"</string>
-    <string name="error_disable_esim_title" msgid="3802652622784813119">"E-simkaart kan niet worden uitgeschakeld"</string>
-    <string name="error_disable_esim_msg" msgid="2441188596467999327">"De e-simkaart kan niet worden uitgeschakeld vanwege een fout."</string>
+    <string name="disable_carrier_button_text" msgid="7153361131709275746">"E-simkaart uitzetten"</string>
+    <string name="error_disable_esim_title" msgid="3802652622784813119">"E-simkaart kan niet worden uitgezet"</string>
+    <string name="error_disable_esim_msg" msgid="2441188596467999327">"De e-simkaart kan niet worden uitgezet vanwege een fout."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"Patroon vergeten"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Onjuist patroon"</string>
@@ -71,17 +71,17 @@
     <string name="kg_pattern_instructions" msgid="5376036737065051736">"Teken je patroon"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Geef de pincode van de simkaart op."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Geef de pincode voor de simkaart van \'<xliff:g id="CARRIER">%1$s</xliff:g>\' op."</string>
-    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Schakel de e-simkaart uit om het apparaat te gebruiken zonder mobiele service."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Zet de e-simkaart uit om het apparaat te gebruiken zonder mobiele service."</string>
     <string name="kg_pin_instructions" msgid="822353548385014361">"Geef je pincode op"</string>
     <string name="kg_password_instructions" msgid="324455062831719903">"Geef je wachtwoord op"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Neem contact op met de provider voor informatie."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Simkaart van \'<xliff:g id="CARRIER">%1$s</xliff:g>\' is nu uitgeschakeld. Geef de pukcode op om door te gaan. Neem contact op met je provider voor meer informatie."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"De simkaart is nu uitgezet. Geef de pukcode op om door te gaan. Neem contact op met de provider voor informatie."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Simkaart van <xliff:g id="CARRIER">%1$s</xliff:g> is nu uitgezet. Geef de pukcode op om door te gaan. Neem contact op met je provider voor meer informatie."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Geef de gewenste pincode op"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Gewenste pincode bevestigen"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"Simkaart ontgrendelen…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Geef een pincode van vier tot acht cijfers op."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"De pukcode is minimaal acht cijfers lang."</string>
-    <string name="kg_invalid_puk" msgid="1774337070084931186">"Geef de juiste pukcode opnieuw op. Bij herhaalde pogingen wordt de simkaart definitief uitgeschakeld."</string>
+    <string name="kg_invalid_puk" msgid="1774337070084931186">"Geef de juiste pukcode opnieuw op. Bij herhaalde pogingen wordt de simkaart definitief uitgezet."</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Te veel patroonpogingen"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Je hebt je pincode <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Je hebt je wachtwoord <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden opnieuw."</string>
@@ -132,8 +132,8 @@
       <item quantity="one">Geef de pincode van de simkaart op. Je hebt nog <xliff:g id="NUMBER_0">%d</xliff:g> poging over voordat je contact met je provider moet opnemen om het apparaat te ontgrendelen.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="other">De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_1">%d</xliff:g> pogingen over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
-      <item quantity="one">De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_0">%d</xliff:g> poging over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
+      <item quantity="other">De simkaart is nu uitgezet. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_1">%d</xliff:g> pogingen over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
+      <item quantity="one">De simkaart is nu uitgezet. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_0">%d</xliff:g> poging over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Standaard"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bel"</string>
