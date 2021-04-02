@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -206,6 +207,7 @@ public interface StatusBarPhoneModule {
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSlider.Factory brightnessSliderFactory,
             WiredChargingRippleController chargingRippleAnimationController,
+            OngoingCallController ongoingCallController,
             FeatureFlags featureFlags) {
         return new StatusBar(
                 context,
@@ -288,6 +290,7 @@ public interface StatusBarPhoneModule {
                 notificationIconAreaController,
                 brightnessSliderFactory,
                 chargingRippleAnimationController,
+                ongoingCallController,
                 featureFlags);
     }
 }
