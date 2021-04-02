@@ -298,7 +298,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         when(mCommandQueue.asBinder()).thenReturn(new Binder());
 
-        mContext.setTheme(R.style.Theme_SystemUI_Light);
+        mContext.setTheme(R.style.Theme_SystemUI_LightWallpaper);
 
         when(mStackScroller.getController()).thenReturn(mStackScrollerController);
         when(mStackScrollerController.getView()).thenReturn(mStackScroller);
