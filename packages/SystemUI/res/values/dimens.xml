@@ -420,6 +420,8 @@
 
     <!-- Padding on each QS Footer Icon to make the icons 20dpx20dp -->
     <dimen name="qs_footer_icon_padding">14dp</dimen>
+    <!-- 3/4 of icon width 20dpx20dp -->
+    <dimen name="qs_footer_tuner_icon_translation">15dp</dimen>
 
     <!-- The padding between the notifications and the quick settings container -->
     <dimen name="qs_notification_padding">@dimen/notification_side_paddings</dimen>
