@@ -19,7 +19,11 @@ package com.android.test.silkfx.common
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.hardware.display.DisplayManager
+import android.os.IBinder
 import android.util.AttributeSet
+import android.util.Log
+import android.view.SurfaceControl
+import android.view.SurfaceControlHdrLayerInfoListener
 import android.view.Window
 import android.widget.Button
 import android.widget.LinearLayout
@@ -35,6 +39,7 @@ class ColorModeControls : LinearLayout, WindowObserver {
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         displayManager = context.getSystemService(DisplayManager::class.java)!!
         displayId = context.getDisplayId()
+        displayToken = SurfaceControl.getInternalDisplayToken()
     }
 
     private var window: Window? = null
@@ -42,6 +47,7 @@ class ColorModeControls : LinearLayout, WindowObserver {
     private val displayManager: DisplayManager
     private var targetSdrWhitePointIndex = 0
     private var displayId: Int
+    private var displayToken: IBinder
 
     private val whitePoint get() = SDR_WHITE_POINTS[targetSdrWhitePointIndex]
 
@@ -109,6 +115,7 @@ class ColorModeControls : LinearLayout, WindowObserver {
         // Imperfect, but close enough, synchronization by waiting for frame commit to set the value
         viewTreeObserver.registerFrameCommitCallback {
             try {
+                SurfaceControl.setDisplayBrightness(displayToken, level)
                 displayManager.setTemporaryBrightness(displayId, level)
             } catch (ex: Exception) {
                 // Ignore a permission denied rejection - it doesn't meaningfully change much
@@ -116,9 +123,28 @@ class ColorModeControls : LinearLayout, WindowObserver {
         }
     }
 
+    private val listener = object : SurfaceControlHdrLayerInfoListener() {
+        override fun onHdrInfoChanged(
+            displayToken: IBinder?,
+            numberOfHdrLayers: Int,
+            maxW: Int,
+            maxH: Int,
+            flags: Int
+        ) {
+            Log.d("HDRInfo", "onHdrInfoChanged: numLayer = $numberOfHdrLayers ($maxW x $maxH)" +
+                    ", flags = $flags")
+        }
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
         threadedRenderer?.setColorMode(window!!.colorMode, whitePoint)
+        listener.register(displayToken)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        listener.unregister(displayToken)
     }
 }
