@@ -322,7 +322,7 @@ public class Clock extends TextView implements
     // Update text color based when shade scrim changes color.
     public void onColorsChanged(boolean lightTheme) {
         final Context context = new ContextThemeWrapper(mContext,
-                lightTheme ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI);
+                lightTheme ? R.style.Theme_SystemUI_LightWallpaper : R.style.Theme_SystemUI);
         setTextColor(Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor));
     }
 
