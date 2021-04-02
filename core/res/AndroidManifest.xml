@@ -660,7 +660,6 @@
     <protected-broadcast android:name="android.app.action.PROFILE_OWNER_CHANGED" />
     <protected-broadcast android:name="android.app.action.TRANSFER_OWNERSHIP_COMPLETE" />
     <protected-broadcast android:name="android.app.action.AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE" />
-    <protected-broadcast android:name="android.app.action.DATA_SHARING_RESTRICTION_CHANGED" />
     <protected-broadcast android:name="android.app.action.STATSD_STARTED" />
     <protected-broadcast android:name="com.android.server.biometrics.fingerprint.ACTION_LOCKOUT_RESET" />
     <protected-broadcast android:name="com.android.server.biometrics.face.ACTION_LOCKOUT_RESET" />
@@ -2759,8 +2758,12 @@
     <permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"
         android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier" />
 
-    <!-- Allows an application to start foreground services from background, can only be granted to
-         privileged apps or app that is SMS/EMERGENCY/SYSTEM GALLERY roles. -->
+    <!-- Allows an application to start foreground services from the background at any time.
+         <em>This permission is not for use by third-party applications</em>,
+         with the only exception being if the app is the default SMS app.
+         Otherwise, it's only usable by privileged apps, app verifier app, and apps with
+         any of the EMERGENCY or SYSTEM GALLERY roles.
+         -->
     <permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
                 android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier|role"/>
 
@@ -5581,7 +5584,6 @@
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"
                 android:protectionLevel="signature|privileged" />
-    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
     <!-- @SystemApi Allows an app to override compat change config on release builds.
         Only ChangeIds that are annotated as @Overridable can be overridden on release builds.
         @hide -->

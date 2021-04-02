@@ -282,8 +282,9 @@ public class AuthContainerView extends LinearLayout
         mPanelController = mInjector.getPanelController(mContext, mPanelView);
 
         // Inflate biometric view only if necessary.
+        final int sensorCount = config.mSensorIds.length;
         if (Utils.isBiometricAllowed(mConfig.mPromptInfo)) {
-            if (config.mSensorIds.length == 1 || config.mSensorIds.length == 2) {
+            if (sensorCount == 1) {
                 final int singleSensorAuthId = config.mSensorIds[0];
                 if (Utils.containsSensorId(mFpProps, singleSensorAuthId)) {
                     FingerprintSensorPropertiesInternal sensorProps = null;
@@ -314,8 +315,54 @@ public class AuthContainerView extends LinearLayout
                     mBiometricScrollView = null;
                     return;
                 }
+            } else if (sensorCount == 2) {
+                int fingerprintSensorId = -1;
+                int faceSensorId = -1;
+                for (final int sensorId : config.mSensorIds) {
+                    if (Utils.containsSensorId(mFpProps, sensorId)) {
+                        fingerprintSensorId = sensorId;
+                        continue;
+                    } else if (Utils.containsSensorId(mFaceProps, sensorId)) {
+                        faceSensorId = sensorId;
+                        continue;
+                    }
+
+                    if (fingerprintSensorId != -1 && faceSensorId != -1) {
+                        break;
+                    }
+                }
+
+                if (fingerprintSensorId == -1 || faceSensorId == -1) {
+                    Log.e(TAG, "Missing fingerprint or face for dual-sensor config");
+                    mBiometricView = null;
+                    mBackgroundView = null;
+                    mBiometricScrollView = null;
+                    return;
+                }
+
+                FingerprintSensorPropertiesInternal fingerprintSensorProps = null;
+                for (FingerprintSensorPropertiesInternal prop : mFpProps) {
+                    if (prop.sensorId == fingerprintSensorId) {
+                        fingerprintSensorProps = prop;
+                        break;
+                    }
+                }
+
+                if (fingerprintSensorProps != null && fingerprintSensorProps.isAnyUdfpsType()) {
+                    final AuthBiometricFaceToUdfpsView faceToUdfpsView =
+                            (AuthBiometricFaceToUdfpsView) factory.inflate(
+                                    R.layout.auth_biometric_face_to_udfps_view, null, false);
+                    faceToUdfpsView.setFingerprintSensorProps(fingerprintSensorProps);
+                    mBiometricView = faceToUdfpsView;
+                } else {
+                    Log.e(TAG, "Fingerprint must be UDFPS for dual-sensor config");
+                    mBiometricView = null;
+                    mBackgroundView = null;
+                    mBiometricScrollView = null;
+                    return;
+                }
             } else {
-                Log.e(TAG, "Unsupported sensor array, length: " + config.mSensorIds.length);
+                Log.e(TAG, "Unsupported sensor array, length: " + sensorCount);
                 mBiometricView = null;
                 mBackgroundView = null;
                 mBiometricScrollView = null;
@@ -442,14 +489,18 @@ public class AuthContainerView extends LinearLayout
                     mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
                     setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
                     break;
+
                 case Surface.ROTATION_90:
                     mPanelController.setPosition(AuthPanelController.POSITION_RIGHT);
                     setScrollViewGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
                     break;
+
                 case Surface.ROTATION_270:
                     mPanelController.setPosition(AuthPanelController.POSITION_LEFT);
                     setScrollViewGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                     break;
+
+                case Surface.ROTATION_180:
                 default:
                     Log.e(TAG, "Unsupported display rotation: " + displayRotation);
                     mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);

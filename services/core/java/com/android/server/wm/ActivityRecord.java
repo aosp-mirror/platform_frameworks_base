@@ -8507,7 +8507,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 record.mAdapter.mRootTaskBounds, task.getWindowConfiguration(),
                 false /*isNotInRecents*/,
                 record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,
-                record.mStartBounds, task.getPictureInPictureParams());
+                record.mStartBounds, task.getTaskInfo());
     }
 
     @Override

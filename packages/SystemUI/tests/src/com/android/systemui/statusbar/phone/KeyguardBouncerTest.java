@@ -441,4 +441,12 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         // mKeyguardViewController.init(), only updateResources above.
         verify(mKeyguardHostViewController).updateResources();
     }
+
+    @Test
+    public void testUpdateKeyguardPosition_delegatesToRootView() {
+        mBouncer.ensureView();
+        mBouncer.updateKeyguardPosition(1.0f);
+
+        verify(mKeyguardHostViewController).updateKeyguardPosition(1.0f);
+    }
 }

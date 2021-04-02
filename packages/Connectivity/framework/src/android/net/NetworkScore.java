@@ -170,7 +170,7 @@ public final class NetworkScore implements Parcelable {
 
     @Override
     public String toString() {
-        return "Score(" + mLegacyInt + ")";
+        return "Score(" + mLegacyInt + " ; Policies : " + mPolicies + ")";
     }
 
     @Override

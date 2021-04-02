@@ -272,7 +272,8 @@ public class PackageDexOptimizer {
                                 dexMetadataPath,
                                 options.getCompilationReason(),
                                 newResult,
-                                ArtStatsLogUtils.getApkType(path),
+                                ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
+                                        pkg.getSplitCodePaths()),
                                 dexCodeIsa,
                                 path);
                     } finally {
@@ -489,9 +490,9 @@ public class PackageDexOptimizer {
         String classLoaderContext = null;
         if (dexUseInfo.isUnsupportedClassLoaderContext()
                 || dexUseInfo.isVariableClassLoaderContext()) {
-            // If we have an unknown (not yet set), or a variable class loader chain. Just extract
+            // If we have an unknown (not yet set), or a variable class loader chain. Just verify
             // the dex file.
-            compilerFilter = "extract";
+            compilerFilter = "verify";
         } else {
             classLoaderContext = dexUseInfo.getClassLoaderContext();
         }

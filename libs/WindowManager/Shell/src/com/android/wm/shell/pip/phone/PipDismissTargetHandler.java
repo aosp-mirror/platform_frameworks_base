@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.pip.phone;
 
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
@@ -242,6 +244,7 @@ public class PipDismissTargetHandler {
 
         lp.setTitle("pip-dismiss-overlay");
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         lp.setFitInsetsTypes(0 /* types */);
 
         return lp;

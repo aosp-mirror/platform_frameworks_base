@@ -19,6 +19,9 @@ package com.android.systemui.people;
 import static android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID;
 import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 
+import static com.android.systemui.people.PeopleTileViewHelper.getPersonIconBitmap;
+import static com.android.systemui.people.PeopleTileViewHelper.getSizeInDp;
+
 import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
@@ -149,11 +152,11 @@ public class PeopleSpaceActivity extends Activity {
     /** Sets {@code tileView} with the data in {@code conversation}. */
     private void setTileView(PeopleSpaceTileView tileView, PeopleSpaceTile tile) {
         try {
-            String pkg = tile.getPackageName();
-
             tileView.setName(tile.getUserName().toString());
-            tileView.setPackageIcon(mPackageManager.getApplicationIcon(pkg));
-            tileView.setPersonIcon(tile.getUserIcon());
+            tileView.setPersonIcon(getPersonIconBitmap(mContext, tile,
+                    getSizeInDp(mContext, R.dimen.avatar_size_for_medium,
+                            mContext.getResources().getDisplayMetrics().density)));
+
             tileView.setOnClickListener(v -> storeWidgetConfiguration(tile));
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve shortcut information", e);

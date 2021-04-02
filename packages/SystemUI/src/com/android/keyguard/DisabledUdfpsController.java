@@ -18,27 +18,31 @@ package com.android.keyguard;
 
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
- * Controls when to show the DisabledUdfpsView to unlock the device on the lockscreen.
- * If the device is not authenticated, the bouncer will show.
+ * Controls when to show the DisabledUdfpsView affordance (unlock icon or circle) on lock screen.
  *
- * This tap target will only show when:
+ * This view only exists when:
  * - User has UDFPS enrolled
  * - UDFPS is currently unavailable see {@link KeyguardUpdateMonitor#shouldListenForUdfps}
  */
@@ -47,21 +51,26 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewController mKeyguardViewController;
     @NonNull private final StatusBarStateController mStatusBarStateController;
+    @NonNull private final KeyguardStateController mKeyguardStateController;
+    @NonNull private final Drawable mButton;
+    @NonNull private final Drawable mUnlockIcon;
 
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
     private boolean mIsKeyguardShowing;
     private boolean mRunningFPS;
-    private boolean mAuthenticated;
+    private boolean mCanDismissLockScreen;
 
     private boolean mShowButton;
+    private boolean mShowUnlockIcon;
 
     public DisabledUdfpsController(
             @NonNull DisabledUdfpsView view,
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull AuthController authController,
-            @NonNull KeyguardViewController keyguardViewController
+            @NonNull KeyguardViewController keyguardViewController,
+            @NonNull KeyguardStateController keyguardStateController
     ) {
         super(view);
         mView.setOnClickListener(mOnClickListener);
@@ -70,25 +79,38 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewController = keyguardViewController;
+        mKeyguardStateController = keyguardStateController;
+
+        final Context context = view.getContext();
+        mButton = context.getResources().getDrawable(
+                com.android.systemui.R.drawable.circle_white, context.getTheme());
+        mUnlockIcon = new InsetDrawable(context.getResources().getDrawable(
+                com.android.internal.R.drawable.ic_lock_open, context.getTheme()),
+                context.getResources().getDimensionPixelSize(
+                        com.android.systemui.R.dimen.udfps_unlock_icon_inset));
     }
 
     @Override
     protected void onViewAttached() {
         mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
-        mIsKeyguardShowing = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        mIsKeyguardShowing = mKeyguardStateController.isShowing();
         mIsDozing = mStatusBarStateController.isDozing();
         mRunningFPS = mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
-        mAuthenticated = false;
-        updateButtonVisibility();
+        mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
+        mUnlockIcon.setTint(Utils.getColorAttrDefaultColor(mView.getContext(),
+                R.attr.wallpaperTextColorAccent));
+        updateVisibility();
 
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mKeyguardStateController.addCallback(mKeyguardStateCallback);
     }
 
     @Override
     protected void onViewDetached() {
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mKeyguardStateController.removeCallback(mKeyguardStateCallback);
     }
 
     /**
@@ -100,30 +122,41 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
         }
     }
 
-    private void updateButtonVisibility() {
-        mShowButton = !mAuthenticated && !mIsDozing && mIsKeyguardShowing
-                && !mIsBouncerShowing && !mRunningFPS;
+    private void updateVisibility() {
+        mShowButton = !mCanDismissLockScreen && !mRunningFPS && isLockScreen();
+        mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
+
         if (mShowButton) {
+            mView.setImageDrawable(mButton);
+            mView.setVisibility(View.VISIBLE);
+        } else if (mShowUnlockIcon) {
+            mView.setImageDrawable(mUnlockIcon);
             mView.setVisibility(View.VISIBLE);
         } else {
             mView.setVisibility(View.INVISIBLE);
         }
     }
 
+    private boolean isLockScreen() {
+        return mIsKeyguardShowing && !mIsDozing && !mIsBouncerShowing;
+    }
+
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("DisabledUdfpsController state:");
         pw.println("  mShowBouncerButton: " + mShowButton);
+        pw.println("  mShowUnlockIcon: " + mShowUnlockIcon);
         pw.println("  mIsDozing: " + mIsDozing);
         pw.println("  mIsKeyguardShowing: " + mIsKeyguardShowing);
         pw.println("  mIsBouncerShowing: " + mIsBouncerShowing);
         pw.println("  mRunningFPS: " + mRunningFPS);
-        pw.println("  mAuthenticated: " + mAuthenticated);
+        pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
     }
 
     private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            // if the device is locked, shows bouncer, else goes to launcher
             mKeyguardViewController.showBouncer(/* scrim */ true);
         }
     };
@@ -131,15 +164,9 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
     private StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
-                public void onStateChanged(int newState) {
-                    mIsKeyguardShowing = newState == StatusBarState.KEYGUARD;
-                    updateButtonVisibility();
-                }
-
-                @Override
                 public void onDozingChanged(boolean isDozing) {
                     mIsDozing = isDozing;
-                    updateButtonVisibility();
+                    updateVisibility();
                 }
             };
 
@@ -148,7 +175,7 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
                 @Override
                 public void onKeyguardBouncerChanged(boolean bouncer) {
                     mIsBouncerShowing = bouncer;
-                    updateButtonVisibility();
+                    updateVisibility();
                 }
 
                 @Override
@@ -157,21 +184,29 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
                     if (biometricSourceType == FINGERPRINT) {
                         mRunningFPS = running;
                     }
-                    mAuthenticated &= !mRunningFPS;
-                    updateButtonVisibility();
-                }
 
-                @Override
-                public void onBiometricAuthenticated(int userId,
-                        BiometricSourceType biometricSourceType, boolean isStrongBiometric) {
-                    mAuthenticated = true;
-                    updateButtonVisibility();
-                }
-
-                @Override
-                public void onUserUnlocked() {
-                    mAuthenticated = true;
-                    updateButtonVisibility();
+                    updateVisibility();
                 }
             };
+
+    private final KeyguardStateController.Callback mKeyguardStateCallback =
+            new KeyguardStateController.Callback() {
+        @Override
+        public void onKeyguardShowingChanged() {
+            updateIsKeyguardShowing();
+            updateVisibility();
+        }
+
+        @Override
+        public void onUnlockedChanged() {
+            updateIsKeyguardShowing();
+            mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
+            updateVisibility();
+        }
+
+        private void updateIsKeyguardShowing() {
+            mIsKeyguardShowing = mKeyguardStateController.isShowing()
+                    && !mKeyguardStateController.isKeyguardGoingAway();
+        }
+    };
 }
