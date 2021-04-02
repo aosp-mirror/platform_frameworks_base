@@ -158,7 +158,7 @@ public class UnderlyingNetworkTrackerTest {
         for (final int subId : expectedSubIds) {
             verify(mConnectivityManager)
                     .requestBackgroundNetwork(
-                            eq(getCellRequestForSubId(subId, expectedSubIds)),
+                            eq(getCellRequestForSubId(subId)),
                             any(),
                             any(NetworkBringupCallback.class));
         }
@@ -189,30 +189,30 @@ public class UnderlyingNetworkTrackerTest {
     }
 
     private NetworkRequest getWifiRequest(Set<Integer> netCapsSubIds) {
-        return getExpectedRequestBase(netCapsSubIds)
+        return getExpectedRequestBase()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .setSubIds(netCapsSubIds)
                 .build();
     }
 
-    private NetworkRequest getCellRequestForSubId(int subId, Set<Integer> netCapsSubIds) {
-        return getExpectedRequestBase(netCapsSubIds)
+    private NetworkRequest getCellRequestForSubId(int subId) {
+        return getExpectedRequestBase()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                 .setNetworkSpecifier(new TelephonyNetworkSpecifier(subId))
                 .build();
     }
 
     private NetworkRequest getRouteSelectionRequest(Set<Integer> netCapsSubIds) {
-        return getExpectedRequestBase(netCapsSubIds).build();
+        return getExpectedRequestBase().setSubIds(netCapsSubIds).build();
     }
 
-    private NetworkRequest.Builder getExpectedRequestBase(Set<Integer> subIds) {
+    private NetworkRequest.Builder getExpectedRequestBase() {
         final NetworkRequest.Builder builder =
                 new NetworkRequest.Builder()
                         .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                         .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
                         .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
-                        .setSubIds(subIds);
+                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
 
         return builder;
     }
