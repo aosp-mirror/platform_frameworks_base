@@ -75,7 +75,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
 
         `when`(quickQSPanel.tileLayout).thenReturn(tileLayout)
         `when`(quickQSPanel.dumpableTag).thenReturn("")
-        `when`(qsTileHost.createTileView(any(), anyBoolean())).thenReturn(tileView)
+        `when`(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
 
         controller = QuickQSPanelController(
                 quickQSPanel,
