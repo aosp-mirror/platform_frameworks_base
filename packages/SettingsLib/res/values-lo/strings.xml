@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ແທັບເລັດອາດປິດໃນໄວໆນີ້ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ອຸປະກອນອາດປິດໃນໄວໆນີ້ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ຈົນກວ່າຈະສາກເຕັມ"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ຈົນກວ່າຈະສາກເຕັມ"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ກຳລັງເພີ່ມປະສິດທິພາບເພື່ອສຸຂະພາບແບັດເຕີຣີ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ກຳລັງສາກໄຟ"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ກຳລັງສາກໄຟຊ້າໆ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ບໍ່ໄດ້ສາກໄຟ"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ສຽບສາຍແລ້ວ, ບໍ່ສາມາດສາກໄດ້ໃນຕອນນີ້"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"ເຕັມ"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ຄວບຄຸມໂດຍຜູ້ເບິ່ງແຍງ"</string>
     <string name="disabled" msgid="8017887509554714950">"ປິດການນຳໃຊ້"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ອະນຸຍາດແລ້ວ"</string>
@@ -501,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ຫຼຸດເວລາ."</string>
     <string name="cancel" msgid="5665114069455378395">"ຍົກເລີກ"</string>
     <string name="okay" msgid="949938843324579502">"ຕົກລົງ"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"ອະນຸຍາດໃຫ້ຕັ້ງໂມງປຸກ ຫຼື ການແຈ້ງເຕືອນ"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"ອະນຸຍາດໃຫ້ແອັບນີ້ກຳນົດເວລາໂມງປຸກ ຫຼື ເຫດການທີ່ອ້າງອີງເວລາອື່ນໆ. ນີ້ຈະເຮັດໃຫ້ແອັບສາມາດປຸກ ແລະ ເຮັດວຽກໄດ້ເຖິງແມ່ນວ່າທ່ານຈະບໍ່ໄດ້ໃຊ້ອຸປະກອນຢູ່ກໍຕາມ. ກະລຸນາຮັບຊາບວ່າການຖອດຖອນການອະນຸຍາດນີ້ອາດສົ່ງຜົນໃຫ້ແອັບເຮັດວຽກຜິດປົກກະຕິໄດ້, ໂດຍສະເພາະແມ່ນໂມງປຸກໃດກໍຕາມທີ່ແອັບໄດ້ກຳນົດເວລາໄວ້ຈະບໍ່ສາມາດເຮັດວຽໄດ້ອີກຕໍ່ໄປ."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"ກຳນົດເວລາ, ໂມງປຸກ, ການແຈ້ງເຕືອນ, ນັດໝາຍ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ເປີດ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ເປີດໂໝດຫ້າມລົບກວນ"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ບໍ່ໃຊ້"</string>
@@ -579,7 +587,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"ປິດອິນເຕີເນັດມືຖືແລ້ວ"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"ບໍ່ໄດ້ຕັ້ງໃຫ້ໃຊ້ອິນເຕີເນັດ"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"ບໍ່ມີໂທລະສັບ."</string>

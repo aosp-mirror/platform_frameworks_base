@@ -424,8 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"क्षीण रक्तवर्णांधता (लाल-हिरवा)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"रंग दृष्टी कमतरता (निळा-पिवळा)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग सुधारणा"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (2333641630205214702) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"तुमच्या डिव्हाइसवर रंग कसे प्रदर्शित केले जातात ते अ‍ॅडजस्ट करा. तुम्हाला :&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;अधिक स्पष्टपणे रंग पाहणे&lt;/li&gt; &lt;li&gt;&amp;nbsp;तुम्हाला फोकस करण्यात मदत करण्यासाठी रंग काढून टाकणे&lt;/li&gt; &lt;/ol&gt;हे करायचे असते तेव्हा हे उपयुक्त असू शकते"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारे अधिलिखित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"अंदाजे <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाकी आहे"</string>
@@ -451,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"टॅबलेट लवकरच बंद होऊ शकतो (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"डिव्हाइस लवकरच बंद होऊ शकते (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> पर्यंत पूर्ण चार्ज होईल"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> पर्यंत पूर्ण चार्ज होईल"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - बॅटरीची क्षमता वाढवण्यासाठी ऑप्टिमाइझ करत आहे"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
@@ -460,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"हळूहळू चार्ज होत आहे"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज होत नाही"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लग इन केलेले आहे, आता चार्ज करू शकत नाही"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"पूर्ण"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"प्रशासकाने नियंत्रित केलेले"</string>
     <string name="disabled" msgid="8017887509554714950">"अक्षम"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमती आहे"</string>
@@ -502,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कमी वेळ."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>
     <string name="okay" msgid="949938843324579502">"ठीक आहे"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"अलार्म किंवा रिमाइंडर सेट करण्याची अनुमती द्या"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"अलार्म आणि रिमाइंडर"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"या अ‍ॅपला अलार्म किंवा वेळेवर आधारित इतर इव्हेंट शेड्युल करण्याची अनुमती द्या. यामुळे तुम्ही डिव्हाइस वापरत नसतानादेखील अ‍ॅपला सुरू आणि रन करण्याची अनुमती मिळते. लक्षात ठेवा की, ही परवानगी नाकारल्याने ॲप कदाचित नीट काम करणार नाही, विशेषतः अ‍ॅपने शेड्युल केलेले कोणतेही अलार्म यापुढे काम करणार नाहीत."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"शेड्युल, अलार्म, रिमाइंडर, इव्‍हेंट"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सुरू करा"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"व्यत्यय आणू नका सुरू करा"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कधीही नाही"</string>
@@ -580,7 +587,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"४G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"वा+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"मोबाइल डेटा बंद आहे"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"डेटा वापरण्यासाठी सेट केलेले नाही"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"कोणताही फोन नाही."</string>

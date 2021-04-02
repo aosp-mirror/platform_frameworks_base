@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"平板电脑可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"设备可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"还剩 <xliff:g id="TIME">%1$s</xliff:g>充满电"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>后充满电"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 正在针对电池状况进行优化"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"正在充电"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充电"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"未在充电"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已插入电源，但是现在无法充电"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"电量充足"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"由管理员控制"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"允许"</string>
@@ -501,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"减少时间。"</string>
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
     <string name="okay" msgid="949938843324579502">"确定"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"闹钟和提醒"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"允许设置闹钟或提醒"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"闹钟和提醒"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"允许该应用设置闹钟或其他在指定时间发生的活动。这样一来，即使您并未使用设备，该应用仍会唤醒并运行。请注意，撤消此权限可能会导致该应用出现故障，特别是该应用设置的所有闹钟都将不再生效。"</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"设置, 闹钟, 提醒, 活动, schedule, alarm, reminder, event"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"开启"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"开启勿扰模式"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"永不"</string>
@@ -579,7 +587,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"移动数据网络已关闭"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"未设置为使用移动数据"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"没有手机信号。"</string>

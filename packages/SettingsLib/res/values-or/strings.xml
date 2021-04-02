@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ଟାବଲେଟ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"ଚାର୍ଜ ହେବା ପାଇଁ <xliff:g id="TIME">%1$s</xliff:g> ବାକି ଅଛି"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ଚାର୍ଜ ହେବା ପର୍ଯ୍ୟନ୍ତ"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ବ୍ୟାଟେରୀ ହେଲ୍ଥ ପାଇଁ ଅପ୍ଟିମାଇଜ୍ ହେଉଛି"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ଅଜ୍ଞାତ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ଚାର୍ଜ ହେଉଛି"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ପ୍ଲଗ୍‌ରେ ଲାଗିଛି, ହେଲେ ଏବେ ଚାର୍ଜ କରିପାରିବ ନାହିଁ"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"ଚାର୍ଜ ସମ୍ପୂର୍ଣ୍ଣ"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ଆଡ୍‌ମିନ୍‌ ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ"</string>
     <string name="disabled" msgid="8017887509554714950">"ଅକ୍ଷମ ହୋଇଛି"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ଅନୁମତି ଦିଆଯାଇଛି"</string>
@@ -501,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"କମ୍ ସମୟ।"</string>
     <string name="cancel" msgid="5665114069455378395">"ବାତିଲ୍"</string>
     <string name="okay" msgid="949938843324579502">"ଠିକ୍‌ ଅଛି"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ଆଲାରାମ୍ ଏବଂ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"ଆଲାରାମ୍ ବା ରିମାଇଣ୍ଡର୍ ସେଟ୍ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"ଆଲାରାମ୍ ଏବଂ ରିମାଇଣ୍ଡରଗୁଡ଼ିକ"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"ଆଲାରାମ୍ କିମ୍ବା ଅନ୍ୟ ସମୟ ଆଧାରିତ ଇଭେଣ୍ଟଗୁଡ଼ିକ ସିଡୁଲ୍ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଆପଣ ଡିଭାଇସ୍ ବ୍ୟବହାର କରୁନଥିଲେ ମଧ୍ୟ ଏହା ଆପକୁ ସକ୍ରିୟ ହେବା ଏବଂ ଚାଲିବାକୁ ଅନୁମତି ଦେବ। ଧ୍ୟାନ ଦିଅନ୍ତୁ ଯେ ଏହି ଅନୁମତି ପ୍ରତ୍ୟାହାର କରିବା ଫଳରେ ଆପ୍ ଠିକରେ କାମ ନକରିପାରେ, ନିର୍ଦ୍ଦିଷ୍ଟ ଭାବେ ଆପ୍ ସିଡୁଲ୍ କରିଥିବା ଯେ କୌଣସି ଆଲାରାମ୍ ଆଉ କାମ କରିବ ନାହିଁ।"</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"ସିଡୁଲ୍, ଆଲାରାମ, ରିମାଇଣ୍ଡର୍, ଇଭେଣ୍ଟ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍ କରନ୍ତୁ"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"କଦାପି ନୁହେଁ"</string>
@@ -579,7 +587,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"ମୋବାଇଲ୍‌ ଡାଟା ବନ୍ଦ ଅଛି"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"ବ୍ୟବହୃତ ଡାଟା ପାଇଁ ସେଟ୍ ହୋଇନାହିଁ"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"କୌଣସି ଫୋନ୍ ନାହିଁ।"</string>
