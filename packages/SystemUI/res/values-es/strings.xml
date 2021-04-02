@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"La aplicación o tu organización no permiten realizar capturas de pantalla"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editar"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editar captura de pantalla"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Pantalla continua"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Hacer captura de pantalla continua"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturar más"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Cerrar captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Vista previa de captura de pantalla"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Margen superior"</string>
@@ -178,6 +177,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Cerrar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Icono de huella digital"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Buscando tu cara…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Icono de cara"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Botón de zoom de compatibilidad"</string>
@@ -378,7 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertir colores"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modo de corrección de color"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Más ajustes"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Ajustes de usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Listo"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Cerrar"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Conectado"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Conectado (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Conectando..."</string>
@@ -523,6 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Este dispositivo pertenece a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> y está conectado a varias VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Tu organización puede supervisar el tráfico de red de tu perfil de trabajo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> puede supervisar el tráfico de red de tu perfil de trabajo"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Tu administrador de TI puede ver la actividad de red del perfil de trabajo"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Puede que la red esté supervisada"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Este dispositivo está conectado a varias VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Tu perfil de trabajo está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -1088,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"Conversación abierta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversación"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toca una conversación para añadirla a la pantalla de inicio"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"Hace <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Hace menos de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Hace más de <xliff:g id="DURATION">%1$s</xliff:g>"</string>
@@ -1102,6 +1118,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"Amigos"</string>
     <string name="empty_status" msgid="5938893404951307749">"Charlemos esta noche"</string>
     <string name="missed_call" msgid="4228016077700161689">"Llamada perdida"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Consulta los mensajes recientes, las llamadas perdidas y los cambios de estado"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversación"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"No se ha podido leer el indicador de batería"</string>

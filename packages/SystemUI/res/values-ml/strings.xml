@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"സ്ക്രീൻഷോട്ടുകൾ എടുക്കുന്നത് ആപ്പോ നിങ്ങളുടെ സ്ഥാപനമോ അനുവദിക്കുന്നില്ല"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"സ്ക്രീൻഷോട്ട് എഡിറ്റ് ചെയ്യുക"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"സ്‌ക്രോൾ ചെയ്യുക"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"സ്ക്രീൻഷോട്ട് സ്ക്രോൾ ചെയ്യുക"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"കൂടുതൽ ക്യാപ്‌ചർ ചെയ്യുക"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"സ്ക്രീൻഷോട്ട് ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"സ്‌ക്രീൻഷോട്ട് പ്രിവ്യു"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"മുകളിലുള്ള അതിർത്തി"</string>
@@ -178,6 +177,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ഡിസ്മിസ് ചെയ്യുക"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ഫിംഗർപ്രിന്റ് സെൻസർ സ്‌പർശിക്കുക"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"നിങ്ങൾക്കായി തിരയുന്നു…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"മുഖത്തിന്റെ ഐക്കൺ"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"അനുയോജ്യതാ സൂം ബട്ടൺ."</string>
@@ -378,7 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"നെഗറ്റീവ് ലുക്ക്"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"വർണ്ണം ശരിയാക്കൽ മോഡ്"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"കൂടുതൽ ക്രമീകരണങ്ങൾ"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ഉപയോക്തൃ ക്രമീകരണം"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"പൂർത്തിയാക്കി"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"അടയ്ക്കുക"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"കണക്‌റ്റുചെയ്‌തു, ബാറ്ററി നില <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"കണക്റ്റുചെയ്യുന്നു..."</string>
@@ -523,6 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ഈ ഉപകരണം <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> എന്ന സ്ഥാപനത്തിന്റേതാണ്, കൂടാതെ VPN-കളിലേക്ക് കണക്റ്റ് ചെയ്‌തിരിക്കുന്നു"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിലെ നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കാൻ നിങ്ങളുടെ സ്ഥാപനത്തിന് കഴിഞ്ഞേക്കാം"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിലെ നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> നിരീക്ഷിച്ചേക്കാം"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"ഔദ്യോഗിക പ്രൊഫൈലിലെ നെറ്റ്‍വര്‍ക്ക് ആക്റ്റിവിറ്റി ഐടി അഡ്‌മിന് കാണാനാകും"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"നെറ്റ്‌വർക്ക് നിരീക്ഷിക്കപ്പെടാം"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ഈ ഉപകരണം VPN-കളിലേക്ക് കണക്റ്റ് ചെയ്തിരിക്കുന്നു"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"<xliff:g id="VPN_APP">%1$s</xliff:g> എന്നതിലേക്ക് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ കണക്റ്റ് ചെയ്‌തിരിക്കുന്നു"</string>
@@ -1088,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"സംഭാഷണം തുറക്കുക"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"സംഭാഷണ വിജറ്റുകൾ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"നിങ്ങളുടെ ഹോം സ്‌ക്രീനിൽ ചേർക്കാൻ സംഭാഷണത്തിൽ ടാപ്പ് ചെയ്യുക"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> മുമ്പ്"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> എന്നതിൽ കുറവ്"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> മുമ്പ്"</string>
@@ -1102,6 +1118,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"സുഹൃത്തുക്കൾ"</string>
     <string name="empty_status" msgid="5938893404951307749">"ഇന്നുരാത്രി ചാറ്റുചെയ്യാം!"</string>
     <string name="missed_call" msgid="4228016077700161689">"മിസ്‌ഡ് കോൾ"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"അടുത്തിടെയുള്ള സന്ദേശങ്ങൾ, മിസ്‌ഡ് കോളുകൾ, സ്റ്റാറ്റസ് അപ്‌ഡേറ്റുകൾ എന്നിവ കാണുക"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"സംഭാഷണം"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"നിങ്ങളുടെ ബാറ്ററി മീറ്റർ വായിക്കുന്നതിൽ പ്രശ്‌നമുണ്ട്"</string>

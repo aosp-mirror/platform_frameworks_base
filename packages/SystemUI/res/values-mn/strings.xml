@@ -28,7 +28,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> үлдсэн байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g>-н хугацаа үлдсэн"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> үлдсэн байна. Ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g>-н хугацаа үлдсэн"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн. Тэжээл хэмнэгч асаалттай байна."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн. Батарей хэмнэгч асаалттай байна."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"USB-р цэнэглэх боломжгүй байна. Төхөөрөмждөө дагалдаж ирсэн цэнэглэгчийг ашиглана уу."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB-р цэнэглэх боломжгүй байна"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Төхөөрөмждөө дагалдаж ирсэн цэнэглэгчийг ашиглах"</string>
@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Таны апп, байгууллагад дэлгэцийн зураг авахыг зөвшөөрдөггүй"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Засах"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Дэлгэцийн агшныг засах"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Гүйлгэх"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Бүхэлд нь багтаасан дэлгэцийн агшин"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Ихийг багтаасан зураг авах"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Дэлгэцийн агшныг хаах"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Дэлгэцийн агшныг урьдчилан үзэх"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Дээд талын хязгаар"</string>
@@ -178,6 +177,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Хаах"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Хурууны хээ мэдрэгчид хүрэх"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Хурууны хээний дүрс тэмдэг"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Таныг хайж байна…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Царайны дүрс тэмдэг"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Тохиромжтой өсгөх товч."</string>
@@ -378,7 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Өнгийг урвуулах"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Өнгө залруулах горим"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Бусад тохиргоо"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Хэрэглэгчийн тохиргоо"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Дууссан"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Хаах"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Холбогдсон"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Холбогдож байна..."</string>
@@ -489,9 +496,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Хэрэглэгчийг устгах уу?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Энэ хэрэглэгчийн бүх апп болон мэдээлэл устах болно."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Арилгах"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Тэжээл хэмнэгч асаалттай байна"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Батарей хэмнэгч асаалттай байна"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Ажиллагаа болон далд датаг бууруулна"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Тэжээл хэмнэгчийг унтраах"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Батарей хэмнэгчийг унтраах"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> нь бичлэг хийх эсвэл дамжуулах үед таны дэлгэц дээр харагдах эсвэл таны төхөөрөмжөөс тоглуулах бүх мэдээлэлд хандах боломжтой байна. Үүнд нууц үг, төлбөрийн дэлгэрэнгүй, зураг болон таны тоглуулдаг аудио зэрэг мэдээлэл багтана."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Энэ функцийг ажиллуулж байгаа үйлчилгээ нь бичлэг хийх эсвэл дамжуулах үед таны дэлгэц дээр харагдах эсвэл таны төхөөрөмжөөс тоглуулах бүх мэдээлэлд хандах боломжтой байна. Үүнд нууц үг, төлбөрийн дэлгэрэнгүй, зураг болон таны тоглуулдаг аудио зэрэг мэдээлэл багтана."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Бичлэг хийх эсвэл дамжуулахыг эхлүүлэх үү?"</string>
@@ -523,6 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Энэ төхөөрөмж <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-д харьяалагддаг бөгөөд VPN-д холбогдсон байна"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Таны байгууллага таны ажлын профайлын сүлжээний ачааллыг хянадаг"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> таны ажлын профайлын сүлжээний ачааллыг хянадаг"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Таны IT админд ажлын профайлын сүлжээний үйл ажиллагаа харагдана"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Сүлжээг хянаж байж болзошгүй"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Энэ төхөөрөмж VPN-д холбогдсон байна"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Таны ажлын профайл <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна"</string>
@@ -777,7 +785,7 @@
       <item quantity="one">%d минут</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Батарей ашиглалт"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Цэнэглэх үед тэжээл хэмнэгч ажиллахгүй"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Цэнэглэх үед батарей хэмнэгч ажиллахгүй"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Батарей хэмнэгч"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Гүйцэтгэл болон дэвсгэрийн датаг багасгадаг"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> товчлуур"</string>
@@ -969,11 +977,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g>-д дурын аппаас хэсэг харуулахыг зөвшөөрөх"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Зөвшөөрөх"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Татгалзах"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Тэжээл хэмнэгч онцлогийг хуваарилахын тулд товших"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Батарей хэмнэгч онцлогийг хуваарилахын тулд товших"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Батарей дуусах гэж байгаа үед асаана уу"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Үгүй, баярлалаа"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Тэжээл хэмнэгч онцлогийн хуваарийг асаасан"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%%-с бага болсон үед Тэжээл хэмнэгч автоматаар асна."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Батарей хэмнэгч онцлогийн хуваарийг асаасан"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%%-с бага болсон үед Батарей хэмнэгч автоматаар асна."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Тохиргоо"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Ойлголоо"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
@@ -1088,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"Харилцан яриаг нээх"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Харилцан ярианы жижиг хэрэгслүүд"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Үндсэн нүүрэндээ нэмэх харилцан яриаг товшино уу"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>-н өмнө"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>-с бага хугацааны өмнө"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>-с дээш хугацааны өмнө"</string>
@@ -1102,6 +1118,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"Найзууд"</string>
     <string name="empty_status" msgid="5938893404951307749">"Өнөө орой чаталъя!"</string>
     <string name="missed_call" msgid="4228016077700161689">"Аваагүй дуудлага"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Саяхны мессеж, аваагүй дуудлага болон төлөвийн шинэчлэлтийг харах"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Харилцан яриа"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Таны батарей хэмжигчийг уншихад асуудал гарлаа"</string>
