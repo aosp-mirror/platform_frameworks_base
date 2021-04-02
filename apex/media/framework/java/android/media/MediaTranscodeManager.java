@@ -1361,8 +1361,6 @@ public final class MediaTranscodeManager {
         private @TranscodingSessionErrorCode int mErrorCode = ERROR_NONE;
         @GuardedBy("mLock")
         private boolean mHasRetried = false;
-        @GuardedBy("mLock")
-        private @NonNull List<Integer> mClientUidList = new ArrayList<>();
         // The original request that associated with this session.
         private final TranscodingRequest mRequest;
 
@@ -1381,7 +1379,6 @@ public final class MediaTranscodeManager {
             mListenerExecutor = executor;
             mListener = listener;
             mRequest = request;
-            mClientUidList.add(request.getClientUid());
         }
 
         /**
@@ -1532,17 +1529,31 @@ public final class MediaTranscodeManager {
          * Only privilege caller with android.permission.WRITE_MEDIA_STORAGE could add the
          * uid. Note that the permission check happens on the service side upon starting the
          * transcoding. If the client does not have the permission, the transcoding will fail.
+         * @param uid  the additional client uid to be added.
+         * @return true if successfully added, false otherwise.
          */
-        public void addClientUid(int uid) {
+        public boolean addClientUid(int uid) {
             if (uid < 0) {
                 throw new IllegalArgumentException("Invalid Uid");
             }
-            synchronized (mLock) {
-                if (!mClientUidList.contains(uid)) {
-                    // see ag/14023202 for implementation
-                    mClientUidList.add(uid);
-                }
+
+            // Get the client interface.
+            ITranscodingClient client = mManager.getTranscodingClient();
+            if (client == null) {
+                Log.e(TAG, "Service is dead...");
+                return false;
             }
+
+            try {
+                if (!client.addClientUid(mSessionId, uid)) {
+                    Log.e(TAG, "Failed to add client uid");
+                    return false;
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Failed to get client uids due to " + ex);
+                return false;
+            }
+            return true;
         }
 
         /**
@@ -1551,9 +1562,25 @@ public final class MediaTranscodeManager {
          */
         @NonNull
         public List<Integer> getClientUids() {
-            synchronized (mLock) {
-                return mClientUidList;
+            List<Integer> uidList = new ArrayList<Integer>();
+
+            // Get the client interface.
+            ITranscodingClient client = mManager.getTranscodingClient();
+            if (client == null) {
+                Log.e(TAG, "Service is dead...");
+                return uidList;
             }
+
+            try {
+                int[] clientUids  = client.getClientUids(mSessionId);
+                for (int i : clientUids) {
+                    uidList.add(i);
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Failed to get client uids due to " + ex);
+            }
+
+            return uidList;
         }
 
         /**
