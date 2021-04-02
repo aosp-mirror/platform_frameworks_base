@@ -1633,8 +1633,14 @@
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->
     <string name="wallet_title">Wallet</string>
+    <!-- Label of the button underneath the card carousel when device is unlocked. [CHAR LIMIT=NONE] -->
+    <string name="wallet_button_label_device_unlocked">Show all</string>
+    <!-- Label of the button underneath the card carousel when device is locked. [CHAR LIMIT=NONE] -->
+    <string name="wallet_button_label_device_locked">Unlock to pay</string>
     <!-- Secondary label of the quick access wallet tile. [CHAR LIMIT=32] -->
     <string name="wallet_secondary_label">Ready</string>
+    <!-- Message shown when an unknown failure occurred when fetching cards. [CHAR LIMIT=NONE] -->
+    <string name="wallet_error_generic">There was a problem getting your cards, please try again later</string>
 
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>

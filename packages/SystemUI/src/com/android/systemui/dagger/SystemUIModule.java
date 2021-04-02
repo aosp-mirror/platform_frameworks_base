@@ -73,6 +73,7 @@ import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.volume.dagger.VolumeModule;
+import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -109,7 +110,8 @@ import dagger.Provides;
             TunerModule.class,
             UserModule.class,
             UtilModule.class,
-            VolumeModule.class
+            VolumeModule.class,
+            WalletModule.class
         },
         subcomponents = {
             StatusBarComponent.class,
