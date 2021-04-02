@@ -573,7 +573,8 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No s\'ha definit cap PIN, patró o contrasenya"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Error en l\'autenticació"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utilitza el bloqueig de pantalla"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Utilitza les credencials del teu dispositiu per continuar"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
@@ -620,14 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Torna a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Per millorar el reconeixement, torna a registrar la cara"</string>
-    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
-    <skip />
-    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Configura el desbloqueig facial"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Mira el telèfon per desbloquejar-lo"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura més maneres de desbloquejar el dispositiu"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca per afegir una empremta digital"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"No es reconeix la teva cara. Torna-ho a provar."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Massa brillant Prova una il·luminació més suau."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Massa fosc. Prova una il·luminació més brillant."</string>
@@ -664,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Utilitza el desbloqueig facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Utilitza el desbloqueig facial o de pantalla"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Utilitza el desbloqueig facial per continuar"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilitza la cara o el bloqueig de pantalla per continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1031,12 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"S\'ha copiat"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha enganxat dades de: <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha enganxat dades del porta-retalls"</string>
-    <!-- no translation found for pasted_text (4298871641549173733) -->
-    <skip />
-    <!-- no translation found for pasted_image (4729097394781491022) -->
-    <skip />
-    <!-- no translation found for pasted_content (646276353060777131) -->
-    <skip />
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha enganxat text que has copiat"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha enganxat una imatge que has copiat"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ha enganxat contingut que has copiat"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Més"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menú+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1327,7 +1322,7 @@
     <item msgid="1616528372438698248">"Ethernet"</item>
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
-    <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"una tipus de xarxa desconegut"</string>
+    <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"un tipus de xarxa desconegut"</string>
     <string name="accept" msgid="5447154347815825107">"Accepta"</string>
     <string name="decline" msgid="6490507610282145874">"Rebutja"</string>
     <string name="select_character" msgid="3352797107930786979">"Insereix un caràcter"</string>
@@ -2141,31 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Feina"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visualització personal"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Visualització de treball"</string>
-    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
-    <skip />
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"L\'administrador de TI ha bloquejat la compartició"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"No es pot compartir aquest contingut amb aplicacions de treball"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"No es pot obrir aquest contingut amb aplicacions de treball"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No es pot compartir aquest contingut amb aplicacions personals"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"No es pot obrir aquest contingut amb aplicacions personals"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"El perfil de treball està en pausa"</string>
-    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Toca per activar"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Cap aplicació de treball"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Cap aplicació personal"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Vols obrir-ho a <xliff:g id="APP">%s</xliff:g> amb el perfil personal?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Vols obrir-ho a <xliff:g id="APP">%s</xliff:g> amb el perfil de treball?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilitza el navegador personal"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilitza el navegador de treball"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueig de la xarxa SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN de desbloqueig de subconjunt de la xarxa SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN de desbloqueig de la SIM corporativa"</string>
@@ -2278,10 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nova configuració d\'ampliació"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Ara pots ampliar una part de la pantalla"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activa a Configuració"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignora"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Per continuar, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; necessita accedir al micròfon del dispositiu."</string>

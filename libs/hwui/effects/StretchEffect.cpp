@@ -58,8 +58,7 @@ static const SkString stretchShader = SkString(R"(
     uniform float viewportWidth; // target height in pixels
     uniform float viewportHeight; // target width in pixels
 
-    void computeOverscrollStart(
-        out float outPos,
+    float computeOverscrollStart(
         float inPos,
         float overscroll,
         float uStretchAffectedDist,
@@ -68,11 +67,10 @@ static const SkString stretchShader = SkString(R"(
         float offsetPos = uStretchAffectedDist - inPos;
         float posBasedVariation = smoothstep(0., uStretchAffectedDist, offsetPos);
         float stretchIntensity = overscroll * posBasedVariation;
-        outPos = distanceStretched - (offsetPos / (1. + stretchIntensity));
+        return distanceStretched - (offsetPos / (1. + stretchIntensity));
     }
 
-    void computeOverscrollEnd(
-        out float outPos,
+    float computeOverscrollEnd(
         float inPos,
         float overscroll,
         float reverseStretchDist,
@@ -82,21 +80,23 @@ static const SkString stretchShader = SkString(R"(
         float offsetPos = inPos - reverseStretchDist;
         float posBasedVariation = (smoothstep(0., uStretchAffectedDist, offsetPos));
         float stretchIntensity = (-overscroll) * posBasedVariation;
-        outPos = 1 - (distanceStretched - (offsetPos / (1. + stretchIntensity)));
+        return 1 - (distanceStretched - (offsetPos / (1. + stretchIntensity)));
     }
 
-    void computeOverscroll(
-        out float outPos,
+    // Prefer usage of return values over out parameters as it enables
+    // SKSL to properly inline method calls and works around potential GPU
+    // driver issues on Wembly. See b/182566543 for details
+    float computeOverscroll(
         float inPos,
         float overscroll,
         float uStretchAffectedDist,
         float distanceStretched,
         float distanceDiff
     ) {
-        if (overscroll > 0) {
+      float outPos = inPos;
+      if (overscroll > 0) {
             if (inPos <= uStretchAffectedDist) {
-                computeOverscrollStart(
-                  outPos,
+                outPos = computeOverscrollStart(
                   inPos,
                   overscroll,
                   uStretchAffectedDist,
@@ -109,8 +109,7 @@ static const SkString stretchShader = SkString(R"(
         if (overscroll < 0) {
             float stretchAffectedDist = 1. - uStretchAffectedDist;
             if (inPos >= stretchAffectedDist) {
-                computeOverscrollEnd(
-                  outPos,
+                outPos = computeOverscrollEnd(
                   inPos,
                   overscroll,
                   stretchAffectedDist,
@@ -121,6 +120,7 @@ static const SkString stretchShader = SkString(R"(
                 outPos = -distanceDiff + inPos;
             }
         }
+        return outPos;
     }
 
     vec4 main(vec2 coord) {
@@ -135,16 +135,14 @@ static const SkString stretchShader = SkString(R"(
         inV += uScrollY;
         outU = inU;
         outV = inV;
-        computeOverscroll(
-            outU,
+        outU = computeOverscroll(
             inU,
             uOverscrollX,
             uStretchAffectedDistX,
             uDistanceStretchedX,
             uDistDiffX
         );
-        computeOverscroll(
-            outV,
+        outV = computeOverscroll(
             inV,
             uOverscrollY,
             uStretchAffectedDistY,

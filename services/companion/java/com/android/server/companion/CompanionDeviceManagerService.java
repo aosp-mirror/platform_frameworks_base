@@ -637,6 +637,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     return association;
                 }
             }));
+
+            restartBleScan();
         }
 
         @Override

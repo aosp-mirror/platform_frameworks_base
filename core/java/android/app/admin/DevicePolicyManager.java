@@ -1774,19 +1774,6 @@ public class DevicePolicyManager {
             = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
 
     /**
-     * Broadcast action to notify ManagedProvisioning that
-     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has changed.
-     * @hide
-     * @deprecated No longer needed as ManagedProvisioning no longer handles
-     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction changing.
-     */
-    // TODO(b/177221010): Remove when Managed Provisioning no longer depend on it.
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
-    public static final String ACTION_DATA_SHARING_RESTRICTION_CHANGED =
-            "android.app.action.DATA_SHARING_RESTRICTION_CHANGED";
-
-    /**
      * Broadcast action from ManagedProvisioning to notify that the latest change to
      * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has been successfully
      * applied (cross profile intent filters updated). Only usesd for CTS tests.
@@ -2678,8 +2665,8 @@ public class DevicePolicyManager {
      * A boolean extra which determines whether to skip the ownership disclaimer screen during the
      * provisioning flow. The default value is {@code false}.
      *
-     * If the value is {@code true}, it is the responsibility of the provisioning initiator to
-     * show the relevant disclaimer.
+     * If the value is {@code true}, the provisioning initiator must display a device ownership
+     * disclaimer screen similar to that provided in AOSP.
      *
      * <p>This extra is only respected when provided alongside the {@link
      * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.

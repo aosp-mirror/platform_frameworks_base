@@ -417,7 +417,7 @@ public class Vcn extends Handler {
 
         /** Callback by a VcnGatewayConnection to indicate that an error occurred. */
         void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage);
@@ -445,12 +445,12 @@ public class Vcn extends Handler {
 
         @Override
         public void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage) {
             mVcnCallback.onGatewayConnectionError(
-                    networkCapabilities, errorCode, exceptionClass, exceptionMessage);
+                    gatewayConnectionName, errorCode, exceptionClass, exceptionMessage);
         }
     }
 

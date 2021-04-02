@@ -313,15 +313,15 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
-    field public static final int hotwordDetectionService = 16844326; // 0x1010626
+    field public static final int hotwordDetectionService;
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
-    field public static final int playHomeTransitionSound = 16844358; // 0x1010646
+    field public static final int playHomeTransitionSound;
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
     field public static final int sdkVersion = 16844304; // 0x1010610
     field public static final int supportsAmbientMode = 16844173; // 0x101058d
-    field public static final int throttleDurationMillis = 16844360; // 0x1010648
+    field public static final int throttleDurationMillis;
     field public static final int userRestriction = 16844164; // 0x1010584
   }
 
@@ -350,8 +350,8 @@ package android {
   }
 
   public static final class R.string {
-    field public static final int config_customMediaKeyDispatcher = 17039404; // 0x104002c
-    field public static final int config_customMediaSessionPolicyProvider = 17039405; // 0x104002d
+    field public static final int config_customMediaKeyDispatcher;
+    field public static final int config_customMediaSessionPolicyProvider;
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultBrowser = 17039394; // 0x1040022
     field public static final int config_defaultCallRedirection = 17039397; // 0x1040025
@@ -364,15 +364,15 @@ package android {
     field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
-    field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
-    field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
-    field public static final int config_systemContacts = 17039403; // 0x104002b
+    field public static final int config_systemAutomotiveCluster;
+    field public static final int config_systemAutomotiveProjection;
+    field public static final int config_systemContacts;
     field public static final int config_systemGallery = 17039399; // 0x1040027
-    field public static final int config_systemShell = 17039402; // 0x104002a
-    field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
-    field public static final int config_systemTelevisionNotificationHandler = 17039409; // 0x1040031
-    field public static final int config_systemWellbeing = 17039408; // 0x1040030
-    field public static final int config_systemWifiCoexManager = 17039407; // 0x104002f
+    field public static final int config_systemShell;
+    field public static final int config_systemSpeechRecognizer;
+    field public static final int config_systemTelevisionNotificationHandler;
+    field public static final int config_systemWellbeing;
+    field public static final int config_systemWifiCoexManager;
   }
 
   public static final class R.style {
@@ -7016,8 +7016,8 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_INTERLEAVINGS = 30; // 0x1e
     field public static final int FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS = 31; // 0x1f
     field public static final int FRONTEND_STATUS_TYPE_IS_LINEAR = 35; // 0x23
-    field public static final int FRONTEND_STATUS_TYPE_IS_MISO = 34; // 0x22
-    field public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES = 36; // 0x24
+    field public static final int FRONTEND_STATUS_TYPE_IS_MISO_ENABLED = 34; // 0x22
+    field public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED = 36; // 0x24
     field public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR = 16; // 0x10
     field public static final int FRONTEND_STATUS_TYPE_LNA = 15; // 0xf
     field public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE = 11; // 0xb
@@ -8766,6 +8766,8 @@ package android.permission {
 
   public final class PermissionControllerManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void applyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @Nullable public String getGroupOfPlatformPermission(@NonNull String);
+    method @NonNull public java.util.Set<java.lang.String> getPlatformPermissionsForGroup(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void getRuntimePermissionBackup(@NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<byte[]>);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void stageAndApplyRuntimePermissionsBackup(@NonNull byte[], @NonNull android.os.UserHandle);
@@ -8787,7 +8789,9 @@ package android.permission {
     method @NonNull public final android.os.IBinder onBind(android.content.Intent);
     method @BinderThread public abstract void onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int, @NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGetAppPermissions(@NonNull String, @NonNull java.util.function.Consumer<java.util.List<android.permission.RuntimePermissionPresentationInfo>>);
+    method @BinderThread public void onGetGroupOfPlatformPermission(@NonNull String, @NonNull java.util.function.Consumer<java.lang.String>);
     method @BinderThread public abstract void onGetPermissionUsages(boolean, long, @NonNull java.util.function.Consumer<java.util.List<android.permission.RuntimePermissionUsageInfo>>);
+    method @BinderThread public void onGetPlatformPermissionsForGroup(@NonNull String, @NonNull java.util.function.Consumer<java.util.List<java.lang.String>>);
     method @BinderThread public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream, @NonNull Runnable);
     method @BinderThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable);
     method @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String);
@@ -11409,7 +11413,6 @@ package android.telephony {
     method @Deprecated public int getDataConnectionApnTypeBitMask();
     method @Deprecated public int getDataConnectionFailCause();
     method @Deprecated public int getDataConnectionState();
-    method public int getId();
   }
 
   public final class PreciseDisconnectCause {
@@ -11852,7 +11855,7 @@ package android.telephony {
     method @Deprecated public boolean getDataEnabled();
     method @Deprecated public boolean getDataEnabled(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.ComponentName getDefaultRespondViaMessageApplication();
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();

@@ -166,14 +166,12 @@ public final class PreciseDataConnectionState implements Parcelable {
     /**
      * @return The unique id of the data connection
      *
-     * Note this is the id assigned in {@link DataCallResponse}.
+     * Note this is the id assigned by the data service.
      * The id remains the same for data connection handover between
      * {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN} and
      * {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN}
      *
-     * @hide
      */
-    @SystemApi
     public int getId() {
         return mId;
     }

@@ -320,10 +320,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"শারীরিক অ্যাক্টিভিটি অ্যাক্সেস করা"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ক্যামেরা"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ছবি তোলা এবং ভিডিও রেকর্ড"</string>
-    <!-- no translation found for permgrouplab_nearby_devices (14428105203684587) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_nearby_devices (1146639974734121820) -->
-    <skip />
+    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"কাছাকাছি ব্লুটুথ ডিভাইস"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"কাছাকাছি ব্লুটুথ ডিভাইস খুঁজে দেখুন এবং তার সাথে কানেক্ট করুন"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"কল লগ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ফোন কল লগ পড়ে এবং দেখে"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ফোন"</string>
@@ -537,14 +535,10 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"ট্যাবলেটের ব্লুটুথ কনফিগারেশন দেখতে, এবং যুক্ত ডিভাইসগুলির সাথে সংযোগ স্থাপন এবং সংযোগের অনুরোধ স্বীকার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"আপনার Android TV ডিভাইসের ব্লুটুথের কনফিগারেশন দেখার এবং পেয়ার করা ডিভাইসের সাথে কানেক্ট করার বা কানেকশন গ্রহণ করার অনুমতি দেয়।"</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"ফোনের ব্লুটুথ কনফিগারেশন দেখতে, এবং যুক্ত ডিভাইসগুলির সাথে সংযোগ স্থাপন এবং সংযোগের অনুরোধ স্বীকার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
-    <!-- no translation found for permlab_bluetooth_scan (5402587142833124594) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_scan (6540723536925289276) -->
-    <skip />
-    <!-- no translation found for permlab_bluetooth_connect (6657463246355003528) -->
-    <skip />
-    <!-- no translation found for permdesc_bluetooth_connect (4546016548795544617) -->
-    <skip />
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"কাছাকাছি ব্লুটুথ ডিভাইস খুঁজে দেখুন এবং তার সাথে পেয়ার করুন"</string>
+    <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"অ্যাপটিকে কাছাকাছি ব্লুটুথ ডিভাইস খুঁজে দেখতে এবং তার সাথে পেয়ার করার অনুমতি দেয়"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"পেয়ার করা ব্লুটুথ ডিভাইসের সাথে কানেক্ট করুন"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"অ্যাপটিকে পেয়ার করা ব্লুটুথ ডিভাইসের সাথে কানেক্ট করতে অনুমতি দেয়"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"পছন্দের NFC পেমেন্ট পরিষেবার তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"অ্যাপের মাধ্যমে পছন্দসই এনএফসি পেমেন্ট পরিষেবার তথ্য, যেমন রেজিস্ট্রার করার সহায়তা এবং রুট ডেস্টিনেশন সম্পর্কিত তথ্য অ্যাক্সেস করার অনুমতি দেয়।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়ার ফিল্ড কমিউনিকেশন নিয়ন্ত্রণ করে"</string>
@@ -579,7 +573,8 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"পিন, প্যাটার্ন অথবা পাসওয়ার্ড সেট করা নেই"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"যাচাইকরণে সমস্যা হয়েছে"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্রিন লক ব্যবহার করুন"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"চালিয়ে যেতে আপনার ডিভাইসের ক্রেডেনশিয়াল ব্যবহার করুন"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
@@ -670,7 +665,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> ফেস"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"মুখের সাহায্যে আনলক ব্যবহার করুন"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"মুখ অথবা স্ক্রিন লক ব্যবহার করুন"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"চালিয়ে যেতে মুখের সাহায্যে আনলক ব্যবহার করুন"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"চালিয়ে যেতে আপনার ফেস বা স্ক্রিন লক ব্যবহার করুন"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -2286,8 +2282,7 @@
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
     <skip />
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"আপনার স্ক্রিনের অংশ এখন আপনি বড় করে দেখতে পারবেন"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"সেটিংস থেকে চালু করুন"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"বাতিল করুন"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"চালিয়ে যেতে, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; আপনার ডিভাইসের মাইক্রোফোন অ্যাক্সেস করতে চায়।"</string>

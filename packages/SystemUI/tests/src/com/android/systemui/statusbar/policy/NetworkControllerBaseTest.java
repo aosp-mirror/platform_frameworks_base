@@ -77,6 +77,8 @@ import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -123,6 +125,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected DeviceProvisionedListener mUserCallback;
     protected Instrumentation mInstrumentation;
     protected DemoModeController mDemoModeController;
+    protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     protected int mSubId;
 
@@ -222,6 +225,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mMockSm,
                 mConfig,
                 TestableLooper.get(this).getLooper(),
+                mFakeExecutor,
                 mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class),
@@ -291,7 +295,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         NetworkControllerImpl networkControllerNoMobile =
                 new NetworkControllerImpl(mContext, mMockCm, mMockTm, mTelephonyListenerManager,
                         mMockWm, mMockNsm, mMockSm,
-                        mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
+                        mConfig, TestableLooper.get(this).getLooper(), mFakeExecutor,
+                        mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
                         mock(DeviceProvisionedController.class), mMockBd, mDemoModeController);

@@ -573,7 +573,8 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN, 패턴, 비밀번호가 설정되지 않음"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"계속하려면 기기의 사용자 인증 정보를 입력하세요"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
@@ -620,14 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"얼굴인식 잠금해제"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"얼굴 재등록 필요"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"인식률을 개선하려면 얼굴을 다시 등록하세요."</string>
-    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
-    <skip />
-    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="550617822603450009">"얼굴인식 잠금해제 설정"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"휴대전화의 화면을 응시하여 잠금 해제할 수 있습니다."</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"다른 잠금 해제 방법 설정"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"지문을 추가하려면 탭하세요."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"정확한 얼굴 데이터를 캡처하지 못했습니다. 다시 시도하세요."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"너무 밝습니다. 조명 밝기를 조금 낮춰보세요."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"너무 어둡습니다. 조명을 밝게 해 보세요."</string>
@@ -664,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"얼굴 <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"얼굴인식 잠금해제 사용"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"얼굴 또는 화면 잠금 사용"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"얼굴인식 잠금해제를 사용하여 계속하세요"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"계속하려면 얼굴 또는 화면 잠금을 사용하세요"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1031,12 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"복사 완료"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> 앱에서 복사하여 붙여넣음"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> 앱이 클립보드에서 복사하여 붙여넣음"</string>
-    <!-- no translation found for pasted_text (4298871641549173733) -->
-    <skip />
-    <!-- no translation found for pasted_image (4729097394781491022) -->
-    <skip />
-    <!-- no translation found for pasted_content (646276353060777131) -->
-    <skip />
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>에서 복사한 텍스트를 붙여넣음"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>에서 복사한 이미지를 붙여넣음"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>에서 복사한 콘텐츠를 붙여넣음"</string>
     <string name="more_item_label" msgid="7419249600215749115">"더보기"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2141,31 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"직장"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"개인 뷰"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"직장 뷰"</string>
-    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
-    <skip />
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"IT 관리자에 의해 차단됨"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"이 콘텐츠는 직장 앱으로 공유할 수 없습니다."</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"이 콘텐츠는 직장 앱으로 열 수 없습니다."</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"이 콘텐츠는 개인 앱으로 공유할 수 없습니다."</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"이 콘텐츠는 개인 앱으로 열 수 없습니다."</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
-    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"직장 앱 없음"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"개인 앱 없음"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"개인 프로필의 <xliff:g id="APP">%s</xliff:g>에서 여시겠습니까?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"직장 프로필의 <xliff:g id="APP">%s</xliff:g>에서 여시겠습니까?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"개인 브라우저 사용"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"직장 브라우저 사용"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 네트워크 잠금 해제 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 네트워크 하위 집합 잠금 해제 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 회사 잠금 해제 PIN"</string>
@@ -2278,10 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"새 확대 설정"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"이제 화면 일부를 확대할 수 있습니다."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"설정에서 사용 설정"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"닫기"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"계속하려면 &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;에서 기기 마이크에 액세스해야 합니다."</string>

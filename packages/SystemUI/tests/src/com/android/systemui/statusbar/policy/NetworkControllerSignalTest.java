@@ -63,7 +63,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
                 mTelephonyListenerManager, mMockWm, mMockNsm, mMockSm, mConfig,
-                Looper.getMainLooper(), mCallbackHandler,
+                Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController);
@@ -83,7 +83,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
                 mTelephonyListenerManager, mMockWm, mMockNsm, mMockSm, mConfig,
-                Looper.getMainLooper(), mCallbackHandler,
+                Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController);
@@ -151,7 +151,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
                 mTelephonyListenerManager, mMockWm, mMockNsm, mMockSm, mConfig,
-                Looper.getMainLooper(), mCallbackHandler,
+                Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController);

@@ -540,9 +540,10 @@ public class PipAnimationController {
                     // WindowContainerTransaction in task organizer
                     final Rect destBounds = getDestinationBounds();
                     getSurfaceTransactionHelper().resetScale(tx, leash, destBounds);
-                    if (transitionDirection == TRANSITION_DIRECTION_LEAVE_PIP) {
-                        // Leaving to fullscreen, reset crop to null.
-                        tx.setPosition(leash, destBounds.left, destBounds.top);
+                    if (isOutPipDirection(transitionDirection)) {
+                        // Exit pip, clear scale, position and crop.
+                        tx.setMatrix(leash, 1, 0, 0, 1);
+                        tx.setPosition(leash, 0, 0);
                         tx.setWindowCrop(leash, 0, 0);
                     } else {
                         getSurfaceTransactionHelper().crop(tx, leash, destBounds);

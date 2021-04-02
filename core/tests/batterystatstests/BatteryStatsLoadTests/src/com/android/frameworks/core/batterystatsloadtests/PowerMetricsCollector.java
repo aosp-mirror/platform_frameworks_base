@@ -19,47 +19,43 @@ package com.android.frameworks.core.batterystatsloadtests;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.BatteryConsumer;
 import android.os.BatteryManager;
-import android.os.BatteryStats;
+import android.os.BatteryStatsManager;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.UserManager;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.TimeUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.compatibility.common.util.SystemUtil;
-import com.android.internal.os.BatteryStatsHelper;
-import com.android.internal.os.LoggingPrintStream;
-
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.io.PrintStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class PowerMetricsCollector implements TestRule {
     private final String mTag;
     private final float mBatteryDrainThresholdPct;
     private final int mTimeoutMillis;
 
+    private final Instrumentation mInstrumentation;
     private final Context mContext;
-    private final UserManager mUserManager;
     private final int mUid;
-    private final BatteryStatsHelper mStatsHelper;
-    private final CountDownLatch mSuspendingBatteryInput = new CountDownLatch(1);
+    private final ConditionVariable mSuspendingBatteryInput = new ConditionVariable();
 
     private long mStartTime;
     private volatile float mInitialBatteryLevel;
@@ -68,29 +64,34 @@ public class PowerMetricsCollector implements TestRule {
     private PowerMetrics mInitialPowerMetrics;
     private PowerMetrics mFinalPowerMetrics;
     private List<PowerMetrics.Metric> mPowerMetricsDelta;
-    private Intent mBatteryStatus;
+    private final BatteryStatsManager mBatteryStatsManager;
+    private final BroadcastReceiver mBatteryLevelReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleBatteryStatus(intent);
+        }
+    };
+    private final Bundle mStatus = new Bundle();
+    private final StringWriter mReportStringWriter = new StringWriter();
+    private final IndentingPrintWriter mReportWriter =
+            new IndentingPrintWriter(mReportStringWriter);
 
     @Override
     public Statement apply(Statement base, Description description) {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                BroadcastReceiver batteryBroadcastReceiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        handleBatteryStatus(intent);
-                    }
-                };
-                mBatteryStatus = mContext.registerReceiver(batteryBroadcastReceiver,
-                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 disableCharger();
                 try {
-                    prepareBatteryLevelMonitor();
                     mStartTime = SystemClock.uptimeMillis();
+                    mContext.registerReceiver(mBatteryLevelReceiver,
+                            new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                     base.evaluate();
                     captureFinalPowerStatsData();
+                    mStatus.putString("report", mReportStringWriter.toString());
+                    mInstrumentation.sendStatus(Activity.RESULT_OK, mStatus);
                 } finally {
-                    mContext.unregisterReceiver(batteryBroadcastReceiver);
+                    mContext.unregisterReceiver(mBatteryLevelReceiver);
                     enableCharger();
                 }
             }
@@ -102,35 +103,41 @@ public class PowerMetricsCollector implements TestRule {
         mBatteryDrainThresholdPct = batteryDrainThresholdPct;
         mTimeoutMillis = timeoutMillis;
 
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        mContext = instrumentation.getContext();
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        mContext = mInstrumentation.getContext();
         mUid = Process.myUid();
-        mUserManager = mContext.getSystemService(UserManager.class);
-        // TODO(b/175324611): Use BatteryUsageStats instead
-        mStatsHelper = new BatteryStatsHelper(mContext, false /* collectBatteryBroadcast */);
-        mStatsHelper.create((Bundle) null);
+        mBatteryStatsManager = mContext.getSystemService(BatteryStatsManager.class);
     }
 
-    private void disableCharger() throws InterruptedException {
-        SystemUtil.runShellCommand("dumpsys battery suspend_input");
-        final boolean success = mSuspendingBatteryInput.await(10, TimeUnit.SECONDS);
-        assertTrue("Timed out waiting for battery input to be suspended", success);
+    private void disableCharger() {
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (!isCharging(intent)) {
+                    mInitialBatteryLevel = mCurrentBatteryLevel = getBatteryLevel(intent);
+                    mSuspendingBatteryInput.open();
+                }
+            }
+        };
+        final Intent intent = mContext.registerReceiver(
+                receiver,
+                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        if (isCharging(intent)) {
+            mBatteryStatsManager.suspendBatteryInput();
+            final boolean success = mSuspendingBatteryInput.block(10000);
+            assertTrue("Timed out waiting for battery input to be suspended", success);
+        }
+
+        mContext.unregisterReceiver(receiver);
     }
 
     private void enableCharger() {
-        SystemUtil.runShellCommand("dumpsys battery reset");
+        mBatteryStatsManager.resetBattery(/* forceUpdate */false);
     }
 
     private PowerMetrics readBatteryStatsData() {
-        mStatsHelper.clearStats();
-        mStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED,
-                mUserManager.getUserProfiles());
-        return new PowerMetrics(mStatsHelper, mUid);
-    }
-
-    protected void prepareBatteryLevelMonitor() {
-        handleBatteryStatus(mBatteryStatus);
-        mInitialBatteryLevel = mCurrentBatteryLevel;
+        return new PowerMetrics(mBatteryStatsManager.getBatteryUsageStats(), mUid);
     }
 
     protected void handleBatteryStatus(Intent intent) {
@@ -138,34 +145,33 @@ public class PowerMetricsCollector implements TestRule {
             return;
         }
 
-        final boolean isCharging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) != 0;
-
-        if (mSuspendingBatteryInput.getCount() > 0) {
-            if (!isCharging) {
-                mSuspendingBatteryInput.countDown();
-            }
-            return;
-        }
-
-        if (isCharging) {
+        if (isCharging(intent)) {
             fail("Device must remain disconnected from the power source "
                     + "for the duration of the test");
         }
 
-        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-        mCurrentBatteryLevel = level * 100 / (float) scale;
+        mCurrentBatteryLevel = getBatteryLevel(intent);
         Log.i(mTag, "Battery level = " + mCurrentBatteryLevel);
 
         // We delay tracking until the battery level drops.  If the resolution of
         // battery level is 1%, and the initially reported level is 73, we don't know whether
         // it's 73.1 or 73.7. Once it drops to 72, we can be confident that the real battery
-        // level it is very close to 72.0 and can start tracking.
+        // level is very close to 72.0 and can start tracking.
         if (mInitialPowerMetrics == null && mCurrentBatteryLevel < mInitialBatteryLevel) {
             mInitialBatteryLevel = mCurrentBatteryLevel;
             mInitialPowerMetrics = readBatteryStatsData();
         }
+    }
+
+    private boolean isCharging(Intent intent) {
+        return intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) != 0;
+    }
+
+    private float getBatteryLevel(Intent intent) {
+        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        return level * 100 / (float) scale;
     }
 
     private void captureFinalPowerStatsData() {
@@ -181,7 +187,7 @@ public class PowerMetricsCollector implements TestRule {
         for (PowerMetrics.Metric initialMetric : initialPowerMetrics) {
             PowerMetrics.Metric finalMetric = null;
             for (PowerMetrics.Metric metric : finalPowerMetrics) {
-                if (metric.title.equals(initialMetric.title)) {
+                if (metric.metricName.equals(initialMetric.metricName)) {
                     finalMetric = metric;
                     break;
                 }
@@ -189,9 +195,9 @@ public class PowerMetricsCollector implements TestRule {
 
             if (finalMetric != null) {
                 PowerMetrics.Metric delta = new PowerMetrics.Metric();
-                delta.metricType = initialMetric.metricType;
+                delta.metricName = initialMetric.metricName;
                 delta.metricKind = initialMetric.metricKind;
-                delta.title = initialMetric.title;
+                delta.statusKeyPrefix = initialMetric.statusKeyPrefix;
                 delta.total = finalMetric.total - initialMetric.total;
                 delta.value = finalMetric.value - initialMetric.value;
                 mPowerMetricsDelta.add(delta);
@@ -230,73 +236,80 @@ public class PowerMetricsCollector implements TestRule {
         return mIterations;
     }
 
-    public void dumpMetrics() {
-        dumpMetrics(new LoggingPrintStream() {
-            @Override
-            protected void log(String line) {
-                Log.i(mTag, line);
-            }
-        });
+    public void report(String line) {
+        mReportWriter.println(line);
     }
 
-    public void dumpMetrics(PrintStream out) {
+    public void reportMetrics() {
         List<PowerMetrics.Metric> initialPowerMetrics = mInitialPowerMetrics.getMetrics();
         List<PowerMetrics.Metric> finalPowerMetrics = mFinalPowerMetrics.getMetrics();
 
-        out.println("== Power metrics at test start");
-        dumpPowerStatsData(out, initialPowerMetrics);
+        mReportWriter.println("Power metrics at test start");
+        mReportWriter.increaseIndent();
+        reportPowerStatsData(initialPowerMetrics);
+        mReportWriter.decreaseIndent();
 
-        out.println("== Power metrics at test end");
-        dumpPowerStatsData(out, finalPowerMetrics);
+        mReportWriter.println("Power metrics at test end");
+        mReportWriter.increaseIndent();
+        reportPowerStatsData(finalPowerMetrics);
+        mReportWriter.decreaseIndent();
 
-        out.println("== Power metrics delta");
-        dumpPowerStatsData(out, mPowerMetricsDelta);
+        mReportWriter.println("Power metrics delta");
+        mReportWriter.increaseIndent();
+        reportPowerStatsData(mPowerMetricsDelta);
+        mReportWriter.decreaseIndent();
     }
 
-    protected void dumpPowerStatsData(PrintStream out, List<PowerMetrics.Metric> metrics) {
+    protected void reportPowerStatsData(List<PowerMetrics.Metric> metrics) {
         Locale locale = Locale.getDefault();
         for (PowerMetrics.Metric metric : metrics) {
             double proportion = metric.total != 0 ? metric.value * 100 / metric.total : 0;
             switch (metric.metricKind) {
                 case POWER:
-                    out.println(
-                            String.format(locale, "    %-30s %7.1f mAh %4.1f%%", metric.title,
+                    mReportWriter.println(
+                            String.format(locale, "%-40s %7.1f mAh %4.1f%%", metric.metricName,
                                     metric.value, proportion));
                     break;
                 case DURATION:
-                    out.println(
-                            String.format(locale, "    %-30s %,7d ms  %4.1f%%", metric.title,
+                    mReportWriter.println(
+                            String.format(locale, "%-40s %,7d ms  %4.1f%%", metric.metricName,
                                     (long) metric.value, proportion));
                     break;
             }
         }
     }
 
-    public void dumpMetricAsPercentageOfDrainedPower(String metricType) {
-        double minDrainedPower =
-                mFinalPowerMetrics.getMinDrainedPower() - mInitialPowerMetrics.getMinDrainedPower();
-        double maxDrainedPower =
-                mFinalPowerMetrics.getMaxDrainedPower() - mInitialPowerMetrics.getMaxDrainedPower();
+    public void reportMetricAsPercentageOfDrainedPower(
+            @BatteryConsumer.PowerComponent int component) {
+        double drainedPower =
+                mFinalPowerMetrics.getDrainedPower() - mInitialPowerMetrics.getDrainedPower();
 
-        PowerMetrics.Metric metric = getMetric(metricType);
+        PowerMetrics.Metric metric = getPowerMetric(component);
         double metricDelta = metric.value;
 
-        if (maxDrainedPower - minDrainedPower < 0.1f) {
-            Log.i(mTag, String.format(Locale.getDefault(),
-                    "%s power consumed by the test: %.1f of %.1f mAh (%.1f%%)",
-                    metric.title, metricDelta, maxDrainedPower,
-                    metricDelta / maxDrainedPower * 100));
-        } else {
-            Log.i(mTag, String.format(Locale.getDefault(),
-                    "%s power consumed by the test: %.1f of %.1f - %.1f mAh (%.1f%% - %.1f%%)",
-                    metric.title, metricDelta, minDrainedPower, maxDrainedPower,
-                    metricDelta / minDrainedPower * 100, metricDelta / maxDrainedPower * 100));
-        }
+        final double percent = metricDelta / drainedPower * 100;
+        mStatus.putDouble(metric.statusKeyPrefix, metricDelta);
+        mStatus.putDouble(metric.statusKeyPrefix + "_pct", percent);
+
+        mReportWriter.println(String.format(Locale.getDefault(),
+                "%s power consumed by the test: %.1f of %.1f mAh (%.1f%%)",
+                metric.metricName, metricDelta, drainedPower, percent));
     }
 
-    public PowerMetrics.Metric getMetric(String metricType) {
+    public PowerMetrics.Metric getPowerMetric(@BatteryConsumer.PowerComponent int component) {
+        final String name = PowerMetrics.getPowerMetricName(component);
         for (PowerMetrics.Metric metric : mPowerMetricsDelta) {
-            if (metric.metricType.equals(metricType)) {
+            if (metric.metricName.equals(name)) {
+                return metric;
+            }
+        }
+        return null;
+    }
+
+    public PowerMetrics.Metric getTimeMetric(@BatteryConsumer.TimeComponent int component) {
+        final String name = PowerMetrics.getTimeMetricName(component);
+        for (PowerMetrics.Metric metric : mPowerMetricsDelta) {
+            if (metric.metricName.equals(name)) {
                 return metric;
             }
         }

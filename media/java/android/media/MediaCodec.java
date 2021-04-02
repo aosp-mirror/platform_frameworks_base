@@ -1684,7 +1684,6 @@ final public class MediaCodec {
     private MediaCodecInfo mCodecInfo;
     private final Object mCodecInfoLock = new Object();
     private MediaCrypto mCrypto;
-    private String mPlaybackId;
 
     private static final int EVENT_CALLBACK = 1;
     private static final int EVENT_SET_CALLBACK = 2;

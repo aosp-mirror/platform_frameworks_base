@@ -441,7 +441,7 @@ public class PipResizeGestureHandler {
                 mDownPoint.set(x, y);
                 mDownBounds.set(mPipBoundsState.getBounds());
             }
-            if (!currentPipBounds.contains((int) ev.getX(), (int) ev.getY())
+            if (!currentPipBounds.contains((int) x, (int) y)
                     && mPhonePipMenuController.isMenuVisible()) {
                 mPhonePipMenuController.hideMenu();
             }

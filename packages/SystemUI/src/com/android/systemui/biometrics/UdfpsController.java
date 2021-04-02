@@ -45,6 +45,7 @@ import android.view.VelocityTracker;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.HbmTypes.HbmType;
 import com.android.systemui.dagger.SysUISingleton;
@@ -88,6 +89,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final DumpManager mDumpManager;
     @NonNull private final AuthRippleController mAuthRippleController;
+    @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -307,7 +309,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @NonNull StatusBar statusBar,
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
-            @NonNull AuthRippleController authRippleController) {
+            @NonNull AuthRippleController authRippleController,
+            @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
         mInflater = inflater;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
@@ -320,6 +323,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mDumpManager = dumpManager;
         mAuthRippleController = authRippleController;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -486,6 +490,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                         mStatusBarStateController,
                         mStatusBar,
                         mKeyguardViewManager,
+                        mKeyguardUpdateMonitor,
+                        mFgExecutor,
                         mDumpManager
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:

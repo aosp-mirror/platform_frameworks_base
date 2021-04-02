@@ -455,6 +455,12 @@
     <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
     <uses-permission android:name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
 
+    <!-- Permission required for CTS test - SystemMediaRouter2Test -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
+
+    <!-- Permission required for CTS test - CtsRotationResolverServiceDeviceTestCases -->
+    <uses-permission android:name="android.permission.MANAGE_ROTATION_RESOLVER" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

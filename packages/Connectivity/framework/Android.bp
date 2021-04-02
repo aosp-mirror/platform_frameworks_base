@@ -121,7 +121,16 @@ java_sdk_library {
         "//packages/modules/Connectivity/service",
         "//frameworks/base/packages/Connectivity/service",
         "//frameworks/base",
-        "//packages/modules/Connectivity/Tethering/tests/unit",
+
+        // Tests using hidden APIs
+        "//external/sl4a:__subpackages__",
+        "//frameworks/base/tests/net:__subpackages__",
+        "//frameworks/libs/net/common/testutils",
+        "//frameworks/libs/net/common/tests:__subpackages__",
+        "//frameworks/opt/telephony/tests/telephonytests",
+        "//packages/modules/Connectivity/Tethering/tests:__subpackages__",
+        "//packages/modules/Connectivity/tests:__subpackages__",
+        "//packages/modules/NetworkStack/tests:__subpackages__",
     ],
     apex_available: [
         "com.android.tethering",

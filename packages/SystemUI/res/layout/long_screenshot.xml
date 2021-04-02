@@ -42,6 +42,8 @@
         android:padding="6dp"
         android:src="@drawable/ic_screenshot_share"
         android:layout_marginRight="8dp"
+        android:contentDescription="@*android:string/share"
+        android:tooltipText="@*android:string/share"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/preview" />
@@ -115,4 +117,3 @@
     />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

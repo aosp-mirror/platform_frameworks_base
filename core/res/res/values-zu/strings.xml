@@ -573,7 +573,8 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ayikho iphinikhodi, iphethini, noma iphasiwedi esethiwe"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Iphutha lokufakazela ubuqiniso"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Sebenzisa isikhiya sesikrini"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="8638638125397857315">"Faka izifakazelo zedivayisi yakho ukuze uqhubeke"</string>
+    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
+    <skip />
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Ayikwazanga ukucubungula izigxivizo zeminwe. Sicela uzame futhi."</string>
@@ -620,14 +621,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"I-Face unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Phinda ubhalise ubuso bakho"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Ukuze uthuthukise ukubonwa, sicela uphinde ubhalise ubuso bakho"</string>
-    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
-    <skip />
-    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Setha i-face unlock"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Vula ifoni yakho ngokuyibheka"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Setha izindlela eziningi zokuvula"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Thepha ukuze ungeze izigxivizo zomunwe"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Ayikwazanga ukuthwebula idatha enembile yobuso. Zama futhi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Kukhanya kakhulu. Zama ukukhanya okuthambile."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Kumnyama kakhulu Zama ukukhanyisa okukhanyayo."</string>
@@ -664,7 +661,8 @@
     <string name="face_name_template" msgid="3877037340223318119">"Ubuso be-<xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Sebenzisa i-face unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Sebenzisa i-face lock noma ukukhiya isikrini"</string>
-    <string name="face_dialog_default_subtitle" msgid="4979205739418564856">"Sebenzisa i-face unlock ukuze uqhubeke"</string>
+    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
+    <skip />
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Sebenzisa ubuso bakho noma ukukhiya isikrini ukuze uqhubeke"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1031,12 +1029,9 @@
     <string name="copied" msgid="4675902854553014676">"Kukopishiwe"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"I-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> inamathiselwe kusuka ku-<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"I-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> inamathiselwe kusuka ebhodini yokunamathisela"</string>
-    <!-- no translation found for pasted_text (4298871641549173733) -->
-    <skip />
-    <!-- no translation found for pasted_image (4729097394781491022) -->
-    <skip />
-    <!-- no translation found for pasted_content (646276353060777131) -->
-    <skip />
+    <string name="pasted_text" msgid="4298871641549173733">"U-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> unamathisele umbhalo owukopishile"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"U-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> unamathisele isithombe osikopishile"</string>
+    <string name="pasted_content" msgid="646276353060777131">"U-<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> unamathisele okuqukethwe okukopishile"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Okuningi"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Imenyu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2141,31 +2136,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Umsebenzi"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Ukubuka komuntu siqu"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Ukubuka komsebenzi"</string>
-    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
-    <skip />
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Kuvinjelwe umlawuli wakho we-IT"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Lokhu okuqukethwe akukwazi ukwabiwa nama-app womsebenzi"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Lokhu okuqukethwe akukwazi ukukopishwa ngama-app womsebenzi"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Lokhu okuqukethwe akukwazi ukwabiwa nama-app womuntu siqu"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Lokhu okuqukethwe akukwazi ukukopishwa ngama-app womuntu siqu"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Iphrofayela yomsebenzi iphunyuziwe"</string>
-    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Thepha ukuze uvule"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Awekho ama-app womsebenzi"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Awekho ama-app womuntu siqu"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Vula ku-<xliff:g id="APP">%s</xliff:g> kuphrofayela yomuntu siqu?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Vula ku-<xliff:g id="APP">%s</xliff:g> kuphrofayela yomsebenzi?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Sebenzisa isiphequluli somuntu siqu"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Sebenzisa isiphequluli somsebenzi"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Iphinikhodi yokuvula inethiwekhi ye-SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Iphinikhodi yokuvula yesethi engaphansi yenethiwekhi ye-SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Iphinikhodi yokuvula yenkampani ye-SIM"</string>
@@ -2278,10 +2261,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Amasethingi amasha wokukhuliswa"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Manje ungakhulisa ingxenye yesikrini sakho"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Vula Kumasethingi"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Cashisa"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Ukuze uqhubeke, &lt;b&gt;‎‏‎‎‏‏‎i-<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; idinga ukufinyelela imakrofoni yedivayisi yakho."</string>
