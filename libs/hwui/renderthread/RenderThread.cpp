@@ -153,10 +153,11 @@ JVMAttachHook RenderThread::getOnStartHook() {
 }
 
 RenderThread& RenderThread::getInstance() {
-    // This is a pointer because otherwise __cxa_finalize
-    // will try to delete it like a Good Citizen but that causes us to crash
-    // because we don't want to delete the RenderThread normally.
-    static RenderThread* sInstance = new RenderThread();
+    [[clang::no_destroy]] static sp<RenderThread> sInstance = []() {
+        sp<RenderThread> thread = sp<RenderThread>::make();
+        thread->start("RenderThread");
+        return thread;
+    }();
     gHasRenderThreadInstance = true;
     return *sInstance;
 }
@@ -171,7 +172,6 @@ RenderThread::RenderThread()
         , mFunctorManager(WebViewFunctorManager::instance())
         , mGlobalProfileData(mJankDataMutex) {
     Properties::load();
-    start("RenderThread");
 }
 
 RenderThread::~RenderThread() {
