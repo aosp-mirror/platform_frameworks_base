@@ -23,26 +23,6 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-java_library {
-    name: "framework-connectivity-protos",
-    sdk_version: "module_current",
-    min_sdk_version: "30",
-    proto: {
-        type: "nano",
-    },
-    srcs: [
-        // TODO: consider moving relevant .proto files directly to the module directory
-        ":framework-javastream-protos",
-    ],
-    apex_available: [
-        "com.android.tethering",
-    ],
-    jarjar_rules: "jarjar-rules-proto.txt",
-    visibility: [
-        "//visibility:private",
-    ],
-}
-
 filegroup {
     name: "framework-connectivity-internal-sources",
     srcs: [
@@ -109,9 +89,6 @@ java_sdk_library {
     libs: [
         "unsupportedappusage",
     ],
-    static_libs: [
-        "framework-connectivity-protos",
-    ],
     jarjar_rules: "jarjar-rules.txt",
     permitted_packages: ["android.net"],
     impl_library_visibility: [
@@ -128,8 +105,9 @@ java_sdk_library {
     ],
 }
 
-cc_defaults {
-    name: "libframework-connectivity-defaults",
+cc_library_shared {
+    name: "libframework-connectivity-jni",
+    min_sdk_version: "30",
     cflags: [
         "-Wall",
         "-Werror",
@@ -140,38 +118,19 @@ cc_defaults {
         "-Wno-unguarded-availability",
         "-Wthread-safety",
     ],
+    srcs: [
+        "jni/android_net_NetworkUtils.cpp",
+        "jni/onload.cpp",
+    ],
     shared_libs: [
+        "libandroid",
         "liblog",
         "libnativehelper",
     ],
     header_libs: [
         "dnsproxyd_protocol_headers",
     ],
-}
-
-cc_library_static {
-    name: "libconnectivityframeworkutils",
-    defaults: ["libframework-connectivity-defaults"],
-    srcs: [
-        "jni/android_net_NetworkUtils.cpp",
-    ],
-    shared_libs: ["libandroid_net"],
-    apex_available: [
-        "//apex_available:platform",
-        "com.android.tethering",
-    ],
-}
-
-cc_library_shared {
-    name: "libframework-connectivity-jni",
-    min_sdk_version: "30",
-    defaults: ["libframework-connectivity-defaults"],
-    srcs: [
-        "jni/android_net_NetworkUtils.cpp",
-        "jni/onload.cpp",
-    ],
-    shared_libs: ["libandroid"],
-    stl: "libc++_static",
+    stl: "none",
     apex_available: [
         "com.android.tethering",
     ],
