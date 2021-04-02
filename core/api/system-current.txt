@@ -5274,7 +5274,7 @@ package android.media {
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getAllRoutes();
     method @Nullable public String getClientPackageName();
     method @Nullable public android.media.MediaRouter2.RoutingController getController(@NonNull String);
-    method @Nullable public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
     method public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
     method public void startScan();
     method public void stopScan();
