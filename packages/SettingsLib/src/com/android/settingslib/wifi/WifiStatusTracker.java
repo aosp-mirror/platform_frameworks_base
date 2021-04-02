@@ -26,7 +26,6 @@ import android.net.NetworkKey;
 import android.net.NetworkRequest;
 import android.net.NetworkScoreManager;
 import android.net.ScoredNetwork;
-import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
@@ -345,14 +344,6 @@ public class WifiStatusTracker {
         String ssid = info.getSSID();
         if (ssid != null && !WifiManager.UNKNOWN_SSID.equals(ssid)) {
             return ssid;
-        }
-        // OK, it's not in the connectionInfo; we have to go hunting for it
-        List<WifiConfiguration> networks = mWifiManager.getConfiguredNetworks();
-        int length = networks.size();
-        for (int i = 0; i < length; i++) {
-            if (networks.get(i).networkId == info.getNetworkId()) {
-                return networks.get(i).SSID;
-            }
         }
         return null;
     }
