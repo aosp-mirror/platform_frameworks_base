@@ -16,10 +16,14 @@
 
 package android.bluetooth.le;
 
+import android.annotation.RequiresPermission;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManager;
+import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
+import android.bluetooth.annotations.RequiresBluetoothScanPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -35,9 +39,6 @@ import java.util.Map;
  * <p>
  * Use {@link BluetoothAdapter#getPeriodicAdvertisingManager()} to get an
  * instance of {@link PeriodicAdvertisingManager}.
- * <p>
- * <b>Note:</b> Most of the methods here require
- * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
  *
  * @hide
  */
@@ -89,6 +90,10 @@ public final class PeriodicAdvertisingManager {
      * @throws IllegalArgumentException if {@code scanResult} is null or {@code skip} is invalid or
      * {@code timeout} is invalid or {@code callback} is null.
      */
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void registerSync(ScanResult scanResult, int skip, int timeout,
             PeriodicAdvertisingCallback callback) {
         registerSync(scanResult, skip, timeout, callback, null);
@@ -113,6 +118,10 @@ public final class PeriodicAdvertisingManager {
      * @throws IllegalArgumentException if {@code scanResult} is null or {@code skip} is invalid or
      * {@code timeout} is invalid or {@code callback} is null.
      */
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void registerSync(ScanResult scanResult, int skip, int timeout,
             PeriodicAdvertisingCallback callback, Handler handler) {
         if (callback == null) {
@@ -170,6 +179,9 @@ public final class PeriodicAdvertisingManager {
      * @throws IllegalArgumentException if {@code callback} is null, or not a properly registered
      * callback.
      */
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void unregisterSync(PeriodicAdvertisingCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback can't be null");

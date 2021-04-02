@@ -17,7 +17,6 @@
 
 package android.bluetooth;
 
-import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -25,11 +24,18 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
 import android.bluetooth.BluetoothDevice.Transport;
 import android.bluetooth.BluetoothProfile.ConnectionPolicy;
+import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
+import android.bluetooth.annotations.RequiresBluetoothAdvertisePermission;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresBluetoothLocationPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
+import android.bluetooth.annotations.RequiresBluetoothScanPermission;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.PeriodicAdvertisingManager;
@@ -98,11 +104,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Bluetooth LE devices with {@link #startLeScan(LeScanCallback callback)}.
  * </p>
  * <p>This class is thread safe.</p>
- * <p class="note"><strong>Note:</strong>
- * Most methods require the {@link android.Manifest.permission#BLUETOOTH}
- * permission and some also require the
- * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
- * </p>
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>
@@ -144,8 +145,8 @@ public final class BluetoothAdapter {
      * <p>Always contains the extra fields {@link #EXTRA_STATE} and {@link
      * #EXTRA_PREVIOUS_STATE} containing the new and old states
      * respectively.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
+    @RequiresLegacyBluetoothPermission
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION) public static final String
             ACTION_STATE_CHANGED = "android.bluetooth.adapter.action.STATE_CHANGED";
 
@@ -278,8 +279,10 @@ public final class BluetoothAdapter {
      * <p>Applications can also listen for {@link #ACTION_SCAN_MODE_CHANGED}
      * for global notification whenever the scan mode changes. For example, an
      * application can be notified when the device has ended discoverability.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothAdvertisePermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION) public static final String
             ACTION_REQUEST_DISCOVERABLE = "android.bluetooth.adapter.action.REQUEST_DISCOVERABLE";
 
@@ -305,8 +308,10 @@ public final class BluetoothAdapter {
      * has rejected the request or an error has occurred.
      * <p>Applications can also listen for {@link #ACTION_STATE_CHANGED}
      * for global notification whenever Bluetooth is turned on or off.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION) public static final String
             ACTION_REQUEST_ENABLE = "android.bluetooth.adapter.action.REQUEST_ENABLE";
 
@@ -325,10 +330,12 @@ public final class BluetoothAdapter {
      * has rejected the request or an error has occurred.
      * <p>Applications can also listen for {@link #ACTION_STATE_CHANGED}
      * for global notification whenever Bluetooth is turned on or off.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @hide
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION) public static final String
             ACTION_REQUEST_DISABLE = "android.bluetooth.adapter.action.REQUEST_DISABLE";
 
@@ -355,8 +362,10 @@ public final class BluetoothAdapter {
      * <p>Always contains the extra fields {@link #EXTRA_SCAN_MODE} and {@link
      * #EXTRA_PREVIOUS_SCAN_MODE} containing the new and old scan modes
      * respectively.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION) public static final String
             ACTION_SCAN_MODE_CHANGED = "android.bluetooth.adapter.action.SCAN_MODE_CHANGED";
 
@@ -508,15 +517,19 @@ public final class BluetoothAdapter {
      * progress, and existing connections will experience limited bandwidth
      * and high latency. Use {@link #cancelDiscovery()} to cancel an ongoing
      * discovery.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION) public static final String
             ACTION_DISCOVERY_STARTED = "android.bluetooth.adapter.action.DISCOVERY_STARTED";
     /**
      * Broadcast Action: The local Bluetooth adapter has finished the device
      * discovery process.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION) public static final String
             ACTION_DISCOVERY_FINISHED = "android.bluetooth.adapter.action.DISCOVERY_FINISHED";
 
@@ -526,8 +539,10 @@ public final class BluetoothAdapter {
      * <p>This name is visible to remote Bluetooth devices.
      * <p>Always contains the extra field {@link #EXTRA_LOCAL_NAME} containing
      * the name.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION) public static final String
             ACTION_LOCAL_NAME_CHANGED = "android.bluetooth.adapter.action.LOCAL_NAME_CHANGED";
     /**
@@ -559,9 +574,10 @@ public final class BluetoothAdapter {
      * {@link #EXTRA_CONNECTION_STATE} or {@link #EXTRA_PREVIOUS_CONNECTION_STATE}
      * can be any of {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION) public static final String
             ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED";
@@ -870,7 +886,7 @@ public final class BluetoothAdapter {
      *
      * @return true if the local adapter is turned on
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
     public boolean isEnabled() {
         return getState() == BluetoothAdapter.STATE_ON;
     }
@@ -921,6 +937,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disableBLE() {
         if (!isBleScanAlwaysAvailable()) {
             return false;
@@ -966,6 +983,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean enableBLE() {
         if (!isBleScanAlwaysAvailable()) {
             return false;
@@ -986,6 +1004,7 @@ public final class BluetoothAdapter {
             new PropertyInvalidatedCache<Void, Integer>(
                 8, BLUETOOTH_GET_STATE_CACHE_PROPERTY) {
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 protected Integer recompute(Void query) {
                     try {
                         return mService.getState();
@@ -1039,7 +1058,7 @@ public final class BluetoothAdapter {
      *
      * @return current state of Bluetooth adapter
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
     @AdapterState
     public int getState() {
         int state = getStateInternal();
@@ -1075,7 +1094,7 @@ public final class BluetoothAdapter {
      * @return current state of Bluetooth adapter
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
     @AdapterState
     @UnsupportedAppUsage(publicAlternatives = "Use {@link #getState()} instead to determine "
             + "whether you can use BLE & BT classic.")
@@ -1122,7 +1141,9 @@ public final class BluetoothAdapter {
      *
      * @return true to indicate adapter startup has begun, or false on immediate error
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean enable() {
         if (isEnabled()) {
             if (DBG) {
@@ -1159,7 +1180,9 @@ public final class BluetoothAdapter {
      *
      * @return true to indicate adapter shutdown has begun, or false on immediate error
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disable() {
         try {
             return mManagerService.disable(ActivityThread.currentPackageName(), true);
@@ -1172,13 +1195,13 @@ public final class BluetoothAdapter {
     /**
      * Turn off the local Bluetooth adapter and don't persist the setting.
      *
-     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission
-     *
      * @return true to indicate adapter shutdown has begun, or false on immediate error
      * @hide
      */
     @UnsupportedAppUsage(trackingBug = 171933273)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disable(boolean persist) {
 
         try {
@@ -1195,7 +1218,12 @@ public final class BluetoothAdapter {
      *
      * @return Bluetooth hardware address as string
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.LOCAL_MAC_ADDRESS,
+    })
     public String getAddress() {
         try {
             return mManagerService.getAddress();
@@ -1208,10 +1236,12 @@ public final class BluetoothAdapter {
     /**
      * Get the friendly Bluetooth name of the local Bluetooth adapter.
      * <p>This name is visible to remote Bluetooth devices.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return the Bluetooth name, or null on error
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public String getName() {
         try {
             return mManagerService.getName();
@@ -1228,7 +1258,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean factoryReset() {
         try {
             mServiceLock.readLock().lock();
@@ -1253,7 +1283,9 @@ public final class BluetoothAdapter {
      * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @Nullable ParcelUuid[] getUuids() {
         if (getState() != STATE_ON) {
             return null;
@@ -1285,7 +1317,9 @@ public final class BluetoothAdapter {
      * @param name a valid Bluetooth name
      * @return true if the name was set, false otherwise
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean setName(String name) {
         if (getState() != STATE_ON) {
             return false;
@@ -1311,7 +1345,9 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothClass getBluetoothClass() {
         if (getState() != STATE_ON) {
             return null;
@@ -1340,7 +1376,7 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setBluetoothClass(BluetoothClass bluetoothClass) {
         if (getState() != STATE_ON) {
             return false;
@@ -1367,7 +1403,9 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @IoCapability
     public int getIoCapability() {
         if (getState() != STATE_ON) return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
@@ -1395,7 +1433,7 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setIoCapability(@IoCapability int capability) {
         if (getState() != STATE_ON) return false;
         try {
@@ -1418,7 +1456,9 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @IoCapability
     public int getLeIoCapability() {
         if (getState() != STATE_ON) return BluetoothAdapter.IO_CAPABILITY_UNKNOWN;
@@ -1446,7 +1486,7 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setLeIoCapability(@IoCapability int capability) {
         if (getState() != STATE_ON) return false;
         try {
@@ -1475,7 +1515,9 @@ public final class BluetoothAdapter {
      *
      * @return scan mode
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     @ScanMode
     public int getScanMode() {
         if (getState() != STATE_ON) {
@@ -1522,7 +1564,9 @@ public final class BluetoothAdapter {
      */
     @UnsupportedAppUsage(publicAlternatives = "Use {@link #ACTION_REQUEST_DISCOVERABLE}, which "
             + "shows UI that confirms the user wants to go into discoverable mode.")
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public boolean setScanMode(@ScanMode int mode, long durationMillis) {
         if (getState() != STATE_ON) {
             return false;
@@ -1571,7 +1615,9 @@ public final class BluetoothAdapter {
      * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public boolean setScanMode(@ScanMode int mode) {
         if (getState() != STATE_ON) {
             return false;
@@ -1591,6 +1637,7 @@ public final class BluetoothAdapter {
 
     /** @hide */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public int getDiscoverableTimeout() {
         if (getState() != STATE_ON) {
             return -1;
@@ -1610,6 +1657,7 @@ public final class BluetoothAdapter {
 
     /** @hide */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void setDiscoverableTimeout(int timeout) {
         if (getState() != STATE_ON) {
             return;
@@ -1635,7 +1683,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public long getDiscoveryEndMillis() {
         try {
             mServiceLock.readLock().lock();
@@ -1703,7 +1751,10 @@ public final class BluetoothAdapter {
      *
      * @return true on success, false on error
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public boolean startDiscovery() {
         if (getState() != STATE_ON) {
             return false;
@@ -1737,7 +1788,9 @@ public final class BluetoothAdapter {
      *
      * @return true on success, false on error
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public boolean cancelDiscovery() {
         if (getState() != STATE_ON) {
             return false;
@@ -1773,7 +1826,9 @@ public final class BluetoothAdapter {
      *
      * @return true if discovering
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public boolean isDiscovering() {
         if (getState() != STATE_ON) {
             return false;
@@ -1805,7 +1860,11 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+    })
     public boolean removeActiveDevice(@ActiveDeviceUse int profiles) {
         if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
                 && profiles != ACTIVE_DEVICE_ALL) {
@@ -1845,7 +1904,11 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+    })
     public boolean setActiveDevice(@NonNull BluetoothDevice device,
             @ActiveDeviceUse int profiles) {
         if (device == null) {
@@ -1889,7 +1952,11 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+    })
     public boolean connectAllEnabledProfiles(@NonNull BluetoothDevice device) {
         try {
             mServiceLock.readLock().lock();
@@ -1917,7 +1984,10 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean disconnectAllEnabledProfiles(@NonNull BluetoothDevice device) {
         try {
             mServiceLock.readLock().lock();
@@ -1938,6 +2008,7 @@ public final class BluetoothAdapter {
      *
      * @return true if Multiple Advertisement feature is supported
      */
+    @RequiresLegacyBluetoothPermission
     public boolean isMultipleAdvertisementSupported() {
         if (getState() != STATE_ON) {
             return false;
@@ -1981,6 +2052,7 @@ public final class BluetoothAdapter {
             new PropertyInvalidatedCache<Void, Boolean>(
                 8, BLUETOOTH_FILTERING_CACHE_PROPERTY) {
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 protected Boolean recompute(Void query) {
                     try {
                         mServiceLock.readLock().lock();
@@ -2012,6 +2084,7 @@ public final class BluetoothAdapter {
      *
      * @return true if chipset supports on-chip filtering
      */
+    @RequiresLegacyBluetoothPermission
     public boolean isOffloadedFilteringSupported() {
         if (!getLeAccess()) {
             return false;
@@ -2024,6 +2097,7 @@ public final class BluetoothAdapter {
      *
      * @return true if chipset supports on-chip scan batching
      */
+    @RequiresLegacyBluetoothPermission
     public boolean isOffloadedScanBatchingSupported() {
         if (!getLeAccess()) {
             return false;
@@ -2046,6 +2120,7 @@ public final class BluetoothAdapter {
      *
      * @return true if chipset supports LE 2M PHY feature
      */
+    @RequiresLegacyBluetoothPermission
     public boolean isLe2MPhySupported() {
         if (!getLeAccess()) {
             return false;
@@ -2068,6 +2143,7 @@ public final class BluetoothAdapter {
      *
      * @return true if chipset supports LE Coded PHY feature
      */
+    @RequiresLegacyBluetoothPermission
     public boolean isLeCodedPhySupported() {
         if (!getLeAccess()) {
             return false;
@@ -2090,6 +2166,7 @@ public final class BluetoothAdapter {
      *
      * @return true if chipset supports LE Extended Advertising feature
      */
+    @RequiresLegacyBluetoothPermission
     public boolean isLeExtendedAdvertisingSupported() {
         if (!getLeAccess()) {
             return false;
@@ -2112,6 +2189,7 @@ public final class BluetoothAdapter {
      *
      * @return true if chipset supports LE Periodic Advertising feature
      */
+    @RequiresLegacyBluetoothPermission
     public boolean isLePeriodicAdvertisingSupported() {
         if (!getLeAccess()) {
             return false;
@@ -2135,6 +2213,7 @@ public final class BluetoothAdapter {
      *
      * @return the maximum LE advertising data length.
      */
+    @RequiresLegacyBluetoothPermission
     public int getLeMaximumAdvertisingDataLength() {
         if (!getLeAccess()) {
             return 0;
@@ -2172,7 +2251,9 @@ public final class BluetoothAdapter {
      * @return the maximum number of connected audio devices
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getMaxConnectedAudioDevices() {
         try {
             mServiceLock.readLock().lock();
@@ -2193,6 +2274,7 @@ public final class BluetoothAdapter {
      * @return true if there are hw entries available for matching beacons
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean isHardwareTrackingFiltersAvailable() {
         if (!getLeAccess()) {
             return false;
@@ -2223,6 +2305,7 @@ public final class BluetoothAdapter {
      * instead.
      */
     @Deprecated
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public BluetoothActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
         SynchronousResultReceiver receiver = new SynchronousResultReceiver();
         requestControllerActivityEnergyInfo(receiver);
@@ -2248,6 +2331,7 @@ public final class BluetoothAdapter {
      * @param result The callback to which to send the activity info.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public void requestControllerActivityEnergyInfo(ResultReceiver result) {
         try {
             mServiceLock.readLock().lock();
@@ -2275,7 +2359,9 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getMostRecentlyConnectedDevices() {
         if (getState() != STATE_ON) {
             return new ArrayList<>();
@@ -2303,7 +2389,9 @@ public final class BluetoothAdapter {
      *
      * @return unmodifiable set of {@link BluetoothDevice}, or null on error
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public Set<BluetoothDevice> getBondedDevices() {
         if (getState() != STATE_ON) {
             return toDeviceSet(new BluetoothDevice[0]);
@@ -2368,6 +2456,7 @@ public final class BluetoothAdapter {
                  * This method must not be called when mService is null.
                  */
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 protected Integer recompute(Void query) {
                     try {
                         return mService.getAdapterConnectionState();
@@ -2401,6 +2490,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresLegacyBluetoothPermission
     public int getConnectionState() {
         if (getState() != STATE_ON) {
             return BluetoothAdapter.STATE_DISCONNECTED;
@@ -2429,6 +2519,7 @@ public final class BluetoothAdapter {
             new PropertyInvalidatedCache<Integer, Integer>(
                 8, BLUETOOTH_PROFILE_CACHE_PROPERTY) {
                 @Override
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 protected Integer recompute(Integer query) {
                     try {
                         mServiceLock.readLock().lock();
@@ -2471,7 +2562,10 @@ public final class BluetoothAdapter {
      * {@link BluetoothProfile#STATE_CONNECTED},
      * {@link BluetoothProfile#STATE_DISCONNECTING}
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public int getProfileConnectionState(int profile) {
         if (getState() != STATE_ON) {
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -2486,7 +2580,6 @@ public final class BluetoothAdapter {
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
      * connections from a listening {@link BluetoothServerSocket}.
      * <p>Valid RFCOMM channels are in range 1 to 30.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
      * @param channel RFCOMM channel to listen on
      * @return a listening RFCOMM BluetoothServerSocket
@@ -2494,6 +2587,9 @@ public final class BluetoothAdapter {
      * permissions, or channel in use.
      * @hide
      */
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingRfcommOn(int channel) throws IOException {
         return listenUsingRfcommOn(channel, false, false);
     }
@@ -2505,7 +2601,6 @@ public final class BluetoothAdapter {
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
      * connections from a listening {@link BluetoothServerSocket}.
      * <p>Valid RFCOMM channels are in range 1 to 30.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      * <p>To auto assign a channel without creating a SDP record use
      * {@link #SOCKET_CHANNEL_AUTO_STATIC_NO_SDP} as channel number.
      *
@@ -2519,6 +2614,9 @@ public final class BluetoothAdapter {
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingRfcommOn(int channel, boolean mitm,
             boolean min16DigitPin) throws IOException {
         BluetoothServerSocket socket =
@@ -2559,7 +2657,9 @@ public final class BluetoothAdapter {
      * @throws IOException on error, for example Bluetooth not available, or insufficient
      * permissions, or channel in use.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingRfcommWithServiceRecord(String name, UUID uuid)
             throws IOException {
         return createNewRfcommSocketAndRecord(name, uuid, true, true);
@@ -2591,7 +2691,9 @@ public final class BluetoothAdapter {
      * @throws IOException on error, for example Bluetooth not available, or insufficient
      * permissions, or channel in use.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingInsecureRfcommWithServiceRecord(String name, UUID uuid)
             throws IOException {
         return createNewRfcommSocketAndRecord(name, uuid, false, false);
@@ -2622,7 +2724,6 @@ public final class BluetoothAdapter {
      * closed, or if this application closes unexpectedly.
      * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to
      * connect to this socket from another device using the same {@link UUID}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @param name service name for SDP record
      * @param uuid uuid for SDP record
@@ -2632,12 +2733,15 @@ public final class BluetoothAdapter {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingEncryptedRfcommWithServiceRecord(String name, UUID uuid)
             throws IOException {
         return createNewRfcommSocketAndRecord(name, uuid, false, true);
     }
 
-
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private BluetoothServerSocket createNewRfcommSocketAndRecord(String name, UUID uuid,
             boolean auth, boolean encrypt) throws IOException {
         BluetoothServerSocket socket;
@@ -2663,6 +2767,7 @@ public final class BluetoothAdapter {
      * permissions.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingInsecureRfcommOn(int port) throws IOException {
         BluetoothServerSocket socket =
                 new BluetoothServerSocket(BluetoothSocket.TYPE_RFCOMM, false, false, port);
@@ -2694,6 +2799,7 @@ public final class BluetoothAdapter {
      * permissions.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingL2capOn(int port, boolean mitm, boolean min16DigitPin)
             throws IOException {
         BluetoothServerSocket socket =
@@ -2726,10 +2832,10 @@ public final class BluetoothAdapter {
      * permissions.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingL2capOn(int port) throws IOException {
         return listenUsingL2capOn(port, false, false);
     }
-
 
     /**
      * Construct an insecure L2CAP server socket.
@@ -2743,6 +2849,7 @@ public final class BluetoothAdapter {
      * permissions.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public BluetoothServerSocket listenUsingInsecureL2capOn(int port) throws IOException {
         Log.d(TAG, "listenUsingInsecureL2capOn: port=" + port);
         BluetoothServerSocket socket =
@@ -2769,11 +2876,14 @@ public final class BluetoothAdapter {
 
     /**
      * Read the local Out of Band Pairing Data
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return Pair<byte[], byte[]> of Hash and Randomizer
      * @hide
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public Pair<byte[], byte[]> readOutOfBandData() {
         return null;
     }
@@ -2863,6 +2973,7 @@ public final class BluetoothAdapter {
      * @param profile
      * @param proxy Profile proxy object
      */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public void closeProfileProxy(int profile, BluetoothProfile proxy) {
         if (proxy == null) {
             return;
@@ -2937,6 +3048,7 @@ public final class BluetoothAdapter {
 
     private final IBluetoothManagerCallback mManagerCallback =
             new IBluetoothManagerCallback.Stub() {
+                @SuppressLint("AndroidFrameworkRequiresPermission")
                 public void onBluetoothServiceUp(IBluetooth bluetoothService) {
                     if (DBG) {
                         Log.d(TAG, "onBluetoothServiceUp: " + bluetoothService);
@@ -3031,7 +3143,9 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean enableNoAutoConnect() {
         if (isEnabled()) {
             if (DBG) {
@@ -3184,7 +3298,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public void generateLocalOobData(@Transport int transport,
             @NonNull @CallbackExecutor Executor executor, @NonNull OobDataCallback callback) {
         if (transport != BluetoothDevice.TRANSPORT_BREDR && transport
@@ -3228,12 +3342,14 @@ public final class BluetoothAdapter {
      * reason. If Bluetooth is already on and if this function is called to turn
      * it on, the api will return true and a callback will be called.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
-     *
      * @param on True for on, false for off.
      * @param callback The callback to notify changes to the state.
      * @hide
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public boolean changeApplicationBluetoothState(boolean on,
             BluetoothStateChangeCallback callback) {
         return false;
@@ -3252,6 +3368,7 @@ public final class BluetoothAdapter {
     /**
      * @hide
      */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public class StateChangeCallbackWrapper extends IBluetoothStateChangeCallback.Stub {
         private BluetoothStateChangeCallback mCallback;
 
@@ -3443,7 +3560,10 @@ public final class BluetoothAdapter {
      * instead.
      */
     @Deprecated
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public boolean startLeScan(LeScanCallback callback) {
         return startLeScan(null, callback);
     }
@@ -3462,7 +3582,10 @@ public final class BluetoothAdapter {
      * instead.
      */
     @Deprecated
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresBluetoothLocationPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public boolean startLeScan(final UUID[] serviceUuids, final LeScanCallback callback) {
         if (DBG) {
             Log.d(TAG, "startLeScan(): " + Arrays.toString(serviceUuids));
@@ -3559,7 +3682,9 @@ public final class BluetoothAdapter {
      * @deprecated Use {@link BluetoothLeScanner#stopScan(ScanCallback)} instead.
      */
     @Deprecated
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothScanPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN)
     public void stopLeScan(LeScanCallback callback) {
         if (DBG) {
             Log.d(TAG, "stopLeScan()");
@@ -3600,7 +3725,9 @@ public final class BluetoothAdapter {
      * @throws IOException on error, for example Bluetooth not available, or insufficient
      * permissions, or unable to start this CoC
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull BluetoothServerSocket listenUsingL2capChannel()
             throws IOException {
         BluetoothServerSocket socket =
@@ -3646,7 +3773,9 @@ public final class BluetoothAdapter {
      * @throws IOException on error, for example Bluetooth not available, or insufficient
      * permissions, or unable to start this CoC
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull BluetoothServerSocket listenUsingInsecureL2capChannel()
             throws IOException {
         BluetoothServerSocket socket =
@@ -3691,7 +3820,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean addOnMetadataChangedListener(@NonNull BluetoothDevice device,
             @NonNull Executor executor, @NonNull OnMetadataChangedListener listener) {
         if (DBG) Log.d(TAG, "addOnMetadataChangedListener()");
@@ -3764,7 +3893,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean removeOnMetadataChangedListener(@NonNull BluetoothDevice device,
             @NonNull OnMetadataChangedListener listener) {
         if (DBG) Log.d(TAG, "removeOnMetadataChangedListener()");
@@ -3853,6 +3982,7 @@ public final class BluetoothAdapter {
      * @throws IllegalArgumentException if the callback is already registered
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean registerBluetoothConnectionCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull BluetoothConnectionCallback callback) {
         if (DBG) Log.d(TAG, "registerBluetoothConnectionCallback()");
@@ -3895,6 +4025,7 @@ public final class BluetoothAdapter {
      * @return true if the callback was unregistered successfully, false otherwise
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean unregisterBluetoothConnectionCallback(
             @NonNull BluetoothConnectionCallback callback) {
         if (DBG) Log.d(TAG, "unregisterBluetoothConnectionCallback()");
