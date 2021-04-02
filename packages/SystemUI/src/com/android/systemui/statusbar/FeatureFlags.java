@@ -98,4 +98,8 @@ public class FeatureFlags {
     public boolean isChargingRippleEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_charging_ripple);
     }
+
+    public boolean isOngoingCallStatusBarChipEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_ongoing_call_status_bar_chip);
+    }
 }
