@@ -204,6 +204,10 @@ package android.app {
     method public void onTaskRemovalStarted(int);
   }
 
+  public class AlarmManager {
+    method public boolean hasScheduleExactAlarm(@NonNull String, int);
+  }
+
   public class AppDetailsActivity extends android.app.Activity {
     ctor public AppDetailsActivity();
   }
