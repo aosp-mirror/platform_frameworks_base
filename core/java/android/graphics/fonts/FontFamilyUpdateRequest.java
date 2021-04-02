@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -157,12 +158,69 @@ public final class FontFamilyUpdateRequest {
      */
     public static final class Font {
 
+        /**
+         * Builds a {@link Font}.
+         */
+        public static final class Builder {
+            private final@NonNull  String mPostScriptName;
+            private final @NonNull FontStyle mStyle;
+            private @NonNull List<FontVariationAxis> mAxes = Collections.emptyList();
+            private @IntRange(from = 0) int mIndex = 0;
+
+            /**
+             * Construct a {@link Font.Builder}
+             *
+             * @param postScriptName The PostScript name of the font file to use. PostScript name is
+             *                       in Name ID 6 field in 'name' table, as specified by OpenType
+             *                       specification.
+             * @param style          The style for this font.
+             */
+            public Builder(@NonNull String postScriptName, @NonNull FontStyle style) {
+                Objects.requireNonNull(postScriptName);
+                Preconditions.checkStringNotEmpty(postScriptName);
+                Objects.requireNonNull(style);
+                mPostScriptName = postScriptName;
+                mStyle = style;
+            }
+
+            /**
+             * A list of {@link FontVariationAxis} to specify axis tags and values for variable
+             * fonts.
+             */
+            public @NonNull Builder setAxes(@NonNull List<FontVariationAxis> axes) {
+                Objects.requireNonNull(axes);
+                Preconditions.checkCollectionElementsNotNull(axes, "axes");
+                mAxes = axes;
+                return this;
+            }
+
+            /**
+             * Sets font collection index for the Font.
+             *
+             * @see {@link android.R.attr#ttcIndex}.
+             */
+            public @NonNull Builder setIndex(@IntRange(from = 0) int index) {
+                Preconditions.checkArgumentNonnegative(index);
+                mIndex = index;
+                return this;
+            }
+
+            /**
+             * Build a {@link Font} instance.
+             */
+            public @NonNull Font build() {
+                return new Font(mPostScriptName, mStyle, mIndex, mAxes);
+            }
+        }
+
         @NonNull
         private final String mPostScriptName;
         @NonNull
         private final FontStyle mStyle;
         @NonNull
         private final List<FontVariationAxis> mAxes;
+
+        private final @IntRange(from = 0) int mIndex;
 
         /**
          * Constructs a FontStyleVariation.
@@ -176,18 +234,15 @@ public final class FontFamilyUpdateRequest {
          *                       Name ID 6 field in 'name' table, as specified by OpenType
          *                       specification.
          * @param style          The style for this font.
+         * @param index          The index of the font in the collection.
          * @param axes           A list of {@link FontVariationAxis} to specify axis tags and values
          *                       for variable fonts.
          */
-        public Font(@NonNull String postScriptName, @NonNull FontStyle style,
-                @NonNull List<FontVariationAxis> axes) {
-            Objects.requireNonNull(postScriptName);
-            Preconditions.checkStringNotEmpty(postScriptName);
-            Objects.requireNonNull(style);
-            Objects.requireNonNull(axes);
-            Preconditions.checkCollectionElementsNotNull(axes, "axes");
+        private Font(@NonNull String postScriptName, @NonNull FontStyle style,
+                @IntRange(from = 0) int index, @NonNull List<FontVariationAxis> axes) {
             mPostScriptName = postScriptName;
             mStyle = style;
+            mIndex = index;
             mAxes = axes;
         }
 
@@ -207,6 +262,7 @@ public final class FontFamilyUpdateRequest {
             return mStyle;
         }
 
+
         /**
          * Returns the list of {@link FontVariationAxis}.
          */
@@ -217,9 +273,6 @@ public final class FontFamilyUpdateRequest {
 
         /**
          * Returns the index of collection
-         *
-         * TODO(183752879): Make font index configurable and make this SystemApi.
-         * @hide
          */
         public @IntRange(from = 0) int getIndex() {
             return 0;
