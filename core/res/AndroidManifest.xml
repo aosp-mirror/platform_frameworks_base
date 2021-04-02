@@ -2576,7 +2576,7 @@
          third-party apps.
     -->
     <permission android:name="android.permission.MANAGE_DOCUMENTS"
-        android:protectionLevel="signature|documenter" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows an application to manage access to crates, usually as part
          of a crates picker.
@@ -2593,7 +2593,7 @@
          <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.CACHE_CONTENT"
-        android:protectionLevel="signature|documenter" />
+        android:protectionLevel="signature|role" />
 
     <!-- @SystemApi @hide
          Allows an application to aggressively allocate disk space.
@@ -2740,7 +2740,7 @@
 
     <!-- @SystemApi @TestApi @hide Allows an application to change to remove/kill tasks -->
     <permission android:name="android.permission.REMOVE_TASKS"
-        android:protectionLevel="signature|documenter|recents" />
+        android:protectionLevel="signature|recents|role" />
 
     <!-- @deprecated Use MANAGE_ACTIVITY_TASKS instead.
          @SystemApi @TestApi @hide Allows an application to create/manage/remove stacks -->

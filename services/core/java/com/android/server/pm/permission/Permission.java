@@ -304,10 +304,6 @@ public final class Permission {
                 & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER) != 0;
     }
 
-    public boolean isDocumenter() {
-        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0;
-    }
-
     public boolean isConfigurator() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_CONFIGURATOR) != 0;
     }

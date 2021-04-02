@@ -69,6 +69,7 @@ import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -85,7 +86,6 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
-import android.content.AttributionSource;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
@@ -3531,14 +3531,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         PackageManagerInternal.PACKAGE_CONFIGURATOR,
                 UserHandle.USER_SYSTEM), pkg.getPackageName())) {
             // Special permissions for the device configurator.
-            allowed = true;
-        }
-        if (!allowed && bp.isDocumenter()
-                && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_DOCUMENTER, UserHandle.USER_SYSTEM),
-                pkg.getPackageName())) {
-            // If this permission is to be granted to the documenter and
-            // this app is the documenter, then it gets the permission.
             allowed = true;
         }
         if (!allowed && bp.isIncidentReportApprover()

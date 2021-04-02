@@ -1341,7 +1341,6 @@ public class PackageManagerService extends IPackageManager.Stub
         public DefaultAppProvider defaultAppProvider;
         public DexManager dexManager;
         public List<ScanPartition> dirsToScanAsSystem;
-        public @Nullable String documenterPackage;
         public boolean factoryTest;
         public ArrayMap<String, FeatureInfo> availableFeatures;
         public Handler handler;
@@ -1671,7 +1670,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mDefaultTextClassifierPackage;
     final @Nullable String mSystemTextClassifierPackageName;
-    final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
     final @Nullable String mAppPredictionServicePackage;
     final @Nullable String mIncidentReportApproverPackage;
@@ -6247,7 +6245,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mSystemTextClassifierPackageName = testParams.systemTextClassifierPackage;
         mRetailDemoPackage = testParams.retailDemoPackage;
         mRecentsPackage = testParams.recentsPackage;
-        mDocumenterPackage = testParams.documenterPackage;
         mConfiguratorPackage = testParams.configuratorPackage;
         mAppPredictionServicePackage = testParams.appPredictionServicePackage;
         mIncidentReportApproverPackage = testParams.incidentReportApproverPackage;
@@ -6834,7 +6831,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mDefaultTextClassifierPackage = getDefaultTextClassifierPackageName();
             mSystemTextClassifierPackageName = getSystemTextClassifierPackageName();
-            mDocumenterPackage = getDocumenterPackageName();
             mConfiguratorPackage = getDeviceConfiguratorPackageName();
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
@@ -22855,25 +22851,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 getPackageFromComponentString(R.string.config_defaultRotationResolverService));
     }
 
-    private @Nullable String getDocumenterPackageName() {
-        final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");
-        final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
-
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, resolvedType,
-                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
-                        | MATCH_DISABLED_COMPONENTS,
-                UserHandle.myUserId());
-        if (matches.size() == 1) {
-            return matches.get(0).getComponentInfo().packageName;
-        } else {
-            Slog.e(TAG, "There should probably be exactly one documenter; found "
-                    + matches.size() + ": matches=" + matches);
-            return null;
-        }
-    }
-
     @Nullable
     private String getDeviceConfiguratorPackageName() {
         return ensureSystemPackageName(mContext.getString(
@@ -26456,8 +26433,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             mDefaultTextClassifierPackage, mSystemTextClassifierPackageName);
                 case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
                     return filterOnlySystemPackages(mRequiredPermissionControllerPackage);
-                case PackageManagerInternal.PACKAGE_DOCUMENTER:
-                    return filterOnlySystemPackages(mDocumenterPackage);
                 case PackageManagerInternal.PACKAGE_CONFIGURATOR:
                     return filterOnlySystemPackages(mConfiguratorPackage);
                 case PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER:
