@@ -1954,6 +1954,14 @@
         android:label="@string/permlab_bluetooth_connect"
         android:protectionLevel="dangerous" />
 
+    <!-- Required to be able to range to devices using uwb.
+         <p>Protection level: dangerous -->
+    <permission android:name="android.permission.UWB_RANGING"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:description="@string/permdesc_uwb_ranging"
+        android:label="@string/permlab_uwb_ranging"
+        android:protectionLevel="dangerous" />
+
     <!-- @SystemApi @TestApi Allows an application to suspend other apps, which will prevent the
          user from using them until they are unsuspended.
          @hide

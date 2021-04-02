@@ -1485,6 +1485,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
     <string name="permdesc_bluetooth_connect" product="default">Allows the app to connect to paired Bluetooth devices</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
+    <string name="permlab_uwb_ranging">range to devices using ultra-wideband</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <string name="permdesc_uwb_ranging" product="default">Allows the app to range to devices using ultra-wideband</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_preferredPaymentInfo">Preferred NFC Payment Service Information</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
