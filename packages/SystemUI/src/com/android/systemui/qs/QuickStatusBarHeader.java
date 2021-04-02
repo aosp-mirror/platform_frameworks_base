@@ -17,9 +17,6 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
-import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -41,7 +38,7 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetail.Callback;
-import com.android.systemui.statusbar.StatusBarMobileView;
+import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
@@ -91,7 +88,7 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mMobileSlotName = context.getString(com.android.internal.R.string.status_bar_mobile);
+        mMobileSlotName = context.getString(com.android.internal.R.string.status_bar_no_calling);
     }
 
     /**
@@ -221,8 +218,8 @@ public class QuickStatusBarHeader extends FrameLayout {
     }
 
     private void updateAlphaAnimator() {
-        StatusBarMobileView icon =
-                ((StatusBarMobileView) mIconContainer.getViewForSlot(mMobileSlotName));
+        StatusBarIconView icon =
+                ((StatusBarIconView) mIconContainer.getViewForSlot(mMobileSlotName));
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
                 .addFloat(mQSCarriers, "alpha", 0, 1)
                 .addFloat(mDatePrivacyView, "alpha", 0, mDatePrivacyAlpha);
@@ -231,14 +228,12 @@ public class QuickStatusBarHeader extends FrameLayout {
             builder.setListener(new TouchAnimator.ListenerAdapter() {
                 @Override
                 public void onAnimationAtEnd() {
-                    icon.forceHidden(true);
-                    icon.setVisibleState(STATE_HIDDEN);
+                    mIconContainer.addIgnoredSlot(mMobileSlotName);
                 }
 
                 @Override
                 public void onAnimationStarted() {
-                    icon.forceHidden(false);
-                    icon.setVisibleState(STATE_ICON);
+                    mIconContainer.removeIgnoredSlot(mMobileSlotName);
                 }
             });
         }
