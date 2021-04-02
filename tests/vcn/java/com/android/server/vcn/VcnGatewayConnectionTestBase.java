@@ -74,8 +74,14 @@ public class VcnGatewayConnectionTestBase {
     protected static final ParcelUuid TEST_SUB_GRP = new ParcelUuid(UUID.randomUUID());
     protected static final InetAddress TEST_DNS_ADDR =
             InetAddresses.parseNumericAddress("2001:DB8:0:1::");
+    protected static final InetAddress TEST_DNS_ADDR_2 =
+            InetAddresses.parseNumericAddress("2001:DB8:0:2::");
     protected static final LinkAddress TEST_INTERNAL_ADDR =
-            new LinkAddress(InetAddresses.parseNumericAddress("2001:DB8:0:2::"), 64);
+            new LinkAddress(InetAddresses.parseNumericAddress("2001:DB8:1:1::"), 64);
+    protected static final LinkAddress TEST_INTERNAL_ADDR_2 =
+            new LinkAddress(InetAddresses.parseNumericAddress("2001:DB8:1:2::"), 64);
+    protected static final LinkAddress TEST_INTERNAL_ADDR_3 =
+            new LinkAddress(InetAddresses.parseNumericAddress("2001:DB8:1:3::"), 64);
 
     protected static final int TEST_IPSEC_SPI_VALUE = 0x1234;
     protected static final int TEST_IPSEC_SPI_RESOURCE_ID = 1;

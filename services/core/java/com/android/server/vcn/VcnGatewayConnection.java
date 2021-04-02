@@ -1521,13 +1521,6 @@ public class VcnGatewayConnection extends StateMachine {
         protected void setupInterface(
                 int token,
                 @NonNull IpSecTunnelInterface tunnelIface,
-                @NonNull VcnChildSessionConfiguration childConfig) {
-            setupInterface(token, tunnelIface, childConfig, null);
-        }
-
-        protected void setupInterface(
-                int token,
-                @NonNull IpSecTunnelInterface tunnelIface,
                 @NonNull VcnChildSessionConfiguration childConfig,
                 @Nullable VcnChildSessionConfiguration oldChildConfig) {
             try {
@@ -1609,9 +1602,11 @@ public class VcnGatewayConnection extends StateMachine {
                             transformCreatedInfo.direction);
                     break;
                 case EVENT_SETUP_COMPLETED:
+                    final VcnChildSessionConfiguration oldChildConfig = mChildConfig;
                     mChildConfig = ((EventSetupCompletedInfo) msg.obj).childSessionConfig;
 
-                    setupInterfaceAndNetworkAgent(mCurrentToken, mTunnelIface, mChildConfig);
+                    setupInterfaceAndNetworkAgent(
+                            mCurrentToken, mTunnelIface, mChildConfig, oldChildConfig);
                     break;
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested((EventDisconnectRequestedInfo) msg.obj);
@@ -1655,8 +1650,9 @@ public class VcnGatewayConnection extends StateMachine {
         protected void setupInterfaceAndNetworkAgent(
                 int token,
                 @NonNull IpSecTunnelInterface tunnelIface,
-                @NonNull VcnChildSessionConfiguration childConfig) {
-            setupInterface(token, tunnelIface, childConfig);
+                @NonNull VcnChildSessionConfiguration childConfig,
+                @NonNull VcnChildSessionConfiguration oldChildConfig) {
+            setupInterface(token, tunnelIface, childConfig, oldChildConfig);
 
             if (mNetworkAgent == null) {
                 mNetworkAgent = buildNetworkAgent(tunnelIface, childConfig);
