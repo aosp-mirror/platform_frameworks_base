@@ -110,7 +110,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mDarkIconManager.setShouldLog(true);
         mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_volume));
         mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_alarm_clock));
-        mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_call_strength));
         mDarkIconManager.setBlockList(mBlockedIcons);
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
