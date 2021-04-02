@@ -25,6 +25,7 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
+import static com.android.wm.shell.pip.PipAnimationController.FRACTION_START;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
@@ -352,9 +353,19 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // updated right after applying the windowing mode change.
             final Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
                     mPictureInPictureParams, destinationBounds);
-            scheduleAnimateResizePip(mPipBoundsState.getBounds(), destinationBounds,
+            final PipAnimationController.PipTransitionAnimator<?> animator =
+                    scheduleAnimateResizePip(mPipBoundsState.getBounds(), destinationBounds,
                     0 /* startingAngle */, sourceHintRect, direction,
                     animationDurationMs, null /* updateBoundsCallback */);
+            if (animator != null) {
+                // Even though the animation was started above, re-apply the transaction for the
+                // first frame using the SurfaceControl.Transaction supplied by the
+                // SyncTransactionQueue. This is necessary because the initial surface transform
+                // may not be applied until the next frame if a different Transaction than the one
+                // supplied is used, resulting in 1 frame not being cropped to the source rect
+                // hint during expansion that causes a visible jank/flash. See b/184166183.
+                animator.applySurfaceControlTransaction(mLeash, t, FRACTION_START);
+            }
             mState = State.EXITING_PIP;
         });
     }
@@ -768,22 +779,24 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Animates resizing of the pinned stack given the duration and start bounds.
      * This always animates the angle to zero from the starting angle.
      */
-    private void scheduleAnimateResizePip(Rect currentBounds, Rect destinationBounds,
-            float startingAngle, Rect sourceHintRect,
+    private @Nullable PipAnimationController.PipTransitionAnimator<?> scheduleAnimateResizePip(
+            Rect currentBounds, Rect destinationBounds, float startingAngle, Rect sourceHintRect,
             @PipAnimationController.TransitionDirection int direction, int durationMs,
             Consumer<Rect> updateBoundsCallback) {
         if (!mState.isInPip()) {
             // TODO: tend to use shouldBlockResizeRequest here as well but need to consider
             // the fact that when in exitPip, scheduleAnimateResizePip is executed in the window
             // container transaction callback and we want to set the mState immediately.
-            return;
+            return null;
         }
 
-        animateResizePip(currentBounds, destinationBounds, sourceHintRect, direction, durationMs,
+        final PipAnimationController.PipTransitionAnimator<?> animator = animateResizePip(
+                currentBounds, destinationBounds, sourceHintRect, direction, durationMs,
                 startingAngle);
         if (updateBoundsCallback != null) {
             updateBoundsCallback.accept(destinationBounds);
         }
+        return animator;
     }
 
     /**
@@ -1048,26 +1061,28 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         return WINDOWING_MODE_UNDEFINED;
     }
 
-    private void animateResizePip(Rect currentBounds, Rect destinationBounds, Rect sourceHintRect,
+    private @Nullable PipAnimationController.PipTransitionAnimator<?> animateResizePip(
+            Rect currentBounds, Rect destinationBounds, Rect sourceHintRect,
             @PipAnimationController.TransitionDirection int direction, int durationMs,
             float startingAngle) {
         // Could happen when exitPip
         if (mToken == null || mLeash == null) {
             Log.w(TAG, "Abort animation, invalid leash");
-            return;
+            return null;
         }
         final int rotationDelta = mWaitForFixedRotation
                 ? ((mNextRotation - mPipBoundsState.getDisplayLayout().rotation()) + 4) % 4
                 : Surface.ROTATION_0;
         Rect baseBounds = direction == TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
                 ? mPipBoundsState.getBounds() : currentBounds;
-        mPipAnimationController
+        final PipAnimationController.PipTransitionAnimator<?> animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseBounds, currentBounds, destinationBounds,
-                        sourceHintRect, direction, startingAngle, rotationDelta)
-                .setTransitionDirection(direction)
+                        sourceHintRect, direction, startingAngle, rotationDelta);
+        animator.setTransitionDirection(direction)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(durationMs)
                 .start();
+        return animator;
     }
 
     /**
