@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"ପ୍ୟାକେଜ୍‌ ଇନଷ୍ଟଲର୍‍"</string>
     <string name="install" msgid="711829760615509273">"ଇନଷ୍ଟଲ୍‍ କରନ୍ତୁ"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"ହୋଇଗଲା"</string>
     <string name="cancel" msgid="1018267193425558088">"ବାତିଲ୍ କରନ୍ତୁ"</string>
     <string name="installing" msgid="4921993079741206516">"ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>
     <string name="install_done" msgid="5987363587661783896">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇଗଲା।"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"ଆପଣ ଏହି ଆପ୍ଲିକେଶନ୍ ଇନ୍‌ଷ୍ଟଲ୍ କରିବାକୁ ଚାହୁଁଛନ୍ତି?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"ପୂର୍ବରୁ ରହିଥିବା ଏହି ଆପ୍ଲିକେଶନ୍‌ରେ ଆପଣ ଅପ୍‌ଡେଟ୍ ଇନ୍‌ଷ୍ଟଲ୍ କରିବାକୁ ଚାହୁଁଛନ୍ତି? ନିଜର ବିଦ୍ୟମାନ ଡାଟାକୁ ଆପଣ ହରାଇବେ ନାହିଁ।"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"ଏହି ବିଲ୍ଟ-ଇନ୍ ଆପ୍ଲିକେଶନ୍‌ରେ ଆପଣ ଏକ ଅପ୍‌ଡେଟ୍ ଇନ୍‌ଷ୍ଟଲ୍ କରିବାକୁ ଚାହୁଁଛନ୍ତି? ନିଜର ବିଦ୍ୟମାନ ଡାଟାକୁ ଆପଣ ହରାଇବେ ନାହିଁ।"</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇନାହିଁ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ଏହି ପ୍ୟାକେଜ୍‌କୁ ଇନଷ୍ଟଲ୍‍ କରାଯିବାରୁ ଅବରୋଧ କରାଯାଇଥିଲା।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ପୂର୍ବରୁ ଥିବା ପ୍ୟାକେଜ୍‍ ସହ ଏହି ପ୍ୟାକେଜ୍‌ର ସମସ୍ୟା ଉପୁଯିବାରୁ ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ ହୋଇପାରିଲା ନାହିଁ।"</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"ୱିଅର୍‌ରେ ଇନଷ୍ଟଲ୍‍/ଅନଇନଷ୍ଟଲ୍‍ କାର୍ଯ୍ୟ ସପୋର୍ଟ କରେନାହିଁ।"</string>
     <string name="message_staging" msgid="8032722385658438567">"ଆପ୍‍ ପର୍ଯ୍ୟାୟଭୁକ୍ତ କରାଯାଉଛି…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"ଅଜଣା"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"ଆପଣଙ୍କ ସୁରକ୍ଷା ପାଇଁ, ଆପଣଙ୍କ ଟାବ୍‌ଲେଟ୍‌କୁ ଏହି ସୋର୍ସରୁ ଆସିଥିବା ଅଜଣା ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ କରିବାକୁ ଅନୁମତି ଦିଆଯାଇନାହିଁ।"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"ଆପଣଙ୍କ ସୁରକ୍ଷା ପାଇଁ, ଆପଣଙ୍କ ଟିଭିକୁ ଏହି ସୋର୍ସରୁ ଆସିଥିବା ଅଜଣା ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ କରିବାକୁ ଅନୁମତି ଦିଆଯାଇନାହିଁ।"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"ଆପଣଙ୍କ ସୁରକ୍ଷା ପାଇଁ, ଆପଣଙ୍କ ଫୋନ୍‌କୁ ଏହି ସୋର୍ସରୁ ଆସିଥିବା ଅଜଣା ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ କରିବାକୁ ଅନୁମତି ଦିଆଯାଇନାହିଁ।"</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ଅଜଣା ଆପ୍‌ ଦ୍ୱାରା ଆପଣଙ୍କ ଫୋନ୍‍ ଏବଂ ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ନଷ୍ଟ କରାଯାଇପାରିବାର ସମ୍ଭାବନା ବହୁତ ଅଧିକ। ଏହି ଆପ୍‌କୁ ଇନଷ୍ଟଲ୍‌ କରିବାର ଅର୍ଥ ହେଉଛି ଆପଣଙ୍କ ଫୋନ୍‌ରେ ଘଟିବା କୌଣସି ପ୍ରକାର କ୍ଷତି କିମ୍ବା ସେଗୁଡ଼ିକର ବ୍ୟବହାରରୁ ହେବା କୌଣସି ପ୍ରକାର ଡାଟାର ହାନୀ ପାଇଁ ଆପଣ ଦାୟୀ ରହିବାକୁ ରାଜି ହୁଅନ୍ତି।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ଅଜଣା ଆପ୍‌ ଦ୍ୱାରା ଆପଣଙ୍କ ଟାବଲେଟ୍‍ ଏବଂ ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ନଷ୍ଟ କରାଯାଇପାରିବାର ସମ୍ଭାବନା ବହୁତ ଅଧିକ। ଏହି ଆପ୍‌କୁ ଇନଷ୍ଟଲ୍‌ କରିବାର ଅର୍ଥ ହେଉଛି ଆପଣଙ୍କ ଟାବ୍‌ଲେଟ୍‌ରେ ଘଟିବା କୌଣସି ପ୍ରକାର କ୍ଷତି କିମ୍ବା ସେଗୁଡ଼ିକର ବ୍ୟବହାରରୁ ହେବା କୌଣସି ପ୍ରକାର ଡାଟାର ହାନୀ ପାଇଁ ଆପଣ ଦାୟୀ ରହିବାକୁ ରାଜି ହୁଅନ୍ତି।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ଅଜଣା ଆପ୍‌ ଦ୍ୱାରା ଆପଣଙ୍କ ଟିଭି ଏବଂ ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ନଷ୍ଟ କରାଯାଇପାରିବାର ସମ୍ଭାବନା ବହୁତ ଅଧିକ। ଏହି ଆପ୍‌କୁ ଇନଷ୍ଟଲ୍‌ କରିବାର ଅର୍ଥ ହେଉଛି ଆପଣଙ୍କ ଟିଭିରେ ଘଟିବା କୌଣସି ପ୍ରକାର କ୍ଷତି କିମ୍ବା ସେଗୁଡ଼ିକର ବ୍ୟବହାରରୁ ହେବା କୌଣସି ପ୍ରକାର ଡାଟାର ହାନୀ ପାଇଁ ଆପଣ ଦାୟୀ ରହିବାକୁ ରାଜି ହୁଅନ୍ତି।"</string>

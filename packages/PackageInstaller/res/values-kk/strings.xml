@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Пакет орнатқыш"</string>
     <string name="install" msgid="711829760615509273">"Орнату"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Дайын"</string>
     <string name="cancel" msgid="1018267193425558088">"Бас тарту"</string>
     <string name="installing" msgid="4921993079741206516">"Орнатылуда…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> орнатылуда…"</string>
     <string name="install_done" msgid="5987363587661783896">"Қолданба орнатылды."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Осы қолданба орнатылсын ба?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Қолданбаның жаңартылған нұсқасы орнатылсын ба? Бұрыннан бар деректер сақталады."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Орнатылған қолданбаның жаңартылған нұсқасы орнатылсын ба? Бұрыннан бар деректер сақталады."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Қолданба орнатылмады."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Пакетті орнатуға тыйым салынды."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Жаңа пакет пен бұрыннан бар пакеттің арасында қайшылық туындағандықтан, қолданба орнатылмады."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear жүйесінде \"Орнату/Жою\" әрекеттері қолданылмайды."</string>
     <string name="message_staging" msgid="8032722385658438567">"Қолданба дайындалуда…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Белгісіз"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Қауіпсіздік үшін планшетке бұл дереккөзден белгісіз қолданбаларды орнатуға рұқсат берілмейді."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Қауіпсіздік үшін теледидарға бұл дереккөзден белгісіз қолданбаларды орнатуға рұқсат берілмейді."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Қауіпсіздік үшін телефонға бұл дереккөзден белгісіз қолданбаларды орнатуға рұқсат берілмейді."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Телефон және жеке деректер белгісіз қолданбалардың шабуылына ұшырауы мүмкін. Бұл қолданбаны орнату арқылы оны пайдалану нәтижесіндегі телефонға келетін залалға немесе деректердің жоғалуына өзіңіз ғана жауапты болатыныңызға келісесіз."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Планшет және жеке деректер белгісіз қолданбалардың шабуылына ұшырауы мүмкін. Бұл қолданбаны орнату арқылы оны пайдалану нәтижесіндегі планшетке келетін залалға немесе деректердің жоғалуына өзіңіз ғана жауапты болатыныңызға келісесіз."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Теледидар және жеке деректер белгісіз қолданбалардың шабуылына ұшырауы мүмкін. Бұл қолданбаны орнату арқылы оны пайдалану нәтижесіндегі теледидарға келетін қандай да бір залалға немесе деректердің жоғалуына өзіңіз ғана жауапты болатыныңызға келісесіз."</string>
