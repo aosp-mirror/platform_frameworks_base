@@ -17,13 +17,13 @@
 package com.android.server.soundtrigger_middleware;
 
 /**
- * A factory for creating instances of {@link ISoundTriggerHw2}.
+ * A factory for creating instances of {@link ISoundTriggerHal}.
  *
  * @hide
  */
 public interface HalFactory {
     /**
-     * @return An instance of {@link ISoundTriggerHw2}.
+     * @return An instance of {@link ISoundTriggerHal}.
      */
-    ISoundTriggerHw2 create();
+    ISoundTriggerHal create();
 }

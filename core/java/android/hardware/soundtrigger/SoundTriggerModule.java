@@ -22,13 +22,13 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.SafeCloseable;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.SoundModel;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -354,18 +354,20 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onRecognition(int handle, RecognitionEvent event)
+        public synchronized void onRecognition(int handle, RecognitionEvent event,
+                int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
-                    ConversionUtil.aidl2apiRecognitionEvent(handle, event));
+                    ConversionUtil.aidl2apiRecognitionEvent(handle, captureSession, event));
             mHandler.sendMessage(m);
         }
 
         @Override
-        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEvent event)
+        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEvent event,
+                int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
-                    ConversionUtil.aidl2apiPhraseRecognitionEvent(handle, event));
+                    ConversionUtil.aidl2apiPhraseRecognitionEvent(handle, captureSession, event));
             mHandler.sendMessage(m);
         }
 

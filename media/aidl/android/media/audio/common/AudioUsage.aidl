@@ -22,8 +22,14 @@ package android.media.audio.common;
 /**
  * {@hide}
  */
+@VintfStability
 @Backing(type="int")
 enum AudioUsage {
+    /**
+     * Used as default value in parcelables to indicate that a value was not set.
+     * Should never be considered a valid setting, except for backward compatibility scenarios.
+     */
+    INVALID = -1,
     UNKNOWN = 0,
     MEDIA = 1,
     VOICE_COMMUNICATION = 2,

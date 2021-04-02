@@ -19,19 +19,19 @@ package android.hardware.soundtrigger;
 import android.annotation.Nullable;
 import android.media.AudioFormat;
 import android.media.audio.common.AudioConfig;
-import android.media.soundtrigger_middleware.AudioCapabilities;
-import android.media.soundtrigger_middleware.ConfidenceLevel;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.Phrase;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.RecognitionMode;
-import android.media.soundtrigger_middleware.SoundModel;
+import android.media.soundtrigger.AudioCapabilities;
+import android.media.soundtrigger.ConfidenceLevel;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.Phrase;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseRecognitionExtra;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionMode;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
 
@@ -43,7 +43,7 @@ import java.util.UUID;
 class ConversionUtil {
     public static SoundTrigger.ModuleProperties aidl2apiModuleDescriptor(
             SoundTriggerModuleDescriptor aidlDesc) {
-        SoundTriggerModuleProperties properties = aidlDesc.properties;
+        Properties properties = aidlDesc.properties;
         return new SoundTrigger.ModuleProperties(
                 aidlDesc.handle,
                 properties.implementor,
@@ -194,19 +194,19 @@ class ConversionUtil {
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiRecognitionEvent(
-            int modelHandle, RecognitionEvent aidlEvent) {
+            int modelHandle, int captureSession, RecognitionEvent aidlEvent) {
         // The API recognition event doesn't allow for a null audio format, even though it doesn't
         // always make sense. We thus replace it with a default.
         AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(aidlEvent.audioConfig);
         return new SoundTrigger.GenericRecognitionEvent(
                 aidlEvent.status,
-                modelHandle, aidlEvent.captureAvailable, aidlEvent.captureSession,
+                modelHandle, aidlEvent.captureAvailable, captureSession,
                 aidlEvent.captureDelayMs, aidlEvent.capturePreambleMs, aidlEvent.triggerInData,
                 audioFormat, aidlEvent.data);
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiPhraseRecognitionEvent(
-            int modelHandle,
+            int modelHandle, int captureSession,
             PhraseRecognitionEvent aidlEvent) {
         SoundTrigger.KeyphraseRecognitionExtra[] apiExtras =
                 new SoundTrigger.KeyphraseRecognitionExtra[aidlEvent.phraseExtras.length];
@@ -218,7 +218,7 @@ class ConversionUtil {
         AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(aidlEvent.common.audioConfig);
         return new SoundTrigger.KeyphraseRecognitionEvent(aidlEvent.common.status, modelHandle,
                 aidlEvent.common.captureAvailable,
-                aidlEvent.common.captureSession, aidlEvent.common.captureDelayMs,
+                captureSession, aidlEvent.common.captureDelayMs,
                 aidlEvent.common.capturePreambleMs, aidlEvent.common.triggerInData,
                 audioFormat, aidlEvent.common.data,
                 apiExtras);
@@ -328,9 +328,9 @@ class ConversionUtil {
     public static int api2aidlModelParameter(int apiParam) {
         switch (apiParam) {
             case ModelParams.THRESHOLD_FACTOR:
-                return android.media.soundtrigger_middleware.ModelParameter.THRESHOLD_FACTOR;
+                return android.media.soundtrigger.ModelParameter.THRESHOLD_FACTOR;
             default:
-                return android.media.soundtrigger_middleware.ModelParameter.INVALID;
+                return android.media.soundtrigger.ModelParameter.INVALID;
         }
     }
 

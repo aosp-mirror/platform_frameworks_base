@@ -18,21 +18,18 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
-import android.hardware.soundtrigger.V2_2.ISoundTriggerHw;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.RecognitionStatus;
-import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
-import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
-import android.os.IHwBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -68,9 +65,8 @@ import java.util.Set;
  * <li>There is no binder instance associated with this implementation. Do not call asBinder().
  * <li>The implementation may throw a {@link RecoverableException} to indicate non-fatal,
  * recoverable faults. The error code would one of the
- * {@link android.media.soundtrigger_middleware.Status} constants. Any other exception
- * thrown should be regarded as a bug in the implementation or one of its dependencies
- * (assuming correct usage).
+ * {@link android.media.soundtrigger.Status} constants. Any other exception thrown should be
+ * regarded as a bug in the implementation or one of its dependencies (assuming correct usage).
  * <li>The implementation is designed for testability by featuring dependency injection (the
  * underlying HAL driver instances are passed to the ctor) and by minimizing dependencies
  * on Android runtime.
@@ -85,13 +81,13 @@ import java.util.Set;
  *
  * @hide
  */
-class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.GlobalCallback {
+class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.GlobalCallback {
     static private final String TAG = "SoundTriggerModule";
     @NonNull private final HalFactory mHalFactory;
-    @NonNull private ISoundTriggerHw2 mHalService;
+    @NonNull private ISoundTriggerHal mHalService;
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
-    private SoundTriggerModuleProperties mProperties;
+    private Properties mProperties;
 
     /**
      * Ctor.
@@ -132,12 +128,12 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
      * @return The properties structure.
      */
     synchronized @NonNull
-    SoundTriggerModuleProperties getProperties() {
+    Properties getProperties() {
         return mProperties;
     }
 
     @Override
-    public void serviceDied(long cookie) {
+    public void binderDied() {
         Log.w(TAG, "Underlying HAL driver died.");
         List<ISoundTriggerCallback> callbacks;
         synchronized (this) {
@@ -170,11 +166,11 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
      * Attached to the HAL service via factory.
      */
     private void attachToHal() {
-        mHalService = new SoundTriggerHw2Enforcer(
-                new SoundTriggerHw2Watchdog(mHalFactory.create()));
-        mHalService.linkToDeath(this, 0);
+        mHalService = new SoundTriggerHalEnforcer(
+                new SoundTriggerHalWatchdog(mHalFactory.create()));
+        mHalService.linkToDeath(this);
         mHalService.registerCallback(this);
-        mProperties = ConversionUtil.hidl2aidlProperties(mHalService.getProperties());
+        mProperties = mHalService.getProperties();
     }
 
     /**
@@ -376,7 +372,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
          *
          * All model-based operations are delegated to this class and implemented here.
          */
-        private class Model implements ISoundTriggerHw2.ModelCallback {
+        private class Model implements ISoundTriggerHal.ModelCallback {
             public int mHandle;
             private ModelState mState = ModelState.INIT;
             private SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession mSession;
@@ -394,9 +390,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             private int load(@NonNull SoundModel model,
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
                 mSession = audioSession;
-                ISoundTriggerHw.SoundModel hidlModel = ConversionUtil.aidl2hidlSoundModel(model);
-
-                mHandle = mHalService.loadSoundModel(hidlModel, this);
+                mHandle = mHalService.loadSoundModel(model, this);
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
@@ -405,10 +399,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             private int load(@NonNull PhraseSoundModel model,
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
                 mSession = audioSession;
-                ISoundTriggerHw.PhraseSoundModel hidlModel =
-                        ConversionUtil.aidl2hidlPhraseSoundModel(model);
-
-                mHandle = mHalService.loadPhraseSoundModel(hidlModel, this);
+                mHandle = mHalService.loadPhraseSoundModel(model, this);
 
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
@@ -426,11 +417,8 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             }
 
             private void startRecognition(@NonNull RecognitionConfig config) {
-                android.hardware.soundtrigger.V2_3.RecognitionConfig hidlConfig =
-                        ConversionUtil.aidl2hidlRecognitionConfig(config);
-                hidlConfig.base.header.captureDevice = mSession.mDeviceHandle;
-                hidlConfig.base.header.captureHandle = mSession.mIoHandle;
-                mHalService.startRecognition(mHandle, hidlConfig);
+                mHalService.startRecognition(mHandle, mSession.mDeviceHandle,
+                        mSession.mIoHandle, config);
                 setState(ModelState.ACTIVE);
             }
 
@@ -449,7 +437,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                     // This call is idempotent in order to avoid races.
                     return;
                 }
-                mHalService.getModelState(mHandle);
+                mHalService.forceRecognitionEvent(mHandle);
             }
 
 
@@ -465,20 +453,15 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
             @Nullable
             private ModelParameterRange queryModelParameterSupport(int modelParam) {
-                return ConversionUtil.hidl2aidlModelParameterRange(
-                        mHalService.queryParameter(mHandle,
-                                ConversionUtil.aidl2hidlModelParameter(modelParam)));
+                return mHalService.queryParameter(mHandle, modelParam);
             }
 
             @Override
-            public void recognitionCallback(
-                    @NonNull ISoundTriggerHwCallback.RecognitionEvent recognitionEvent) {
+            public void recognitionCallback(int modelHandle,
+                    @NonNull RecognitionEvent recognitionEvent) {
                 ISoundTriggerCallback callback;
-                RecognitionEvent aidlEvent =
-                        ConversionUtil.hidl2aidlRecognitionEvent(recognitionEvent);
-                aidlEvent.captureSession = mSession.mSessionHandle;
                 synchronized (SoundTriggerModule.this) {
-                    if (aidlEvent.status != RecognitionStatus.FORCED) {
+                    if (recognitionEvent.status != RecognitionStatus.FORCED) {
                         setState(ModelState.LOADED);
                     }
                     callback = mCallback;
@@ -486,7 +469,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 // The callback must be invoked outside of the lock.
                 try {
                     if (callback != null) {
-                        callback.onRecognition(mHandle, aidlEvent);
+                        callback.onRecognition(mHandle, recognitionEvent, mSession.mSessionHandle);
                     }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
@@ -495,15 +478,11 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             }
 
             @Override
-            public void phraseRecognitionCallback(
-                    @NonNull ISoundTriggerHwCallback.PhraseRecognitionEvent phraseRecognitionEvent) {
+            public void phraseRecognitionCallback(int modelHandle,
+                    @NonNull PhraseRecognitionEvent phraseRecognitionEvent) {
                 ISoundTriggerCallback callback;
-                PhraseRecognitionEvent aidlEvent =
-                        ConversionUtil.hidl2aidlPhraseRecognitionEvent(phraseRecognitionEvent);
-                aidlEvent.common.captureSession = mSession.mSessionHandle;
-
                 synchronized (SoundTriggerModule.this) {
-                    if (aidlEvent.common.status != RecognitionStatus.FORCED) {
+                    if (phraseRecognitionEvent.common.status != RecognitionStatus.FORCED) {
                         setState(ModelState.LOADED);
                     }
                     callback = mCallback;
@@ -512,7 +491,8 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 // The callback must be invoked outside of the lock.
                 try {
                     if (callback != null) {
-                        mCallback.onPhraseRecognition(mHandle, aidlEvent);
+                        mCallback.onPhraseRecognition(mHandle, phraseRecognitionEvent,
+                                mSession.mSessionHandle);
                     }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.

@@ -36,7 +36,7 @@ import java.util.List;
  * <li>There is no binder instance associated with this implementation. Do not call asBinder().
  * <li>The implementation may throw a {@link RecoverableException} to indicate non-fatal,
  * recoverable faults. The error code would one of the
- * {@link android.media.soundtrigger_middleware.Status}
+ * {@link android.media.soundtrigger.Status}
  * constants. Any other exception thrown should be regarded as a bug in the implementation or one
  * of its dependencies (assuming correct usage).
  * <li>The implementation is designed for testibility by featuring dependency injection (the

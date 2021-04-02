@@ -8,23 +8,6 @@ package {
 }
 
 aidl_interface {
-    name: "audio_common-aidl",
-    unstable: true,
-    host_supported: true,
-    vendor_available: true,
-    local_include_dir: "aidl",
-    double_loadable: true,
-    srcs: [
-        "aidl/android/media/audio/common/AudioChannelMask.aidl",
-        "aidl/android/media/audio/common/AudioConfig.aidl",
-        "aidl/android/media/audio/common/AudioFormat.aidl",
-        "aidl/android/media/audio/common/AudioOffloadInfo.aidl",
-        "aidl/android/media/audio/common/AudioStreamType.aidl",
-        "aidl/android/media/audio/common/AudioUsage.aidl",
-    ],
-}
-
-aidl_interface {
     name: "media_permission-aidl",
     unstable: true,
     host_supported: true,
@@ -40,30 +23,92 @@ aidl_interface {
     name: "soundtrigger_middleware-aidl",
     unstable: true,
     local_include_dir: "aidl",
+    backend: {
+        java: {
+            sdk_version: "module_current",
+        },
+    },
     srcs: [
-        "aidl/android/media/soundtrigger_middleware/AudioCapabilities.aidl",
-        "aidl/android/media/soundtrigger_middleware/ConfidenceLevel.aidl",
         "aidl/android/media/soundtrigger_middleware/ISoundTriggerCallback.aidl",
         "aidl/android/media/soundtrigger_middleware/ISoundTriggerMiddlewareService.aidl",
         "aidl/android/media/soundtrigger_middleware/ISoundTriggerModule.aidl",
-        "aidl/android/media/soundtrigger_middleware/ModelParameter.aidl",
-        "aidl/android/media/soundtrigger_middleware/ModelParameterRange.aidl",
-        "aidl/android/media/soundtrigger_middleware/Phrase.aidl",
-        "aidl/android/media/soundtrigger_middleware/PhraseRecognitionEvent.aidl",
-        "aidl/android/media/soundtrigger_middleware/PhraseRecognitionExtra.aidl",
-        "aidl/android/media/soundtrigger_middleware/PhraseSoundModel.aidl",
-        "aidl/android/media/soundtrigger_middleware/RecognitionConfig.aidl",
-        "aidl/android/media/soundtrigger_middleware/RecognitionEvent.aidl",
-        "aidl/android/media/soundtrigger_middleware/RecognitionMode.aidl",
-        "aidl/android/media/soundtrigger_middleware/RecognitionStatus.aidl",
-        "aidl/android/media/soundtrigger_middleware/SoundModel.aidl",
-        "aidl/android/media/soundtrigger_middleware/SoundModelType.aidl",
         "aidl/android/media/soundtrigger_middleware/SoundTriggerModuleDescriptor.aidl",
-        "aidl/android/media/soundtrigger_middleware/SoundTriggerModuleProperties.aidl",
-        "aidl/android/media/soundtrigger_middleware/Status.aidl",
     ],
     imports: [
-        "audio_common-aidl",
+        "android.media.soundtrigger.types",
         "media_permission-aidl",
+    ],
+}
+
+aidl_interface {
+    name: "android.media.audio.common.types",
+    vendor_available: true,
+    host_supported: true,
+    double_loadable: true,
+    flags: ["-Werror", "-Weverything", ],
+    local_include_dir: "aidl",
+    srcs: [
+        "aidl/android/media/audio/common/AudioChannelMask.aidl",
+        "aidl/android/media/audio/common/AudioConfig.aidl",
+        "aidl/android/media/audio/common/AudioFormat.aidl",
+        "aidl/android/media/audio/common/AudioOffloadInfo.aidl",
+        "aidl/android/media/audio/common/AudioStreamType.aidl",
+        "aidl/android/media/audio/common/AudioUsage.aidl",
+    ],
+    stability: "vintf",
+    backend: {
+        cpp: {
+            enabled: true,
+        },
+        java: {
+            sdk_version: "module_current",
+        },
+        ndk: {
+            vndk: {
+                enabled: true,
+            },
+        },
+    },
+}
+
+aidl_interface {
+    name: "android.media.soundtrigger.types",
+    vendor_available: true,
+    flags: ["-Werror", "-Weverything", ],
+    local_include_dir: "aidl",
+    srcs: [
+        "aidl/android/media/soundtrigger/AudioCapabilities.aidl",
+        "aidl/android/media/soundtrigger/ConfidenceLevel.aidl",
+        "aidl/android/media/soundtrigger/ModelParameter.aidl",
+        "aidl/android/media/soundtrigger/ModelParameterRange.aidl",
+        "aidl/android/media/soundtrigger/Phrase.aidl",
+        "aidl/android/media/soundtrigger/PhraseRecognitionEvent.aidl",
+        "aidl/android/media/soundtrigger/PhraseRecognitionExtra.aidl",
+        "aidl/android/media/soundtrigger/PhraseSoundModel.aidl",
+        "aidl/android/media/soundtrigger/Properties.aidl",
+        "aidl/android/media/soundtrigger/RecognitionConfig.aidl",
+        "aidl/android/media/soundtrigger/RecognitionEvent.aidl",
+        "aidl/android/media/soundtrigger/RecognitionMode.aidl",
+        "aidl/android/media/soundtrigger/RecognitionStatus.aidl",
+        "aidl/android/media/soundtrigger/SoundModel.aidl",
+        "aidl/android/media/soundtrigger/SoundModelType.aidl",
+        "aidl/android/media/soundtrigger/Status.aidl",
+    ],
+    stability: "vintf",
+    backend: {
+        cpp: {
+            enabled: true,
+        },
+        java: {
+            sdk_version: "module_current",
+        },
+        ndk: {
+            vndk: {
+                enabled: true,
+            },
+        },
+    },
+    imports: [
+        "android.media.audio.common.types",
     ],
 }

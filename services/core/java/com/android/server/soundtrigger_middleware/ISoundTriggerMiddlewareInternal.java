@@ -21,7 +21,8 @@ import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 
 /**
- * This interface unifies methods from ISoundTriggerMiddlewareService and ICaptureStateListener.
+ * This interface closely follows ISoundTriggerMiddlewareService with some subtle changes for
+ * convenience.
  *
  * The ISoundTriggerMiddlewareService have been modified to exclude identity information and the
  * RemoteException signature, both of which are only relevant at the service boundary layer.

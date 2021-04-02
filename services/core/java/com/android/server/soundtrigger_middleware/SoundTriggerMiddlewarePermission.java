@@ -23,20 +23,20 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.PermissionChecker;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.Status;
 import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
 import android.media.permission.PermissionUtil;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -294,17 +294,18 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onRecognition(int modelHandle, RecognitionEvent event)
+            public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
                     throws RemoteException {
                 enforcePermissions("Sound trigger recognition.");
-                mDelegate.onRecognition(modelHandle, event);
+                mDelegate.onRecognition(modelHandle, event, captureSession);
             }
 
             @Override
-            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event)
+            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
+                    int captureSession)
                     throws RemoteException {
                 enforcePermissions("Sound trigger phrase recognition.");
-                mDelegate.onPhraseRecognition(modelHandle, event);
+                mDelegate.onPhraseRecognition(modelHandle, event, captureSession);
             }
 
             @Override
