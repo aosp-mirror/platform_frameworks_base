@@ -23,7 +23,7 @@
         <item name="android:windowExitAnimation">@null</item>
     </style>
 
-    <style name="volume_dialog_theme" parent="qs_theme">
+    <style name="volume_dialog_theme" parent="Theme.SystemUI">
         <item name="android:colorAccent">@color/tv_volume_dialog_accent</item>
         <item name="android:dialogCornerRadius">@dimen/volume_dialog_panel_width_half</item>
     </style>
