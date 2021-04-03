@@ -450,8 +450,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet may shut down soon (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Device may shut down soon (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> left until charged"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> until charged"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> left until full"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> left until full"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimising for battery health"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Unknown"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Charging"</string>
@@ -459,7 +459,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Charging slowly"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Not charging"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Plugged in, can\'t charge at the moment"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Full"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Charged"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlled by admin"</string>
     <string name="disabled" msgid="8017887509554714950">"Disabled"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Allowed"</string>

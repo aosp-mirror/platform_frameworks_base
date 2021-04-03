@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet sa môže čoskoro vypnúť (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Zariadenie sa môže čoskoro vypnúť (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Zostávajúci čas do úplného nabitia: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabitia"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimalizácia stavu batérie"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Neznáme"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nabíja sa"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Pomalé nabíjanie"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenabíja sa"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Pripojené, ale nie je možné nabíjať"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Nabitá"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Ovládané správcom"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktivované"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Povolené"</string>
@@ -503,16 +506,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kratší čas."</string>
     <string name="cancel" msgid="5665114069455378395">"Zrušiť"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
-    <!-- no translation found for alarms_and_reminders_label (6918395649731424294) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_switch_title (186992351401152744) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_title (2988400785896875237) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_footer_title (5882788882647778753) -->
-    <skip />
-    <!-- no translation found for keywords_alarms_and_reminders (8882739572152019456) -->
-    <skip />
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Budíky a pripomenutia"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Povoliť nastavovanie budíkov a pripomenutí"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Budíky a pripomenutia"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Povoľte tejto aplikácii plánovať budíky alebo iné udalosti založené na čase. Príslušnej aplikácii tak umožníte prebudiť sa a spustiť, aj keď zariadenie nepoužívate. Upozorňujeme, že ak toto povolenie zrušíte, aplikácia nemusí fungovať správne a konkrétne môže dôjsť k zrušeniu všetkých budíkov, ktoré naplánovala."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"plán, budík, pripomenutie, udalosť"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Zapnúť"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Zapnite režim bez vyrušení"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nikdy"</string>
