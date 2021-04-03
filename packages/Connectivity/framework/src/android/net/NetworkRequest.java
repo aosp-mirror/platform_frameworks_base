@@ -500,9 +500,14 @@ public class NetworkRequest implements Parcelable {
          * A network will satisfy this request only if it matches one of the subIds in this set.
          * An empty set matches all networks, including those without a subId.
          *
+         * <p>Registering a NetworkRequest with a non-empty set of subIds requires the
+         * NETWORK_FACTORY permission.
+         *
          * @param subIds A {@code Set} that represents subscription IDs.
+         * @hide
          */
         @NonNull
+        @SystemApi
         public Builder setSubIds(@NonNull Set<Integer> subIds) {
             mNetworkCapabilities.setSubIds(subIds);
             return this;

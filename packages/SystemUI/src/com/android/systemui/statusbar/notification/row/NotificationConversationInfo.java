@@ -346,9 +346,22 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     private void bindIcon(boolean important) {
+        Drawable person =  mIconFactory.getBaseIconDrawable(mShortcutInfo);
+        if (person == null) {
+            person = mContext.getDrawable(R.drawable.ic_person).mutate();
+            TypedArray ta = mContext.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
+            int colorAccent = ta.getColor(0, 0);
+            ta.recycle();
+            person.setTint(colorAccent);
+        }
         ImageView image = findViewById(R.id.conversation_icon);
-        image.setImageDrawable(mIconFactory.getConversationDrawable(
-                mShortcutInfo, mPackageName, mAppUid, important));
+        image.setImageDrawable(person);
+
+        ImageView app = findViewById(R.id.conversation_icon_badge_icon);
+        app.setImageDrawable(mIconFactory.getAppBadge(
+                        mPackageName, UserHandle.getUserId(mSbn.getUid())));
+
+        findViewById(R.id.conversation_icon_badge_ring).setVisibility(important ? VISIBLE : GONE);
     }
 
     private void bindPackage() {

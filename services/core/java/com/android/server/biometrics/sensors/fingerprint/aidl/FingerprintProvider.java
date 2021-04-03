@@ -432,7 +432,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mContext.getOpPackageName(), sensorId, enrolledList,
                             FingerprintUtils.getInstance(sensorId),
                             mSensors.get(sensorId).getAuthenticatorIds());
-            scheduleForSensor(sensorId, client);
+            scheduleForSensor(sensorId, client, callback);
         });
     }
 

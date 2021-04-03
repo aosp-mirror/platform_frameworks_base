@@ -19,7 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:theme="@style/qs_theme"
+    android:theme="@style/Theme.SystemUI.QuickSettings"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:layout_marginStart="@dimen/global_actions_side_margin"
