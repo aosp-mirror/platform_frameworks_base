@@ -375,7 +375,7 @@
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.SystemUI">
+    <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault.SystemUI">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
@@ -384,7 +384,7 @@
     </style>
 
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
-    <style name="volume_dialog_theme" parent="qs_theme"/>
+    <style name="volume_dialog_theme" parent="Theme.SystemUI"/>
 
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
 
@@ -587,7 +587,7 @@
         <item name="android:elevation">10dp</item>
     </style>
 
-    <style name="edit_theme" parent="qs_theme">
+    <style name="Theme.SystemUI.QuickSettings.Edit">
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>
 
