@@ -3773,6 +3773,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /** @hide */
     @Override
+    public void resetSubtreeAutofillIds() {
+        super.resetSubtreeAutofillIds();
+        View[] children = mChildren;
+        final int childCount = mChildrenCount;
+        for (int i = 0; i < childCount; i++) {
+            children[i].resetSubtreeAutofillIds();
+        }
+    }
+
+    /** @hide */
+    @Override
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);

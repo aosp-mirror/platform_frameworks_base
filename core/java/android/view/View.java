@@ -9285,6 +9285,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * parentView.addView(reusableView);
      * </pre>
      *
+     * <p>NOTE: If this view is a descendant of an {@link android.widget.AdapterView}, the system
+     * may reset its autofill id when this view is recycled. If the autofill ids need to be stable,
+     * they should be set again in
+     * {@link android.widget.Adapter#getView(int, android.view.View, android.view.ViewGroup)}.
+     *
      * @param id an autofill ID that is unique in the {@link android.app.Activity} hosting the view,
      * or {@code null} to reset it. Usually it's an id previously allocated to another view (and
      * obtained through {@link #getAutofillId()}), or a new value obtained through
@@ -9318,6 +9323,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAutofillViewId = NO_ID;
             mPrivateFlags3 &= ~PFLAG3_AUTOFILLID_EXPLICITLY_SET;
         }
+    }
+
+    /**
+     * Forces a reset of the autofill ids of the subtree rooted at this view. Like calling
+     * {@link #setAutofillId(AutofillId) setAutofillId(null)} for each view, but works even if the
+     * views are attached to a window.
+     *
+     * <p>This is useful if the views are being recycled, since an autofill id should uniquely
+     * identify a particular piece of content.
+     *
+     * @hide
+     */
+    public void resetSubtreeAutofillIds() {
+        if (mAutofillViewId == NO_ID) {
+            return;
+        }
+        if (Log.isLoggable(CONTENT_CAPTURE_LOG_TAG, Log.VERBOSE)) {
+            Log.v(CONTENT_CAPTURE_LOG_TAG, "resetAutofillId() for " + mAutofillViewId);
+        } else if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
+            Log.v(AUTOFILL_LOG_TAG, "resetAutofillId() for " + mAutofillViewId);
+        }
+        mAutofillId = null;
+        mAutofillViewId = NO_ID;
+        mPrivateFlags3 &= ~PFLAG3_AUTOFILLID_EXPLICITLY_SET;
     }
 
     /**
@@ -30838,8 +30867,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.view.translation.Translator} to translate the requests. All the
      * {@link ViewTranslationRequest}s must be added when the traversal is done.
      *
-     * <p> The default implementation will call {@link View#onCreateTranslationRequest} to build
-     * {@link ViewTranslationRequest} if the view should be translated. </p>
+     * <p> The default implementation calls {@link View#onCreateTranslationRequest} to build
+     * {@link ViewTranslationRequest} if the view should be translated. The view is marked as having
+     * {@link #setHasTransientState(boolean) transient state} so that recycling of views doesn't
+     * prevent the system from attaching the response to it.</p>
      *
      * @param viewIds a map for the view's {@link AutofillId} and its virtual child ids or
      * {@code null} if the view doesn't have virtual child that should be translated. The virtual
@@ -30860,6 +30891,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 ViewTranslationRequest request = onCreateTranslationRequest(supportedFormats);
                 if (request != null && request.getKeys().size() > 0) {
                     requests.add(request);
+                    if (Log.isLoggable(CONTENT_CAPTURE_LOG_TAG, Log.VERBOSE)) {
+                        Log.v(CONTENT_CAPTURE_LOG_TAG, "Calling setHasTransientState(true) for "
+                                + autofillId);
+                    }
+                    // TODO: Add a default ViewTranslationCallback for View that resets this in
+                    // onClearTranslation(). Also update the javadoc for this method to mention
+                    // that.
+                    setHasTransientState(true);
                 }
             } else {
                 onCreateTranslationRequests(viewIds.get(autofillId), supportedFormats, request -> {
