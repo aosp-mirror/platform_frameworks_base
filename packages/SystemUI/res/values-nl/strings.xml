@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Het maken van screenshots wordt niet toegestaan door de app of je organisatie"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Bewerken"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Screenshot bewerken"</string>
-    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
-    <skip />
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Meer opnemen"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Screenshot sluiten"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Voorbeeld van screenshot"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Bovengrens"</string>
@@ -384,11 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Kleuren omkeren"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modus voor kleurcorrectie"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Meer instellingen"</string>
-    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Gebruikersinstellingen"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Klaar"</string>
-    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
-    <skip />
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Sluiten"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Verbonden"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Verbonden, batterij <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Verbinding maken…"</string>
@@ -533,8 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Dit apparaat is eigendom van <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> en is verbonden met VPN\'s"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Je organisatie kan het netwerkverkeer in je werkprofiel bijhouden"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kan het netwerkverkeer in je werkprofiel bijhouden"</string>
-    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
-    <skip />
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"De netwerkactiviteit van je werkprofiel is zichtbaar voor je IT-beheerder"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Netwerk kan worden bijgehouden"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Dit apparaat is verbonden met VPN\'s"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Je werkprofiel is verbonden met <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -648,7 +644,7 @@
     <string name="output_title" msgid="3938776561655668350">"Media-uitvoer"</string>
     <string name="output_calls_title" msgid="7085583034267889109">"Uitvoer van telefoongesprek"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Geen apparaten gevonden"</string>
-    <string name="output_none_found_service_off" msgid="935667567681386368">"Geen apparaten gevonden. Probeer <xliff:g id="SERVICE">%1$s</xliff:g> in te schakelen."</string>
+    <string name="output_none_found_service_off" msgid="935667567681386368">"Geen apparaten gevonden. Probeer <xliff:g id="SERVICE">%1$s</xliff:g> aan te zetten."</string>
     <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"Wifi"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth en wifi"</string>
@@ -669,7 +665,7 @@
     <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuigmodus"</string>
     <string name="add_tile" msgid="6239678623873086686">"Tegel toevoegen"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Tegel \'Uitzenden\'"</string>
-    <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g> tenzij je dit voor die tijd uitschakelt"</string>
+    <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g> tenzij je dit voor die tijd uitzet"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -981,7 +977,7 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g> toestaan om segmenten van apps te tonen"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Toestaan"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Weigeren"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Tikken om Batterijbesparing in te schakelen"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Tikken om Batterijbesparing aan te zetten"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aanzetten als de batterij waarschijnlijk leeg raakt"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Batterijbesparing staat aan"</string>
@@ -1100,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"Gesprek openen"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Gesprekswidgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tik op een gesprek om het toe te voegen aan je startscherm"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> geleden"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Minder dan <xliff:g id="DURATION">%1$s</xliff:g> geleden"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Meer dan <xliff:g id="DURATION">%1$s</xliff:g> geleden"</string>

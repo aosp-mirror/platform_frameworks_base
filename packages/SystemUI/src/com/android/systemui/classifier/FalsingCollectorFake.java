@@ -147,6 +147,10 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
+    public void onMotionEventComplete() {
+    }
+
+    @Override
     public void avoidGesture() {
     }
 

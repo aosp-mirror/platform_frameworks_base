@@ -19,6 +19,8 @@ package com.android.server;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
 
@@ -695,7 +697,9 @@ public class VcnManagementServiceTest {
                 hasCarrierPrivileges);
 
         final Vcn vcn = startAndGetVcnInstance(subGrp);
-        doReturn(isVcnActive).when(vcn).isActive();
+        doReturn(isVcnActive ? VCN_STATUS_CODE_ACTIVE : VCN_STATUS_CODE_SAFE_MODE)
+                .when(vcn)
+                .getStatus();
 
         doReturn(true)
                 .when(mLocationPermissionChecker)

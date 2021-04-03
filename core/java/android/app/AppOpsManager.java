@@ -1223,8 +1223,11 @@ public class AppOpsManager {
     public static final int OP_MANAGE_MEDIA = AppProtoEnums.APP_OP_MANAGE_MEDIA;
 
     /** @hide */
+    public static final int OP_UWB_RANGING = AppProtoEnums.APP_OP_UWB_RANGING;
+
+    /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 112;
+    public static final int _NUM_OP = 113;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1637,6 +1640,8 @@ public class AppOpsManager {
      * @hide
      */
     public static final String OPSTR_MANAGE_MEDIA = "android:manage_media";
+    /** @hide */
+    public static final String OPSTR_UWB_RANGING = "android:uwb_ranging";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -1706,6 +1711,7 @@ public class AppOpsManager {
             // Nearby devices
             OP_BLUETOOTH_SCAN,
             OP_BLUETOOTH_CONNECT,
+            OP_UWB_RANGING,
 
             // APPOP PERMISSIONS
             OP_ACCESS_NOTIFICATIONS,
@@ -1846,6 +1852,7 @@ public class AppOpsManager {
             OP_COARSE_LOCATION,                 // OP_COARSE_LOCATION_SOURCE
             OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
             OP_BLUETOOTH_CONNECT,               // OP_BLUETOOTH_CONNECT
+            OP_UWB_RANGING,                     // OP_UWB_RANGING
     };
 
     /**
@@ -1964,6 +1971,7 @@ public class AppOpsManager {
             OPSTR_COARSE_LOCATION_SOURCE,
             OPSTR_MANAGE_MEDIA,
             OPSTR_BLUETOOTH_CONNECT,
+            OPSTR_UWB_RANGING,
     };
 
     /**
@@ -2083,6 +2091,7 @@ public class AppOpsManager {
             "COARSE_LOCATION_SOURCE",
             "MANAGE_MEDIA",
             "BLUETOOTH_CONNECT",
+            "UWB_RANGING"
     };
 
     /**
@@ -2203,6 +2212,7 @@ public class AppOpsManager {
             null, // no permission for OP_ACCESS_COARSE_LOCATION_SOURCE,
             Manifest.permission.MANAGE_MEDIA,
             Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.UWB_RANGING,
     };
 
     /**
@@ -2323,6 +2333,7 @@ public class AppOpsManager {
             null, // ACCESS_COARSE_LOCATION_SOURCE
             null, // MANAGE_MEDIA
             null, // BLUETOOTH_CONNECT
+            null, // UWB_RANGING
     };
 
     /**
@@ -2442,6 +2453,7 @@ public class AppOpsManager {
             null, // ACCESS_COARSE_LOCATION_SOURCE
             null, // MANAGE_MEDIA
             null, // BLUETOOTH_CONNECT
+            null, // UWB_RANGING
     };
 
     /**
@@ -2560,6 +2572,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // ACCESS_COARSE_LOCATION_SOURCE
             AppOpsManager.MODE_DEFAULT, // MANAGE_MEDIA
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_CONNECT
+            AppOpsManager.MODE_ALLOWED, // UWB_RANGING
     };
 
     /**
@@ -2682,6 +2695,7 @@ public class AppOpsManager {
             false, // ACCESS_COARSE_LOCATION_SOURCE
             false, // MANAGE_MEDIA
             false, // BLUETOOTH_CONNECT
+            false, // UWB_RANGING
     };
 
     /**

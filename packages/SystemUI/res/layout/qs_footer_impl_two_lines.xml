@@ -129,10 +129,10 @@
 
                 <com.android.systemui.statusbar.AlphaOptimizedImageView
                     android:id="@+id/tuner_icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingStart="36dp"
-                    android:paddingEnd="4dp"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:layout_marginBottom="@dimen/qs_footer_icon_padding"
                     android:src="@drawable/tuner"
                     android:tint="?android:attr/textColorTertiary"
                     android:visibility="invisible" />

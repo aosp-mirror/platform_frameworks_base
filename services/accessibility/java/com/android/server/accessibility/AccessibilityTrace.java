@@ -25,6 +25,16 @@ public interface AccessibilityTrace {
     boolean isA11yTracingEnabled();
 
     /**
+     * Start tracing.
+     */
+    void startTrace();
+
+    /**
+     * Stop tracing.
+     */
+    void stopTrace();
+
+    /**
      * Log one trace entry.
      * @param where A string to identify this log entry, which can be used to filter/search
      *        through the tracing file.
@@ -38,4 +48,19 @@ public interface AccessibilityTrace {
      * @param callingParams The parameters for the method to be logged.
      */
     void logTrace(String where, String callingParams);
+
+    /**
+     * Log one trace entry. Accessibility services using AccessibilityInteractionClient to
+     * make screen content related requests use this API to log entry when receive callback.
+     * @param timestamp The timestamp when a callback is received.
+     * @param where A string to identify this log entry, which can be used to filter/search
+     *        through the tracing file.
+     * @param callingParams The parameters for the callback.
+     * @param processId The process id of the calling component.
+     * @param threadId The threadId of the calling component.
+     * @param callingUid The calling uid of the callback.
+     * @param callStack The call stack of the callback.
+     */
+    void logTrace(long timestamp, String where, String callingParams, int processId,
+            long threadId, int callingUid, StackTraceElement[] callStack);
 }

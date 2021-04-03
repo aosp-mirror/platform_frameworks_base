@@ -302,6 +302,10 @@ void GnssMeasurementCallbackAidl::translateSingleGnssMeasurement(JNIEnv* env,
 
     SET(Cn0DbHz, measurement.antennaCN0DbHz);
     SET(ConstellationType, static_cast<int32_t>(measurement.signalType.constellation));
+    // Half cycle state is reported in the AIDL version of GnssMeasurement
+    SET(AccumulatedDeltaRangeState,
+        (static_cast<int32_t>(measurement.accumulatedDeltaRangeState) |
+         ADR_STATE_HALF_CYCLE_REPORTED));
 
     if (measurement.flags & static_cast<uint32_t>(GnssMeasurement::HAS_CARRIER_FREQUENCY)) {
         SET(CarrierFrequencyHz, static_cast<float>(measurement.signalType.carrierFrequencyHz));
@@ -481,7 +485,7 @@ void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
         JavaObject& object) {
     translateSingleGnssMeasurement(measurement_V1_1.v1_0, object);
 
-    // Set the V1_1 flag, and mark that new field has valid information for Java Layer
+    // Half cycle state is reported in HIDL v1.1 or newer.
     SET(AccumulatedDeltaRangeState,
         (static_cast<int32_t>(measurement_V1_1.accumulatedDeltaRangeState) |
          ADR_STATE_HALF_CYCLE_REPORTED));

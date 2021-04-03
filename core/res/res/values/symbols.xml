@@ -2973,7 +2973,6 @@
   <java-symbol type="string" name="status_bar_clock" />
   <java-symbol type="string" name="status_bar_airplane" />
   <java-symbol type="string" name="status_bar_no_calling" />
-  <java-symbol type="string" name="status_bar_call_strength" />
   <java-symbol type="string" name="status_bar_mobile" />
   <java-symbol type="string" name="status_bar_ethernet" />
   <java-symbol type="string" name="status_bar_vpn" />

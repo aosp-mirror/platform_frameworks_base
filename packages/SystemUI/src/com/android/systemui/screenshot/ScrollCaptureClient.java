@@ -83,6 +83,13 @@ public class ScrollCaptureClient {
         int getMaxTiles();
 
         /**
+         * @return the maximum combined capture height for this session, in pixels.
+         */
+        default int getMaxHeight() {
+            return getMaxTiles() * getTileHeight();
+        }
+
+        /**
          * @return the height of each image tile
          */
         int getTileHeight();

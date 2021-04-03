@@ -194,24 +194,25 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
         outWindowInfo->bufferCount = static_cast<uint32_t>(query_value);
     }
 
-    outWindowInfo->dataspace = HAL_DATASPACE_V0_SRGB;
-    if (colorMode == ColorMode::WideColorGamut) {
-        skcms_Matrix3x3 surfaceGamut;
-        LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&surfaceGamut),
-                            "Could not get gamut matrix from color space");
-        if (memcmp(&surfaceGamut, &SkNamedGamut::kSRGB, sizeof(surfaceGamut)) == 0) {
-            outWindowInfo->dataspace = HAL_DATASPACE_V0_SCRGB;
-        } else if (memcmp(&surfaceGamut, &SkNamedGamut::kDisplayP3, sizeof(surfaceGamut)) == 0) {
-            outWindowInfo->dataspace = HAL_DATASPACE_DISPLAY_P3;
-        } else {
-            LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
-        }
-    }
-
     outWindowInfo->bufferFormat = ColorTypeToBufferFormat(colorType);
-    VkFormat vkPixelFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    if (outWindowInfo->bufferFormat == AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT) {
-        vkPixelFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+    outWindowInfo->colorspace = colorSpace;
+    outWindowInfo->dataspace = ColorSpaceToADataSpace(colorSpace.get(), colorType);
+    LOG_ALWAYS_FATAL_IF(outWindowInfo->dataspace == HAL_DATASPACE_UNKNOWN,
+                        "Unsupported colorspace");
+
+    VkFormat vkPixelFormat;
+    switch (colorType) {
+        case kRGBA_8888_SkColorType:
+            vkPixelFormat = VK_FORMAT_R8G8B8A8_UNORM;
+            break;
+        case kRGBA_F16_SkColorType:
+            vkPixelFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+            break;
+        case kRGBA_1010102_SkColorType:
+            vkPixelFormat = VK_FORMAT_A2B10G10R10_UNORM_PACK32;
+            break;
+        default:
+            LOG_ALWAYS_FATAL("Unsupported colorType: %d", (int)colorType);
     }
 
     LOG_ALWAYS_FATAL_IF(nullptr == vkManager.mGetPhysicalDeviceImageFormatProperties2,
@@ -425,7 +426,7 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     if (bufferInfo->skSurface.get() == nullptr) {
         bufferInfo->skSurface = SkSurface::MakeFromAHardwareBuffer(
                 mGrContext, ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
-                kTopLeft_GrSurfaceOrigin, DataSpaceToColorSpace(mWindowInfo.dataspace), nullptr);
+                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr);
         if (bufferInfo->skSurface.get() == nullptr) {
             ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
             mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer, fence_fd);

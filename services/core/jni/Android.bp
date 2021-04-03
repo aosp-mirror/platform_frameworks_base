@@ -104,7 +104,6 @@ cc_defaults {
         "libhardware",
         "libhardware_legacy",
         "libhidlbase",
-        "libkeystore_binder",
         "libmeminfo",
         "libmtp",
         "libnativehelper",

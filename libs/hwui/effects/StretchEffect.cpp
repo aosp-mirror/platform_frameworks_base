@@ -40,6 +40,8 @@ static const SkString stretchShader = SkString(R"(
     // scale intensity
     uniform float uDistanceStretchedX;
     uniform float uDistanceStretchedY;
+    uniform float uInverseDistanceStretchedX;
+    uniform float uInverseDistanceStretchedY;
     uniform float uDistDiffX;
 
     // Difference between the peak stretch amount and overscroll amount normalized
@@ -58,14 +60,20 @@ static const SkString stretchShader = SkString(R"(
     uniform float viewportWidth; // target height in pixels
     uniform float viewportHeight; // target width in pixels
 
+    float easeInCubic(float t, float d) {
+        float tmp = t * d;
+        return tmp * tmp * tmp;
+    }
+
     float computeOverscrollStart(
         float inPos,
         float overscroll,
         float uStretchAffectedDist,
+        float uInverseStretchAffectedDist,
         float distanceStretched
     ) {
         float offsetPos = uStretchAffectedDist - inPos;
-        float posBasedVariation = smoothstep(0., uStretchAffectedDist, offsetPos);
+        float posBasedVariation = easeInCubic(offsetPos, uInverseStretchAffectedDist);
         float stretchIntensity = overscroll * posBasedVariation;
         return distanceStretched - (offsetPos / (1. + stretchIntensity));
     }
@@ -75,10 +83,11 @@ static const SkString stretchShader = SkString(R"(
         float overscroll,
         float reverseStretchDist,
         float uStretchAffectedDist,
+        float uInverseStretchAffectedDist,
         float distanceStretched
     ) {
         float offsetPos = inPos - reverseStretchDist;
-        float posBasedVariation = (smoothstep(0., uStretchAffectedDist, offsetPos));
+        float posBasedVariation = easeInCubic(offsetPos, uInverseStretchAffectedDist);
         float stretchIntensity = (-overscroll) * posBasedVariation;
         return 1 - (distanceStretched - (offsetPos / (1. + stretchIntensity)));
     }
@@ -90,6 +99,7 @@ static const SkString stretchShader = SkString(R"(
         float inPos,
         float overscroll,
         float uStretchAffectedDist,
+        float uInverseStretchAffectedDist,
         float distanceStretched,
         float distanceDiff
     ) {
@@ -100,6 +110,7 @@ static const SkString stretchShader = SkString(R"(
                   inPos,
                   overscroll,
                   uStretchAffectedDist,
+                  uInverseStretchAffectedDist,
                   distanceStretched
                 );
             } else if (inPos >= distanceStretched) {
@@ -114,6 +125,7 @@ static const SkString stretchShader = SkString(R"(
                   overscroll,
                   stretchAffectedDist,
                   uStretchAffectedDist,
+                  uInverseStretchAffectedDist,
                   distanceStretched
                 );
             } else if (inPos < stretchAffectedDist) {
@@ -139,6 +151,7 @@ static const SkString stretchShader = SkString(R"(
             inU,
             uOverscrollX,
             uStretchAffectedDistX,
+            uInverseDistanceStretchedX,
             uDistanceStretchedX,
             uDistDiffX
         );
@@ -146,6 +159,7 @@ static const SkString stretchShader = SkString(R"(
             inV,
             uOverscrollY,
             uStretchAffectedDistY,
+            uInverseDistanceStretchedY,
             uDistanceStretchedY,
             uDistDiffY
         );
@@ -155,6 +169,7 @@ static const SkString stretchShader = SkString(R"(
     })");
 
 static const float ZERO = 0.f;
+static const float CONTENT_DISTANCE_STRETCHED = 1.f;
 
 sk_sp<SkImageFilter> StretchEffect::getImageFilter(const sk_sp<SkImage>& snapshotImage) const {
     if (isEmpty()) {
@@ -169,10 +184,12 @@ sk_sp<SkImageFilter> StretchEffect::getImageFilter(const sk_sp<SkImage>& snapsho
     float viewportHeight = stretchArea.height();
     float normOverScrollDistX = mStretchDirection.x();
     float normOverScrollDistY = mStretchDirection.y();
-    float distanceStretchedX = maxStretchAmountX / (1 + abs(normOverScrollDistX));
-    float distanceStretchedY = maxStretchAmountY / (1 + abs(normOverScrollDistY));
-    float diffX = distanceStretchedX;
-    float diffY = distanceStretchedY;
+    float distanceStretchedX = CONTENT_DISTANCE_STRETCHED / (1 + abs(normOverScrollDistX));
+    float distanceStretchedY = CONTENT_DISTANCE_STRETCHED / (1 + abs(normOverScrollDistY));
+    float inverseDistanceStretchedX = 1.f / distanceStretchedX;
+    float inverseDistanceStretchedY = 1.f / distanceStretchedY;
+    float diffX = distanceStretchedX - CONTENT_DISTANCE_STRETCHED;
+    float diffY = distanceStretchedY - CONTENT_DISTANCE_STRETCHED;
 
     if (mBuilder == nullptr) {
         mBuilder = std::make_unique<SkRuntimeShaderBuilder>(getStretchEffect());
@@ -180,10 +197,12 @@ sk_sp<SkImageFilter> StretchEffect::getImageFilter(const sk_sp<SkImage>& snapsho
 
     mBuilder->child("uContentTexture") = snapshotImage->makeShader(
             SkTileMode::kClamp, SkTileMode::kClamp, SkSamplingOptions(SkFilterMode::kLinear));
-    mBuilder->uniform("uStretchAffectedDistX").set(&maxStretchAmountX, 1);
-    mBuilder->uniform("uStretchAffectedDistY").set(&maxStretchAmountY, 1);
+    mBuilder->uniform("uStretchAffectedDistX").set(&CONTENT_DISTANCE_STRETCHED, 1);
+    mBuilder->uniform("uStretchAffectedDistY").set(&CONTENT_DISTANCE_STRETCHED, 1);
     mBuilder->uniform("uDistanceStretchedX").set(&distanceStretchedX, 1);
     mBuilder->uniform("uDistanceStretchedY").set(&distanceStretchedY, 1);
+    mBuilder->uniform("uInverseDistanceStretchedX").set(&inverseDistanceStretchedX, 1);
+    mBuilder->uniform("uInverseDistanceStretchedY").set(&inverseDistanceStretchedY, 1);
     mBuilder->uniform("uDistDiffX").set(&diffX, 1);
     mBuilder->uniform("uDistDiffY").set(&diffY, 1);
     mBuilder->uniform("uOverscrollX").set(&normOverScrollDistX, 1);

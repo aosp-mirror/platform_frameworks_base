@@ -4132,6 +4132,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void destroyInternal() {
+        final IncrementalFileStorages incrementalFileStorages;
         synchronized (mLock) {
             mSealed = true;
             if (!params.isStaged) {
@@ -4144,16 +4145,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             for (FileBridge bridge : mBridges) {
                 bridge.forceClose();
             }
-            if (mIncrementalFileStorages != null) {
-                mIncrementalFileStorages.cleanUp();
-                mIncrementalFileStorages = null;
-            }
+            incrementalFileStorages = mIncrementalFileStorages;
+            mIncrementalFileStorages = null;
         }
         // For staged sessions, we don't delete the directory where the packages have been copied,
         // since these packages are supposed to be read on reboot.
         // Those dirs are deleted when the staged session has reached a final state.
         if (stageDir != null && !params.isStaged) {
             try {
+                if (incrementalFileStorages != null) {
+                    incrementalFileStorages.cleanUp();
+                }
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {
             }
@@ -4171,13 +4173,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void cleanStageDir() {
+        final IncrementalFileStorages incrementalFileStorages;
         synchronized (mLock) {
-            if (mIncrementalFileStorages != null) {
-                mIncrementalFileStorages.cleanUp();
-                mIncrementalFileStorages = null;
-            }
+            incrementalFileStorages = mIncrementalFileStorages;
+            mIncrementalFileStorages = null;
         }
         try {
+            if (incrementalFileStorages != null) {
+                incrementalFileStorages.cleanUp();
+            }
             mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
         } catch (InstallerException ignored) {
         }

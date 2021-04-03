@@ -43,6 +43,7 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransition;
@@ -51,6 +52,7 @@ import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
+import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.transition.Transitions;
 
@@ -140,9 +142,15 @@ public class WMShellModule {
 
     @WMSingleton
     @Provides
-    static PipBoundsAlgorithm providesPipBoundsHandler(Context context,
-            PipBoundsState pipBoundsState) {
-        return new PipBoundsAlgorithm(context, pipBoundsState);
+    static PipSnapAlgorithm providePipSnapAlgorithm() {
+        return new PipSnapAlgorithm();
+    }
+
+    @WMSingleton
+    @Provides
+    static PipBoundsAlgorithm providesPipBoundsAlgorithm(Context context,
+            PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm) {
+        return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm);
     }
 
     // Handler is used by Icon.loadDrawableAsync
@@ -162,12 +170,12 @@ public class WMShellModule {
             PhonePipMenuController menuPhoneController, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
-            PipTransitionController pipTransitionController,
+            PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTouchHandler(context, menuPhoneController, pipBoundsAlgorithm,
-                pipBoundsState, pipTaskOrganizer, pipTransitionController,
+                pipBoundsState, pipTaskOrganizer, pipMotionHelper,
                 floatingContentCoordinator, pipUiEventLogger, mainExecutor);
     }
 
@@ -207,5 +215,17 @@ public class WMShellModule {
             PipBoundsState pipBoundsState, PhonePipMenuController pipMenuController) {
         return new PipTransition(context, pipBoundsState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipMotionHelper providePipMotionHelper(Context context,
+            PipBoundsState pipBoundsState, PipTaskOrganizer pipTaskOrganizer,
+            PhonePipMenuController menuController, PipSnapAlgorithm pipSnapAlgorithm,
+            PipTransitionController pipTransitionController,
+            FloatingContentCoordinator floatingContentCoordinator) {
+        return new PipMotionHelper(context, pipBoundsState, pipTaskOrganizer,
+                menuController, pipSnapAlgorithm, pipTransitionController,
+                floatingContentCoordinator);
     }
 }

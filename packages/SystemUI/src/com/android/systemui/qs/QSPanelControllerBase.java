@@ -202,11 +202,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private void addTile(final QSTile tile, boolean collapsedView) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
-        r.tileView = mHost.createTileView(tile, collapsedView);
+        r.tileView = mHost.createTileView(getContext(), tile, collapsedView);
         mView.addTile(r);
         mRecords.add(r);
         mCachedSpecs = getTilesSpecs();
-
     }
 
     /** */

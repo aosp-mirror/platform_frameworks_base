@@ -6562,7 +6562,7 @@ public class Notification implements Parcelable
             theme = new ContextThemeWrapper(mContext, R.style.Theme_DeviceDefault_DayNight)
                     .getTheme();
             try (TypedArray ta = theme.obtainStyledAttributes(new int[]{attrRes})) {
-                return ta.getColor(0, defaultColor);
+                return ta == null ? defaultColor : ta.getColor(0, defaultColor);
             }
         }
 
@@ -9060,10 +9060,8 @@ public class Notification implements Parcelable
             container.setDrawableTint(buttonId, false, tintColor,
                     PorterDuff.Mode.SRC_ATOP);
 
-            final TypedArray typedArray = mBuilder.mContext.obtainStyledAttributes(
-                    new int[]{ android.R.attr.colorControlHighlight });
-            int rippleAlpha = Color.alpha(typedArray.getColor(0, 0));
-            typedArray.recycle();
+            int rippleAlpha = Color.alpha(mBuilder.obtainThemeColor(
+                    android.R.attr.colorControlHighlight, COLOR_DEFAULT));
             int rippleColor = Color.argb(rippleAlpha, Color.red(tintColor), Color.green(tintColor),
                     Color.blue(tintColor));
             container.setRippleDrawableColor(buttonId, ColorStateList.valueOf(rippleColor));
@@ -9150,9 +9148,12 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class CallStyle extends Style {
-        private static final int CALL_TYPE_INCOMING = 1;
-        private static final int CALL_TYPE_ONGOING = 2;
-        private static final int CALL_TYPE_SCREENING = 3;
+        /** @hide */
+        public static final int CALL_TYPE_INCOMING = 1;
+        /** @hide */
+        public static final int CALL_TYPE_ONGOING = 2;
+        /** @hide */
+        public static final int CALL_TYPE_SCREENING = 3;
 
         /**
          * This is a key used privately on the action.extras to give spacing priority
