@@ -20,10 +20,10 @@ import android.annotation.Nullable;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.security.keystore.AndroidKeyStoreSpi;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.security.keystore2.AndroidKeyStoreSpi;
 import android.util.Slog;
 import android.util.SparseArray;
 
