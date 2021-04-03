@@ -23,7 +23,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import android.app.Fragment;
 import android.app.StatusBarManager;
+import android.content.Context;
+import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
@@ -34,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -156,5 +160,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         Mockito.verify(mStatusBarStateController).isDozing();
         Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+    }
+
+    @Override
+    protected Fragment instantiate(Context context, String className, Bundle arguments) {
+        return new CollapsedStatusBarFragment(mock(OngoingCallController.class));
     }
 }

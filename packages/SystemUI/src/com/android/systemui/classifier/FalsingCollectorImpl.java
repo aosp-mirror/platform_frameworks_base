@@ -275,6 +275,11 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     @Override
+    public void onMotionEventComplete() {
+        mFalsingDataProvider.onMotionEventComplete();
+    }
+
+    @Override
     public void avoidGesture() {
         mAvoidGesture = true;
         if (mPendingDownEvent != null) {

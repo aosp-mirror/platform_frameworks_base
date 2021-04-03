@@ -143,10 +143,10 @@ are ready to act on the owner's action, and then query the `FalsingManager`. The
 will update its belief in pocket dialing based only on the last call made, so multiple calls per
 gesture are not well defined.
 
-The `FalsingManager` does not update its belief in pocket-dialing until a new
-gesture starts. That is to say, if the owner makes a bad tap on your feature,
-the belief in pocket dialing will not incorporate this new data until the
-following gesture begins.
+The `FalsingManager` does not update its belief in pocket-dialing until after a gesture completes.
+That is to say, if the owner makes a bad tap on your feature, the "belief" in pocket dialing will
+not incorporate this new data after processing on the final `ACTION_UP` or `ACTION_CANCEL` event
+occurs.
 
 If you expect a mix of taps, double taps, and swipes on your feature, segment them
 accordingly. Figure out which `FalsingManager` method you need to call first, rather than relying

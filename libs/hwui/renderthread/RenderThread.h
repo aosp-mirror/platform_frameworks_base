@@ -171,6 +171,7 @@ private:
     friend class android::uirenderer::WebViewFunctor;
     friend class android::uirenderer::skiapipeline::VkFunctorDrawHandler;
     friend class android::uirenderer::VectorDrawable::Tree;
+    friend class sp<RenderThread>;
 
     RenderThread();
     virtual ~RenderThread();

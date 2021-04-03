@@ -74,10 +74,6 @@ public interface StatusBarIconController {
     /**
      * Display the no calling & SMS icons.
      */
-    void setCallStrengthIcons(String slot, List<CallIndicatorIconState> states);
-    /**
-     * Display the no calling & SMS icons.
-     */
     void setNoCallingIcons(String slot, List<CallIndicatorIconState> states);
     public void setIconVisibility(String slot, boolean b);
 

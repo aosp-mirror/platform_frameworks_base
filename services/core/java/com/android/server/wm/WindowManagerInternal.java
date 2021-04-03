@@ -81,6 +81,22 @@ public abstract class WindowManagerInternal {
         void logTrace(
                 String where, String callingParams, byte[] a11yDump, int callingUid,
                 StackTraceElement[] stackTrace);
+
+        /**
+         * Add an accessibility trace entry.
+         *
+         * @param where A string to identify this log entry, which can be used to filter/search
+         *        through the tracing file.
+         * @param callingParams The parameters for the method to be logged.
+         * @param a11yDump The proto byte array for a11y state when the entry is generated.
+         * @param callingUid The calling uid.
+         * @param callStack The call stack of the method to be logged.
+         * @param timeStamp The time when the method to be logged is called.
+         * @param processId The calling process Id.
+         * @param threadId The calling thread Id.
+         */
+        void logTrace(String where, String callingParams, byte[] a11yDump, int callingUid,
+                StackTraceElement[] callStack, long timeStamp, int processId, long threadId);
     }
 
     /**

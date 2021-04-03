@@ -42,7 +42,7 @@ import java.lang.annotation.RetentionPolicy;
  * Controller class of PiP animations (both from and to PiP mode).
  */
 public class PipAnimationController {
-    private static final float FRACTION_START = 0f;
+    static final float FRACTION_START = 0f;
     private static final float FRACTION_END = 1f;
 
     public static final int ANIM_TYPE_BOUNDS = 0;

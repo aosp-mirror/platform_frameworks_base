@@ -15,6 +15,8 @@
  */
 package com.android.internal.os;
 
+import android.annotation.NonNull;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
@@ -114,18 +116,47 @@ public abstract class PowerCalculator {
     public void reset() {
     }
 
+    protected static @BatteryConsumer.PowerModel int getPowerModel(
+            long measuredEnergyUC, @NonNull BatteryUsageStatsQuery query) {
+        if (measuredEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE
+                && !query.shouldForceUsePowerProfileModel()) {
+            return BatteryConsumer.POWER_MODEL_MEASURED_ENERGY;
+        }
+        return BatteryConsumer.POWER_MODEL_POWER_PROFILE;
+    }
+
+    protected static @BatteryConsumer.PowerModel int getPowerModel(long measuredEnergyUC) {
+        return measuredEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE
+                ? BatteryConsumer.POWER_MODEL_MEASURED_ENERGY
+                : BatteryConsumer.POWER_MODEL_POWER_PROFILE;
+    }
+
     /**
      * Returns either the measured energy converted to mAh or a usage-based estimate.
      */
-    protected static double getMeasuredOrEstimatedPower(long measuredEnergyUC,
-            UsageBasedPowerEstimator powerEstimator, long durationMs,
-            boolean forceUsePowerProfileModel) {
-        if (measuredEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE
-                && !forceUsePowerProfileModel) {
-            return uCtoMah(measuredEnergyUC);
+    protected static double getMeasuredOrEstimatedPower(@BatteryConsumer.PowerModel int powerModel,
+            long measuredEnergyUC, UsageBasedPowerEstimator powerEstimator, long durationMs) {
+        switch (powerModel) {
+            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+                return uCtoMah(measuredEnergyUC);
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+            default:
+                return powerEstimator.calculatePower(durationMs);
         }
-        return powerEstimator.calculatePower(durationMs);
     }
+
+    /**
+     * Returns either the measured energy converted to mAh or a usage-based estimate.
+     */
+    protected static double getMeasuredOrEstimatedPower(
+            long measuredEnergyUC, UsageBasedPowerEstimator powerEstimator, long durationMs) {
+        if (measuredEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE) {
+            return uCtoMah(measuredEnergyUC);
+        } else {
+            return powerEstimator.calculatePower(durationMs);
+        }
+    }
+
 
     /**
      * Converts charge in mAh to string.

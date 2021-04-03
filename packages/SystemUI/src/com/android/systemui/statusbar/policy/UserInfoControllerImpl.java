@@ -143,7 +143,7 @@ public class UserInfoControllerImpl implements UserInfoController {
         final int userId = userInfo.id;
         final boolean isGuest = userInfo.isGuest();
         final String userName = userInfo.name;
-        final boolean lightIcon = mContext.getThemeResId() != R.style.Theme_SystemUI_Light;
+        final boolean lightIcon = mContext.getThemeResId() != R.style.Theme_SystemUI_LightWallpaper;
 
         final Resources res = mContext.getResources();
         final int avatarSize = Math.max(

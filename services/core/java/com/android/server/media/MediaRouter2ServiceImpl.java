@@ -113,6 +113,22 @@ class MediaRouter2ServiceImpl {
     ////////////////////////////////////////////////////////////////
 
     @NonNull
+    public void checkModifyAudioRoutingPermission() {
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+
+        try {
+            if (mContext.checkPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING, pid, uid)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Must hold the MODIFY_AUDIO_ROUTING permission.");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @NonNull
     public List<MediaRoute2Info> getSystemRoutes() {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();

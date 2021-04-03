@@ -423,9 +423,15 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         return null;
     }
 
-    public QSTileView createTileView(QSTile tile, boolean collapsedView) {
+    /**
+     * Create a view for a tile, iterating over all possible {@link QSFactory}.
+     *
+     * @see QSFactory#createTileView
+     */
+    public QSTileView createTileView(Context themedContext, QSTile tile, boolean collapsedView) {
         for (int i = 0; i < mQsFactories.size(); i++) {
-            QSTileView view = mQsFactories.get(i).createTileView(tile, collapsedView);
+            QSTileView view = mQsFactories.get(i)
+                    .createTileView(themedContext, tile, collapsedView);
             if (view != null) {
                 return view;
             }
