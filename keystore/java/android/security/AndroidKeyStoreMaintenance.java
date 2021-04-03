@@ -47,7 +47,6 @@ public class AndroidKeyStoreMaintenance {
      * @hide
      */
     public static int onUserAdded(@NonNull int userId) {
-        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return 0;
         try {
             getService().onUserAdded(userId);
             return 0;
@@ -68,7 +67,6 @@ public class AndroidKeyStoreMaintenance {
      * @hide
      */
     public static int onUserRemoved(int userId) {
-        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return 0;
         try {
             getService().onUserRemoved(userId);
             return 0;
@@ -91,7 +89,6 @@ public class AndroidKeyStoreMaintenance {
      * @hide
      */
     public static int onUserPasswordChanged(int userId, @Nullable byte[] password) {
-        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return 0;
         try {
             getService().onUserPasswordChanged(userId, password);
             return 0;
@@ -109,7 +106,6 @@ public class AndroidKeyStoreMaintenance {
      * be cleared.
      */
     public static int clearNamespace(@Domain int domain, long namespace) {
-        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return 0;
         try {
             getService().clearNamespace(domain, namespace);
             return 0;
@@ -144,7 +140,6 @@ public class AndroidKeyStoreMaintenance {
      * Informs Keystore 2.0 that an off body event was detected.
      */
     public static void onDeviceOffBody() {
-        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return;
         try {
             getService().onDeviceOffBody();
         } catch (Exception e) {

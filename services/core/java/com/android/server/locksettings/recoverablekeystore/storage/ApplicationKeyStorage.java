@@ -20,8 +20,6 @@ import static android.security.keystore.recovery.RecoveryController.ERROR_SERVIC
 
 import android.annotation.Nullable;
 import android.os.ServiceSpecificException;
-import android.security.Credentials;
-import android.security.KeyStore;
 import android.security.KeyStore2;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
@@ -75,13 +73,7 @@ public class ApplicationKeyStorage {
     public @Nullable String getGrantAlias(int userId, int uid, String alias) {
         Log.i(TAG, String.format(Locale.US, "Get %d/%d/%s", userId, uid, alias));
         String keystoreAlias = getInternalAlias(userId, uid, alias);
-        if (useKeyStore2()) {
-            return makeKeystoreEngineGrantString(uid, keystoreAlias);
-        } else {
-            // Aliases used by {@link KeyStore} are different than used by public API.
-            // {@code USER_PRIVATE_KEY} prefix is used secret keys.
-            return KeyStore.getInstance().grant(Credentials.USER_PRIVATE_KEY + keystoreAlias, uid);
-        }
+        return makeKeystoreEngineGrantString(uid, keystoreAlias);
     }
 
     public void setSymmetricKeyEntry(int userId, int uid, String alias, byte[] secretKey)
@@ -148,9 +140,4 @@ public class ApplicationKeyStorage {
         }
         return String.format("%s%016X", APPLICATION_KEY_GRANT_PREFIX, key.nspace);
     }
-
-    private static boolean useKeyStore2() {
-        return android.security.keystore2.AndroidKeyStoreProvider.isInstalled();
-    }
-
 }
