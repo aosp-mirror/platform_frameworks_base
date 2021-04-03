@@ -243,7 +243,7 @@
     <dimen name="notification_guts_conversation_action_text_padding_start">32dp</dimen>
     <dimen name="conversation_onboarding_bullet_gap_width">6dp</dimen>
 
-    <dimen name="notification_guts_header_top_padding">11dp</dimen>
+    <dimen name="notification_guts_header_top_padding">12dp</dimen>
 
     <!-- The height of the header in inline settings -->
     <dimen name="notification_guts_header_height">24dp</dimen>
