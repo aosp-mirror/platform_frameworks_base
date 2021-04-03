@@ -211,7 +211,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Foutopsporingsmodus als wifi is verbonden"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Fout"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Draadloze foutopsporing"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Schakel draadloze foutopsporing in om beschikbare apparaten te bekijken en te gebruiken"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Zet draadloze foutopsporing aan om beschikbare apparaten te bekijken en te gebruiken"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Apparaat koppelen met QR-code"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Nieuwe apparaten koppelen via QR-codescanner"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Apparaat koppelen met koppelingscode"</string>
@@ -240,7 +240,7 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"Stand-by"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Scherm gaat nooit uit tijdens het opladen"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Snoop-logbestand voor bluetooth-HCI aanzetten"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth-pakketten opslaan. (Schakel Bluetooth in nadat je deze instelling hebt gewijzigd)."</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth-pakketten opslaan. (Zet Bluetooth aan nadat je deze instelling hebt gewijzigd)."</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM-ontgrendeling"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Toestaan dat de bootloader wordt ontgrendeld"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM-ontgrendeling toestaan?"</string>
@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet wordt binnenkort mogelijk uitgezet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Apparaat wordt binnenkort mogelijk uitgezet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Nog <xliff:g id="TIME">%1$s</xliff:g> tot opgeladen"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> tot opgeladen"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Optimaliseren voor batterijduur"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Opladen"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Langzaam opladen"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Wordt niet opgeladen"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Aangesloten, kan nu niet opladen"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Volledig"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Ingesteld door beheerder"</string>
     <string name="disabled" msgid="8017887509554714950">"Uitgezet"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Toegestaan"</string>
@@ -501,18 +504,13 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Minder tijd."</string>
     <string name="cancel" msgid="5665114069455378395">"Annuleren"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
-    <!-- no translation found for alarms_and_reminders_label (6918395649731424294) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_switch_title (186992351401152744) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_title (2988400785896875237) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_footer_title (5882788882647778753) -->
-    <skip />
-    <!-- no translation found for keywords_alarms_and_reminders (8882739572152019456) -->
-    <skip />
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en herinneringen"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Instellen van wekkers en herinneringen toestaan"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Wekkers en herinneringen"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Toestaan dat deze app wekkers of andere op tijd gebaseerde afspraken plant. Hiermee kan de app worden geactiveerd en uitgevoerd, ook als je het apparaat niet gebruikt. Als je dit recht intrekt, kan de werking van de app worden verstoord (met name wekkers die de app heeft ingesteld, werken niet meer)."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"schema, wekker, herinnering, afspraak"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aanzetten"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Schakel Niet storen in."</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Zet Niet storen aan."</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nooit"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Alleen prioriteit"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -526,7 +524,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Zojuist"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefoonspeaker"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Deze telefoon"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Probleem bij verbinding maken. Schakel het apparaat uit en weer in."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Probleem bij verbinding maken. Zet het apparaat uit en weer aan."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedraad audioapparaat"</string>
     <string name="help_label" msgid="3528360748637781274">"Hulp en feedback"</string>
     <string name="storage_category" msgid="2287342585424631813">"Opslag"</string>
