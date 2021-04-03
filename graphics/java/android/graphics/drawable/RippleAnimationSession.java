@@ -49,23 +49,12 @@ public final class RippleAnimationSession {
     private Runnable mOnUpdate;
     private long mStartTime;
     private boolean mForceSoftware;
-    private final ValueAnimator mSparkle = ValueAnimator.ofFloat(0, 1);
+    private boolean mAnimateSparkle;
 
     RippleAnimationSession(@NonNull AnimationProperties<Float, Paint> properties,
             boolean forceSoftware) {
         mProperties = properties;
         mForceSoftware = forceSoftware;
-
-        mSparkle.addUpdateListener(anim -> {
-            final long now = AnimationUtils.currentAnimationTimeMillis();
-            final long elapsed = now - mStartTime - ENTER_ANIM_DURATION;
-            final float phase = (float) elapsed / 800;
-            mProperties.getShader().setNoisePhase(phase);
-            notifyUpdate();
-        });
-        mSparkle.setDuration(ENTER_ANIM_DURATION);
-        mSparkle.setInterpolator(LINEAR_INTERPOLATOR);
-        mSparkle.setRepeatCount(ValueAnimator.INFINITE);
     }
 
     @NonNull RippleAnimationSession enter(Canvas canvas) {
@@ -99,6 +88,16 @@ public final class RippleAnimationSession {
         return this;
     }
 
+    public boolean shouldAnimateSparkle() {
+        return mAnimateSparkle;
+    }
+
+    public float getSparklePhase() {
+        final long now = AnimationUtils.currentAnimationTimeMillis();
+        final long elapsed = now - mStartTime;
+        return  (float) elapsed / 800;
+    }
+
     private boolean isHwAccelerated(Canvas canvas) {
         return canvas.isHardwareAccelerated() && !mForceSoftware;
     }
@@ -115,7 +114,7 @@ public final class RippleAnimationSession {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                mSparkle.end();
+                mAnimateSparkle = false;
                 Consumer<RippleAnimationSession> onEnd = mOnSessionEnd;
                 if (onEnd != null) onEnd.accept(RippleAnimationSession.this);
             }
@@ -149,7 +148,7 @@ public final class RippleAnimationSession {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                mSparkle.end();
+                mAnimateSparkle = false;
                 Consumer<RippleAnimationSession> onEnd = mOnSessionEnd;
                 if (onEnd != null) onEnd.accept(RippleAnimationSession.this);
             }
@@ -176,9 +175,7 @@ public final class RippleAnimationSession {
         expand.addListener(new AnimatorListener(this));
         expand.setInterpolator(FAST_OUT_LINEAR_IN);
         expand.start();
-        if (!mSparkle.isRunning()) {
-            mSparkle.start();
-        }
+        mAnimateSparkle = true;
     }
 
     private void enterSoftware() {

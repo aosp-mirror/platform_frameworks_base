@@ -27,10 +27,12 @@ import android.media.audio.common.AudioOffloadInfo;
  *
  * {@hide}
  */
+@JavaDerive(equals = true, toString = true)
+@VintfStability
 parcelable AudioConfig {
     int sampleRateHz;
     int channelMask;
-    AudioFormat format;
+    AudioFormat format = AudioFormat.INVALID;
     AudioOffloadInfo offloadInfo;
     long frameCount;
 }

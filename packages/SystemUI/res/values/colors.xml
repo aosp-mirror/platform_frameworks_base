@@ -288,4 +288,9 @@
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#CCFFFFFF</color> <!-- 80% -->
     <color name="accessibility_floating_menu_stroke_dark">#26FFFFFF</color> <!-- 15% -->
+
+    <!-- Wallet screen -->
+    <color name="wallet_white">#FFFFFF</color>
+    <color name="wallet_card_border">#33FFFFFF</color>
+    <color name="wallet_primary_text">@color/GM2_grey_900</color>
 </resources>

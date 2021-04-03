@@ -26,8 +26,14 @@ package android.media.audio.common;
  *
  * {@hide}
  */
+@VintfStability
 @Backing(type="int")
 enum AudioStreamType {
+    /**
+     * Used as default value in parcelables to indicate that a value was not set.
+     * Should never be considered a valid setting, except for backward compatibility scenarios.
+     */
+    INVALID = -2,
     DEFAULT = -1,
     MIN = 0,
     VOICE_CALL = 0,

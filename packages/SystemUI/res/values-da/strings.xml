@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller din organisation tillader ikke, at du tager screenshots"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Rediger"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediger screenshot"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Rul"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Rul screenshot"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Medtag mere"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Luk screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Forhåndsvisning af screenshot"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Øverste kant"</string>
@@ -178,6 +177,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Afvis"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sæt fingeren på fingeraftrykslæseren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon for fingeraftryk"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Forsøger at finde dig…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ansigt"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Knap for kompatibilitetszoom."</string>
@@ -378,7 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Byt om på farver"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Farvekorrigeringstilstand"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Flere indstillinger"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Brugerindstillinger"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Udfør"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Luk"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Tilsluttet"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Tilsluttet – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Opretter forbindelse…"</string>
@@ -523,6 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> og har forbindelse til VPN-netværk"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Din organisation kan overvåge netværkstrafikken på din arbejdsprofil"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kan overvåge netværkstrafik på din arbejdsprofil"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Din it-administrator kan se netværksaktivitet på din arbejdsprofil"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Netværket kan være overvåget"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Denne enhed har forbindelse til VPN-netværk"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Din arbejdsprofil har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -538,7 +546,7 @@
     <string name="disable_vpn" msgid="482685974985502922">"Deaktiver VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Afbryd VPN-forbindelse"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Se politikker"</string>
-    <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Se styringselementer"</string>
+    <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Se indstillinger"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nDin it-administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er tilknyttet din enhed, og din enheds placeringsdata.\n\nKontakt din it-administrator for at få mere at vide."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> kan muligvis administrere apps, få adgang til data, der er tilknyttet denne enhed, og ændre enhedens indstillinger.\n\nKontakt <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>, hvis du har spørgsmål."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Denne enhed tilhører din organisation.\n\nDin it-administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er tilknyttet din enhed, og din enheds placeringsdata.\n\nKontakt din it-administrator for at få mere at vide."</string>
@@ -1024,8 +1032,8 @@
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Hold afbryderknappen nede for at få adgang til dine betjeningselementer"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Vælg en app for at tilføje styring"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> styringselement er tilføjet.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> styringselementer er tilføjet.</item>
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> styring er tilføjet.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> styring er tilføjet.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Angivet som favorit"</string>
@@ -1036,7 +1044,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Flyt til position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Betjeningselementer"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vælg de indstillinger, der skal vises i menuen for afbryderknappen"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Flyt rundt på styringselementer ved at holde dem nede og trække"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Flyt et felt ved at holde det nede og trække"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle styringselementerne blev fjernet"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ændringerne blev ikke gemt"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Se andre apps"</string>
@@ -1088,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"Åben samtale"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Samtalewidgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tryk på en samtale for at føje den til din startskærm"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"For <xliff:g id="DURATION">%1$s</xliff:g> siden"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"For mindre end <xliff:g id="DURATION">%1$s</xliff:g> siden"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"For mere end <xliff:g id="DURATION">%1$s</xliff:g> siden"</string>
@@ -1102,6 +1118,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"Venner"</string>
     <string name="empty_status" msgid="5938893404951307749">"Lad os chatte i aften!"</string>
     <string name="missed_call" msgid="4228016077700161689">"Ubesvaret opkald"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Se dine seneste beskeder, mistede opkald og statusopdateringer"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Samtale"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Der er problemer med at aflæse dit batteriniveau"</string>

@@ -88,7 +88,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mComponent1 = new ComponentName(mContext, "component1");
         mComponent2 = new ComponentName(mContext, "component2");
         mPipBoundsState = new PipBoundsState(mContext);
-        mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState);
+        mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
+                new PipSnapAlgorithm());
         mMainExecutor = new TestShellExecutor();
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext,
                 mMockSyncTransactionQueue, mPipBoundsState,

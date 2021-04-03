@@ -21,24 +21,23 @@ import android.annotation.Nullable;
 import android.hardware.audio.common.V2_0.Uuid;
 import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger.V2_3.ISoundTriggerHw;
-import android.hardware.soundtrigger.V2_3.Properties;
+import android.media.soundtrigger.AudioCapabilities;
+import android.media.soundtrigger.ConfidenceLevel;
+import android.media.soundtrigger.ModelParameter;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.Phrase;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseRecognitionExtra;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionMode;
+import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.SoundModelType;
 import android.media.audio.common.AudioConfig;
 import android.media.audio.common.AudioOffloadInfo;
-import android.media.soundtrigger_middleware.AudioCapabilities;
-import android.media.soundtrigger_middleware.ConfidenceLevel;
-import android.media.soundtrigger_middleware.ModelParameter;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.Phrase;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.RecognitionMode;
-import android.media.soundtrigger_middleware.RecognitionStatus;
-import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.SoundModelType;
-import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 import android.os.HidlMemory;
 import android.os.HidlMemoryUtil;
 import android.os.ParcelFileDescriptor;
@@ -55,9 +54,9 @@ import java.util.regex.Matcher;
  */
 class ConversionUtil {
     static @NonNull
-    SoundTriggerModuleProperties hidl2aidlProperties(
+    Properties hidl2aidlProperties(
             @NonNull ISoundTriggerHw.Properties hidlProperties) {
-        SoundTriggerModuleProperties aidlProperties = new SoundTriggerModuleProperties();
+        Properties aidlProperties = new Properties();
         aidlProperties.implementor = hidlProperties.implementor;
         aidlProperties.description = hidlProperties.description;
         aidlProperties.version = hidlProperties.version;
@@ -75,9 +74,9 @@ class ConversionUtil {
         return aidlProperties;
     }
 
-    static @NonNull SoundTriggerModuleProperties hidl2aidlProperties(
-            @NonNull Properties hidlProperties) {
-        SoundTriggerModuleProperties aidlProperties = hidl2aidlProperties(hidlProperties.base);
+    static @NonNull Properties hidl2aidlProperties(
+            @NonNull android.hardware.soundtrigger.V2_3.Properties hidlProperties) {
+        Properties aidlProperties = hidl2aidlProperties(hidlProperties.base);
         aidlProperties.supportedModelArch = hidlProperties.supportedModelArch;
         aidlProperties.audioCapabilities =
                 hidl2aidlAudioCapabilities(hidlProperties.audioCapabilities);
@@ -216,9 +215,11 @@ class ConversionUtil {
     }
 
     static @NonNull android.hardware.soundtrigger.V2_3.RecognitionConfig aidl2hidlRecognitionConfig(
-            @NonNull RecognitionConfig aidlConfig) {
+            @NonNull RecognitionConfig aidlConfig, int deviceHandle, int ioHandle) {
         android.hardware.soundtrigger.V2_3.RecognitionConfig hidlConfig =
                 new android.hardware.soundtrigger.V2_3.RecognitionConfig();
+        hidlConfig.base.header.captureDevice = deviceHandle;
+        hidlConfig.base.header.captureHandle = ioHandle;
         hidlConfig.base.header.captureRequested = aidlConfig.captureRequested;
         for (PhraseRecognitionExtra aidlPhraseExtra : aidlConfig.phraseRecognitionExtras) {
             hidlConfig.base.header.phrases.add(aidl2hidlPhraseRecognitionExtra(aidlPhraseExtra));
@@ -299,8 +300,6 @@ class ConversionUtil {
         aidlEvent.status = hidl2aidlRecognitionStatus(hidlEvent.status);
         aidlEvent.type = hidl2aidlSoundModelType(hidlEvent.type);
         aidlEvent.captureAvailable = hidlEvent.captureAvailable;
-        // hidlEvent.captureSession is never a valid field.
-        aidlEvent.captureSession = -1;
         aidlEvent.captureDelayMs = hidlEvent.captureDelayMs;
         aidlEvent.capturePreambleMs = hidlEvent.capturePreambleMs;
         aidlEvent.triggerInData = hidlEvent.triggerInData;

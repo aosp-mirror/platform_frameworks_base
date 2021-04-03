@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Namest. program za paket"</string>
     <string name="install" msgid="711829760615509273">"Namesti"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Končano"</string>
     <string name="cancel" msgid="1018267193425558088">"Prekliči"</string>
     <string name="installing" msgid="4921993079741206516">"Nameščanje …"</string>
     <string name="installing_app" msgid="1165095864863849422">"Nameščanje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplikacija je nameščena."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Ali želite namestiti to aplikacijo?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Ali želite namestiti posodobitev te obstoječe aplikacije? Obstoječi podatki ne bodo izgubljeni."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Ali želite namestiti posodobitev te vgrajene aplikacije? Obstoječi podatki ne bodo izgubljeni."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Aplikacija ni nameščena."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Namestitev paketa je bila blokirana."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikacija ni bila nameščena, ker je paket v navzkrižju z obstoječim paketom."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Dejanja namestitve in odstranitve v sistemu Android Wear niso podprta."</string>
     <string name="message_staging" msgid="8032722385658438567">"Priprava aplikacije …"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Neznano"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Vaš tablični računalnik zaradi varnosti nima dovoljenja za nameščanje neznanih aplikacij iz tega vira."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Vaš televizor zaradi varnosti nima dovoljenja za nameščanje neznanih aplikacij iz tega vira."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Vaš telefon zaradi varnosti nima dovoljenja za nameščanje neznanih aplikacij iz tega vira."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Neznane aplikacije lahko resno ogrozijo varnost telefona in osebnih podatkov. Z namestitvijo te aplikacije se strinjate, da ste sami odgovorni za morebitno škodo, nastalo v telefonu, ali izgubo podatkov, do katerih lahko pride zaradi uporabe te aplikacije."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Neznane aplikacije lahko resno ogrozijo varnost tabličnega računalnika in osebnih podatkov. Z namestitvijo te aplikacije se strinjate, da ste sami odgovorni za morebitno škodo, nastalo v tabličnem računalniku, ali izgubo podatkov, do katerih lahko pride zaradi uporabe te aplikacije."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Neznane aplikacije lahko resno ogrozijo varnost televizorja in osebnih podatkov. Z namestitvijo te aplikacije se strinjate, da ste sami odgovorni za morebitno škodo, nastalo v televizorju, ali izgubo podatkov, do katerih lahko pride zaradi uporabe te aplikacije."</string>

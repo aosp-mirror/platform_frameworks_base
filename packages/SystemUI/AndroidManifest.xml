@@ -762,6 +762,17 @@
                   android:visibleToInstantApps="true">
         </activity>
 
+        <activity android:name=".wallet.ui.WalletActivity"
+                  android:label="@string/wallet_title"
+                  android:theme="@style/Wallet.Theme"
+                  android:excludeFromRecents="true"
+                  android:showWhenLocked="true"
+                  android:showForAllUsers="true"
+                  android:launchMode="singleInstance"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
         <receiver android:name=".controls.management.ControlsRequestReceiver"
             android:exported="true">
             <intent-filter>

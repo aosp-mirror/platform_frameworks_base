@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"बदलाव करें"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रीनशॉट में बदलाव करें"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"स्क्रोल करें"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"स्क्रीनशॉट को स्क्रोल करें"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"ज़्यादा जानकारी कैप्चर करें"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट को खारिज करें"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉट की झलक"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"स्क्रीनशॉट को ऊपर से काटने की सीमा"</string>
@@ -178,6 +177,12 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"खारिज करें"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फ़िंगरप्रिंट सेंसर को छुएं"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"फ़िंगरप्रिंट आइकॉन"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
+    <skip />
+    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"आपको पहचान रहा है…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"चेहरे का आइकॉन"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"संगतता ज़ूम बटन."</string>
@@ -378,7 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"रंग उलटें"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"रंग सुधार मोड"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"और सेटिंग"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"उपयोगकर्ता सेटिंग"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"हो गया"</string>
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"बंद करें"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"कनेक्ट है"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"कनेक्ट किया गया, बैटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> है"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"कनेक्ट हो रहा है..."</string>
@@ -490,7 +497,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाएं"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"बैटरी सेवर चालू है"</string>
-    <string name="battery_saver_notification_text" msgid="2617841636449016951">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>
+    <string name="battery_saver_notification_text" msgid="2617841636449016951">"परफ़ॉर्मेंस और बैकग्राउंड डेटा को कम करता है"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"बैटरी सेवर बंद करें"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपकी स्क्रीन पर दिख रही या आपके डिवाइस पर चलाई जा रही जानकारी ऐक्सेस कर सकता है. इसमें पासवर्ड, पैसे चुकाने का ब्यौरा, फ़ोटो, मैसेज, और चलाए गए ऑडियो जैसी जानकारी शामिल है."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"रिकॉर्ड या कास्ट करते समय, वह सेवा जो यह फ़ंक्शन उपलब्ध कराती है, आपके डिवाइस पर चलाई जा रही या स्क्रीन पर दिख रही जानकारी को ऐक्सेस कर सकती है. इसमें पासवर्ड, पैसे चुकाने का ब्यौरा, फ़ोटो, मैसेज, और चलाए गए ऑडियो जैसी जानकारी शामिल है."</string>
@@ -523,6 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> के पास है. इस डिवाइस को वीपीएन से कनेक्ट किया गया है"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"आपका संगठन आपकी वर्क प्रोफ़ाइल में नेटवर्क ट्रैफ़िक की निगरानी कर सकता है"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> आपकी वर्क प्रोफ़ाइल में नेटवर्क ट्रैफ़िक की निगरानी कर सकता है"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"आपका आईटी एडमिन आपकी वर्क प्रोफ़ाइल के नेटवर्क से जुड़ी गतिविधि देख सकता है"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"नेटवर्क की निगरानी की जा सकती है"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"इस डिवाइस को वीपीएन से कनेक्ट किया गया है"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"आपकी वर्क प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट की गई है"</string>
@@ -779,7 +787,7 @@
     <string name="battery_panel_title" msgid="5931157246673665963">"बैटरी उपयोग"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"चार्ज किए जाने के दौरान बैटरी सेवर उपलब्ध नहीं है"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"बैटरी सेवर"</string>
-    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>
+    <string name="battery_detail_switch_summary" msgid="3668748557848025990">"परफ़ॉर्मेंस और बैकग्राउंड डेटा को कम करता है"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"बटन <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Back"</string>
@@ -942,7 +950,7 @@
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> चल रहा है"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है."</string>
-    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है. ज़्यादा जानने के लिए टैप करें."</string>
+    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"इस ऐप्लिकेशन को इंस्टॉल करने की ज़रूरत नहीं पड़ती. ज़्यादा जानकारी के लिए इस लिंक पर टैप करें."</string>
     <string name="app_info" msgid="5153758994129963243">"ऐप्लिकेशन की जानकारी"</string>
     <string name="go_to_web" msgid="636673528981366511">"ब्राउज़र पर जाएं"</string>
     <string name="mobile_data" msgid="4564407557775397216">"मोबाइल डेटा"</string>
@@ -1088,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"ऐसी बातचीत जिसमें इंटरैक्शन डेटा मौजूद नहीं है"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत विजेट"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"किसी बातचीत को होम स्क्रीन पर जोड़ने के लिए, उस बातचीत पर टैप करें"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> पहले"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> से थोड़ा पहले"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"करीब <xliff:g id="DURATION">%1$s</xliff:g> से ज़्यादा"</string>
@@ -1102,6 +1118,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"दोस्त"</string>
     <string name="empty_status" msgid="5938893404951307749">"आज रात चैट करते हैं!"</string>
     <string name="missed_call" msgid="4228016077700161689">"मिस्ड कॉल"</string>
+    <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"हाल के मैसेज, मिस्ड कॉल, और स्टेटस अपडेट देखें"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"बातचीत"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"आपके डिवाइस के बैटरी मीटर की रीडिंग लेने में समस्या आ रही है"</string>

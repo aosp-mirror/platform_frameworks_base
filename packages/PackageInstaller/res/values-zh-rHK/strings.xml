@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"套件安裝程式"</string>
     <string name="install" msgid="711829760615509273">"安裝"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"完成"</string>
     <string name="cancel" msgid="1018267193425558088">"取消"</string>
     <string name="installing" msgid="4921993079741206516">"正在安裝…"</string>
     <string name="installing_app" msgid="1165095864863849422">"正在安裝「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」…"</string>
     <string name="install_done" msgid="5987363587661783896">"已安裝應用程式。"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"要安裝此應用程式嗎？"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"您要為這個現有的應用程式安裝更新嗎？您不會遺失現有的資料。"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"您要為這個內置的應用程式安裝更新嗎？您不會遺失現有的資料。"</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"未安裝應用程式。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"套件已遭封鎖，無法安裝。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"套件與現有的套件發生衝突，無法安裝應用程式。"</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear 不支援安裝/解除安裝操作。"</string>
     <string name="message_staging" msgid="8032722385658438567">"正在準備安裝應用程式…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"不明"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"為安全起見，您的平板電腦不得安裝此來源的不明應用程式。"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"為安全起見，您的電視不得安裝此來源的不明應用程式。"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"為安全起見，您的手機不得安裝此來源的不明應用程式。"</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"來源不明的應用程式可能會侵害您的手機和個人資料。安裝此應用程式，即表示您同意承擔因使用這個應用程式而導致手機損壞或資料遺失的責任。"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"來源不明的應用程式可能會侵害您的平板電腦和個人資料。安裝此應用程式，即表示您同意承擔因使用這個應用程式而導致平板電腦損壞或資料遺失的責任。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"來源不明的應用程式可能會侵害您的電視和個人資料。安裝此應用程式，即表示您同意承擔因使用這個應用程式而導致電視損壞或資料遺失的責任。"</string>

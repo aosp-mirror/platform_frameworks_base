@@ -1300,8 +1300,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     if (callbacks == null) return;
                     callbacks.broadcast(c -> {
                         try {
-                            int targetDisplayId =
+                            Integer targetDisplayId =
                                     callbackDisplayIds.get(c.asBinder());
+                            if (targetDisplayId == null) return;
                             if (targetDisplayId == displayId) c.onColorsChanged(area, colors);
                         } catch (RemoteException e) {
                             e.printStackTrace();

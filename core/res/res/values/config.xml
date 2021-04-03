@@ -59,7 +59,6 @@
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_call_strength</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
@@ -97,7 +96,6 @@
     <string translatable="false" name="status_bar_camera">camera</string>
     <string translatable="false" name="status_bar_airplane">airplane</string>
     <string translatable="false" name="status_bar_no_calling">no_calling</string>
-    <string translatable="false" name="status_bar_call_strength">call_strength</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
     <string translatable="false" name="status_bar_screen_record">screen_record</string>
 
