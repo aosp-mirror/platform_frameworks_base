@@ -21,7 +21,6 @@ import android.security.KeyStoreException;
 import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyStoreCryptoOperation;
-import android.security.keystore.KeymasterUtils;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;

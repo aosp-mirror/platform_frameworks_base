@@ -101,7 +101,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore2;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.system.keystore2.Domain;
 import android.system.keystore2.KeyDescriptor;
@@ -2054,10 +2053,6 @@ public class Vpn {
     private String makeKeystoreEngineGrantString(String alias) {
         if (alias == null) {
             return null;
-        }
-        // If Keystore 2.0 is not enabled the legacy private key prefix is used.
-        if (!AndroidKeyStoreProvider.isKeystore2Enabled()) {
-            return Credentials.USER_PRIVATE_KEY + alias;
         }
         final KeyStore2 keystore2 = KeyStore2.getInstance();
 
