@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Paketo diegimo programa"</string>
     <string name="install" msgid="711829760615509273">"Įdiegti"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Atlikta"</string>
     <string name="cancel" msgid="1018267193425558088">"Atšaukti"</string>
     <string name="installing" msgid="4921993079741206516">"Įdiegiama…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Įdiegiamas paketas „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“…"</string>
     <string name="install_done" msgid="5987363587661783896">"Programa įdiegta."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Ar norite įdiegti šią programą?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Ar norite įdiegti šios esamos programos naujinį? Esamų duomenų neprarasite."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Ar norite įdiegti šios įtaisytos programos naujinį? Esamų duomenų neprarasite."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Programa neįdiegta."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketas užblokuotas ir negali būti įdiegtas."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Programa neįdiegta, nes paketas nesuderinamas su esamu paketu."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Diegimo / pašalinimo veiksmai nepalaikomi sistemoje „Wear“."</string>
     <string name="message_staging" msgid="8032722385658438567">"Programa pateikiama etapais…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Nežinoma"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Saugos sumetimais planšetiniame kompiuteryje neleidžiama diegti nežinomų programų iš šio šaltinio."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Saugos sumetimais televizoriuje neleidžiama diegti nežinomų programų iš šio šaltinio."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Saugos sumetimais telefone neleidžiama diegti nežinomų programų iš šio šaltinio."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefonas ir asmens duomenys labiau pažeidžiami įdiegus nežinomų programų. Įdiegdami šią programą sutinkate, kad patys esate atsakingi už žalą telefonui arba prarastus duomenis dėl šios programos naudojimo."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Planšetinis kompiuteris ir asmens duomenys labiau pažeidžiami įdiegus nežinomų programų. Įdiegdami šią programą sutinkate, kad patys esate atsakingi už žalą planšetiniam kompiuteriui arba prarastus duomenis dėl šios programos naudojimo."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV ir asmens duomenys labiau pažeidžiami įdiegus nežinomų programų. Įdiegdami šią programą sutinkate, kad patys esate atsakingi už žalą TV arba prarastus duomenis dėl šios programos naudojimo."</string>

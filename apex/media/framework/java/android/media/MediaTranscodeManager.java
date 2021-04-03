@@ -1207,14 +1207,14 @@ public final class MediaTranscodeManager {
 
             @Override
             @NonNull
-            public Builder setSourceFileDescriptor(ParcelFileDescriptor fd) {
+            public Builder setSourceFileDescriptor(@NonNull ParcelFileDescriptor fd) {
                 super.setSourceFileDescriptor(fd);
                 return self();
             }
 
             @Override
             @NonNull
-            public Builder setDestinationFileDescriptor(ParcelFileDescriptor fd) {
+            public Builder setDestinationFileDescriptor(@NonNull ParcelFileDescriptor fd) {
                 super.setDestinationFileDescriptor(fd);
                 return self();
             }

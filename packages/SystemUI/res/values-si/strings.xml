@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"තිර රූ ගැනීමට යෙදුම හෝ ඔබගේ සංවිධානය ඉඩ නොදේ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"සංස්කරණය කරන්න"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"තිර රුව සංස්කරණය කරන්න"</string>
-    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
-    <skip />
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"තව ග්‍රහණය කරන්න"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"තිර රුව ඉවත ලන්න"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"තිර රූ පෙර දසුන"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"ඉහළම මායිම"</string>
@@ -384,11 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"වර්ණ යටිකුරු කරන්න"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"වර්ණ නිවැරදි කිරීමේ ප්‍රකාරය"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"තව සැකසීම්"</string>
-    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"පරිශීලක සැකසීම්"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"නිමයි"</string>
-    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
-    <skip />
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"වසන්න"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"සම්බන්ධිත"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"සම්බන්ධිතයි, බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"සම්බන්ධ වෙමින්..."</string>
@@ -533,8 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට අයිති අතර VPNs වෙත සම්බන්ධ කර ඇත"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ඔබගේ කාර්යාල පැතිකඩ තුළ ඔබේ සංවිධානය ජාල තදබදය නිරීක්ෂණය කිරීමට හැක"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ඔබේ කාර්යාල පැතිකඩ තුළ ජාල තදබදය නිරීක්ෂණය කළ හැක"</string>
-    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
-    <skip />
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"කාර්යාල පැතිකඩ ජාල ක්‍රියාකාරකම් ඔබගේ IT පරිපාලකට දෘශ්‍යමානය"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"මෙම උපාංගය VPNs වෙත සම්බන්ධ කර ඇත"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"ඔබේ කාර්යාල පැතිකඩ <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ කර ඇත"</string>
@@ -1100,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"සංවාදය විවෘත කරන්න"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"සංවාද විජට්"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ඔබගේ මුල් තිරයට එය එක් කිරීමට සංවාදයක් තට්ටු කරන්න"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>කට පෙර"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>කට වඩා අඩු කාලයකට පෙර"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>කට වඩා පෙර"</string>

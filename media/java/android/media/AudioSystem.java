@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.os.Build;
+import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
@@ -1936,6 +1937,14 @@ public class AudioSystem
      */
     public static native int getDevicesForRoleAndCapturePreset(
             int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devices);
+
+    /**
+     * @hide
+     * Set the vibrators' information. The value will be used to initialize HapticGenerator.
+     * @param vibrators a list of all available vibrators
+     * @return command completion status
+     */
+    public static native int setVibratorInfos(@NonNull List<Vibrator> vibrators);
 
     // Items shared with audio service
 

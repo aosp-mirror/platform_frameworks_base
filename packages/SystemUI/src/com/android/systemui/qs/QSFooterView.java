@@ -75,6 +75,8 @@ public class QSFooterView extends FrameLayout {
     private TouchAnimator mSettingsCogAnimator;
 
     private View mActionsContainer;
+    private View mTunerIcon;
+    private int mTunerIconTranslation;
 
     private OnClickListener mExpandClickListener;
 
@@ -107,6 +109,7 @@ public class QSFooterView extends FrameLayout {
         mActionsContainer = requireViewById(R.id.qs_footer_actions_container);
         mEditContainer = findViewById(R.id.qs_footer_actions_edit_container);
         mBuildText = findViewById(R.id.build);
+        mTunerIcon = requireViewById(R.id.tuner_icon);
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
@@ -166,6 +169,9 @@ public class QSFooterView extends FrameLayout {
 
     private void updateResources() {
         updateFooterAnimator();
+        mTunerIconTranslation = mContext.getResources()
+                .getDimensionPixelOffset(R.dimen.qs_footer_tuner_icon_translation);
+        mTunerIcon.setTranslationX(isLayoutRtl() ? -mTunerIconTranslation : mTunerIconTranslation);
     }
 
     private void updateFooterAnimator() {
@@ -274,8 +280,7 @@ public class QSFooterView extends FrameLayout {
 
     private void updateVisibilities(boolean isTunerEnabled) {
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
-        mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
-                isTunerEnabled ? View.VISIBLE : View.INVISIBLE);
+        mTunerIcon.setVisibility(isTunerEnabled ? View.VISIBLE : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
         mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.GONE);
         if (mEditContainer != null) {

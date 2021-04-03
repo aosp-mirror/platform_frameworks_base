@@ -911,6 +911,21 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldNotListenForUdfps_whenInLockDown() {
+        // GIVEN a "we should listen for udfps" state
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN device in lock down
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
     public void testRequireUnlockForNfc_Broadcast() {
         KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
         mKeyguardUpdateMonitor.registerCallback(callback);
