@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Топтомду орноткуч"</string>
     <string name="install" msgid="711829760615509273">"Орнотуу"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Бүттү"</string>
     <string name="cancel" msgid="1018267193425558088">"Жокко чыгаруу"</string>
     <string name="installing" msgid="4921993079741206516">"Орнотулууда…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> орнотулууда…"</string>
     <string name="install_done" msgid="5987363587661783896">"Колдонмо орнотулду."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Бул колдонмону орнотоюн деп жатасызбы?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Учурдагы колдонмону жаңыртканы жатасызбы? Буга чейин сакталган дайын-даректериңиз өчүрүлбөйт."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Учурдагы алдын ала орнотулган колдонмону жаңыртканы жатасызбы? Буга чейин сакталган дайын-даректериңиз өчүрүлбөйт."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Колдонмо орнотулган жок."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Топтомду орнотууга болбойт."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Башка топтом менен дал келбегендиктен колдонмо орнотулган жок."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Орнотуу/чыгарып салуу аракеттери Android Wear\'де колдоого алынбайт."</string>
     <string name="message_staging" msgid="8032722385658438567">"Күтө туруңуз…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Белгисиз"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Коопсуздукту сактоо максатында, планшетиңизге бул булактан колдонмолорду орнотууга уруксат жок."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Коопсуздукту сактоо максатында, сыналгыңызга бул булактан колдонмолорду орнотууга уруксат жок."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Коопсуздукту сактоо максатында, телефонуңузга бул булактан колдонмолорду орнотууга уруксат жок."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Телефонуңуз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам телефонуңузга кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Планшетиңиз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам планшетиңизге кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Сыналгыңыз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам сыналгыңызга кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>

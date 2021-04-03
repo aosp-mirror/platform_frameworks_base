@@ -19,9 +19,7 @@ import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSIconView;
@@ -251,8 +249,7 @@ public class QSFactoryImpl implements QSFactory {
     }
 
     @Override
-    public QSTileView createTileView(QSTile tile, boolean collapsedView) {
-        Context context = new ContextThemeWrapper(mQsHostLazy.get().getContext(), R.style.qs_theme);
+    public QSTileView createTileView(Context context, QSTile tile, boolean collapsedView) {
         QSIconView icon = tile.createTileView(context);
         if (mSideLabels) {
             return new QSTileViewHorizontal(context, icon, collapsedView);

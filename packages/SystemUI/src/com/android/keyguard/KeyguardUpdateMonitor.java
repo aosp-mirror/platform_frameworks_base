@@ -2113,6 +2113,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return shouldListenForFingerprint()
                 && !mBouncer
                 && !getUserCanSkipBouncer(getCurrentUser())
+                && !isEncryptedOrLockdown(getCurrentUser())
                 && mStrongAuthTracker.hasUserAuthenticatedSinceBoot();
     }
 

@@ -3541,15 +3541,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         InputBindResult res = null;
         // We shows the IME when the system allows the IME focused target window to restore the
         // IME visibility (e.g. switching to the app task when last time the IME is visible).
-        if (isTextEditor && mWindowManagerInternal.shouldRestoreImeVisibility(windowToken)) {
-            if (attribute != null) {
-                res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                        attribute, startInputFlags, startInputReason);
-                showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
-                        SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY);
-            } else {
-                res = InputBindResult.NULL_EDITOR_INFO;
-            }
+        // Note that we don't restore IME visibility for some cases (e.g. when the soft input
+        // state is ALWAYS_HIDDEN or STATE_HIDDEN with forward navigation).
+        // Because the app might leverage these flags to hide soft-keyboard with showing their own
+        // UI for input.
+        if (isTextEditor && attribute != null
+                && shouldRestoreImeVisibility(windowToken, softInputMode)) {
+            res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
+                    startInputFlags, startInputReason);
+            showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
+                    SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY);
             return res;
         }
 
@@ -3671,6 +3672,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return res;
+    }
+
+    private boolean shouldRestoreImeVisibility(IBinder windowToken,
+            @SoftInputModeFlags int softInputMode) {
+        switch (softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE) {
+            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+                return false;
+            case LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+                if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                    return false;
+                }
+        }
+        return mWindowManagerInternal.shouldRestoreImeVisibility(windowToken);
     }
 
     private boolean isImeVisible() {

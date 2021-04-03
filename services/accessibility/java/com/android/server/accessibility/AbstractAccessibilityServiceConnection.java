@@ -22,6 +22,7 @@ import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILIT
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP;
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+import static android.view.accessibility.AccessibilityInteractionClient.CALL_STACK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
@@ -1977,6 +1978,17 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         if (mTrace.isA11yTracingEnabled()) {
             mTrace.logTrace(TRACE_A11Y_SERVICE_CONNECTION + ".setFocusAppearance",
                     "strokeWidth=" + strokeWidth + ";color=" + color);
+        }
+    }
+
+    @Override
+    public void logTrace(long timestamp, String where, String callingParams, int processId,
+            long threadId, int callingUid, Bundle callingStack) {
+        if (mTrace.isA11yTracingEnabled()) {
+            ArrayList<StackTraceElement> list =
+                    (ArrayList<StackTraceElement>) callingStack.getSerializable(CALL_STACK);
+            mTrace.logTrace(timestamp, where, callingParams, processId, threadId, callingUid,
+                    list.toArray(new StackTraceElement[list.size()]));
         }
     }
 }

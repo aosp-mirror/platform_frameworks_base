@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"កែ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"កែ​រូបថត​អេក្រង់"</string>
-    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
-    <skip />
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"ថត​ច្រើនទៀត"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ច្រានចោល​រូបថត​អេក្រង់"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ការមើល​រូបថត​អេក្រង់​សាកល្បង"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"បន្ទាត់បែងចែក​ខាងលើ"</string>
@@ -384,11 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ដាក់​​​បញ្ច្រាស​ពណ៌"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"របៀប​កែ​ពណ៌"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ការ​កំណត់​ច្រើន​ទៀត"</string>
-    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ការកំណត់អ្នកប្រើប្រាស់"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"រួចរាល់"</string>
-    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
-    <skip />
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"បិទ"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"បាន​ភ្ជាប់"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"បានភ្ជាប់ ហើយថ្មមានកម្រិត <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"កំពុង​តភ្ជាប់..."</string>
@@ -533,8 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> និងត្រូវបានភ្ជាប់ទៅ VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ស្ថាប័ន​របស់អ្នក​អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ​របស់​អ្នក"</string>
-    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
-    <skip />
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​អាចមើលឃើញ​សកម្មភាព​បណ្ដាញ​នៃកម្រងព័ត៌មាន​ការងារ"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"បណ្ដាញ​អាច​ត្រូវ​តាមដាន"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ឧបករណ៍នេះ​ត្រូវបានភ្ជាប់ទៅ VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"កម្រងព័ត៌មានការងារ​របស់អ្នក​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -1100,6 +1096,14 @@
     <string name="basic_status" msgid="2315371112182658176">"បើកការសន្ទនា"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ធាតុ​ក្រាហ្វិកនៃការសន្ទនា"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ចុចការសន្ទនា ដើម្បីបញ្ចូលវាទៅក្នុងអេក្រង់ដើមរបស់អ្នក"</string>
+    <!-- no translation found for no_conversations_text (7362374212649891057) -->
+    <skip />
+    <!-- no translation found for priority_conversations (3967482288896653039) -->
+    <skip />
+    <!-- no translation found for recent_conversations (8531874684782574622) -->
+    <skip />
+    <!-- no translation found for okay (6490552955618608554) -->
+    <skip />
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"តិចជាង <xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"ជាង <xliff:g id="DURATION">%1$s</xliff:g> មុន"</string>

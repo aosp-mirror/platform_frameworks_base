@@ -252,6 +252,7 @@ LIBANDROID {
     ASurfaceTransaction_setColor; # introduced=29
     ASurfaceTransaction_setDamageRegion; # introduced=29
     ASurfaceTransaction_setDesiredPresentTime; # introduced=29
+    ASurfaceTransaction_setEnableBackPressure; # introduced=31
     ASurfaceTransaction_setFrameRate; # introduced=30
     ASurfaceTransaction_setFrameRateWithChangeStrategy; # introduced=31
     ASurfaceTransaction_setGeometry; # introduced=29

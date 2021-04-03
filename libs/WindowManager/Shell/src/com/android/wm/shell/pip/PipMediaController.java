@@ -19,6 +19,8 @@ package com.android.wm.shell.pip;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
+import android.annotation.DrawableRes;
+import android.annotation.StringRes;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
@@ -49,6 +51,7 @@ import java.util.List;
  * when there is a media session from the top PiP activity.
  */
 public class PipMediaController {
+    private static final String SYSTEMUI_PERMISSION = "com.android.systemui.permission.SELF";
 
     private static final String ACTION_PLAY = "com.android.wm.shell.pip.PLAY";
     private static final String ACTION_PAUSE = "com.android.wm.shell.pip.PAUSE";
@@ -87,18 +90,26 @@ public class PipMediaController {
     private RemoteAction mNextAction;
     private RemoteAction mPrevAction;
 
-    private BroadcastReceiver mPlayPauseActionReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMediaActionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (action.equals(ACTION_PLAY)) {
-                mMediaController.getTransportControls().play();
-            } else if (action.equals(ACTION_PAUSE)) {
-                mMediaController.getTransportControls().pause();
-            } else if (action.equals(ACTION_NEXT)) {
-                mMediaController.getTransportControls().skipToNext();
-            } else if (action.equals(ACTION_PREV)) {
-                mMediaController.getTransportControls().skipToPrevious();
+            if (mMediaController == null || mMediaController.getTransportControls() == null) {
+                // no active media session, bail early.
+                return;
+            }
+            switch (intent.getAction()) {
+                case ACTION_PLAY:
+                    mMediaController.getTransportControls().play();
+                    break;
+                case ACTION_PAUSE:
+                    mMediaController.getTransportControls().pause();
+                    break;
+                case ACTION_NEXT:
+                    mMediaController.getTransportControls().skipToNext();
+                    break;
+                case ACTION_PREV:
+                    mMediaController.getTransportControls().skipToPrevious();
+                    break;
             }
         }
     };
@@ -131,10 +142,19 @@ public class PipMediaController {
         mediaControlFilter.addAction(ACTION_PAUSE);
         mediaControlFilter.addAction(ACTION_NEXT);
         mediaControlFilter.addAction(ACTION_PREV);
-        mContext.registerReceiverForAllUsers(mPlayPauseActionReceiver, mediaControlFilter,
-                null /* permission */, mainHandler);
+        mContext.registerReceiverForAllUsers(mMediaActionReceiver, mediaControlFilter,
+                SYSTEMUI_PERMISSION, mainHandler);
 
-        createMediaActions();
+        // Creates the standard media buttons that we may show.
+        mPauseAction = getDefaultRemoteAction(R.string.pip_pause,
+                R.drawable.pip_ic_pause_white, ACTION_PAUSE);
+        mPlayAction = getDefaultRemoteAction(R.string.pip_play,
+                R.drawable.pip_ic_play_arrow_white, ACTION_PLAY);
+        mNextAction = getDefaultRemoteAction(R.string.pip_skip_to_next,
+                R.drawable.pip_ic_skip_next_white, ACTION_NEXT);
+        mPrevAction = getDefaultRemoteAction(R.string.pip_skip_to_prev,
+                R.drawable.pip_ic_skip_previous_white, ACTION_PREV);
+
         mMediaSessionManager = context.getSystemService(MediaSessionManager.class);
     }
 
@@ -216,32 +236,15 @@ public class PipMediaController {
         return mediaActions;
     }
 
-    /**
-     * Creates the standard media buttons that we may show.
-     */
-    private void createMediaActions() {
-        String pauseDescription = mContext.getString(R.string.pip_pause);
-        mPauseAction = new RemoteAction(Icon.createWithResource(mContext,
-                R.drawable.pip_ic_pause_white), pauseDescription, pauseDescription,
-                PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PAUSE),
-                        FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-
-        String playDescription = mContext.getString(R.string.pip_play);
-        mPlayAction = new RemoteAction(Icon.createWithResource(mContext,
-                R.drawable.pip_ic_play_arrow_white), playDescription, playDescription,
-                PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PLAY),
-                        FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-
-        String nextDescription = mContext.getString(R.string.pip_skip_to_next);
-        mNextAction = new RemoteAction(Icon.createWithResource(mContext,
-                R.drawable.pip_ic_skip_next_white), nextDescription, nextDescription,
-                PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_NEXT),
-                        FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-
-        String prevDescription = mContext.getString(R.string.pip_skip_to_prev);
-        mPrevAction = new RemoteAction(Icon.createWithResource(mContext,
-                R.drawable.pip_ic_skip_previous_white), prevDescription, prevDescription,
-                PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PREV),
+    /** @return Default {@link RemoteAction} sends broadcast back to SysUI. */
+    private RemoteAction getDefaultRemoteAction(@StringRes int titleAndDescription,
+            @DrawableRes int icon, String action) {
+        final String titleAndDescriptionStr = mContext.getString(titleAndDescription);
+        final Intent intent = new Intent(action);
+        intent.setPackage(mContext.getPackageName());
+        return new RemoteAction(Icon.createWithResource(mContext, icon),
+                titleAndDescriptionStr, titleAndDescriptionStr,
+                PendingIntent.getBroadcast(mContext, 0 /* requestCode */, intent,
                         FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
     }
 

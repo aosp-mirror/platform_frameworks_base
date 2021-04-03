@@ -124,6 +124,30 @@ public abstract class BatteryConsumer {
     public static final int FIRST_CUSTOM_TIME_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_TIME_COMPONENT_ID = 9999;
 
+    /**
+     * Identifiers of models used for power estimation.
+     *
+     * @hide
+     */
+    @IntDef(prefix = {"POWER_MODEL_"}, value = {
+            POWER_MODEL_POWER_PROFILE,
+            POWER_MODEL_MEASURED_ENERGY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PowerModel {
+    }
+
+    /**
+     * Power model that is based on average consumption rates that hardware components
+     * consume in various states.
+     */
+    public static final int POWER_MODEL_POWER_PROFILE = 0;
+
+    /**
+     * Power model that is based on energy consumption measured by on-device power monitors.
+     */
+    public static final int POWER_MODEL_MEASURED_ENERGY = 1;
+
     private final PowerComponents mPowerComponents;
 
     protected BatteryConsumer(@NonNull PowerComponents powerComponents) {
@@ -146,6 +170,16 @@ public abstract class BatteryConsumer {
      */
     public double getConsumedPower(@PowerComponent int componentId) {
         return mPowerComponents.getConsumedPower(componentId);
+    }
+
+    /**
+     * Returns the ID of the model that was used for power estimation.
+     *
+     * @param componentId The ID of the power component, e.g.
+     *                    {@link BatteryConsumer#POWER_COMPONENT_CPU}.
+     */
+    public @PowerModel int getPowerModel(@BatteryConsumer.PowerComponent int componentId) {
+        return mPowerComponents.getPowerModel(componentId);
     }
 
     /**
@@ -188,9 +222,22 @@ public abstract class BatteryConsumer {
     protected abstract static class BaseBuilder<T extends BaseBuilder<?>> {
         final PowerComponents.Builder mPowerComponentsBuilder;
 
-        public BaseBuilder(int customPowerComponentCount, int customTimeComponentCount) {
+        public BaseBuilder(int customPowerComponentCount, int customTimeComponentCount,
+                boolean includePowerModels) {
             mPowerComponentsBuilder = new PowerComponents.Builder(customPowerComponentCount,
-                    customTimeComponentCount);
+                    customTimeComponentCount, includePowerModels);
+        }
+
+        /**
+         * Sets the amount of drain attributed to the specified drain type, e.g. CPU, WiFi etc.
+         *
+         * @param componentId    The ID of the power component, e.g.
+         *                       {@link BatteryConsumer#POWER_COMPONENT_CPU}.
+         * @param componentPower Amount of consumed power in mAh.
+         */
+        @NonNull
+        public T setConsumedPower(@PowerComponent int componentId, double componentPower) {
+            return setConsumedPower(componentId, componentPower, POWER_MODEL_POWER_PROFILE);
         }
 
         /**
@@ -202,8 +249,9 @@ public abstract class BatteryConsumer {
          */
         @SuppressWarnings("unchecked")
         @NonNull
-        public T setConsumedPower(@PowerComponent int componentId, double componentPower) {
-            mPowerComponentsBuilder.setConsumedPower(componentId, componentPower);
+        public T setConsumedPower(@PowerComponent int componentId, double componentPower,
+                @PowerModel int powerModel) {
+            mPowerComponentsBuilder.setConsumedPower(componentId, componentPower, powerModel);
             return (T) this;
         }
 

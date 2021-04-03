@@ -12580,10 +12580,21 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mInstallLock")
     void removeCodePathLI(File codePath) {
         if (codePath.isDirectory()) {
-            File codePathParent = codePath.getParentFile();
+            final File codePathParent = codePath.getParentFile();
+            final boolean needRemoveParent = codePathParent.getName().startsWith(RANDOM_DIR_PREFIX);
             try {
+                final boolean isIncremental = (mIncrementalManager != null && isIncrementalPath(
+                        codePath.getAbsolutePath()));
+                if (isIncremental) {
+                    if (needRemoveParent) {
+                        mIncrementalManager.rmPackageDir(codePathParent);
+                    } else {
+                        mIncrementalManager.rmPackageDir(codePath);
+                    }
+                }
+
                 mInstaller.rmPackageDir(codePath.getAbsolutePath());
-                if (codePathParent.getName().startsWith(RANDOM_DIR_PREFIX)) {
+                if (needRemoveParent) {
                     mInstaller.rmPackageDir(codePathParent.getAbsolutePath());
                     removeCachedResult(codePathParent);
                 }
@@ -18126,16 +18137,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (codeFile == null || !codeFile.exists()) {
                 return false;
             }
-
-            final boolean isIncremental = (mIncrementalManager != null && isIncrementalPath(
-                    codeFile.getAbsolutePath()));
-
             removeCodePathLI(codeFile);
-
-            if (isIncremental) {
-                mIncrementalManager.onPackageRemoved(codeFile);
-            }
-
             return true;
         }
 
@@ -24776,7 +24778,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int fileToDeleteCount = filesToDelete.size();
             for (int i = 0; i < fileToDeleteCount; i++) {
                 File fileToDelete = filesToDelete.get(i);
-                logCriticalInfo(Log.WARN, "Destroying orphaned" + fileToDelete);
+                logCriticalInfo(Log.WARN, "Destroying orphaned at " + fileToDelete);
                 synchronized (mInstallLock) {
                     removeCodePathLI(fileToDelete);
                 }

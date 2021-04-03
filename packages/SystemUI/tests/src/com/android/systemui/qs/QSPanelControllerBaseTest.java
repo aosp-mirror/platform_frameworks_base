@@ -131,7 +131,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSTile.getTileSpec()).thenReturn("dnd");
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
-        when(mQSTileHost.createTileView(eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
+        when(mQSTileHost.createTileView(any(), eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mQSTileRevealControllerFactory.create(any(), any()))
                 .thenReturn(mQSTileRevealController);
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());

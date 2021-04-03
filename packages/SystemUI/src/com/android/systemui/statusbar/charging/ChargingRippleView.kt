@@ -20,13 +20,14 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
 
-private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
+private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
 
 /**
  * Expanding ripple effect that shows when charging begins.
@@ -49,6 +50,16 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
         ripplePaint.shader = rippleShader
         visibility = View.GONE
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        rippleShader.pixelDensity = resources.displayMetrics.density
+        super.onConfigurationChanged(newConfig)
+    }
+
+    override fun onAttachedToWindow() {
+        rippleShader.pixelDensity = resources.displayMetrics.density
+        super.onAttachedToWindow()
     }
 
     fun startRipple() {

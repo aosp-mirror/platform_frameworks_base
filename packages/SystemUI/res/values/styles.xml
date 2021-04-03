@@ -335,7 +335,7 @@
         <item name="*android:isLightTheme">false</item>
     </style>
 
-    <style name="Theme.SystemUI.Light">
+    <style name="Theme.SystemUI.LightWallpaper">
         <item name="wallpaperTextColor">@*android:color/primary_text_material_light</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
         <item name="wallpaperTextColorAccent">@*android:color/system_accent2_600</item>
@@ -791,5 +791,19 @@
         <item name="android:max">10000</item>
         <item name="android:mirrorForRtl">false</item>
         <item name="android:progressDrawable">@drawable/udfps_progress_bar</item>
+    </style>
+
+    <!-- Wallet styles -->
+    <style name="Wallet" />
+
+    <style name="Wallet.TextAppearance">
+      <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+      <item name="android:textColor">@color/wallet_primary_text</item>
+      <item name="android:singleLine">true</item>
+      <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Wallet.Theme">
+      <item name="android:colorControlHighlight">@*android:color/primary_text_material_dark</item>
     </style>
 </resources>

@@ -103,6 +103,7 @@ public class PipResizeGestureHandler {
     private boolean mIsAttached;
     private boolean mIsEnabled;
     private boolean mEnablePinchResize;
+    private boolean mEnableDragCornerResize;
     private boolean mIsSysUiStateValid;
     private boolean mThresholdCrossed;
     private boolean mOngoingPinchToResize = false;
@@ -174,6 +175,7 @@ public class PipResizeGestureHandler {
     private void reloadResources() {
         final Resources res = mContext.getResources();
         mDelta = res.getDimensionPixelSize(R.dimen.pip_resize_edge_size);
+        mEnableDragCornerResize = res.getBoolean(R.bool.config_pipEnableDragCornerResize);
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
     }
 
@@ -267,6 +269,10 @@ public class PipResizeGestureHandler {
      * |_|_|         |_|_|
      */
     public boolean isWithinDragResizeRegion(int x, int y) {
+        if (!mEnableDragCornerResize) {
+            return false;
+        }
+
         final Rect currentPipBounds = mPipBoundsState.getBounds();
         if (currentPipBounds == null) {
             return false;

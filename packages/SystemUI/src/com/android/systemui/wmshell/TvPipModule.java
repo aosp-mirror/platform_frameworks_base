@@ -34,6 +34,7 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -85,9 +86,15 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
-    static PipBoundsAlgorithm providePipBoundsHandler(Context context,
-            PipBoundsState pipBoundsState) {
-        return new PipBoundsAlgorithm(context, pipBoundsState);
+    static PipSnapAlgorithm providePipSnapAlgorithm() {
+        return new PipSnapAlgorithm();
+    }
+
+    @WMSingleton
+    @Provides
+    static PipBoundsAlgorithm providePipBoundsAlgorithm(Context context,
+            PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm) {
+        return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm);
     }
 
     @WMSingleton
