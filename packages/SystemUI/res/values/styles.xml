@@ -375,9 +375,10 @@
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault.SystemUI">
+    <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
@@ -452,7 +453,7 @@
         <item name="singleToneColor">@color/dark_mode_qs_icon_color_single_tone</item>
     </style>
 
-    <style name="QSHeaderTheme" parent="@style/Theme.SystemUI">
+    <style name="Theme.SystemUI.QuickSettings.Header">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
         <item name="darkIconTheme">@style/QSHeaderDarkTheme</item>
     </style>
