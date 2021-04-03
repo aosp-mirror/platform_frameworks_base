@@ -3962,14 +3962,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * </ol>
      *
      * @param volumeUuid The volume UUID of the packages to be updated
-     * @param sdkVersionChanged whether the current SDK version is different from what it was when
-     *                          this volume was last mounted
+     * @param fingerprintChanged whether the current build fingerprint is different from what it was
+     *                           when this volume was last mounted
      */
-    private void updateAllPermissions(@NonNull String volumeUuid, boolean sdkVersionChanged) {
+    private void updateAllPermissions(@NonNull String volumeUuid, boolean fingerprintChanged) {
         PackageManager.corkPackageInfoCache();  // Prevent invalidation storm
         try {
             final int flags = UPDATE_PERMISSIONS_ALL |
-                    (sdkVersionChanged
+                    (fingerprintChanged
                             ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                             : 0);
             updatePermissions(null, null, volumeUuid, flags, mDefaultPermissionCallback);
@@ -4944,8 +4944,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return PermissionManagerService.this.getAppOpPermissionPackagesInternal(permissionName);
         }
         @Override
-        public void onStorageVolumeMounted(@Nullable String volumeUuid, boolean sdkVersionChanged) {
-            updateAllPermissions(volumeUuid, sdkVersionChanged);
+        public void onStorageVolumeMounted(@Nullable String volumeUuid, boolean fingerprintChanged) {
+            updateAllPermissions(volumeUuid, fingerprintChanged);
         }
         @Override
         public void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId) {
