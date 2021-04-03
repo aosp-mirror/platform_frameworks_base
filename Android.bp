@@ -150,7 +150,6 @@ filegroup {
         ":incidentcompanion_aidl",
         ":inputconstants_aidl",
         ":installd_aidl",
-        ":keystore_aidl",
         ":libaudioclient_aidl",
         ":libbinder_aidl",
         ":libbluetooth-binder-aidl",
