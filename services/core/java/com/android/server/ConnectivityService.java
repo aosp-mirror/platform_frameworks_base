@@ -1895,6 +1895,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             newNc.setNetworkSpecifier(newNc.getNetworkSpecifier().redact());
         }
         newNc.setAdministratorUids(new int[0]);
+        if (!checkAnyPermissionOf(
+                callerPid, callerUid, android.Manifest.permission.NETWORK_FACTORY)) {
+            newNc.setSubIds(Collections.emptySet());
+        }
 
         return newNc;
     }
@@ -5666,6 +5670,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     "Insufficient permissions to request a specific signal strength");
         }
         mAppOpsManager.checkPackage(callerUid, callerPackageName);
+
+        if (!nc.getSubIds().isEmpty()) {
+            enforceNetworkFactoryPermission();
+        }
     }
 
     private int[] getSignalStrengthThresholds(@NonNull final NetworkAgentInfo nai) {
