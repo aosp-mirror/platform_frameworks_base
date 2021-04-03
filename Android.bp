@@ -112,7 +112,6 @@ filegroup {
         ":gsiservice_aidl",
         ":incidentcompanion_aidl",
         ":installd_aidl",
-        ":keystore_aidl",
         ":libaudioclient_aidl",
         ":libbinder_aidl",
         ":libbluetooth-binder-aidl",

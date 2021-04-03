@@ -48,7 +48,6 @@ public class Authorization {
      * @return 0 if successful or {@code ResponseCode.SYSTEM_ERROR}.
      */
     public static int addAuthToken(@NonNull HardwareAuthToken authToken) {
-        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return 0;
         try {
             getService().addAuthToken(authToken);
             return 0;
@@ -80,7 +79,6 @@ public class Authorization {
      */
     public static int onLockScreenEvent(@NonNull boolean locked, @NonNull int userId,
             @Nullable byte[] syntheticPassword) {
-        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return 0;
         try {
             if (locked) {
                 getService().onLockScreenEvent(LockScreenEvent.LOCK, userId, null);

@@ -209,7 +209,6 @@ Landroid/os/storage/IObbActionListener$Stub;-><init>()V
 Landroid/os/storage/IStorageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/storage/IStorageManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/storage/IStorageManager;
 Landroid/security/IKeyChainService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/security/IKeyChainService;
-Landroid/security/keystore/IKeystoreService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/security/keystore/IKeystoreService;
 Landroid/service/dreams/IDreamManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/dreams/IDreamManager;
 Landroid/service/notification/INotificationListener$Stub;-><init>()V
 Landroid/service/persistentdata/IPersistentDataBlockService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/persistentdata/IPersistentDataBlockService;

@@ -16,11 +16,10 @@
 
 package com.android.server.locksettings;
 
-import android.security.keystore.AndroidKeyStoreSpi;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore2.AndroidKeyStoreLoadStoreParameter;
-import android.security.keystore2.AndroidKeyStoreProvider;
+import android.security.keystore2.AndroidKeyStoreSpi;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -67,9 +66,7 @@ public class RebootEscrowKeyStoreManager {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
             KeyStore.LoadStoreParameter loadStoreParameter = null;
             // Load from the specific namespace if keystore2 is enabled.
-            if (AndroidKeyStoreProvider.isInstalled()) {
-                loadStoreParameter = new AndroidKeyStoreLoadStoreParameter(KEY_STORE_NAMESPACE);
-            }
+            loadStoreParameter = new AndroidKeyStoreLoadStoreParameter(KEY_STORE_NAMESPACE);
             keyStore.load(loadStoreParameter);
             return (SecretKey) keyStore.getKey(REBOOT_ESCROW_KEY_STORE_ENCRYPTION_KEY_NAME,
                     null);
@@ -91,9 +88,7 @@ public class RebootEscrowKeyStoreManager {
                 KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
                 KeyStore.LoadStoreParameter loadStoreParameter = null;
                 // Load from the specific namespace if keystore2 is enabled.
-                if (AndroidKeyStoreProvider.isInstalled()) {
-                    loadStoreParameter = new AndroidKeyStoreLoadStoreParameter(KEY_STORE_NAMESPACE);
-                }
+                loadStoreParameter = new AndroidKeyStoreLoadStoreParameter(KEY_STORE_NAMESPACE);
                 keyStore.load(loadStoreParameter);
                 keyStore.deleteEntry(REBOOT_ESCROW_KEY_STORE_ENCRYPTION_KEY_NAME);
             } catch (IOException | GeneralSecurityException e) {
@@ -119,9 +114,7 @@ public class RebootEscrowKeyStoreManager {
                         .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                         .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE);
                 // Generate the key with the correct namespace if keystore2 is enabled.
-                if (AndroidKeyStoreProvider.isInstalled()) {
-                    parameterSpecBuilder.setNamespace(KEY_STORE_NAMESPACE);
-                }
+                parameterSpecBuilder.setNamespace(KEY_STORE_NAMESPACE);
                 generator.init(parameterSpecBuilder.build());
                 return generator.generateKey();
             } catch (GeneralSecurityException e) {
