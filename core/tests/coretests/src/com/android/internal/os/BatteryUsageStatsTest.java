@@ -77,7 +77,7 @@ public class BatteryUsageStatsTest {
                 .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND, 1000)
                 .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND, 2000)
                 .setConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_USAGE, 300)
+                        BatteryConsumer.POWER_COMPONENT_SCREEN, 300)
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CPU, 400)
                 .setConsumedPowerForCustomComponent(
@@ -123,7 +123,7 @@ public class BatteryUsageStatsTest {
                 assertThat(uidBatteryConsumer.getTimeInStateMs(
                         UidBatteryConsumer.STATE_BACKGROUND)).isEqualTo(2000);
                 assertThat(uidBatteryConsumer.getConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_USAGE)).isEqualTo(300);
+                        BatteryConsumer.POWER_COMPONENT_SCREEN)).isEqualTo(300);
                 assertThat(uidBatteryConsumer.getConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(400);
                 assertThat(uidBatteryConsumer.getConsumedPowerForCustomComponent(
@@ -157,6 +157,8 @@ public class BatteryUsageStatsTest {
                         BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID)).isEqualTo(10400);
                 assertThat(systemBatteryConsumer.getConsumedPower()).isEqualTo(20300);
                 assertThat(systemBatteryConsumer.getPowerConsumedByApps()).isEqualTo(20000);
+                assertThat(systemBatteryConsumer.getUsageDurationMillis())
+                        .isEqualTo(10400); // max
                 assertThat(systemBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
                 assertThat(systemBatteryConsumer.getCustomPowerComponentName(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo("FOO");

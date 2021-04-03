@@ -213,14 +213,6 @@ public class BatteryConsumerData {
         }
         addEntry("System services", EntryType.POWER,
                 requestedBatterySipper.systemServiceCpuPowerMah, totalSystemServiceCpuPowerMah);
-        if (requestedBatteryConsumer != null) {
-            addEntry("Usage", EntryType.POWER,
-                    requestedBatteryConsumer.getConsumedPower(
-                            BatteryConsumer.POWER_COMPONENT_USAGE), totalUsagePowerMah);
-        } else {
-            addEntry("Usage (sipper)", EntryType.POWER,
-                    requestedBatterySipper.usagePowerMah, totalUsagePowerMah);
-        }
         addEntry("Wake lock", EntryType.POWER,
                 requestedBatterySipper.wakeLockPowerMah, totalWakeLockPowerMah);
         addEntry("Mobile radio", EntryType.POWER,

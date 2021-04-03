@@ -32,8 +32,8 @@ public class MemoryPowerCalculator extends PowerCalculator {
         final double powerMah = calculatePower(batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
         builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_MEMORY)
-                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE, durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, powerMah);
+                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_MEMORY, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MEMORY, powerMah);
     }
 
     @Override
