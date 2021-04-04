@@ -48,7 +48,7 @@ final class RippleShader extends RuntimeShader {
             + "  float s = 0.0;\n"
             + "  for (float i = 0; i < 4; i += 1) {\n"
             + "    float l = i * 0.01;\n"
-            + "    float h = l + 0.1;\n"
+            + "    float h = l + 0.2;\n"
             + "    float o = smoothstep(n - l, h, n);\n"
             + "    o *= abs(sin(PI * o * (t + 0.55 * i)));\n"
             + "    s += o;\n"
@@ -73,18 +73,19 @@ final class RippleShader extends RuntimeShader {
             + "    return (sub - start) / (end - start); \n"
             + "}\n";
     private static final String SHADER_MAIN = "vec4 main(vec2 p) {\n"
-            + "    float fadeIn = subProgress(0., 0.175, in_progress);\n"
-            + "    float fadeOutNoise = subProgress(0.375, 1., in_progress);\n"
-            + "    float fadeOutRipple = subProgress(0.375, 0.75, in_progress);\n"
+            + "    float fadeIn = subProgress(0., 0.1, in_progress);\n"
+            + "    float scaleIn = subProgress(0., 0.45, in_progress);\n"
+            + "    float fadeOutNoise = subProgress(0.5, 1., in_progress);\n"
+            + "    float fadeOutRipple = subProgress(0.5, 0.75, in_progress);\n"
             + "    vec2 center = mix(in_touch, in_origin, fadeIn);\n"
-            + "    float ring = softRing(p, center, in_maxRadius, fadeIn, 0.45);\n"
-            + "    float alpha = 1. - fadeOutNoise;\n"
+            + "    float ring = softRing(p, center, in_maxRadius, scaleIn, 0.45);\n"
+            + "    float alpha = min(fadeIn, 1. - fadeOutNoise);\n"
             + "    vec2 uv = p * in_resolutionScale;\n"
             + "    vec2 densityUv = uv - mod(uv, in_noiseScale);\n"
             + "    float sparkle = sparkles(densityUv, in_noisePhase) * ring * alpha;\n"
             + "    float fade = min(fadeIn, 1. - fadeOutRipple);\n"
             + "    vec4 circle = in_color * (softCircle(p, center, in_maxRadius "
-            + "      * fadeIn, 0.2) * fade);\n"
+            + "      * scaleIn, 0.2) * fade);\n"
             + "    float mask = in_hasMask == 1. ? sample(in_shader).a > 0. ? 1. : 0. : 1.;\n"
             + "    return mix(circle, vec4(sparkle), sparkle) * mask;\n"
             + "}";
@@ -134,7 +135,7 @@ final class RippleShader extends RuntimeShader {
     }
 
     public void setResolution(float w, float h, int density) {
-        float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 1.25f;
         setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
         setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
     }
