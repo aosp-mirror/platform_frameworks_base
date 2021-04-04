@@ -588,7 +588,6 @@ android.app.SystemServiceRegistry$118
 android.app.SystemServiceRegistry$119
 android.app.SystemServiceRegistry$11
 android.app.SystemServiceRegistry$120
-android.app.SystemServiceRegistry$121
 android.app.SystemServiceRegistry$12
 android.app.SystemServiceRegistry$13
 android.app.SystemServiceRegistry$14
@@ -946,7 +945,6 @@ android.app.slice.SliceManager
 android.app.slice.SliceProvider
 android.app.slice.SliceSpec$1
 android.app.slice.SliceSpec
-android.app.time.TimeManager
 android.app.timedetector.ITimeDetectorService$Stub$Proxy
 android.app.timedetector.ITimeDetectorService$Stub
 android.app.timedetector.ITimeDetectorService
@@ -1949,7 +1947,6 @@ android.graphics.Region$1
 android.graphics.Region$Op
 android.graphics.Region
 android.graphics.RegionIterator
-android.graphics.RenderEffect
 android.graphics.RenderNode$AnimationHost
 android.graphics.RenderNode$CompositePositionUpdateListener
 android.graphics.RenderNode$NoImagePreloadHolder
@@ -2117,7 +2114,6 @@ android.graphics.text.LineBreaker$Result
 android.graphics.text.LineBreaker
 android.graphics.text.MeasuredText$Builder
 android.graphics.text.MeasuredText
-android.graphics.text.PositionedGlyphs
 android.gsi.AvbPublicKey$1
 android.gsi.AvbPublicKey
 android.gsi.GsiProgress$1
@@ -4670,7 +4666,6 @@ android.media.NativeRoutingEventHandlerDelegate
 android.media.NotProvisionedException
 android.media.PlaybackParams$1
 android.media.PlaybackParams
-android.media.PlayerBase$IAppOpsCallbackWrapper
 android.media.PlayerBase$IPlayerWrapper
 android.media.PlayerBase$PlayerIdCard$1
 android.media.PlayerBase$PlayerIdCard
@@ -5614,7 +5609,6 @@ android.os.PowerManager$2
 android.os.PowerManager$3
 android.os.PowerManager$OnThermalStatusChangedListener
 android.os.PowerManager$WakeData
-android.os.PowerManager$WakeLock$1
 android.os.PowerManager$WakeLock
 android.os.PowerManager
 android.os.PowerManagerInternal$1
@@ -5738,14 +5732,6 @@ android.os.VibrationAttributes
 android.os.VibrationEffect$1
 android.os.VibrationEffect$Composed$1
 android.os.VibrationEffect$Composed
-android.os.VibrationEffect$Composition$PrimitiveEffect$1
-android.os.VibrationEffect$Composition$PrimitiveEffect
-android.os.VibrationEffect$OneShot$1
-android.os.VibrationEffect$OneShot
-android.os.VibrationEffect$Prebaked$1
-android.os.VibrationEffect$Prebaked
-android.os.VibrationEffect$Waveform$1
-android.os.VibrationEffect$Waveform
 android.os.VibrationEffect
 android.os.Vibrator
 android.os.VintfObject
@@ -8132,7 +8118,6 @@ android.view.textservice.SentenceSuggestionsInfo$1
 android.view.textservice.SentenceSuggestionsInfo
 android.view.textservice.SpellCheckerInfo$1
 android.view.textservice.SpellCheckerInfo
-android.view.textservice.SpellCheckerSession$1
 android.view.textservice.SpellCheckerSession$InternalListener
 android.view.textservice.SpellCheckerSession$SpellCheckerSessionListener
 android.view.textservice.SpellCheckerSession$SpellCheckerSessionListenerImpl$1
@@ -9512,7 +9497,6 @@ com.android.internal.telephony.IntRangeManager
 com.android.internal.telephony.IntentBroadcaster$1
 com.android.internal.telephony.IntentBroadcaster
 com.android.internal.telephony.LastCallFailCause
-com.android.internal.telephony.LinkCapacityEstimate
 com.android.internal.telephony.LocalLog$ReadOnlyLocalLog
 com.android.internal.telephony.LocalLog
 com.android.internal.telephony.LocaleTracker$1
@@ -10617,7 +10601,6 @@ com.android.internal.util.JournaledFile
 com.android.internal.util.LatencyTracker
 com.android.internal.util.LineBreakBufferedWriter
 com.android.internal.util.LocalLog
-com.android.internal.util.LocationPermissionChecker
 com.android.internal.util.MemInfoReader
 com.android.internal.util.MessageUtils$DuplicateConstantError
 com.android.internal.util.MessageUtils
@@ -11247,7 +11230,6 @@ com.android.phone.ecc.nano.android.ParcelableExtendableMessageNano
 com.android.phone.ecc.nano.android.ParcelableMessageNano
 com.android.phone.ecc.nano.android.ParcelableMessageNanoCreator
 com.android.server.AppWidgetBackupBridge
-com.android.server.BootReceiver$1
 com.android.server.LocalServices
 com.android.server.NetworkManagementSocketTagger$1
 com.android.server.NetworkManagementSocketTagger$SocketTags
