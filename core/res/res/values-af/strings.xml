@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Laat die program toe om Bluetooth-toestelle in die omtrek te ontdek en saam te bind"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"koppel aan saamgebinde Bluetooth-toestelle"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Laat die program toe om aan saamgebinde Bluetooth-toestelle te koppel"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Voorkeur-NFC-betalingdiensinligting"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Laat die program toe om voorkeur-NFC-betalingdiensinligting soos geregistreerde hulpmiddels en roetebestemming te kry."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"beheer kortveldkommunikasie"</string>
@@ -573,8 +577,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Geen PIN, patroon of wagwoord is gestel nie"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Kon nie staaf nie"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gebruik skermslot"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Voer jou skermslot in om voort te gaan"</string>
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kon nie vingerafdruk verwerk nie. Probeer asseblief weer."</string>
@@ -661,8 +664,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Gesig <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Gebruik gesigslot"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gebruik gesig- of skermslot"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gebruik jou gesig om voort te gaan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gebruik jou gesig of skermslot om voort te gaan"</string>
   <string-array name="face_error_vendor">
   </string-array>

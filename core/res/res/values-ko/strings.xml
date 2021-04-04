@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"앱이 근처의 블루투스 기기를 찾고 페어링하도록 허용"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"페어링된 블루투스 기기에 연결"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"앱이 페어링된 블루투스 기기에 연결하도록 허용"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"기본 NFC 결제 서비스 정보"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
@@ -2137,9 +2141,9 @@
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"개인 뷰"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"직장 뷰"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"IT 관리자에 의해 차단됨"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"이 콘텐츠는 직장 앱으로 공유할 수 없습니다."</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"이 콘텐츠는 직장 앱을 통해 공유할 수 없습니다."</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"이 콘텐츠는 직장 앱으로 열 수 없습니다."</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"이 콘텐츠는 개인 앱으로 공유할 수 없습니다."</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"이 콘텐츠는 개인 앱을 통해 공유할 수 없습니다."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"이 콘텐츠는 개인 앱으로 열 수 없습니다."</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
     <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용"</string>

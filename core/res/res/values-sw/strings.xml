@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Huruhusu programu itambue na kuoanisha kwenye vifaa vyenye Bluetooth vilivyo karibu"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"kuunganisha kwenye vifaa vyenye Bluetooth vilivyooanishwa"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Huruhusu programu iunganishe kwenye vifaa vyenye Bluetooth vilivyooanishwa"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maelezo ya Huduma Inayopendelewa ya Malipo ya NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Huruhusu programu kupata maelezo ya huduma inayopendelewa ya malipo ya nfc kama vile huduma zilizosajiliwa na njia."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>

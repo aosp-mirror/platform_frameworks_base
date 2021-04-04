@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များကို ရှာဖွေပြီးတွဲချိတ်ရန် အက်ပ်ကိုခွင့်ပြုမည်"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"တွဲချိတ်ထားသော ဘလူးတုသ်စက်များနှင့် ချိတ်ဆက်ခြင်း"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"တွဲချိတ်ထားသော ဘလူးတုသ်သုံးစက်များနှင့် ချိတ်ဆက်ရန် အက်ပ်ကိုခွင့်ပြုမည်"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"အက်ပ်အား ဦစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များဖြစ်သည့် မှတ်ပုံတင်ထားသော အကူအညီများနှင့် သွားလာရာ လမ်းကြောင်းတို့ကို ရယူရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communicationအား ထိန်းချုပ်ရန်"</string>
@@ -621,7 +625,7 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ပိုမှတ်မိစေရန် သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"မျက်နှာမှတ်သော့ဖွင့်ခြင်းကို စနစ်ထည့်သွင်းပါ"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို စနစ်ထည့်သွင်းပါ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"သင့်ဖုန်းကိုကြည့်၍ သော့ဖွင့်ပါ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"သော့ဖွင့်ရန် နောက်ထပ်နည်းလမ်းများကို စနစ်ထည့်သွင်းပါ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"လက်ဗွေထည့်ရန် တို့ပါ"</string>
@@ -1029,9 +1033,9 @@
     <string name="copied" msgid="4675902854553014676">"မိတ္တူကူးပြီးပါပြီ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> မှ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> သို့ ကူးထည့်ထားသည်"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"ကလစ်ဘုတ်မှ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> သို့ ကူးထည့်ထားသည်"</string>
-    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော စာသားကို ကူးထည့်ထားသည်"</string>
-    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော ပုံကို ကူးထည့်ထားသည်"</string>
-    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော အကြောင်းအရာကို ကူးထည့်ထားသည်"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော စာသားကို ထည့်လိုက်သည်"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော ပုံကို ထည့်လိုက်သည်"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> က သင်မိတ္တူကူးထားသော အကြောင်းအရာကို ထည့်လိုက်သည်"</string>
     <string name="more_item_label" msgid="7419249600215749115">"နောက်ထပ်"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>

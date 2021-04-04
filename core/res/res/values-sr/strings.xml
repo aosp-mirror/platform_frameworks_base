@@ -542,6 +542,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дозвољава апликацији да открива Bluetooth уређаје у близини и упарује се са њима"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"повезивање са упареним Bluetooth уређајима"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дозвољава апликацији да се повезује са упареним Bluetooth уређајима"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информације о жељеној NFC услузи за плаћање"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозвољава апликацији да преузима информације о жељеној NFC услузи за плаћање, попут регистрованих идентификатора апликација и одредишта преусмеравања."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрола комуникације у ужем пољу (Near Field Communication)"</string>
@@ -1493,7 +1497,7 @@
     <string name="ime_action_previous" msgid="6548799326860401611">"Претходно"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Изврши"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Бирај број\nкористећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="6200708808003692594">"Креирајте контакт\nкористећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="6200708808003692594">"Направите контакт\nкористећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Следеће апликације захтевају дозволу за приступ налогу, како сада, тако и убудуће."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Желите да одобрите овај захтев?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Захтев за приступ"</string>

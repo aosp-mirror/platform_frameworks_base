@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permet que l\'aplicació detecti i vinculi dispositius Bluetooth propers"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"connectar-se a dispositius Bluetooth vinculats"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permet que l\'aplicació es connecti a dispositius Bluetooth vinculats"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informació preferent sobre el servei de pagament per NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet que l\'aplicació obtingui informació preferent sobre el servei de pagament per NFC, com ara complements registrats i destinacions de rutes."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Comunicació de camp proper (NFC)"</string>
@@ -2136,7 +2140,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Feina"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visualització personal"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Visualització de treball"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"L\'administrador de TI ha bloquejat la compartició"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Bloquejat per l\'administrador de TI"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"No es pot compartir aquest contingut amb aplicacions de treball"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"No es pot obrir aquest contingut amb aplicacions de treball"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No es pot compartir aquest contingut amb aplicacions personals"</string>

@@ -545,6 +545,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Umožňuje aplikaci vyhledávat zařízení Bluetooth v okolí a spárovávat se s nimi"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"připojovat se ke spárovaným zařízením Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Umožňuje aplikaci připojovat se ke spárovaným zařízením Bluetooth"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informace o preferované platební službě NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikaci získat informace o preferované platební službě NFC, například o registrovaných pomůckách a cíli směrování."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládání technologie NFC"</string>
