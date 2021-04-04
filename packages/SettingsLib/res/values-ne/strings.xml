@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ट्याब्लेट चाँडै बन्द हुन सक्छ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"यन्त्र चाँडै बन्द हुन सक्छ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"पूर्ण चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> बाँकी"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"पूर्ण चार्ज हुन <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> लाग्छ"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ब्याट्री लामो समयसम्म टिक्ने बनाउन अप्टिमाइज गरिँदै छ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"बिस्तारै चार्ज गरिँदै"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज भइरहेको छैन"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लगइन गरिएको छ, अहिले नै चार्ज गर्न सकिँदैन"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"पूर्ण चार्ज भएको स्थिति"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"प्रशासकद्वारा नियन्त्रित"</string>
     <string name="disabled" msgid="8017887509554714950">"असक्षम पारियो"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति छ"</string>
@@ -501,16 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कम समय।"</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द गर्नुहोस्"</string>
     <string name="okay" msgid="949938843324579502">"ठिक छ"</string>
-    <!-- no translation found for alarms_and_reminders_label (6918395649731424294) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_switch_title (186992351401152744) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_title (2988400785896875237) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_footer_title (5882788882647778753) -->
-    <skip />
-    <!-- no translation found for keywords_alarms_and_reminders (8882739572152019456) -->
-    <skip />
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म र रिमाइन्डरहरू"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"अलार्म वा रिमाइन्डर सेट गर्ने अनुमति दिनुहोस्"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"अलार्म र रिमाइन्डरहरू"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"यो एपलाई अलार्म वा समयमा आधारित अन्य कार्यक्रमहरूको समय तोक्ने अनुमति दिनुहोस्। यसका सहायताले तपाईंले यो यन्त्र प्रयोग नगरेका बेला पनि यो एपले अन भई काम गर्न सक्छ। स्मरण रहोस्, तपाईंले यो एपलाई दिनुभएको अनुमति रद्द गर्नुभयो भने यसले राम्रोसँग काम नगर्न सक्छ। खास गरी, यो एपले तोकेको कुनै पनि अलार्म बज्ने छैन।"</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"कार्यतालिका, अलार्म, रिमाइन्डर, कार्यक्रम"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सक्रिय गर्नुहोस्"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई सक्रिय गर्नुहोस्"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कहिल्यै होइन"</string>

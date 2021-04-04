@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - பேட்டரியின் ஆயுளை மேம்படுத்துகிறது"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"சார்ஜ் ஆகிறது"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"மெதுவாக சார்ஜாகிறது"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"சார்ஜ் செய்யப்படவில்லை"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"செருகப்பட்டது, ஆனால் இப்போது சார்ஜ் செய்ய முடியவில்லை"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"முழுவதும் சார்ஜ் ஆனது"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"நிர்வாகி கட்டுப்படுத்துகிறார்"</string>
     <string name="disabled" msgid="8017887509554714950">"முடக்கப்பட்டது"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"அனுமதிக்கப்பட்டது"</string>
@@ -501,16 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"நேரத்தைக் குறைக்கும்."</string>
     <string name="cancel" msgid="5665114069455378395">"ரத்துசெய்"</string>
     <string name="okay" msgid="949938843324579502">"சரி"</string>
-    <!-- no translation found for alarms_and_reminders_label (6918395649731424294) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_switch_title (186992351401152744) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_title (2988400785896875237) -->
-    <skip />
-    <!-- no translation found for alarms_and_reminders_footer_title (5882788882647778753) -->
-    <skip />
-    <!-- no translation found for keywords_alarms_and_reminders (8882739572152019456) -->
-    <skip />
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"அலாரங்களும் நினைவூட்டல்களும்"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"அலாரங்களையோ நினைவூட்டல்களையோ அமைக்க அனுமதித்தல்"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"அலாரங்களும் நினைவூட்டல்களும்"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"அலாரங்களையோ பிற நேரம் சார்ந்த நிகழ்வுகளையோ திட்டமிட இந்த ஆப்ஸை அனுமதிக்கும். சாதனத்தைப் பயன்படுத்தாதபோதும், ஆப்ஸ் தொடங்கவும் இயங்கவும் இது அனுமதிக்கும். கவனத்திற்கு: இந்த அனுமதியைத் திரும்பப்பெற்றால் ஆப்ஸ் செயலிழக்கக்கூடும். குறிப்பாக, ஆப்ஸ் திட்டமிட்டுள்ள அலாரங்கள் எதுவும் இனி இயங்காது."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"திட்ட அட்டவணை, அலாரம், நினைவூட்டல், நிகழ்வு"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ஆன் செய்"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"தொந்தரவு செய்ய வேண்டாம் என்பதை ஆன் செய்யும்"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ஒருபோதும் வேண்டாம்"</string>
