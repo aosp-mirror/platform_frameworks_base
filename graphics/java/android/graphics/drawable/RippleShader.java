@@ -62,7 +62,7 @@ final class RippleShader extends RuntimeShader {
             + "  return 1. - smoothstep(1. - blurHalf, 1. + blurHalf, d / radius);\n"
             + "}\n"
             + "float softRing(vec2 uv, vec2 xy, float radius, float progress, float blur) {\n"
-            + "  float thickness = 0.2 * radius;\n"
+            + "  float thickness = 0.3 * radius;\n"
             + "  float currentRadius = radius * progress;\n"
             + "  float circle_outer = softCircle(uv, xy, currentRadius + thickness, blur);\n"
             + "  float circle_inner = softCircle(uv, xy, currentRadius - thickness, blur);\n"
