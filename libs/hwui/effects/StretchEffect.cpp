@@ -186,8 +186,8 @@ sk_sp<SkImageFilter> StretchEffect::getImageFilter(const sk_sp<SkImage>& snapsho
     float normOverScrollDistY = mStretchDirection.y();
     float distanceStretchedX = CONTENT_DISTANCE_STRETCHED / (1 + abs(normOverScrollDistX));
     float distanceStretchedY = CONTENT_DISTANCE_STRETCHED / (1 + abs(normOverScrollDistY));
-    float inverseDistanceStretchedX = 1.f / distanceStretchedX;
-    float inverseDistanceStretchedY = 1.f / distanceStretchedY;
+    float inverseDistanceStretchedX = 1.f / CONTENT_DISTANCE_STRETCHED;
+    float inverseDistanceStretchedY = 1.f / CONTENT_DISTANCE_STRETCHED;
     float diffX = distanceStretchedX - CONTENT_DISTANCE_STRETCHED;
     float diffY = distanceStretchedY - CONTENT_DISTANCE_STRETCHED;
 
