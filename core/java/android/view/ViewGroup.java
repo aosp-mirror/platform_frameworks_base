@@ -2723,7 +2723,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                     continue;
                                 }
                                 childWithAccessibilityFocus = null;
-                                i = childrenCount - 1;
+                                i = childrenCount;
                             }
 
                             if (!child.canReceivePointerEvents()
