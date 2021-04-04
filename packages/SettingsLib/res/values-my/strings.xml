@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"နှိုးစက် (သို့) သတိပေးချက်များ သတ်မှတ်ခွင့်ပြုရန်"</string>
     <string name="alarms_and_reminders_title" msgid="2988400785896875237">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"နှိုးစက်သတ်မှတ်ရန် (သို့) အချိန်သတ်မှတ်ချက်ပါသည့် အစီအစဉ်များဆွဲရန် ဤအက်ပ်ကို ခွင့်ပြုပါ။ ၎င်းက စက်ကို သင်အသုံးမပြုသော်လည်း အက်ပ်ကို နှိုးရန်နှင့် အလုပ်လုပ်နေရန် ခွင့်ပြုမည်။ ဤခွင့်ပြုချက်ကို ရုတ်သိမ်းခြင်းက အက်ပ်ကို ချွတ်ယွင်းစေမည်ဖြစ်ကြောင်း သတိပြုပါ၊ အထူးသဖြင့် အက်ပ်က သတ်မှတ်ထားသော မည်သည့်နှိုးစက်မျှ အလုပ်မလုပ်တော့ပါ။"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"နှိုးစက်သတ်မှတ်ရန် (သို့) အချိန်သတ်မှတ်ချက်ပါသည့် အစီအစဉ်များဆွဲရန် ဤအက်ပ်ကို ခွင့်ပြုပါ။ သင်က စက်ကိုအသုံးမပြုနေသည့် အချိန်တွင်လည်း စတင်ရန်နှင့် အလုပ်လုပ်နေရန် အက်ပ်ကို ခွင့်ပြုပါမည်။ ဤခွင့်ပြုချက်ကို ရုတ်သိမ်းခြင်းက အက်ပ်ကို ချွတ်ယွင်းစေမည်ဖြစ်ကြောင်း သတိပြုပါ၊ အထူးသဖြင့် အက်ပ်က သတ်မှတ်ထားသော မည်သည့်နှိုးစက်မျှ အလုပ်မလုပ်တော့ပါ။"</string>
     <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"အချိန်ဇယား၊ နှိုးစက်၊ သတိပေးချက်၊ အစီအစဉ်"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ဖွင့်ရန်"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'မနှောင့်ယှက်ရ\' ဖွင့်ခြင်း"</string>
@@ -562,6 +562,8 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"သော့ချရန် သတ်မှတ်ပါ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> သို့ ပြောင်းရန်"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"အသုံးပြုသူအသစ် ပြုလုပ်နေသည်…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"နာမည်ပြောင်"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ဧည့်သည့် ထည့်ရန်"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ဧည့်သည်ကို ဖယ်ထုတ်ရန်"</string>
