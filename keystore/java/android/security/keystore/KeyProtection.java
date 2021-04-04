@@ -24,6 +24,7 @@ import android.app.KeyguardManager;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.security.GateKeeper;
+import android.security.keystore2.KeymasterUtils;
 
 import java.security.Key;
 import java.security.KeyStore.ProtectionParameter;

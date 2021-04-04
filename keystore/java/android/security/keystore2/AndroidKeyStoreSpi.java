@@ -30,7 +30,6 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
-import android.security.keystore.KeymasterUtils;
 import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.WrappedKeyEntry;
 import android.system.keystore2.AuthenticatorSpec;
