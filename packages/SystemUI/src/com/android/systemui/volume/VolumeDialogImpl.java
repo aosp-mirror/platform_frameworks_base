@@ -301,11 +301,13 @@ public class VolumeDialogImpl implements VolumeDialog,
         // the volume dialog container itself, so this is fine.
         for (int i = 0; i < mDialogView.getChildCount(); i++) {
             final View view = mDialogView.getChildAt(i);
+            final int[] locInWindow = new int[2];
+            view.getLocationInWindow(locInWindow);
             mTouchableRegion.op(
-                    view.getLeft(),
-                    view.getTop(),
-                    view.getRight(),
-                    view.getBottom(),
+                    locInWindow[0],
+                    locInWindow[1],
+                    locInWindow[0] + view.getWidth(),
+                    locInWindow[1] + view.getHeight(),
                     Region.Op.UNION);
         }
 
