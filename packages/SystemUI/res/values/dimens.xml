@@ -1437,4 +1437,6 @@
     <dimen name="min_wallet_empty_height">208dp</dimen>
     <dimen name="wallet_card_border_width">1dp</dimen>
     <dimen name="wallet_empty_state_corner_radius">24dp</dimen>
+    <dimen name="wallet_tile_card_view_height">32dp</dimen>
+    <dimen name="wallet_tile_card_view_width">50dp</dimen>
 </resources>
