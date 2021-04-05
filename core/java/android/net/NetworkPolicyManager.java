@@ -772,6 +772,12 @@ public class NetworkPolicyManager {
         return DebugUtils.flagsToString(ConnectivityManager.class, "BLOCKED_", blockedReasons);
     }
 
+    /** @hide */
+    @NonNull
+    public static String allowedReasonsToString(int allowedReasons) {
+        return DebugUtils.flagsToString(NetworkPolicyManager.class, "ALLOWED_", allowedReasons);
+    }
+
     /**
      * Register a {@link NetworkPolicyCallback} to listen for changes to network blocked status
      * of apps.
