@@ -61,7 +61,10 @@ public final class Slog {
      * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void v(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.VERBOSE)) return;
 
@@ -87,7 +90,10 @@ public final class Slog {
      * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void d(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.DEBUG)) return;
 
@@ -112,7 +118,10 @@ public final class Slog {
      * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void i(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.INFO)) return;
 
@@ -142,7 +151,10 @@ public final class Slog {
      * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void w(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.WARN)) return;
 
@@ -157,7 +169,10 @@ public final class Slog {
      * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void w(String tag, Exception exception, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.WARN)) return;
 
@@ -183,7 +198,10 @@ public final class Slog {
      * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void e(String tag, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.ERROR)) return;
 
@@ -198,7 +216,10 @@ public final class Slog {
      * of the objects for the {@code vargars}, which could affect garbage collection. So, if you're
      * calling this method in a critical path, make sure to explicitly do the check before calling
      * it.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void e(String tag, Exception exception, String format, @Nullable Object... args) {
         if (!Log.isLoggable(tag, Log.ERROR)) return;
 
@@ -217,14 +238,20 @@ public final class Slog {
 
     /**
      * Logs a {@code wtf} message.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void wtf(String tag, String format, @Nullable Object... args) {
         wtf(tag, getMessage(format, args));
     }
 
     /**
      * Logs a {@code wtf} message with an exception.
+     *
+     * @deprecated use {@code com.android.server.utils.SLogF} instead.
      */
+    @Deprecated
     public static void wtf(String tag, Exception exception, String format,
             @Nullable Object... args) {
         wtf(tag, getMessage(format, args), exception);
