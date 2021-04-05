@@ -24,6 +24,30 @@
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
+    },
+    {
+      // Permission indicators
+      "name": "CtsPermission4TestCases",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      // Permission indicators
+      "name": "CtsVoiceRecognitionTestCases",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ],
 
