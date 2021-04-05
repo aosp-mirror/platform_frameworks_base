@@ -59,7 +59,7 @@ public class NetworkRanker {
         /** Get score of this scoreable */
         FullScore getScore();
         /** Get capabilities of this scoreable */
-        NetworkCapabilities getCaps();
+        NetworkCapabilities getCapsNoCopy();
     }
 
     private static final boolean USE_POLICY_RANKING = false;
@@ -159,11 +159,12 @@ public class NetworkRanker {
         if (accepted.size() == 1) return accepted.get(0);
         if (accepted.size() > 0 && rejected.size() > 0) candidates = new ArrayList<>(accepted);
 
-        // Yield to bad wifi policy : if any wifi has ever been validated, keep only networks
-        // that don't yield to such a wifi network.
+        // Yield to bad wifi policy : if any wifi has ever been validated (even if it's now
+        // unvalidated), and unless it's been explicitly avoided when bad in UI, then keep only
+        // networks that don't yield to such a wifi network.
         final boolean anyWiFiEverValidated = CollectionUtils.any(candidates,
                 nai -> nai.getScore().hasPolicy(POLICY_EVER_VALIDATED_NOT_AVOIDED_WHEN_BAD)
-                        && nai.getCaps().hasTransport(TRANSPORT_WIFI));
+                        && nai.getCapsNoCopy().hasTransport(TRANSPORT_WIFI));
         if (anyWiFiEverValidated) {
             partitionInto(candidates, nai -> !nai.getScore().hasPolicy(POLICY_YIELD_TO_BAD_WIFI),
                     accepted, rejected);
@@ -207,18 +208,18 @@ public class NetworkRanker {
         for (final Scoreable defaultSubNai : accepted) {
             // Remove all networks without the DEFAULT_SUBSCRIPTION policy and the same transports
             // as a network that has it.
-            final int[] transports = defaultSubNai.getCaps().getTransportTypes();
+            final int[] transports = defaultSubNai.getCapsNoCopy().getTransportTypes();
             candidates.removeIf(nai -> !nai.getScore().hasPolicy(POLICY_TRANSPORT_PRIMARY)
-                    && Arrays.equals(transports, nai.getCaps().getTransportTypes()));
+                    && Arrays.equals(transports, nai.getCapsNoCopy().getTransportTypes()));
         }
         if (1 == candidates.size()) return candidates.get(0);
-        // It's guaranteed candidates.size() > 0 because there is at least one with DEFAULT_SUB
-        // policy and only those without it were removed.
+        // It's guaranteed candidates.size() > 0 because there is at least one with the
+        // TRANSPORT_PRIMARY policy and only those without it were removed.
 
         // If some of the networks have a better transport than others, keep only the ones with
         // the best transports.
         for (final int transport : PREFERRED_TRANSPORTS_ORDER) {
-            partitionInto(candidates, nai -> nai.getCaps().hasTransport(transport),
+            partitionInto(candidates, nai -> nai.getCapsNoCopy().hasTransport(transport),
                     accepted, rejected);
             if (accepted.size() == 1) return accepted.get(0);
             if (accepted.size() > 0 && rejected.size() > 0) {

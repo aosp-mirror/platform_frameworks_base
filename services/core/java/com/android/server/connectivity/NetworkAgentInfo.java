@@ -894,7 +894,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo>, NetworkRa
     // Caller must not mutate. This method is called frequently and making a defensive copy
     // would be too expensive. This is used by NetworkRanker.Scoreable, so it can be compared
     // against other scoreables.
-    @Override public NetworkCapabilities getCaps() {
+    @Override public NetworkCapabilities getCapsNoCopy() {
         return networkCapabilities;
     }
 
