@@ -4342,6 +4342,49 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
+         * Allows an app to set an initial notification listener filter
+         *
+         * @param token The binder for the listener, to check that the caller is allowed
+         */
+        @Override
+        public void migrateNotificationFilter(INotificationListener token, int defaultTypes,
+                List<String> disallowedApps) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+
+                    Pair key = Pair.create(info.component, info.userid);
+
+                    NotificationListenerFilter nlf = mListeners.getNotificationListenerFilter(key);
+                    if (nlf == null) {
+                        nlf = new NotificationListenerFilter();
+                    }
+                    if (nlf.getDisallowedPackages().isEmpty() && disallowedApps != null) {
+                        for (String pkg : disallowedApps) {
+                            // block the current user's version and any work profile versions
+                            for (int userId : mUm.getProfileIds(info.userid, false)) {
+                                try {
+                                    int uid = getUidForPackageAndUser(pkg, UserHandle.of(userId));
+                                    VersionedPackage vp = new VersionedPackage(pkg, uid);
+                                    nlf.addPackage(vp);
+                                } catch (Exception e) {
+                                    // pkg doesn't exist on that user; skip
+                                }
+                            }
+                        }
+                    }
+                    if (nlf.areAllTypesAllowed()) {
+                        nlf.setTypes(defaultTypes);
+                    }
+                    mListeners.setNotificationListenerFilter(key, nlf);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        /**
          * Allow an INotificationListener to simulate clearing (dismissing) a single notification.
          *
          * {@see com.android.server.StatusBarManagerService.NotificationCallbacks#onNotificationClear}
@@ -5239,7 +5282,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         private int getUidForPackageAndUser(String pkg, UserHandle user) throws RemoteException {
-            int uid = 0;
+            int uid = INVALID_UID;
             final long identity = Binder.clearCallingIdentity();
             try {
                 uid = mPackageManager.getPackageUid(pkg, 0, user.getIdentifier());
