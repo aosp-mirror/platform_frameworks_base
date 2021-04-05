@@ -956,17 +956,25 @@ public class DomainVerificationService extends SystemService
         }
 
         AndroidPackage pkg = newPkgSetting.getPkg();
-        ArraySet<String> domains = mCollector.collectValidAutoVerifyDomains(pkg);
-        boolean hasAutoVerifyDomains = !domains.isEmpty();
+        ArraySet<String> autoVerifyDomains = mCollector.collectValidAutoVerifyDomains(pkg);
+        boolean hasAutoVerifyDomains = !autoVerifyDomains.isEmpty();
         boolean isPendingOrRestored = pkgState != null;
         if (isPendingOrRestored) {
             pkgState = new DomainVerificationPkgState(pkgState, domainSetId, hasAutoVerifyDomains);
+            pkgState.getStateMap().retainAll(autoVerifyDomains);
+
+            Set<String> webDomains = mCollector.collectAllWebDomains(pkg);
+            SparseArray<DomainVerificationInternalUserState> userStates = pkgState.getUserStates();
+            int size = userStates.size();
+            for (int index = 0; index < size; index++) {
+                userStates.valueAt(index).retainHosts(webDomains);
+            }
         } else {
             pkgState = new DomainVerificationPkgState(pkgName, domainSetId, hasAutoVerifyDomains);
         }
 
-        boolean needsBroadcast =
-                applyImmutableState(newPkgSetting, pkgState.getStateMap(), domains);
+        boolean needsBroadcast = applyImmutableState(newPkgSetting, pkgState.getStateMap(),
+                autoVerifyDomains);
         if (needsBroadcast && !isPendingOrRestored) {
             // TODO(b/159952358): Test this behavior
             // Attempt to preserve user experience by automatically verifying all domains from
@@ -997,9 +1005,10 @@ public class DomainVerificationService extends SystemService
                     && legacyInfo.getStatus()
                     == PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
                 ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
-                int domainsSize = domains.size();
+                int domainsSize = autoVerifyDomains.size();
                 for (int index = 0; index < domainsSize; index++) {
-                    stateMap.put(domains.valueAt(index), DomainVerificationState.STATE_MIGRATED);
+                    stateMap.put(autoVerifyDomains.valueAt(index),
+                            DomainVerificationState.STATE_MIGRATED);
                 }
             }
         }
