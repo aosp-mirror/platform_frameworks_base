@@ -1474,7 +1474,13 @@ public class VcnGatewayConnection extends StateMachine {
                             mVcnContext.getVcnNetworkProvider(),
                             () -> {
                                 Slog.d(TAG, "NetworkAgent was unwanted");
-                                teardownAsynchronously();
+                                // If network agent has already been torn down, skip sending the
+                                // disconnect. Unwanted() is always called, even when networkAgents
+                                // are unregistered in teardownNetwork(), so prevent duplicate
+                                // notifications.
+                                if (mNetworkAgent != null) {
+                                    teardownAsynchronously();
+                                }
                             } /* networkUnwantedCallback */,
                             (status) -> {
                                 if (status == NetworkAgent.VALIDATION_STATUS_VALID) {
