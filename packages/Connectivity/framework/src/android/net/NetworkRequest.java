@@ -660,25 +660,6 @@ public class NetworkRequest implements Parcelable {
                 ", " + networkCapabilities.toString() + " ]";
     }
 
-    private int typeToProtoEnum(Type t) {
-        switch (t) {
-            case NONE:
-                return NetworkRequestProto.TYPE_NONE;
-            case LISTEN:
-                return NetworkRequestProto.TYPE_LISTEN;
-            case TRACK_DEFAULT:
-                return NetworkRequestProto.TYPE_TRACK_DEFAULT;
-            case REQUEST:
-                return NetworkRequestProto.TYPE_REQUEST;
-            case BACKGROUND_REQUEST:
-                return NetworkRequestProto.TYPE_BACKGROUND_REQUEST;
-            case TRACK_SYSTEM_DEFAULT:
-                return NetworkRequestProto.TYPE_TRACK_SYSTEM_DEFAULT;
-            default:
-                return NetworkRequestProto.TYPE_UNKNOWN;
-        }
-    }
-
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof NetworkRequest == false) return false;
         NetworkRequest that = (NetworkRequest)obj;
