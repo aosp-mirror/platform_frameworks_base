@@ -42,7 +42,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.system.keystore2.Domain;
@@ -806,23 +805,13 @@ public final class KeyChain {
             return null;
         }
 
-        if (AndroidKeyStoreProvider.isKeystore2Enabled()) {
-            try {
-                return android.security.keystore2.AndroidKeyStoreProvider
-                        .loadAndroidKeyStoreKeyPairFromKeystore(
-                                KeyStore2.getInstance(),
-                                getGrantDescriptor(keyId));
-            } catch (UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
-                throw new KeyChainException(e);
-            }
-        } else {
-            try {
-                return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
-                        KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
-            } catch (RuntimeException | UnrecoverableKeyException
-                    | KeyPermanentlyInvalidatedException e) {
-                throw new KeyChainException(e);
-            }
+        try {
+            return android.security.keystore2.AndroidKeyStoreProvider
+                    .loadAndroidKeyStoreKeyPairFromKeystore(
+                            KeyStore2.getInstance(),
+                            getGrantDescriptor(keyId));
+        } catch (UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
+            throw new KeyChainException(e);
         }
     }
 
