@@ -78,9 +78,22 @@ public class TranslationTransformationMethod implements TransformationMethod2 {
         if (TextUtils.isEmpty(translatedText) || isWhitespace(translatedText.toString())) {
             return source;
         } else {
+            // TODO(b/179693024): Remove this once we have the fix to pad the view text instead.
+            translatedText = ellipsize(translatedText, ((TextView) view).getText().length());
             // TODO(b/174283799): apply the spans to the text
             return translatedText;
         }
+    }
+
+    private static CharSequence ellipsize(CharSequence text, int newLength) {
+        if (text.length() <= newLength) {
+            return text;
+        }
+        String ellipsis = String.valueOf('\u2026');
+        if (newLength == 1) {
+            return ellipsis;
+        }
+        return TextUtils.concat(TextUtils.trimToSize(text, newLength - 1), ellipsis);
     }
 
     @Override
