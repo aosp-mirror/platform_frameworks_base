@@ -5175,10 +5175,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @param outMatrix Matrix to fill in the transformation.
      */
     void getTransformationMatrix(float[] float9, Matrix outMatrix) {
-        float9[Matrix.MSCALE_X] = mWinAnimator.mDsDx;
-        float9[Matrix.MSKEW_Y] = mWinAnimator.mDtDx;
-        float9[Matrix.MSKEW_X] = mWinAnimator.mDtDy;
-        float9[Matrix.MSCALE_Y] = mWinAnimator.mDsDy;
+        float9[Matrix.MSCALE_X] = mGlobalScale;
+        float9[Matrix.MSKEW_Y] = 0;
+        float9[Matrix.MSKEW_X] = 0;
+        float9[Matrix.MSCALE_Y] = mGlobalScale;
         transformSurfaceInsetsPosition(mTmpPoint, mAttrs.surfaceInsets);
         int x = mSurfacePosition.x + mTmpPoint.x;
         int y = mSurfacePosition.y + mTmpPoint.y;

@@ -125,11 +125,6 @@ class WindowStateAnimator {
      */
     private final Rect mSystemDecorRect = new Rect();
 
-    float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
-    private float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
-
-    boolean mHaveMatrix;
-
     // Set to true if, when the window gets displayed, it should perform
     // an enter animation.
     boolean mEnterAnimationPending;
@@ -478,11 +473,6 @@ class WindowStateAnimator {
         }
 
         mShownAlpha = mAlpha;
-        mHaveMatrix = false;
-        mDsDx = 1;
-        mDtDx = 0;
-        mDtDy = 0;
-        mDsDy = 1;
     }
 
     private boolean isInBlastSync() {
@@ -522,10 +512,10 @@ class WindowStateAnimator {
                 // Wallpaper is already updated above when calling setWallpaperPositionAndScale so
                 // we only need to consider the non-wallpaper case here.
                 mSurfaceController.setMatrix(t,
-                        mDsDx * w.mHScale,
-                        mDtDx * w.mVScale,
-                        mDtDy * w.mHScale,
-                        mDsDy * w.mVScale);
+                        w.mHScale,
+                        w.mVScale,
+                        w.mHScale,
+                        w.mVScale);
             } else {
                 setWallpaperPositionAndScale(t, xOffset, yOffset, mWallpaperScale);
             }
@@ -585,25 +575,17 @@ class WindowStateAnimator {
                         "Orientation change skips hidden %s", w);
             }
         } else if (mLastAlpha != mShownAlpha
-                || mLastDsDx != mDsDx
-                || mLastDtDx != mDtDx
-                || mLastDsDy != mDsDy
-                || mLastDtDy != mDtDy
                 || w.mLastHScale != w.mHScale
                 || w.mLastVScale != w.mVScale
                 || mLastHidden) {
             displayed = true;
             mLastAlpha = mShownAlpha;
-            mLastDsDx = mDsDx;
-            mLastDtDx = mDtDx;
-            mLastDsDy = mDsDy;
-            mLastDtDy = mDtDy;
             w.mLastHScale = w.mHScale;
             w.mLastVScale = w.mVScale;
             ProtoLog.i(WM_SHOW_TRANSACTIONS,
                     "SURFACE controller=%s alpha=%f matrix=[%f*%f,%f*%f][%f*%f,%f*%f]: %s",
-                            mSurfaceController, mShownAlpha, mDsDx, w.mHScale, mDtDx, w.mVScale,
-                            mDtDy, w.mHScale, mDsDy, w.mVScale, w);
+                            mSurfaceController, mShownAlpha, w.mHScale, w.mVScale,
+                            w.mHScale, w.mVScale, w);
 
             boolean prepared = true;
 
@@ -612,10 +594,10 @@ class WindowStateAnimator {
             } else {
                 prepared =
                     mSurfaceController.prepareToShowInTransaction(t, mShownAlpha,
-                        mDsDx * w.mHScale,
-                        mDtDx * w.mVScale,
-                        mDtDy * w.mHScale,
-                        mDsDy * w.mVScale
+                        w.mHScale,
+                        w.mVScale,
+                        w.mHScale,
+                        w.mVScale
                     );
             }
 
@@ -712,10 +694,10 @@ class WindowStateAnimator {
         mSurfaceController.setPosition(t,mWin.mTmpMatrixArray[MTRANS_X],
                 mWin.mTmpMatrixArray[MTRANS_Y]);
         mSurfaceController.setMatrix(t,
-                mDsDx * mWin.mTmpMatrixArray[MSCALE_X] * mWin.mHScale,
-                mDtDx * mWin.mTmpMatrixArray[MSKEW_Y] * mWin.mVScale,
-                mDtDy * mWin.mTmpMatrixArray[MSKEW_X] * mWin.mHScale,
-                mDsDy * mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale);
+                mWin.mTmpMatrixArray[MSCALE_X] * mWin.mHScale,
+                mWin.mTmpMatrixArray[MSKEW_Y] * mWin.mVScale,
+                mWin.mTmpMatrixArray[MSKEW_X] * mWin.mHScale,
+                mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale);
     }
 
     /**
@@ -917,12 +899,8 @@ class WindowStateAnimator {
                     pw.print(" mAlpha="); pw.print(mAlpha);
                     pw.print(" mLastAlpha="); pw.println(mLastAlpha);
         }
-        if (mHaveMatrix || mWin.mGlobalScale != 1) {
+        if (mWin.mGlobalScale != 1) {
             pw.print(prefix); pw.print("mGlobalScale="); pw.print(mWin.mGlobalScale);
-                    pw.print(" mDsDx="); pw.print(mDsDx);
-                    pw.print(" mDtDx="); pw.print(mDtDx);
-                    pw.print(" mDtDy="); pw.print(mDtDy);
-                    pw.print(" mDsDy="); pw.println(mDsDy);
         }
     }
 
