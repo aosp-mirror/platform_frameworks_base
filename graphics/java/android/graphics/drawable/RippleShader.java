@@ -31,6 +31,13 @@ final class RippleShader extends RuntimeShader {
             + "uniform vec2 in_noiseScale;\n"
             + "uniform float in_hasMask;\n"
             + "uniform float in_noisePhase;\n"
+            + "uniform float in_turbulencePhase;\n"
+            + "uniform vec2 in_tCircle1;\n"
+            + "uniform vec2 in_tCircle2;\n"
+            + "uniform vec2 in_tCircle3;\n"
+            + "uniform vec2 in_tRotation1;\n"
+            + "uniform vec2 in_tRotation2;\n"
+            + "uniform vec2 in_tRotation3;\n"
             + "uniform vec4 in_color;\n"
             + "uniform shader in_shader;\n";
     private static final String SHADER_LIB =
@@ -41,7 +48,7 @@ final class RippleShader extends RuntimeShader {
             + "    return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;\n"
             + "}"
             + "const float PI = 3.1415926535897932384626;\n"
-            + "const float SPARKLE_OPACITY = 0.55;\n"
+            + "const float SPARKLE_OPACITY = 0.75;\n"
             + "\n"
             + "float sparkles(vec2 uv, float t) {\n"
             + "  float n = triangleNoise(uv);\n"
@@ -55,7 +62,6 @@ final class RippleShader extends RuntimeShader {
             + "  }\n"
             + "  return saturate(s) * SPARKLE_OPACITY;\n"
             + "}\n"
-            + "\n"
             + "float softCircle(vec2 uv, vec2 xy, float radius, float blur) {\n"
             + "  float blurHalf = blur * 0.5;\n"
             + "  float d = distance(uv, xy);\n"
@@ -71,6 +77,26 @@ final class RippleShader extends RuntimeShader {
             + "float subProgress(float start, float end, float progress) {\n"
             + "    float sub = clamp(progress, start, end);\n"
             + "    return (sub - start) / (end - start); \n"
+            + "}\n"
+            + "mat2 rotate2d(vec2 rad){\n"
+            + "  return mat2(rad.x, -rad.y, rad.y, rad.x);\n"
+            + "}\n"
+            + "float circle_grid(vec2 resolution, vec2 coord, float time, vec2 center,\n"
+            + "    vec2 rotation, float cell_diameter) {\n"
+            + "  coord = rotate2d(rotation) * (center - coord) + center;\n"
+            + "  coord = mod(coord, cell_diameter) / resolution;\n"
+            + "  float normal_radius = cell_diameter / resolution.y * 0.5;\n"
+            + "  float radius = 0.65 * normal_radius;\n"
+            + "  return softCircle(coord, vec2(normal_radius), radius, radius * 50.0);\n"
+            + "}\n"
+            + "float turbulence(vec2 uv, float t) {\n"
+            + "  const vec2 scale = vec2(1.5);\n"
+            + "  uv = uv * scale;\n"
+            + "  float g1 = circle_grid(scale, uv, t, in_tCircle1, in_tRotation1, 0.17);\n"
+            + "  float g2 = circle_grid(scale, uv, t, in_tCircle2, in_tRotation2, 0.2);\n"
+            + "  float g3 = circle_grid(scale, uv, t, in_tCircle3, in_tRotation3, 0.275);\n"
+            + "  float v = (g1 * g1 + g2 - g3) * 0.5;\n"
+            + "  return saturate(0.45 + 0.8 * v);\n"
             + "}\n";
     private static final String SHADER_MAIN = "vec4 main(vec2 p) {\n"
             + "    float fadeIn = subProgress(0., 0.1, in_progress);\n"
@@ -82,7 +108,9 @@ final class RippleShader extends RuntimeShader {
             + "    float alpha = min(fadeIn, 1. - fadeOutNoise);\n"
             + "    vec2 uv = p * in_resolutionScale;\n"
             + "    vec2 densityUv = uv - mod(uv, in_noiseScale);\n"
-            + "    float sparkle = sparkles(densityUv, in_noisePhase) * ring * alpha;\n"
+            + "    float turbulence = turbulence(uv, in_turbulencePhase);\n"
+            + "    float sparkle = sparkles(densityUv, in_noisePhase) * ring * alpha "
+            + "* turbulence;\n"
             + "    float fade = min(fadeIn, 1. - fadeOutRipple);\n"
             + "    vec4 circle = in_color * (softCircle(p, center, in_maxRadius "
             + "      * scaleIn, 0.2) * fade);\n"
@@ -90,6 +118,11 @@ final class RippleShader extends RuntimeShader {
             + "    return mix(circle, vec4(sparkle), sparkle) * mask;\n"
             + "}";
     private static final String SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN;
+    private static final double PI_ROTATE_RIGHT = Math.PI * 0.0078125;
+    private static final double PI_ROTATE_LEFT = Math.PI * -0.0078125;
+
+    private float mNoisePhase;
+    private float mProgress;
 
     RippleShader() {
         super(SHADER, false);
@@ -109,8 +142,10 @@ final class RippleShader extends RuntimeShader {
     /**
      * Continuous offset used as noise phase.
      */
-    public void setNoisePhase(float t) {
-        setUniform("in_noisePhase", t);
+    public void setNoisePhase(float phase) {
+        mNoisePhase = phase;
+        setUniform("in_noisePhase", phase);
+        updateTurbulence();
     }
 
     public void setOrigin(float x, float y) {
@@ -122,7 +157,40 @@ final class RippleShader extends RuntimeShader {
     }
 
     public void setProgress(float progress) {
+        mProgress = progress;
         setUniform("in_progress", progress);
+        updateTurbulence();
+    }
+
+    private void updateTurbulence() {
+        final float turbulencePhase = (float) ((mProgress + mNoisePhase * 0.333f) * 5f * Math.PI);
+        setUniform("in_turbulencePhase", turbulencePhase);
+
+        final float scale = 1.5f;
+        setUniform("in_tCircle1", new float[]{
+                (float) (scale * 0.5 + (turbulencePhase * 0.01 * Math.cos(scale * 0.55))),
+                (float) (scale * 0.5 + (turbulencePhase * 0.01 * Math.sin(scale * 0.55)))
+        });
+        setUniform("in_tCircle2", new float[]{
+                (float) (scale * 0.2 + (turbulencePhase * -0.0066 * Math.cos(scale * 0.45))),
+                (float) (scale * 0.2 + (turbulencePhase * -0.0066 * Math.sin(scale * 0.45)))
+        });
+        setUniform("in_tCircle3", new float[]{
+                (float) (scale + (turbulencePhase * -0.0066 * Math.cos(scale * 0.35))),
+                (float) (scale + (turbulencePhase * -0.0066 * Math.sin(scale * 0.35)))
+        });
+        final double rotation1 = turbulencePhase * PI_ROTATE_RIGHT + 1.7 * Math.PI;
+        setUniform("in_tRotation1", new float[]{
+                (float) Math.cos(rotation1), (float) Math.sin(rotation1)
+        });
+        final double rotation2 = turbulencePhase * PI_ROTATE_LEFT + 2 * Math.PI;
+        setUniform("in_tRotation2", new float[]{
+                (float) Math.cos(rotation2), (float) Math.sin(rotation2)
+        });
+        final double rotation3 = turbulencePhase * PI_ROTATE_RIGHT + 2.75 * Math.PI;
+        setUniform("in_tRotation3", new float[]{
+                (float) Math.cos(rotation3), (float) Math.sin(rotation3)
+        });
     }
 
     /**
@@ -135,7 +203,7 @@ final class RippleShader extends RuntimeShader {
     }
 
     public void setResolution(float w, float h, int density) {
-        float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 1.25f;
+        final float densityScale = density * DisplayMetrics.DENSITY_DEFAULT_SCALE * 1.25f;
         setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
         setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
     }
