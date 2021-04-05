@@ -104,7 +104,6 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    ctor public NetworkCapabilities(@Nullable android.net.NetworkCapabilities, long);
     method @Nullable public java.util.Set<android.util.Range<java.lang.Integer>> getUids();
     method public boolean hasUnwantedCapability(int);
     field public static final long REDACT_ALL = -1L; // 0xffffffffffffffffL

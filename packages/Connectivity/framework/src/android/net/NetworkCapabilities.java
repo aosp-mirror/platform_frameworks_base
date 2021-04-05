@@ -163,7 +163,6 @@ public final class NetworkCapabilities implements Parcelable {
      *                   {@link NetworkCapabilities}.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public NetworkCapabilities(@Nullable NetworkCapabilities nc, @RedactionType long redactions) {
         mRedactions = redactions;
         if (nc != null) {
