@@ -513,6 +513,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean mLayoutNeeded;
 
+    /**
+     * If the application is not currently visible but requires a layout,
+     * then make sure we call performSurfacePlacement as well. This is set
+     * in layout if mLayoutNeeded is set until surface placement is done.
+     */
+    boolean mSurfacePlacementNeeded;
+
     /** Currently running an exit animation? */
     boolean mAnimatingExit;
 
@@ -5368,7 +5375,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mIsDimming = false;
         applyDims();
         updateSurfacePositionNonOrganized();
-        // Send information to SufaceFlinger about the priority of the current window.
+        // Send information to SurfaceFlinger about the priority of the current window.
         updateFrameRateSelectionPriorityIfNeeded();
         if (isVisibleRequested()) updateGlobalScaleIfNeeded();
 
@@ -5382,13 +5389,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mSurfaceControl == null) {
             return;
         }
-        if (mWmService.mWindowPlacerLocked.isLayoutDeferred() || isGoneForLayout()) {
+
+        if ((mWmService.mWindowPlacerLocked.isLayoutDeferred() || isGoneForLayout())
+                && !mSurfacePlacementNeeded) {
             // Since this relies on mWindowFrames, changes made while layout is deferred are
             // likely to be invalid. Similarly, if it's goneForLayout, mWindowFrames may not be
             // up-to-date and thus can't be relied on.
             return;
         }
 
+        mSurfacePlacementNeeded = false;
         transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
                 mSurfacePosition);
 
