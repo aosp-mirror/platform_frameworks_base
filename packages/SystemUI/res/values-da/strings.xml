@@ -489,8 +489,8 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Log brugeren ud"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Log den aktuelle bruger ud"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"LOG BRUGEREN UD"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Vil du tilføje den nye bruger?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nEnhver bruger kan opdatere apps for alle andre brugere."</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Vil du tilføje en ny bruger?"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Grænsen for antal brugere er nået"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Du kan tilføje op til <xliff:g id="COUNT">%d</xliff:g> bruger.</item>

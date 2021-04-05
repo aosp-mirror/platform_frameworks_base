@@ -532,7 +532,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrænset profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du tilføje en ny bruger?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enhed med andre ved at oprette ekstra brugere. Hver bruger har sit personlige område, som kan tilpasses med apps, baggrund osv. Brugerne kan også justere enhedsindstillinger, som for eksempel Wi-Fi, som påvirker alle.\n\nNår du tilføjer en ny bruger, skal vedkommende konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle andre brugere. Indstillinger og tjenester for hjælpefunktioner overføres muligvis ikke til den nye bruger."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nEnhver bruger kan opdatere apps for alle andre brugere."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brugeren nu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for, at brugeren har mulighed for at tage enheden og konfigurere sit eget rum"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du oprette en profil nu?"</string>
@@ -546,7 +546,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Før du kan oprette en begrænset profil, skal du oprette en skærmlås for at beskytte dine apps og personlige data."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Konfigurer låseskærmen"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Skift til <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Tilføj gæsten"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Tilføj gæst"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gæsten"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gæst"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Enhedens standardindstilling"</string>

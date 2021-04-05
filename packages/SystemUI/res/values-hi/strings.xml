@@ -241,9 +241,7 @@
     <string name="accessibility_battery_details" msgid="6184390274150865789">"बैटरी का विवरण खोलें"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> प्रतिशत बैटरी बची है और आपके इस्तेमाल के हिसाब से यह <xliff:g id="TIME">%2$s</xliff:g> में खत्म हो जाएगी"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (8892191177774027364) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"बैटरी चार्ज हो रही है, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> प्रतिशत."</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"सिस्टम सेटिंग."</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"सूचनाएं."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"पूरी सूचनाएं देखें"</string>
@@ -478,10 +476,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"प्रोफ़ाइल दिखाएं"</string>
     <string name="user_add_user" msgid="4336657383006913022">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नया उपयोगकर्ता"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि को निकालें?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"क्या आप मेहमान को हटाना चाहते हैं?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्लिकेशन और डेटा को हटा दिया जाएगा."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"निकालें"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"अतिथि, आपका फिर से स्वागत है!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"मेहमान, आपका फिर से स्वागत है!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"फिर से शुरू करें"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"हां, जारी रखें"</string>
@@ -500,7 +498,7 @@
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"उपयोगकर्ता निकालें?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"इस उपयोगकर्ता के सभी ऐप और डेटा को हटा दिया जाएगा."</string>
-    <string name="user_remove_user_remove" msgid="8387386066949061256">"निकालें"</string>
+    <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाएं"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"बैटरी सेवर चालू है"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"बैटरी सेवर बंद करें"</string>
@@ -718,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे चैट, बातचीत सेक्शन में सबसे ऊपर फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
