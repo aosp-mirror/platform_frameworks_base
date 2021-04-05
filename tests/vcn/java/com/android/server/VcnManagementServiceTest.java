@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.net.ConnectivityManager.NetworkCallback;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
@@ -55,8 +57,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkCapabilities.Transport;
+import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
@@ -258,6 +262,10 @@ public class VcnManagementServiceTest {
 
         verify(mConnMgr).registerNetworkProvider(any(VcnNetworkProvider.class));
         verify(mSubscriptionTracker).register();
+        verify(mConnMgr)
+                .registerNetworkCallback(
+                        eq(new NetworkRequest.Builder().clearCapabilities().build()),
+                        any(NetworkCallback.class));
     }
 
     @Test
@@ -706,10 +714,8 @@ public class VcnManagementServiceTest {
                 .checkLocationPermission(eq(TEST_PACKAGE_NAME), any(), eq(TEST_UID), any());
     }
 
-    private VcnUnderlyingNetworkPolicy startVcnAndGetPolicyForTransport(
-            int subId, ParcelUuid subGrp, boolean isVcnActive, int transport) {
-        setupSubscriptionAndStartVcn(subId, subGrp, isVcnActive);
-
+    private NetworkCapabilities.Builder getNetworkCapabilitiesBuilderForTransport(
+            int subId, int transport) {
         final NetworkCapabilities.Builder ncBuilder =
                 new NetworkCapabilities.Builder()
                         .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
@@ -718,7 +724,16 @@ public class VcnManagementServiceTest {
             ncBuilder.setSubIds(Collections.singleton(subId));
         }
 
-        return mVcnMgmtSvc.getUnderlyingNetworkPolicy(ncBuilder.build(), new LinkProperties());
+        return ncBuilder;
+    }
+
+    private VcnUnderlyingNetworkPolicy startVcnAndGetPolicyForTransport(
+            int subId, ParcelUuid subGrp, boolean isVcnActive, int transport) {
+        setupSubscriptionAndStartVcn(subId, subGrp, isVcnActive);
+
+        return mVcnMgmtSvc.getUnderlyingNetworkPolicy(
+                getNetworkCapabilitiesBuilderForTransport(subId, transport).build(),
+                new LinkProperties());
     }
 
     @Test
@@ -778,6 +793,53 @@ public class VcnManagementServiceTest {
                 NetworkCapabilities.TRANSPORT_WIFI,
                 false /* isVcnManaged */,
                 true /* isRestricted */);
+    }
+
+    private void setupTrackedCarrierWifiNetwork(NetworkCapabilities caps) {
+        mVcnMgmtSvc.systemReady();
+
+        final ArgumentCaptor<NetworkCallback> captor =
+                ArgumentCaptor.forClass(NetworkCallback.class);
+        verify(mConnMgr)
+                .registerNetworkCallback(
+                        eq(new NetworkRequest.Builder().clearCapabilities().build()),
+                        captor.capture());
+        captor.getValue().onCapabilitiesChanged(new Network(0), caps);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicyVcnWifi_unrestrictingExistingNetworkRequiresRestart()
+            throws Exception {
+        final NetworkCapabilities existingNetworkCaps =
+                getNetworkCapabilitiesBuilderForTransport(TEST_SUBSCRIPTION_ID, TRANSPORT_WIFI)
+                        .removeCapability(NET_CAPABILITY_NOT_RESTRICTED)
+                        .build();
+        setupTrackedCarrierWifiNetwork(existingNetworkCaps);
+
+        // Trigger test without VCN instance alive; expect restart due to change of NOT_RESTRICTED
+        // immutable capability
+        final VcnUnderlyingNetworkPolicy policy =
+                mVcnMgmtSvc.getUnderlyingNetworkPolicy(
+                        getNetworkCapabilitiesBuilderForTransport(
+                                        TEST_SUBSCRIPTION_ID, TRANSPORT_WIFI)
+                                .build(),
+                        new LinkProperties());
+        assertTrue(policy.isTeardownRequested());
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicyVcnWifi_restrictingExistingNetworkRequiresRestart()
+            throws Exception {
+        final NetworkCapabilities existingNetworkCaps =
+                getNetworkCapabilitiesBuilderForTransport(TEST_SUBSCRIPTION_ID, TRANSPORT_WIFI)
+                        .build();
+        setupTrackedCarrierWifiNetwork(existingNetworkCaps);
+
+        final VcnUnderlyingNetworkPolicy policy =
+                startVcnAndGetPolicyForTransport(
+                        TEST_SUBSCRIPTION_ID, TEST_UUID_2, false /* isActive */, TRANSPORT_WIFI);
+
+        assertTrue(policy.isTeardownRequested());
     }
 
     @Test
