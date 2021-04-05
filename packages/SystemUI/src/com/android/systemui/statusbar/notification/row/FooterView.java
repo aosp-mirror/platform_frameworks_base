@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -93,14 +94,16 @@ public class FooterView extends StackScrollerDecorView {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        int textColor = getResources().getColor(R.color.notif_pill_text);
+        Resources.Theme theme = getContext().getTheme();
         mDismissButton.setBackground(
-                getResources().getDrawable(R.drawable.notif_footer_btn_background));
-        mDismissButton.setTextColor(getResources().getColor(R.color.notif_pill_text));
+                getResources().getDrawable(R.drawable.notif_footer_btn_background, theme));
+        mDismissButton.setTextColor(textColor);
         mManageButton.setBackground(
-                getResources().getDrawable(R.drawable.notif_footer_btn_background));
-        mManageButton.setTextColor(getResources().getColor(R.color.notif_pill_text));
+                getResources().getDrawable(R.drawable.notif_footer_btn_background, theme));
         mManageButton = findViewById(R.id.manage_text);
         mDismissButton.setText(R.string.clear_all_notifications_text);
+        mManageButton.setTextColor(textColor);
         mDismissButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
         showHistory(mShowHistory);

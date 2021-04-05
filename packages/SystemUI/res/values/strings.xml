@@ -2096,7 +2096,8 @@
     <string name="keyboard_key_num_lock">Num Lock</string>
     <!-- Name used to refer to keys on the numeric pad of the keyboard, e.g. "Numpad 9". -->
     <string name="keyboard_key_numpad_template">Numpad <xliff:g id="name">%1$s</xliff:g></string>
-
+    <!-- Content description for the delete button on an image attachment when using inline reply via notification [CHAR LIMIT=NONE] -->
+    <string name="notif_inline_reply_remove_attachment_description">Remove attachment</string>
     <!-- User visible title for the system-wide keyboard shortcuts list. -->
     <string name="keyboard_shortcut_group_system">System</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the home screen. -->
