@@ -873,13 +873,18 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void setBackgroundTintColor(int color) {
+        boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
         if (mExpandedSmartReplyView != null) {
-            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
             mExpandedSmartReplyView.setBackgroundTintColor(color, colorized);
         }
         if (mHeadsUpSmartReplyView != null) {
-            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
             mHeadsUpSmartReplyView.setBackgroundTintColor(color, colorized);
+        }
+        if (mExpandedRemoteInput != null) {
+            mExpandedRemoteInput.setBackgroundTintColor(color, colorized);
+        }
+        if (mHeadsUpRemoteInput != null) {
+            mHeadsUpRemoteInput.setBackgroundTintColor(color, colorized);
         }
     }
 
@@ -1243,8 +1248,7 @@ public class NotificationContentView extends FrameLayout {
         View actionContainerCandidate = view.findViewById(
                 com.android.internal.R.id.actions_container);
         if (actionContainerCandidate instanceof FrameLayout) {
-            RemoteInputView existing = (RemoteInputView)
-                    view.findViewWithTag(RemoteInputView.VIEW_TAG);
+            RemoteInputView existing = view.findViewWithTag(RemoteInputView.VIEW_TAG);
 
             if (existing != null) {
                 existing.onNotificationUpdateOrReset();
@@ -1292,13 +1296,9 @@ public class NotificationContentView extends FrameLayout {
                 }
             }
             if (existing != null) {
-                if (entry.getSbn().getNotification().isColorized()) {
-                    existing.setBackgroundTintColor(
-                            entry.getSbn().getNotification().color, true);
-                } else {
-                    existing.setBackgroundTintColor(
-                            entry.getRow().getCurrentBackgroundTint(), false);
-                }
+                int backgroundColor = entry.getRow().getCurrentBackgroundTint();
+                boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
+                existing.setBackgroundTintColor(backgroundColor, colorized);
             }
             return existing;
         }

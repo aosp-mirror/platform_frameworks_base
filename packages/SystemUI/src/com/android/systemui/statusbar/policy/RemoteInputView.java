@@ -34,6 +34,7 @@ import android.content.pm.ShortcutManager;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -157,52 +158,48 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     /**
      * The remote view needs to adapt to colorized notifications when set
      * It overrides the background of itself as well as all of its childern
-     * @param color colorized notification color
+     * @param backgroundColor colorized notification color
      */
-    public void setBackgroundTintColor(int color, boolean colorized) {
-        if (colorized == mColorized && color == mTint) return;
+    public void setBackgroundTintColor(final int backgroundColor, boolean colorized) {
+        if (colorized == mColorized && backgroundColor == mTint) return;
         mColorized = colorized;
-        mTint = color;
-        final int[][] states = new int[][]{
-                new int[]{com.android.internal.R.attr.state_enabled},
-                new int[]{},
-        };
-        final int[] colors;
+        mTint = backgroundColor;
+        final int editBgColor;
+        final int accentColor;
+        final int textColor;
+        final int hintTextColor;
         if (colorized) {
-            final boolean dark = !ContrastColorUtil.isColorLight(color);
-            final int finalColor = dark
-                    ? Color.WHITE
-                    : Color.BLACK;
-            colors = new int[]{
-                    finalColor,
-                    finalColor & 0x4DFFFFFF // %30 opacity
-            };
-            mEditText.setUniformBackgroundTintColor(color);
-            mEditText.setUniformForegroundColor(finalColor);
-
+            final boolean dark = !ContrastColorUtil.isColorLight(backgroundColor);
+            final int foregroundColor = dark ? Color.WHITE : Color.BLACK;
+            editBgColor = backgroundColor;
+            accentColor = foregroundColor;
+            textColor = foregroundColor;
+            hintTextColor = ColorUtils.setAlphaComponent(foregroundColor, 0x99);
         } else {
-            mEditText.setTextColor(mContext.getColor(R.color.remote_input_text));
-            mEditText.setHintTextColor(mContext.getColorStateList(R.color.remote_input_hint));
-            TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
+            textColor = mContext.getColor(R.color.remote_input_text);
+            hintTextColor = mContext.getColor(R.color.remote_input_hint);
+            try (TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
                     com.android.internal.R.attr.colorAccent,
                     com.android.internal.R.attr.colorBackgroundFloating,
-            });
-            int colorAccent = ta.getColor(0, 0);
-            int colorBackgroundFloating = ta.getColor(1, 0);
-            ta.recycle();
-            mEditText.setTextBackgroundColors(colorAccent, colorBackgroundFloating);
-            colors = new int[]{
-                    colorAccent,
-                    colorBackgroundFloating & 0x4DFFFFFF // %30 opacity
-            };
+            })) {
+                accentColor = ta.getColor(0, textColor);
+                editBgColor = ta.getColor(1, backgroundColor);
+            }
         }
-        mEditText.setBackgroundColor(color);
-        final ColorStateList  tint = new ColorStateList(states, colors);
-        mSendButton.setImageTintList(tint);
-        mProgressBar.setProgressTintList(tint);
-        mProgressBar.setIndeterminateTintList(tint);
-        mProgressBar.setSecondaryProgressTintList(tint);
-        setBackgroundColor(color);
+        mEditText.setAllColors(backgroundColor, editBgColor,
+                accentColor, textColor, hintTextColor);
+        final ColorStateList accentTint = new ColorStateList(new int[][]{
+                new int[]{com.android.internal.R.attr.state_enabled},
+                new int[]{},
+        }, new int[]{
+                accentColor,
+                accentColor & 0x4DFFFFFF // %30 opacity
+        });
+        mSendButton.setImageTintList(accentTint);
+        mProgressBar.setProgressTintList(accentTint);
+        mProgressBar.setIndeterminateTintList(accentTint);
+        mProgressBar.setSecondaryProgressTintList(accentTint);
+        setBackgroundColor(backgroundColor);
     }
 
     @Override
@@ -796,20 +793,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             }
         }
 
-        protected void setUniformBackgroundTintColor(int color) {
-            mBackgroundColor.setColor(color);
-            mTextBackground.setColor(color);
-        }
-
-        protected void setUniformForegroundColor(int color) {
-            int stroke = getContext().getResources()
-                    .getDimensionPixelSize(R.dimen.remote_input_view_text_stroke);
-            mTextBackground.setStroke(stroke, color);
-            setTextColor(color);
-            setHintTextColor(ColorUtils.setAlphaComponent(color, 0x99));
-            setTextCursorDrawable(null);
-        }
-
         @Override
         public void getFocusedRect(Rect r) {
             super.getFocusedRect(r);
@@ -938,11 +921,17 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return remainingItems;
         }
 
-        protected void setTextBackgroundColors(int strokeColor, int textBackground) {
-            mTextBackground.setColor(textBackground);
+        protected void setAllColors(int backgroundColor, int editBackgroundColor,
+                int accentColor, int textColor, int hintTextColor) {
+            setBackgroundColor(backgroundColor);
+            mBackgroundColor.setColor(backgroundColor);
+            mTextBackground.setColor(editBackgroundColor);
             int stroke = getContext().getResources()
                     .getDimensionPixelSize(R.dimen.remote_input_view_text_stroke);
-            mTextBackground.setStroke(stroke, strokeColor);
+            mTextBackground.setStroke(stroke, accentColor);
+            setTextColor(textColor);
+            setHintTextColor(hintTextColor);
+            getTextCursorDrawable().setColorFilter(accentColor, PorterDuff.Mode.SRC_IN);
         }
     }
 }
