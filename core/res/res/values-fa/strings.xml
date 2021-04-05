@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"به برنامه اجازه می‌دهد دستگاه‌های بلوتوث اطراف را پیدا کند و با آن‌ها مرتبط شود"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"اتصال به دستگاه‌های بلوتوث مرتبط‌شده"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"به برنامه اجازه می‌دهد به دستگاه‌های بلوتوث مرتبط‌شده متصل شود"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی «ارتباط میدان نزدیک» (NFC)"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی «ارتباط میدان نزدیک» (NFC)، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
@@ -573,8 +577,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"پین، الگو یا گذرواژه‌ای تنظیم نشده است"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطا هنگام اصالت‌سنجی"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"از قفل صفحه استفاده کنید"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"برای ادامه، قفل صفحه‌تان را وارد کنید"</string>
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"اثرانگشت پردازش نشد. لطفاً دوباره امتحان کنید."</string>
@@ -661,8 +664,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"چهره <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"استفاده از «بازگشایی با چهره»"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"استفاده از قفل صفحه یا چهره"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"برای ادامه، از چهره‌تان استفاده کنید"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"برای ادامه، از تشخیص چهره یا قفل صفحه استفاده کنید"</string>
   <string-array name="face_error_vendor">
   </string-array>

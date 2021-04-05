@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дозволува апликацијата да открива и да се поврзува со спарени уреди со Bluetooth во близина"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"да се поврзува со спарени уреди со Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дозволува апликацијата да се поврзува со спарени уреди со Bluetooth"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информации за претпочитаната услуга за плаќање преку NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>

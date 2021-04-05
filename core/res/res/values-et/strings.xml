@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Lubab rakendusel avastada lähedalasuvaid Bluetooth-seadmeid ja nendega siduda"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"seotud Bluetooth-seadmetega ühenduse loomine"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Lubab rakendusel luua ühenduse seotud Bluetooth-seadmetega"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Eelistatud NFC-makseteenuse teave"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Võimaldab rakendusel hankida eelistatud NFC-makseteenuse teavet (nt registreeritud abi ja marsruudi sihtkoht)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lähiväljaside juhtimine"</string>

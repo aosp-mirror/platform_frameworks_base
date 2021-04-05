@@ -551,6 +551,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"يسمح هذا الإذن للتطبيق باكتشاف الأجهزة القريبة التي تتضمّن بلوتوث والاقتران بها."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"تسمح بالربط الأجهزة المقترنة التي تتضمّن بلوتوث."</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"يسمح هذا الإذن للتطبيق بالارتباط بالأجهزة المقترنة التي تتضمّن بلوتوث."</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>
@@ -633,14 +637,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"فتح القفل بالوجه"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"إعادة تسجيل وجهك"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"لتحسين قدرة الجهاز على معرفة وجهك، يُرجى إعادة تسجيل الوجه."</string>
-    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
-    <skip />
-    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="550617822603450009">"إعداد ميزة \"فتح القفل بالوجه\""</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"يمكنك فتح قفل هاتفك بمجرّد النظر إلى الشاشة."</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"إعداد المزيد من الطرق لفتح قفل الجهاز"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"انقر لإضافة بصمة إصبع."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"تعذّر تسجيل بيانات دقيقة للوجه. حاول مرة أخرى."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. تجربة مستوى سطوع أقلّ."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"الصورة معتمة للغاية. يُرجى زيادة السطوع."</string>
@@ -1045,12 +1045,9 @@
     <string name="copied" msgid="4675902854553014676">"تم النسخ."</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"تم لصق محتوى في <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> من <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>."</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"تم لصق محتوى في <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> من الحافظة."</string>
-    <!-- no translation found for pasted_text (4298871641549173733) -->
-    <skip />
-    <!-- no translation found for pasted_image (4729097394781491022) -->
-    <skip />
-    <!-- no translation found for pasted_content (646276353060777131) -->
-    <skip />
+    <string name="pasted_text" msgid="4298871641549173733">"لصق تطبيق <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> النص الذي نسخته."</string>
+    <string name="pasted_image" msgid="4729097394781491022">"لصق تطبيق <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> الصورة التي نسختها."</string>
+    <string name="pasted_content" msgid="646276353060777131">"لصق تطبيق <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> المحتوى الذي نسخته."</string>
     <string name="more_item_label" msgid="7419249600215749115">"المزيد"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"القائمة+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2279,31 +2276,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"للعمل"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"عرض المحتوى الشخصي"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"عرض محتوى العمل"</string>
-    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
-    <skip />
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"حظر مشرف تكنولوجيا المعلومات مشاركة المحتوى"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"لا يمكن مشاركة هذا المحتوى مع تطبيقات العمل."</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"لا يمكن فتح هذا المحتوى باستخدام تطبيقات العمل."</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"لا يمكن مشاركة هذا المحتوى مع التطبيقات الشخصية."</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"لا يمكن فتح هذا المحتوى باستخدام التطبيقات الشخصية."</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"الملف الشخصي للعمل متوقف مؤقتًا."</string>
-    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"انقر لتفعيل الميزة"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ما مِن تطبيقات عمل."</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ما مِن تطبيقات شخصية."</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"هل تريد فتح المحتوى في <xliff:g id="APP">%s</xliff:g> في ملفك الشخصي؟"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"هل تريد فتح المحتوى في <xliff:g id="APP">%s</xliff:g> في ملفك الشخصي للعمل؟"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استخدام المتصفّح الشخصي"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استخدام متصفّح العمل"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏رقم التعريف الشخصي لإلغاء قفل شبكة شريحة SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"‏رقم التعريف الشخصي لإلغاء قفل المجموعة الفرعية لشبكة شريحة SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"‏رقم التعريف الشخصي لإلغاء قفل شريحة SIM للشركات"</string>
@@ -2416,8 +2401,7 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"إعدادات التكبير الجديدة"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"يمكنك الآن تكبير جزء من الشاشة."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"التفعيل من خلال \"الإعدادات\""</string>
     <string name="dismiss_action" msgid="1728820550388704784">"إغلاق"</string>

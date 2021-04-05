@@ -538,6 +538,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‎‎‏‎‏‎‏‎‏‎‎‎‏‎‏‏‎‎‏‏‏‎‎‎‏‎‎‎‎‎‏‏‏‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‏‏‏‎‎‎Allows the app to discover and pair nearby Bluetooth devices‎‏‎‎‏‎"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‏‎‎‏‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‏‎‎‏‏‎‎‎‎‎‎‎‎‏‏‎‏‎‏‎‏‏‏‏‎‎‎‏‎‎‎‏‎‎‎‎connect to paired Bluetooth devices‎‏‎‎‏‎"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‏‏‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‎‎‎‎‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‏‎Allows the app to connect to paired Bluetooth devices‎‏‎‎‏‎"</string>
+    <string name="permlab_uwb_ranging" msgid="1386872477514626447">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‎‏‎‏‎‏‏‏‎‎‏‏‎‏‏‎‎‎‎‎‏‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‏‏‏‎range to devices using ultra-wideband‎‏‎‎‏‎"</string>
+    <string name="permdesc_uwb_ranging" product="default" msgid="1583519616137382182">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‏‏‎‎‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‏‏‎‏‏‏‎‏‏‎‏‎‏‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‏‏‎‎Allows the app to range to devices using ultra-wideband‎‏‎‎‏‎"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‏‏‎‎‏‎‏‎‎‎‎‏‎‎‏‎‎‎‏‎‏‎‏‎‏‎‏‏‏‎‎‎‏‏‎‏‏‎‏‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎Preferred NFC Payment Service Information‎‏‎‎‏‎"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‎‏‏‏‎‎‏‎‏‎‎‏‏‎‏‎‎‏‏‏‏‏‎‏‏‏‎Allows the app to get preferred nfc payment service information like registered aids and route destination.‎‏‎‎‏‎"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‏‎‎‏‏‎‎‎‏‏‎‏‏‏‎‎‏‏‏‏‏‎‎‎‎‏‎control Near Field Communication‎‏‎‎‏‎"</string>
@@ -572,8 +574,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‎‎‎‏‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‎‏‎‎‎‏‎‏‎‎‎No pin, pattern, or password set‎‏‎‎‏‎"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎‏‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‏‏‎Error authenticating‎‏‎‎‏‎"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‎‎‎‏‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎Use screen lock‎‏‎‎‏‎"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‎‏‎‏‎‏‏‏‎‎‏‏‎‏‎‎‏‎‏‏‏‎‎‏‎‏‏‎‏‏‎‏‎‏‏‎‏‏‎‏‎‎‎‎‏‎‎‏‎‏‏‏‏‏‏‎Enter your screen lock to continue‎‏‎‎‏‎"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‏‎‎‎‏‏‏‎‏‏‎‏‎‏‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‏‏‏‎‏‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎‏‏‏‎Partial fingerprint detected‎‏‎‎‏‎"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‏‏‎‎‎‎‎‎‎‏‎‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎Couldn\'t process fingerprint. Please try again.‎‏‎‎‏‎"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‎‏‎‏‏‎‎‏‎‏‎‎‏‏‏‎‎‎‎‎‎‎‎‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎‎‎‏‎‏‎‏‏‏‎Clean the sensor‎‏‎‎‏‎"</string>
@@ -653,8 +654,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‏‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‏‎‏‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‏‏‏‎‏‎‏‎‎‎‎‏‏‎‎‏‏‏‎Face ‎‏‎‎‏‏‎<xliff:g id="FACEID">%d</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‎‏‏‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‎Use face unlock‎‏‎‎‏‎"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‎‏‏‎‎‏‎‎Use face or screen lock‎‏‎‎‏‎"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‎‎‎‎‎‏‎‏‏‎‏‏‏‎‎‏‎‎‎‏‏‎‎‎‎‏‎‏‏‎‎‎‎‎‏‎‎‎‏‎‎‎‎‎‎‎‎‏‎‎‏‎‏‎Use your face to continue‎‏‎‎‏‎"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‏‏‏‎‏‎‎‎‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‎‎Use your face or screen lock to continue‎‏‎‎‏‎"</string>
   <string-array name="face_error_vendor">
   </string-array>

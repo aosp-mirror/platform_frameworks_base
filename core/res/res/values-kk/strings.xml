@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Қолданбаға маңайдағы Bluetooth құрылғыларын анықтап, жұптауға рұқсат береді."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"жұпталған Bluetooth құрылғыларына қосылу"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Қолданбаға жұпталған Bluetooth құрылғыларына қосылуға рұқсат береді."</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Таңдаулы NFC төлеу қызметі туралы ақпарат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC функциясын басқару"</string>

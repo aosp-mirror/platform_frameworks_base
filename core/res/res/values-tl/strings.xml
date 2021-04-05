@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Nagbibigay-daan sa app na tumuklas at makipagpares sa mga malapit na Bluetooth device"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"kumonekta sa mga nakapares na Bluetooth device"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Nagbibigay-daan sa app na kumonekta sa mga nakapares na Bluetooth device"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Impormasyon sa Gustong NFC na Serbisyo sa Pagbabayad"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pinapayagan ang app na makakuha ng impormasyon sa gustong nfc na serbisyo sa pagbabayad tulad ng mga nakarehistrong application ID at destinasyon ng ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolin ang Near Field Communication"</string>
