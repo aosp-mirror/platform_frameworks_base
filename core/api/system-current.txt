@@ -13591,7 +13591,7 @@ package android.telephony.ims {
     method @NonNull public byte[] getEncodedMessage();
     method @NonNull public String getHeaderSection();
     method @NonNull public String getStartLine();
-    method @Nullable public String getViaBranchParameter();
+    method @NonNull public String getViaBranchParameter();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipMessage> CREATOR;
   }
