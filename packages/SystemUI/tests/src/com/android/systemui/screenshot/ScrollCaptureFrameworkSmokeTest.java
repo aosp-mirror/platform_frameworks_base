@@ -82,7 +82,11 @@ public class ScrollCaptureFrameworkSmokeTest extends SysuiTestCase {
         latch.await(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(mResponse);
-        assertTrue(mResponse.isConnected());
-        assertTrue(mResponse.getWindowTitle().contains(ScrollViewActivity.class.getSimpleName()));
+        if (!mResponse.isConnected()) {
+            Log.e(TAG, "Received response with no connection: " + mResponse);
+            fail("expected response.isConnected() == true");
+        }
+        assertTrue("expected a connection to ScrollViewActivity",
+                mResponse.getWindowTitle().contains(ScrollViewActivity.class.getSimpleName()));
     }
 }
