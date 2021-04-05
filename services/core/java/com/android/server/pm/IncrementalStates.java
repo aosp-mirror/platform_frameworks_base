@@ -293,11 +293,11 @@ public final class IncrementalStates {
             Slog.i(TAG, "received progress update: " + progress);
         }
         mLoadingState.setProgress(progress);
-        if (1 - progress < 0.001) {
+        if (Math.abs(1.0f - progress) < 0.00000001f) {
             if (DEBUG) {
                 Slog.i(TAG, "package is fully loaded");
             }
-            mLoadingState.setProgress(1);
+            mLoadingState.setProgress(1.0f);
             if (mLoadingState.isLoading()) {
                 mLoadingState.adoptNewLoadingStateLocked(false);
             }
