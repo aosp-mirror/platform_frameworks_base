@@ -18,7 +18,7 @@ package com.android.systemui.biometrics;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -44,7 +45,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -65,12 +65,13 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     private DelayableExecutor mExecutor;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
+    private KeyguardViewMediator mKeyguardViewMediator;
 
     private UdfpsKeyguardViewController mController;
 
     // Capture listeners so that they can be used to send events
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerCaptor;
-    private StatusBarStateController.StateListener mParentStatusBarStateListener;
     private StatusBarStateController.StateListener mStatusBarStateListener;
 
     @Captor private ArgumentCaptor<StatusBar.ExpansionChangedListener> mExpansionListenerCaptor;
@@ -83,6 +84,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
@@ -90,7 +92,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mKeyguardUpdateMonitor,
                 mExecutor,
-                mDumpManager);
+                mDumpManager,
+                mKeyguardViewMediator);
     }
 
     @Test
@@ -108,7 +111,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     @Test
     public void testViewControllerQueriesSBStateOnAttached() {
         mController.onViewAttached();
-        verify(mStatusBarStateController, times(2)).getState();
+        verify(mStatusBarStateController).getState();
         verify(mStatusBarStateController).getDozeAmount();
 
         final float dozeAmount = .88f;
@@ -117,7 +120,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         captureStatusBarStateListeners();
 
         mController.onViewAttached();
-        verify(mView).setPauseAuth(true);
+        verify(mView, atLeast(1)).setPauseAuth(true);
         verify(mView).onDozeAmountChanged(dozeAmount, dozeAmount);
     }
 
@@ -128,7 +131,6 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         captureExpansionListener();
         mController.onViewDetached();
 
-        verify(mStatusBarStateController).removeCallback(mParentStatusBarStateListener);
         verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
         verify(mStatusBar).removeExpansionChangedListener(mExpansionListener);
     }
@@ -168,6 +170,47 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldPauseAuthOnShade() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureExpansionListener();
+
+        // WHEN not on keyguard yet (shade = home)
+        sendStatusBarStateChanged(StatusBarState.SHADE);
+
+        // THEN pause auth
+        assertTrue(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void testShouldPauseAuthAnimatingScreenOffFromShade() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureExpansionListener();
+
+        // WHEN transitioning from home/shade => keyguard + animating screen off
+        mStatusBarStateListener.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD);
+        when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(true);
+
+        // THEN pause auth
+        assertTrue(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void testDoNotPauseAuthAnimatingScreenOffFromLS() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureExpansionListener();
+
+        // WHEN animating screen off transition from LS => AOD
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+        when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(true);
+
+        // THEN don't pause auth
+        assertFalse(mController.shouldPauseAuth());
+    }
+
+    @Test
     public void testOverrideShouldPauseAuthOnShadeLocked() {
         mController.onViewAttached();
         captureStatusBarStateListeners();
@@ -203,15 +246,11 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
     private void sendStatusBarStateChanged(int statusBarState) {
         mStatusBarStateListener.onStateChanged(statusBarState);
-        mParentStatusBarStateListener.onStateChanged(statusBarState);
     }
 
     private void captureStatusBarStateListeners() {
-        verify(mStatusBarStateController, times(2)).addCallback(mStateListenerCaptor.capture());
-        List<StatusBarStateController.StateListener> stateListeners =
-                mStateListenerCaptor.getAllValues();
-        mParentStatusBarStateListener = stateListeners.get(0);
-        mStatusBarStateListener = stateListeners.get(1);
+        verify(mStatusBarStateController).addCallback(mStateListenerCaptor.capture());
+        mStatusBarStateListener = mStateListenerCaptor.getValue();
     }
 
     private void captureExpansionListener() {
