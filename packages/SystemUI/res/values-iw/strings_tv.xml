@@ -23,7 +23,7 @@
     <string name="app_accessed_mic" msgid="2754428675130470196">"‏לאפליקציה %1$s יש גישה למיקרופון שלך"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"‏ה-VPN מחובר"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"‏ה-VPN מנותק"</string>
-    <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"באמצעות <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"דרך <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"התראות"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"אין התראות"</string>
 </resources>
