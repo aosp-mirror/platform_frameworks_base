@@ -526,6 +526,10 @@ public class PhonePipMenuController implements PipMenuController {
      * Handles a pointer event sent from pip input consumer.
      */
     void handlePointerEvent(MotionEvent ev) {
+        if (mPipMenuView == null) {
+            return;
+        }
+
         if (ev.isTouchEvent()) {
             mPipMenuView.dispatchTouchEvent(ev);
         } else {
