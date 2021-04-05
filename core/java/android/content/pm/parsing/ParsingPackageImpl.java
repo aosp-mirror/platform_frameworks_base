@@ -72,7 +72,6 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringValueMap;
 import com.android.internal.util.Parcelling.BuiltIn.ForStringSet;
 
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -1346,7 +1345,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.gwpAsanMode = in.readInt();
         this.minExtensionVersions = in.readSparseIntArray();
         this.mBooleans = in.readLong();
-        this.mProperties = in.createTypedArrayMap(Property.CREATOR);
+        this.mProperties = in.readHashMap(boot);
         this.memtagMode = in.readInt();
         this.nativeHeapZeroInitialized = in.readInt();
         this.requestOptimizedExternalStorageAccess = sForBoolean.unparcel(in);
