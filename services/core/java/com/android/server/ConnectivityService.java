@@ -4056,7 +4056,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        decrementRequestCount(nri);
+        nri.decrementRequestCount();
         mNetworkRequestInfoLogs.log("RELEASE " + nri);
 
         if (null != nri.getActiveRequest()) {
@@ -4165,14 +4165,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return checkAnyPermissionOf(
                 nri.mPid, nri.mUid, NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
                 ? mSystemNetworkRequestCounter : mNetworkRequestCounter;
-    }
-
-    private void incrementRequestCountOrThrow(NetworkRequestInfo nri) {
-        getRequestCounter(nri).incrementCountOrThrow(nri.mUid);
-    }
-
-    private void decrementRequestCount(NetworkRequestInfo nri) {
-        getRequestCounter(nri).decrementCount(nri.mUid);
     }
 
     @Override
@@ -5462,6 +5454,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         @Nullable
         final String mCallingAttributionTag;
 
+        // Counter keeping track of this NRI.
+        final PerUidCounter mPerUidCounter;
+
         // Effective UID of this request. This is different from mUid when a privileged process
         // files a request on behalf of another UID. This UID is used to determine blocked status,
         // UID matching, and so on. mUid above is used for permission checks and to enforce the
@@ -5512,7 +5507,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mPid = getCallingPid();
             mUid = mDeps.getCallingUid();
             mAsUid = asUid;
-            incrementRequestCountOrThrow(this);
+            mPerUidCounter = getRequestCounter(this);
+            mPerUidCounter.incrementCountOrThrow(mUid);
             /**
              * Location sensitive data not included in pending intent. Only included in
              * {@link NetworkCallback}.
@@ -5544,7 +5540,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mUid = mDeps.getCallingUid();
             mAsUid = asUid;
             mPendingIntent = null;
-            incrementRequestCountOrThrow(this);
+            mPerUidCounter = getRequestCounter(this);
+            mPerUidCounter.incrementCountOrThrow(mUid);
             mCallbackFlags = callbackFlags;
             mCallingAttributionTag = callingAttributionTag;
             linkDeathRecipient();
@@ -5582,7 +5579,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mUid = nri.mUid;
             mAsUid = nri.mAsUid;
             mPendingIntent = nri.mPendingIntent;
-            incrementRequestCountOrThrow(this);
+            mPerUidCounter = getRequestCounter(this);
+            mPerUidCounter.incrementCountOrThrow(mUid);
             mCallbackFlags = nri.mCallbackFlags;
             mCallingAttributionTag = nri.mCallingAttributionTag;
             linkDeathRecipient();
@@ -5612,6 +5610,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // reflected in the return value of this method.
             final List<NetworkRequest> tempRequests = new ArrayList<>(r);
             return Collections.unmodifiableList(tempRequests);
+        }
+
+        void decrementRequestCount() {
+            mPerUidCounter.decrementCount(mUid);
         }
 
         void linkDeathRecipient() {
@@ -8883,7 +8885,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Decrement the reference count for this NetworkRequestInfo. The reference count is
             // incremented when the NetworkRequestInfo is created as part of
             // enforceRequestCountLimit().
-            decrementRequestCount(nri);
+            nri.decrementRequestCount();
             return;
         }
 
@@ -8949,7 +8951,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Decrement the reference count for this NetworkRequestInfo. The reference count is
         // incremented when the NetworkRequestInfo is created as part of
         // enforceRequestCountLimit().
-        decrementRequestCount(nri);
+        nri.decrementRequestCount();
 
         iCb.unlinkToDeath(cbInfo, 0);
     }
