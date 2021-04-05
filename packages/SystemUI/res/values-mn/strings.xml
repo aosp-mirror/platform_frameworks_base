@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Хаах"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Хурууны хээ мэдрэгчид хүрэх"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Хурууны хээний дүрс тэмдэг"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Царай таних боломжгүй. Оронд нь хурууны хээ ашигла"</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Үргэлжлүүлэхийн тулд хурууныхаа хээг ашиглана уу"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Хурууны хээг таних боломжгүй. Оронд нь дэлгэцийн түгжээ ашиглана уу."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Таныг хайж байна…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Царайны дүрс тэмдэг"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Тохиромжтой өсгөх товч."</string>
@@ -660,7 +657,13 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Этернет"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Сэрүүлэг"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Түрийвч"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
     <string name="wallet_secondary_label" msgid="2017028770884957543">"Бэлэн"</string>
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Ажлын профайл"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Нислэгийн горим"</string>
     <string name="add_tile" msgid="6239678623873086686">"Вебсайтын цонх нэмэх"</string>
@@ -1096,14 +1099,10 @@
     <string name="basic_status" msgid="2315371112182658176">"Харилцан яриаг нээх"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Харилцан ярианы жижиг хэрэгслүүд"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Үндсэн нүүрэндээ нэмэх харилцан яриаг товшино уу"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Та зарим мессеж авсныхаа дараа эндээс буцаж шалгана уу"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Чухал харилцан яриа"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Саяхны харилцан яриа"</string>
+    <string name="okay" msgid="6490552955618608554">"За"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>-н өмнө"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>-с бага хугацааны өмнө"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>-с дээш хугацааны өмнө"</string>

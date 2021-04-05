@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"يحظر التطبيق أو تحظر مؤسستك التقاط لقطات شاشة"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"تعديل"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"تعديل لقطة الشاشة"</string>
-    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
-    <skip />
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"التقاط المزيد من المحتوى"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"إغلاق لقطة الشاشة"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"معاينة لقطة الشاشة"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"الحد العلوي"</string>
@@ -388,11 +387,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"قلب الألوان"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"وضع تصحيح الألوان"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"المزيد من الإعدادات"</string>
-    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"إعدادات المستخدم"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"تم"</string>
-    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
-    <skip />
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"إغلاق"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"متصل"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"الجهاز متّصل، ومستوى طاقة البطارية <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"جارٍ الاتصال..."</string>
@@ -545,8 +542,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"‏هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> وتم ربطه بشبكات افتراضية خاصة (VPN)."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"يمكن لمؤسستك مراقبة حركة بيانات الشبكة في الملف الشخصي للعمل"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"يمكن لـ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> مراقبة حركة بيانات الشبكة في ملفك الشخصي للعمل"</string>
-    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
-    <skip />
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"تكون أنشطة شبكة الملف الشخصي للعمل مرئية لمشرف تكنولوجيا المعلومات."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"قد تكون الشبكة خاضعة للمراقبة"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"‏تم ربط هذا الجهاز بشبكات افتراضية خاصة (VPN)."</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"تم ربط الملف الشخصي للعمل بشبكة <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
@@ -676,7 +672,13 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"المنبّه"</string>
     <string name="wallet_title" msgid="5369767670735827105">"المحفظة"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
     <string name="wallet_secondary_label" msgid="2017028770884957543">"جاهزة"</string>
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="add_tile" msgid="6239678623873086686">"إضافة فئة"</string>
