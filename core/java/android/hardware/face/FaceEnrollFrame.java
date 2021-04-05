@@ -18,6 +18,7 @@ package android.hardware.face;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.face.FaceEnrollStages.FaceEnrollStage;
 import android.os.Parcel;
 import android.os.Parcelable;
 

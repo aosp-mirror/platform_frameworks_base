@@ -1023,6 +1023,34 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
 
         /**
+         * Called each time a single frame is captured during enrollment.
+         *
+         * <p>For older, non-AIDL implementations, only {@code helpCode} and {@code helpMessage} are
+         * supported. Sensible default values will be provided for all other arguments.
+         *
+         * @param helpCode    An integer identifying the capture status for this frame.
+         * @param helpMessage A human-readable help string that can be shown in UI.
+         * @param cell        The cell captured during this frame of enrollment, if any.
+         * @param stage       An integer representing the current stage of enrollment.
+         * @param pan         The horizontal pan of the detected face. Values in the range [-1, 1]
+         *                    indicate a good capture.
+         * @param tilt        The vertical tilt of the detected face. Values in the range [-1, 1]
+         *                    indicate a good capture.
+         * @param distance    The distance of the detected face from the device. Values in
+         *                    the range [-1, 1] indicate a good capture.
+         */
+        public void onEnrollmentFrame(
+                int helpCode,
+                @Nullable CharSequence helpMessage,
+                @Nullable FaceEnrollCell cell,
+                @FaceEnrollStages.FaceEnrollStage int stage,
+                float pan,
+                float tilt,
+                float distance) {
+            onEnrollmentHelp(helpCode, helpMessage);
+        }
+
+        /**
          * Called as each enrollment step progresses. Enrollment is considered complete when
          * remaining reaches 0. This function will not be called if enrollment fails. See
          * {@link EnrollmentCallback#onEnrollmentError(int, CharSequence)}
@@ -1305,7 +1333,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         } else if (mEnrollmentCallback != null) {
             final FaceEnrollFrame frame = new FaceEnrollFrame(
                     null /* cell */,
-                    FaceEnrollStage.UNKNOWN,
+                    FaceEnrollStages.UNKNOWN,
                     new FaceDataFrame(acquireInfo, vendorCode));
             sendEnrollmentFrame(frame);
         }
@@ -1333,12 +1361,19 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (frame == null) {
             Slog.w(TAG, "Received null enrollment frame");
         } else if (mEnrollmentCallback != null) {
-            // TODO(b/178414967): Send additional frame data to callback
-            final int acquireInfo = frame.getData().getAcquiredInfo();
-            final int vendorCode = frame.getData().getVendorCode();
+            final FaceDataFrame data = frame.getData();
+            final int acquireInfo = data.getAcquiredInfo();
+            final int vendorCode = data.getVendorCode();
             final int helpCode = getHelpCode(acquireInfo, vendorCode);
             final String helpMessage = getEnrollHelpMessage(mContext, acquireInfo, vendorCode);
-            mEnrollmentCallback.onEnrollmentHelp(helpCode, helpMessage);
+            mEnrollmentCallback.onEnrollmentFrame(
+                    helpCode,
+                    helpMessage,
+                    frame.getCell(),
+                    frame.getStage(),
+                    data.getPan(),
+                    data.getTilt(),
+                    data.getDistance());
         }
     }
 
