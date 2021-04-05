@@ -18,7 +18,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_phone_close" msgid="5783752637260411309">"סגירה"</string>
-    <string name="pip_phone_expand" msgid="2579292903468287504">"הרחב"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"הרחבה"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"הגדרות"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"תפריט"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> במצב תמונה בתוך תמונה"</string>
@@ -43,12 +43,12 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"עליון 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"למעלה 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"מסך תחתון מלא"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"איך להשתמש במצב שימוש ביד אחת"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"איך להשתמש בתכונה \'מצב שימוש ביד אחת\'"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"כדי לצאת, יש להחליק למעלה מתחתית המסך או להקיש במקום כלשהו במסך מעל האפליקציה"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"הפעלה של מצב שימוש ביד אחת"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"יציאה ממצב שימוש ביד אחת"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"הגדרות לבועות של <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"גלישה"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"אפשרויות נוספות"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"הוספה בחזרה לערימה"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> מהאפליקציה <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> מ-<xliff:g id="APP_NAME">%2$s</xliff:g> ועוד <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
