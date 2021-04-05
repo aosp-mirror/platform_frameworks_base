@@ -979,7 +979,9 @@ public final class PermissionChecker {
             int uid, @NonNull Set<String> renouncedPermissions) {
         final boolean permissionGranted = context.checkPermission(permission, /*pid*/ -1,
                 uid) == PackageManager.PERMISSION_GRANTED;
-        if (permissionGranted && renouncedPermissions.contains(permission)) {
+        if (permissionGranted && renouncedPermissions.contains(permission)
+                && context.checkPermission(Manifest.permission.RENOUNCE_PERMISSIONS,
+                        /*pid*/ -1, uid) == PackageManager.PERMISSION_GRANTED) {
             return false;
         }
         return permissionGranted;

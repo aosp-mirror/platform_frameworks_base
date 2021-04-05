@@ -179,6 +179,15 @@ public final class AttributionSource implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
+    public AttributionSource(int uid, @Nullable String packageName,
+            @Nullable String attributionTag, @Nullable Set<String> renouncedPermissions,
+            @Nullable AttributionSource next) {
+        this(uid, packageName, attributionTag, /*token*/ null,
+                renouncedPermissions, next);
+    }
+
+    /** @hide */
     public AttributionSource(@NonNull AttributionSource current,
             @Nullable AttributionSource next) {
         this(current.getUid(), current.getPackageName(), current.getAttributionTag(),
@@ -526,7 +535,7 @@ public final class AttributionSource implements Parcelable {
         /**
          * The package that is accessing the permission protected data.
          */
-        public @NonNull Builder setPackageName(@NonNull String value) {
+        public @NonNull Builder setPackageName(@Nullable String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2;
             mPackageName = value;
@@ -536,7 +545,7 @@ public final class AttributionSource implements Parcelable {
         /**
          * The attribution tag of the app accessing the permission protected data.
          */
-        public @NonNull Builder setAttributionTag(@NonNull String value) {
+        public @NonNull Builder setAttributionTag(@Nullable String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4;
             mAttributionTag = value;
@@ -550,7 +559,7 @@ public final class AttributionSource implements Parcelable {
          */
         @SystemApi
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
-        public @NonNull Builder setRenouncedPermissions(@NonNull Set<String> value) {
+        public @NonNull Builder setRenouncedPermissions(@Nullable Set<String> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x10;
             mRenouncedPermissions = value;
@@ -560,7 +569,7 @@ public final class AttributionSource implements Parcelable {
         /**
          * The next app to receive the permission protected data.
          */
-        public @NonNull Builder setNext(@NonNull AttributionSource value) {
+        public @NonNull Builder setNext(@Nullable AttributionSource value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x20;
             mNext = value;

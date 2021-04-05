@@ -1114,6 +1114,7 @@ public final class PermissionManager {
      *
      * @hide
      */
+    @TestApi
     public @NonNull AttributionSource registerAttributionSource(@NonNull AttributionSource source) {
         try {
             return mPermissionManager.registerAttributionSource(source);
