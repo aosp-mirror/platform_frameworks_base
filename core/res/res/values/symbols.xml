@@ -3570,7 +3570,7 @@
 
   <java-symbol type="bool" name="config_quickSettingsSupported" />
 
-  <java-symbol type="style" name="Theme.DeviceDefault.QuickSettings" />
+  <java-symbol type="style" name="Theme.DeviceDefault.SystemUI" />
 
   <java-symbol type="integer" name="default_data_warning_level_mb" />
   <java-symbol type="bool" name="config_useVideoPauseWorkaround" />
