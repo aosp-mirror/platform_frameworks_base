@@ -62,11 +62,6 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
     }
 
-    /** b/178485354 */
-    public boolean useNewBrightnessSlider() {
-        return mFlagReader.isEnabled(R.bool.flag_brightness_slider);
-    }
-
     public boolean useNewLockscreenAnimations() {
         return mFlagReader.isEnabled(R.bool.flag_lockscreen_animations);
     }
