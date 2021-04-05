@@ -2235,7 +2235,7 @@ package android.content {
   }
 
   public static final class AttributionSource.Builder {
-    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.AttributionSource.Builder setRenouncedPermissions(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.AttributionSource.Builder setRenouncedPermissions(@Nullable java.util.Set<java.lang.String>);
   }
 
   public abstract class BroadcastReceiver {
