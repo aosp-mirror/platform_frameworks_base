@@ -38531,6 +38531,7 @@ package android.service.notification {
     method public final java.util.List<android.app.NotificationChannelGroup> getNotificationChannelGroups(@NonNull String, @NonNull android.os.UserHandle);
     method public final java.util.List<android.app.NotificationChannel> getNotificationChannels(@NonNull String, @NonNull android.os.UserHandle);
     method public final android.service.notification.StatusBarNotification[] getSnoozedNotifications();
+    method public final void migrateNotificationFilter(int, @Nullable java.util.List<java.lang.String>);
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onInterruptionFilterChanged(int);
     method public void onListenerConnected();
