@@ -97,6 +97,11 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         }
     }
 
+    @Override
+    int calculateAlpha() {
+        return mPauseAuth ? 0 : 255;
+    }
+
     void onDozeAmountChanged(float linear, float eased) {
         mFingerprintDrawable.onDozeAmountChanged(linear, eased);
     }
@@ -151,6 +156,10 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
     private boolean isShadeLocked() {
         return mStatusBarState == StatusBarState.SHADE_LOCKED;
+    }
+
+    boolean isHome() {
+        return mStatusBarState == StatusBarState.SHADE;
     }
 
     /**
