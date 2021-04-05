@@ -528,8 +528,13 @@ public class CameraServiceProxy extends SystemService
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register task stack listener!");
         }
+    }
 
-        CameraStatsJobService.schedule(mContext);
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_BOOT_COMPLETED) {
+            CameraStatsJobService.schedule(mContext);
+        }
     }
 
     @Override
