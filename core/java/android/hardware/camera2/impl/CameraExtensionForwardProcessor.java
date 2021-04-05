@@ -25,6 +25,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.ImageWriter;
 import android.annotation.NonNull;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
@@ -39,6 +40,7 @@ public class CameraExtensionForwardProcessor {
     private final IPreviewImageProcessorImpl mProcessor;
     private final long mOutputSurfaceUsage;
     private final int mOutputSurfaceFormat;
+    private final Handler mHandler;
 
     private ImageReader mIntermediateReader = null;
     private Surface mIntermediateSurface = null;
@@ -48,10 +50,11 @@ public class CameraExtensionForwardProcessor {
     private boolean mOutputAbandoned = false;
 
     public CameraExtensionForwardProcessor(@NonNull IPreviewImageProcessorImpl processor,
-                                           int format, long surfaceUsage) {
+            int format, long surfaceUsage, @NonNull Handler handler) {
         mProcessor = processor;
         mOutputSurfaceUsage = surfaceUsage;
         mOutputSurfaceFormat = format;
+        mHandler = handler;
     }
 
     public void close() {
@@ -98,7 +101,7 @@ public class CameraExtensionForwardProcessor {
                     mResolution.getHeight(), CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
                     FORWARD_QUEUE_SIZE, mOutputSurfaceUsage);
             mIntermediateSurface = mIntermediateReader.getSurface();
-            mIntermediateReader.setOnImageAvailableListener(new ForwardCallback(), null);
+            mIntermediateReader.setOnImageAvailableListener(new ForwardCallback(), mHandler);
 
             mProcessor.onOutputSurface(mIntermediateSurface, mOutputSurfaceFormat);
             // PreviewImageProcessorImpl always expect the extension processing format as input
@@ -124,9 +127,13 @@ public class CameraExtensionForwardProcessor {
         @Override public void onImageAvailable(ImageReader reader) {
             Image processedImage = null;
             try {
-                processedImage = mIntermediateReader.acquireNextImage();
+                processedImage = reader.acquireNextImage();
             } catch (IllegalStateException e) {
                 Log.e(TAG, "Failed to acquire processed image!");
+                return;
+            }
+            if (processedImage == null) {
+                Log.e(TAG, "Invalid image");
                 return;
             }
 
