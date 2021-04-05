@@ -235,7 +235,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Maak verbinding met een wifi-netwerk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, foutopsporing, ontwikkeling"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snelle link naar bugrapport"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Een knop in het aan/uit-menu weergeven om een bugrapport te maken"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Een knop in het aan/uit-menu tonen om een bugrapport te maken"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Stand-by"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Scherm gaat nooit uit tijdens het opladen"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Snoop-logbestand voor Bluetooth-HCI inschakelen"</string>
@@ -254,7 +254,7 @@
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Via wifi ondersteunde MAC-herschikking"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobiele data altijd actief"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardwareversnelling voor tethering"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-apparaten zonder namen weergeven"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth-apparaten zonder naam tonen"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Absoluut volume uitschakelen"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche inschakelen"</string>
     <string name="enhanced_connectivity" msgid="7201127377781666804">"Verbeterde connectiviteit"</string>
@@ -281,8 +281,8 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostnaam van privé-DNS-provider"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Geef hostnaam van DNS-provider op"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kan geen verbinding maken"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Opties weergeven voor certificering van draadloze weergave"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Opties tonen voor certificering van draadloze weergave"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Logniveau voor wifi verhogen, tonen per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaagt het batterijverbruik en verbetert de netwerkprestaties"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Als deze modus is ingeschakeld, kan het MAC-adres van dit apparaat elke keer wijzigen als het verbinding maakt met een netwerk waarvoor MAC-herschikking is ingeschakeld."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Met datalimiet"</string>
@@ -297,7 +297,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB-configuratie selecteren"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Neplocaties toestaan"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Neplocaties toestaan"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"Inspectie van weergavekenmerk inschakelen"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"Inspectie van weergavekenmerk aanzetten"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mobiele data altijd actief houden, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Hardwareversnelling voor tethering gebruiken indien beschikbaar"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB-foutopsporing toestaan?"</string>
@@ -309,7 +309,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Deze instellingen zijn uitsluitend bedoeld voor ontwikkelingsgebruik. Je apparaat en apps kunnen hierdoor vastlopen of anders reageren."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Apps verifiëren via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Apps die zijn geïnstalleerd via ADB/ADT, controleren op schadelijk gedrag"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-apparaten zonder namen (alleen MAC-adressen) worden weergegeven"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-apparaten zonder naam (alleen MAC-adressen) worden weergegeven"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Hiermee wordt de functie voor absoluut volume van Bluetooth uitgeschakeld in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Hierdoor wordt de Gabeldorsche-functiestack voor bluetooth ingeschakeld."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Hiermee wordt de functie voor verbeterde connectiviteit ingeschakeld."</string>
@@ -334,12 +334,12 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"Knipperend scherm bij lange bewerkingen door apps"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Cursorlocatie"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Schermoverlay met huidige aanraakgegevens"</string>
-    <string name="show_touches" msgid="8437666942161289025">"Tikken weergeven"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Visuele feedback weergeven voor tikken"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Oppervlakupdates weergeven"</string>
+    <string name="show_touches" msgid="8437666942161289025">"Tikken tonen"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Visuele feedback tonen voor tikken"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Oppervlakupdates tonen"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Volledige vensteroppervlakken flashen bij updates"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Weergave-updates tonen"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Flash-weergave in vensters bij update"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Flash-weergaven in vensters bij update"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Hardwarelayer-upd. tonen"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hardwarelagen knipperen groen bij updates"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Foutopsporing GPU-overbelasting"</string>
@@ -349,8 +349,8 @@
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL-sporen inschakelen"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB-audiorouting uitsch."</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Autom. routing naar USB-randapparatuur uitsch."</string>
-    <string name="debug_layout" msgid="1659216803043339741">"Indelingsgrenzen weergeven"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Clipgrenzen, marges en meer weergeven"</string>
+    <string name="debug_layout" msgid="1659216803043339741">"Indelingsgrenzen tonen"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Clipgrenzen, marges en meer tonen"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"V.r.n.l.-indelingsrichting afdwingen"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Schermindelingsrichting geforceerd instellen op v.r.n.l. voor alle talen"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA forceren"</string>
@@ -371,7 +371,7 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"Achtergrondproceslimiet"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"ANR\'s op de achtergrond"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Dialoogvenster \'App reageert niet\' weergeven voor achtergrond-apps"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Kanaalwaarschuwingen voor meldingen weergeven"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Kanaalwaarschuwingen voor meldingen tonen"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Geeft een waarschuwing op het scherm weer wanneer een app een melding post zonder geldig kanaal"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Toestaan van apps op externe opslag afdwingen"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Hiermee komt elke app in aanmerking voor schrijven naar externe opslag, ongeacht de manifestwaarden"</string>
@@ -401,7 +401,7 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Actief. Tik om te schakelen."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Stand-bystatus app: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Actieve services"</string>
-    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Services die momenteel actief zijn, weergeven en beheren"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Services die momenteel actief zijn, bekijken en beheren"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementatie"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView-implementatie instellen"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Deze keuze is niet meer geldig. Probeer het opnieuw."</string>
