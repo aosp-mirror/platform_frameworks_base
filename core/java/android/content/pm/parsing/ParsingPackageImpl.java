@@ -401,7 +401,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Nullable
     @DataClass.ParcelWith(ForBoolean.class)
-    private Boolean requestOptimizedExternalStorageAccess;
+    private Boolean requestRawExternalStorageAccess;
 
     // TODO(chiuwinson): Non-null
     @Nullable
@@ -1087,7 +1087,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.setGwpAsanMode(gwpAsanMode);
         appInfo.setMemtagMode(memtagMode);
         appInfo.setNativeHeapZeroInitialized(nativeHeapZeroInitialized);
-        appInfo.setRequestOptimizedExternalStorageAccess(requestOptimizedExternalStorageAccess);
+        appInfo.setRequestRawExternalStorageAccess(requestRawExternalStorageAccess);
         appInfo.setBaseCodePath(mBaseApkPath);
         appInfo.setBaseResourcePath(mBaseApkPath);
         appInfo.setCodePath(mPath);
@@ -1224,7 +1224,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeMap(this.mProperties);
         dest.writeInt(this.memtagMode);
         dest.writeInt(this.nativeHeapZeroInitialized);
-        sForBoolean.parcel(this.requestOptimizedExternalStorageAccess, dest, flags);
+        sForBoolean.parcel(this.requestRawExternalStorageAccess, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1349,7 +1349,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.mProperties = in.createTypedArrayMap(Property.CREATOR);
         this.memtagMode = in.readInt();
         this.nativeHeapZeroInitialized = in.readInt();
-        this.requestOptimizedExternalStorageAccess = sForBoolean.unparcel(in);
+        this.requestRawExternalStorageAccess = sForBoolean.unparcel(in);
         assignDerivedFields();
     }
 
@@ -2132,8 +2132,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Nullable
     @Override
-    public Boolean hasRequestOptimizedExternalStorageAccess() {
-        return requestOptimizedExternalStorageAccess;
+    public Boolean hasRequestRawExternalStorageAccess() {
+        return requestRawExternalStorageAccess;
     }
 
     @Override
@@ -2587,8 +2587,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setRequestOptimizedExternalStorageAccess(@Nullable Boolean value) {
-        requestOptimizedExternalStorageAccess = value;
+    public ParsingPackageImpl setRequestRawExternalStorageAccess(@Nullable Boolean value) {
+        requestRawExternalStorageAccess = value;
         return this;
     }
     @Override
