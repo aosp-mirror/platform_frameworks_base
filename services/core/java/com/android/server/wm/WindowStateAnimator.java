@@ -509,13 +509,6 @@ class WindowStateAnimator {
             int yOffset = mYOffset;
             if (!mIsWallpaper) {
                 mSurfaceController.setPosition(t, xOffset, yOffset);
-                // Wallpaper is already updated above when calling setWallpaperPositionAndScale so
-                // we only need to consider the non-wallpaper case here.
-                mSurfaceController.setMatrix(t,
-                        w.mHScale,
-                        w.mVScale,
-                        w.mHScale,
-                        w.mVScale);
             } else {
                 setWallpaperPositionAndScale(t, xOffset, yOffset, mWallpaperScale);
             }
@@ -575,17 +568,12 @@ class WindowStateAnimator {
                         "Orientation change skips hidden %s", w);
             }
         } else if (mLastAlpha != mShownAlpha
-                || w.mLastHScale != w.mHScale
-                || w.mLastVScale != w.mVScale
                 || mLastHidden) {
             displayed = true;
             mLastAlpha = mShownAlpha;
-            w.mLastHScale = w.mHScale;
-            w.mLastVScale = w.mVScale;
             ProtoLog.i(WM_SHOW_TRANSACTIONS,
-                    "SURFACE controller=%s alpha=%f matrix=[%f*%f,%f*%f][%f*%f,%f*%f]: %s",
-                            mSurfaceController, mShownAlpha, w.mHScale, w.mVScale,
-                            w.mHScale, w.mVScale, w);
+                    "SURFACE controller=%s alpha=%f HScale=%f, VScale=%f: %s",
+                    mSurfaceController, mShownAlpha, w.mHScale, w.mVScale, w);
 
             boolean prepared = true;
 
@@ -593,12 +581,7 @@ class WindowStateAnimator {
                 setWallpaperPositionAndScale(t, mXOffset, mYOffset, mWallpaperScale);
             } else {
                 prepared =
-                    mSurfaceController.prepareToShowInTransaction(t, mShownAlpha,
-                        w.mHScale,
-                        w.mVScale,
-                        w.mHScale,
-                        w.mVScale
-                    );
+                    mSurfaceController.prepareToShowInTransaction(t, mShownAlpha);
             }
 
             if (prepared && mDrawState == HAS_DRAWN) {
@@ -693,11 +676,10 @@ class WindowStateAnimator {
 
         mSurfaceController.setPosition(t,mWin.mTmpMatrixArray[MTRANS_X],
                 mWin.mTmpMatrixArray[MTRANS_Y]);
-        mSurfaceController.setMatrix(t,
-                mWin.mTmpMatrixArray[MSCALE_X] * mWin.mHScale,
-                mWin.mTmpMatrixArray[MSKEW_Y] * mWin.mVScale,
-                mWin.mTmpMatrixArray[MSKEW_X] * mWin.mHScale,
-                mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale);
+        mSurfaceController.setMatrix(t, mWin.mTmpMatrixArray[MSCALE_X],
+            mWin.mTmpMatrixArray[MSKEW_Y],
+            mWin.mTmpMatrixArray[MSKEW_X],
+            mWin.mTmpMatrixArray[MSCALE_Y]);
     }
 
     /**

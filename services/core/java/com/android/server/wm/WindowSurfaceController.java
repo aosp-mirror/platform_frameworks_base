@@ -178,19 +178,13 @@ class WindowSurfaceController {
         t.setMatrix(mSurfaceControl, dsdx, dtdx, dtdy, dsdy);
     }
 
-    boolean prepareToShowInTransaction(SurfaceControl.Transaction t, float alpha, float dsdx,
-            float dtdx, float dsdy, float dtdy) {
+    boolean prepareToShowInTransaction(SurfaceControl.Transaction t, float alpha) {
         if (mSurfaceControl == null) {
             return false;
         }
 
         mSurfaceAlpha = alpha;
         t.setAlpha(mSurfaceControl, alpha);
-        mLastDsdx = dsdx;
-        mLastDtdx = dtdx;
-        mLastDsdy = dsdy;
-        mLastDtdy = dtdy;
-        t.setMatrix(mSurfaceControl, dsdx, dtdx, dsdy, dtdy);
         return true;
     }
 
