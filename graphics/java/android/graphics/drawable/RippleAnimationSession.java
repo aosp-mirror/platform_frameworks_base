@@ -41,8 +41,8 @@ public final class RippleAnimationSession {
     private static final int ENTER_ANIM_DURATION = 450;
     private static final int EXIT_ANIM_DURATION = 300;
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
-    private static final Interpolator FAST_OUT_LINEAR_IN =
-            new PathInterpolator(0.4f, 0f, 1f, 1f);
+    private static final Interpolator FAST_OUT_SLOW_IN =
+            new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private Consumer<RippleAnimationSession> mOnSessionEnd;
     private final AnimationProperties<Float, Paint> mProperties;
     private AnimationProperties<CanvasProperty<Float>, CanvasProperty<Paint>> mCanvasProperties;
@@ -173,7 +173,7 @@ public final class RippleAnimationSession {
     private void startAnimation(Animator expand) {
         expand.setDuration(ENTER_ANIM_DURATION);
         expand.addListener(new AnimatorListener(this));
-        expand.setInterpolator(FAST_OUT_LINEAR_IN);
+        expand.setInterpolator(FAST_OUT_SLOW_IN);
         expand.start();
         mAnimateSparkle = true;
     }
