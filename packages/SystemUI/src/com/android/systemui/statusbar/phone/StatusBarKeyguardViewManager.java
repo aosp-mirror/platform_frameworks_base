@@ -187,6 +187,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private int mLastBiometricMode;
     private boolean mLastLockVisible;
     private boolean mLastLockOrientationIsPortrait;
+    private boolean mQsExpanded;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -1128,9 +1129,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
+     * Whether qs is currently expanded.
+     */
+    public boolean isQsExpanded() {
+        return mQsExpanded;
+    }
+    /**
      * Set whether qs is currently expanded
      */
     public void setQsExpanded(boolean expanded) {
+        mQsExpanded = expanded;
         if (mAlternateAuthInterceptor != null) {
             mAlternateAuthInterceptor.setQsExpanded(expanded);
         }

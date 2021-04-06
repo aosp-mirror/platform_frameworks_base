@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -53,6 +54,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -91,6 +93,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @NonNull private final DumpManager mDumpManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
+    @NonNull private FalsingManager mFalsingManager;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -291,6 +294,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                     Log.v(TAG, "onTouch | finger up");
                     onFingerUp();
                 }
+                mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
+
                 break;
 
             default:
@@ -311,7 +316,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
-            @NonNull KeyguardViewMediator keyguardViewMediator) {
+            @NonNull KeyguardViewMediator keyguardViewMediator,
+            @NonNull FalsingManager falsingManager) {
         mContext = context;
         mInflater = inflater;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
@@ -325,6 +331,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mDumpManager = dumpManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewMediator = keyguardViewMediator;
+        mFalsingManager = falsingManager;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists

@@ -18,11 +18,12 @@ package com.android.keyguard;
 
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 
+import static com.android.systemui.classifier.Classifier.DISABLED_UDFPS_AFFORDANCE;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.hardware.biometrics.BiometricSourceType;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -33,7 +34,9 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
@@ -53,14 +56,16 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
     @NonNull private final KeyguardViewController mKeyguardViewController;
     @NonNull private final StatusBarStateController mStatusBarStateController;
     @NonNull private final KeyguardStateController mKeyguardStateController;
+    @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final Drawable mButton;
     @NonNull private final Drawable mUnlockIcon;
 
     private boolean mIsDozing;
     private boolean mIsBouncerShowing;
-    private boolean mIsKeyguardShowing;
     private boolean mRunningFPS;
     private boolean mCanDismissLockScreen;
+    private boolean mQsExpanded;
+    private int mStatusBarState;
 
     private boolean mShowButton;
     private boolean mShowUnlockIcon;
@@ -71,16 +76,19 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull AuthController authController,
             @NonNull KeyguardViewController keyguardViewController,
-            @NonNull KeyguardStateController keyguardStateController
+            @NonNull KeyguardStateController keyguardStateController,
+            @NonNull FalsingManager falsingManager
     ) {
         super(view);
-        mView.setOnTouchListener(mOnTouchListener);
+        mView.setOnClickListener(v -> onAffordanceClick());
+        mView.setOnLongClickListener(v -> onAffordanceClick());
         mView.setSensorProperties(authController.getUdfpsProps().get(0));
 
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewController = keyguardViewController;
         mKeyguardStateController = keyguardStateController;
+        mFalsingManager = falsingManager;
 
         final Context context = view.getContext();
         mButton = context.getResources().getDrawable(
@@ -94,10 +102,10 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
     @Override
     protected void onViewAttached() {
         mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
-        mIsKeyguardShowing = mKeyguardStateController.isShowing();
         mIsDozing = mStatusBarStateController.isDozing();
         mRunningFPS = mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
         mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
+        mStatusBarState = mStatusBarStateController.getState();
         mUnlockIcon.setTint(Utils.getColorAttrDefaultColor(mView.getContext(),
                 R.attr.wallpaperTextColorAccent));
         updateVisibility();
@@ -114,6 +122,15 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
         mKeyguardStateController.removeCallback(mKeyguardStateCallback);
     }
 
+    private boolean onAffordanceClick() {
+        if (mFalsingManager.isFalseTouch(DISABLED_UDFPS_AFFORDANCE)) {
+            return false;
+        }
+        mView.setVisibility(View.INVISIBLE);
+        mKeyguardViewController.showBouncer(/* scrim */ true);
+        return true;
+    }
+
     /**
      * Call when this controller is no longer needed. This will remove the view from its parent.
      */
@@ -121,6 +138,14 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
         if (mView != null && mView.getParent() != null) {
             ((ViewGroup) mView.getParent()).removeView(mView);
         }
+    }
+
+    /**
+     * Set whether qs is expanded. When QS is expanded, don't show a DisabledUdfps affordance.
+     */
+    public void setQsExpanded(boolean expanded) {
+        mQsExpanded = expanded;
+        updateVisibility();
     }
 
     private void updateVisibility() {
@@ -139,7 +164,10 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
     }
 
     private boolean isLockScreen() {
-        return mIsKeyguardShowing && !mIsDozing && !mIsBouncerShowing;
+        return !mIsDozing
+                && !mIsBouncerShowing
+                && !mQsExpanded
+                && mStatusBarState == StatusBarState.KEYGUARD;
     }
 
     @Override
@@ -148,25 +176,24 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
         pw.println("  mShowBouncerButton: " + mShowButton);
         pw.println("  mShowUnlockIcon: " + mShowUnlockIcon);
         pw.println("  mIsDozing: " + mIsDozing);
-        pw.println("  mIsKeyguardShowing: " + mIsKeyguardShowing);
         pw.println("  mIsBouncerShowing: " + mIsBouncerShowing);
         pw.println("  mRunningFPS: " + mRunningFPS);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
+        pw.println("  mStatusBarState: " + StatusBarState.toShortString(mStatusBarState));
+        pw.println("  mQsExpanded: " + mQsExpanded);
     }
-
-    private final View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            mKeyguardViewController.showBouncer(/* scrim */ true);
-            return true;
-        }
-    };
 
     private StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onDozingChanged(boolean isDozing) {
                     mIsDozing = isDozing;
+                    updateVisibility();
+                }
+
+                @Override
+                public void onStateChanged(int statusBarState) {
+                    mStatusBarState = statusBarState;
                     updateVisibility();
                 }
             };
@@ -193,21 +220,9 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
     private final KeyguardStateController.Callback mKeyguardStateCallback =
             new KeyguardStateController.Callback() {
         @Override
-        public void onKeyguardShowingChanged() {
-            updateIsKeyguardShowing();
-            updateVisibility();
-        }
-
-        @Override
         public void onUnlockedChanged() {
-            updateIsKeyguardShowing();
             mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
             updateVisibility();
-        }
-
-        private void updateIsKeyguardShowing() {
-            mIsKeyguardShowing = mKeyguardStateController.isShowing()
-                    && !mKeyguardStateController.isKeyguardGoingAway();
         }
     };
 }
