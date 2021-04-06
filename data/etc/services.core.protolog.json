@@ -193,6 +193,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1906387645": {
+      "message": "SURFACE controller=%s alpha=%f HScale=%f, VScale=%f: %s",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
+    },
     "-1905191109": {
       "message": "SyncGroup %d: Finished!",
       "level": "VERBOSE",
@@ -3282,12 +3288,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1747941491": {
-      "message": "SURFACE controller=%s alpha=%f matrix=[%f*%f,%f*%f][%f*%f,%f*%f]: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
     "1756082882": {
       "message": "Orientation change skips hidden %s",
