@@ -71,6 +71,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     private final FeatureFlags mFeatureFlags;
 
     @VisibleForTesting Drawable mCardViewDrawable;
+    private boolean mHasCard;
 
     @Inject
     public QuickAccessWalletTile(
@@ -128,15 +129,27 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         state.icon = ResourceIcon.get(R.drawable.ic_qs_wallet);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
         if (mQuickAccessWalletClient.isWalletFeatureAvailable()) {
-            state.state = isDeviceLocked ? Tile.STATE_INACTIVE : Tile.STATE_ACTIVE;
-            state.secondaryLabel = isDeviceLocked
-                    ? null
-                    : mContext.getString(R.string.wallet_secondary_label);
+            if (mHasCard) {
+                if (isDeviceLocked) {
+                    state.state = Tile.STATE_INACTIVE;
+                    state.secondaryLabel =
+                            mContext.getString(R.string.wallet_secondary_label_device_locked);
+                } else {
+                    state.state = Tile.STATE_ACTIVE;
+                    state.secondaryLabel =
+                            mContext.getString(R.string.wallet_secondary_label_active);
+                }
+            } else {
+                state.state = Tile.STATE_INACTIVE;
+                state.secondaryLabel = mContext.getString(R.string.wallet_secondary_label_no_card);
+            }
             state.stateDescription = state.secondaryLabel;
         } else {
             state.state = Tile.STATE_UNAVAILABLE;
         }
-        state.sideViewDrawable = mCardViewDrawable;
+        if (!isDeviceLocked) {
+            state.sideViewDrawable = mCardViewDrawable;
+        }
     }
 
     @Override
@@ -184,10 +197,12 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             if (cards.isEmpty()) {
                 Log.d(TAG, "No wallet cards exist.");
                 mCardViewDrawable = null;
+                mHasCard = false;
                 refreshState();
                 return;
             }
             mCardViewDrawable = cards.get(0).getCardImage().loadDrawable(mContext);
+            mHasCard = true;
             refreshState();
         }
 
@@ -195,6 +210,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         public void onWalletCardRetrievalError(@NonNull GetWalletCardsError error) {
             Log.w(TAG, "Error retrieve wallet cards");
             mCardViewDrawable = null;
+            mHasCard = false;
             refreshState();
         }
     }
