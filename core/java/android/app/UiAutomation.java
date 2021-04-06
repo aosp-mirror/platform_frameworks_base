@@ -43,6 +43,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -66,7 +67,9 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -159,6 +162,16 @@ public final class UiAutomation {
      * {@link Instrumentation#getUiAutomation(int)}.
      */
     public static final int FLAG_DONT_USE_ACCESSIBILITY = 0x00000002;
+
+    /**
+     * Returned by {@link #getAdoptedShellPermissions} to indicate that all permissions have been
+     * adopted using {@link #adoptShellPermissionIdentity}.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public static final Set<String> ALL_PERMISSIONS = Set.of("_ALL_PERMISSIONS_");
 
     private final Object mLock = new Object();
 
@@ -495,6 +508,25 @@ public final class UiAutomation {
             mUiAutomationConnection.dropShellPermissionIdentity();
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error executing dropping shell permission identity!", re);
+        }
+    }
+
+    /**
+     * Returns a list of adopted shell permissions using {@link #adoptShellPermissionIdentity},
+     * returns and empty set if no permissions are adopted and {@link #ALL_PERMISSIONS} if all
+     * permissions are adopted.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public Set<String> getAdoptedShellPermissions() {
+        try {
+            final List<String> permissions = mUiAutomationConnection.getAdoptedShellPermissions();
+            return permissions == null ? ALL_PERMISSIONS : new ArraySet<>(permissions);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error getting adopted shell permissions", re);
+            return Collections.emptySet();
         }
     }
 

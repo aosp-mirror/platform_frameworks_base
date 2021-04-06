@@ -571,6 +571,12 @@ interface IActivityManager {
      */
     void stopDelegateShellPermissionIdentity();
 
+    /**
+     * Method for the shell UID to get currently adopted permissions for an active instrumentation.
+     * An active instrumentation is one running and started from the shell.
+     */
+    List<String> getDelegatedShellPermissions();
+
     /** Returns a file descriptor that'll be closed when the system server process dies. */
     ParcelFileDescriptor getLifeMonitor();
 
