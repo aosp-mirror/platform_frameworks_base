@@ -16548,6 +16548,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
+    public List<String> getDelegatedShellPermissions() {
+        if (UserHandle.getCallingAppId() != Process.SHELL_UID
+                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
+            throw new SecurityException("Only the shell can get delegated permissions");
+        }
+        synchronized (mProcLock) {
+            return getPermissionManagerInternal().getDelegatedShellPermissions();
+        }
+    }
+
     private class ShellDelegate implements CheckOpsDelegate {
         private final int mTargetUid;
         @Nullable

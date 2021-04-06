@@ -49,6 +49,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * This is a remote object that is passed from the shell to an instrumentation
@@ -335,6 +336,22 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             mActivityManager.stopDelegateShellPermissionIdentity();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    @Nullable
+    public List<String> getAdoptedShellPermissions() throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mActivityManager.getDelegatedShellPermissions();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
