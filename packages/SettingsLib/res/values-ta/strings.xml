@@ -389,7 +389,7 @@
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"வைபிரன்ட் (இயல்பு)"</item>
     <item msgid="9112200311983078311">"இயற்கை வண்ணம்"</item>
-    <item msgid="6564241960833766170">"வழக்கமான வண்ணம்"</item>
+    <item msgid="6564241960833766170">"இயல்புநிலை"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"மேம்படுத்தப்பட்ட வண்ணங்கள்"</item>

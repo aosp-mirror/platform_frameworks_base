@@ -468,7 +468,7 @@
     <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> ਪਹਿਲਾਂ"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> ਬਾਕੀ"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"ਛੋਟਾ"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"ਵੱਡੀ"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"ਥੋੜ੍ਹਾ ਵੱਡੀ"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"ਸਭ ਤੋਂ ਵੱਡੀ"</string>
