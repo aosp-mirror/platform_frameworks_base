@@ -224,35 +224,29 @@ public class KeyguardQsUserSwitchController extends ViewController<UserAvatarVie
             mView.setContentDescription(contentDescription);
         }
 
+        mView.setDrawableWithBadge(getCurrentUserIcon().mutate(), mCurrentUser.resolveId());
+    }
+
+    Drawable getCurrentUserIcon() {
+        Drawable drawable;
         if (mCurrentUser.picture == null) {
-            mView.setDrawableWithBadge(getDrawable(mCurrentUser).mutate(),
-                    mCurrentUser.resolveId());
+            if (mCurrentUser.isCurrent && mCurrentUser.isGuest) {
+                drawable = mContext.getDrawable(R.drawable.ic_avatar_guest_user);
+            } else {
+                drawable = mAdapter.getIconDrawable(mContext, mCurrentUser);
+            }
+            int iconColorRes;
+            if (mCurrentUser.isSwitchToEnabled) {
+                iconColorRes = R.color.kg_user_switcher_avatar_icon_color;
+            } else {
+                iconColorRes = R.color.kg_user_switcher_restricted_avatar_icon_color;
+            }
+            drawable.setTint(mResources.getColor(iconColorRes, mContext.getTheme()));
         } else {
             int avatarSize =
                     (int) mResources.getDimension(R.dimen.kg_framed_avatar_size);
-            Drawable drawable = new CircleFramedDrawable(mCurrentUser.picture, avatarSize);
-            drawable.setColorFilter(
-                    mCurrentUser.isSwitchToEnabled ? null
-                            : mAdapter.getDisabledUserAvatarColorFilter());
-            mView.setDrawableWithBadge(drawable, mCurrentUser.info.id);
+            drawable = new CircleFramedDrawable(mCurrentUser.picture, avatarSize);
         }
-    }
-
-    Drawable getDrawable(UserSwitcherController.UserRecord item) {
-        Drawable drawable;
-        if (item.isCurrent && item.isGuest) {
-            drawable = mContext.getDrawable(R.drawable.ic_avatar_guest_user);
-        } else {
-            drawable = mAdapter.getIconDrawable(mContext, item);
-        }
-
-        int iconColorRes;
-        if (item.isSwitchToEnabled) {
-            iconColorRes = R.color.kg_user_switcher_avatar_icon_color;
-        } else {
-            iconColorRes = R.color.kg_user_switcher_restricted_avatar_icon_color;
-        }
-        drawable.setTint(mResources.getColor(iconColorRes, mContext.getTheme()));
 
         Drawable bg = mContext.getDrawable(R.drawable.kg_bg_avatar);
         drawable = new LayerDrawable(new Drawable[]{bg, drawable});
