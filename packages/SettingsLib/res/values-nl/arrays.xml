@@ -59,9 +59,9 @@
     <item msgid="6421717003037072581">"HDCP-controle altijd gebruiken"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"Uitgeschakeld"</item>
-    <item msgid="6336372935919715515">"Gefilterd ingeschakeld"</item>
-    <item msgid="2779123106632690576">"Ingeschakeld"</item>
+    <item msgid="695678520785580527">"Uitgezet"</item>
+    <item msgid="6336372935919715515">"Gefilterd staat aan"</item>
+    <item msgid="2779123106632690576">"Aangezet"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="8036025277512210160">"AVRCP 1.4 (standaard)"</item>

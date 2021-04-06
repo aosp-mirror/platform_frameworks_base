@@ -254,7 +254,7 @@
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi иштетилген MAC даректерин башаламан түзүү"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилдик Интернет иштей берет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Модем режиминде аппараттын иштешин тездетүү"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Аталышсыз Bluetooth түзмөктөрү көрсөтүлсүн"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Аталышсыз Bluetooth түзмөктөрү көрүнсүн"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Үндүн абсолюттук деңгээли өчүрүлсүн"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche функциясын иштетүү"</string>
     <string name="enhanced_connectivity" msgid="7201127377781666804">"Жакшыртылган туташуу"</string>
