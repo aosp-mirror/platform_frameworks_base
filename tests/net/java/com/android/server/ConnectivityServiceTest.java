@@ -21,6 +21,9 @@ import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.NETWORK_FACTORY;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.content.Intent.ACTION_PACKAGE_ADDED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
+import static android.content.Intent.ACTION_PACKAGE_REPLACED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.ACTION_USER_UNLOCKED;
@@ -2793,10 +2796,14 @@ public class ConnectivityServiceTest {
     }
 
     private void grantUsingBackgroundNetworksPermissionForUid(final int uid) throws Exception {
-        final String myPackageName = mContext.getPackageName();
-        when(mPackageManager.getPackageInfo(eq(myPackageName), eq(GET_PERMISSIONS)))
+        grantUsingBackgroundNetworksPermissionForUid(uid, mContext.getPackageName());
+    }
+
+    private void grantUsingBackgroundNetworksPermissionForUid(
+            final int uid, final String packageName) throws Exception {
+        when(mPackageManager.getPackageInfo(eq(packageName), eq(GET_PERMISSIONS)))
                 .thenReturn(buildPackageInfo(true, uid));
-        mService.mPermissionMonitor.onPackageAdded(myPackageName, uid);
+        mService.mPermissionMonitor.onPackageAdded(packageName, uid);
     }
 
     @Test
@@ -10255,6 +10262,12 @@ public class ConnectivityServiceTest {
                 .thenReturn(applicationInfo);
     }
 
+    private void mockGetApplicationInfoThrowsNameNotFound(@NonNull final String packageName)
+            throws Exception {
+        when(mPackageManager.getApplicationInfo(eq(packageName), anyInt()))
+                .thenThrow(new PackageManager.NameNotFoundException(packageName));
+    }
+
     private void mockHasSystemFeature(@NonNull final String featureName,
             @NonNull final boolean hasFeature) {
         when(mPackageManager.hasSystemFeature(eq(featureName)))
@@ -10711,15 +10724,23 @@ public class ConnectivityServiceTest {
             @NonNull final UidRangeParcel[] uidRanges,
             @NonNull final String testPackageName)
             throws Exception {
-        mockHasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, true);
-
         // These tests work off a single UID therefore using 'start' is valid.
         mockGetApplicationInfo(testPackageName, uidRanges[0].start);
 
+        setOemNetworkPreference(networkPrefToSetup, testPackageName);
+    }
+
+    private void setOemNetworkPreference(final int networkPrefToSetup,
+            @NonNull final String... testPackageNames)
+            throws Exception {
+        mockHasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, true);
+
         // Build OemNetworkPreferences object
-        final OemNetworkPreferences pref = new OemNetworkPreferences.Builder()
-                .addNetworkPreference(testPackageName, networkPrefToSetup)
-                .build();
+        final OemNetworkPreferences.Builder builder = new OemNetworkPreferences.Builder();
+        for (final String packageName : testPackageNames) {
+            builder.addNetworkPreference(packageName, networkPrefToSetup);
+        }
+        final OemNetworkPreferences pref = builder.build();
 
         // Act on ConnectivityService.setOemNetworkPreference()
         final TestOemListenerCallback oemPrefListener = new TestOemListenerCallback();
@@ -11318,8 +11339,7 @@ public class ConnectivityServiceTest {
         // Arrange PackageManager mocks
         final int secondUserTestPackageUid = UserHandle.getUid(secondUser, TEST_PACKAGE_UID);
         final UidRangeParcel[] uidRangesSingleUser =
-                toUidRangeStableParcels(
-                        uidRangesForUids(TEST_PACKAGE_UID));
+                toUidRangeStableParcels(uidRangesForUids(TEST_PACKAGE_UID));
         final UidRangeParcel[] uidRangesBothUsers =
                 toUidRangeStableParcels(
                         uidRangesForUids(TEST_PACKAGE_UID, secondUserTestPackageUid));
@@ -11361,6 +11381,84 @@ public class ConnectivityServiceTest {
 
         // Test that we correctly add values for the single user and remove for the all users.
         verifySetOemNetworkPreferenceForPreference(uidRangesSingleUser, uidRangesBothUsers,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                false /* shouldDestroyNetwork */);
+    }
+
+    @Test
+    public void testMultilayerForPackageChangesEvaluatesCorrectly()
+            throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final String packageScheme = "package:";
+
+        // Arrange PackageManager mocks
+        final String packageToInstall = "package.to.install";
+        final int packageToInstallUid = 81387;
+        final UidRangeParcel[] uidRangesSinglePackage =
+                toUidRangeStableParcels(uidRangesForUids(TEST_PACKAGE_UID));
+        mockGetApplicationInfo(TEST_PACKAGE_NAME, TEST_PACKAGE_UID);
+        mockGetApplicationInfoThrowsNameNotFound(packageToInstall);
+        setOemNetworkPreference(networkPref, TEST_PACKAGE_NAME, packageToInstall);
+        grantUsingBackgroundNetworksPermissionForUid(Binder.getCallingUid(), packageToInstall);
+
+        // Verify the starting state. No networks should be connected.
+        verifySetOemNetworkPreferenceForPreference(uidRangesSinglePackage,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Test that we correctly add the expected values for installed packages.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, true);
+        verifySetOemNetworkPreferenceForPreference(uidRangesSinglePackage,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Set the system to recognize the package to be installed
+        mockGetApplicationInfo(packageToInstall, packageToInstallUid);
+        final UidRangeParcel[] uidRangesAllPackages =
+                toUidRangeStableParcels(uidRangesForUids(TEST_PACKAGE_UID, packageToInstallUid));
+
+        // Send a broadcast indicating a package was installed.
+        final Intent addedIntent = new Intent(ACTION_PACKAGE_ADDED);
+        addedIntent.setData(Uri.parse(packageScheme + packageToInstall));
+        processBroadcast(addedIntent);
+
+        // Test the single package is removed and the combined packages are added.
+        verifySetOemNetworkPreferenceForPreference(uidRangesAllPackages, uidRangesSinglePackage,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Set the system to no longer recognize the package to be installed
+        mockGetApplicationInfoThrowsNameNotFound(packageToInstall);
+
+        // Send a broadcast indicating a package was removed.
+        final Intent removedIntent = new Intent(ACTION_PACKAGE_REMOVED);
+        removedIntent.setData(Uri.parse(packageScheme + packageToInstall));
+        processBroadcast(removedIntent);
+
+        // Test the combined packages are removed and the single package is added.
+        verifySetOemNetworkPreferenceForPreference(uidRangesSinglePackage, uidRangesAllPackages,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Set the system to change the installed package's uid
+        final int replacedTestPackageUid = TEST_PACKAGE_UID + 1;
+        mockGetApplicationInfo(TEST_PACKAGE_NAME, replacedTestPackageUid);
+        final UidRangeParcel[] uidRangesReplacedPackage =
+                toUidRangeStableParcels(uidRangesForUids(replacedTestPackageUid));
+
+        // Send a broadcast indicating a package was replaced.
+        final Intent replacedIntent = new Intent(ACTION_PACKAGE_REPLACED);
+        replacedIntent.setData(Uri.parse(packageScheme + TEST_PACKAGE_NAME));
+        processBroadcast(replacedIntent);
+
+        // Test the original uid is removed and is replaced with the new uid.
+        verifySetOemNetworkPreferenceForPreference(uidRangesReplacedPackage, uidRangesSinglePackage,
                 mCellNetworkAgent.getNetwork().netId, 1 /* times */,
                 mCellNetworkAgent.getNetwork().netId, 1 /* times */,
                 false /* shouldDestroyNetwork */);
