@@ -10669,7 +10669,7 @@ package android.content {
     field public static final String USB_SERVICE = "usb";
     field public static final String USER_SERVICE = "user";
     field public static final String VIBRATOR_MANAGER_SERVICE = "vibrator_manager";
-    field public static final String VIBRATOR_SERVICE = "vibrator";
+    field @Deprecated public static final String VIBRATOR_SERVICE = "vibrator";
     field public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
     field @UiContext public static final String WALLPAPER_SERVICE = "wallpaper";
     field public static final String WIFI_AWARE_SERVICE = "wifiaware";
@@ -30836,16 +30836,16 @@ package android.os {
     method public void onCancel();
   }
 
-  public abstract class CombinedVibrationEffect implements android.os.Parcelable {
-    method @NonNull public static android.os.CombinedVibrationEffect createSynced(@NonNull android.os.VibrationEffect);
+  public abstract class CombinedVibration implements android.os.Parcelable {
+    method @NonNull public static android.os.CombinedVibration createParallel(@NonNull android.os.VibrationEffect);
     method public int describeContents();
-    method @NonNull public static android.os.CombinedVibrationEffect.SyncedCombination startSynced();
-    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect> CREATOR;
+    method @NonNull public static android.os.CombinedVibration.ParallelCombination startParallel();
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibration> CREATOR;
   }
 
-  public static final class CombinedVibrationEffect.SyncedCombination {
-    method @NonNull public android.os.CombinedVibrationEffect.SyncedCombination addVibrator(int, @NonNull android.os.VibrationEffect);
-    method @NonNull public android.os.CombinedVibrationEffect combine();
+  public static final class CombinedVibration.ParallelCombination {
+    method @NonNull public android.os.CombinedVibration.ParallelCombination addVibrator(int, @NonNull android.os.VibrationEffect);
+    method @NonNull public android.os.CombinedVibration combine();
   }
 
   public class ConditionVariable {
@@ -32098,8 +32098,8 @@ package android.os {
     method @NonNull public abstract android.os.Vibrator getDefaultVibrator();
     method @NonNull public abstract android.os.Vibrator getVibrator(int);
     method @NonNull public abstract int[] getVibratorIds();
-    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibrationEffect);
-    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibrationEffect, @Nullable android.os.VibrationAttributes);
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibration);
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibration, @Nullable android.os.VibrationAttributes);
   }
 
   public class WorkSource implements android.os.Parcelable {
@@ -47139,7 +47139,7 @@ package android.view {
     method @NonNull public android.hardware.SensorManager getSensorManager();
     method public int getSources();
     method public int getVendorId();
-    method public android.os.Vibrator getVibrator();
+    method @Deprecated public android.os.Vibrator getVibrator();
     method @NonNull public android.os.VibratorManager getVibratorManager();
     method public boolean[] hasKeys(int...);
     method public boolean hasMicrophone();
