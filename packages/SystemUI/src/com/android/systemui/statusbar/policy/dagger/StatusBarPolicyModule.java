@@ -26,6 +26,8 @@ import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
+import com.android.systemui.statusbar.policy.DeviceControlsController;
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -44,8 +46,6 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
-import com.android.systemui.statusbar.policy.SensorPrivacyController;
-import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -112,6 +112,11 @@ public interface StatusBarPolicyModule {
     /** */
     @Binds
     ZenModeController provideZenModeController(ZenModeControllerImpl controllerImpl);
+
+    /** */
+    @Binds
+    DeviceControlsController provideDeviceControlsController(
+            DeviceControlsControllerImpl controllerImpl);
 
     /** */
     @Binds
