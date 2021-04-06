@@ -6880,19 +6880,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " seconds");
 
             mPermissionManager.readLegacyPermissionStateTEMP();
-            // If the platform SDK has changed since the last time we booted,
+            // If the build fingerprint has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
             // cases get permissions that the user didn't initially explicitly
             // allow...  it would be nice to have some better way to handle
             // this situation.
-            final boolean sdkUpdated = (ver.sdkVersion != mSdkVersion);
-            if (sdkUpdated) {
-                Slog.i(TAG, "Platform changed from " + ver.sdkVersion + " to "
-                        + mSdkVersion + "; regranting permissions for internal storage");
+            if (mIsUpgrade) {
+                Slog.i(TAG, "Build fingerprint changed from " + ver.fingerprint + " to "
+                        + Build.FINGERPRINT + "; regranting permissions for internal storage");
             }
             mPermissionManager.onStorageVolumeMounted(
-                    StorageManager.UUID_PRIVATE_INTERNAL, sdkUpdated);
+                    StorageManager.UUID_PRIVATE_INTERNAL, mIsUpgrade);
             ver.sdkVersion = mSdkVersion;
 
             // If this is the first boot or an update from pre-M, and it is a normal
@@ -24612,12 +24611,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         synchronized (mLock) {
-            final boolean sdkUpdated = (ver.sdkVersion != mSdkVersion);
-            if (sdkUpdated) {
-                logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
-                        + mSdkVersion + "; regranting permissions for " + volumeUuid);
+            final boolean isUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+            if (isUpgrade) {
+                logCriticalInfo(Log.INFO, "Build fingerprint changed from " + ver.fingerprint
+                        + " to " + Build.FINGERPRINT + "; regranting permissions for "
+                        + volumeUuid);
             }
-            mPermissionManager.onStorageVolumeMounted(volumeUuid, sdkUpdated);
+            mPermissionManager.onStorageVolumeMounted(volumeUuid, isUpgrade);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();
