@@ -3275,18 +3275,18 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         if (isFsEncrypted) {
-            // When a user has secure lock screen, require secret to actually unlock.
-            // This check is mostly in place for emulation mode.
-            if (StorageManager.isFileEncryptedEmulatedOnly() &&
-                mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(secret)) {
-                throw new IllegalStateException("Secret required to unlock secure user " + userId);
+            // When a user has a secure lock screen, a secret is required to
+            // unlock the key, so don't bother trying to unlock it without one.
+            // This prevents misleading error messages from being logged.  This
+            // is also needed for emulated FBE to behave like native FBE.
+            if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(secret)) {
+                Slog.d(TAG, "Not unlocking user " + userId
+                        + "'s CE storage yet because a secret is needed");
+                return;
             }
             try {
                 mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
                         encodeBytes(secret));
-            } catch (ServiceSpecificException sse) {
-                Slog.d(TAG, "Expected if the user has not unlocked the device.", sse);
-                return;
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
                 return;
