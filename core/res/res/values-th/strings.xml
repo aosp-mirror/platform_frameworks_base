@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"อนุญาตให้แอปค้นหาและจับคู่อุปกรณ์บลูทูธที่อยู่ใกล้เคียง"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"เชื่อมต่อกับอุปกรณ์บลูทูธที่จับคู่"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"อนุญาตให้แอปเชื่อมต่อกับอุปกรณ์บลูทูธที่จับคู่"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ข้อมูลบริการชำระเงิน NFC ที่ต้องการ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"อนุญาตให้แอปรับข้อมูลบริการชำระเงิน NFC ที่ต้องการ เช่น รหัสแอป (AID) ที่ลงทะเบียนและปลายทางของเส้นทาง"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ควบคุม Near Field Communication"</string>

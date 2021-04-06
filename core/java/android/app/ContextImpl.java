@@ -115,6 +115,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 class ReceiverRestrictedContext extends ContextWrapper {
@@ -3074,14 +3075,16 @@ class ContextImpl extends Context {
 
         mOpPackageName = overrideOpPackageName != null ? overrideOpPackageName : opPackageName;
         mParams = Objects.requireNonNull(params);
-        mAttributionSource = createAttributionSource(attributionTag, nextAttributionSource);
+        mAttributionSource = createAttributionSource(attributionTag, nextAttributionSource,
+                params.getRenouncedPermissions());
         mContentResolver = new ApplicationContentResolver(this, mainThread);
     }
 
     private @NonNull AttributionSource createAttributionSource(@Nullable String attributionTag,
-            @Nullable AttributionSource nextAttributionSource) {
-        AttributionSource attributionSource = new AttributionSource(Process.myUid(), mOpPackageName,
-                attributionTag, nextAttributionSource);
+            @Nullable AttributionSource nextAttributionSource,
+            @Nullable Set<String> renouncedPermissions) {
+        AttributionSource attributionSource = new AttributionSource(Process.myUid(),
+                mOpPackageName, attributionTag, renouncedPermissions, nextAttributionSource);
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
         if (nextAttributionSource != null) {

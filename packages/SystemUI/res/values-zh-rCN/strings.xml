@@ -530,7 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有，且已连接到多个 VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"您所在的单位可能会监控您工作资料中的网络流量"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"“<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>”可能会监控您工作资料中的网络流量"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IT 管理员可以看到工作资料网络活动记录"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IT 管理员可以看到工作资料的网络活动记录"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"网络可能会受到监控"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"此设备已连接到多个 VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"您的工作资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”"</string>
@@ -660,7 +660,13 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"以太网"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"闹钟"</string>
     <string name="wallet_title" msgid="5369767670735827105">"电子钱包"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
     <string name="wallet_secondary_label" msgid="2017028770884957543">"已可使用"</string>
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"工作资料"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"飞行模式"</string>
     <string name="add_tile" msgid="6239678623873086686">"添加图块"</string>

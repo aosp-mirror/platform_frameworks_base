@@ -449,6 +449,9 @@
     <!-- Permission required for CTS test - ResourceObserverNativeTest -->
     <uses-permission android:name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
 
+    <!-- Permission required for CTS test - CtsPermission5TestCases -->
+    <uses-permission android:name="android.permission.RENOUNCE_PERMISSIONS" />
+
     <!-- Permission required for CTS test - android.widget.cts.ToastTest -->
     <uses-permission android:name="android.permission.UNLIMITED_TOASTS" />
 

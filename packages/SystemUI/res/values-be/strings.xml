@@ -379,7 +379,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Прылада без назвы"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Гатова для трансляцыі"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Няма даступных прылад"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi не падключаны"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Няма падключэння да Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркасць"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"АЎТА"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Інвертаваць колеры"</string>
@@ -666,7 +666,13 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Будзільнік"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Кашалёк"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
     <string name="wallet_secondary_label" msgid="2017028770884957543">"Гатова"</string>
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Працоўны профіль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Рэжым палёту"</string>
     <string name="add_tile" msgid="6239678623873086686">"Дадаць плітку"</string>

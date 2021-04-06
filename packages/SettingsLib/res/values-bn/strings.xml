@@ -562,6 +562,8 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"লক সেট করুন"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>-এ পাল্টান"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"নতুন ব্যবহারকারী তৈরি করা হচ্ছে…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"বিশেষ নাম"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ করুন"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি সরান"</string>

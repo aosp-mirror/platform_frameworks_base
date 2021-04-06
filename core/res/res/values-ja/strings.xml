@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"実行中のアプリ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"電池を消費しているアプリ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"拡大"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ユーザー補助の使用"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップして電池やデータの使用量を確認"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"付近の Bluetooth デバイスの検出とペア設定をアプリに許可します"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ペア設定された Bluetooth デバイスへの接続"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ペア設定された Bluetooth デバイスへの接続をアプリに許可します"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"優先される NFC お支払いサービスの情報"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"登録されている支援やルートの目的地など、優先される NFC お支払いサービスの情報を取得することをアプリに許可します。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFCの管理"</string>
@@ -575,28 +578,21 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"画面ロックの使用"</string>
     <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
     <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"指紋の一部しか検出できません"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"センサーの汚れを取り除いてください"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"指を離すのが早すぎました"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"指の動きが遅すぎました。もう一度お試しください。"</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"別の指紋をお試しください"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"明るすぎます"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"調整してみてください"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"指紋認証を完了しました"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"顔を認証しました"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"顔を認証しました。[確認] を押してください"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指紋認証ハードウェアは使用できません。"</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"指紋を設定できません"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"指紋の読み取りがタイムアウトになりました。もう一度お試しください。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋の操作をキャンセルしました。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"指紋の操作がユーザーによりキャンセルされました。"</string>

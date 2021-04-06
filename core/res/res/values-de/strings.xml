@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Erlaubt der App, Bluetooth-Geräte in der Nähe zu finden und zu koppeln"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Mit gekoppelten Bluetooth-Geräten verbinden"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Erlaubt der App, sich mit gekoppelten Bluetooth-Geräten zu verbinden"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informationen zum bevorzugten NFC-Zahlungsdienst"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ermöglicht der App, Informationen zum bevorzugten NFC-Zahlungsdienst abzurufen, etwa registrierte Hilfsmittel oder das Routenziel."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Nahfeldkommunikation steuern"</string>
@@ -573,8 +577,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Keine PIN, kein Muster und kein Passwort festgelegt"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Fehler bei der Authentifizierung"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Displaysperre verwenden"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Displaysperre eingeben, um fortzufahren"</string>
     <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
     <skip />
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Fingerabdruck konnte nicht verarbeitet werden. Bitte versuche es noch einmal."</string>
@@ -621,14 +624,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Gesicht neu scannen lassen"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Für bessere Erkennung Gesicht neu scannen lassen"</string>
-    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
-    <skip />
-    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Face Unlock einrichten"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Entsperre dein Smartphone, indem du es ansiehst"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Weitere Möglichkeiten zum Entsperren einrichten"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tippe, um einen Fingerabdruck hinzuzufügen"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gesichtsdaten nicht gut erfasst. Erneut versuchen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zu hell. Schwächere Beleuchtung ausprobieren."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Zu dunkel. Probier eine hellere Beleuchtung aus."</string>
@@ -665,8 +664,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Gesicht <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Face Unlock verwenden"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Face Unlock oder Displaysperre verwenden"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Per Gesichtserkennung fortfahren"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Verwende die Gesichtserkennung oder deine Display-Entsperrmethode, um fortzufahren"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1033,12 +1031,9 @@
     <string name="copied" msgid="4675902854553014676">"Kopiert"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> hat etwas von <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> eingefügt"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> hat etwas aus der Zwischenablage eingefügt"</string>
-    <!-- no translation found for pasted_text (4298871641549173733) -->
-    <skip />
-    <!-- no translation found for pasted_image (4729097394781491022) -->
-    <skip />
-    <!-- no translation found for pasted_content (646276353060777131) -->
-    <skip />
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> hat einen von dir kopierten Text eingefügt"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> hat ein von dir kopiertes Bild eingefügt"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> hat den von dir kopierten Inhalt eingefügt"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Mehr"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menü+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta-Taste +"</string>
@@ -2143,31 +2138,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Geschäftlich"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Private Ansicht"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Geschäftliche Ansicht"</string>
-    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
-    <skip />
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Von deinem IT-Administrator blockiert"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Diese Art von Inhalt kann nicht über geschäftliche Apps geteilt werden"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Diese Art von Inhalt kann nicht mit geschäftlichen Apps geöffnet werden"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Diese Art von Inhalt kann nicht über private Apps geteilt werden"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Diese Art von Inhalt kann nicht mit privaten Apps geöffnet werden"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Arbeitsprofil pausiert"</string>
-    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Zum Aktivieren tippen"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Keine geschäftlichen Apps"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Keine privaten Apps"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"In <xliff:g id="APP">%s</xliff:g> im privaten Profil öffnen?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"In <xliff:g id="APP">%s</xliff:g> im Arbeitsprofil öffnen?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Privaten Browser verwenden"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Arbeitsbrowser verwenden"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Entsperr-PIN für netzgebundenes Gerät"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Entsperr-PIN für subnetzgebundenes Gerät"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Entsperr-PIN für unternehmensgebundenes Gerät"</string>
@@ -2280,10 +2263,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Neue Vergrößerungseinstellungen"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Du kannst das Display teilweise vergrößern"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"In den Einstellungen aktivieren"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Schließen"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Zum Fortfahren benötigt, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; Zugriff auf das Mikrofon deines Geräts."</string>

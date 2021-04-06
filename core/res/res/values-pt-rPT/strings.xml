@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que a app descubra e sincronize com dispositivos Bluetooth próximos"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ligar-se a dispositivos Bluetooth sincronizados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que a app se ligue a dispositivos Bluetooth sincronizados"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informações de serviços de pagamento com NFC preferenciais"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a app obtenha informações de serviços de pagamento com NFC preferenciais, como apoios registados e destino da rota."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlo Near Field Communication"</string>

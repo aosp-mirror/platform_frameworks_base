@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ଆପ୍‍ ଚାଲୁଛି"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ଆପ୍‍ଗୁଡ଼ିକ ବ୍ୟାଟେରୀ ଖର୍ଚ୍ଚ କରିଥା\'ନ୍ତି"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ମ୍ୟାଗ୍ନିଫିକେସନ୍"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ଆକ୍ସେସିବିଲିଟୀ ବ୍ୟବହାର"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରୁଛି"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g>ଟି ଆପ୍‍ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ବ୍ୟାଟେରୀ ଏବଂ ଡାଟା ବ୍ୟବହାର ଉପରେ ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ଆଖପାଖର ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକୁ ଖୋଜି ପେୟାର୍ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ପେୟାର୍ କରାଯାଇଥିବା ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକ ସହ ସଂଯୋଗ କର"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ପେୟାର୍ କରାଯାଇଥିବା ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକ ସହ ସଂଯୋଗ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ପସନ୍ଦର NFC ପେମେଣ୍ଟ ସେବା ସୂଚନା"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ପଞ୍ଜିକୃତ ଯନ୍ତ୍ର ଏବଂ ମାର୍ଗ ଲକ୍ଷସ୍ଥଳ ପରି ପସନ୍ଦର nfc ପେମେଣ୍ଟ ସେବା ସୂଚନା ପାଇବାକୁ ଆପ୍ ଅନୁମତି କରିଥାଏ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ନିଅର୍ ଫିଲ୍ଡ କମ୍ୟୁନିକେଶନ୍ ଉପରେ ନିୟନ୍ତ୍ରଣ ରଖନ୍ତୁ"</string>
@@ -575,28 +578,21 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
     <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ଆଂଶିକ ଟିପଚିହ୍ନ ଚିହ୍ନଟ କରାଯାଇଛି"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ସେନ୍ସରକୁ ସଫା କରନ୍ତୁ"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ଆଙ୍ଗୁଠିକୁ ବହୁତ ଶୀଘ୍ର ମୁଭ୍ କରାଯାଇଛି"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ଆଙ୍ଗୁଠି ଖୁବ୍‍ ଧୀରେ ନିଆଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ଅନ୍ୟ ଏକ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ବହୁତ ଉଜ୍ଜ୍ୱଳ"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ଆଡଜଷ୍ଟ କରି ଦେଖନ୍ତୁ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ଟିପଚିହ୍ନ ପ୍ରମାଣିତ ହେଲା"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି, ଦୟାକରି ସୁନିଶ୍ଚିତ ଦବାନ୍ତୁ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ଟିପଚିହ୍ନ ହାର୍ଡୱେର୍‍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ଟିପଚିହ୍ନକୁ ସେଟ୍ ଅପ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ଟିପଚିହ୍ନର ସମୟ ଶେଷ ହେଲା । ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରାଗଲା।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ଉପଯୋଗକର୍ତ୍ତା ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରିଛନ୍ତି।"</string>
@@ -1323,7 +1319,7 @@
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"ଏକ ଅଜଣା ନେଟ୍‌ୱର୍କ ପ୍ରକାର"</string>
-    <string name="accept" msgid="5447154347815825107">"ସ୍ୱୀକାର କରନ୍ତୁ"</string>
+    <string name="accept" msgid="5447154347815825107">"ଗ୍ରହଣ କରନ୍ତୁ"</string>
     <string name="decline" msgid="6490507610282145874">"ପ୍ରତ୍ୟାଖ୍ୟାନ"</string>
     <string name="select_character" msgid="3352797107930786979">"ବର୍ଣ୍ଣ ଲେଖନ୍ତୁ"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"SMS ମେସେଜ୍‌ଗୁଡ଼ିକୁ ପଠାଯାଉଛି"</string>
@@ -2145,8 +2141,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ଚାଲୁ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"କୌଣସି ୱାର୍କ ଆପ୍ ନାହିଁ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"କୌଣସି ବ୍ୟକ୍ତିଗତ ଆପ୍ ନାହିଁ"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲରେ <xliff:g id="APP">%s</xliff:g>ରେ ଖୋଲିବେ?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"ୱାର୍କ ପ୍ରୋଫାଇଲରେ <xliff:g id="APP">%s</xliff:g>ରେ ଖୋଲିବେ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲକୁ <xliff:g id="APP">%s</xliff:g>ରେ ଖୋଲିବେ?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"ୱାର୍କ ପ୍ରୋଫାଇଲକୁ <xliff:g id="APP">%s</xliff:g>ରେ ଖୋଲିବେ?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ବ୍ୟକ୍ତିଗତ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ୱାର୍କ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ନେଟୱାର୍କ ଅନଲକ୍ PIN"</string>
@@ -2262,8 +2258,7 @@
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"ନୂଆ ମ୍ୟାଗ୍ନିଫିକେସନ୍ ସେଟିଂସ୍"</string>
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ଆପଣ ଏବେ ଆପଣଙ୍କ ସ୍କ୍ରିନର ଅଂଶକୁ ମ୍ୟାଗ୍ନିଫାଏ କରିପାରିବେ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ସେଟିଂସରେ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ଜାରି ରଖିବାକୁ, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ଆପଣଙ୍କ ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଆକ୍ସେସ୍ ଆବଶ୍ୟକ କରେ।"</string>
