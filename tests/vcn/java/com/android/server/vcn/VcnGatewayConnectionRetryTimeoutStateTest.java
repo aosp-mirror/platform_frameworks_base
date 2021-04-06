@@ -96,8 +96,9 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
     }
 
     @Test
-    public void testSafeModeTimeoutNotifiesCallback() {
-        verifySafeModeTimeoutNotifiesCallback(mGatewayConnection.mRetryTimeoutState);
+    public void testSafeModeTimeoutNotifiesCallbackAndUnregistersNetworkAgent() {
+        verifySafeModeTimeoutNotifiesCallbackAndUnregistersNetworkAgent(
+                mGatewayConnection.mRetryTimeoutState);
     }
 
     @Test
