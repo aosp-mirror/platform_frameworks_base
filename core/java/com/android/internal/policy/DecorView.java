@@ -258,6 +258,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Drawable mLastOriginalBackgroundDrawable;
     private Drawable mResizingBackgroundDrawable;
     private BackgroundBlurDrawable mBackgroundBlurDrawable;
+    private BackgroundBlurDrawable mLastBackgroundBlurDrawable;
 
     /**
      * Temporary holder for a window background when it is set before {@link #mWindow} is
@@ -289,7 +290,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private int mOriginalBackgroundBlurRadius = 0;
     private int mBackgroundBlurRadius = 0;
-    private int mLastBackgroundBlurRadius = 0;
     private boolean mCrossWindowBlurEnabled;
     private final ViewTreeObserver.OnPreDrawListener mBackgroundBlurOnPreDrawListener = () -> {
         updateBackgroundBlurCorners();
@@ -1278,13 +1278,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
 
         if (mBackgroundInsets.equals(mLastBackgroundInsets)
-                && mBackgroundBlurRadius == mLastBackgroundBlurRadius
+                && mBackgroundBlurDrawable == mLastBackgroundBlurDrawable
                 && mLastOriginalBackgroundDrawable == mOriginalBackgroundDrawable) {
             return;
         }
 
         Drawable destDrawable = mOriginalBackgroundDrawable;
-        if (mBackgroundBlurRadius > 0) {
+        if (mBackgroundBlurDrawable != null) {
             destDrawable = new LayerDrawable(new Drawable[] {mBackgroundBlurDrawable,
                                                              mOriginalBackgroundDrawable});
         }
@@ -1309,7 +1309,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         super.setBackgroundDrawable(destDrawable);
 
         mLastBackgroundInsets = mBackgroundInsets;
-        mLastBackgroundBlurRadius = mBackgroundBlurRadius;
+        mLastBackgroundBlurDrawable = mBackgroundBlurDrawable;
         mLastOriginalBackgroundDrawable = mOriginalBackgroundDrawable;
     }
 
@@ -1334,11 +1334,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 ? mOriginalBackgroundBlurRadius : 0;
         if (mBackgroundBlurDrawable == null && mBackgroundBlurRadius > 0) {
             mBackgroundBlurDrawable = getViewRootImpl().createBackgroundBlurDrawable();
+            updateBackgroundDrawable();
         }
 
         if (mBackgroundBlurDrawable != null) {
             mBackgroundBlurDrawable.setBlurRadius(mBackgroundBlurRadius);
-            updateBackgroundDrawable();
         }
     }
 
@@ -1357,12 +1357,20 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 updateBackgroundBlurRadius();
             }
         } else if (mCrossWindowBlurEnabledListener != null) {
-            mCrossWindowBlurEnabledListener = null;
+            updateBackgroundBlurRadius();
+            removeBackgroundBlurDrawable();
+        }
+    }
+
+    void removeBackgroundBlurDrawable() {
+        if (mCrossWindowBlurEnabledListener != null) {
             getContext().getSystemService(WindowManager.class)
                     .removeCrossWindowBlurEnabledListener(mCrossWindowBlurEnabledListener);
-            getViewTreeObserver().removeOnPreDrawListener(mBackgroundBlurOnPreDrawListener);
-            updateBackgroundBlurRadius();
+            mCrossWindowBlurEnabledListener = null;
         }
+        getViewTreeObserver().removeOnPreDrawListener(mBackgroundBlurOnPreDrawListener);
+        mBackgroundBlurDrawable = null;
+        updateBackgroundDrawable();
     }
 
     @Override
@@ -1846,6 +1854,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mFloatingToolbar.dismiss();
             mFloatingToolbar = null;
         }
+
+        removeBackgroundBlurDrawable();
 
         PhoneWindow.PanelFeatureState st = mWindow.getPanelState(Window.FEATURE_OPTIONS_PANEL, false);
         if (st != null && st.menu != null && mFeatureId < 0) {
