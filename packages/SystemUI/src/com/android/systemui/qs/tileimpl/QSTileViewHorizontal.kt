@@ -24,6 +24,8 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.view.Gravity
+import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import com.android.systemui.R
@@ -41,6 +43,7 @@ open class QSTileViewHorizontal(
     private var paintColor = Color.WHITE
     private var paintAnimator: ValueAnimator? = null
     private var labelAnimator: ValueAnimator? = null
+    private var mSideView: ImageView = ImageView(mContext)
     override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
 
     init {
@@ -55,6 +58,14 @@ open class QSTileViewHorizontal(
         removeView(mIconFrame)
         val iconSize = context.resources.getDimensionPixelSize(R.dimen.qs_icon_size)
         addView(mIcon, 0, LayoutParams(iconSize, iconSize))
+
+        mSideView.visibility = View.GONE
+        addView(
+                mSideView,
+                -1,
+                LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                    gravity = Gravity.CENTER_VERTICAL
+        })
 
         mColorLabelActive = ColorStateList.valueOf(getColorForState(getContext(), STATE_ACTIVE))
         changeLabelColor(getLabelColor(mState)) // Matches the default state of the tile
@@ -128,6 +139,7 @@ open class QSTileViewHorizontal(
             }
             paintColor = newColor
         }
+        loadSideViewDrawableIfNecessary(state)
     }
 
     private fun animateBackground(newBackgroundColor: Int) {
@@ -178,6 +190,22 @@ open class QSTileViewHorizontal(
 
     private fun clearLabelAnimator() {
         labelAnimator?.cancel()?.also { labelAnimator = null }
+    }
+
+    private fun loadSideViewDrawableIfNecessary(state: QSTile.State) {
+        if (state.sideViewDrawable != null) {
+            (mSideView.layoutParams as MarginLayoutParams).apply {
+                marginStart =
+                        context.resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
+            }
+            mSideView.setImageDrawable(state.sideViewDrawable)
+            mSideView.visibility = View.VISIBLE
+            mSideView.adjustViewBounds = true
+            mSideView.scaleType = ImageView.ScaleType.FIT_CENTER
+        } else {
+            mSideView.setImageDrawable(null)
+            mSideView.visibility = GONE
+        }
     }
 
     override fun handleExpand(dualTarget: Boolean) {}
