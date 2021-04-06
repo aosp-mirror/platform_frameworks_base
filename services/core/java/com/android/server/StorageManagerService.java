@@ -363,6 +363,12 @@ class StorageManagerService extends IStorageManager.Stub
             users = ArrayUtils.appendInt(users, userId);
             invalidateIsUserUnlockedCache();
         }
+        public void appendAll(int[] userIds) {
+            for (int userId : userIds) {
+                users = ArrayUtils.appendInt(users, userId);
+            }
+            invalidateIsUserUnlockedCache();
+        }
         public void remove(int userId) {
             users = ArrayUtils.removeInt(users, userId);
             invalidateIsUserUnlockedCache();
@@ -1099,6 +1105,10 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             try {
+                // Reset vold to tear down existing disks/volumes and start from
+                // a clean state.  Exception: already-unlocked user storage will
+                // remain unlocked and is not affected by the reset.
+                //
                 // TODO(b/135341433): Remove cautious logging when FUSE is stable
                 Slog.i(TAG, "Resetting vold...");
                 mVold.reset();
@@ -1113,7 +1123,7 @@ class StorageManagerService extends IStorageManager.Stub
                     mStoraged.onUserStarted(userId);
                 }
                 if (mIsAutomotive) {
-                    restoreAllUnlockedUsers(userManager, users, systemUnlockedUsers);
+                    restoreSystemUnlockedUsers(userManager, users, systemUnlockedUsers);
                 }
                 mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
                 mStorageManagerInternal.onReset(mVold);
@@ -1123,7 +1133,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void restoreAllUnlockedUsers(UserManager userManager, List<UserInfo> allUsers,
+    private void restoreSystemUnlockedUsers(UserManager userManager, List<UserInfo> allUsers,
             int[] systemUnlockedUsers) throws Exception {
         Arrays.sort(systemUnlockedUsers);
         UserManager.invalidateIsUserUnlockedCache();
@@ -1143,6 +1153,31 @@ class StorageManagerService extends IStorageManager.Stub
             mVold.onUserStarted(userId);
             mStoraged.onUserStarted(userId);
             mHandler.obtainMessage(H_COMPLETE_UNLOCK_USER, userId).sendToTarget();
+        }
+    }
+
+    // If vold knows that some users have their storage unlocked already (which
+    // can happen after a "userspace reboot"), then add those users to
+    // mLocalUnlockedUsers.  Do this right away and don't wait until
+    // PHASE_BOOT_COMPLETED, since the system may unlock users before then.
+    private void restoreLocalUnlockedUsers() {
+        final int[] userIds;
+        try {
+            userIds = mVold.getUnlockedUsers();
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to get unlocked users from vold", e);
+            return;
+        }
+        if (!ArrayUtils.isEmpty(userIds)) {
+            Slog.d(TAG, "CE storage for users " + Arrays.toString(userIds)
+                    + " is already unlocked");
+            synchronized (mLock) {
+                // Append rather than replace, just in case we're actually
+                // reconnecting to vold after it crashed and was restarted, in
+                // which case things will be the other way around --- we'll know
+                // about the unlocked users but vold won't.
+                mLocalUnlockedUsers.appendAll(userIds);
+            }
         }
     }
 
@@ -1947,6 +1982,7 @@ class StorageManagerService extends IStorageManager.Stub
                 connectVold();
             }, DateUtils.SECOND_IN_MILLIS);
         } else {
+            restoreLocalUnlockedUsers();
             onDaemonConnected();
         }
     }
