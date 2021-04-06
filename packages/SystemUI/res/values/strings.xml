@@ -2693,6 +2693,14 @@
     <string name="accessibility_floating_button_migration_tooltip">Accessibility button replaced the accessibility gesture\n\n<annotation id="link">View settings</annotation></string>
     <!-- Message for the accessibility floating button docking tooltip. It shows when the user first time drag the button. It will tell the user about docking behavior. [CHAR LIMIT=70] -->
     <string name="accessibility_floating_button_docking_tooltip">Move button to the edge to hide it temporarily</string>
+    <!-- Action in accessibility menu to move the accessibility floating button to the top left of the screen. [CHAR LIMIT=30] -->
+    <string name="accessibility_floating_button_action_move_top_left">Move top left</string>
+    <!-- Action in accessibility menu to move the accessibility floating button to the top right of the screen. [CHAR LIMIT=30] -->
+    <string name="accessibility_floating_button_action_move_top_right">Move top right</string>
+    <!-- Action in accessibility menu to move the accessibility floating button to the bottom left of the screen. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_action_move_bottom_left">Move bottom left</string>
+    <!-- Action in accessibility menu to move the accessibility floating button to the bottom right of the screen. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_action_move_bottom_right">Move bottom right</string>
 
     <!-- Device Controls strings -->
     <!-- Device Controls empty state, title [CHAR LIMIT=30] -->
