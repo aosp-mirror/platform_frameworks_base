@@ -15,7 +15,6 @@
  */
 package android.content.rollback;
 
-import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
 
@@ -24,7 +23,6 @@ import android.content.Context;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public class RollbackManagerFrameworkInitializer {
     private RollbackManagerFrameworkInitializer() {}
 
