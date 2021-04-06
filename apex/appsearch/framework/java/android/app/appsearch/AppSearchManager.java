@@ -29,14 +29,16 @@ import java.util.function.Consumer;
 /**
  * Provides access to the centralized AppSearch index maintained by the system.
  *
- * <p>AppSearch is a search library for managing structured data featuring:
+ * <p>AppSearch is an offline, on-device search library for managing structured data featuring:
  *
  * <ul>
- *   <li>A fully offline on-device solution
- *   <li>A set of APIs for applications to index documents and retrieve them via full-text search
- *   <li>APIs for applications to allow the System to display their content on system UI surfaces
- *   <li>Similarly, APIs for applications to allow the System to share their content with other
- *       specified applications.
+ *   <li>APIs to index and retrieve data via full-text search.
+ *   <li>An API for applications to explicitly grant read-access permission of their data to other
+ *   applications.
+ *   <b>See: {@link SetSchemaRequest.Builder#setSchemaTypeVisibilityForPackage}</b>
+ *   <li>An API for applications to opt into or out of having their data displayed on System UI
+ *   surfaces by the System-designated global querier.
+ *   <b>See: {@link SetSchemaRequest.Builder#setSchemaTypeDisplayedBySystem}</b>
  * </ul>
  *
  * <p>Applications create a database by opening an {@link AppSearchSession}.
