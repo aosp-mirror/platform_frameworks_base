@@ -282,20 +282,6 @@ public final class RcsContactUceCapability implements Parcelable {
      * <p>
      * Note: this is only populated if {@link #getCapabilityMechanism} is
      * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_OPTIONS}
-     * @hide
-     */
-    public @NonNull List<String> getOptionsFeatureTags() {
-        if (mCapabilityMechanism != CAPABILITY_MECHANISM_OPTIONS) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(new ArrayList<>(mFeatureTags));
-    }
-
-    /**
-     * @return The feature tags present in the OPTIONS response from the network.
-     * <p>
-     * Note: this is only populated if {@link #getCapabilityMechanism} is
-     * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_OPTIONS}
      */
     public @NonNull Set<String> getFeatureTags() {
         if (mCapabilityMechanism != CAPABILITY_MECHANISM_OPTIONS) {
