@@ -37,7 +37,8 @@ public interface JobSchedulerInternal {
     /**
      * Cancel the jobs for a given uid (e.g. when app data is cleared)
      */
-    void cancelJobsForUid(int uid, @JobParameters.StopReason int reason, String debugReason);
+    void cancelJobsForUid(int uid, @JobParameters.StopReason int reason, int debugReasonCode,
+            String debugReason);
 
     /**
      * These are for activity manager to communicate to use what is currently performing backups.

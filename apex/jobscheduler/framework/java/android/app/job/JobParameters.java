@@ -64,6 +64,16 @@ public class JobParameters implements Parcelable {
      */
     public static final int REASON_RESTRICTED_BUCKET =
             JobProtoEnums.STOP_REASON_RESTRICTED_BUCKET; // 6.
+    /**
+     * The app was uninstalled.
+     * @hide
+     */
+    public static  final int DEBUG_REASON_UNINSTALL = 7;
+    /**
+     * The app's data was cleared.
+     * @hide
+     */
+    public static  final int DEBUG_REASON_DATA_CLEARED = 8;
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -187,8 +197,8 @@ public class JobParameters implements Parcelable {
      */
     public static final int STOP_REASON_APP_STANDBY = 12;
     /**
-     * The user stopped the job. This can happen either through force-stop, or via adb shell
-     * commands.
+     * The user stopped the job. This can happen either through force-stop, adb shell commands,
+     * or uninstalling.
      */
     public static final int STOP_REASON_USER = 13;
     /** The system is doing some processing that requires stopping this job. */
