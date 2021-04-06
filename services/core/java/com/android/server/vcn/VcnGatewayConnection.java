@@ -1473,15 +1473,21 @@ public class VcnGatewayConnection extends StateMachine {
                             Vcn.getNetworkScore(),
                             nac,
                             mVcnContext.getVcnNetworkProvider(),
-                            () -> {
-                                Slog.d(TAG, "NetworkAgent was unwanted");
-                                // If network agent has already been torn down, skip sending the
-                                // disconnect. Unwanted() is always called, even when networkAgents
-                                // are unregistered in teardownNetwork(), so prevent duplicate
-                                // notifications.
-                                if (mNetworkAgent != null) {
-                                    teardownAsynchronously();
+                            (agentRef) -> {
+                                // Only trigger teardown if the NetworkAgent hasn't been replaced or
+                                // changed. This guards against two cases - the first where
+                                // unwanted() may be called as a result of the
+                                // NetworkAgent.unregister() call, which might trigger a teardown
+                                // instead of just a Network disconnect, as well as the case where a
+                                // new NetworkAgent replaces an old one before the unwanted() call
+                                // is processed.
+                                if (mNetworkAgent != agentRef) {
+                                    Slog.d(TAG, "unwanted() called on stale NetworkAgent");
+                                    return;
                                 }
+
+                                Slog.d(TAG, "NetworkAgent was unwanted");
+                                teardownAsynchronously();
                             } /* networkUnwantedCallback */,
                             (status) -> {
                                 if (status == NetworkAgent.VALIDATION_STATUS_VALID) {
@@ -2089,7 +2095,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull int score,
                 @NonNull NetworkAgentConfig nac,
                 @NonNull NetworkProvider provider,
-                @NonNull Runnable networkUnwantedCallback,
+                @NonNull Consumer<NetworkAgent> networkUnwantedCallback,
                 @NonNull Consumer<Integer> validationStatusCallback) {
             return new NetworkAgent(
                     vcnContext.getContext(),
@@ -2102,7 +2108,7 @@ public class VcnGatewayConnection extends StateMachine {
                     provider) {
                 @Override
                 public void onNetworkUnwanted() {
-                    networkUnwantedCallback.run();
+                    networkUnwantedCallback.accept(this);
                 }
 
                 @Override
