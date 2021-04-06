@@ -4966,7 +4966,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public void setGlobalProxy(final ProxyInfo proxyProperties) {
+    public void setGlobalProxy(@Nullable final ProxyInfo proxyProperties) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
         mProxyTracker.setGlobalProxy(proxyProperties);
     }
