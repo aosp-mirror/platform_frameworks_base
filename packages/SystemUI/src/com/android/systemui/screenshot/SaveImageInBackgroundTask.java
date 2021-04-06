@@ -283,8 +283,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         // cancel current pending intent (if any) since clipData isn't used for matching
-        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
-                sharingChooserIntent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
+                context, 0, sharingChooserIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.CURRENT);
 
         // Create a share action for the notification
         PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
@@ -296,7 +298,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                                 mSmartActionsEnabled)
                         .setAction(Intent.ACTION_SEND)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                UserHandle.SYSTEM);
 
         Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
                 Icon.createWithResource(r, R.drawable.ic_screenshot_share),
@@ -325,7 +328,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
-                editIntent, 0, null, UserHandle.CURRENT);
+                editIntent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
 
         // Make sure pending intents for the system user are still unique across users
         // by setting the (otherwise unused) request code to the current user id.
@@ -340,7 +343,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                                 mSmartActionsEnabled)
                         .setAction(Intent.ACTION_EDIT)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                UserHandle.SYSTEM);
         Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
                 Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
                 r.getString(com.android.internal.R.string.screenshot_edit), editAction);
@@ -362,7 +366,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
                                 mSmartActionsEnabled)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_CANCEL_CURRENT
+                        | PendingIntent.FLAG_ONE_SHOT
+                        | PendingIntent.FLAG_IMMUTABLE);
         Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
                 Icon.createWithResource(r, R.drawable.ic_screenshot_delete),
                 r.getString(com.android.internal.R.string.delete), deleteAction);
@@ -403,7 +409,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             PendingIntent broadcastIntent = PendingIntent.getBroadcast(context,
                     mRandom.nextInt(),
                     intent,
-                    PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             broadcastActions.add(new Notification.Action.Builder(action.getIcon(), action.title,
                     broadcastIntent).setContextual(true).addExtras(extras).build());
         }
