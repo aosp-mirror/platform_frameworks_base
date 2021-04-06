@@ -500,7 +500,7 @@ public final class DnsResolver {
                             try {
                                 resp = resNetworkResult(fd);  // Closes fd, marks it invalid.
                             } catch (ErrnoException e) {
-                                Log.e(TAG, "resNetworkResult:" + e.toString());
+                                Log.w(TAG, "resNetworkResult:" + e.toString());
                                 exception = e;
                             }
                         }
