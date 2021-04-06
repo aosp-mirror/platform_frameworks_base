@@ -36,7 +36,6 @@ import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
 import java.util.concurrent.Executor
@@ -50,7 +49,6 @@ class ControlsProviderSelectorActivity @Inject constructor(
     @Background private val backExecutor: Executor,
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
-    private val globalActionsComponent: GlobalActionsComponent,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val uiController: ControlsUiController
 ) : LifecycleActivity() {
@@ -59,7 +57,6 @@ class ControlsProviderSelectorActivity @Inject constructor(
         private const val TAG = "ControlsProviderSelectorActivity"
     }
 
-    private var backToGlobalActions = true
     private lateinit var recyclerView: RecyclerView
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = listingController.currentUserId
@@ -105,23 +102,13 @@ class ControlsProviderSelectorActivity @Inject constructor(
             }
         }
         requireViewById<View>(R.id.done).visibility = View.GONE
-
-        backToGlobalActions = intent.getBooleanExtra(
-            ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
-            true
-        )
     }
 
     override fun onBackPressed() {
-        if (backToGlobalActions) {
-            globalActionsComponent.handleShowGlobalActionsMenu()
-        } else {
-            val i = Intent().apply {
-                component = ComponentName(applicationContext, ControlsActivity::class.java)
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            startActivity(i)
+        val i = Intent().apply {
+            component = ComponentName(applicationContext, ControlsActivity::class.java)
         }
+        startActivity(i, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
         animateExitAndFinish()
     }
 
@@ -169,10 +156,6 @@ class ControlsProviderSelectorActivity @Inject constructor(
                             listingController.getAppLabel(it))
                     putExtra(Intent.EXTRA_COMPONENT_NAME, it)
                     putExtra(ControlsFavoritingActivity.EXTRA_FROM_PROVIDER_SELECTOR, true)
-                    putExtra(
-                        ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
-                        backToGlobalActions
-                    )
                 }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
                 animateExitAndFinish()

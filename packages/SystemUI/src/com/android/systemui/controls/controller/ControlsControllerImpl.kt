@@ -44,8 +44,9 @@ import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.globalactions.GlobalActionsDialog
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_FILE
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_SEEDING_COMPLETED
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -198,11 +199,11 @@ class ControlsControllerImpl @Inject constructor (
                 // When a component is uninstalled, allow seeding to happen again if the user
                 // reinstalls the app
                 val prefs = userStructure.userContext.getSharedPreferences(
-                    GlobalActionsDialog.PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
+                    PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
                 val completedSeedingPackageSet = prefs.getStringSet(
-                    GlobalActionsDialog.PREFS_CONTROLS_SEEDING_COMPLETED, mutableSetOf<String>())
+                    PREFS_CONTROLS_SEEDING_COMPLETED, mutableSetOf<String>())
                 val servicePackageSet = serviceInfoSet.map { it.packageName }
-                prefs.edit().putStringSet(GlobalActionsDialog.PREFS_CONTROLS_SEEDING_COMPLETED,
+                prefs.edit().putStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
                     completedSeedingPackageSet.intersect(servicePackageSet)).apply()
 
                 var changed = false
