@@ -1637,8 +1637,12 @@
     <string name="wallet_button_label_device_unlocked">Show all</string>
     <!-- Label of the button underneath the card carousel when device is locked. [CHAR LIMIT=NONE] -->
     <string name="wallet_button_label_device_locked">Unlock to pay</string>
-    <!-- Secondary label of the quick access wallet tile. [CHAR LIMIT=32] -->
-    <string name="wallet_secondary_label">Ready</string>
+    <!-- Secondary label of the quick access wallet tile if active. [CHAR LIMIT=32] -->
+    <string name="wallet_secondary_label_active">Ready</string>
+    <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
+    <string name="wallet_secondary_label_no_card">Set up payment</string>
+    <!-- Secondary label of the quick access wallet tile if device locked. [CHAR LIMIT=NONE] -->
+    <string name="wallet_secondary_label_device_locked">Unlock to use</string>
     <!-- Message shown when an unknown failure occurred when fetching cards. [CHAR LIMIT=NONE] -->
     <string name="wallet_error_generic">There was a problem getting your cards, please try again later</string>
 
