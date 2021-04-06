@@ -77,7 +77,7 @@ final class RippleShader extends RuntimeShader {
             + "    float scaleIn = subProgress(0., 0.45, in_progress);\n"
             + "    float fadeOutNoise = subProgress(0.5, 1., in_progress);\n"
             + "    float fadeOutRipple = subProgress(0.5, 0.75, in_progress);\n"
-            + "    vec2 center = mix(in_touch, in_origin, fadeIn);\n"
+            + "    vec2 center = mix(in_touch, in_origin, scaleIn);\n"
             + "    float ring = softRing(p, center, in_maxRadius, scaleIn, 0.45);\n"
             + "    float alpha = min(fadeIn, 1. - fadeOutNoise);\n"
             + "    vec2 uv = p * in_resolutionScale;\n"
