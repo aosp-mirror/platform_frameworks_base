@@ -2633,7 +2633,10 @@ public class SubscriptionManager {
         if (subInfo != null) {
             overrideConfig.mcc = subInfo.getMcc();
             overrideConfig.mnc = subInfo.getMnc();
-            if (overrideConfig.mnc == 0) overrideConfig.mnc = Configuration.MNC_ZERO;
+            if (overrideConfig.mnc == 0) {
+                overrideConfig.mnc = Configuration.MNC_ZERO;
+                cacheKey = null;
+            }
         }
 
         if (useRootLocale) {
