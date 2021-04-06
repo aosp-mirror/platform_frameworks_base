@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ಸಾಧನವು ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"ಚಾರ್ಜ್ ಆಗಲು <xliff:g id="TIME">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ ಇದೆ"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಚಾರ್ಜ್ ಆಗಲು <xliff:g id="TIME">%2$s</xliff:g> ಸಮಯ ಬೇಕು"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಬ್ಯಾಟರಿಯ ಸುಸ್ಥಿತಿಗಾಗಿ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ಅಪರಿಚಿತ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ನಿಧಾನ ಗತಿಯ ಚಾರ್ಜಿಂಗ್"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ಚಾರ್ಜ್‌ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ಪ್ಲಗ್ ಇನ್ ಮಾಡಲಾಗಿದೆ, ಇದೀಗ ಚಾರ್ಜ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"ಭರ್ತಿ"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ನಿರ್ವಾಹಕರ ಮೂಲಕ ನಿಯಂತ್ರಿಸಲಾಗಿದೆ"</string>
     <string name="disabled" msgid="8017887509554714950">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ಅನುಮತಿಸಲಾಗಿದೆ"</string>
@@ -501,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ಕಡಿಮೆ ಸಮಯ."</string>
     <string name="cancel" msgid="5665114069455378395">"ರದ್ದುಮಾಡಿ"</string>
     <string name="okay" msgid="949938843324579502">"ಸರಿ"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ಅಲಾರಾಮ್‌ಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"ಅಲಾರಾಮ್‌ಗಳು ಅಥವಾ ರಿಮೈಂಡರ್‌ಗಳನ್ನು ಹೊಂದಿಸಲು ಅನುಮತಿಸಿ"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"ಅಲಾರಾಮ್‌ಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"ಅಲಾರಾಮ್‌ಗಳು ಅಥವಾ ಸಮಯಾಧಾರಿತ ಈವೆಂಟ್‌ಗಳನ್ನು ನಿಗದಿಪಡಿಸಲು ಈ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿ ನೀಡಿ. ನೀವು ಸಾಧನವನ್ನು ಬಳಸದೇ ಇದ್ದಾಗಲೂ, ಜಾಗೃತಗೊಳಿಸಲು ಮತ್ತು ರನ್ ಆಗಲು ಇದು ಈ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಈ ಅನುಮತಿಯನ್ನು ಹಿಂತೆಗೆದುಕೊಳ್ಳುವುದು ಆ್ಯಪ್ ಅನ್ನು ಅಸಮರ್ಪಕಗೊಳಿಸುತ್ತದೆ, ನಿರ್ದಿಷ್ಟವಾಗಿ ಆ್ಯಪ್ ನಿಗದಿಪಡಿಸಿದ ಯಾವುದೇ ಅಲಾರಾಮ್‌ಗಳು ಇನ್ನು ಮುಂದೆ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"ವೇಳಾಪಟ್ಟಿ, ಅಲಾರಾಮ್, ರಿಮೈಂಡರ್, ಈವೆಂಟ್"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ಆನ್ ಮಾಡಿ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ಎಂದೂ ಇಲ್ಲ"</string>
@@ -579,7 +587,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"ಮೊಬೈಲ್ ಡೇಟಾ ಆಫ್"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"ಡೇಟಾ ಬಳಸಲು ಹೊಂದಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"ಯಾವುದೇ ಫೋನ್ ಇಲ್ಲ."</string>
