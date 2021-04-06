@@ -1,3 +1,6 @@
+# Accessibility
+per-file WindowInfoTest.java = file:/services/accessibility/OWNERS
+
 # Input
 per-file *MotionEventTest.* = file:/services/core/java/com/android/server/input/OWNERS
 per-file *KeyEventTest.* = file:/services/core/java/com/android/server/input/OWNERS
@@ -9,6 +12,7 @@ per-file *Focus* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *Insets* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *View* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *Visibility* = file:/services/core/java/com/android/server/wm/OWNERS
+per-file *Window*  = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Scroll Capture
 per-file *ScrollCapture*.java = file:/packages/SystemUI/src/com/android/systemui/screenshot/OWNERS
