@@ -441,30 +441,6 @@ public class RcsCapabilityExchangeImplBase {
      * @param contactUri The URI of the remote user that we wish to get the capabilities of.
      * @param myCapabilities The capabilities of this device to send to the remote user.
      * @param callback The callback of this request which is sent from the remote user.
-     * @hide
-     */
-    // executor used is defined in the constructor.
-    @SuppressLint("ExecutorRegistration")
-    public void sendOptionsCapabilityRequest(@NonNull Uri contactUri,
-            @NonNull List<String> myCapabilities, @NonNull OptionsResponseCallback callback) {
-        // Stub - to be implemented by service
-        Log.w(LOG_TAG, "sendOptionsCapabilityRequest called with no implementation.");
-        try {
-            callback.onCommandError(COMMAND_CODE_NOT_SUPPORTED);
-        } catch (ImsException e) {
-            // Do not do anything, this is a stub implementation.
-        }
-    }
-
-    /**
-     * Push one's own capabilities to a remote user via the SIP OPTIONS presence exchange mechanism
-     * in order to receive the capabilities of the remote user in response.
-     * <p>
-     * The implementer must use {@link OptionsResponseCallback} to send the response of
-     * this query from the network back to the framework.
-     * @param contactUri The URI of the remote user that we wish to get the capabilities of.
-     * @param myCapabilities The capabilities of this device to send to the remote user.
-     * @param callback The callback of this request which is sent from the remote user.
      */
     // executor used is defined in the constructor.
     @SuppressLint("ExecutorRegistration")
