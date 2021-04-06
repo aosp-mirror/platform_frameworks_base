@@ -6279,6 +6279,8 @@ class Task extends WindowContainer<WindowContainer> {
         // Launching this app's activity, make sure the app is no longer
         // considered stopped.
         try {
+            mTaskSupervisor.getActivityMetricsLogger()
+                    .notifyBeforePackageUnstopped(next.packageName);
             mAtmService.getPackageManager().setPackageStoppedState(
                     next.packageName, false, next.mUserId); /* TODO: Verify if correct userid */
         } catch (RemoteException e1) {
