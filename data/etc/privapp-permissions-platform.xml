@@ -257,6 +257,8 @@ applications that come with the platform
         <permission name="android.permission.READ_DEVICE_CONFIG" />
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
         <permission name="android.permission.MODIFY_QUIET_MODE"/>
+        <!-- Permissions required to check if an app is in the foreground or not during IO -->
+        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
