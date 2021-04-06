@@ -33,8 +33,6 @@
     <!-- AOD/Lockscreen alternate layout -->
     <bool name="flag_keyguard_layout">false</bool>
 
-    <bool name="flag_brightness_slider">false</bool>
-
     <!-- People Tile flag -->
     <bool name="flag_conversations">false</bool>
 

@@ -449,7 +449,7 @@
 
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
-    <dimen name="brightness_mirror_height">56dp</dimen>
+    <dimen name="brightness_mirror_height">48dp</dimen>
 
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
@@ -531,10 +531,10 @@
     <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
     <dimen name="qs_tile_margin_top_bottom_negative">-12dp</dimen>
     <!-- The height of the qs customize header. Should be
-         (qs_panel_padding_top (48dp) +  brightness_mirror_height (56dp) + qs_tile_margin_top (0dp)) -
+         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_tile_margin_top (0dp)) -
          (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (12dp))
     -->
-    <dimen name="qs_customize_header_min_height">36dp</dimen>
+    <dimen name="qs_customize_header_min_height">28dp</dimen>
     <dimen name="qs_tile_margin_top">0dp</dimen>
     <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">44dp</dimen>
