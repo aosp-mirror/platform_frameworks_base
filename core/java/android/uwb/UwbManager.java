@@ -16,7 +16,7 @@
 
 package android.uwb;
 
-import android.Manifest;
+import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -24,7 +24,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.content.AttributionSource;
 import android.content.Context;
+import android.content.ContextParams;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.PersistableBundle;
@@ -47,9 +49,10 @@ import java.util.concurrent.Executor;
 @SystemApi
 @SystemService(Context.UWB_SERVICE)
 public final class UwbManager {
-    private IUwbAdapter mUwbAdapter;
     private static final String SERVICE_NAME = "uwb";
 
+    private final Context mContext;
+    private final IUwbAdapter mUwbAdapter;
     private final AdapterStateListener mAdapterStateListener;
     private final RangingManager mRangingManager;
 
@@ -116,9 +119,11 @@ public final class UwbManager {
     /**
      * Use <code>Context.getSystemService(UwbManager.class)</code> to get an instance.
      *
+     * @param ctx Context of the client.
      * @param adapter an instance of an {@link android.uwb.IUwbAdapter}
      */
-    private UwbManager(IUwbAdapter adapter) {
+    private UwbManager(@NonNull Context ctx, @NonNull IUwbAdapter adapter) {
+        mContext = ctx;
         mUwbAdapter = adapter;
         mAdapterStateListener = new AdapterStateListener(adapter);
         mRangingManager = new RangingManager(adapter);
@@ -127,7 +132,7 @@ public final class UwbManager {
     /**
      * @hide
      */
-    public static UwbManager getInstance() {
+    public static UwbManager getInstance(@NonNull Context ctx) {
         IBinder b = ServiceManager.getService(SERVICE_NAME);
         if (b == null) {
             return null;
@@ -138,7 +143,7 @@ public final class UwbManager {
             return null;
         }
 
-        return new UwbManager(adapter);
+        return new UwbManager(ctx, adapter);
     }
 
     /**
@@ -153,7 +158,7 @@ public final class UwbManager {
      * @param executor an {@link Executor} to execute given callback
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
+    @RequiresPermission(permission.UWB_PRIVILEGED)
     public void registerAdapterStateCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull AdapterStateCallback callback) {
         mAdapterStateListener.register(executor, callback);
@@ -168,7 +173,7 @@ public final class UwbManager {
      *
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
+    @RequiresPermission(permission.UWB_PRIVILEGED)
     public void unregisterAdapterStateCallback(@NonNull AdapterStateCallback callback) {
         mAdapterStateListener.unregister(callback);
     }
@@ -182,7 +187,7 @@ public final class UwbManager {
      * @return {@link PersistableBundle} of the device's supported UWB protocols and parameters
      */
     @NonNull
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
+    @RequiresPermission(permission.UWB_PRIVILEGED)
     public PersistableBundle getSpecificationInfo() {
         try {
             return mUwbAdapter.getSpecificationInfo();
@@ -199,7 +204,7 @@ public final class UwbManager {
      * @return the timestamp resolution in nanoseconds
      */
     @SuppressLint("MethodNameUnits")
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
+    @RequiresPermission(permission.UWB_PRIVILEGED)
     public long elapsedRealtimeResolutionNanos() {
         try {
             return mUwbAdapter.getTimestampResolutionNanos();
@@ -235,10 +240,14 @@ public final class UwbManager {
      *         {@link RangingSession.Callback#onOpened(RangingSession)}.
      */
     @NonNull
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
+    @RequiresPermission(allOf = {
+            permission.UWB_PRIVILEGED,
+            permission.UWB_RANGING
+    })
     public CancellationSignal openRangingSession(@NonNull PersistableBundle parameters,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {
-        return mRangingManager.openSession(parameters, executor, callbacks);
+        return mRangingManager.openSession(
+                mContext.getAttributionSource(), parameters, executor, callbacks);
     }
 }
