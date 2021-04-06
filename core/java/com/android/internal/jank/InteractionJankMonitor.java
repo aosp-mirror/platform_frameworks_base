@@ -19,6 +19,7 @@ package com.android.internal.jank;
 import static android.content.Intent.FLAG_RECEIVER_REGISTERED_ONLY;
 
 import static com.android.internal.jank.FrameTracker.ChoreographerWrapper;
+import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NOT_BEGUN;
 import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
@@ -104,7 +105,7 @@ public class InteractionJankMonitor {
     public static final String BUNDLE_KEY_CUJ_NAME = ACTION_PREFIX + ".CUJ_NAME";
     public static final String BUNDLE_KEY_TIMESTAMP = ACTION_PREFIX + ".TIMESTAMP";
     @VisibleForTesting
-    public static final String PROP_NOTIFY_CUJ_EVENT = "debug.notify_cuj_events";
+    public static final String PROP_NOTIFY_CUJ_EVENT = "debug.jank.notify_cuj_events";
 
     // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
     public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 0;
@@ -287,11 +288,25 @@ public class InteractionJankMonitor {
     }
 
     private void notifyEvents(Context context, String action, Session session) {
+        if (action.equals(ACTION_SESSION_CANCEL)
+                && session.getReason() == REASON_CANCEL_NOT_BEGUN) {
+            return;
+        }
         Intent intent = new Intent(action);
         intent.putExtra(BUNDLE_KEY_CUJ_NAME, getNameOfCuj(session.getCuj()));
         intent.putExtra(BUNDLE_KEY_TIMESTAMP, session.getTimeStamp());
         intent.addFlags(FLAG_RECEIVER_REGISTERED_ONLY);
         context.sendBroadcast(intent);
+    }
+
+    void removeTimeout(@CujType int cujType) {
+        synchronized (this) {
+            Runnable timeout = mTimeoutActions.get(cujType);
+            if (timeout != null) {
+                mWorker.getThreadHandler().removeCallbacks(timeout);
+                mTimeoutActions.remove(cujType);
+            }
+        }
     }
 
     /**
@@ -351,16 +366,11 @@ public class InteractionJankMonitor {
         synchronized (this) {
 
             // remove the timeout action first.
-            Runnable timeout = mTimeoutActions.get(cujType);
-            if (timeout != null) {
-                mWorker.getThreadHandler().removeCallbacks(timeout);
-                mTimeoutActions.remove(cujType);
-            }
-
+            removeTimeout(cujType);
             FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
-            tracker.end();
+            tracker.end(FrameTracker.REASON_END_NORMAL);
             mRunningTrackers.remove(cujType);
             return true;
         }
@@ -375,16 +385,11 @@ public class InteractionJankMonitor {
         //TODO (163505250): This should be no-op if not in droid food rom.
         synchronized (this) {
             // remove the timeout action first.
-            Runnable timeout = mTimeoutActions.get(cujType);
-            if (timeout != null) {
-                mWorker.getThreadHandler().removeCallbacks(timeout);
-                mTimeoutActions.remove(cujType);
-            }
-
+            removeTimeout(cujType);
             FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
-            tracker.cancel();
+            tracker.cancel(FrameTracker.REASON_CANCEL_NORMAL);
             mRunningTrackers.remove(cujType);
             return true;
         }
@@ -509,6 +514,8 @@ public class InteractionJankMonitor {
         @CujType
         private int mCujType;
         private long mTimeStamp;
+        @FrameTracker.Reasons
+        private int mReason = FrameTracker.REASON_END_UNKNOWN;
 
         public Session(@CujType int cujType) {
             mCujType = cujType;
@@ -542,6 +549,14 @@ public class InteractionJankMonitor {
 
         public long getTimeStamp() {
             return mTimeStamp;
+        }
+
+        public void setReason(@FrameTracker.Reasons int reason) {
+            mReason = reason;
+        }
+
+        public int getReason() {
+            return mReason;
         }
     }
 }
