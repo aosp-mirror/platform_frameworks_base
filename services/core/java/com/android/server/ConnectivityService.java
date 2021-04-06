@@ -6736,7 +6736,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     mDeps.reportNetworkInterfaceForTransports(mContext, iface,
                             caps.getTransportTypes());
                 } catch (Exception e) {
-                    loge("Exception adding interface: " + e);
+                    logw("Exception adding interface: " + e);
                 }
             }
         }
