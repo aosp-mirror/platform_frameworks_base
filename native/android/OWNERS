@@ -1,3 +1,5 @@
+jreck@google.com
+
 per-file libandroid_net.map.txt, net.c = set noparent
 per-file libandroid_net.map.txt, net.c = codewiz@google.com, jchalard@google.com, junyulai@google.com
 per-file libandroid_net.map.txt, net.c = lorenzo@google.com, reminv@google.com, satk@google.com
@@ -6,3 +8,9 @@ per-file system_fonts.cpp = file:/graphics/java/android/graphics/fonts/OWNERS
 per-file native_window_jni.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file native_activity.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file surface_control.cpp = file:/services/core/java/com/android/server/wm/OWNERS
+
+per-file choreographer.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file hardware_buffer_jni.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file native_window_jni.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file surface_control.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file surface_texture.cpp = file:/graphics/java/android/graphics/OWNERS
