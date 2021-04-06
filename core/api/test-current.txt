@@ -666,6 +666,7 @@ package android.content {
   public final class AttributionSource implements android.os.Parcelable {
     ctor public AttributionSource(int, @Nullable String, @Nullable String);
     ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable android.content.AttributionSource);
+    ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable java.util.Set<java.lang.String>, @Nullable android.content.AttributionSource);
   }
 
   public final class AutofillOptions implements android.os.Parcelable {
@@ -1990,6 +1991,7 @@ package android.permission {
 
   public final class PermissionManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
+    method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
   }
 
 }

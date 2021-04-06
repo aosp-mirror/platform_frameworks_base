@@ -66,6 +66,11 @@ filegroup {
     visibility: ["//visibility:private"],
 }
 
+java_library {
+    name: "Slogf",
+    srcs: ["core/java/com/android/server/utils/Slogf.java"],
+}
+
 // merge all required services into one jar
 // ============================================================
 java_library {

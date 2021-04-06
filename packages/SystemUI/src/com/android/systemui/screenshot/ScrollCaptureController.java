@@ -203,7 +203,7 @@ public class ScrollCaptureController {
                 && result.captured.height() < result.requested.height();
         boolean finish = false;
 
-        if (partialResult || emptyResult) {
+        if (emptyResult) {
             // Potentially reached a vertical boundary. Extend in the other direction.
             if (mFinishOnBoundary) {
                 Log.d(TAG, "Partial/empty: finished!");
@@ -217,12 +217,12 @@ public class ScrollCaptureController {
                 Log.d(TAG, "Partial/empty: cleared, switch direction to finish");
             }
         } else {
-            // Got the full requested result, but may have got enough bitmap data now
+            // Got a non-empty result, but may already have enough bitmap data now
             int expectedTiles = mImageTileSet.size() + 1;
             if (expectedTiles >= mSession.getMaxTiles()) {
                 Log.d(TAG, "Hit max tiles: finished");
-                // If we ever hit the max tiles, we've got enough bitmap data to finish (even if we
-                // weren't sure we'd finish on this pass).
+                // If we ever hit the max tiles, we've got enough bitmap data to finish
+                // (even if we weren't sure we'd finish on this pass).
                 finish = true;
             } else {
                 if (mScrollingUp && !mFinishOnBoundary) {
@@ -259,10 +259,18 @@ public class ScrollCaptureController {
             return;
         }
 
-        // Partial or empty results caused the direction the flip, so we can reliably use the
-        // requested edges to determine the next top.
-        int nextTop = (mScrollingUp) ? result.requested.top - mSession.getTileHeight()
-                : result.requested.bottom;
+        int nextTop;
+        if (emptyResult) {
+            // An empty result caused the direction the flip,
+            // so use the requested edges to determine the next top.
+            nextTop = (mScrollingUp)
+                    ? result.requested.top - mSession.getTileHeight()
+                    : result.requested.bottom;
+        } else {
+            nextTop = (mScrollingUp)
+                    ? result.captured.top - mSession.getTileHeight()
+                    : result.captured.bottom;
+        }
         requestNextTile(nextTop);
     }
 

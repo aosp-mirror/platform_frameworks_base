@@ -16,10 +16,6 @@
 
 package com.android.systemui.biometrics;
 
-import static com.android.systemui.statusbar.StatusBarState.FULLSCREEN_USER_SWITCHER;
-import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
-
 import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -68,18 +64,13 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
 
     @Override
     protected void onViewAttached() {
-        mStatusBarStateController.addCallback(mStateListener);
-        mStateListener.onStateChanged(mStatusBarStateController.getState());
         mStatusBar.addExpansionChangedListener(mStatusBarExpansionChangedListener);
-
         mDumpManger.registerDumpable(getDumpTag(), this);
     }
 
     @Override
     protected void onViewDetached() {
-        mStatusBarStateController.removeCallback(mStateListener);
         mStatusBar.removeExpansionChangedListener(mStatusBarExpansionChangedListener);
-
         mDumpManger.unregisterDumpable(getDumpTag());
     }
 
@@ -106,9 +97,7 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
      * authentication.
      */
     boolean shouldPauseAuth() {
-        return (mNotificationShadeExpanded && mStatusBarState != KEYGUARD)
-                || mStatusBarState == SHADE_LOCKED
-                || mStatusBarState == FULLSCREEN_USER_SWITCHER;
+        return mNotificationShadeExpanded;
     }
 
     /**
@@ -185,15 +174,6 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
                 public void onExpansionChanged(float expansion, boolean expanded) {
                     mNotificationShadeExpanded = expanded;
                     mView.onExpansionChanged(expansion, expanded);
-                    updatePauseAuth();
-                }
-            };
-
-    private final StatusBarStateController.StateListener mStateListener =
-            new StatusBarStateController.StateListener() {
-                @Override
-                public void onStateChanged(int newState) {
-                    mStatusBarState = newState;
                     updatePauseAuth();
                 }
             };

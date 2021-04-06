@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.hardware.biometrics.BiometricSourceType;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -73,7 +74,7 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
             @NonNull KeyguardStateController keyguardStateController
     ) {
         super(view);
-        mView.setOnClickListener(mOnClickListener);
+        mView.setOnTouchListener(mOnTouchListener);
         mView.setSensorProperties(authController.getUdfpsProps().get(0));
 
         mStatusBarStateController = statusBarStateController;
@@ -153,11 +154,11 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
     }
 
-    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
+    private final View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
         @Override
-        public void onClick(View v) {
-            // if the device is locked, shows bouncer, else goes to launcher
+        public boolean onTouch(View v, MotionEvent event) {
             mKeyguardViewController.showBouncer(/* scrim */ true);
+            return true;
         }
     };
 

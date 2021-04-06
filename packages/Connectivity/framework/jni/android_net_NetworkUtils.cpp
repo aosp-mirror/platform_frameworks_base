@@ -16,33 +16,18 @@
 
 #define LOG_TAG "NetworkUtils"
 
-#include <vector>
-
 #include <android/file_descriptor_jni.h>
 #include <android/multinetwork.h>
-#include <arpa/inet.h>
 #include <linux/filter.h>
-#include <linux/if_arp.h>
 #include <linux/tcp.h>
-#include <net/if.h>
-#include <netinet/ether.h>
-#include <netinet/ip.h>
-#include <netinet/udp.h>
+#include <netinet/in.h>
+#include <string.h>
 
 #include <DnsProxydProtocol.h> // NETID_USE_LOCAL_NAMESERVERS
-#include <cutils/properties.h>
-#include <nativehelper/JNIHelp.h>
 #include <nativehelper/JNIPlatformHelp.h>
-#include <nativehelper/ScopedLocalRef.h>
 #include <utils/Log.h>
-#include <utils/misc.h>
 
 #include "jni.h"
-
-extern "C" {
-int ifc_enable(const char *ifname);
-int ifc_disable(const char *ifname);
-}
 
 #define NETUTILS_PKG_NAME "android/net/NetworkUtils"
 
@@ -51,6 +36,9 @@ namespace android {
 constexpr int MAXPACKETSIZE = 8 * 1024;
 // FrameworkListener limits the size of commands to 4096 bytes.
 constexpr int MAXCMDSIZE = 4096;
+
+static volatile jclass class_Network = 0;
+static volatile jmethodID method_fromNetworkHandle = 0;
 
 static inline jclass FindClassOrDie(JNIEnv* env, const char* class_name) {
     jclass clazz = env->FindClass(class_name);
@@ -138,11 +126,11 @@ static jobject android_net_utils_resNetworkQuery(JNIEnv *env, jobject thiz, jlon
 
     // Only allow dname which could be simply formatted to UTF8.
     // In native layer, res_mkquery would re-format the input char array to packet.
-    std::vector<char> queryname(byteCountUTF8 + 1, 0);
+    char queryname[byteCountUTF8 + 1];
+    memset(queryname, 0, (byteCountUTF8 + 1) * sizeof(char));
 
-    env->GetStringUTFRegion(dname, 0, javaCharsCount, queryname.data());
-
-    int fd = android_res_nquery(netHandle, queryname.data(), ns_class, ns_type, flags);
+    env->GetStringUTFRegion(dname, 0, javaCharsCount, queryname);
+    int fd = android_res_nquery(netHandle, queryname, ns_class, ns_type, flags);
 
     if (fd < 0) {
         jniThrowErrnoException(env, "resNetworkQuery", -fd);
@@ -170,9 +158,9 @@ static jobject android_net_utils_resNetworkSend(JNIEnv *env, jobject thiz, jlong
 static jobject android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, jobject javaFd) {
     int fd = AFileDescriptor_getFD(env, javaFd);
     int rcode;
-    std::vector<uint8_t> buf(MAXPACKETSIZE, 0);
+    uint8_t buf[MAXPACKETSIZE] = {0};
 
-    int res = android_res_nresult(fd, &rcode, buf.data(), MAXPACKETSIZE);
+    int res = android_res_nresult(fd, &rcode, buf, MAXPACKETSIZE);
     jniSetFileDescriptorOfFD(env, javaFd, -1);
     if (res < 0) {
         jniThrowErrnoException(env, "resNetworkResult", -res);
@@ -184,8 +172,7 @@ static jobject android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, job
         jniThrowErrnoException(env, "resNetworkResult", ENOMEM);
         return nullptr;
     } else {
-        env->SetByteArrayRegion(answer, 0, res,
-                reinterpret_cast<jbyte*>(buf.data()));
+        env->SetByteArrayRegion(answer, 0, res, reinterpret_cast<jbyte*>(buf));
     }
 
     jclass class_DnsResponse = env->FindClass("android/net/DnsResolver$DnsResponse");
@@ -207,11 +194,14 @@ static jobject android_net_utils_getDnsNetwork(JNIEnv *env, jobject thiz) {
         return nullptr;
     }
 
-    static jclass class_Network = MakeGlobalRefOrDie(
-            env, FindClassOrDie(env, "android/net/Network"));
-    static jmethodID method = env->GetStaticMethodID(class_Network, "fromNetworkHandle",
-            "(J)Landroid/net/Network;");
-    return env->CallStaticObjectMethod(class_Network, method, static_cast<jlong>(dnsNetHandle));
+    if (method_fromNetworkHandle == 0) {
+        // This may be called multiple times concurrently but that is fine
+        class_Network = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/net/Network"));
+        method_fromNetworkHandle = env->GetStaticMethodID(class_Network, "fromNetworkHandle",
+                "(J)Landroid/net/Network;");
+    }
+    return env->CallStaticObjectMethod(class_Network, method_fromNetworkHandle,
+            static_cast<jlong>(dnsNetHandle));
 }
 
 static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
