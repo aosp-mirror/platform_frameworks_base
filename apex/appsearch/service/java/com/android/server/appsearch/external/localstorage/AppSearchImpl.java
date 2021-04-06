@@ -1127,6 +1127,40 @@ public final class AppSearchImpl implements Closeable {
     }
 
     /**
+     * Remove all {@link AppSearchSchema}s and {@link GenericDocument}s under the given package.
+     *
+     * @param packageName The name of package to be removed.
+     * @throws AppSearchException if we cannot remove the data.
+     */
+    public void clearPackageData(@NonNull String packageName) throws AppSearchException {
+        mReadWriteLock.writeLock().lock();
+        try {
+            throwIfClosedLocked();
+
+            SchemaProto existingSchema = getSchemaProtoLocked();
+            SchemaProto.Builder newSchemaBuilder = SchemaProto.newBuilder();
+
+            String prefix = createPackagePrefix(packageName);
+            for (int i = 0; i < existingSchema.getTypesCount(); i++) {
+                if (!existingSchema.getTypes(i).getSchemaType().startsWith(prefix)) {
+                    newSchemaBuilder.addTypes(existingSchema.getTypes(i));
+                }
+            }
+
+            // Apply schema, set force override to true to remove all schemas and documents under
+            // that package.
+            SetSchemaResultProto setSchemaResultProto =
+                    mIcingSearchEngineLocked.setSchema(
+                            newSchemaBuilder.build(), /*ignoreErrorsAndDeleteDocuments=*/ true);
+
+            // Determine whether it succeeded.
+            checkSuccess(setSchemaResultProto.getStatus());
+        } finally {
+            mReadWriteLock.writeLock().unlock();
+        }
+    }
+
+    /**
      * Clears documents and schema across all packages and databaseNames.
      *
      * <p>This method also clear all data in {@link VisibilityStore}, an {@link
@@ -1624,7 +1658,12 @@ public final class AppSearchImpl implements Closeable {
 
     @NonNull
     static String createPrefix(@NonNull String packageName, @NonNull String databaseName) {
-        return packageName + PACKAGE_DELIMITER + databaseName + DATABASE_DELIMITER;
+        return createPackagePrefix(packageName) + databaseName + DATABASE_DELIMITER;
+    }
+
+    @NonNull
+    private static String createPackagePrefix(@NonNull String packageName) {
+        return packageName + PACKAGE_DELIMITER;
     }
 
     /**
