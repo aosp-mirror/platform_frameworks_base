@@ -3269,6 +3269,11 @@ class StorageManagerService extends IStorageManager.Stub
                 + " hasSecret: " + (secret != null));
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
+        if (isUserKeyUnlocked(userId)) {
+            Slog.d(TAG, "User " + userId + "'s CE storage is already unlocked");
+            return;
+        }
+
         if (isFsEncrypted) {
             // When a user has secure lock screen, require secret to actually unlock.
             // This check is mostly in place for emulation mode.
@@ -3302,6 +3307,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+
+        if (!isUserKeyUnlocked(userId)) {
+            Slog.d(TAG, "User " + userId + "'s CE storage is already locked");
+            return;
+        }
 
         try {
             mVold.lockUserKey(userId);
