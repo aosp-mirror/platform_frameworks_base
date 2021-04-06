@@ -27,7 +27,8 @@
 
     <original-package android:name="com.android.smspush" />
     <application
-        android:allowClearUserData="false">
+        android:allowClearUserData="false"
+        android:directBootAware="true">
         <service android:name=".WapPushManager"
             android:permission="com.android.smspush.WAPPUSH_MANAGER_BIND"
             android:exported="true">
