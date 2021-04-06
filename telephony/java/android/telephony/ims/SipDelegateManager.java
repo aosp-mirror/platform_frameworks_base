@@ -80,13 +80,18 @@ public class SipDelegateManager {
     public static final int MESSAGE_FAILURE_REASON_DELEGATE_CLOSED = 2;
 
     /**
-     * The SIP message has an invalid start line and the message can not be sent.
+     * The SIP message has an invalid start line and the message can not be sent or the start line
+     * failed validation due to the request containing a restricted SIP request method.
+     * {@link SipDelegateConnection}s can not send SIP requests for the methods: REGISTER, PUBLISH,
+     * or OPTIONS.
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_START_LINE = 3;
 
     /**
      * One or more of the header fields in the header section of the outgoing SIP message is invalid
-     * and the SIP message can not be sent.
+     * or contains a restricted header value and the SIP message can not be sent.
+     * {@link SipDelegateConnection}s can not send SIP SUBSCRIBE requests for the "Event" header
+     * value of "presence".
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS = 4;
 
