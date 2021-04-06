@@ -5185,10 +5185,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @param outMatrix Matrix to fill in the transformation.
      */
     void getTransformationMatrix(float[] float9, Matrix outMatrix) {
-        float9[Matrix.MSCALE_X] = mWinAnimator.mDsDx;
-        float9[Matrix.MSKEW_Y] = mWinAnimator.mDtDx;
-        float9[Matrix.MSKEW_X] = mWinAnimator.mDtDy;
-        float9[Matrix.MSCALE_Y] = mWinAnimator.mDsDy;
+        float9[Matrix.MSCALE_X] = mGlobalScale;
+        float9[Matrix.MSKEW_Y] = 0;
+        float9[Matrix.MSKEW_X] = 0;
+        float9[Matrix.MSCALE_Y] = mGlobalScale;
         transformSurfaceInsetsPosition(mTmpPoint, mAttrs.surfaceInsets);
         int x = mSurfacePosition.x + mTmpPoint.x;
         int y = mSurfacePosition.y + mTmpPoint.y;
@@ -5364,11 +5364,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    private void updateGlobalScaleIfNeeded() {
-        if (mLastGlobalScale != mGlobalScale) {
+    private void updateScaleIfNeeded() {
+        if (mLastGlobalScale != mGlobalScale || mLastHScale != mHScale ||
+            mLastVScale != mVScale ) {
             getPendingTransaction().setMatrix(getSurfaceControl(),
-                mGlobalScale, 0, 0, mGlobalScale);
+                mGlobalScale*mHScale, 0, 0, mGlobalScale*mVScale);
             mLastGlobalScale = mGlobalScale;
+            mLastHScale = mHScale;
+            mLastVScale = mVScale;
         }
     }
 
@@ -5379,7 +5382,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateSurfacePositionNonOrganized();
         // Send information to SurfaceFlinger about the priority of the current window.
         updateFrameRateSelectionPriorityIfNeeded();
-        if (isVisibleRequested()) updateGlobalScaleIfNeeded();
+        if (isVisibleRequested()) updateScaleIfNeeded();
 
         mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
         super.prepareSurfaces();
