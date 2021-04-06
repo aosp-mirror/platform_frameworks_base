@@ -722,7 +722,7 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<UwbManager>() {
                     @Override
                     public UwbManager createService(ContextImpl ctx) {
-                        return UwbManager.getInstance();
+                        return UwbManager.getInstance(ctx);
                     }
                 });
 
