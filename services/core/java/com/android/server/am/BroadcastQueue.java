@@ -1419,6 +1419,7 @@ public final class BroadcastQueue {
                 skip = true;
             }
         }
+
         boolean isSingleton = false;
         try {
             isSingleton = mService.isSingleton(info.activityInfo.processName,
@@ -1551,6 +1552,37 @@ public final class BroadcastQueue {
             Slog.w(TAG,
                     "Skipping delivery to " + info.activityInfo.packageName + " / "
                             + info.activityInfo.applicationInfo.uid + " : user is not running");
+        }
+
+        if (!skip && r.excludedPermissions != null && r.excludedPermissions.length > 0) {
+            for (int i = 0; i < r.excludedPermissions.length; i++) {
+                String excludedPermission = r.excludedPermissions[i];
+                try {
+                    perm = AppGlobals.getPackageManager()
+                        .checkPermission(excludedPermission,
+                                info.activityInfo.applicationInfo.packageName,
+                                UserHandle
+                                .getUserId(info.activityInfo.applicationInfo.uid));
+                } catch (RemoteException e) {
+                    perm = PackageManager.PERMISSION_DENIED;
+                }
+
+                if (perm == PackageManager.PERMISSION_GRANTED) {
+                    skip = true;
+                    break;
+                }
+
+                int appOp = AppOpsManager.permissionToOpCode(excludedPermission);
+                if (appOp != AppOpsManager.OP_NONE) {
+                    if (mService.getAppOpsManager().checkOpNoThrow(appOp,
+                                info.activityInfo.applicationInfo.uid,
+                                info.activityInfo.packageName)
+                            == AppOpsManager.MODE_ALLOWED) {
+                        skip = true;
+                        break;
+                    }
+                }
+            }
         }
 
         if (!skip && info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
