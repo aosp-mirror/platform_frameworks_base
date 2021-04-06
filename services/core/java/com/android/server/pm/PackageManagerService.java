@@ -7198,7 +7198,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         updateSharedLibrariesLocked(pkg, stubPkgSetting, null, null,
                                 Collections.unmodifiableMap(mPackages));
                     } catch (PackageManagerException e) {
-                        Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
+                        Slog.w(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
                     final int[] userIds = mUserManager.getUserIds();
                     for (final int userId : userIds) {
@@ -7450,7 +7450,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else if (matches.size() == 0) {
-            Log.e(TAG, "There should probably be a verifier, but, none were found");
+            Log.w(TAG, "There should probably be a verifier, but, none were found");
             return null;
         }
         throw new RuntimeException("There must be exactly one verifier; found " + matches);
@@ -22827,7 +22827,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
-            Slog.e(TAG, "There should probably be exactly one storage manager; found "
+            Slog.w(TAG, "There should probably be exactly one storage manager; found "
                     + matches.size() + ": matches=" + matches);
             return null;
         }
@@ -25019,7 +25019,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // already held, since it's invoked as a side-effect of
                     // executeBatchLI()
                     if (e != null) {
-                        logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
+                        logCriticalInfo(Log.WARN, "Failed to create app data for " + packageName
                                 + ", but trying to recover: " + e);
                         destroyAppDataLeafLIF(pkg, userId, flags);
                         try {
