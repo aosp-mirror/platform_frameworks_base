@@ -19,9 +19,9 @@
     <dimen name="qs_tile_margin_vertical">24dp</dimen>
 
     <!-- The height of the qs customize header. Should be
-         (qs_panel_padding_top (48dp) +  brightness_mirror_height (56dp) + qs_tile_margin_top (18dp)) -
+         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_tile_margin_top (18dp)) -
          (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (12dp))
     -->
-    <dimen name="qs_customize_header_min_height">54dp</dimen>
+    <dimen name="qs_customize_header_min_height">46dp</dimen>
     <dimen name="qs_tile_margin_top">18dp</dimen>
 </resources>
