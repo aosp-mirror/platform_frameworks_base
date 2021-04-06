@@ -350,8 +350,6 @@ java_defaults {
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
     ],
-    // See comment on framework-atb-backward-compatibility module below
-    exclude_srcs: ["core/java/android/content/pm/AndroidTestBaseUpdater.java"],
     aidl: {
         generate_get_transaction_name: true,
         local_include_dirs: [
@@ -462,20 +460,6 @@ java_library {
 platform_compat_config {
     name: "framework-platform-compat-config",
     src: ":framework-minus-apex",
-}
-
-// A temporary build target that is conditionally included on the bootclasspath if
-// android.test.base library has been removed and which provides support for
-// maintaining backwards compatibility for APKs that target pre-P and depend on
-// android.test.base classes. This is used iff REMOVE_ATB_FROM_BCP=true is
-// specified on the build command line.
-java_library {
-    name: "framework-atb-backward-compatibility",
-    installable: true,
-    libs: ["app-compat-annotations"],
-    srcs: [
-        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
-    ],
 }
 
 genrule {
