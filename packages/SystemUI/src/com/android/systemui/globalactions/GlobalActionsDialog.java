@@ -17,8 +17,6 @@ package com.android.systemui.globalactions;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
-import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
-import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
 
 import android.animation.Animator;
@@ -30,10 +28,8 @@ import android.app.IActivityManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
@@ -47,7 +43,6 @@ import android.telecom.TelecomManager;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
-import android.util.Log;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,18 +64,12 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.controls.ControlsServiceInfo;
-import com.android.systemui.controls.controller.ControlsController;
-import com.android.systemui.controls.dagger.ControlsComponent;
-import com.android.systemui.controls.management.ControlsAnimations;
-import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
-import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -91,12 +80,6 @@ import com.android.systemui.util.leak.RotationUtils;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -105,7 +88,7 @@ import javax.inject.Provider;
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that may show depending
  * on whether the keyguard is showing, and whether the device is provisioned.
- * This version includes wallet and controls.
+ * This version includes wallet.
  */
 public class GlobalActionsDialog extends GlobalActionsDialogLite
         implements DialogInterface.OnDismissListener,
@@ -116,10 +99,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
 
     private static final String TAG = "GlobalActionsDialog";
 
-    public static final String PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted";
-    public static final String PREFS_CONTROLS_FILE = "controls_prefs";
-    private static final int SEEDING_MAX = 2;
-
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationShadeDepthController mDepthController;
@@ -129,13 +108,9 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
     private final IStatusBarService mStatusBarService;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private GlobalActionsPanelPlugin mWalletPlugin;
-    private Optional<ControlsUiController> mControlsUiControllerOptional;
-    private List<ControlsServiceInfo> mControlsServiceInfos = new ArrayList<>();
-    private ControlsComponent mControlsComponent;
-    private Optional<ControlsController> mControlsControllerOptional;
-    private UserContextProvider mUserContextProvider;
+
     @VisibleForTesting
-    boolean mShowLockScreenCardsAndControls = false;
+    boolean mShowLockScreenCards = false;
 
     /**
      * @param context everything needs a context :(
@@ -158,9 +133,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
             IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             UiEventLogger uiEventLogger,
-            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler,
-            ControlsComponent controlsComponent,
-            UserContextProvider userContextProvider) {
+            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler) {
 
         super(context, windowManagerFuncs,
                 audioManager, iDreamManager,
@@ -186,11 +159,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
         mNotificationShadeWindowController = notificationShadeWindowController;
-        mControlsComponent = controlsComponent;
-        mControlsUiControllerOptional = controlsComponent.getControlsUiController();
-        mControlsControllerOptional = controlsComponent.getControlsController();
         mSysUiState = sysUiState;
-        mUserContextProvider = userContextProvider;
         mActivityStarter = activityStarter;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -201,10 +170,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                     if (dialog.mWalletViewController != null) {
                         dialog.mWalletViewController.onDeviceLockStateChanged(!unlocked);
                     }
-                    if (!dialog.isShowingControls()
-                            && mControlsComponent.getVisibility() == AVAILABLE) {
-                        dialog.showControls(mControlsUiControllerOptional.get());
-                    }
+
                     if (unlocked) {
                         dialog.hideLockMessage();
                     }
@@ -212,25 +178,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
             }
         });
 
-        if (mControlsComponent.getControlsListingController().isPresent()) {
-            mControlsComponent.getControlsListingController().get()
-                    .addCallback(list -> {
-                        mControlsServiceInfos = list;
-                        // This callback may occur after the dialog has been shown. If so, add
-                        // controls into the already visible space or show the lock msg if needed.
-                        if (mDialog != null) {
-                            ActionsDialog dialog = (ActionsDialog) mDialog;
-                            if (!dialog.isShowingControls()
-                                    && mControlsComponent.getVisibility() == AVAILABLE) {
-                                dialog.showControls(mControlsUiControllerOptional.get());
-                            } else if (shouldShowLockMessage(dialog)) {
-                                dialog.showLockMessage();
-                            }
-                        }
-                    });
-        }
-
-        // Listen for changes to show controls on the power menu while locked
+        // Listen for changes to show pay on the power menu while locked
         onPowerMenuLockScreenSettingsChanged();
         mGlobalSettings.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT),
@@ -244,65 +192,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
     }
 
     /**
-     * See if any available control service providers match one of the preferred components. If
-     * they do, and there are no current favorites for that component, query the preferred
-     * component for a limited number of suggested controls.
-     */
-    private void seedFavorites() {
-        if (!mControlsControllerOptional.isPresent()
-                || mControlsServiceInfos.isEmpty()) {
-            return;
-        }
-
-        String[] preferredControlsPackages = getContext().getResources()
-                .getStringArray(com.android.systemui.R.array.config_controlsPreferredPackages);
-
-        SharedPreferences prefs = mUserContextProvider.getUserContext()
-                .getSharedPreferences(PREFS_CONTROLS_FILE, Context.MODE_PRIVATE);
-        Set<String> seededPackages = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
-                Collections.emptySet());
-
-        List<ComponentName> componentsToSeed = new ArrayList<>();
-        for (int i = 0; i < Math.min(SEEDING_MAX, preferredControlsPackages.length); i++) {
-            String pkg = preferredControlsPackages[i];
-            for (ControlsServiceInfo info : mControlsServiceInfos) {
-                if (!pkg.equals(info.componentName.getPackageName())) continue;
-                if (seededPackages.contains(pkg)) {
-                    break;
-                } else if (mControlsControllerOptional.get()
-                        .countFavoritesForComponent(info.componentName) > 0) {
-                    // When there are existing controls but no saved preference, assume it
-                    // is out of sync, perhaps through a device restore, and update the
-                    // preference
-                    addPackageToSeededSet(prefs, pkg);
-                    break;
-                }
-                componentsToSeed.add(info.componentName);
-                break;
-            }
-        }
-
-        if (componentsToSeed.isEmpty()) return;
-
-        mControlsControllerOptional.get().seedFavoritesForComponents(
-                componentsToSeed,
-                (response) -> {
-                    Log.d(TAG, "Controls seeded: " + response);
-                    if (response.getAccepted()) {
-                        addPackageToSeededSet(prefs, response.getPackageName());
-                    }
-                });
-    }
-
-    private void addPackageToSeededSet(SharedPreferences prefs, String pkg) {
-        Set<String> seededPackages = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
-                Collections.emptySet());
-        Set<String> updatedPkgs = new HashSet<>(seededPackages);
-        updatedPkgs.add(pkg);
-        prefs.edit().putStringSet(PREFS_CONTROLS_SEEDING_COMPLETED, updatedPkgs).apply();
-    }
-
-    /**
      * Show the global actions dialog (creating if necessary)
      *
      * @param keyguardShowing True if keyguard is showing
@@ -311,12 +200,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
             GlobalActionsPanelPlugin walletPlugin) {
         mWalletPlugin = walletPlugin;
         super.showOrHideDialog(keyguardShowing, isDeviceProvisioned);
-    }
-
-    @Override
-    protected void handleShow() {
-        seedFavorites();
-        super.handleShow();
     }
 
     /**
@@ -340,14 +223,9 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         initDialogItems();
 
         mDepthController.setShowingHomeControls(true);
-        ControlsUiController uiController = null;
-        if (mControlsComponent.getVisibility() == AVAILABLE) {
-            uiController = mControlsUiControllerOptional.get();
-        }
         ActionsDialog dialog = new ActionsDialog(getContext(), mAdapter, mOverflowAdapter,
                 this::getWalletViewController, mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
-                controlsAvailable(), uiController,
                 mSysUiState, this::onRotate, isKeyguardShowing(), mPowerAdapter);
 
         if (shouldShowLockMessage(dialog)) {
@@ -407,10 +285,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         private final Provider<GlobalActionsPanelPlugin.PanelViewController> mWalletFactory;
         @Nullable private GlobalActionsPanelPlugin.PanelViewController mWalletViewController;
         private ResetOrientationData mResetOrientationData;
-        private final boolean mControlsAvailable;
-
-        private ControlsUiController mControlsUiController;
-        private ViewGroup mControlsView;
         @VisibleForTesting ViewGroup mLockMessageContainer;
         private TextView mLockMessage;
 
@@ -419,15 +293,12 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 NotificationShadeDepthController depthController,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
-                boolean controlsAvailable, @Nullable ControlsUiController controlsUiController,
                 SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions,
                     adapter, overflowAdapter, depthController, sysuiColorExtractor,
                     statusBarService, notificationShadeWindowController, sysuiState,
                     onRotateCallback, keyguardShowing, powerAdapter);
-            mControlsAvailable = controlsAvailable;
-            mControlsUiController = controlsUiController;
             mWalletFactory = walletFactory;
 
             // Update window attributes
@@ -446,16 +317,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                             | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
             setTitle(R.string.global_actions);
             initializeLayout();
-        }
-
-        private boolean isShowingControls() {
-            return mControlsUiController != null;
-        }
-
-        private void showControls(ControlsUiController controller) {
-            mControlsUiController = controller;
-            mControlsUiController.show(mControlsView, this::dismissForControlsActivity,
-                    null /* activityContext */);
         }
 
         private boolean isWalletViewAvailable() {
@@ -524,10 +385,8 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                     new FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.MATCH_PARENT,
                             FrameLayout.LayoutParams.MATCH_PARENT);
-            if (!mControlsAvailable) {
-                panelParams.topMargin = mContext.getResources().getDimensionPixelSize(
-                        com.android.systemui.R.dimen.global_actions_wallet_top_margin);
-            }
+            panelParams.topMargin = mContext.getResources().getDimensionPixelSize(
+                    com.android.systemui.R.dimen.global_actions_wallet_top_margin);
             View walletView = mWalletViewController.getPanelContent();
             panelContainer.addView(walletView, panelParams);
             // Smooth transitions when wallet is resized, which can happen when a card is added
@@ -554,7 +413,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         @Override
         protected void initializeLayout() {
             super.initializeLayout();
-            mControlsView = findViewById(com.android.systemui.R.id.global_actions_controls);
             mLockMessageContainer = requireViewById(
                     com.android.systemui.R.id.global_actions_lock_message_container);
             mLockMessage = requireViewById(com.android.systemui.R.id.global_actions_lock_message);
@@ -577,10 +435,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                         windowInsets.getStableInsetBottom());
                 return WindowInsets.CONSUMED;
             });
-            if (mControlsUiController != null) {
-                mControlsUiController.show(mControlsView, this::dismissForControlsActivity,
-                        null /* activityContext */);
-            }
 
             mBackgroundDrawable.setAlpha(0);
             float xOffset = mGlobalActionsLayout.getAnimationOffsetX();
@@ -609,20 +463,11 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         @Override
         protected void dismissInternal() {
             super.dismissInternal();
-            if (mControlsUiController != null) mControlsUiController.closeDialogs(false);
-        }
-
-        private void dismissForControlsActivity() {
-            dismissWithAnimation(() -> {
-                ViewGroup root = (ViewGroup) mGlobalActionsLayout.getParent();
-                ControlsAnimations.exitAnimation(root, this::completeDismiss).start();
-            });
         }
 
         @Override
         protected void completeDismiss() {
             dismissWallet();
-            if (mControlsUiController != null) mControlsUiController.hide();
             resetOrientation();
             super.completeDismiss();
         }
@@ -647,15 +492,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         public void refreshDialog() {
             // ensure dropdown menus are dismissed before re-initializing the dialog
             dismissWallet();
-            if (mControlsUiController != null) {
-                mControlsUiController.hide();
-            }
-
             super.refreshDialog();
-            if (mControlsUiController != null) {
-                mControlsUiController.show(mControlsView, this::dismissForControlsActivity,
-                        null /* activityContext */);
-            }
         }
 
         void hideLockMessage() {
@@ -699,15 +536,8 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         return isPanelDebugModeEnabled(context);
     }
 
-    private boolean controlsAvailable() {
-        return isDeviceProvisioned()
-                && mControlsComponent.isEnabled()
-                && !mControlsServiceInfos.isEmpty();
-    }
-
     private boolean shouldShowLockMessage(ActionsDialog dialog) {
-        return mControlsComponent.getVisibility() == AVAILABLE_AFTER_UNLOCK
-                || isWalletAvailableAfterUnlock(dialog);
+        return isWalletAvailableAfterUnlock(dialog);
     }
 
     // Temporary while we move items out of the power menu
@@ -715,12 +545,12 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
         boolean isLockedAfterBoot = mLockPatternUtils.getStrongAuthForUser(getCurrentUser().id)
                 == STRONG_AUTH_REQUIRED_AFTER_BOOT;
         return !mKeyguardStateController.isUnlocked()
-                && (!mShowLockScreenCardsAndControls || isLockedAfterBoot)
+                && (!mShowLockScreenCards || isLockedAfterBoot)
                 && dialog.isWalletViewAvailable();
     }
 
     private void onPowerMenuLockScreenSettingsChanged() {
-        mShowLockScreenCardsAndControls = mSecureSettings.getInt(
+        mShowLockScreenCards = mSecureSettings.getInt(
                 Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT, 0) != 0;
     }
 }

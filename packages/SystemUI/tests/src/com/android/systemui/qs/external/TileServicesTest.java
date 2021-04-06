@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -95,6 +96,8 @@ public class TileServicesTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private SecureSettings  mSecureSettings;
 
     @Before
     public void setUp() throws Exception {
@@ -114,7 +117,8 @@ public class TileServicesTest extends SysuiTestCase {
                 Optional.of(mStatusBar),
                 mQSLogger,
                 mUiEventLogger,
-                mUserTracker);
+                mUserTracker,
+                mSecureSettings);
         mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher,
                 mUserTracker);
     }

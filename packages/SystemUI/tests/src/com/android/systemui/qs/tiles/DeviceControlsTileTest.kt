@@ -38,11 +38,9 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.settings.FakeSettings
-import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -83,9 +81,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
     @Mock
     private lateinit var controlsController: ControlsController
     @Mock
-    private lateinit var featureFlags: FeatureFlags
-    private lateinit var globalSettings: GlobalSettings
-    @Mock
     private lateinit var serviceInfo: ControlsServiceInfo
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
@@ -115,11 +110,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
         secureSettings.putInt(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT, 1)
 
         setupControlsComponent()
-
-        globalSettings = FakeSettings()
-
-        globalSettings.putInt(DeviceControlsTile.SETTINGS_FLAG, 1)
-        `when`(featureFlags.isKeyguardLayoutEnabled).thenReturn(true)
 
         tile = createTile()
     }
@@ -156,13 +146,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNotAvailableFeature() {
-        `when`(featureFlags.isKeyguardLayoutEnabled).thenReturn(false)
-
-        assertThat(tile.isAvailable).isFalse()
-    }
-
-    @Test
     fun testNotAvailableControls() {
         featureEnabled = false
         tile = createTile()
@@ -176,14 +159,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
         tile = createTile()
         assertThat(tile.isAvailable).isTrue()
-    }
-
-    @Test
-    fun testNotAvailableControlsLockscreenFlag() {
-        globalSettings.putInt(DeviceControlsTile.SETTINGS_FLAG, 0)
-        tile = createTile()
-
-        assertThat(tile.isAvailable).isFalse()
     }
 
     @Test
@@ -329,9 +304,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                controlsComponent,
-                featureFlags,
-                globalSettings
+                controlsComponent
         )
     }
 }
