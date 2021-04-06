@@ -59,7 +59,7 @@ import java.util.List;
  */
 public class PhonePipMenuController implements PipMenuController {
 
-    private static final String TAG = "PipMenuActController";
+    private static final String TAG = "PhonePipMenuController";
     private static final boolean DEBUG = false;
 
     public static final int MENU_STATE_NONE = 0;
