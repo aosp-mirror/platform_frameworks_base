@@ -89,7 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisasjonen din tillater ikke at du tar skjermdumper"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Rediger"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediger skjermdumpen"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Ta bilde av mer"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Utvidet skjermdump"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Avvis skjermdumpen"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Forhåndsvisning av skjermdump"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Øvre grense"</string>
@@ -660,7 +660,13 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
     <string name="wallet_secondary_label" msgid="2017028770884957543">"Klar"</string>
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flymodus"</string>
     <string name="add_tile" msgid="6239678623873086686">"Legg til felt"</string>

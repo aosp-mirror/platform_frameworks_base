@@ -501,6 +501,8 @@ applications that come with the platform
         <permission name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
         <!-- Permission required for CTS test - SystemMediaRouter2Test -->
         <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
+        <!-- Permission required for CTS test - CtsPermission5TestCases -->
+        <permission name="android.permission.RENOUNCE_PERMISSIONS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

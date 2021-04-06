@@ -258,8 +258,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private final PermissionRegistry mRegistry = new PermissionRegistry();
 
     @NonNull
-    private final AttributionSourceRegistry mAttributionSourceRegistry =
-            new AttributionSourceRegistry();
+    private final AttributionSourceRegistry mAttributionSourceRegistry;
 
     @GuardedBy("mLock")
     @Nullable
@@ -379,6 +378,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mSystemPermissions = systemConfig.getSystemPermissions();
         mGlobalGids = systemConfig.getGlobalGids();
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(FgThread.get().getLooper());
+        mAttributionSourceRegistry = new AttributionSourceRegistry(context);
 
         // propagate permission configuration
         final ArrayMap<String, SystemConfig.PermissionEntry> permConfig =
@@ -5294,6 +5294,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private static final class AttributionSourceRegistry {
         private final Object mLock = new Object();
 
+        private final Context mContext;
+
+        AttributionSourceRegistry(@NonNull Context context) {
+            mContext = context;
+        }
+
         private final WeakHashMap<IBinder, AttributionSource> mAttributions = new WeakHashMap<>();
 
         public @NonNull AttributionSource registerAttributionSource(
@@ -5321,7 +5327,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // app passing the source, in which case you must trust the other side;
 
             final int callingUid = Binder.getCallingUid();
-            if (source.getUid() != callingUid) {
+            if (source.getUid() != callingUid && mContext.checkPermission(
+                    Manifest.permission.UPDATE_APP_OPS_STATS, /*pid*/ -1, callingUid)
+                    != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Cannot register attribution source for uid:"
                         + source.getUid() + " from uid:" + callingUid);
             }

@@ -52,6 +52,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -90,6 +91,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @NonNull private final DumpManager mDumpManager;
     @NonNull private final AuthRippleController mAuthRippleController;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -310,7 +312,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
             @NonNull AuthRippleController authRippleController,
-            @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
+            @NonNull KeyguardViewMediator keyguardViewMediator) {
         mContext = context;
         mInflater = inflater;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
@@ -324,6 +327,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mDumpManager = dumpManager;
         mAuthRippleController = authRippleController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mKeyguardViewMediator = keyguardViewMediator;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -491,7 +495,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                         mKeyguardViewManager,
                         mKeyguardUpdateMonitor,
                         mFgExecutor,
-                        mDumpManager
+                        mDumpManager,
+                        mKeyguardViewMediator
                 );
             case IUdfpsOverlayController.REASON_AUTH_BP:
                 // note: empty controller, currently shows no visual affordance

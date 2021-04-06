@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Autorise l\'appli à détecter et à associer les appareils Bluetooth à proximité"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"se connecter aux appareils Bluetooth associés"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Autorise l\'appli à se connecter à des appareils Bluetooth associés"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informations sur le service de paiement NFC préféré"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir des informations sur le service de paiement NFC préféré, y compris les ID d\'applications et les destinations de routage enregistrés."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"contrôler la communication en champ proche"</string>
@@ -2262,8 +2266,7 @@
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Nouveaux paramètres d\'agrandissement"</string>
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Vous pouvez désormais agrandir une partie de l\'écran"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activer dans les paramètres"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Fermer"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Pour continuer, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; a besoin d\'accéder au micro de votre appareil."</string>
