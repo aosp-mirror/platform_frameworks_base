@@ -73,6 +73,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
@@ -210,6 +211,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NotificationManagerService.WorkerHandler mHandler;
     @Mock
     Resources mResources;
+    @Mock
+    ActivityManagerInternal mAmi;
 
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
@@ -355,6 +358,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class, mAmi);
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
@@ -413,7 +418,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
                 mGroupHelper, mAm, mAppUsageStats,
                 mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
-                mAppOpsManager, mUm);
+                mAppOpsManager, mUm, mAmi);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
