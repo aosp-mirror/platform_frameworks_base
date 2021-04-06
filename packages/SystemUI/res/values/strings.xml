@@ -2689,6 +2689,10 @@
     <string name="accessibility_floating_button_action_move_bottom_left">Move bottom left</string>
     <!-- Action in accessibility menu to move the accessibility floating button to the bottom right of the screen. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_action_move_bottom_right">Move bottom right</string>
+    <!-- Action in accessibility menu to move the accessibility floating button to the edge and hide it to half. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half">Move to edge and hide</string>
+    <!-- Action in accessibility menu to move the accessibility floating button out the edge and show. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_action_move_out_edge_and_show">Move out edge and show</string>
 
     <!-- Device Controls strings -->
     <!-- Device Controls empty state, title [CHAR LIMIT=30] -->

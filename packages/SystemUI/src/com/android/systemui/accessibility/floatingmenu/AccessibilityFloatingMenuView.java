@@ -303,22 +303,36 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
         final Rect bounds = getAvailableBounds();
         if (action == R.id.action_move_top_left) {
+            setShapeType(ShapeType.OVAL);
             snapToLocation(bounds.left, bounds.top);
             return true;
         }
 
         if (action == R.id.action_move_top_right) {
+            setShapeType(ShapeType.OVAL);
             snapToLocation(bounds.right, bounds.top);
             return true;
         }
 
         if (action == R.id.action_move_bottom_left) {
+            setShapeType(ShapeType.OVAL);
             snapToLocation(bounds.left, bounds.bottom);
             return true;
         }
 
         if (action == R.id.action_move_bottom_right) {
+            setShapeType(ShapeType.OVAL);
             snapToLocation(bounds.right, bounds.bottom);
+            return true;
+        }
+
+        if (action == R.id.action_move_to_edge_and_hide) {
+            setShapeType(ShapeType.HALF_OVAL);
+            return true;
+        }
+
+        if (action == R.id.action_move_out_edge_and_show) {
+            setShapeType(ShapeType.OVAL);
             return true;
         }
 
@@ -446,6 +460,16 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                         res.getString(
                                 R.string.accessibility_floating_button_action_move_bottom_right));
         info.addAction(moveBottomRight);
+
+        final int moveEdgeId = mShapeType == ShapeType.OVAL
+                ? R.id.action_move_to_edge_and_hide
+                : R.id.action_move_out_edge_and_show;
+        final int moveEdgeTextResId = mShapeType == ShapeType.OVAL
+                ? R.string.accessibility_floating_button_action_move_to_edge_and_hide_to_half
+                : R.string.accessibility_floating_button_action_move_out_edge_and_show;
+        final AccessibilityAction moveToOrOutEdge =
+                new AccessibilityAction(moveEdgeId, res.getString(moveEdgeTextResId));
+        info.addAction(moveToOrOutEdge);
     }
 
     private boolean onTouched(MotionEvent event) {
