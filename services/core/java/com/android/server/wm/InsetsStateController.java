@@ -573,18 +573,17 @@ class InsetsStateController {
 
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "WindowInsetsStateController");
-        mState.dump(prefix + "  ", pw);
-        pw.println(prefix + "  " + "Control map:");
+        prefix = prefix + "  ";
+        mState.dump(prefix, pw);
+        pw.println(prefix + "Control map:");
         for (int i = mTypeControlTargetMap.size() - 1; i >= 0; i--) {
             pw.print(prefix + "  ");
             pw.println(InsetsState.typeToString(mTypeControlTargetMap.keyAt(i)) + " -> "
                     + mTypeControlTargetMap.valueAt(i));
         }
-        pw.println(prefix + "  " + "InsetsSourceProviders map:");
+        pw.println(prefix + "InsetsSourceProviders:");
         for (int i = mProviders.size() - 1; i >= 0; i--) {
-            pw.print(prefix + "  ");
-            pw.println(InsetsState.typeToString(mProviders.keyAt(i)) + " -> ");
-            mProviders.valueAt(i).dump(pw, prefix);
+            mProviders.valueAt(i).dump(pw, prefix + "  ");
         }
     }
 }
