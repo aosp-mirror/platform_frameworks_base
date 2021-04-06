@@ -22,7 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Instellingen"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> is in scherm-in-scherm"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en zet je de functie uit."</string>
     <string name="pip_play" msgid="3496151081459417097">"Afspelen"</string>
     <string name="pip_pause" msgid="690688849510295232">"Onderbreken"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Doorgaan naar volgende"</string>
@@ -62,7 +62,7 @@
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chatten met bubbels"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nieuwe gesprekken worden als zwevende iconen of bubbels getoond. Tik om een bubbel te openen. Sleep om een bubbel te verplaatsen."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Beheer bubbels wanneer je wilt"</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tik op Beheren om bubbels van deze app uit te schakelen"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tik op Beheren om bubbels van deze app uit te zetten"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Geen recente bubbels"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Recente bubbels en gesloten bubbels zie je hier"</string>

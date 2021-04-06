@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'application ou votre organisation n\'autorise pas les saisies d\'écran"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Modifier"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Modifier la capture d\'écran"</string>
-    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
-    <skip />
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturer plus"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Fermer la capture d\'écran"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Aperçu de la capture d\'écran"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Limite supérieure"</string>
@@ -384,11 +383,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverser les couleurs"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Mode de correction des couleurs"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Plus de paramètres"</string>
-    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Paramètres utilisateur"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Terminé"</string>
-    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
-    <skip />
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Fermer"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Connecté"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Connecté. Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Connexion en cours…"</string>
@@ -533,8 +530,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> et est connecté à des RPV"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Votre organisation peut contrôler le trafic réseau dans votre profil professionnel"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> peut contrôler votre trafic réseau dans votre profil professionnel"</string>
-    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
-    <skip />
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Votre administrateur informatique a accès à l\'activité sur le réseau de votre profil professionnel"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Le réseau peut être surveillé"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Cet appareil est connecté à des RPV"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Votre profil professionnel est connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -664,7 +660,13 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarme"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
     <string name="wallet_secondary_label" msgid="2017028770884957543">"Prêt"</string>
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profil professionnel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode Avion"</string>
     <string name="add_tile" msgid="6239678623873086686">"Ajouter la tuile"</string>

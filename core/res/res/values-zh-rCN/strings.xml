@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"允许该应用发现附近的蓝牙设备并与其配对"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"连接到已配对的蓝牙设备"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"允许该应用连接到已配对的蓝牙设备"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首选 NFC 付款服务信息"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允许应用获取首选 NFC 付款服务信息，例如注册的应用标识符和路线目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距离通信"</string>
@@ -2143,10 +2147,10 @@
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"无法使用个人应用打开该内容"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"工作资料已被暂停"</string>
     <string name="resolver_switch_on_work" msgid="463709043650610420">"点按即可开启"</string>
-    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"所有工作应用都不支持该内容"</string>
-    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"所有个人应用都不支持该内容"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"要使用个人资料打开<xliff:g id="APP">%s</xliff:g>吗？"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"要使用工作资料打开<xliff:g id="APP">%s</xliff:g>吗？"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"没有支持该内容的工作应用"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"没有支持该内容的个人应用"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"要使用个人资料在<xliff:g id="APP">%s</xliff:g>中打开吗？"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"要使用工作资料在<xliff:g id="APP">%s</xliff:g>中打开吗？"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用个人浏览器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作浏览器"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 网络解锁 PIN 码"</string>
@@ -2261,9 +2265,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"推出了新的放大设置"</string>
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"推出了新的放大功能设置"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"现在您可以放大屏幕上的部分内容"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"在“设置”中开启"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"关闭"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"如要继续操作，请向&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;授予设备的麦克风使用权。"</string>

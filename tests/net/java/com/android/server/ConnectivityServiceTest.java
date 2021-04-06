@@ -578,6 +578,7 @@ public class ConnectivityServiceTest {
             final UserManager umMock = createContextAsUser(userHandle, 0 /* flags */)
                     .getSystemService(UserManager.class);
             doReturn(value).when(umMock).isManagedProfile();
+            doReturn(value).when(mUserManager).isManagedProfile(eq(userHandle.getIdentifier()));
         }
 
         @Override

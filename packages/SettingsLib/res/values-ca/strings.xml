@@ -562,6 +562,8 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Defineix un bloqueig"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Canvia a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"S\'està creant l\'usuari…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"Àlies"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Afegeix un convidat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Suprimeix el convidat"</string>

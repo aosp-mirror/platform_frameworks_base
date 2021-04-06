@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ایپ کو قریبی بلوٹوتھ آلات دریافت کرنے اور ان کا جوڑا بنانے کی اجازت دیں"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"جوڑا بنائے ہوئے بلوٹوتھ آلات سے منسلک کریں"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ایپ کو جوڑا بنائے ہوئے بلوٹوتھ آلات سے منسلک کرنے کی اجازت دیں"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏ترجیح شدہ NFC ادائیگی کی سروس کی معلومات"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏ایپ کو رجسٹرشدہ ایڈز اور روٹ ڈسٹنیشن جیسی ترجیح شدہ nfc ادائیگی سروس کی معلومات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"‏Near Field کمیونیکیشن کنٹرول کریں"</string>

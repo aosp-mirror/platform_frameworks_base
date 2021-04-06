@@ -56,6 +56,9 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 
@@ -124,6 +127,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
+import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
@@ -188,6 +192,8 @@ import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.After;
 import org.junit.Before;
@@ -7584,5 +7590,107 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(), r.getSbn().getId(),
                     r.getSbn().getTag(), r,false);
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_migrationAllAllowed() throws Exception {
+        int uid = 9000;
+        int[] userIds = new int[] {UserHandle.getUserId(mUid), 1000};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples", "bananas", "cherries");
+        for (int userId : userIds) {
+            for (String pkg : disallowedApps) {
+                when(mPackageManager.getPackageUid(pkg, 0, userId)).thenReturn(uid++);
+            }
+        }
+
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(
+                new NotificationListenerFilter());
+
+        mBinderService.migrateNotificationFilter(null,
+                FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ONGOING,
+                captor.getValue().getTypes());
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 9000)));
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("cherries", 9002)));
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 9003)));
+
+        // hypothetical other user untouched
+        assertTrue(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 10000)));
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_noPreexistingFilter() throws Exception {
+        int[] userIds = new int[] {UserHandle.getUserId(mUid)};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples");
+        when(mPackageManager.getPackageUid("apples", 0, UserHandle.getUserId(mUid)))
+                .thenReturn(1001);
+
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(null);
+
+        mBinderService.migrateNotificationFilter(null, FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        assertEquals(FLAG_FILTER_TYPE_ONGOING, captor.getValue().getTypes());
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 1001)));
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_existingTypeFilter() throws Exception {
+        int[] userIds = new int[] {UserHandle.getUserId(mUid)};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples");
+        when(mPackageManager.getPackageUid("apples", 0, UserHandle.getUserId(mUid)))
+                .thenReturn(1001);
+
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(
+                new NotificationListenerFilter(FLAG_FILTER_TYPE_CONVERSATIONS, new ArraySet<>()));
+
+        mBinderService.migrateNotificationFilter(null, FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        // type isn't saved but pkg list is
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, captor.getValue().getTypes());
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 1001)));
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_existingPkgFilter() throws Exception {
+        int[] userIds = new int[] {UserHandle.getUserId(mUid)};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples");
+        when(mPackageManager.getPackageUid("apples", 0, UserHandle.getUserId(mUid)))
+                .thenReturn(1001);
+
+        NotificationListenerFilter preexisting = new NotificationListenerFilter();
+        preexisting.addPackage(new VersionedPackage("test", 1002));
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(preexisting);
+
+        mBinderService.migrateNotificationFilter(null, FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        // type is saved but pkg list isn't
+        assertEquals(FLAG_FILTER_TYPE_ONGOING, captor.getValue().getTypes());
+        assertTrue(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 1001)));
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("test", 1002)));
     }
 }

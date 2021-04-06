@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ඉවත ලන්න"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ඇඟිලි සලකුණු සංවේදකය ස්පර්ශ කරන්න"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ඇඟිලි සලකුණු නිරූපකය"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"මුහුණ හැඳිනිය නොහැක. ඒ වෙනුවට ඇඟිලි සලකුණ භාවිත ක."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"ඉදිරියට යාමට ඔබගේ ඇඟිලි සලකුණ භාවිත කරන්න"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"ඇඟිලි සලකුණ හඳුනා ගත නොහැකිය. ඒ වෙනුවට තිර අගුල භාවිත කරන්න."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"ඔබව සොයමින්…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"මුහුණ නිරූපකය"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"ගැළපෙන විශාලන බොත්තම."</string>
@@ -660,7 +657,13 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"එලාමය"</string>
     <string name="wallet_title" msgid="5369767670735827105">"පසුම්බිය"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
     <string name="wallet_secondary_label" msgid="2017028770884957543">"සූදානම්"</string>
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"කාර්යාල පැතිකඩ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ගුවන්යානා ප්‍රකාරය"</string>
     <string name="add_tile" msgid="6239678623873086686">"ටයිල් එක් කරන්න"</string>
@@ -1096,14 +1099,10 @@
     <string name="basic_status" msgid="2315371112182658176">"සංවාදය විවෘත කරන්න"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"සංවාද විජට්"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ඔබගේ මුල් තිරයට එය එක් කිරීමට සංවාදයක් තට්ටු කරන්න"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"ඔබට පණිවිඩ කිහිපයක් ලැබුණු පසු නැවත මෙහි පරීක්ෂා කරන්න"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"ප්‍රමුඛතා සංවාද"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"මෑත සංවාද"</string>
+    <string name="okay" msgid="6490552955618608554">"හරි"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>කට පෙර"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>කට වඩා අඩු කාලයකට පෙර"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>කට වඩා පෙර"</string>

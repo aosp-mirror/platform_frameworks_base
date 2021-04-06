@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"መተግበሪያው በአቅራቢያ ያሉ የብሉቱዝ መሣሪያዎችን እንዲያገኝ እና እንዲጣመር ይፈቅድለታል"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ከተጣመሩ የብሉቱዝ መሣሪያዎች ጋር ያገናኙ"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"መተግበሪያው ከተጣመሩ የብሉቱዝ መሣሪያዎች ጋር እንዲገናኝ ይፈቅድለታል"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ተመራጭ NFC የክፍያ አገልግሎት መረጃ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"እንደ የተመዘገቡ እርዳታዎች እና የጉዞ መሥመር መዳረሻ የመሳሰለ ተመራጭ nfc የክፍያ አገልግሎት መረጃን ለማግኘት ለመተግበሪያው ያፈቅድለታል።"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ቅርብ የግኑኙነትመስክ (NFC) ተቆጣጠር"</string>

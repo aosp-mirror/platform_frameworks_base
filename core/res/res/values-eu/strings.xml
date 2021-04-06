@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Inguruko Bluetooth bidezko gailuak hautemateko eta haiekin parekatzeko baimena ematen die aplikazioei"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"parekatutako Bluetooth bidezko gailuetara konektatu"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Parekatutako Bluetooth bidezko gailuetara konektatzeko baimena ematen die aplikazioei"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikazioari baimena ematen dio NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolatu Near Field Communication komunikazioa"</string>

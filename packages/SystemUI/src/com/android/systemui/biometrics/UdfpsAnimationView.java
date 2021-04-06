@@ -32,9 +32,10 @@ import android.widget.FrameLayout;
  * - optionally can override dozeTimeTick to adjust views for burn-in mitigation
  */
 abstract class UdfpsAnimationView extends FrameLayout {
-
+    // mAlpha takes into consideration the status bar expansion amount to fade out icon when
+    // the status bar is expanded
     private int mAlpha;
-    private boolean mPauseAuth;
+    boolean mPauseAuth;
 
     public UdfpsAnimationView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -75,7 +76,7 @@ abstract class UdfpsAnimationView extends FrameLayout {
         getDrawable().setAlpha(calculateAlpha());
     }
 
-    protected final int calculateAlpha() {
+    int calculateAlpha() {
         return mPauseAuth ? mAlpha : 255;
     }
 

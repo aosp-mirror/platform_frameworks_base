@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Թույլ է տալիս հավելվածին հայտնաբերել և զուգակցել մոտակա Bluetooth սարքերը"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"միանալ զուգակցված Bluetooth սարքերի"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Թույլ է տալիս հավելվածին միանալ զուգակցված Bluetooth սարքերի"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Տեղեկություններ NFC վճարային ծառայության մասին"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Թույլ է տալիս հավելվածին ստանալ նախընտրելի NFC վճարային ծառայության մասին տեղեկություններ (օր․՝ գրանցված լրացուցիչ սարքերի և երթուղու նպատակակետի մասին տվյալներ)։"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"վերահսկել Մոտ Տարածությամբ Հաղորդակցումը"</string>

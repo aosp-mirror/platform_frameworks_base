@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_NOT_CONFIGURED;
@@ -35,7 +37,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
@@ -160,6 +164,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private final TelephonySubscriptionTracker mTelephonySubscriptionTracker;
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final BroadcastReceiver mPkgChangeReceiver;
+
+    @NonNull
+    private final TrackingNetworkCallback mTrackingNetworkCallback = new TrackingNetworkCallback();
 
     /** Can only be assigned when {@link #systemReady()} is called, since it uses AppOpsManager. */
     @Nullable private LocationPermissionChecker mLocationPermissionChecker;
@@ -356,6 +363,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     public void systemReady() {
         mContext.getSystemService(ConnectivityManager.class)
                 .registerNetworkProvider(mNetworkProvider);
+        mContext.getSystemService(ConnectivityManager.class)
+                .registerNetworkCallback(
+                        new NetworkRequest.Builder().clearCapabilities().build(),
+                        mTrackingNetworkCallback);
         mTelephonySubscriptionTracker.register();
         mLocationPermissionChecker = mDeps.newLocationPermissionChecker(mVcnContext.getContext());
     }
@@ -791,8 +802,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
             }
 
+            final NetworkCapabilities result = ncBuilder.build();
             return new VcnUnderlyingNetworkPolicy(
-                    false /* isTearDownRequested */, ncBuilder.build());
+                    mTrackingNetworkCallback.requiresRestartForCarrierWifi(result), result);
         });
     }
 
@@ -937,6 +949,49 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage);
+    }
+
+    /**
+     * TrackingNetworkCallback tracks all active networks
+     *
+     * <p>This is used to ensure that no underlying networks have immutable capabilities changed
+     * without requiring a Network restart.
+     */
+    private class TrackingNetworkCallback extends ConnectivityManager.NetworkCallback {
+        private final Map<Network, NetworkCapabilities> mCaps = new ArrayMap<>();
+
+        @Override
+        public void onCapabilitiesChanged(Network network, NetworkCapabilities caps) {
+            synchronized (mCaps) {
+                mCaps.put(network, caps);
+            }
+        }
+
+        @Override
+        public void onLost(Network network) {
+            synchronized (mCaps) {
+                mCaps.remove(network);
+            }
+        }
+
+        private boolean requiresRestartForCarrierWifi(NetworkCapabilities caps) {
+            if (!caps.hasTransport(TRANSPORT_WIFI) || caps.getSubIds() == null) {
+                return false;
+            }
+
+            synchronized (mCaps) {
+                for (NetworkCapabilities existing : mCaps.values()) {
+                    if (existing.hasTransport(TRANSPORT_WIFI)
+                            && caps.getSubIds().equals(existing.getSubIds())) {
+                        // Restart if any immutable capabilities have changed
+                        return existing.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
+                                != caps.hasCapability(NET_CAPABILITY_NOT_RESTRICTED);
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 
     /** VcnCallbackImpl for Vcn signals sent up to VcnManagementService. */

@@ -31,15 +31,17 @@ import android.util.ArraySet;
  * @hide
  */
 public class NotificationListenerFilter implements Parcelable {
+
+    private static final int DEFAULT_TYPES = FLAG_FILTER_TYPE_CONVERSATIONS
+            | FLAG_FILTER_TYPE_ALERTING
+            | FLAG_FILTER_TYPE_SILENT
+            | FLAG_FILTER_TYPE_ONGOING;
     private int mAllowedNotificationTypes;
     // VersionedPackage is holding the pkg name and pkg uid
     private ArraySet<VersionedPackage> mDisallowedPackages;
 
     public NotificationListenerFilter() {
-        mAllowedNotificationTypes = FLAG_FILTER_TYPE_CONVERSATIONS
-                | FLAG_FILTER_TYPE_ALERTING
-                | FLAG_FILTER_TYPE_SILENT
-                | FLAG_FILTER_TYPE_ONGOING;
+        mAllowedNotificationTypes = DEFAULT_TYPES;
         mDisallowedPackages = new ArraySet<>();
     }
 
@@ -78,6 +80,10 @@ public class NotificationListenerFilter implements Parcelable {
 
     public boolean isTypeAllowed(int type) {
         return (mAllowedNotificationTypes & type) != 0;
+    }
+
+    public boolean areAllTypesAllowed() {
+        return DEFAULT_TYPES == mAllowedNotificationTypes;
     }
 
     public boolean isPackageAllowed(VersionedPackage pkg) {
