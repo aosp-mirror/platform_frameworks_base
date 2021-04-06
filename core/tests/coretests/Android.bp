@@ -61,7 +61,6 @@ android_test {
         "org.apache.http.legacy",
         "android.test.base",
         "android.test.mock",
-        "framework-atb-backward-compatibility",
         "framework",
         "ext",
         "framework-res",
