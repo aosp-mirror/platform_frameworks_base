@@ -30,12 +30,14 @@
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
 
-    <!--  Offset from the bottom of the device a toast shows -->
+    <!-- Offset from the bottom of the device a toast shows -->
     <dimen name="toast_y_offset">48dp</dimen>
     <!-- Max width of a toast -->
     <dimen name="toast_width">300dp</dimen>
     <!-- Text size of the message within a toast -->
     <dimen name="toast_text_size">14sp</dimen>
+    <!-- Elevation of toast view -->
+    <dimen name="toast_elevation">6dp</dimen>
 
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
