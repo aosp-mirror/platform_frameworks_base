@@ -364,13 +364,19 @@ package android {
     field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
+    field public static final int config_systemAmbientAudioIntelligence;
+    field public static final int config_systemAudioIntelligence;
     field public static final int config_systemAutomotiveCluster;
     field public static final int config_systemAutomotiveProjection;
     field public static final int config_systemContacts;
     field public static final int config_systemGallery = 17039399; // 0x1040027
+    field public static final int config_systemNotificationIntelligence;
     field public static final int config_systemShell;
     field public static final int config_systemSpeechRecognizer;
     field public static final int config_systemTelevisionNotificationHandler;
+    field public static final int config_systemTextIntelligence;
+    field public static final int config_systemUiIntelligence;
+    field public static final int config_systemVisualIntelligence;
     field public static final int config_systemWellbeing;
     field public static final int config_systemWifiCoexManager;
   }
