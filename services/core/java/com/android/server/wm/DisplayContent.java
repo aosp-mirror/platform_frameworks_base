@@ -776,6 +776,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (mTmpInitial) {
                 w.resetContentChanged();
             }
+            w.mSurfacePlacementNeeded = true;
             w.mLayoutNeeded = false;
             w.prelayout();
             final boolean firstLayout = !w.isLaidOut();
@@ -818,6 +819,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                     w.resetContentChanged();
                 }
+                w.mSurfacePlacementNeeded = true;
                 w.mLayoutNeeded = false;
                 w.prelayout();
                 getDisplayPolicy().layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
