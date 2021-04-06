@@ -30,6 +30,7 @@ import static com.android.server.timezonedetector.location.TimeZoneProviderEvent
 import static com.android.server.timezonedetector.location.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;
 
 import android.annotation.DurationMillisLong;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteCallback;
@@ -604,14 +605,14 @@ class ControllerImpl extends LocationTimeZoneProviderController {
      * known provider, then the command is logged and discarded.
      */
     void handleProviderTestCommand(
-            @NonNull String providerName, @NonNull TestCommand testCommand,
+            @IntRange(from = 0, to = 1) int providerIndex, @NonNull TestCommand testCommand,
             @Nullable RemoteCallback callback) {
         mThreadingDomain.assertCurrentThread();
 
-        LocationTimeZoneProvider targetProvider = getLocationTimeZoneProvider(providerName);
+        LocationTimeZoneProvider targetProvider = getLocationTimeZoneProvider(providerIndex);
         if (targetProvider == null) {
             warnLog("Unable to process test command:"
-                    + " providerName=" + providerName + ", testCommand=" + testCommand);
+                    + " providerIndex=" + providerIndex + ", testCommand=" + testCommand);
             return;
         }
 
@@ -620,7 +621,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
                 targetProvider.handleTestCommand(testCommand, callback);
             } catch (Exception e) {
                 warnLog("Unable to process test command:"
-                        + " providerName=" + providerName + ", testCommand=" + testCommand, e);
+                        + " providerIndex=" + providerIndex + ", testCommand=" + testCommand, e);
             }
         }
     }
@@ -658,14 +659,15 @@ class ControllerImpl extends LocationTimeZoneProviderController {
     }
 
     @Nullable
-    private LocationTimeZoneProvider getLocationTimeZoneProvider(@NonNull String providerName) {
+    private LocationTimeZoneProvider getLocationTimeZoneProvider(
+            @IntRange(from = 0, to = 1) int providerIndex) {
         LocationTimeZoneProvider targetProvider;
-        if (Objects.equals(mPrimaryProvider.getName(), providerName)) {
+        if (providerIndex == 0) {
             targetProvider = mPrimaryProvider;
-        } else if (Objects.equals(mSecondaryProvider.getName(), providerName)) {
+        } else if (providerIndex == 1) {
             targetProvider = mSecondaryProvider;
         } else {
-            warnLog("Bad providerName=" + providerName);
+            warnLog("Bad providerIndex=" + providerIndex);
             targetProvider = null;
         }
         return targetProvider;

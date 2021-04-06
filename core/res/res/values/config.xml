@@ -1637,32 +1637,22 @@
          config_timeZoneRulesUpdateTrackingEnabled are true.] -->
     <integer name="config_timeZoneRulesCheckRetryCount">5</integer>
 
-    <!-- Whether the geolocation time zone detection feature is enabled. -->
+    <!-- Whether the geolocation time zone detection feature is enabled. Setting this to false means
+         the feature cannot be used. Setting this to true means it may be used if other
+         configuration allows (see provider configuration below, also compile time overlays). -->
     <bool name="config_enableGeolocationTimeZoneDetection" translatable="false">true</bool>
 
-    <!-- Whether the primary LocationTimeZoneProvider is enabled device.
+    <!-- Whether the primary LocationTimeZoneProvider is enabled.
          Ignored if config_enableGeolocationTimeZoneDetection is false -->
     <bool name="config_enablePrimaryLocationTimeZoneProvider" translatable="false">false</bool>
-    <!-- Used when enablePrimaryLocationTimeZoneProvider is true. Controls whether to enable primary
-         location time zone provider overlay which allows the primary location time zone provider to
-         be replaced by an app at run-time. When disabled, only the
-         config_primaryLocationTimeZoneProviderPackageName package will be searched for the primary
-         location time zone provider, otherwise any system package is eligible. Anyone who wants to
-         disable the runtime overlay mechanism can set it to false. -->
-    <bool name="config_enablePrimaryLocationTimeZoneOverlay" translatable="false">false</bool>
-    <!-- Package name providing the primary location time zone provider. Used only when
-         config_enablePrimaryLocationTimeZoneOverlay is false. -->
+    <!-- The package name providing the primary location time zone provider.
+         Only used when config_enableGeolocationTimeZoneDetection and
+         enablePrimaryLocationTimeZoneProvider are true. -->
     <string name="config_primaryLocationTimeZoneProviderPackageName" translatable="false">@null</string>
 
-    <!-- Whether the secondary LocationTimeZoneProvider is enabled device.
+    <!-- Whether the secondary LocationTimeZoneProvider is enabled.
          Ignored if config_enableGeolocationTimeZoneDetection is false -->
     <bool name="config_enableSecondaryLocationTimeZoneProvider" translatable="false">true</bool>
-    <!-- Used when enableSecondaryLocationTimeZoneProvider is true. Controls whether to enable
-         secondary location time zone provider overlay which allows the primary location time zone
-         provider to config_secondaryLocationTimeZoneProviderPackageName package will be searched
-         for the secondary location time zone provider, otherwise any system package is eligible.
-         Anyone who wants to disable the runtime overlay mechanism can set it to false. -->
-    <bool name="config_enableSecondaryLocationTimeZoneOverlay" translatable="false">false</bool>
     <!-- Package name providing the secondary location time zone provider. Used only when
          config_enableSecondaryLocationTimeZoneOverlay is false.
 
