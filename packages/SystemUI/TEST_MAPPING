@@ -29,8 +29,9 @@
 
   // Curious where your @Scenario tests will run?
   //
-  // @Ignore or @FlakyTest: nowhere
-  // @Staging: in staged-postsubmit, but not postsubmit or presubmit
+  // @Ignore: nowhere
+  // @Staging or @FlakyTest: in staged-postsubmit, but not postsubmit or
+  // 	presubmit
   // @Postsubmit: in postsubmit and staged-postsubmit, but not presubmit
   // none of the above: in presubmit, postsubmit, and staged-postsubmit
   //
@@ -74,9 +75,6 @@
         },
         {
             "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     }
