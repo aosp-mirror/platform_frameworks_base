@@ -19379,6 +19379,7 @@ package android.media {
     field public static final int ENCODING_DOLBY_TRUEHD = 14; // 0xe
     field public static final int ENCODING_DTS = 7; // 0x7
     field public static final int ENCODING_DTS_HD = 8; // 0x8
+    field public static final int ENCODING_DTS_UHD = 27; // 0x1b
     field public static final int ENCODING_E_AC3 = 6; // 0x6
     field public static final int ENCODING_E_AC3_JOC = 18; // 0x12
     field public static final int ENCODING_IEC61937 = 13; // 0xd
