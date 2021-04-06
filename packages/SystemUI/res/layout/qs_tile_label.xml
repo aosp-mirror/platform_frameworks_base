@@ -16,8 +16,9 @@
 -->
 <com.android.systemui.qs.tileimpl.ButtonRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
+    android:layout_weight="1"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:paddingTop="12dp">
