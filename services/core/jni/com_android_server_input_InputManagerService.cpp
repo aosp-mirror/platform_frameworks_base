@@ -1920,7 +1920,7 @@ static void nativeVibrateCombined(JNIEnv* env, jclass /* clazz */, jlong ptr, ji
         // VibrationEffect.validate guarantees duration > 0.
         std::chrono::milliseconds duration(patternMillis[i]);
         element.duration = std::min(duration, MAX_VIBRATE_PATTERN_DELAY_MILLIS);
-        for (int32_t channel = 0; channel < CHANNEL_SIZE; channel++) {
+        for (int32_t channel = 0; channel < amplSize; channel++) {
             element.addChannel(vibratorIdArray[channel],
                                static_cast<uint8_t>(amplitudesArray[channel][i]));
         }
