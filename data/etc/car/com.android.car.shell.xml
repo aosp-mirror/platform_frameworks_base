@@ -26,5 +26,7 @@
         <permission name="android.car.permission.CAR_DRIVING_STATE"/>
         <permission name="android.car.permission.CAR_POWER"/>
         <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
+        <permission name="android.car.permission.CAR_TIRES"/>
+        <permission name="android.car.permission.READ_CAR_STEERING"/>
     </privapp-permissions>
 </permissions>
