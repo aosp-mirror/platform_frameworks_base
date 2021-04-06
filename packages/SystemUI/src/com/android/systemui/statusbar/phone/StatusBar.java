@@ -239,6 +239,7 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -791,6 +792,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             BrightnessSlider.Factory brightnessSliderFactory,
             WiredChargingRippleController chargingRippleAnimationController,
             OngoingCallController ongoingCallController,
+            TunerService tunerService,
             FeatureFlags featureFlags) {
         super(context);
         mNotificationsController = notificationsController;
@@ -872,6 +874,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         mChargingRippleAnimationController = chargingRippleAnimationController;
         mOngoingCallController = ongoingCallController;
         mFeatureFlags = featureFlags;
+
+        tunerService.addTunable(
+                (key, newValue) -> {
+                    if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {
+                        updateLightRevealScrimVisibility();
+                    }
+                },
+                Settings.Secure.DOZE_ALWAYS_ON
+        );
 
         mExpansionChangedListeners = new ArrayList<>();
 
@@ -1216,15 +1227,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
         mChargingRippleAnimationController.setViewHost(mNotificationShadeWindowView);
-
-
-        if (mFeatureFlags.useNewLockscreenAnimations()
-                && (mDozeParameters.getAlwaysOn() || mDozeParameters.isQuickPickupEnabled())) {
-            mLightRevealScrim.setVisibility(View.VISIBLE);
-            mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
-        } else {
-            mLightRevealScrim.setVisibility(View.GONE);
-        }
+        updateLightRevealScrimVisibility();
 
         mNotificationPanelViewController.initDependencies(
                 this,
@@ -4653,5 +4656,20 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
         mExpansionChangedListeners.remove(listener);
+    }
+
+    private void updateLightRevealScrimVisibility() {
+        if (mLightRevealScrim == null) {
+            // status bar may not be inflated yet
+            return;
+        }
+
+        if (mFeatureFlags.useNewLockscreenAnimations()
+                && (mDozeParameters.getAlwaysOn() || mDozeParameters.isQuickPickupEnabled())) {
+            mLightRevealScrim.setVisibility(View.VISIBLE);
+            mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
+        } else {
+            mLightRevealScrim.setVisibility(View.GONE);
+        }
     }
 }

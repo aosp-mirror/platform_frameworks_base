@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Η εφαρμογή εκτελείται"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Εφαρμογές που καταναλώνουν μπαταρία"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Μεγιστοποίηση"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Χρήση προσβασιμότητας"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> χρησιμοποιεί μπαταρία"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> εφαρμογές χρησιμοποιούν μπαταρία"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Πατήστε για λεπτομέρειες σχετικά με τη χρήση μπαταρίας και δεδομένων"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Επιτρέπει στην εφαρμογή την ανακάλυψη και τη σύζευξη κοντινών συσκευών Bluetooth"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"σύνδεση σε συζευγμένες συσκευές Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Επιτρέπει στην εφαρμογή τη σύνδεση σε συζευγμένες συσκευές Bluetooth"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Πληροφορίες προτιμώμενης υπηρεσίας πληρωμών NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Επιτρέπει στην εφαρμογή να λαμβάνει πληροφορίες προτιμώμενης υπηρεσίας πληρωμής NFC, όπως καταχωρημένα βοηθήματα και προορισμό διαδρομής."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ελέγχει την Επικοινωνία κοντινού πεδίου (FNC)"</string>
@@ -575,28 +578,21 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Χρήση κλειδώματος οθόνης"</string>
     <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
     <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Εντοπίστηκε μέρους του δακτυλικού αποτυπώματος"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Δεν ήταν δυνατή η επεξεργασία του δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Καθαρίστε τον αισθητήρα"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Το δάχτυλο μετακινήθηκε πολύ γρήγορα"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Πολύ αργή κίνηση δαχτύλου. Δοκιμάστε ξανά."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Δοκιμάστε άλλο δακτυλικό αποτύπωμα"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Υπερβολικά έντονος φωτισμός"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Δοκιμάστε να το προσαρμόσετε"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Η ταυτότητα του δακτυλικού αποτυπώματος ελέγχθηκε"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Έγινε έλεγχος ταυτότητας προσώπου, πατήστε \"Επιβεβαίωση\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Ο εξοπλισμός δακτυλικού αποτυπώματος δεν είναι διαθέσιμος."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Δεν είναι δυνατή η ρύθμιση του δακτυλικού αποτυπώματος"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Λήξη χρονικού ορίου δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Η λειτουργία δακτυλικού αποτυπώματος ακυρώθηκε."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Η λειτουργία δακτυλικού αποτυπώματος ακυρώθηκε από τον χρήστη."</string>
@@ -621,14 +617,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Εγγράψτε ξανά το πρόσωπό σας"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Για να βελτιώσετε την αναγνώριση, εγγράψτε ξανά το πρόσωπό σας"</string>
-    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
-    <skip />
-    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Ρυθμίστε το Face Unlock"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"Ξεκλειδώστε το τηλέφωνό σας απλώς κοιτώντας το"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Ρυθμίστε περισσότερους τρόπους ξεκλειδώματος"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Πατήστε για να προσθέσετε δακτυλικό αποτύπωμα"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Αδύνατη λήψη ακριβών δεδομ. προσώπου. Επανάληψη."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Υπερβολικά έντονος φωτισμός. Δοκιμάστε πιο ήπιο."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Πολύ σκοτεινό περιβάλλον. Φροντίστε τον φωτισμό."</string>
@@ -1033,12 +1025,9 @@
     <string name="copied" msgid="4675902854553014676">"Αντιγράφηκε"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"Η εφαρμογή <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> έκανε επικόλληση από την εφαρμογή <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"Η εφαρμογή <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> έκανε επικόλληση από το πρόχειρο"</string>
-    <!-- no translation found for pasted_text (4298871641549173733) -->
-    <skip />
-    <!-- no translation found for pasted_image (4729097394781491022) -->
-    <skip />
-    <!-- no translation found for pasted_content (646276353060777131) -->
-    <skip />
+    <string name="pasted_text" msgid="4298871641549173733">"Η εφαρμογή <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> επικόλλησε το κείμενο που αντιγράψατε"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"Η εφαρμογή <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> επικόλλησε την εικόνα που αντιγράψατε"</string>
+    <string name="pasted_content" msgid="646276353060777131">"Η εφαρμογή <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> επικόλλησε περιεχόμενο που αντιγράψατε"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Περισσότερα"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Πλήκτρο Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2143,31 +2132,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Εργασία"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Προσωπική προβολή"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Προβολή εργασίας"</string>
-    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
-    <skip />
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Αποκλείστηκε από τον διαχειριστή IT"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Δεν είναι δυνατή η κοινοποίηση αυτού του περιεχομένου με εφαρμογές εργασιών"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Δεν είναι δυνατό το άνοιγμα αυτού του περιεχομένου με εφαρμογές εργασιών"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Δεν είναι δυνατή η κοινοποίηση αυτού του περιεχομένου με προσωπικές εφαρμογές"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Δεν είναι δυνατό το άνοιγμα αυτού του περιεχομένου με προσωπικές εφαρμογές"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Το προφίλ εργασίας σας έχει τεθεί σε παύση."</string>
-    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Πατήστε για ενεργοποίηση"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Δεν υπάρχουν εφαρμογές εργασιών"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Δεν υπάρχουν προσωπικές εφαρμογές"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Άνοιγμα εφαρμογής <xliff:g id="APP">%s</xliff:g> στο προσωπικό προφίλ;"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Άνοιγμα εφαρμογής <xliff:g id="APP">%s</xliff:g> στο προφίλ εργασίας;"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Χρήση προσωπικού προγράμματος περιήγησης"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Χρήση προγράμματος περιήγησης εργασίας"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ξεκλειδώματος δικτύου κάρτας SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN ξεκλειδώματος υποσυνόλου δικτύου κάρτας SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN ξεκλειδώματος εταιρικής SIM"</string>
@@ -2280,8 +2257,7 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Νέες ρυθμίσεις μεγιστοποίησης"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Μπορείτε πλέον να μεγεθύνετε μέρος της οθόνης σας"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Ενεργοποίηση στις Ρυθμίσεις"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Παράβλεψη"</string>

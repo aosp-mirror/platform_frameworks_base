@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmer og påminnelser"</string>
     <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Gi tillatelse til å angi alarmer og påminnelser"</string>
     <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmer og påminnelser"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Dette gjør at appen kan planlegge alarmer eller andre tidsbaserte hendelser. Dette gjør at appen kan starte og kjøre, selv når du ikke bruker enheten. Hvis du opphever denne tillatelsen, kan det føre til feil med appen, spesifikt at alarmer som appen har planlagt, ikke fungerer lenger."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Tillat denne appen å planlegge alarmer eller andre tidsbaserte hendelser. Dette gjør at appen kan starte og kjøre, selv når du ikke bruker enheten. Hvis du opphever denne tillatelsen, kan det føre til feil med appen, blant annet at alarmer som appen har planlagt, ikke fungerer lenger."</string>
     <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"tidsplan, alarm, påminnelse, hendelse"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Slå på"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Slå på Ikke forstyrr"</string>
@@ -562,6 +562,8 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Angi lås"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Bytt til <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Oppretter en ny bruker …"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"Kallenavn"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Legg til en gjest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gjesten"</string>

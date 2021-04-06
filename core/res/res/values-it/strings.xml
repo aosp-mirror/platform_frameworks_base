@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"App in esecuzione"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"App che consumano la batteria"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ingrandimento"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Utilizzo dell\'accessibilità"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> sta consumando la batteria"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> app stanno consumando la batteria"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Tocca per conoscere i dettagli sull\'utilizzo dei dati e della batteria"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Consente all\'app di rilevare e accoppiare dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Connessione a dispositivi Bluetooth accoppiati"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Consente all\'app di connettersi ai dispositivi Bluetooth accoppiati"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informazioni del servizio di pagamento NFC preferito"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Consente all\'app di recuperare informazioni del servizio di pagamento NFC preferito, quali destinazione della route e identificatori applicazione registrati."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controllo Near Field Communication"</string>
@@ -573,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Non hai impostato PIN, sequenza o password"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Errore durante l\'autenticazione"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usa il blocco schermo"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Inserisci il blocco schermo per continuare"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Impronta parziale rilevata"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Impossibile elaborare l\'impronta. Riprova."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Pulisci il sensore"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Hai tolto il dito troppo presto"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Movimento del dito troppo lento. Riprova."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prova con un\'altra impronta"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Troppa luce"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prova a regolare"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Impronta autenticata"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Volto autenticato"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Volto autenticato, premi Conferma"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware per l\'impronta non disponibile."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Impossibile configurare l\'impronta"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Timeout impronta. Riprova."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operazione associata all\'impronta annullata."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operazione di autenticazione dell\'impronta annullata dall\'utente."</string>
@@ -661,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Volto <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Usa Sblocco con il volto"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usa Sblocco con il volto o il blocco schermo"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Usa il tuo volto per continuare"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Per continuare devi usare il tuo volto o il tuo blocco schermo"</string>
   <string-array name="face_error_vendor">
   </string-array>

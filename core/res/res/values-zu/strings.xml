@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Kuvumela i-app ithole futhi ibhangqe amadivayisi we-Bluetooth aseduze"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"xhuma kumadivayisi we-Bluetooth abhangqiwe"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Kuvumela i-app ixhume kumadivayisi we-Bluetooth abhangqiwe"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Ulwazi Lwesevisi Yenkokhelo Ye-NFC Okhethwayo"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ivuemela uhlelo lokusebenza ukuthola ulwazi lesevisi yenkokhelo ye-nfc njengezinsiza zokubhalisa nezindawo zomzila."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lawula Uxhumano Lwenkambu Eseduze"</string>

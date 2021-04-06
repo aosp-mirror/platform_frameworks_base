@@ -562,6 +562,8 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"લૉક સેટ કરો"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> પર સ્વિચ કરો"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"નવા વપરાશકર્તા બનાવી રહ્યાં છીએ…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
     <string name="user_nickname" msgid="262624187455825083">"ઉપનામ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"અતિથિ ઉમેરો"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"અતિથિને કાઢી નાખો"</string>

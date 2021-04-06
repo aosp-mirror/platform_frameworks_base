@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricSourceType;
 
@@ -24,7 +26,9 @@ import androidx.annotation.Nullable;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -45,12 +49,15 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final DelayableExecutor mExecutor;
+    @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
 
     @Nullable private Runnable mCancelRunnable;
     private boolean mShowBouncer;
     private boolean mQsExpanded;
     private boolean mFaceDetectRunning;
     private boolean mHintShown;
+    private boolean mTransitioningFromHome;
+    private int mStatusBarState;
 
     protected UdfpsKeyguardViewController(
             @NonNull UdfpsKeyguardView view,
@@ -59,11 +66,13 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull DelayableExecutor mainDelayableExecutor,
-            @NonNull DumpManager dumpManager) {
+            @NonNull DumpManager dumpManager,
+            @NonNull KeyguardViewMediator keyguardViewMediator) {
         super(view, statusBarStateController, statusBar, dumpManager);
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mExecutor = mainDelayableExecutor;
+        mKeyguardViewMediator = keyguardViewMediator;
     }
 
     @Override
@@ -94,6 +103,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mStatusBarStateController.removeCallback(mStateListener);
         mAlternateAuthInterceptor.hideAlternateAuthBouncer();
         mKeyguardViewManager.setAlternateAuthInterceptor(null);
+        mTransitioningFromHome = false;
 
         if (mCancelRunnable != null) {
             mCancelRunnable.run();
@@ -106,17 +116,18 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         super.dump(fd, pw, args);
         pw.println("mShowBouncer=" + mShowBouncer);
         pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
+        pw.println("mTransitioningFromHomeToKeyguard=" + mTransitioningFromHome);
     }
 
     /**
      * Overrides non-bouncer show logic in shouldPauseAuth to still auth.
      */
-    private void showBouncer(boolean forceShow) {
-        if (mShowBouncer == forceShow) {
+    private void showBouncer(boolean show) {
+        if (mShowBouncer == show) {
             return;
         }
 
-        mShowBouncer = forceShow;
+        mShowBouncer = show;
         updatePauseAuth();
         if (mShowBouncer) {
             mView.animateUdfpsBouncer();
@@ -128,18 +139,26 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
     /**
      * Returns true if the fingerprint manager is running but we want to temporarily pause
      * authentication. On the keyguard, we may want to show udfps when the shade
-     * is expanded, so this can be overridden with the forceShow method.
+     * is expanded, so this can be overridden with the showBouncer method.
      */
     public boolean shouldPauseAuth() {
         if (mShowBouncer) {
             return false;
         }
 
+        if (mStatusBarState != KEYGUARD) {
+            return true;
+        }
+
+        if (mTransitioningFromHome && mKeyguardViewMediator.isAnimatingScreenOff()) {
+            return true;
+        }
+
         if (mQsExpanded) {
             return true;
         }
 
-        return super.shouldPauseAuth();
+        return false;
     }
 
     private void cancelDelayedHint() {
@@ -176,12 +195,25 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
             new StatusBarStateController.StateListener() {
         @Override
         public void onDozeAmountChanged(float linear, float eased) {
-            mView.onDozeAmountChanged(linear, eased);
             if (linear != 0) showBouncer(false);
+            mView.onDozeAmountChanged(linear, eased);
+            if (linear == 1f) {
+                // transition has finished
+                mTransitioningFromHome = false;
+            }
+            updatePauseAuth();
+        }
+
+        @Override
+        public void onStatePreChange(int oldState, int newState) {
+            mTransitioningFromHome = oldState == StatusBarState.SHADE
+                    && newState == StatusBarState.KEYGUARD;
+            updatePauseAuth();
         }
 
         @Override
         public void onStateChanged(int statusBarState) {
+            mStatusBarState = statusBarState;
             mView.setStatusBarState(statusBarState);
         }
     };

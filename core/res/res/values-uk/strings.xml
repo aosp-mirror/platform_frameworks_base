@@ -545,6 +545,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дозволяє додатку знаходити поблизу пристрої Bluetooth і створювати з ними пару"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"підключатися до пристроїв із Bluetooth, з якими є пара"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дозволяє додатку підключатися до пристроїв із Bluetooth, з якими створено пару"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Використання інформації з платіжного NFC-сервісу"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
@@ -2204,7 +2208,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Робоче"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Особистий перегляд"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Робочий перегляд"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Заблоковано адміністратором"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Заблокував адміністратор"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Цим контентом не можна ділитися в робочих додатках"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Цей контент не можна відкривати в робочих додатках"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Цим контентом не можна ділитися в особистих додатках"</string>
@@ -2215,8 +2219,8 @@
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Відкрити в додатку <xliff:g id="APP">%s</xliff:g> в особистому профілі?"</string>
     <string name="miniresolver_open_in_work" msgid="152208044699347924">"Відкрити в додатку <xliff:g id="APP">%s</xliff:g> у робочому профілі?"</string>
-    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використовувати особистий веб-переглядач"</string>
-    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використовувати робочий веб-переглядач"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код розблокування підгрупи мереж SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код розблокування корпоративної SIM-карти"</string>

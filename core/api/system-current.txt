@@ -2235,7 +2235,7 @@ package android.content {
   }
 
   public static final class AttributionSource.Builder {
-    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.AttributionSource.Builder setRenouncedPermissions(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.AttributionSource.Builder setRenouncedPermissions(@Nullable java.util.Set<java.lang.String>);
   }
 
   public abstract class BroadcastReceiver {
@@ -13591,7 +13591,7 @@ package android.telephony.ims {
     method @NonNull public byte[] getEncodedMessage();
     method @NonNull public String getHeaderSection();
     method @NonNull public String getStartLine();
-    method @Nullable public String getViaBranchParameter();
+    method @NonNull public String getViaBranchParameter();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipMessage> CREATOR;
   }

@@ -542,6 +542,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Ļauj lietotnei atrast un savienot pārī tuvumā esošas Bluetooth ierīces."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"piekļūt pārī savienotām Bluetooth ierīcēm"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Ļauj lietotnei piekļūt pārī savienotām Bluetooth ierīcēm."</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informācija par vēlamo NFC maksājumu pakalpojumu"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ļauj lietotnei iegūt informāciju par vēlamo NFC maksājumu pakalpojumu, piemēram, par reģistrētajiem lietojumprogrammu ID un maršruta galamērķi."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolē tuvlauka saziņu"</string>

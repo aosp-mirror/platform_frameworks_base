@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"යෙදුම ධාවනය කරමින්"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"බැටරිය භාවිත කරන යෙදුම්"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"විශාලනය"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ප්‍රවේශ්‍යතා භාවිතය"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> බැටරිය භාවිත කරයි"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"යෙදුම් <xliff:g id="NUMBER">%1$d</xliff:g>ක් බැටරිය භාවිත කරයි"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"බැටරි හා දත්ත භාවිතය පිළිබඳව විස්තර සඳහා තට්ටු කරන්න"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"අව‍ට ඇති බ්ලූටූත් උපාංග සොයා ගැනීමට සහ යුගල කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"යුගල කළ බ්ලූටූත් උපාංගවලට සම්බන්ධ වන්න"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"යුගල කළ බ්ලූටූත් උපාංග සමඟ සම්බන්ධ වීමට යෙදුමට ඉඩ දෙයි"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"කැමති NFC ගෙවීම් සේවා තොරතුරු"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ලියාපදිංචි කළ ආධාර සහ ගමන් මාර්ග ගමනාන්ත වැනි කැමති nfc ගෙවීම් සේවා තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ආසන්න ක්ෂේත්‍ර සන්නිවේදනය පාලනය කරන්න"</string>
@@ -575,28 +578,21 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"තිර අගුල භාවිත කරන්න"</string>
     <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
     <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"අර්ධ ඇඟිලි සලකුණක් අනාවරණය කරන ලදි"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"සංවේදකය පිරිසිදු කරන්න"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ඇඟිල්ල වඩා වේගයෙන් ගෙන යන ලදි"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ඇඟිල්ල වඩා සෙමෙන් ගෙන යන ලදි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"තවත් ඇඟිලි සලකුණක් උත්සාහ කරන්න"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"දීප්තිය වැඩියි"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"සීරුමාරු කිරීම උත්සාහ කරන්න"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ඇඟිලි සලකුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"මුහුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"මුහුණ සත්‍යාපනය කරන ලදී, කරුණාකර තහවුරු කරන්න ඔබන්න"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ඇඟිලි සලකුණු දෘඪාංගය ලද නොහැකිය."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ඇඟිලි සලකුණ පිහිටුවිය නොහැකිය"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ඇඟිලි සලකුණු කාල නිමාව ළඟා විය. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"පරිශීලක විසින් ඇඟිලි සලකුණු මෙහෙයුම අවසන් කරන ලදී."</string>

@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Tillåter appen att hitta och parkoppla Bluetooth-enheter i närheten"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ansluta till parkopplade Bluetooth-enheter"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Tillåter appen att ansluta till parkopplade Bluetooth-enheter"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information kopplad till standardtjänsten för NFC-betalning"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillåter att appen hämtar information kopplad till standardtjänsten för NFC-betalning, till exempel registrerade hjälpmedel och ruttdestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollera närfältskommunikationen"</string>

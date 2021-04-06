@@ -539,6 +539,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ઍપને આસપાસના બ્લૂટૂથ ડિવાઇસ શોધવાની અને તેની સાથે જોડી કરવાની મંજૂરી આપે છે"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"જોડી કરેલા બ્લૂટૂથ ડિવાઇસ સાથે કનેક્ટ કરો"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ઍપને જોડી કરેલા બ્લૂટૂથ ડિવાઇસ સાથે કનેક્ટ કરવાની મંજૂરી આપે છે"</string>
+    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"આ મંજૂરીને આપવાથી, ઍપ તમારી પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી મેળવી શકે છે, જેમ કે રજિસ્ટર થયેલી સહાય અને નિર્ધારિત સ્થાન."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"નિઅર ફીલ્ડ કમ્યુનિકેશન નિયંત્રિત કરો"</string>
@@ -621,14 +625,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ફેસ અનલૉક"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"ઓળખવાની પ્રક્રિયાને બહેતર બનાવવા માટે કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
-    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
-    <skip />
-    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="550617822603450009">"ફેસ અનલૉક સુવિધાનું સેટઅપ કરો"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"તમારા ફોનની તરફ જોઈને તેને અનલૉક કરો"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"અનલૉક કરવાની બીજી રીતોનું સેટઅપ કરો"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ફિંગરપ્રિન્ટ ઉમેરવા માટે ટૅપ કરો"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ચહેરાનો સચોટ ડેટા કૅપ્ચર ન થયો. ફરી પ્રયાસ કરો."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"અતિશય પ્રકાશિત. થોડો હળવો પ્રકાશ અજમાવી જુઓ."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"અતિશય ઘેરી. વધુ ઝળહળતો પ્રકાશ અજમાવો"</string>
@@ -753,7 +753,7 @@
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ચેતવણી વિના આ Android TV ડિવાઇસ પર રહેલો આ વપરાશકર્તાનો ડેટા કાઢી નાખો."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ચેતવણી વિના આ ફોન પરનો આ વપરાશકર્તાનો ડેટા કાઢી નાખો."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ઉપકરણ વૈશ્વિક પ્રોક્સી સેટ કરો"</string>
-    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"પૉલિસી સક્ષમ હોય તે વખતે ઉપયોગ કરવા માટેના ડિવાઇસ વૈશ્વિક પ્રોક્સીને સેટ કરો. ફક્ત ડિવાઇસના માલિક વૈશ્વિક પ્રોક્સી સેટ કરી શકે છે."</string>
+    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"પૉલિસી ચાલુ હોય તે વખતે ઉપયોગ કરવા માટેના ડિવાઇસ વૈશ્વિક પ્રોક્સીને સેટ કરો. ફક્ત ડિવાઇસના માલિક વૈશ્વિક પ્રોક્સી સેટ કરી શકે છે."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"સ્ક્રીન લૉક પાસવર્ડ સમાપ્તિ સેટ કરો"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"કેટલા સમયાંતરે સ્ક્રીન લૉક પાસવર્ડ, પિન અથવા પૅટર્ન બદલવો આવશ્યક છે, તેને બદલો."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"સંગ્રહ એન્ક્રિપ્શન સેટ કરો"</string>
@@ -1033,12 +1033,9 @@
     <string name="copied" msgid="4675902854553014676">"કૉપિ કરેલ"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>માંથી કૉપિ કરાયેલો ડેટા <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>માં પેસ્ટ કરવામાં આવ્યો"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"ક્લિપબોર્ડ ડેટાને <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g>માં પેસ્ટ કર્યો"</string>
-    <!-- no translation found for pasted_text (4298871641549173733) -->
-    <skip />
-    <!-- no translation found for pasted_image (4729097394781491022) -->
-    <skip />
-    <!-- no translation found for pasted_content (646276353060777131) -->
-    <skip />
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> દ્વારા તમે કૉપિ કરેલી ટેક્સ્ટ પેસ્ટ કરાઈ"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> દ્વારા તમે કૉપિ કરેલી છબી પેસ્ટ કરાઈ"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> દ્વારા તમે કૉપિ કરેલું કન્ટેન્ટ પેસ્ટ કરાયું"</string>
     <string name="more_item_label" msgid="7419249600215749115">"વધુ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"મેનૂ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2143,31 +2140,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ઑફિસ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"વ્યક્તિગત વ્યૂ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ઑફિસ વ્યૂ"</string>
-    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
-    <skip />
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"તમારા IT વ્યવસ્થાપકે બ્લૉક કર્યું છે"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"આ કન્ટેન્ટ ઑફિસ માટેની ઍપ સાથે શેર કરી શકાતું નથી"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"આ કન્ટેન્ટ ઑફિસ માટેની ઍપ વડે ખોલી શકાતું નથી"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"આ કન્ટેન્ટ વ્યક્તિગત ઍપ સાથે શેર કરી શકાતું નથી"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"આ કન્ટેન્ટ વ્યક્તિગત ઍપ વડે ખોલી શકાતું નથી"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ઑફિસની પ્રોફાઇલ થોભાવી છે"</string>
-    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"ચાલુ કરવા માટે ટૅપ કરો"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"કોઈ ઑફિસ માટેની ઍપ સપોર્ટ કરતી નથી"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"કોઈ વ્યક્તિગત ઍપ સપોર્ટ કરતી નથી"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"વ્યક્તિગત પ્રોફાઇલમાં <xliff:g id="APP">%s</xliff:g>માં ખોલીએ?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"ઑફિસની પ્રોફાઇલમાં <xliff:g id="APP">%s</xliff:g>માં ખોલીએ?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"વ્યક્તિગત બ્રાઉઝરનો ઉપયોગ કરો"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ઑફિસના બ્રાઉઝરના ઉપયોગ કરો"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"સિમ નેટવર્કને અનલૉક કરવાનો પિન"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"સિમ નેટવર્ક સબસેટને અનલૉક કરવાનો પિન"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"સિમ કૉર્પોરેટ કાર્ડના લૉકને અનલૉક કરવાનો પિન"</string>
@@ -2280,10 +2265,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (8159173903032344891) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"મોટું કરવા માટેના નવા સેટિંગ"</string>
+    <string name="window_magnification_prompt_content" msgid="8159173903032344891">"હવે તમે તમારી સ્ક્રીનનો અમુક ભાગ મોટો કરી શકો છો"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"સેટિંગમાં ચાલુ કરો"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"છોડી દો"</string>
     <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ચાલુ રાખવા માટે, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;ને તમારા ડિવાઇસના માઇક્રોફોનના ઍક્સેસની જરૂર છે."</string>

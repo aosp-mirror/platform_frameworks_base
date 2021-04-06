@@ -16,10 +16,13 @@
 
 package android.content;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
+import android.content.pm.PackageManager;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -179,6 +182,13 @@ public final class ContextParams {
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
         public @NonNull Builder setRenouncedPermissions(
                 @Nullable Set<String> renouncedPermissions) {
+            // This is not a security check but a fail fast - the OS enforces the permission too
+            if (renouncedPermissions != null && !renouncedPermissions.isEmpty()
+                    && ActivityThread.currentApplication().checkSelfPermission(Manifest.permission
+                    .RENOUNCE_PERMISSIONS) != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Renouncing permissions requires: "
+                        + Manifest.permission.RENOUNCE_PERMISSIONS);
+            }
             mRenouncedPermissions = renouncedPermissions;
             return this;
         }

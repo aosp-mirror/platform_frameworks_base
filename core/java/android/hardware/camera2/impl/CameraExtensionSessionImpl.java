@@ -352,7 +352,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             try {
                 mPreviewImageProcessor = new CameraExtensionForwardProcessor(
                         mPreviewExtender.getPreviewImageProcessor(), repeatingSurfaceInfo.mFormat,
-                        repeatingSurfaceInfo.mUsage);
+                        repeatingSurfaceInfo.mUsage, mHandler);
             } catch (ClassCastException e) {
                 throw new UnsupportedOperationException("Failed casting preview processor!");
             }

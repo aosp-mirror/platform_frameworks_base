@@ -77,6 +77,58 @@ public class ScrollCaptureControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testInfiniteWithPartialResultsTop() {
+        ScrollCaptureController controller = new TestScenario()
+                .withPageHeight(100)
+                .withPageVisibleRange(5, 100) // <-- simulate 5px of invisible top
+                .withMaxPages(2.5f)
+                .withTileHeight(50)
+                .withAvailableRange(Integer.MIN_VALUE, Integer.MAX_VALUE)
+                .createController(mContext);
+
+        ScrollCaptureController.LongScreenshot screenshot =
+                getUnchecked(controller.run(EMPTY_RESPONSE));
+
+        // Each tile is cropped to the visible page size, which is inset 5px from the TOP
+        // requested    result
+        //   0,   50       5,   50
+        // -45,    5     -40,    5   <-- clear previous /  top
+        //   5,   55       5,   55   (not cropped, target is positioned fully within visible range)
+        //  55,  105      55,  105
+        // 105,  155     105,  155
+        // 155,  205     155,  205   <-- bottom
+
+        assertEquals("top", -40, screenshot.getTop());
+        assertEquals("bottom", 205, screenshot.getBottom());
+    }
+
+    @Test
+    public void testInfiniteWithPartialResultsBottom() {
+        ScrollCaptureController controller = new TestScenario()
+                .withPageHeight(100)
+                .withPageVisibleRange(0, 95) // <-- simulate 5px of invisible bottom
+                .withMaxPages(2.5f)
+                .withTileHeight(50)
+                .withAvailableRange(Integer.MIN_VALUE, Integer.MAX_VALUE)
+                .createController(mContext);
+
+        ScrollCaptureController.LongScreenshot screenshot =
+                getUnchecked(controller.run(EMPTY_RESPONSE));
+
+        // Each tile is cropped to the visible page size, which is inset 5px from the BOTTOM
+        // requested      result
+        //    0,   50        0,   50   // not cropped, positioned within visible range
+        //  -50,    0      -50,    0   <-- clear previous/reverse
+        //    0,   50     -  0,   45   // target now positioned at page bottom, bottom cropped
+        //   45,   95,      45,   90
+        //   90,  140,     140,  135
+        //  135,  185      185,  180   <-- bottom
+
+        assertEquals("top", -50, screenshot.getTop());
+        assertEquals("bottom", 180, screenshot.getBottom());
+    }
+
+    @Test
     public void testLimitedBottom() {
         ScrollCaptureController controller = new TestScenario()
                 .withPageHeight(100)
