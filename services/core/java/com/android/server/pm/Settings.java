@@ -1229,7 +1229,7 @@ public final class Settings implements Watchable, Snappable {
                 size++;
             }
             if (mAppIds.get(index) != null) {
-                PackageManagerService.reportSettingsProblem(Log.ERROR,
+                PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Adding duplicate app id: " + appId
                         + " name=" + name);
                 return false;
@@ -1237,7 +1237,7 @@ public final class Settings implements Watchable, Snappable {
             mAppIds.set(index, obj);
         } else {
             if (mOtherAppIds.get(appId) != null) {
-                PackageManagerService.reportSettingsProblem(Log.ERROR,
+                PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Adding duplicate shared id: " + appId
                                 + " name=" + name);
                 return false;
