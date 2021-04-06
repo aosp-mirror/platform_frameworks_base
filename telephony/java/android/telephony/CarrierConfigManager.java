@@ -4881,14 +4881,15 @@ public class CarrierConfigManager {
     /**
      * Determines whether or not to use (IP) data connectivity as a supplemental condition to
      * control the visibility of the no-calling indicator for this carrier in the System UI. Setting
-     * the configuration to true may make sense to a carrier which provides OTT calling.
+     * the configuration to true may make sense for carriers that provide OTT calling.
      *
-     * Config = true: do not show no-calling indication if (IP) data connectivity is available
-     *                or telephony has voice registration.
-     * Config = false: do not show no-calling indication if telephony has voice registration.
+     * Config = true: show no-calling indication only if telephony does not have voice registration
+     *                and if no (IP) data connectivity is available.
+     * Config = false: show no-calling indication only if telephony does not have voice
+     *                 registration.
      */
-    public static final String KEY_HIDE_NO_CALLING_INDICATOR_ON_DATA_NETWORK_BOOL =
-            "hide_no_calling_indicator_on_data_network_bool";
+    public static final String KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL =
+            "use_ip_for_calling_indicator_bool";
 
     /**
      * Determine whether or not to display a call strength indicator for this carrier in the System
@@ -5484,7 +5485,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
                 new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
         sDefaults.putBoolean(KEY_CARRIER_PROVISIONS_WIFI_MERGED_NETWORKS_BOOL, false);
-        sDefaults.putBoolean(KEY_HIDE_NO_CALLING_INDICATOR_ON_DATA_NETWORK_BOOL, false);
+        sDefaults.putBoolean(KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL, false);
         sDefaults.putBoolean(KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL, true);
         sDefaults.putString(KEY_CARRIER_PROVISIONING_APP_STRING, "");
         sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
