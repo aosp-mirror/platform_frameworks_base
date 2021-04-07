@@ -27,7 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.notification.ActivityLaunchAnimator
+import com.android.systemui.statusbar.notification.ExpandAnimationParameters
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -215,7 +215,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun updateBlurCallback_appLaunchAnimation_overridesZoom() {
         `when`(shadeSpring.radius).thenReturn(maxBlur)
         `when`(shadeAnimation.radius).thenReturn(maxBlur)
-        val animProgress = ActivityLaunchAnimator.ExpandAnimationParameters()
+        val animProgress = ExpandAnimationParameters()
         animProgress.linearProgress = 1f
         notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
@@ -264,7 +264,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
     @Test
     fun setNotificationLaunchAnimationParams_schedulesFrame() {
-        val animProgress = ActivityLaunchAnimator.ExpandAnimationParameters()
+        val animProgress = ExpandAnimationParameters()
         animProgress.linearProgress = 0.5f
         notificationShadeDepthController.notificationLaunchAnimationParams = animProgress
         verify(choreographer).postFrameCallback(
@@ -273,7 +273,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
     @Test
     fun setNotificationLaunchAnimationParams_whennNull_ignoresIfShadeHasNoBlur() {
-        val animProgress = ActivityLaunchAnimator.ExpandAnimationParameters()
+        val animProgress = ExpandAnimationParameters()
         animProgress.linearProgress = 0.5f
         `when`(shadeSpring.radius).thenReturn(0)
         `when`(shadeAnimation.radius).thenReturn(0)
