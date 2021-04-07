@@ -21453,6 +21453,8 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             if (outInfo != null) {
                 outInfo.uid = ps.appId;
+                outInfo.broadcastAllowList = mAppsFilter.getVisibilityAllowList(ps,
+                        allUserHandles, mSettings.getPackagesLocked());
             }
         }
 
