@@ -393,6 +393,11 @@ public final class SystemServer {
     private static native void startSensorService();
 
     /**
+     * Start the memtrack proxy service.
+     */
+    private static native void startMemtrackProxyService();
+
+    /**
      * Start all HIDL services that are run inside the system server. This may take some time.
      */
     private static native void startHidlServices();
@@ -828,6 +833,12 @@ public final class SystemServer {
         // Uri Grants Manager.
         t.traceBegin("UriGrantsManagerService");
         mSystemServiceManager.startService(UriGrantsManagerService.Lifecycle.class);
+        t.traceEnd();
+
+        // Start MemtrackProxyService before ActivityManager, so that early calls
+        // to Memtrack::getMemory() don't fail.
+        t.traceBegin("MemtrackProxyService");
+        startMemtrackProxyService();
         t.traceEnd();
 
         // Activity manager runs the show.
