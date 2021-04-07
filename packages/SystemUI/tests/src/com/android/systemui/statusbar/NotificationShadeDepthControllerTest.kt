@@ -174,6 +174,13 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun setQsPanelExpansion_appliesBlur() {
+        notificationShadeDepthController.qsPanelExpansion = 1f
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(blurUtils).applyBlur(any(), eq(maxBlur))
+    }
+
+    @Test
     fun updateGlobalDialogVisibility_animatesBlur() {
         notificationShadeDepthController.updateGlobalDialogVisibility(0.5f, root)
         verify(globalActionsSpring).animateTo(eq(maxBlur / 2), eq(root))
