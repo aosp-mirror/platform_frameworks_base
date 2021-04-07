@@ -1769,9 +1769,17 @@ class ActivityStarter {
         mRootWindowContainer.startPowerModeLaunchIfNeeded(
                 false /* forceSend */, mStartActivity);
 
+        final boolean startFromSamePackage;
+        if (sourceRecord != null && sourceRecord.mActivityComponent != null) {
+            startFromSamePackage = mStartActivity.mActivityComponent
+                    .getPackageName().equals(sourceRecord.mActivityComponent.getPackageName());
+        } else {
+            startFromSamePackage = false;
+        }
+
         mTargetRootTask.startActivityLocked(mStartActivity,
                 topRootTask != null ? topRootTask.getTopNonFinishingActivity() : null, newTask,
-                mKeepCurTransition, mOptions);
+                mKeepCurTransition, mOptions, startFromSamePackage);
         if (mDoResume) {
             final ActivityRecord topTaskActivity =
                     mStartActivity.getTask().topRunningActivityLocked();
