@@ -18826,10 +18826,10 @@ package android.hardware.display {
   public final class DeviceProductInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getConnectionToSinkType();
-    method public int getManufactureWeek();
-    method public int getManufactureYear();
+    method @IntRange(from=0xffffffff, to=53) public int getManufactureWeek();
+    method @IntRange(from=0xffffffff) public int getManufactureYear();
     method @NonNull public String getManufacturerPnpId();
-    method public int getModelYear();
+    method @IntRange(from=0xffffffff) public int getModelYear();
     method @Nullable public String getName();
     method @NonNull public String getProductId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
