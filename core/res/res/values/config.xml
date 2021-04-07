@@ -2580,10 +2580,6 @@
     <!-- Set to true if after a provisioning apn the radio should be restarted -->
     <bool name="config_restartRadioAfterProvisioning">false</bool>
 
-    <!-- Boolean indicating if RADIO POWER OFF is required on receiving SIM REFRESH with RESET.
-         This will be handled by modem if it is false. -->
-    <bool name="config_requireRadioPowerOffOnSimRefreshReset">false</bool>
-
     <!-- Vibrator pattern to be used as the default for notifications
          that specify DEFAULT_VIBRATE.
      -->
