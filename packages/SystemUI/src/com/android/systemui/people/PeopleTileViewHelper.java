@@ -33,6 +33,7 @@ import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
 import static com.android.systemui.people.PeopleSpaceUtils.convertDrawableToBitmap;
 import static com.android.systemui.people.PeopleSpaceUtils.getUserId;
 
+import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.app.people.ConversationStatus;
@@ -40,6 +41,7 @@ import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -48,12 +50,13 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 import android.util.Log;
-import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
@@ -344,10 +347,11 @@ class PeopleTileViewHelper {
             setMaxLines(views);
             CharSequence content = mTile.getNotificationContent();
             views = setPunctuationRemoteViewsFields(views, content);
-            TypedValue typedValue = new TypedValue();
-            mContext.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
-            int primaryTextColor = mContext.getColor(typedValue.resourceId);
-            views.setInt(R.id.text_content, "setTextColor", primaryTextColor);
+            // TODO(b/184931139): Update to RemoteViews wrapper to set via attribute once available
+            @ColorInt int color = Utils.getColorAttr(mContext,
+                    android.R.attr.textColorPrimary).getDefaultColor();
+            views.setInt(R.id.text_content, "setTextColor", color);
+
             views.setTextViewText(R.id.text_content, mTile.getNotificationContent());
             views.setViewVisibility(R.id.image, View.GONE);
             views.setImageViewResource(R.id.predefined_icon, R.drawable.ic_message);
@@ -393,10 +397,9 @@ class PeopleTileViewHelper {
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
         setMaxLines(views);
         // Secondary text color for statuses.
-        TypedValue typedValue = new TypedValue();
-        mContext.getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
-        int secondaryTextColor = mContext.getColor(typedValue.resourceId);
-        views.setInt(R.id.text_content, "setTextColor", secondaryTextColor);
+        @ColorInt int secondaryColor = Utils.getColorAttr(mContext,
+                android.R.attr.textColorSecondary).getDefaultColor();
+        views.setInt(R.id.text_content, "setTextColor", secondaryColor);
         views.setTextViewText(R.id.text_content, statusText);
 
         Icon statusIcon = status.getIcon();
