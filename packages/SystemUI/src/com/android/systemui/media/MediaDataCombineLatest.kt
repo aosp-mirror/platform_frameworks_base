@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import android.app.smartspace.SmartspaceTarget
 import javax.inject.Inject
 
 /**
@@ -38,16 +37,8 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         }
     }
 
-    override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
-        listeners.toSet().forEach { it.onSmartspaceMediaDataLoaded(key, data) }
-    }
-
     override fun onMediaDataRemoved(key: String) {
         remove(key)
-    }
-
-    override fun onSmartspaceMediaDataRemoved(key: String) {
-        listeners.toSet().forEach { it.onSmartspaceMediaDataRemoved(key) }
     }
 
     override fun onMediaDeviceChanged(
