@@ -48,6 +48,9 @@ public final class RcsConfig implements Parcelable {
     private static final String LOG_TAG = "RcsConfig";
     private static final boolean DBG = Build.IS_ENG;
 
+    // Tag for Rcs Volte single registration defined in RCC.07 A.1.6.2
+    private static final String TAG_SINGLE_REGISTRATION = "rcsVolteSingleRegistration";
+
     private final HashMap<String, String> mValues = new HashMap<>();
 
     private RcsConfig(HashMap<String, String> values) {
@@ -143,6 +146,14 @@ public final class RcsConfig implements Parcelable {
      */
     public boolean hasConfig(@NonNull String tag) {
         return mValues.containsKey(tag);
+    }
+
+    /**
+     * Check whether Rcs Volte single registration is supported by the config.
+     */
+    public boolean isRcsVolteSingleRegistrationSupported() {
+        return getBoolean(TAG_SINGLE_REGISTRATION, false)
+                || getInteger(TAG_SINGLE_REGISTRATION, 0) != 0;
     }
 
     @Override
