@@ -35,7 +35,7 @@ import com.android.systemui.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.notification.ActivityLaunchAnimator
+import com.android.systemui.statusbar.notification.ExpandAnimationParameters
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -111,7 +111,7 @@ class NotificationShadeDepthController @Inject constructor(
      * When launching an app from the shade, the animations progress should affect how blurry the
      * shade is, overriding the expansion amount.
      */
-    var notificationLaunchAnimationParams: ActivityLaunchAnimator.ExpandAnimationParameters? = null
+    var notificationLaunchAnimationParams: ExpandAnimationParameters? = null
         set(value) {
             field = value
             if (value != null) {

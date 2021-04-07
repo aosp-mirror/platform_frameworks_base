@@ -173,6 +173,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -208,9 +209,9 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.charging.ChargingRippleView;
 import com.android.systemui.statusbar.charging.WiredChargingRippleController;
-import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -263,7 +264,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, KeyguardStateController.Callback,
         OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
-        StatusBarStateController.StateListener, ActivityLaunchAnimator.Callback,
+        StatusBarStateController.StateListener,
         LifecycleOwner, BatteryController.BatteryStateChangeCallback {
     public static final boolean MULTIUSER_DEBUG = false;
 
@@ -692,6 +693,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mVibrateOnOpening;
     private final VibratorHelper mVibratorHelper;
     private ActivityLaunchAnimator mActivityLaunchAnimator;
+    private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
@@ -1370,16 +1372,18 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator = new ActivityLaunchAnimator(
-                mNotificationShadeWindowViewController, this, mNotificationPanelViewController,
-                mNotificationShadeDepthControllerLazy.get(),
+        mActivityLaunchAnimator = new ActivityLaunchAnimator();
+        mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
+                mNotificationShadeWindowViewController,
+                mNotificationPanelViewController,
                 mStackScrollerController.getNotificationListContainer(),
-                mContext.getMainExecutor());
+                mNotificationShadeDepthControllerLazy.get()
+        );
 
         // TODO: inject this.
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanelViewController,
                 mHeadsUpManager, mNotificationShadeWindowView, mStackScrollerController,
-                mDozeScrimController, mScrimController, mActivityLaunchAnimator,
+                mDozeScrimController, mScrimController, mNotificationShadeWindowController,
                 mDynamicPrivacyController, mKeyguardStateController,
                 mKeyguardIndicationController,
                 this /* statusBar */, mShadeController, mCommandQueue, mInitController,
@@ -1392,6 +1396,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarNotificationActivityStarterBuilder
                         .setStatusBar(this)
                         .setActivityLaunchAnimator(mActivityLaunchAnimator)
+                        .setNotificationAnimatorControllerProvider(mNotificationAnimationProvider)
                         .setNotificationPresenter(mPresenter)
                         .setNotificationPanelViewController(mNotificationPanelViewController)
                         .build();
@@ -1990,16 +1995,16 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mHeadsUpAppearanceController.shouldBeVisible();
     }
 
+    /** A launch animation was cancelled. */
     //TODO: These can / should probably be moved to NotificationPresenter or ShadeController
-    @Override
     public void onLaunchAnimationCancelled() {
         if (!mPresenter.isCollapsing()) {
             onClosingFinished();
         }
     }
 
-    @Override
-    public void onExpandAnimationFinished(boolean launchIsFullScreen) {
+    /** A launch animation ended. */
+    public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
         if (!mPresenter.isCollapsing()) {
             onClosingFinished();
         }
@@ -2008,19 +2013,19 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    @Override
-    public void onExpandAnimationTimedOut() {
+    /** A launch animation timed out. */
+    public void onLaunchAnimationTimedOut(boolean isLaunchForActivity) {
         if (mPresenter.isPresenterFullyCollapsed() && !mPresenter.isCollapsing()
-                && mActivityLaunchAnimator != null
-                && !mActivityLaunchAnimator.isLaunchForActivity()) {
+                && isLaunchForActivity) {
             onClosingFinished();
         } else {
             mShadeController.collapsePanel(true /* animate */);
         }
     }
 
-    @Override
+    /** Whether we should animate an activity launch. */
     public boolean areLaunchAnimationsEnabled() {
+        // TODO(b/184121838): Support lock screen launch animations.
         return mState == StatusBarState.SHADE;
     }
 
@@ -3134,8 +3139,15 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void postStartActivityDismissingKeyguard(final PendingIntent intent) {
-        mHandler.post(() -> startPendingIntentDismissingKeyguard(intent));
+    public void postStartActivityDismissingKeyguard(PendingIntent intent) {
+        postStartActivityDismissingKeyguard(intent, null /* animationController */);
+    }
+
+    @Override
+    public void postStartActivityDismissingKeyguard(final PendingIntent intent,
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
+        mHandler.post(() -> startPendingIntentDismissingKeyguard(intent,
+                null /* intentSentUiThreadCallback */, animationController));
     }
 
     @Override
@@ -3616,6 +3628,23 @@ public class StatusBar extends SystemUI implements DemoMode,
     void instantCollapseNotificationPanel() {
         mNotificationPanelViewController.instantCollapse();
         mShadeController.runPostCollapseRunnables();
+    }
+
+    /**
+     * Collapse the panel directly if we are on the main thread, post the collapsing on the main
+     * thread if we are not.
+     */
+    void collapsePanelOnMainThread() {
+        if (Looper.getMainLooper().isCurrentThread()) {
+            mShadeController.collapsePanel();
+        } else {
+            mContext.getMainExecutor().execute(mShadeController::collapsePanel);
+        }
+    }
+
+    /** Collapse the panel. The collapsing will be animated for the given {@code duration}. */
+    void collapsePanelWithDuration(int duration) {
+        mNotificationPanelViewController.collapseWithDuration(duration);
     }
 
     @Override
@@ -4415,7 +4444,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         KeyboardShortcuts.dismiss();
     }
 
-    public void executeActionDismissingKeyguard(Runnable action, boolean afterKeyguardGone) {
+    /**
+     * Dismiss the keyguard then execute an action.
+     *
+     * @param action The action to execute after dismissing the keyguard.
+     * @param collapsePanel Whether we should collapse the panel after dismissing the keyguard.
+     */
+    private void executeActionDismissingKeyguard(Runnable action, boolean afterKeyguardGone,
+            boolean collapsePanel) {
         if (!mDeviceProvisionedController.isDeviceProvisioned()) return;
 
         dismissKeyguardThenExecute(() -> {
@@ -4431,7 +4467,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 action.run();
             }).start();
 
-            return mShadeController.collapsePanel();
+            boolean deferred = collapsePanel ? mShadeController.collapsePanel() : false;
+            return deferred;
         }, afterKeyguardGone);
     }
 
@@ -4443,27 +4480,55 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void startPendingIntentDismissingKeyguard(
             final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback) {
-        startPendingIntentDismissingKeyguard(intent, intentSentUiThreadCallback, null /* row */);
+        startPendingIntentDismissingKeyguard(intent, intentSentUiThreadCallback,
+                (ActivityLaunchAnimator.Controller) null);
+    }
+
+    @Override
+    public void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentUiThreadCallback, View associatedView) {
+        ActivityLaunchAnimator.Controller animationController = null;
+        if (associatedView instanceof ExpandableNotificationRow) {
+            animationController = mNotificationAnimationProvider.getAnimatorController(
+                    ((ExpandableNotificationRow) associatedView));
+        }
+
+        startPendingIntentDismissingKeyguard(intent, intentSentUiThreadCallback,
+                animationController);
     }
 
     @Override
     public void startPendingIntentDismissingKeyguard(
             final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback,
-            View associatedView) {
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
         final boolean afterKeyguardGone = intent.isActivity()
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
 
+        boolean animate =
+                animationController != null && areLaunchAnimationsEnabled() && !isOccluded();
+        boolean collapse = !animate;
         executeActionDismissingKeyguard(() -> {
             try {
-                intent.send(null, 0, null, null, null, null, getActivityOptions(
-                        mDisplayId,
-                        mActivityLaunchAnimator.getLaunchAnimation(associatedView, isOccluded())));
+                // We wrap animationCallback with a StatusBarLaunchAnimatorController so that the
+                // shade is collapsed after the animation (or when it is cancelled, aborted, etc).
+                ActivityLaunchAnimator.Controller controller =
+                        animate ? new StatusBarLaunchAnimatorController(animationController, this,
+                                intent.isActivity())
+                                : null;
+
+                mActivityLaunchAnimator.startPendingIntentWithAnimation(
+                        controller,
+                        (animationAdapter) -> intent.sendAndReturnResult(null, 0, null, null, null,
+                                null, getActivityOptions(mDisplayId, animationAdapter)));
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.
                 // Just log the exception message.
                 Log.w(TAG, "Sending intent failed: " + e);
-
+                if (!collapse) {
+                    // executeActionDismissingKeyguard did not collapse for us already.
+                    collapsePanelOnMainThread();
+                }
                 // TODO: Dismiss Keyguard.
             }
             if (intent.isActivity()) {
@@ -4472,7 +4537,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (intentSentUiThreadCallback != null) {
                 postOnUiThread(intentSentUiThreadCallback);
             }
-        }, afterKeyguardGone);
+        }, afterKeyguardGone, collapse);
     }
 
     private void postOnUiThread(Runnable runnable) {

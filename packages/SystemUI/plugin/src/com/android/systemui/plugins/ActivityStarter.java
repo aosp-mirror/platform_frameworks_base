@@ -19,6 +19,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.view.View;
 
+import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 /**
@@ -44,7 +45,15 @@ public interface ActivityStarter {
      * specifies an associated view that should be used for the activity launch animation.
      */
     void startPendingIntentDismissingKeyguard(PendingIntent intent,
-            Runnable intentSentUiThreadCallback, View associatedView);
+            Runnable intentSentUiThreadCallback, @Nullable View associatedView);
+
+    /**
+     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent, Runnable)}, but also
+     * specifies an animation controller that should be used for the activity launch animation.
+     */
+    void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentUiThreadCallback,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
 
     /**
      * The intent flag can be specified in startActivity().
@@ -55,6 +64,14 @@ public interface ActivityStarter {
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
     void postStartActivityDismissingKeyguard(Intent intent, int delay);
     void postStartActivityDismissingKeyguard(PendingIntent intent);
+
+    /**
+     * Similar to {@link #postStartActivityDismissingKeyguard(PendingIntent)}, but also specifies an
+     * animation controller that should be used for the activity launch animation.
+     */
+    void postStartActivityDismissingKeyguard(PendingIntent intent,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
+
     void postQSRunnableDismissingKeyguard(Runnable runnable);
 
     void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
