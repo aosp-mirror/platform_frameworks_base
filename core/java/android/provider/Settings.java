@@ -9921,6 +9921,18 @@ public final class Settings {
                 "accessibility_floating_menu_opacity";
 
         /**
+         * Prompts the user to the Accessibility button is replaced with the floating menu.
+         * <ul>
+         *    <li> 0 = disabled </li>
+         *    <li> 1 = enabled </li>
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT =
+                "accessibility_floating_menu_migration_tooltip_prompt";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide
