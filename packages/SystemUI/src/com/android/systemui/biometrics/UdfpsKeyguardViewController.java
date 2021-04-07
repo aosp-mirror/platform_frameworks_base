@@ -91,6 +91,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         mStatusBarStateController.addCallback(mStateListener);
         mStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
         mStateListener.onStateChanged(mStatusBarStateController.getState());
+        mAlternateAuthInterceptor.setQsExpanded(mKeyguardViewManager.isQsExpanded());
         mKeyguardViewManager.setAlternateAuthInterceptor(mAlternateAuthInterceptor);
     }
 
@@ -117,6 +118,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         pw.println("mShowBouncer=" + mShowBouncer);
         pw.println("mFaceDetectRunning=" + mFaceDetectRunning);
         pw.println("mTransitioningFromHomeToKeyguard=" + mTransitioningFromHome);
+        pw.println("mStatusBarState" + StatusBarState.toShortString(mStatusBarState));
+        pw.println("mQsExpanded=" + mQsExpanded);
     }
 
     /**
@@ -215,6 +218,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         public void onStateChanged(int statusBarState) {
             mStatusBarState = statusBarState;
             mView.setStatusBarState(statusBarState);
+            updatePauseAuth();
         }
     };
 
@@ -283,7 +287,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
                 @Override
                 public void dump(PrintWriter pw) {
-                    pw.print(getTag());
+                    pw.println(getTag());
                 }
             };
 }
