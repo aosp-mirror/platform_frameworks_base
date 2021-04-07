@@ -1066,11 +1066,25 @@ public final class PermissionChecker {
                 return AppOpsManager.MODE_ERRORED;
             }
             if (selfAccess) {
-                return appOpsManager.startOpNoThrow(op, resolvedAttributionSource.getUid(),
-                        resolvedAttributionSource.getPackageName(),
-                        /*startIfModeDefault*/ false,
-                        resolvedAttributionSource.getAttributionTag(),
-                        message);
+                // If the datasource is not in a trusted platform component then in would not
+                // have UPDATE_APP_OPS_STATS and the call below would fail. The problem is that
+                // an app is exposing runtime permission protected data but cannot blame others
+                // in a trusted way which would not properly show in permission usage UIs.
+                // As a fallback we note a proxy op that blames the app and the datasource.
+                try {
+                    return appOpsManager.startOpNoThrow(op, resolvedAttributionSource.getUid(),
+                            resolvedAttributionSource.getPackageName(),
+                            /*startIfModeDefault*/ false,
+                            resolvedAttributionSource.getAttributionTag(),
+                            message);
+                } catch (SecurityException e) {
+                    Slog.w(LOG_TAG, "Datasource " + attributionSource + " protecting data with"
+                            + " platform defined runtime permission "
+                            + AppOpsManager.opToPermission(op) + " while not having "
+                            + Manifest.permission.UPDATE_APP_OPS_STATS);
+                    return appOpsManager.startProxyOpNoThrow(op, attributionSource, message,
+                            skipProxyOperation);
+                }
             } else {
                 return appOpsManager.startProxyOpNoThrow(op, resolvedAttributionSource, message,
                         skipProxyOperation);
@@ -1082,10 +1096,24 @@ public final class PermissionChecker {
                 return AppOpsManager.MODE_ERRORED;
             }
             if (selfAccess) {
-                return appOpsManager.noteOpNoThrow(op, resolvedAttributionSource.getUid(),
-                        resolvedAttributionSource.getPackageName(),
-                        resolvedAttributionSource.getAttributionTag(),
-                        message);
+                // If the datasource is not in a trusted platform component then in would not
+                // have UPDATE_APP_OPS_STATS and the call below would fail. The problem is that
+                // an app is exposing runtime permission protected data but cannot blame others
+                // in a trusted way which would not properly show in permission usage UIs.
+                // As a fallback we note a proxy op that blames the app and the datasource.
+                try {
+                    return appOpsManager.noteOpNoThrow(op, resolvedAttributionSource.getUid(),
+                            resolvedAttributionSource.getPackageName(),
+                            resolvedAttributionSource.getAttributionTag(),
+                            message);
+                } catch (SecurityException e) {
+                    Slog.w(LOG_TAG, "Datasource " + attributionSource + " protecting data with"
+                            + " platform defined runtime permission "
+                            + AppOpsManager.opToPermission(op) + " while not having "
+                            + Manifest.permission.UPDATE_APP_OPS_STATS);
+                    return appOpsManager.noteProxyOpNoThrow(op, attributionSource, message,
+                            skipProxyOperation);
+                }
             } else {
                 return appOpsManager.noteProxyOpNoThrow(op, resolvedAttributionSource, message,
                         skipProxyOperation);
