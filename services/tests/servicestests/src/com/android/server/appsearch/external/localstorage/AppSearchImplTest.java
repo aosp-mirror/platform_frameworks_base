@@ -988,6 +988,49 @@ public class AppSearchImplTest {
     }
 
     @Test
+    public void testClearPackageData() throws AppSearchException {
+        List<SchemaTypeConfigProto> existingSchemas =
+                mAppSearchImpl.getSchemaProtoLocked().getTypesList();
+
+        // Insert package schema
+        List<AppSearchSchema> schema =
+                ImmutableList.of(new AppSearchSchema.Builder("schema").build());
+        mAppSearchImpl.setSchema(
+                "package",
+                "database",
+                schema,
+                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false,
+                /*version=*/ 0);
+
+        // Insert package document
+        GenericDocument document =
+                new GenericDocument.Builder<>("namespace", "uri", "schema").build();
+        mAppSearchImpl.putDocument("package", "database", document, /*logger=*/ null);
+
+        // Verify the document is indexed.
+        SearchSpec searchSpec =
+                new SearchSpec.Builder().setTermMatch(TermMatchType.Code.PREFIX_VALUE).build();
+        SearchResultPage searchResultPage =
+                mAppSearchImpl.query("package", "database", /*queryExpression=*/ "", searchSpec);
+        assertThat(searchResultPage.getResults()).hasSize(1);
+        assertThat(searchResultPage.getResults().get(0).getGenericDocument()).isEqualTo(document);
+
+        // Remove the package
+        mAppSearchImpl.clearPackageData("package");
+
+        // Verify the document is cleared.
+        searchResultPage =
+                mAppSearchImpl.query("package2", "database2", /*queryExpression=*/ "", searchSpec);
+        assertThat(searchResultPage.getResults()).isEmpty();
+
+        // Verify the schema is cleared.
+        assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
+                .containsExactlyElementsIn(existingSchemas);
+    }
+
+    @Test
     public void testGetPackageToDatabases() throws Exception {
         Map<String, Set<String>> existingMapping = mAppSearchImpl.getPackageToDatabases();
         Map<String, Set<String>> expectedMapping = new ArrayMap<>();
