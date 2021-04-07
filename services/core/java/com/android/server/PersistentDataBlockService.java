@@ -23,7 +23,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -46,6 +45,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
@@ -132,13 +132,13 @@ public class PersistentDataBlockService extends SystemService {
     private static final String FLASH_LOCK_UNLOCKED = "0";
 
     private final Context mContext;
+    private final String mDataBlockFile;
     private final boolean mIsRunningDSU;
     private final Object mLock = new Object();
     private final CountDownLatch mInitDoneSignal = new CountDownLatch(1);
 
     private int mAllowedUid = -1;
     private long mBlockDeviceSize;
-    private String mDataBlockFile;
 
     @GuardedBy("mLock")
     private boolean mIsWritable = true;
@@ -146,8 +146,12 @@ public class PersistentDataBlockService extends SystemService {
     public PersistentDataBlockService(Context context) {
         super(context);
         mContext = context;
-        mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
         mIsRunningDSU = SystemProperties.getBoolean(GSI_RUNNING_PROP, false);
+        if (mIsRunningDSU) {
+            mDataBlockFile = GSI_SANDBOX;
+        } else {
+            mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
+        }
         mBlockDeviceSize = -1; // Load lazily
     }
 
@@ -262,7 +266,11 @@ public class PersistentDataBlockService extends SystemService {
     private long getBlockDeviceSize() {
         synchronized (mLock) {
             if (mBlockDeviceSize == -1) {
-                mBlockDeviceSize = nativeGetBlockDeviceSize(mDataBlockFile);
+                if (mIsRunningDSU) {
+                    mBlockDeviceSize = MAX_DATA_BLOCK_SIZE;
+                } else {
+                    mBlockDeviceSize = nativeGetBlockDeviceSize(mDataBlockFile);
+                }
             }
         }
 
@@ -292,40 +300,30 @@ public class PersistentDataBlockService extends SystemService {
         return true;
     }
 
-    private FileOutputStream getBlockOutputStream() throws IOException {
-        if (!mIsRunningDSU) {
-            return new FileOutputStream(new File(mDataBlockFile));
-        } else {
-            File sandbox = new File(GSI_SANDBOX);
-            File realpdb = new File(SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP));
-            if (!sandbox.exists()) {
-                FileUtils.copy(realpdb, sandbox);
-                mDataBlockFile = GSI_SANDBOX;
-            }
-            Slog.i(TAG, "PersistentDataBlock copy-on-write");
-            return new FileOutputStream(sandbox);
-        }
+    private FileChannel getBlockOutputChannel() throws IOException {
+        return new RandomAccessFile(mDataBlockFile, "rw").getChannel();
     }
 
     private boolean computeAndWriteDigestLocked() {
         byte[] digest = computeDigestLocked(null);
         if (digest != null) {
-            DataOutputStream outputStream;
+            FileChannel channel;
             try {
-                outputStream = new DataOutputStream(getBlockOutputStream());
+                channel = getBlockOutputChannel();
             } catch (IOException e) {
                 Slog.e(TAG, "partition not available?", e);
                 return false;
             }
 
             try {
-                outputStream.write(digest, 0, DIGEST_SIZE_BYTES);
-                outputStream.flush();
+                ByteBuffer buf = ByteBuffer.allocate(DIGEST_SIZE_BYTES);
+                buf.put(digest);
+                buf.flip();
+                channel.write(buf);
+                channel.force(true);
             } catch (IOException e) {
                 Slog.e(TAG, "failed to write block checksum", e);
                 return false;
-            } finally {
-                IoUtils.closeQuietly(outputStream);
             }
             return true;
         } else {
@@ -376,25 +374,18 @@ public class PersistentDataBlockService extends SystemService {
     }
 
     private void formatPartitionLocked(boolean setOemUnlockEnabled) {
-        DataOutputStream outputStream;
-        try {
-            outputStream = new DataOutputStream(getBlockOutputStream());
-        } catch (IOException e) {
-            Slog.e(TAG, "partition not available?", e);
-            return;
-        }
 
-        byte[] data = new byte[DIGEST_SIZE_BYTES];
         try {
-            outputStream.write(data, 0, DIGEST_SIZE_BYTES);
-            outputStream.writeInt(PARTITION_TYPE_MARKER);
-            outputStream.writeInt(0); // data size
-            outputStream.flush();
+            FileChannel channel = getBlockOutputChannel();
+            ByteBuffer buf = ByteBuffer.allocate(DIGEST_SIZE_BYTES + HEADER_SIZE);
+            buf.put(new byte[DIGEST_SIZE_BYTES]);
+            buf.putInt(PARTITION_TYPE_MARKER);
+            buf.putInt(0);
+            channel.write(buf);
+            channel.force(true);
         } catch (IOException e) {
             Slog.e(TAG, "failed to format block", e);
             return;
-        } finally {
-            IoUtils.closeQuietly(outputStream);
         }
 
         doSetOemUnlockEnabledLocked(setOemUnlockEnabled);
@@ -402,16 +393,9 @@ public class PersistentDataBlockService extends SystemService {
     }
 
     private void doSetOemUnlockEnabledLocked(boolean enabled) {
-        FileOutputStream outputStream;
-        try {
-            outputStream = getBlockOutputStream();
-        } catch (IOException e) {
-            Slog.e(TAG, "partition not available", e);
-            return;
-        }
 
         try {
-            FileChannel channel = outputStream.getChannel();
+            FileChannel channel = getBlockOutputChannel();
 
             channel.position(getBlockDeviceSize() - 1);
 
@@ -419,13 +403,12 @@ public class PersistentDataBlockService extends SystemService {
             data.put(enabled ? (byte) 1 : (byte) 0);
             data.flip();
             channel.write(data);
-            outputStream.flush();
+            channel.force(true);
         } catch (IOException e) {
             Slog.e(TAG, "unable to access persistent partition", e);
             return;
         } finally {
             SystemProperties.set(OEM_UNLOCK_PROP, enabled ? "1" : "0");
-            IoUtils.closeQuietly(outputStream);
         }
     }
 
@@ -479,35 +462,32 @@ public class PersistentDataBlockService extends SystemService {
                 return (int) -maxBlockSize;
             }
 
-            DataOutputStream outputStream;
+            FileChannel channel;
             try {
-                outputStream = new DataOutputStream(getBlockOutputStream());
+                channel = getBlockOutputChannel();
             } catch (IOException e) {
                 Slog.e(TAG, "partition not available?", e);
-                return -1;
+               return -1;
             }
 
-            ByteBuffer headerAndData = ByteBuffer.allocate(data.length + HEADER_SIZE);
+            ByteBuffer headerAndData = ByteBuffer.allocate(
+                                           data.length + HEADER_SIZE + DIGEST_SIZE_BYTES);
+            headerAndData.put(new byte[DIGEST_SIZE_BYTES]);
             headerAndData.putInt(PARTITION_TYPE_MARKER);
             headerAndData.putInt(data.length);
             headerAndData.put(data);
-
+            headerAndData.flip();
             synchronized (mLock) {
                 if (!mIsWritable) {
-                    IoUtils.closeQuietly(outputStream);
                     return -1;
                 }
 
                 try {
-                    byte[] checksum = new byte[DIGEST_SIZE_BYTES];
-                    outputStream.write(checksum, 0, DIGEST_SIZE_BYTES);
-                    outputStream.write(headerAndData.array());
-                    outputStream.flush();
+                    channel.write(headerAndData);
+                    channel.force(true);
                 } catch (IOException e) {
                     Slog.e(TAG, "failed writing to the persistent data block", e);
                     return -1;
-                } finally {
-                    IoUtils.closeQuietly(outputStream);
                 }
 
                 if (computeAndWriteDigestLocked()) {
@@ -567,17 +547,6 @@ public class PersistentDataBlockService extends SystemService {
         public void wipe() {
             enforceOemUnlockWritePermission();
 
-            if (mIsRunningDSU) {
-                File sandbox = new File(GSI_SANDBOX);
-                if (sandbox.exists()) {
-                    if (sandbox.delete()) {
-                        mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
-                    } else {
-                        Slog.e(TAG, "Failed to wipe sandbox persistent data block");
-                    }
-                }
-                return;
-            }
             synchronized (mLock) {
                 int ret = nativeWipe(mDataBlockFile);
 
@@ -735,28 +704,18 @@ public class PersistentDataBlockService extends SystemService {
         }
 
         private void writeDataBuffer(long offset, ByteBuffer dataBuffer) {
-            FileOutputStream outputStream;
-            try {
-                outputStream = getBlockOutputStream();
-            } catch (IOException e) {
-                Slog.e(TAG, "partition not available", e);
-                return;
-            }
             synchronized (mLock) {
                 if (!mIsWritable) {
-                    IoUtils.closeQuietly(outputStream);
                     return;
                 }
                 try {
-                    FileChannel channel = outputStream.getChannel();
+                    FileChannel channel = getBlockOutputChannel();
                     channel.position(offset);
                     channel.write(dataBuffer);
-                    outputStream.flush();
+                    channel.force(true);
                 } catch (IOException e) {
                     Slog.e(TAG, "unable to access persistent partition", e);
                     return;
-                } finally {
-                    IoUtils.closeQuietly(outputStream);
                 }
 
                 computeAndWriteDigestLocked();
