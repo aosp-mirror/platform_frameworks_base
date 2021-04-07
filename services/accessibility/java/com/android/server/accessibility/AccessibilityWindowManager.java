@@ -373,6 +373,20 @@ public class AccessibilityWindowManager {
             }
         }
 
+        /**
+         * Called when the display is reparented and becomes an embedded
+         * display.
+         *
+         * @param embeddedDisplayId The embedded display Id.
+         */
+        @Override
+        public void onDisplayReparented(int embeddedDisplayId) {
+            // Removes the un-used window observer for the embedded display.
+            synchronized (mLock) {
+                mDisplayWindowsObservers.remove(embeddedDisplayId);
+            }
+        }
+
         private boolean shouldUpdateWindowsLocked(boolean forceSend,
                 @NonNull List<WindowInfo> windows) {
             if (forceSend) {
