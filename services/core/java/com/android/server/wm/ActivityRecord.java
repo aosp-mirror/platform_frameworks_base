@@ -587,7 +587,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     AnimatingActivityRegistry mAnimatingActivityRegistry;
 
-    private Task mLastParent;
+    // Set whenever the ActivityRecord gets reparented to a Task so we can know the last known
+    // parent was when the ActivityRecord is detached from the hierarchy
+    private Task mLastKnownParent;
+
+    // Set to the previous Task parent of the ActivityRecord when it is reparented to a new Task
+    // due to picture-in-picture. This gets cleared whenever this activity or the Task
+    // it references to gets removed. This should also be cleared when we move out of pip.
+    private Task mLastParentBeforePip;
 
     boolean firstWindowDrawn;
     /** Whether the visible window(s) of this activity is drawn. */
@@ -1096,6 +1103,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.println(prefix + "configChanges=0x" + Integer.toHexString(info.configChanges));
             }
         }
+        if (mLastParentBeforePip != null) {
+            pw.println(prefix + "lastParentTaskIdBeforePip=" + mLastParentBeforePip.mTaskId);
+        }
 
         dumpLetterboxInfo(pw, prefix);
     }
@@ -1349,7 +1359,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (getDisplayContent() != null) {
                 getDisplayContent().mClosingApps.remove(this);
             }
-        } else if (mLastParent != null && mLastParent.getRootTask() != null) {
+        } else if (mLastKnownParent != null && mLastKnownParent.getRootTask() != null) {
             task.getRootTask().mExitingActivities.remove(this);
         }
         final Task rootTask = getRootTask();
@@ -1362,7 +1372,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ? rootTask.getAnimatingActivityRegistry()
                 : null;
 
-        mLastParent = task;
+        mLastKnownParent = task;
+        if (mLastKnownParent == mLastParentBeforePip) {
+            // Activity's reparented back from pip, clear the links once established
+            clearLastParentBeforePip();
+        }
 
         updateColorTransform();
 
@@ -1379,6 +1393,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 rootTask.setHasBeenVisible(true);
             }
         }
+    }
+
+    /**
+     * Sets {@link #mLastParentBeforePip} to the current parent Task, it's caller's job to ensure
+     * {@link #getTask()} is set before this is called.
+     */
+    void setLastParentBeforePip() {
+        mLastParentBeforePip = getTask();
+        mLastParentBeforePip.mChildPipActivity = this;
+    }
+
+    private void clearLastParentBeforePip() {
+        if (mLastParentBeforePip != null) {
+            mLastParentBeforePip.mChildPipActivity = null;
+            mLastParentBeforePip = null;
+        }
+    }
+
+    @Nullable Task getLastParentBeforePip() {
+        return mLastParentBeforePip;
     }
 
     private void updateColorTransform() {
@@ -3434,6 +3468,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     void cleanUp(boolean cleanServices, boolean setState) {
         task.cleanUpActivityReferences(this);
+        clearLastParentBeforePip();
 
         deferRelaunchUntilPaused = false;
         frozenBeforeDestroy = false;
