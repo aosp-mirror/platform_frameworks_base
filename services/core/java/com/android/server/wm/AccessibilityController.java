@@ -59,6 +59,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -188,22 +189,28 @@ final class AccessibilityController {
         }
 
         if (callback != null) {
+            WindowsForAccessibilityObserver observer =
+                    mWindowsForAccessibilityObserver.get(displayId);
             if (isEmbeddedDisplay(dc)) {
                 // If this display is an embedded one, its window observer should have been set from
                 // window manager after setting its parent window. But if its window observer is
                 // empty, that means this mapping didn't be set, and needs to do this again.
                 // This happened when accessibility window observer is disabled and enabled again.
-                if (mWindowsForAccessibilityObserver.get(displayId) == null) {
+                if (observer == null) {
                     handleWindowObserverOfEmbeddedDisplay(displayId, dc.getParentWindow());
                 }
                 return false;
-            } else if (mWindowsForAccessibilityObserver.get(displayId) != null) {
-                throw new IllegalStateException(
-                        "Windows for accessibility callback of display "
-                                + displayId + " already set!");
+            } else if (observer != null) {
+                final String errorMessage = "Windows for accessibility callback of display "
+                        + displayId + " already set!";
+                Slog.e(TAG, errorMessage);
+                if (Build.IS_DEBUGGABLE) {
+                    throw new IllegalStateException(errorMessage);
+                }
+                removeObserverOfEmbeddedDisplay(observer);
+                mWindowsForAccessibilityObserver.remove(displayId);
             }
-            final WindowsForAccessibilityObserver observer =
-                    new WindowsForAccessibilityObserver(mService, displayId, callback);
+            observer = new WindowsForAccessibilityObserver(mService, displayId, callback);
             mWindowsForAccessibilityObserver.put(displayId, observer);
             mAllObserversInitialized &= observer.mInitialized;
         } else {
@@ -218,9 +225,12 @@ final class AccessibilityController {
             final WindowsForAccessibilityObserver windowsForA11yObserver =
                     mWindowsForAccessibilityObserver.get(displayId);
             if (windowsForA11yObserver == null) {
-                throw new IllegalStateException(
-                        "Windows for accessibility callback of display " + displayId
-                                + " already cleared!");
+                final String errorMessage = "Windows for accessibility callback of display "
+                        + displayId + " already cleared!";
+                Slog.e(TAG, errorMessage);
+                if (Build.IS_DEBUGGABLE) {
+                    throw new IllegalStateException(errorMessage);
+                }
             }
             removeObserverOfEmbeddedDisplay(windowsForA11yObserver);
             mWindowsForAccessibilityObserver.remove(displayId);
