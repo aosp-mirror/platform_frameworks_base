@@ -149,7 +149,7 @@ TEST(CanvasOp, simpleDrawPoints) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
     size_t numPts = 3;
-    auto pts = sk_ref_sp(
+    auto pts = sk_sp<Points>(
           new Points({
               {32, 16},
               {48, 48},
@@ -192,7 +192,7 @@ TEST(CanvasOp, simpleDrawLines) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
     size_t numPts = 3;
-    auto pts = sk_ref_sp(
+    auto pts = sk_sp<Points>(
         new Points({
                {32, 16},
                {48, 48},
