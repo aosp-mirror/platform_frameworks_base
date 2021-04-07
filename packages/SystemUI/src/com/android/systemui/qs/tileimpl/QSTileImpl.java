@@ -276,7 +276,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_CLICK, 0, getMetricsSpec(),
                 getInstanceId());
         mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
-        mHandler.sendEmptyMessage(H.CLICK);
+        if (!mFalsingManager.isFalseTap(true, 0.1)) {
+            mHandler.sendEmptyMessage(H.CLICK);
+        }
     }
 
     public void secondaryClick() {
@@ -605,9 +607,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                                 mContext, mEnforcedAdmin);
                         mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
-                        if (!mFalsingManager.isFalseTap(true, 0.1)) {
-                            handleClick();
-                        }
+                        handleClick();
                     }
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
