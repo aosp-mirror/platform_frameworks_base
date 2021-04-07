@@ -3005,10 +3005,17 @@ package android.graphics.fonts {
   }
 
   public static final class FontFamilyUpdateRequest.Font {
-    ctor public FontFamilyUpdateRequest.Font(@NonNull String, @NonNull android.graphics.fonts.FontStyle, @NonNull java.util.List<android.graphics.fonts.FontVariationAxis>);
     method @NonNull public java.util.List<android.graphics.fonts.FontVariationAxis> getAxes();
+    method @IntRange(from=0) public int getIndex();
     method @NonNull public String getPostScriptName();
     method @NonNull public android.graphics.fonts.FontStyle getStyle();
+  }
+
+  public static final class FontFamilyUpdateRequest.Font.Builder {
+    ctor public FontFamilyUpdateRequest.Font.Builder(@NonNull String, @NonNull android.graphics.fonts.FontStyle);
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.Font build();
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.Font.Builder setAxes(@NonNull java.util.List<android.graphics.fonts.FontVariationAxis>);
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.Font.Builder setIndex(@IntRange(from=0) int);
   }
 
   public static final class FontFamilyUpdateRequest.FontFamily {
