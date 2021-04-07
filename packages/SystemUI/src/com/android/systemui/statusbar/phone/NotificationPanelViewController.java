@@ -111,6 +111,7 @@ import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -481,6 +482,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final UserManager mUserManager;
     private final ShadeController mShadeController;
     private final MediaDataManager mMediaDataManager;
+    private NotificationShadeDepthController mDepthController;
     private int mDisplayId;
 
     /**
@@ -580,6 +582,7 @@ public class NotificationPanelViewController extends PanelViewController {
             ScrimController scrimController,
             UserManager userManager,
             MediaDataManager mediaDataManager,
+            NotificationShadeDepthController notificationShadeDepthController,
             AmbientState ambientState,
             FeatureFlags featureFlags) {
         super(view, falsingManager, dozeLog, keyguardStateController,
@@ -598,6 +601,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationIconAreaController = notificationIconAreaController;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mKeyguardStatusBarViewComponentFactory = keyguardStatusBarViewComponentFactory;
+        mDepthController = notificationShadeDepthController;
         mFeatureFlags = featureFlags;
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
         mKeyguardUserSwitcherComponentFactory = keyguardUserSwitcherComponentFactory;
@@ -1997,6 +2001,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         mScrimController.setQsExpansion(qsExpansionFraction);
         mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
+        mDepthController.setQsPanelExpansion(qsExpansionFraction);
     }
 
     private String determineAccessibilityPaneTitle() {
