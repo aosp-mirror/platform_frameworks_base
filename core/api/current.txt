@@ -7201,7 +7201,6 @@ package android.app.admin {
     method public boolean isComplianceAcknowledgementRequired();
     method public boolean isDeviceIdAttestationSupported();
     method public boolean isDeviceOwnerApp(String);
-    method public boolean isEnterpriseNetworkPreferenceEnabled();
     method public boolean isEphemeralUser(@NonNull android.content.ComponentName);
     method public boolean isKeyPairGrantedToWifiAuth(@NonNull String);
     method public boolean isLockTaskPermitted(String);
@@ -7212,6 +7211,7 @@ package android.app.admin {
     method public boolean isOrganizationOwnedDeviceWithManagedProfile();
     method public boolean isOverrideApnEnabled(@NonNull android.content.ComponentName);
     method public boolean isPackageSuspended(@NonNull android.content.ComponentName, String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public boolean isPreferentialNetworkServiceEnabled();
     method public boolean isProfileOwnerApp(String);
     method public boolean isProvisioningAllowed(@NonNull String);
     method public boolean isResetPasswordTokenActive(android.content.ComponentName);
@@ -7263,7 +7263,6 @@ package android.app.admin {
     method public void setDelegatedScopes(@NonNull android.content.ComponentName, @NonNull String, @NonNull java.util.List<java.lang.String>);
     method public void setDeviceOwnerLockScreenInfo(@NonNull android.content.ComponentName, CharSequence);
     method public void setEndUserSessionMessage(@NonNull android.content.ComponentName, @Nullable CharSequence);
-    method public void setEnterpriseNetworkPreferenceEnabled(boolean);
     method public void setFactoryResetProtectionPolicy(@NonNull android.content.ComponentName, @Nullable android.app.admin.FactoryResetProtectionPolicy);
     method public int setGlobalPrivateDnsModeOpportunistic(@NonNull android.content.ComponentName);
     method @WorkerThread public int setGlobalPrivateDnsModeSpecifiedHost(@NonNull android.content.ComponentName, @NonNull String);
@@ -7306,6 +7305,7 @@ package android.app.admin {
     method public boolean setPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName, @Nullable java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(@NonNull android.content.ComponentName, java.util.List<java.lang.String>);
     method public void setPersonalAppsSuspended(@NonNull android.content.ComponentName, boolean);
+    method public void setPreferentialNetworkServiceEnabled(boolean);
     method public void setProfileEnabled(@NonNull android.content.ComponentName);
     method public void setProfileName(@NonNull android.content.ComponentName, String);
     method public void setRecommendedGlobalProxy(@NonNull android.content.ComponentName, @Nullable android.net.ProxyInfo);

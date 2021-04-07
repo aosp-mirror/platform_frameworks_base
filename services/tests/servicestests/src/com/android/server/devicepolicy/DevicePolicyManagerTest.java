@@ -4030,20 +4030,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    public void testGetSetEnterpriseNetworkPreference() throws Exception {
+    public void testGetSetPreferentialNetworkService() throws Exception {
         assertExpectException(SecurityException.class, null,
-                () -> dpm.setEnterpriseNetworkPreferenceEnabled(false));
+                () -> dpm.setPreferentialNetworkServiceEnabled(false));
 
         assertExpectException(SecurityException.class, null,
-                () -> dpm.isEnterpriseNetworkPreferenceEnabled());
+                () -> dpm.isPreferentialNetworkServiceEnabled());
 
         final int managedProfileUserId = 15;
         final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
         addManagedProfile(admin1, managedProfileAdminUid, admin1);
         mContext.binder.callingUid = managedProfileAdminUid;
 
-        dpm.setEnterpriseNetworkPreferenceEnabled(false);
-        assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isFalse();
+        dpm.setPreferentialNetworkServiceEnabled(false);
+        assertThat(dpm.isPreferentialNetworkServiceEnabled()).isFalse();
         verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
                 eq(UserHandle.of(managedProfileUserId)),
                 eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT),
@@ -4051,8 +4051,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 any()
         );
 
-        dpm.setEnterpriseNetworkPreferenceEnabled(true);
-        assertThat(dpm.isEnterpriseNetworkPreferenceEnabled()).isTrue();
+        dpm.setPreferentialNetworkServiceEnabled(true);
+        assertThat(dpm.isPreferentialNetworkServiceEnabled()).isTrue();
         verify(getServices().connectivityManager, times(1)).setProfileNetworkPreference(
                 eq(UserHandle.of(managedProfileUserId)),
                 eq(ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE),

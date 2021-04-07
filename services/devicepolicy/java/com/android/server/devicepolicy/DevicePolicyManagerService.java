@@ -3097,13 +3097,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
 
-        boolean enableEnterpriseNetworkPreferenceEnabled = true;
+        boolean preferentialNetworkServiceEnabled = true;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
-            enableEnterpriseNetworkPreferenceEnabled = owner != null
-                    ? owner.mEnterpriseNetworkPreferenceEnabled : true;
+            preferentialNetworkServiceEnabled = owner != null
+                    ? owner.mPreferentialNetworkServiceEnabled : true;
         }
-        updateNetworkPreferenceForUser(userId, enableEnterpriseNetworkPreferenceEnabled);
+        updateNetworkPreferenceForUser(userId, preferentialNetworkServiceEnabled);
 
         startOwnerService(userId, "start-user");
     }
@@ -11572,32 +11572,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setEnterpriseNetworkPreferenceEnabled(boolean enabled) {
+    public void setPreferentialNetworkServiceEnabled(boolean enabled) {
         if (!mHasFeature) {
             return;
         }
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(isProfileOwner(caller),
                 "Caller is not profile owner;"
-                        + " only profile owner may control the enterprise network preference");
+                        + " only profile owner may control the preferntial network service");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
                     caller.getUserId());
             if (requiredAdmin != null
-                    && requiredAdmin.mEnterpriseNetworkPreferenceEnabled != enabled) {
-                requiredAdmin.mEnterpriseNetworkPreferenceEnabled = enabled;
+                    && requiredAdmin.mPreferentialNetworkServiceEnabled != enabled) {
+                requiredAdmin.mPreferentialNetworkServiceEnabled = enabled;
                 saveSettingsLocked(caller.getUserId());
             }
         }
         updateNetworkPreferenceForUser(caller.getUserId(), enabled);
         DevicePolicyEventLogger
-                .createEvent(DevicePolicyEnums.SET_ENTERPRISE_NETWORK_PREFERENCE_ENABLED)
+                .createEvent(DevicePolicyEnums.SET_PREFERENTIAL_NETWORK_SERVICE_ENABLED)
                 .setBoolean(enabled)
                 .write();
     }
 
     @Override
-    public boolean isEnterpriseNetworkPreferenceEnabled(int userHandle) {
+    public boolean isPreferentialNetworkServiceEnabled(int userHandle) {
         if (!mHasFeature) {
             return false;
         }
@@ -11608,7 +11608,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(userHandle);
             if (requiredAdmin != null) {
-                return requiredAdmin.mEnterpriseNetworkPreferenceEnabled;
+                return requiredAdmin.mPreferentialNetworkServiceEnabled;
             } else {
                 return false;
             }
@@ -17182,11 +17182,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void updateNetworkPreferenceForUser(int userId,
-            boolean enableEnterpriseNetworkPreferenceEnabled) {
+            boolean preferentialNetworkServiceEnabled) {
         if (!isManagedProfile(userId)) {
             return;
         }
-        int networkPreference = enableEnterpriseNetworkPreferenceEnabled
+        int networkPreference = preferentialNetworkServiceEnabled
                 ? PROFILE_NETWORK_PREFERENCE_ENTERPRISE : PROFILE_NETWORK_PREFERENCE_DEFAULT;
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getConnectivityManager().setProfileNetworkPreference(

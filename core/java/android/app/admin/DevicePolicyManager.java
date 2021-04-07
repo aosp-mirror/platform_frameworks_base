@@ -10121,45 +10121,51 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether enterprise network preference is enabled on the work profile.
+     * Sets whether preferential network service is enabled on the work profile.
+     * For example, an organization can have a deal/agreement with a carrier that all of
+     * the work data from its employees’ devices will be sent via a network service dedicated
+     * for enterprise use.
      *
-     * For example, a corporation can have a deal/agreement with a carrier that all of its
-     * employees’ devices use data on a network preference dedicated for enterprise use.
+     * An example of a supported preferential network service is the Enterprise
+     * slice on 5G networks.
      *
-     * By default, enterprise network preference is enabled on the work profile on supported
+     * By default, preferential network service is enabled on the work profile on supported
      * carriers and devices. Admins can explicitly disable it with this API.
+     * On fully-managed devices this method is unsupported because all traffic is considered
+     * work traffic.
      *
      * <p>This method can only be called by the profile owner of a managed profile.
-     *
-     * @param enabled whether enterprise network preference should be enabled.
+     * @param enabled whether preferential network service should be enabled.
      * @throws SecurityException if the caller is not the profile owner.
      **/
-    public void setEnterpriseNetworkPreferenceEnabled(boolean enabled) {
-        throwIfParentInstance("setEnterpriseNetworkPreferenceEnabled");
-        if (mService != null) {
-            try {
-                mService.setEnterpriseNetworkPreferenceEnabled(enabled);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+    public void setPreferentialNetworkServiceEnabled(boolean enabled) {
+        throwIfParentInstance("setPreferentialNetworkServiceEnabled");
+        if (mService == null) {
+            return;
+        }
+
+        try {
+            mService.setPreferentialNetworkServiceEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Indicates whether whether enterprise network preference is enabled.
+     * Indicates whether preferential network service is enabled.
      *
      * <p>This method can be called by the profile owner of a managed profile.
      *
-     * @return whether whether enterprise network preference is enabled.
+     * @return whether preferential network service is enabled.
      * @throws SecurityException if the caller is not the profile owner.
      */
-    public boolean isEnterpriseNetworkPreferenceEnabled() {
-        throwIfParentInstance("isEnterpriseNetworkPreferenceEnabled");
+    public boolean isPreferentialNetworkServiceEnabled() {
+        throwIfParentInstance("isPreferentialNetworkServiceEnabled");
         if (mService == null) {
             return false;
         }
         try {
-            return mService.isEnterpriseNetworkPreferenceEnabled(myUserId());
+            return mService.isPreferentialNetworkServiceEnabled(myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
