@@ -23,6 +23,7 @@
 #include "hwui/MinikinUtils.h"
 #include "hwui/PaintFilter.h"
 #include "pipeline/skia/AnimatedDrawables.h"
+#include "pipeline/skia/HolePunch.h"
 
 #include <SkAndroidFrameworkUtils.h>
 #include <SkAnimatedImage.h>
@@ -242,6 +243,13 @@ const SkiaCanvas::SaveRec* SkiaCanvas::currentSaveRec() const {
     SkASSERT(!rec || currentSaveCount >= rec->saveCount);
 
     return (rec && rec->saveCount == currentSaveCount) ? rec : nullptr;
+}
+
+void SkiaCanvas::punchHole(const SkRRect& rect) {
+    SkPaint paint = SkPaint();
+    paint.setColor(0);
+    paint.setBlendMode(SkBlendMode::kClear);
+    mCanvas->drawRRect(rect, paint);
 }
 
 // ----------------------------------------------------------------------------

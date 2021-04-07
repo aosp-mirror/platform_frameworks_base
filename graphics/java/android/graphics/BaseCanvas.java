@@ -673,6 +673,13 @@ public abstract class BaseCanvas {
     /**
      * @hide
      */
+    public void punchHole(float left, float top, float right, float bottom, float rx, float ry) {
+        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry);
+    }
+
+    /**
+     * @hide
+     */
     public void setHwBitmapsInSwModeEnabled(boolean enabled) {
         mAllowHwBitmapsInSwMode = enabled;
     }
@@ -815,4 +822,7 @@ public abstract class BaseCanvas {
 
     private static native void nDrawTextOnPath(long nativeCanvas, String text, long nativePath,
             float hOffset, float vOffset, int flags, long nativePaint);
+
+    private static native void nPunchHole(long renderer, float left, float top, float right,
+            float bottom, float rx, float ry);
 }
