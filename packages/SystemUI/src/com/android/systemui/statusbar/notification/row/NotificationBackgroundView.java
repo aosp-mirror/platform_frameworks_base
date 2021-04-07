@@ -284,7 +284,7 @@ public class NotificationBackgroundView extends View {
         mActualWidth = params.getWidth();
         float alphaProgress = Interpolators.ALPHA_IN.getInterpolation(
                 params.getProgress(
-                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_OUT_CONTENT /* delay */,
+                        ActivityLaunchAnimator.ANIMATION_DELAY_FADE_IN_WINDOW /* delay */,
                         ActivityLaunchAnimator.ANIMATION_DURATION_FADE_IN_WINDOW /* duration */));
         mBackground.setAlpha((int) (mDrawableAlpha * (1.0f - alphaProgress)));
         invalidate();
