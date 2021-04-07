@@ -1851,6 +1851,10 @@ public class NotificationPanelViewController extends PanelViewController {
             mPulseExpansionHandler.setQsExpanded(expanded);
             mKeyguardBypassController.setQSExpanded(expanded);
             mStatusBarKeyguardViewManager.setQsExpanded(expanded);
+
+            if (mDisabledUdfpsController != null) {
+                mDisabledUdfpsController.setQsExpanded(expanded);
+            }
         }
     }
 
@@ -3551,7 +3555,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     mUpdateMonitor,
                     mAuthController,
                     mStatusBarKeyguardViewManager,
-                    mKeyguardStateController);
+                    mKeyguardStateController,
+                    mFalsingManager);
             mDisabledUdfpsController.init();
         } else if (mDisabledUdfpsController != null && !udfpsEnrolled) {
             mDisabledUdfpsController.destroy();
