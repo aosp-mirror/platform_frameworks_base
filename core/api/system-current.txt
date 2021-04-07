@@ -11985,10 +11985,11 @@ package android.telephony.ims {
     method public int describeContents();
     method @Nullable public String getCallIdParameter();
     method @NonNull public byte[] getContent();
-    method @NonNull public byte[] getEncodedMessage();
+    method @Deprecated @NonNull public byte[] getEncodedMessage();
     method @NonNull public String getHeaderSection();
     method @NonNull public String getStartLine();
     method @NonNull public String getViaBranchParameter();
+    method @NonNull public byte[] toEncodedMessage();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipMessage> CREATOR;
   }
