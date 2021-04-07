@@ -12271,18 +12271,17 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public ArraySet<String> getOptimizablePackages() {
         ArraySet<String> pkgs = new ArraySet<>();
-        final boolean hibernationEnabled = AppHibernationService.isAppHibernationEnabled();
-        AppHibernationManagerInternal appHibernationManager =
-                mInjector.getLocalService(AppHibernationManagerInternal.class);
         synchronized (mLock) {
             for (AndroidPackage p : mPackages.values()) {
-                // Checking hibernation state is an inexpensive call.
-                boolean isHibernating = hibernationEnabled
-                        && appHibernationManager.isHibernatingGlobally(p.getPackageName());
-                if (PackageDexOptimizer.canOptimizePackage(p) && !isHibernating) {
+                if (PackageDexOptimizer.canOptimizePackage(p)) {
                     pkgs.add(p.getPackageName());
                 }
             }
+        }
+        if (AppHibernationService.isAppHibernationEnabled()) {
+            AppHibernationManagerInternal appHibernationManager =
+                    mInjector.getLocalService(AppHibernationManagerInternal.class);
+            pkgs.removeIf(pkgName -> appHibernationManager.isHibernatingGlobally(pkgName));
         }
         return pkgs;
     }
@@ -23460,10 +23459,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         if (shouldUnhibernate) {
-            AppHibernationManagerInternal ah =
-                    mInjector.getLocalService(AppHibernationManagerInternal.class);
-            ah.setHibernatingForUser(packageName, userId, false);
-            ah.setHibernatingGlobally(packageName, false);
+            mHandler.post(() -> {
+                AppHibernationManagerInternal ah =
+                        mInjector.getLocalService(AppHibernationManagerInternal.class);
+                ah.setHibernatingForUser(packageName, userId, false);
+                ah.setHibernatingGlobally(packageName, false);
+            });
         }
     }
 
