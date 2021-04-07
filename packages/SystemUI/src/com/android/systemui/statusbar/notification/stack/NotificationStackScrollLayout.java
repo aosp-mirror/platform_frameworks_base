@@ -658,6 +658,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             y = getHeight() - getEmptyBottomMargin();
             mDebugPaint.setColor(Color.GREEN);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+
+            y = (int) (mAmbientState.getStackY());
+            mDebugPaint.setColor(Color.CYAN);
+            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+
+            y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
+            mDebugPaint.setColor(Color.BLUE);
+            canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
         }
     }
 
@@ -1123,9 +1131,23 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mTopPaddingNeedsAnimation = true;
                 mNeedsAnimation = true;
             }
+            updateStackPosition();
             requestChildrenUpdate();
             notifyHeightChangeListener(null, animate);
         }
+    }
+
+    /**
+     * Apply expansion fraction to the y position and height of the notifications panel.
+     */
+    private void updateStackPosition() {
+        // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
+        mAmbientState.setStackY(
+                MathUtils.lerp(0, mTopPadding, mAmbientState.getExpansionFraction()));
+        final float shadeBottom = getHeight() - getEmptyBottomMargin();
+        mAmbientState.setStackEndHeight(shadeBottom - mTopPadding);
+        mAmbientState.setStackHeight(
+                MathUtils.lerp(0, shadeBottom - mTopPadding, mAmbientState.getExpansionFraction()));
     }
 
     /**
@@ -1135,6 +1157,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void setExpandedHeight(float height) {
+        final float shadeBottom = getHeight() - getEmptyBottomMargin();
+        final float expansionFraction = MathUtils.constrain(height / shadeBottom, 0f, 1f);
+        mAmbientState.setExpansionFraction(expansionFraction);
+        updateStackPosition();
+
         mExpandedHeight = height;
         setIsExpanded(height > 0);
         int minExpansionHeight = getMinExpansionHeight();
@@ -2067,7 +2094,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mContentHeight = height + Math.max(mIntrinsicPadding, mTopPadding) + mBottomMargin;
         updateScrollability();
         clampScrollPosition();
-        mAmbientState.setLayoutMaxHeight(mContentHeight);
+        updateStackPosition();
+        mAmbientState.setContentHeight(mContentHeight);
     }
 
     /**

@@ -783,6 +783,10 @@ public class NotificationStackScrollLayoutController {
         return mView.getTranslationX();
     }
 
+    public int indexOfChild(View view) {
+        return mView.indexOfChild(view);
+    }
+
     public void setOnHeightChangedListener(
             ExpandableView.OnHeightChangedListener listener) {
         mView.setOnHeightChangedListener(listener);
