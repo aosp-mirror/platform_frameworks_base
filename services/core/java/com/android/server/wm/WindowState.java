@@ -2919,21 +2919,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return processConfig;
     }
 
-    void getMergedConfiguration(MergedConfiguration outConfiguration) {
-        final Configuration globalConfig = getProcessGlobalConfiguration();
-        final Configuration overrideConfig = getMergedOverrideConfiguration();
-        outConfiguration.setConfiguration(globalConfig, overrideConfig);
-    }
-
-    void setLastReportedMergedConfiguration(MergedConfiguration config) {
-        mLastReportedConfiguration.setTo(config);
-        mLastConfigReportedToClient = true;
-    }
-
-    void getLastReportedMergedConfiguration(MergedConfiguration config) {
-        config.setTo(mLastReportedConfiguration);
-    }
-
     private Configuration getLastReportedConfiguration() {
         return mLastReportedConfiguration.getMergedConfiguration();
     }
@@ -3712,7 +3697,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return wpc != null && wpc.registeredForDisplayAreaConfigChanges();
     }
 
-    void fillClientWindowFrames(ClientWindowFrames outFrames) {
+    /**
+     * Fills the given window frames and merged configuration for the client.
+     *
+     * @param outFrames The frames that will be sent to the client.
+     * @param outMergedConfiguration The configuration that will be sent to the client.
+     * @param useLatestConfig Whether to use the latest configuration.
+     * @param relayoutVisible Whether to consider visibility to use the latest configuration.
+     */
+    void fillClientWindowFramesAndConfiguration(ClientWindowFrames outFrames,
+            MergedConfiguration outMergedConfiguration, boolean useLatestConfig,
+            boolean relayoutVisible) {
         outFrames.frame.set(mWindowFrames.mCompatFrame);
         outFrames.displayFrame.set(mWindowFrames.mDisplayFrame);
         if (mInvGlobalScale != 1.0f && hasCompatScale()) {
@@ -3737,6 +3732,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final DisplayInfo displayInfo = getDisplayInfo();
             backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         }
+
+        // Note: in the cases where the window is tied to an activity, we should not send a
+        // configuration update when the window has requested to be hidden. Doing so can lead to
+        // the client erroneously accepting a configuration that would have otherwise caused an
+        // activity restart. We instead hand back the last reported {@link MergedConfiguration}.
+        if (useLatestConfig || (relayoutVisible && (shouldCheckTokenVisibleRequested()
+                || mToken.isVisibleRequested()))) {
+            final Configuration globalConfig = getProcessGlobalConfiguration();
+            final Configuration overrideConfig = getMergedOverrideConfiguration();
+            outMergedConfiguration.setConfiguration(globalConfig, overrideConfig);
+            if (outMergedConfiguration != mLastReportedConfiguration) {
+                mLastReportedConfiguration.setTo(outMergedConfiguration);
+            }
+        } else {
+            outMergedConfiguration.setTo(mLastReportedConfiguration);
+        }
+        mLastConfigReportedToClient = true;
     }
 
     void reportResized() {
@@ -3764,9 +3776,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.i(WM_DEBUG_ORIENTATION, "Resizing %s WITH DRAW PENDING", this);
         }
 
-        getMergedConfiguration(mLastReportedConfiguration);
-        mLastConfigReportedToClient = true;
-
         final boolean reportOrientation = mReportOrientationChanged;
         // Always reset these states first, so if {@link IWindow#resized} fails, this
         // window won't be added to {@link WindowManagerService#mResizingWindows} and set
@@ -3776,18 +3785,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
 
-        final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
+        fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
+                true /* useLatestConfig */, false /* relayoutVisible */);
         final boolean reportDraw = drawPending || useBLASTSync() || !mRedrawForSyncReported;
         final boolean forceRelayout = reportOrientation || isDragResizeChanged() || !mRedrawForSyncReported;
-        final int displayId = getDisplayId();
-        fillClientWindowFrames(mClientWindowFrames);
+        final DisplayContent displayContent = getDisplayContent();
+        final boolean alwaysConsumeSystemBars =
+                displayContent.getDisplayPolicy().areSystemBarsForcedShownLw(this);
+        final int displayId = displayContent.getDisplayId();
 
         markRedrawForSyncReported();
 
         try {
-            mClient.resized(mClientWindowFrames, reportDraw, mergedConfiguration, forceRelayout,
-                    getDisplayContent().getDisplayPolicy().areSystemBarsForcedShownLw(this),
-                    displayId);
+            mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
+                    forceRelayout, alwaysConsumeSystemBars, displayId);
             if (drawPending && reportOrientation && mOrientationChanging) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
                 ProtoLog.v(WM_DEBUG_ORIENTATION,

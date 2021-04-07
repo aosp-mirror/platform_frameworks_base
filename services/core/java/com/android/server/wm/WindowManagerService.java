@@ -2458,29 +2458,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mResizedWhileGone = false;
             }
 
-            // We must always send the latest {@link MergedConfiguration}, regardless of whether we
-            // have already reported it. The client might not have processed the previous value yet
-            // and needs process it before handling the corresponding window frame. the variable
-            // {@code mergedConfiguration} is an out parameter that will be passed back to the
-            // client over IPC and checked there.
-            // Note: in the cases where the window is tied to an activity, we should not send a
-            // configuration update when the window has requested to be hidden. Doing so can lead
-            // to the client erroneously accepting a configuration that would have otherwise caused
-            // an activity restart. We instead hand back the last reported
-            // {@link MergedConfiguration}.
-            if (shouldRelayout && (!win.shouldCheckTokenVisibleRequested()
-                    || win.mToken.isVisibleRequested())) {
-                win.getMergedConfiguration(mergedConfiguration);
-            } else {
-                win.getLastReportedMergedConfiguration(mergedConfiguration);
-            }
-
-            win.setLastReportedMergedConfiguration(mergedConfiguration);
+            win.fillClientWindowFramesAndConfiguration(outFrames, mergedConfiguration,
+                    false /* useLatestConfig */, shouldRelayout);
 
             // Set resize-handled here because the values are sent back to the client.
             win.onResizeHandled();
 
-            win.fillClientWindowFrames(outFrames);
             outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
