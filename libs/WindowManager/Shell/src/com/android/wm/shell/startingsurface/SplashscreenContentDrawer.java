@@ -357,7 +357,7 @@ public class SplashscreenContentDrawer {
             if (iconDrawable != null) {
                 builder.setCenterViewDrawable(iconDrawable);
             }
-            builder.setAnimationDuration(mIconAnimationDuration);
+            builder.setAnimationDurationMillis(mIconAnimationDuration);
             if (mBrandingDrawable != null) {
                 builder.setBrandingDrawable(mBrandingDrawable, mBrandingImageWidth,
                         mBrandingImageHeight);
