@@ -600,8 +600,9 @@ public final class NetworkCapabilities implements Parcelable {
         // TODO: Consider adding unwanted capabilities to the public API and mention this
         // in the documentation.
         checkValidCapability(capability);
-        mNetworkCapabilities |= 1 << capability;
-        mUnwantedNetworkCapabilities &= ~(1 << capability);  // remove from unwanted capability list
+        mNetworkCapabilities |= 1L << capability;
+        // remove from unwanted capability list
+        mUnwantedNetworkCapabilities &= ~(1L << capability);
         return this;
     }
 
@@ -620,8 +621,8 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public void addUnwantedCapability(@NetCapability int capability) {
         checkValidCapability(capability);
-        mUnwantedNetworkCapabilities |= 1 << capability;
-        mNetworkCapabilities &= ~(1 << capability);  // remove from requested capabilities
+        mUnwantedNetworkCapabilities |= 1L << capability;
+        mNetworkCapabilities &= ~(1L << capability);  // remove from requested capabilities
     }
 
     /**
@@ -634,7 +635,7 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public @NonNull NetworkCapabilities removeCapability(@NetCapability int capability) {
         checkValidCapability(capability);
-        final long mask = ~(1 << capability);
+        final long mask = ~(1L << capability);
         mNetworkCapabilities &= mask;
         return this;
     }
@@ -649,7 +650,7 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public @NonNull NetworkCapabilities removeUnwantedCapability(@NetCapability int capability) {
         checkValidCapability(capability);
-        mUnwantedNetworkCapabilities &= ~(1 << capability);
+        mUnwantedNetworkCapabilities &= ~(1L << capability);
         return this;
     }
 
@@ -717,14 +718,14 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public boolean hasCapability(@NetCapability int capability) {
         return isValidCapability(capability)
-                && ((mNetworkCapabilities & (1 << capability)) != 0);
+                && ((mNetworkCapabilities & (1L << capability)) != 0);
     }
 
     /** @hide */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean hasUnwantedCapability(@NetCapability int capability) {
         return isValidCapability(capability)
-                && ((mUnwantedNetworkCapabilities & (1 << capability)) != 0);
+                && ((mUnwantedNetworkCapabilities & (1L << capability)) != 0);
     }
 
     /**
