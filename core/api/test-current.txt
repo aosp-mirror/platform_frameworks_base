@@ -75,6 +75,10 @@ package android.accessibilityservice {
     field public static final int ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS = 1000; // 0x3e8
   }
 
+  public class AccessibilityServiceInfo implements android.os.Parcelable {
+    method @NonNull public android.content.ComponentName getComponentName();
+  }
+
 }
 
 package android.animation {

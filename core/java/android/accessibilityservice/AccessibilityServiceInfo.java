@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -522,6 +523,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * The component name the accessibility service.
      */
+    @NonNull
     private ComponentName mComponentName;
 
     /**
@@ -772,13 +774,15 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * @hide
      */
-    public void setComponentName(ComponentName component) {
+    public void setComponentName(@NonNull ComponentName component) {
         mComponentName = component;
     }
 
     /**
      * @hide
      */
+    @TestApi
+    @NonNull
     public ComponentName getComponentName() {
         return mComponentName;
     }
