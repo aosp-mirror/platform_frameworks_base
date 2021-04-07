@@ -12492,7 +12492,7 @@ package android.uwb {
   public final class DistanceMeasurement implements android.os.Parcelable {
     method public int describeContents();
     method @FloatRange(from=0.0, to=1.0) public double getConfidenceLevel();
-    method public double getErrorMeters();
+    method @FloatRange(from=0.0) public double getErrorMeters();
     method public double getMeters();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.uwb.DistanceMeasurement> CREATOR;
@@ -12501,8 +12501,8 @@ package android.uwb {
   public static final class DistanceMeasurement.Builder {
     ctor public DistanceMeasurement.Builder();
     method @NonNull public android.uwb.DistanceMeasurement build();
-    method @NonNull public android.uwb.DistanceMeasurement.Builder setConfidenceLevel(double);
-    method @NonNull public android.uwb.DistanceMeasurement.Builder setErrorMeters(double);
+    method @NonNull public android.uwb.DistanceMeasurement.Builder setConfidenceLevel(@FloatRange(from=0.0, to=1.0) double);
+    method @NonNull public android.uwb.DistanceMeasurement.Builder setErrorMeters(@FloatRange(from=0.0) double);
     method @NonNull public android.uwb.DistanceMeasurement.Builder setMeters(double);
   }
 
