@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tableta se poate închide în curând (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Dispozitivul se poate închide în curând (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Au mai rămas <xliff:g id="TIME">%1$s</xliff:g> până la încărcare"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> până la încărcare"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Se fac optimizări pentru buna funcționare a bateriei"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Necunoscut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Se încarcă"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Se încarcă lent"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nu se încarcă"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Conectat, nu se poate încărca chiar acum"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Complet"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlată de administrator"</string>
     <string name="disabled" msgid="8017887509554714950">"Dezactivată"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Permise"</string>
@@ -502,6 +505,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mai puțin timp."</string>
     <string name="cancel" msgid="5665114069455378395">"Anulați"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarme și mementouri"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Permiteți setarea de alarme sau mementouri"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarme și mementouri"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Permiteți acestei aplicații să programeze alarme sau alte evenimente legate de timp. Astfel, aplicația va putea să se activeze și să ruleze chiar dacă nu folosiți dispozitivul. Rețineți că revocarea acestei permisiuni poate cauza funcționarea incorectă a aplicației, mai ales dezactivarea alarmelor programate de aplicație."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"programare, alarmă, memento, eveniment"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activați"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activați Nu deranja"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Niciodată"</string>
@@ -580,7 +588,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"Rețeaua Wi‑Fi a operatorului"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Date mobile dezactivate"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Nu este setat pentru a folosi datele"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Nu există semnal pentru telefon."</string>

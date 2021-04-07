@@ -355,11 +355,13 @@ package android.app {
   public final class UiAutomation {
     method public void destroy();
     method @NonNull public android.os.ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String);
+    method @NonNull public java.util.Set<java.lang.String> getAdoptedShellPermissions();
     method @Deprecated public boolean grantRuntimePermission(String, String, android.os.UserHandle);
     method public boolean injectInputEvent(@NonNull android.view.InputEvent, boolean, boolean);
     method @Deprecated public boolean revokeRuntimePermission(String, String, android.os.UserHandle);
     method public void syncInputTransactions();
     method public void syncInputTransactions(boolean);
+    field @NonNull public static final java.util.Set<java.lang.String> ALL_PERMISSIONS;
   }
 
   public class UiModeManager {

@@ -61,6 +61,7 @@ package android.content {
 
   public abstract class Context {
     method @NonNull public android.os.UserHandle getUser();
+    field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
@@ -74,14 +75,6 @@ package android.content.pm {
 
   public abstract class PackageManager {
     method @NonNull public String getPermissionControllerPackageName();
-  }
-
-}
-
-package android.content.rollback {
-
-  public class RollbackManagerFrameworkInitializer {
-    method public static void initialize();
   }
 
 }

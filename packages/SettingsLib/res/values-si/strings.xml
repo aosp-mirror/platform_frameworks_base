@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ටැබ්ලට් පරිගණකය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"උපාංගය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"ආරෝපණය වන තෙක් <xliff:g id="TIME">%1$s</xliff:g> ඇත"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - ආරෝපණය වන තෙක් <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - බැටරි ආයු කාලය වැඩි දියුණු කරමින්"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"නොදනී"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ආරෝපණය වෙමින්"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"සෙමින් ආරෝපණය"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ආරෝපණය නොවේ"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"පේනුගත කර ඇත, මේ අවස්ථාවේදී ආරෝපණය කළ නොහැකිය"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"පූර්ණ"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"පරිපාලක විසින් පාලනය කරන ලදී"</string>
     <string name="disabled" msgid="8017887509554714950">"අබල කර ඇත"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ඉඩ දුන්"</string>
@@ -501,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"වේලාව අඩුවෙන්."</string>
     <string name="cancel" msgid="5665114069455378395">"අවලංගු කරන්න"</string>
     <string name="okay" msgid="949938843324579502">"හරි"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"එලාම සහ සිහිකැඳවීම්"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"එලාම හෝ සිහිකැඳවීම් සැකසීමට ඉඩ දෙන්න"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"එලාම සහ සිහිකැඳවීම්"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"එලාම හෝ වේලාව පදනම් කර ගත් වෙනත් සිදුවීම් කාලසටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. ඔබ උපාංගය භාවිත නොකරන විට පවා යෙදුමට අවදි වීමට සහ ක්‍රියාත්මක වීමට මෙය ඉඩ දෙයි. මෙම අවසරය අහෝසි කිරීම යෙදුම හොඳින් ක්‍රියාත්මක නොවීමට හේතු විය හැකි බව සලකන්න, විශේෂයෙන් යෙදුම කාලසටහන්ගත කර ඇති යම් එලාම තවදුරටත් ක්‍රියා නොකරනු ඇත."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"කාල සටහන, එලාමය, සිහිකැඳවීම, සිදුවීම"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ක්‍රියාත්මක කරන්න"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"බාධා නොකරන්න ක්‍රියාත්මක කරන්න"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"කිසි විටක නැත"</string>
@@ -579,7 +587,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"ජංගම දත්ත ක්‍රියාවිරහිතයි"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"දත්ත භාවිත කිරීමට සකසා නැත"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"දුරකථනයක් නැත."</string>

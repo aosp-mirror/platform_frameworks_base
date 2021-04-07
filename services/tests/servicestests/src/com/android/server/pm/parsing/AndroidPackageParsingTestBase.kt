@@ -238,7 +238,11 @@ open class AndroidPackageParsingTestBase {
             nativeLibraryRootDir=${this.nativeLibraryRootDir}
             nativeLibraryRootRequiresIsa=${this.nativeLibraryRootRequiresIsa}
             networkSecurityConfigRes=${this.networkSecurityConfigRes}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             permission=${this.permission}
             primaryCpuAbi=${this.primaryCpuAbi}
@@ -300,7 +304,11 @@ open class AndroidPackageParsingTestBase {
             metaData=${this.metaData}
             name=${this.name}
             nativeLibraryDir=${this.nativeLibraryDir}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             primaryCpuAbi=${this.primaryCpuAbi}
             publicSourceDir=${this.publicSourceDir}
@@ -338,12 +346,19 @@ open class AndroidPackageParsingTestBase {
             metaData=${this.metaData.dumpToString()}
             minAspectRatio=${this.minAspectRatio}
             name=${this.name}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             parentActivityName=${this.parentActivityName}
             permission=${this.permission}
             persistableMode=${this.persistableMode.ignored("Could be dropped pre-R, fixed in R")}
-            privateFlags=${this.privateFlags}
+            privateFlags=${
+                // Strip flag added in S
+                this.privateFlags and (ActivityInfo.PRIVATE_FLAG_HOME_TRANSITION_SOUND.inv())
+            }
             processName=${this.processName.ignored("Deferred pre-R, but assigned immediately in R")}
             requestedVrComponent=${this.requestedVrComponent}
             resizeMode=${this.resizeMode}
@@ -381,7 +396,11 @@ open class AndroidPackageParsingTestBase {
             metaData=${this.metaData.dumpToString()}
             name=${this.name}
             nonLocalizedDescription=${this.nonLocalizedDescription}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             protectionLevel=${this.protectionLevel}
             requestRes=${this.requestRes}
@@ -407,7 +426,11 @@ open class AndroidPackageParsingTestBase {
             metaData=${this.metaData.dumpToString()}
             multiprocess=${this.multiprocess}
             name=${this.name}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             pathPermissions=${this.pathPermissions?.joinToString {
         "readPermission=${it.readPermission}\nwritePermission=${it.writePermission}"
@@ -434,7 +457,11 @@ open class AndroidPackageParsingTestBase {
             mForegroundServiceType"${this.mForegroundServiceType}
             metaData=${this.metaData.dumpToString()}
             name=${this.name}
-            nonLocalizedLabel=${this.nonLocalizedLabel}
+            nonLocalizedLabel=${
+                // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test
+                // comparison, trim both so they can be matched.
+                this.nonLocalizedLabel?.trim()
+            }
             packageName=${this.packageName}
             permission=${this.permission}
             processName=${this.processName.ignored("Deferred pre-R, but assigned immediately in R")}

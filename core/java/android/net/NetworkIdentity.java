@@ -198,15 +198,11 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         final int oemManaged = getOemBitfield(snapshot.networkCapabilities);
 
         if (legacyType == TYPE_WIFI) {
-            if (snapshot.networkCapabilities.getSsid() != null) {
-                networkId = snapshot.networkCapabilities.getSsid();
-                if (networkId == null) {
-                    // TODO: Figure out if this code path never runs. If so, remove them.
-                    final WifiManager wifi = (WifiManager) context.getSystemService(
-                            Context.WIFI_SERVICE);
-                    final WifiInfo info = wifi.getConnectionInfo();
-                    networkId = info != null ? info.getSSID() : null;
-                }
+            networkId = snapshot.networkCapabilities.getSsid();
+            if (networkId == null) {
+                final WifiManager wifi = context.getSystemService(WifiManager.class);
+                final WifiInfo info = wifi.getConnectionInfo();
+                networkId = info != null ? info.getSSID() : null;
             }
         }
 

@@ -350,8 +350,6 @@ java_defaults {
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
     ],
-    // See comment on framework-atb-backward-compatibility module below
-    exclude_srcs: ["core/java/android/content/pm/AndroidTestBaseUpdater.java"],
     aidl: {
         generate_get_transaction_name: true,
         local_include_dirs: [
@@ -462,20 +460,6 @@ java_library {
 platform_compat_config {
     name: "framework-platform-compat-config",
     src: ":framework-minus-apex",
-}
-
-// A temporary build target that is conditionally included on the bootclasspath if
-// android.test.base library has been removed and which provides support for
-// maintaining backwards compatibility for APKs that target pre-P and depend on
-// android.test.base classes. This is used iff REMOVE_ATB_FROM_BCP=true is
-// specified on the build command line.
-java_library {
-    name: "framework-atb-backward-compatibility",
-    installable: true,
-    libs: ["app-compat-annotations"],
-    srcs: [
-        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
-    ],
 }
 
 genrule {
@@ -1003,38 +987,6 @@ aidl_interface {
             enabled: true,
         },
     },
-}
-
-// TODO(b/77285514): remove this once the last few hidl interfaces have been
-// updated to use hwbinder.stubs.
-java_library {
-    name: "hwbinder",
-    sdk_version: "core_platform",
-
-    srcs: [
-        "core/java/android/os/HidlSupport.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/android/os/HidlMemory.java",
-        "core/java/android/os/HwBinder.java",
-        "core/java/android/os/HwBlob.java",
-        "core/java/android/os/HwParcel.java",
-        "core/java/android/os/IHwBinder.java",
-        "core/java/android/os/IHwInterface.java",
-        "core/java/android/os/DeadObjectException.java",
-        "core/java/android/os/DeadSystemException.java",
-        "core/java/android/os/NativeHandle.java",
-        "core/java/android/os/RemoteException.java",
-        "core/java/android/util/AndroidException.java",
-    ],
-    libs: ["unsupportedappusage"],
-
-    dxflags: ["--core-library"],
-    installable: false,
 }
 
 python_defaults {

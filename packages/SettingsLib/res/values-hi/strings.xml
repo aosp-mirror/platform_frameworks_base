@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"टैबलेट जल्द ही बंद हो सकता है (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"डिवाइस जल्द ही बंद हो सकता है (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"चार्ज पूरा होने में <xliff:g id="TIME">%1$s</xliff:g> बचा है"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में पूरा चार्ज हो जाएगा"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - बैटरी की परफ़ॉर्मेंस बेहतर करने के लिए, ऑप्टिमाइज़ किया जा रहा है"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"धीरे चार्ज हो रही है"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लग इन है, अभी चार्ज नहीं हो सकती"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"पूरी"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"इसका नियंत्रण एडमिन के पास है"</string>
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
@@ -501,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कम समय."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करें"</string>
     <string name="okay" msgid="949938843324579502">"ठीक है"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म और रिमाइंडर"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"अलार्म या रिमाइंडर सेट करने की अनुमति दें"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"अलार्म और रिमाइंडर"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"इस ऐप्लिकेशन को अलार्म या इवेंट के रिमाइंडर सेट करने की अनुमति दें. इससे, यह ऐप्लिकेशन तब भी काम करना शुरू कर देगा, जब आप डिवाइस का इस्तेमाल नहीं कर रहे होंगे. ध्यान रखें कि यह अनुमति न देने पर, हो सकता है कि ऐप्लिकेशन ठीक तरह से काम न करे. खास तौर पर, ऐप्लिकेशन में शेड्यूल किए गए अलार्म नहीं बजेंगे."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"शेड्यूल, अलार्म, रिमाइंडर, इवेंट"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"चालू करें"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'परेशान न करें\' चालू करें"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कभी नहीं"</string>
@@ -579,7 +587,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"एलटीई"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"मोबाइल डेटा बंद है"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"डेटा इस्तेमाल करने के लिए सेट नहीं किया गया है"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"कोई फ़ोन नहीं."</string>

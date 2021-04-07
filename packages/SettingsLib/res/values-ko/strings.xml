@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"태블릿이 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"기기가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"충전 완료까지 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 완료까지 <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 배터리 상태 최적화 중"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"저속 충전 중"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"전원이 연결되었지만 현재 충전할 수 없음"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"충전 완료"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"관리자가 제어"</string>
     <string name="disabled" msgid="8017887509554714950">"사용 안함"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"허용됨"</string>
@@ -501,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"알람 또는 리마인더를 설정하도록 허용"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"알람 및 리마인더"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"이 앱에서 알람 또는 다른 시간 기반 일정을 예약하도록 허용합니다. 이렇게 하면 기기를 사용하고 있지 않더라도 앱이 절전 모드에서 해제된 후 실행됩니다. 이 권한을 취소하면 앱이 오작동할 수 있으며 특히 이 앱에서 예약한 모든 알람은 더 이상 작동하지 않습니다."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"일정 예약, 알람, 리마인더, 이벤트"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"사용 안함"</string>
@@ -579,7 +587,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G 이상"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"모바일 데이터 꺼짐"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"데이터를 사용하도록 설정되지 않음"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"휴대전화의 신호가 없습니다."</string>

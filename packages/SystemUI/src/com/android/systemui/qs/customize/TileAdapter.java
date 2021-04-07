@@ -728,7 +728,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             GridLayoutManager lm = ((GridLayoutManager) parent.getLayoutManager());
             SpanSizeLookup span = lm.getSpanSizeLookup();
             ViewHolder holder = parent.getChildViewHolder(view);
-            int column = span.getSpanIndex(holder.getLayoutPosition(), lm.getSpanCount());
+            int column = span.getSpanIndex(holder.getBindingAdapterPosition(), lm.getSpanCount());
 
             if (view instanceof TextView) {
                 super.getItemOffsets(outRect, view, parent, state);

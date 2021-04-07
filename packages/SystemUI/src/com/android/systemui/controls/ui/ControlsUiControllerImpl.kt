@@ -19,6 +19,8 @@ package com.android.systemui.controls.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
+import android.app.Activity
+import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -129,6 +131,7 @@ class ControlsUiControllerImpl @Inject constructor (
     override val available: Boolean
         get() = controlsController.get().available
 
+    private lateinit var activityContext: Context
     private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
 
     private fun createCallback(
@@ -153,11 +156,12 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun show(
         parent: ViewGroup,
         onDismiss: Runnable,
-        activityContext: Context?
+        activityContext: Context
     ) {
         Log.d(ControlsUiController.TAG, "show()")
         this.parent = parent
         this.onDismiss = onDismiss
+        this.activityContext = activityContext
         hidden = false
         retainCache = false
 
@@ -198,7 +202,7 @@ class ControlsUiControllerImpl @Inject constructor (
                 controlViewsById.clear()
                 controlsById.clear()
 
-                show(parent, onDismiss, controlActionCoordinator.activityContext)
+                show(parent, onDismiss, activityContext)
                 val showAnim = ObjectAnimator.ofFloat(parent, "alpha", 0.0f, 1.0f)
                 showAnim.setInterpolator(DecelerateInterpolator(1.0f))
                 showAnim.setDuration(FADE_IN_MILLIS)
@@ -220,7 +224,7 @@ class ControlsUiControllerImpl @Inject constructor (
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
 
         val viewGroup = parent.requireViewById(R.id.controls_no_favorites_group) as ViewGroup
-        viewGroup.setOnClickListener { v: View -> startProviderSelectorActivity(v.context) }
+        viewGroup.setOnClickListener { _: View -> startProviderSelectorActivity() }
 
         val subtitle = parent.requireViewById<TextView>(R.id.controls_subtitle)
         subtitle.setText(context.resources.getString(R.string.quick_controls_subtitle))
@@ -234,20 +238,18 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun startFavoritingActivity(context: Context, si: StructureInfo) {
-        startTargetedActivity(context, si, ControlsFavoritingActivity::class.java)
+    private fun startFavoritingActivity(si: StructureInfo) {
+        startTargetedActivity(si, ControlsFavoritingActivity::class.java)
     }
 
-    private fun startEditingActivity(context: Context, si: StructureInfo) {
-        startTargetedActivity(context, si, ControlsEditingActivity::class.java)
+    private fun startEditingActivity(si: StructureInfo) {
+        startTargetedActivity(si, ControlsEditingActivity::class.java)
     }
 
-    private fun startTargetedActivity(context: Context, si: StructureInfo, klazz: Class<*>) {
-        val i = Intent(context, klazz).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+    private fun startTargetedActivity(si: StructureInfo, klazz: Class<*>) {
+        val i = Intent(activityContext, klazz)
         putIntentExtras(i, si)
-        startActivity(context, i)
+        startActivity(i)
 
         retainCache = true
     }
@@ -261,27 +263,22 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun startProviderSelectorActivity(context: Context) {
-        val i = Intent(context, ControlsProviderSelectorActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        startActivity(context, i)
+    private fun startProviderSelectorActivity() {
+        startActivity(Intent(activityContext, ControlsProviderSelectorActivity::class.java))
     }
 
-    private fun startActivity(context: Context, intent: Intent) {
+    private fun startActivity(intent: Intent) {
         // Force animations when transitioning from a dialog to an activity
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
-        intent.putExtra(
-            ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
-            controlActionCoordinator.activityContext == null
-        )
-        onDismiss.run()
 
-        activityStarter.dismissKeyguardThenExecute({
-            shadeController.collapsePanel(false)
-            context.startActivity(intent)
-            true
-        }, null, true)
+        if (keyguardStateController.isUnlocked()) {
+            activityContext.startActivity(
+                intent,
+                ActivityOptions.makeSceneTransitionAnimation(activityContext as Activity).toBundle()
+            )
+        } else {
+            activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
+        }
     }
 
     private fun showControlsView(items: List<SelectionItem>) {
@@ -328,9 +325,9 @@ class ControlsUiControllerImpl @Inject constructor (
                         ) {
                             when (pos) {
                                 // 0: Add Control
-                                0 -> startFavoritingActivity(view.context, selectedStructure)
+                                0 -> startFavoritingActivity(selectedStructure)
                                 // 1: Edit controls
-                                1 -> startEditingActivity(view.context, selectedStructure)
+                                1 -> startEditingActivity(selectedStructure)
                             }
                             dismiss()
                         }
@@ -399,15 +396,9 @@ class ControlsUiControllerImpl @Inject constructor (
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_with_favorites, parent, true)
 
-        if (controlActionCoordinator.activityContext == null) {
-            parent.requireViewById<View>(R.id.controls_spacer).apply {
-                visibility = View.VISIBLE
-            }
-        } else {
-            parent.requireViewById<ImageView>(R.id.controls_close).apply {
-                setOnClickListener { _: View -> onDismiss.run() }
-                visibility = View.VISIBLE
-            }
+        parent.requireViewById<ImageView>(R.id.controls_close).apply {
+            setOnClickListener { _: View -> onDismiss.run() }
+            visibility = View.VISIBLE
         }
 
         val maxColumns = findMaxColumns()
@@ -521,8 +512,6 @@ class ControlsUiControllerImpl @Inject constructor (
 
     override fun hide() {
         hidden = true
-
-        controlActionCoordinator.activityContext = null
 
         closeDialogs(true)
         controlsController.get().unsubscribe()

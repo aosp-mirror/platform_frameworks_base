@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 
@@ -27,6 +28,9 @@ final class ProcessCachedOptimizerRecord {
     private final ProcessRecord mApp;
 
     private final ActivityManagerGlobalLock mProcLock;
+
+    @VisibleForTesting
+    static final String IS_FROZEN = "isFrozen";
 
     /**
      * The last time that this process was compacted.
@@ -169,5 +173,6 @@ final class ProcessCachedOptimizerRecord {
     void dump(PrintWriter pw, String prefix, long nowUptime) {
         pw.print(prefix); pw.print("lastCompactTime="); pw.print(mLastCompactTime);
         pw.print(" lastCompactAction="); pw.println(mLastCompactAction);
+        pw.print(" " + IS_FROZEN + "="); pw.println(mFrozen);
     }
 }

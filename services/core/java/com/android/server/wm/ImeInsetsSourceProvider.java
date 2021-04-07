@@ -240,6 +240,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     @Override
     public void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
+        prefix = prefix + "  ";
         pw.print(prefix);
         pw.print("mImeShowing=");
         pw.print(mImeShowing);

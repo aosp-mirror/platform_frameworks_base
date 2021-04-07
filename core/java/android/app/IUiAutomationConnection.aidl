@@ -24,6 +24,8 @@ import android.view.WindowContentFrameStats;
 import android.view.WindowAnimationFrameStats;
 import android.os.ParcelFileDescriptor;
 
+import java.util.List;
+
 /**
  * This interface contains privileged operations a shell program can perform
  * on behalf of an instrumentation that it runs. These operations require
@@ -54,4 +56,5 @@ interface IUiAutomationConnection {
     oneway void shutdown();
     void executeShellCommandWithStderr(String command, in ParcelFileDescriptor sink,
                 in ParcelFileDescriptor source, in ParcelFileDescriptor stderrSink);
+    List<String> getAdoptedShellPermissions();
 }

@@ -370,7 +370,7 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Obustavlja se svaka aktivnost čim je korisnik napusti"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Ograničenje procesa u pozadini"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Prikaži ANR-e u pozadini"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloga \"Aplikacija ne reagira\" za aplikacije pokrenute u pozadini"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloškog okvira \"Aplikacija ne reagira\" za aplikacije pokrenute u pozadini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikaži upozorenja kanala obavještenja"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikaz upozorenja na ekranu kada aplikacija pošalje obavještenje bez važećeg kanala"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Nametni aplikacije na vanjskoj pohrani"</string>
@@ -450,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet će se uskoro isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Uređaj će se uskoro isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Napunit će se za <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – napunit će se za <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimiziranje radi očuvanja baterije"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nepoznato"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Punjenje"</string>
@@ -459,7 +461,8 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Sporo punjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ne puni se"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Priključeno, trenutno se ne može puniti"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Puna"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pod kontrolom administratora"</string>
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dozvoljeno"</string>
@@ -502,6 +505,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Manje vremena."</string>
     <string name="cancel" msgid="5665114069455378395">"Otkaži"</string>
     <string name="okay" msgid="949938843324579502">"Uredu"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsjetnici"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Dozvoli postavljanje alarma ili podsjetnika"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Alarmi i podsjetnici"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Dozvolite ovoj aplikaciji da zakazuje alarme ili druge događaje zasnovane na vremenskom rasporedu. To će dozvoliti aplikaciji da se probudi i pokrene čak i kada ne koristite uređaj. Imajte na umu da ukidanje ovog odobrenja može uzrokovati neispravan rad aplikacije, odnosno nijedan alarm koji je aplikacija zakazala više neće funkcionirati."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"raspored, alarm, podsjetnik, događaj"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključi način rada Ne ometaj"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nikada"</string>
@@ -580,7 +588,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Prijenos podataka na mobilnoj mreži je isključen"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Nije postavljeno za korištenje podataka"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Nema telefonskog signala."</string>

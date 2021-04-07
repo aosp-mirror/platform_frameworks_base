@@ -6880,19 +6880,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " seconds");
 
             mPermissionManager.readLegacyPermissionStateTEMP();
-            // If the platform SDK has changed since the last time we booted,
+            // If the build fingerprint has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
             // cases get permissions that the user didn't initially explicitly
             // allow...  it would be nice to have some better way to handle
             // this situation.
-            final boolean sdkUpdated = (ver.sdkVersion != mSdkVersion);
-            if (sdkUpdated) {
-                Slog.i(TAG, "Platform changed from " + ver.sdkVersion + " to "
-                        + mSdkVersion + "; regranting permissions for internal storage");
+            if (mIsUpgrade) {
+                Slog.i(TAG, "Build fingerprint changed from " + ver.fingerprint + " to "
+                        + Build.FINGERPRINT + "; regranting permissions for internal storage");
             }
             mPermissionManager.onStorageVolumeMounted(
-                    StorageManager.UUID_PRIVATE_INTERNAL, sdkUpdated);
+                    StorageManager.UUID_PRIVATE_INTERNAL, mIsUpgrade);
             ver.sdkVersion = mSdkVersion;
 
             // If this is the first boot or an update from pre-M, and it is a normal
@@ -7198,7 +7197,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         updateSharedLibrariesLocked(pkg, stubPkgSetting, null, null,
                                 Collections.unmodifiableMap(mPackages));
                     } catch (PackageManagerException e) {
-                        Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
+                        Slog.w(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
                     final int[] userIds = mUserManager.getUserIds();
                     for (final int userId : userIds) {
@@ -7450,7 +7449,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else if (matches.size() == 0) {
-            Log.e(TAG, "There should probably be a verifier, but, none were found");
+            Log.w(TAG, "There should probably be a verifier, but, none were found");
             return null;
         }
         throw new RuntimeException("There must be exactly one verifier; found " + matches);
@@ -22823,7 +22822,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
-            Slog.e(TAG, "There should probably be exactly one storage manager; found "
+            Slog.w(TAG, "There should probably be exactly one storage manager; found "
                     + matches.size() + ": matches=" + matches);
             return null;
         }
@@ -24608,12 +24607,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         synchronized (mLock) {
-            final boolean sdkUpdated = (ver.sdkVersion != mSdkVersion);
-            if (sdkUpdated) {
-                logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
-                        + mSdkVersion + "; regranting permissions for " + volumeUuid);
+            final boolean isUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+            if (isUpgrade) {
+                logCriticalInfo(Log.INFO, "Build fingerprint changed from " + ver.fingerprint
+                        + " to " + Build.FINGERPRINT + "; regranting permissions for "
+                        + volumeUuid);
             }
-            mPermissionManager.onStorageVolumeMounted(volumeUuid, sdkUpdated);
+            mPermissionManager.onStorageVolumeMounted(volumeUuid, isUpgrade);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();
@@ -25015,7 +25015,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // already held, since it's invoked as a side-effect of
                     // executeBatchLI()
                     if (e != null) {
-                        logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
+                        logCriticalInfo(Log.WARN, "Failed to create app data for " + packageName
                                 + ", but trying to recover: " + e);
                         destroyAppDataLeafLIF(pkg, userId, flags);
                         try {

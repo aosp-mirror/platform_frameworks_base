@@ -546,6 +546,8 @@ public final class SystemServer implements Dumpable {
 
         new Thread(() -> {
             boolean enabled = false;
+            long nextWrite = 0;
+
             while (true) {
                 int maxFd = getMaxFd();
                 if (maxFd > enableThreshold) {
@@ -556,12 +558,30 @@ public final class SystemServer implements Dumpable {
 
                 if (maxFd > enableThreshold && !enabled) {
                     Slog.i("System", "fdtrack enable threshold reached, enabling");
+                    FrameworkStatsLog.write(FrameworkStatsLog.FDTRACK_EVENT_OCCURRED,
+                            FrameworkStatsLog.FDTRACK_EVENT_OCCURRED__EVENT__ENABLED,
+                            maxFd);
+
                     System.loadLibrary("fdtrack");
                     enabled = true;
                 } else if (maxFd > abortThreshold) {
                     Slog.i("System", "fdtrack abort threshold reached, dumping and aborting");
+                    FrameworkStatsLog.write(FrameworkStatsLog.FDTRACK_EVENT_OCCURRED,
+                            FrameworkStatsLog.FDTRACK_EVENT_OCCURRED__EVENT__ABORTING,
+                            maxFd);
+
                     dumpHprof();
                     fdtrackAbort();
+                } else {
+                    // Limit this to once per hour.
+                    long now = SystemClock.elapsedRealtime();
+                    if (now > nextWrite) {
+                        nextWrite = now + 60 * 60 * 1000;
+                        FrameworkStatsLog.write(FrameworkStatsLog.FDTRACK_EVENT_OCCURRED,
+                                enabled ? FrameworkStatsLog.FDTRACK_EVENT_OCCURRED__EVENT__ENABLED
+                                        : FrameworkStatsLog.FDTRACK_EVENT_OCCURRED__EVENT__DISABLED,
+                                maxFd);
+                    }
                 }
 
                 try {

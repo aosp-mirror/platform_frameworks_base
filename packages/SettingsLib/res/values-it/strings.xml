@@ -450,8 +450,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Il tablet potrebbe spegnersi a breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Il dispositivo potrebbe spegnersi a breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Tempo rimanente alla carica completa: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla carica completa"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> alla ricarica completa"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla ricarica completa"</string>
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ottimizzazione per integrità batteria"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Sconosciuta"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"In carica"</string>
@@ -459,7 +459,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Ricarica lenta"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Non in carica"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Collegato alla corrente. Impossibile caricare al momento"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"Carica"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Carica"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Gestita dall\'amministratore"</string>
     <string name="disabled" msgid="8017887509554714950">"Disattivato"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorizzate"</string>
@@ -501,6 +501,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Meno tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Annulla"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Sveglie e promemoria"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"Consenti di impostare sveglie o promemoria"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"Sveglie e promemoria"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"Consenti a questa app di programmare sveglie o altri eventi basati sull\'orario. In questo modo potrai riattivare ed eseguire l\'app anche quando non usi il dispositivo. Tieni presente che la revoca di questa autorizzazione potrebbe causare il malfunzionamento dell\'app; in particolare, le eventuali sveglie programmate nell\'app non funzioneranno più."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"programmare, sveglia, promemoria, evento"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Attiva"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Attiva Non disturbare"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Mai"</string>
@@ -579,7 +584,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Dati mobili disattivati"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Non impostato per l\'utilizzo dei dati"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Nessun telefono."</string>

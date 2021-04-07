@@ -3211,6 +3211,18 @@
     <public name="config_systemWellbeing" />
     <!-- @hide @SystemApi -->
     <public name="config_systemTelevisionNotificationHandler" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemUiIntelligence" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemAmbientAudioIntelligence" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemAudioIntelligence" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemNotificationIntelligence" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemTextIntelligence" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemVisualIntelligence" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01020055">
