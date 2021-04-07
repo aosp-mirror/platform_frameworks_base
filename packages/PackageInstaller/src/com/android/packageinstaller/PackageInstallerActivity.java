@@ -16,6 +16,8 @@
 */
 package com.android.packageinstaller;
 
+import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
+import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.Manifest;
@@ -50,6 +52,8 @@ import android.widget.Button;
 import com.android.internal.app.AlertActivity;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This activity is launched when a new application is installed via side loading
@@ -91,6 +95,12 @@ public class PackageInstallerActivity extends AlertActivity {
     String mCallingPackage;
     private String mCallingAttributionTag;
     ApplicationInfo mSourceInfo;
+
+    /**
+     * A collection of unknown sources listeners that are actively listening for app ops mode
+     * changes
+     */
+    private List<UnknownSourcesListener> mActiveUnknownSourcesListeners = new ArrayList<>(1);
 
     // ApplicationInfo object primarily used for already existing applications
     private ApplicationInfo mAppInfo = null;
@@ -379,6 +389,14 @@ public class PackageInstallerActivity extends AlertActivity {
         super.onSaveInstanceState(outState);
 
         outState.putBoolean(ALLOW_UNKNOWN_SOURCES_KEY, mAllowUnknownSources);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        while (!mActiveUnknownSourcesListeners.isEmpty()) {
+            unregister(mActiveUnknownSourcesListeners.get(0));
+        }
     }
 
     private void bindUi() {
@@ -707,24 +725,61 @@ public class PackageInstallerActivity extends AlertActivity {
         }
     }
 
+    private class UnknownSourcesListener implements AppOpsManager.OnOpChangedListener {
+
+        @Override
+        public void onOpChanged(String op, String packageName) {
+            if (!mOriginatingPackage.equals(packageName)) {
+                return;
+            }
+            unregister(this);
+            mActiveUnknownSourcesListeners.remove(this);
+            if (isDestroyed()) {
+                return;
+            }
+            getMainThreadHandler().postDelayed(() -> {
+                if (!isDestroyed()) {
+                    startActivity(getIntent().addFlags(FLAG_ACTIVITY_REORDER_TO_FRONT));
+                }
+            }, 500);
+
+        }
+
+    }
+
+    private void register(UnknownSourcesListener listener) {
+        mAppOpsManager.startWatchingMode(
+                AppOpsManager.OPSTR_REQUEST_INSTALL_PACKAGES, mOriginatingPackage,
+                listener);
+        mActiveUnknownSourcesListeners.add(listener);
+    }
+
+    private void unregister(UnknownSourcesListener listener) {
+        mAppOpsManager.stopWatchingMode(listener);
+        mActiveUnknownSourcesListeners.remove(listener);
+    }
+
     /**
      * An error dialog shown when external sources are not allowed
      */
     public static class ExternalSourcesBlockedDialog extends AppErrorDialog {
         static AppErrorDialog newInstance(@NonNull String originationPkg) {
-            ExternalSourcesBlockedDialog dialog = new ExternalSourcesBlockedDialog();
+            ExternalSourcesBlockedDialog dialog =
+                    new ExternalSourcesBlockedDialog();
             dialog.setArgument(originationPkg);
             return dialog;
         }
 
         @Override
         protected Dialog createDialog(@NonNull CharSequence argument) {
+
+            final PackageInstallerActivity activity = (PackageInstallerActivity)getActivity();
             try {
-                PackageManager pm = getActivity().getPackageManager();
+                PackageManager pm = activity.getPackageManager();
 
                 ApplicationInfo sourceInfo = pm.getApplicationInfo(argument.toString(), 0);
 
-                return new AlertDialog.Builder(getActivity())
+                return new AlertDialog.Builder(activity)
                         .setTitle(pm.getApplicationLabel(sourceInfo))
                         .setIcon(pm.getApplicationIcon(sourceInfo))
                         .setMessage(R.string.untrusted_external_source_warning)
@@ -735,8 +790,10 @@ public class PackageInstallerActivity extends AlertActivity {
                                             Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
                                     final Uri packageUri = Uri.parse("package:" + argument);
                                     settingsIntent.setData(packageUri);
+                                    settingsIntent.setFlags(FLAG_ACTIVITY_NO_HISTORY);
                                     try {
-                                        getActivity().startActivityForResult(settingsIntent,
+                                        activity.register(activity.new UnknownSourcesListener());
+                                        activity.startActivityForResult(settingsIntent,
                                                 REQUEST_TRUST_EXTERNAL_SOURCE);
                                     } catch (ActivityNotFoundException exc) {
                                         Log.e(TAG, "Settings activity not found for action: "
@@ -744,11 +801,11 @@ public class PackageInstallerActivity extends AlertActivity {
                                     }
                                 })
                         .setNegativeButton(R.string.cancel,
-                                (dialog, which) -> getActivity().finish())
+                                (dialog, which) -> activity.finish())
                         .create();
             } catch (NameNotFoundException e) {
                 Log.e(TAG, "Did not find app info for " + argument);
-                getActivity().finish();
+                activity.finish();
                 return null;
             }
         }
