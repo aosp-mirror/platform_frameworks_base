@@ -1293,7 +1293,7 @@ public final class InputManager {
      * @param inputPort The port of the input device.
      * @param displayPort The physical port of the associated display.
      * <p>
-     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT}.
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1310,7 +1310,7 @@ public final class InputManager {
      * static association for the cleared input port will be restored.
      * @param inputPort The port of the input device to be cleared.
      * <p>
-     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT}.
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1319,6 +1319,41 @@ public final class InputManager {
             mIm.removePortAssociation(inputPort);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Add a runtime association between the input device name and display, by unique id. Input
+     * device names are expected to be unique.
+     * @param inputDeviceName The name of the input device.
+     * @param displayUniqueId The unique id of the associated display.
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    public void addUniqueIdAssociation(@NonNull String inputDeviceName,
+            @NonNull String displayUniqueId) {
+        try {
+            mIm.addUniqueIdAssociation(inputDeviceName, displayUniqueId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a runtime association between the input device and display.
+     * @param inputDeviceName The name of the input device.
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    public void removeUniqueIdAssociation(@NonNull String inputDeviceName) {
+        try {
+            mIm.removeUniqueIdAssociation(inputDeviceName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
