@@ -7,6 +7,8 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.view.GhostView
 import android.view.View
 import android.view.ViewGroup
@@ -66,15 +68,28 @@ open class GhostedViewLaunchAnimatorController(
         topCornerRadius: Float,
         bottomCornerRadius: Float
     ) {
-        // TODO(b/184121838): Add default support for GradientDrawable and LayerDrawable to make
-        // this work out of the box for common rounded backgrounds.
+        // By default, we rely on WrappedDrawable to set/restore the background radii before/after
+        // each draw.
+        backgroundDrawable?.setBackgroundRadius(topCornerRadius, bottomCornerRadius)
     }
 
     /** Return the current top corner radius of the background. */
-    protected open fun getCurrentTopCornerRadius(): Float = 0f
+    protected open fun getCurrentTopCornerRadius(): Float {
+        val drawable = getBackground() ?: return 0f
+        val gradient = findGradientDrawable(drawable) ?: return 0f
+
+        // TODO(b/184121838): Support more than symmetric top & bottom radius.
+        return gradient.cornerRadii?.get(CORNER_RADIUS_TOP_INDEX) ?: gradient.cornerRadius
+    }
 
     /** Return the current bottom corner radius of the background. */
-    protected open fun getCurrentBottomCornerRadius(): Float = 0f
+    protected open fun getCurrentBottomCornerRadius(): Float {
+        val drawable = getBackground() ?: return 0f
+        val gradient = findGradientDrawable(drawable) ?: return 0f
+
+        // TODO(b/184121838): Support more than symmetric top & bottom radius.
+        return gradient.cornerRadii?.get(CORNER_RADIUS_BOTTOM_INDEX) ?: gradient.cornerRadius
+    }
 
     override fun getRootView(): View {
         return rootView
@@ -94,7 +109,7 @@ open class GhostedViewLaunchAnimatorController(
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
         backgroundView = FrameLayout(rootView.context).apply {
-            forceHasOverlappingRendering(true)
+            forceHasOverlappingRendering(false)
         }
         rootViewOverlay.add(backgroundView)
 
@@ -143,6 +158,33 @@ open class GhostedViewLaunchAnimatorController(
         ghostedView.invalidate()
     }
 
+    companion object {
+        private const val CORNER_RADIUS_TOP_INDEX = 0
+        private const val CORNER_RADIUS_BOTTOM_INDEX = 4
+
+        /**
+         * Return the first [GradientDrawable] found in [drawable], or null if none is found. If
+         * [drawable] is a [LayerDrawable], this will return the first layer that is a
+         * [GradientDrawable].
+         */
+        private fun findGradientDrawable(drawable: Drawable): GradientDrawable? {
+            if (drawable is GradientDrawable) {
+                return drawable
+            }
+
+            if (drawable is LayerDrawable) {
+                for (i in 0 until drawable.numberOfLayers) {
+                    val maybeGradient = drawable.getDrawable(i)
+                    if (maybeGradient is GradientDrawable) {
+                        return maybeGradient
+                    }
+                }
+            }
+
+            return null
+        }
+    }
+
     private class WrappedDrawable(val wrapped: Drawable?) : Drawable() {
         companion object {
             private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
@@ -151,6 +193,9 @@ open class GhostedViewLaunchAnimatorController(
         private var currentAlpha = 0xFF
         private var previousBounds = Rect()
 
+        private var cornerRadii = FloatArray(8) { -1f }
+        private var previousCornerRadii = FloatArray(8)
+
         override fun draw(canvas: Canvas) {
             val wrapped = this.wrapped ?: return
 
@@ -158,7 +203,8 @@ open class GhostedViewLaunchAnimatorController(
 
             wrapped.alpha = currentAlpha
             wrapped.bounds = bounds
-            wrapped.setXfermode(SRC_MODE)
+            setXfermode(wrapped, SRC_MODE)
+            applyBackgroundRadii()
 
             wrapped.draw(canvas)
 
@@ -167,7 +213,8 @@ open class GhostedViewLaunchAnimatorController(
             // background.
             wrapped.alpha = 0
             wrapped.bounds = previousBounds
-            wrapped.setXfermode(null)
+            setXfermode(wrapped, null)
+            restoreBackgroundRadii()
         }
 
         override fun setAlpha(alpha: Int) {
@@ -191,6 +238,92 @@ open class GhostedViewLaunchAnimatorController(
 
         override fun setColorFilter(filter: ColorFilter?) {
             wrapped?.colorFilter = filter
+        }
+
+        private fun setXfermode(background: Drawable, mode: PorterDuffXfermode?) {
+            if (background !is LayerDrawable) {
+                background.setXfermode(mode)
+                return
+            }
+
+            // We set the xfermode on the first layer that is not a mask. Most of the time it will
+            // be the "background layer".
+            for (i in 0 until background.numberOfLayers) {
+                if (background.getId(i) != android.R.id.mask) {
+                    background.getDrawable(i).setXfermode(mode)
+                    break
+                }
+            }
+        }
+
+        fun setBackgroundRadius(topCornerRadius: Float, bottomCornerRadius: Float) {
+            updateRadii(cornerRadii, topCornerRadius, bottomCornerRadius)
+            invalidateSelf()
+        }
+
+        private fun updateRadii(
+            radii: FloatArray,
+            topCornerRadius: Float,
+            bottomCornerRadius: Float
+        ) {
+            radii[0] = topCornerRadius
+            radii[1] = topCornerRadius
+            radii[2] = topCornerRadius
+            radii[3] = topCornerRadius
+
+            radii[4] = bottomCornerRadius
+            radii[5] = bottomCornerRadius
+            radii[6] = bottomCornerRadius
+            radii[7] = bottomCornerRadius
+        }
+
+        private fun applyBackgroundRadii() {
+            if (cornerRadii[0] < 0 || wrapped == null) {
+                return
+            }
+
+            savePreviousBackgroundRadii(wrapped)
+            applyBackgroundRadii(wrapped, cornerRadii)
+        }
+
+        private fun savePreviousBackgroundRadii(background: Drawable) {
+            // TODO(b/184121838): This method assumes that all GradientDrawable in background will
+            // have the same radius. Should we save/restore the radii for each layer instead?
+            val gradient = findGradientDrawable(background) ?: return
+
+            // TODO(b/184121838): GradientDrawable#getCornerRadii clones its radii array. Should we
+            // try to avoid that?
+            val radii = gradient.cornerRadii
+            if (radii != null) {
+                radii.copyInto(previousCornerRadii)
+            } else {
+                // Copy the cornerRadius into previousCornerRadii.
+                val radius = gradient.cornerRadius
+                updateRadii(previousCornerRadii, radius, radius)
+            }
+        }
+
+        private fun applyBackgroundRadii(drawable: Drawable, radii: FloatArray) {
+            if (drawable is GradientDrawable) {
+                drawable.cornerRadii = radii
+                return
+            }
+
+            if (drawable !is LayerDrawable) {
+                return
+            }
+
+            for (i in 0 until drawable.numberOfLayers) {
+                (drawable.getDrawable(i) as? GradientDrawable)?.cornerRadii = radii
+            }
+        }
+
+        private fun restoreBackgroundRadii() {
+            if (cornerRadii[0] < 0 || wrapped == null) {
+                return
+            }
+
+            applyBackgroundRadii(wrapped, previousCornerRadii)
         }
     }
 }

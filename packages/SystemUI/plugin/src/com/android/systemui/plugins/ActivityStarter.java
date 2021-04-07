@@ -63,6 +63,8 @@ public interface ActivityStarter {
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
     void postStartActivityDismissingKeyguard(Intent intent, int delay);
+    void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
     void postStartActivityDismissingKeyguard(PendingIntent intent);
 
     /**

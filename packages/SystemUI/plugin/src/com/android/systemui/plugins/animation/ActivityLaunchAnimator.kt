@@ -35,12 +35,12 @@ class ActivityLaunchAnimator {
         private const val ANIMATION_DURATION_NAV_FADE_OUT = 133L
         private const val ANIMATION_DELAY_NAV_FADE_IN =
                 ANIMATION_DURATION - ANIMATION_DURATION_NAV_FADE_IN
-        private const val LAUNCH_TIMEOUT = 500L
+        private const val LAUNCH_TIMEOUT = 1000L
 
         // TODO(b/184121838): Use android.R.interpolator.fast_out_extra_slow_in instead.
         // TODO(b/184121838): Move com.android.systemui.Interpolators in an animation library we can
         // reuse here.
-        private val ANIMATION_INTERPOLATOR = PathInterpolator(0f, 0f, 0.2f, 1f)
+        private val ANIMATION_INTERPOLATOR = PathInterpolator(0.4f, 0f, 0.2f, 1f)
         private val LINEAR_INTERPOLATOR = LinearInterpolator()
         private val ALPHA_IN_INTERPOLATOR = PathInterpolator(0.4f, 0f, 1f, 1f)
         private val ALPHA_OUT_INTERPOLATOR = PathInterpolator(0f, 0f, 0.8f, 1f)
