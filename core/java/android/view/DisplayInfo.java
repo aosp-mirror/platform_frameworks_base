@@ -377,7 +377,7 @@ public final class DisplayInfo implements Parcelable {
                 && ownerUid == other.ownerUid
                 && Objects.equals(ownerPackageName, other.ownerPackageName)
                 && removeMode == other.removeMode
-                && refreshRateOverride == other.refreshRateOverride
+                && getRefreshRate() == other.getRefreshRate()
                 && brightnessMinimum == other.brightnessMinimum
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
