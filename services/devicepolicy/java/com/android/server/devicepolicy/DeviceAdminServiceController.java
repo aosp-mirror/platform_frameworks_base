@@ -27,13 +27,13 @@ import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.IndentingPrintWriter;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.am.PersistentConnection;
 import com.android.server.appbinding.AppBindingUtils;
+import com.android.server.utils.Slogf;
 
 /**
  * Manages connections to persistent services in owner packages.
@@ -114,7 +114,8 @@ public class DeviceAdminServiceController {
                 final ServiceInfo service = findService(packageName, userId);
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Owner package %s on u%d has no service.", packageName, userId);
+                        Slogf.d(TAG, "Owner package %s on u%d has no service.", packageName,
+                                userId);
                     }
                     disconnectServiceOnUserLocked(userId, actionForLog);
                     return;
@@ -127,14 +128,14 @@ public class DeviceAdminServiceController {
                     // would have died at this point due to a package update.  So we disconnect
                     // anyway and re-connect.
                     if (DEBUG) {
-                        Slog.d("Disconnecting from existing service connection.", packageName,
+                        Slogf.d("Disconnecting from existing service connection.", packageName,
                                 userId);
                     }
                     disconnectServiceOnUserLocked(userId, actionForLog);
                 }
 
                 if (DEBUG) {
-                    Slog.d("Owner package %s on u%d has service %s for %s", packageName, userId,
+                    Slogf.d("Owner package %s on u%d has service %s for %s", packageName, userId,
                         service.getComponentName().flattenToShortString(), actionForLog);
                 }
 
@@ -168,7 +169,7 @@ public class DeviceAdminServiceController {
         final DevicePolicyServiceConnection conn = mConnections.get(userId);
         if (conn != null) {
             if (DEBUG) {
-                Slog.d(TAG, "Stopping service for u%d if already running for %s.", userId,
+                Slogf.d(TAG, "Stopping service for u%d if already running for %s.", userId,
                         actionForLog);
             }
             conn.unbind();
