@@ -313,7 +313,6 @@
     <protected-broadcast android:name="android.se.omapi.action.SECURE_ELEMENT_STATE_CHANGED" />
 
     <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
-    <protected-broadcast android:name="android.nfc.action.ALWAYS_ON_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.PREFERRED_PAYMENT_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
     <protected-broadcast android:name="android.nfc.action.REQUIRE_UNLOCK_FOR_NFC" />
