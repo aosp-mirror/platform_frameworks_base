@@ -4248,6 +4248,7 @@
                 android:protectionLevel="normal" />
 
     <!-- Allows an application to create new companion device associations.
+         @SystemApi
          @hide -->
     <permission android:name="android.permission.ASSOCIATE_COMPANION_DEVICES"
         android:protectionLevel="internal|role" />
