@@ -122,6 +122,7 @@ public final class UidRecord {
     static final int CHANGE_ACTIVE = 1<<2;
     static final int CHANGE_CACHED = 1<<3;
     static final int CHANGE_UNCACHED = 1<<4;
+    static final int CHANGE_CAPABILITY = 1<<5;
 
     // Keep the enum lists in sync
     private static int[] ORIG_ENUMS = new int[] {
@@ -130,6 +131,7 @@ public final class UidRecord {
             CHANGE_ACTIVE,
             CHANGE_CACHED,
             CHANGE_UNCACHED,
+            CHANGE_CAPABILITY,
     };
     private static int[] PROTO_ENUMS = new int[] {
             UidRecordProto.CHANGE_GONE,
@@ -137,6 +139,7 @@ public final class UidRecord {
             UidRecordProto.CHANGE_ACTIVE,
             UidRecordProto.CHANGE_CACHED,
             UidRecordProto.CHANGE_UNCACHED,
+            UidRecordProto.CHANGE_CAPABILITY,
     };
 
     // UidObserverController is the only thing that should modify this.
