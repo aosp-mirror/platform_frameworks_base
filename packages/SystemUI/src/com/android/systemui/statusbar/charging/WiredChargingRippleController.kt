@@ -17,11 +17,11 @@
 package com.android.systemui.statusbar.charging
 
 import android.content.Context
-import android.content.res.Configuration
+import android.graphics.PixelFormat
 import android.graphics.PointF
 import android.util.DisplayMetrics
 import android.view.View
-import android.view.ViewGroupOverlay
+import android.view.WindowManager
 import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.dagger.SysUISingleton
@@ -30,9 +30,7 @@ import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.io.PrintWriter
-import java.lang.Integer.max
 import javax.inject.Inject
 
 /***
@@ -45,11 +43,22 @@ class WiredChargingRippleController @Inject constructor(
     batteryController: BatteryController,
     configurationController: ConfigurationController,
     featureFlags: FeatureFlags,
-    private val context: Context,
-    private val keyguardStateController: KeyguardStateController
+    private val context: Context
 ) {
     private var charging: Boolean? = null
     private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled
+    private val windowLayoutParams = WindowManager.LayoutParams().apply {
+        width = WindowManager.LayoutParams.MATCH_PARENT
+        height = WindowManager.LayoutParams.MATCH_PARENT
+        layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        format = PixelFormat.TRANSLUCENT
+        type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY
+        fitInsetsTypes = 0 // Ignore insets from all system bars
+        title = "Wired Charging Animation"
+        flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+    }
+
     @VisibleForTesting
     var rippleView: ChargingRippleView = ChargingRippleView(context, attrs = null)
 
@@ -68,8 +77,8 @@ class WiredChargingRippleController @Inject constructor(
                 val wasCharging = charging
                 charging = nowCharging
                 // Only triggers when the keyguard is active and the device is just plugged in.
-                if (wasCharging == false && nowCharging && keyguardStateController.isShowing) {
-                    rippleView.startRipple()
+                if ((wasCharging == null || !wasCharging) && nowCharging) {
+                    startRipple()
                 }
             }
         }
@@ -85,46 +94,41 @@ class WiredChargingRippleController @Inject constructor(
             override fun onOverlayChanged() {
                 updateRippleColor()
             }
-            override fun onConfigChanged(newConfig: Configuration?) {
-                layoutRippleView()
-            }
         }
         configurationController.addCallback(configurationChangedListener)
 
         commandRegistry.registerCommand("charging-ripple") { ChargingRippleCommand() }
-    }
-
-    fun setViewHost(viewHost: View) {
-        // Add the ripple view as an overlay of the root view so that it always
-        // shows on top.
-        viewHost.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewDetachedFromWindow(view: View?) {}
-
-            override fun onViewAttachedToWindow(view: View?) {
-                (viewHost.viewRootImpl.view.overlay as ViewGroupOverlay).add(rippleView)
-                layoutRippleView()
-                viewHost.removeOnAttachStateChangeListener(this)
-            }
-        })
-
         updateRippleColor()
     }
 
-    private fun layoutRippleView() {
-        // Overlays are not auto measured and laid out so we do it manually here.
+    fun startRipple() {
+        if (rippleView.rippleInProgress) {
+            return
+        }
+        val mWM = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        windowLayoutParams.packageName = context.opPackageName
+        rippleView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewDetachedFromWindow(view: View?) {}
+
+            override fun onViewAttachedToWindow(view: View?) {
+                layoutRipple()
+                rippleView.startRipple(Runnable {
+                    mWM.removeView(rippleView)
+                })
+                rippleView.removeOnAttachStateChangeListener(this)
+            }
+        })
+        mWM.addView(rippleView, windowLayoutParams)
+    }
+
+    private fun layoutRipple() {
+        // TODO(shanh): Set origin base on phone orientation.
         val displayMetrics = DisplayMetrics()
         context.display.getRealMetrics(displayMetrics)
         val width = displayMetrics.widthPixels
         val height = displayMetrics.heightPixels
-        if (width != rippleView.width || height != rippleView.height) {
-            rippleView.apply {
-                measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
-                        View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY))
-                layout(0, 0, width, height)
-                origin = PointF(width / 2f, height.toFloat())
-                radius = max(width, height).toFloat()
-            }
-        }
+        rippleView.origin = PointF(width / 2f, height.toFloat())
+        rippleView.radius = Integer.max(width, height).toFloat()
     }
 
     private fun updateRippleColor() {
@@ -134,7 +138,7 @@ class WiredChargingRippleController @Inject constructor(
 
     inner class ChargingRippleCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
-            rippleView.startRipple()
+            startRipple()
         }
 
         override fun help(pw: PrintWriter) {

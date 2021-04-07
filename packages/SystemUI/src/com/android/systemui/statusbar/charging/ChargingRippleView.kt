@@ -33,11 +33,11 @@ private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
  * Expanding ripple effect that shows when charging begins.
  */
 class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
-    private var rippleInProgress: Boolean = false
     private val rippleShader = RippleShader()
     private val defaultColor: Int = 0xffffffff.toInt()
     private val ripplePaint = Paint()
 
+    var rippleInProgress: Boolean = false
     var radius: Float = 0.0f
         set(value) { rippleShader.radius = value }
     var origin: PointF = PointF()
@@ -62,7 +62,8 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         super.onAttachedToWindow()
     }
 
-    fun startRipple() {
+    @JvmOverloads
+    fun startRipple(onAnimationEnd: Runnable? = null) {
         if (rippleInProgress) {
             return // Ignore if ripple effect is already playing
         }
@@ -80,6 +81,7 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
             override fun onAnimationEnd(animation: Animator?) {
                 rippleInProgress = false
                 visibility = View.GONE
+                onAnimationEnd?.run()
             }
         })
         animator.start()
