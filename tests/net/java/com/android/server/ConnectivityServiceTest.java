@@ -63,6 +63,7 @@ import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTPS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_PRIVDNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_BIP;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
@@ -89,6 +90,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_SUPL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VSIM;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_XCAP;
 import static android.net.NetworkCapabilities.REDACT_FOR_ACCESS_FINE_LOCATION;
@@ -3030,10 +3032,11 @@ public class ConnectivityServiceTest {
         // Verify NOT_RESTRICTED is set appropriately
         final NetworkCapabilities nc = new NetworkRequest.Builder().addCapability(capability)
                 .build().networkCapabilities;
-        if (capability == NET_CAPABILITY_CBS || capability == NET_CAPABILITY_DUN ||
-                capability == NET_CAPABILITY_EIMS || capability == NET_CAPABILITY_FOTA ||
-                capability == NET_CAPABILITY_IA || capability == NET_CAPABILITY_IMS ||
-                capability == NET_CAPABILITY_RCS || capability == NET_CAPABILITY_XCAP
+        if (capability == NET_CAPABILITY_CBS || capability == NET_CAPABILITY_DUN
+                || capability == NET_CAPABILITY_EIMS || capability == NET_CAPABILITY_FOTA
+                || capability == NET_CAPABILITY_IA || capability == NET_CAPABILITY_IMS
+                || capability == NET_CAPABILITY_RCS || capability == NET_CAPABILITY_XCAP
+                || capability == NET_CAPABILITY_VSIM || capability == NET_CAPABILITY_BIP
                 || capability == NET_CAPABILITY_ENTERPRISE) {
             assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
         } else {
@@ -3168,6 +3171,8 @@ public class ConnectivityServiceTest {
         tryNetworkFactoryRequests(NET_CAPABILITY_INTERNET);
         tryNetworkFactoryRequests(NET_CAPABILITY_TRUSTED);
         tryNetworkFactoryRequests(NET_CAPABILITY_NOT_VPN);
+        tryNetworkFactoryRequests(NET_CAPABILITY_VSIM);
+        tryNetworkFactoryRequests(NET_CAPABILITY_BIP);
         // Skipping VALIDATED and CAPTIVE_PORTAL as they're disallowed.
     }
 
