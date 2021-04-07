@@ -346,6 +346,9 @@ public class DisplayManagerServiceTest {
         DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
         displayDeviceInfo.width = 100;
         displayDeviceInfo.height = 200;
+        displayDeviceInfo.supportedModes = new Display.Mode[1];
+        displayDeviceInfo.supportedModes[0] = new Display.Mode(1, 100, 200, 60f);
+        displayDeviceInfo.modeId = 1;
         final Rect zeroRect = new Rect();
         displayDeviceInfo.displayCutout = new DisplayCutout(
                 Insets.of(0, 10, 0, 0),
