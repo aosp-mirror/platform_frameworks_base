@@ -63,7 +63,8 @@ public class NotificationTapHelperTest extends SysuiTestCase {
         when(mResources.getDimension(R.dimen.double_tap_slop))
                 .thenReturn((float) ViewConfiguration.get(mContext).getScaledTouchSlop() - 1);
 
-        mFalsingManager.setFalseRobustTap(true);  // Test double tapping most of the time.
+        mFalsingManager.setSimpleTap(true);
+        mFalsingManager.setFalseTap(true);  // Test double tapping most of the time.
 
         mNotificationTapHelper = new NotificationTapHelper.Factory(mFalsingManager, mFakeExecutor)
                 .create(mActivationListener, mDoubleTapListener, mSlideBackListener);
@@ -158,7 +159,7 @@ public class NotificationTapHelperTest extends SysuiTestCase {
                                                1,
                                                0);
 
-        mFalsingManager.setFalseTap(true);
+        mFalsingManager.setSimpleTap(false);
         mNotificationTapHelper.onTouchEvent(evDownA);
         mNotificationTapHelper.onTouchEvent(evUpA);
         verify(mActivationListener, never()).onActiveChanged(true);

@@ -16,6 +16,7 @@
 
 package com.android.systemui.plugins;
 
+import android.annotation.IntDef;
 import android.net.Uri;
 import android.view.MotionEvent;
 
@@ -24,6 +25,8 @@ import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface that decides whether a touch on the phone was accidental. i.e. Pocket Dialing.
@@ -34,6 +37,20 @@ import java.io.PrintWriter;
 public interface FalsingManager {
     int VERSION = 6;
 
+    int NO_PENALTY = 0;
+    int LOW_PENALTY = 1;
+    int MODERATE_PENALTY = 2;
+    int HIGH_PENALTY = 3;
+
+    @IntDef({
+            NO_PENALTY,
+            LOW_PENALTY,
+            MODERATE_PENALTY,
+            HIGH_PENALTY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Penalty {}
+
     void onSuccessfulUnlock();
 
     boolean isUnlockingDisabled();
@@ -41,23 +58,31 @@ public interface FalsingManager {
     /** Returns true if the gesture should be rejected. */
     boolean isFalseTouch(int interactionType);
 
+
     /**
-     * Returns true if the FalsingManager thinks the last gesure was not a valid tap.
+     * Does basic checking to see if gesture looks like a tap.
      *
-     * The first parameter, robustCheck, distinctly changes behavior. When set to false,
-     * this method simply looks at the last gesture and returns whether it is a tap or not, (as
-     * opposed to a swipe or other non-tap gesture). When set to true, a more thorough analysis
-     * is performed that can include historical interactions and other contextual cues to see
+     * Only does the most basic of checks. No penalty is applied if this method returns false.
+     *
+     * For more robust analysis, use {@link #isFalseTap(int)}.
+     */
+    boolean isSimpleTap();
+
+    /**
+     * Returns true if the FalsingManager thinks the last gesture was not a valid tap.
+     *
+     * This method runs a more thorough analysis than the similar {@link #isSimpleTap()},
+     * that can include historical interactions and other contextual cues to see
      * if the tap looks accidental.
      *
-     * Set robustCheck to true if you want to validate a tap for launching an action, like opening
-     * a notification. Set to false if you simply want to know if the last gesture looked like a
-     * tap.
+     * Use this method to validate a tap for launching an action, like opening
+     * a notification.
      *
-     * The second parameter, falsePenalty, indicates how much this should affect future gesture
-     * classifications if this tap looks like a false.
+     * The only parameter, penalty, indicates how much this should affect future gesture
+     * classifications if this tap looks like a false. As single taps are hard to confirm as false
+     * or otherwise, a low penalty value is encouraged unless context indicates otherwise.
      */
-    boolean isFalseTap(boolean robustCheck, double falsePenalty);
+    boolean isFalseTap(@Penalty int penalty);
 
     /**
      * Returns true if the last two gestures do not look like a double tap.
