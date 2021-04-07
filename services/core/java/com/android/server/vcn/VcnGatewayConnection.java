@@ -85,6 +85,7 @@ import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscription
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkTrackerCallback;
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
+import com.android.server.vcn.util.MtuUtils;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -448,6 +449,44 @@ public class VcnGatewayConnection extends StateMachine {
      * @param arg1 The "all" token; this signal is always honored.
      */
     private static final int EVENT_SAFE_MODE_TIMEOUT_EXCEEDED = 10;
+
+    /**
+     * Sent when an IKE has completed migration, and created updated transforms for application.
+     *
+     * <p>Only relevant in the Connected state.
+     *
+     * @param arg1 The session token for the IKE Session that completed migration, used to prevent
+     *     out-of-date signals from propagating.
+     * @param obj @NonNull An EventMigrationCompletedInfo instance with relevant data.
+     */
+    private static final int EVENT_MIGRATION_COMPLETED = 11;
+
+    private static class EventMigrationCompletedInfo implements EventInfo {
+        @NonNull public final IpSecTransform inTransform;
+        @NonNull public final IpSecTransform outTransform;
+
+        EventMigrationCompletedInfo(
+                @NonNull IpSecTransform inTransform, @NonNull IpSecTransform outTransform) {
+            this.inTransform = Objects.requireNonNull(inTransform);
+            this.outTransform = Objects.requireNonNull(outTransform);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(inTransform, outTransform);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (!(other instanceof EventMigrationCompletedInfo)) {
+                return false;
+            }
+
+            final EventMigrationCompletedInfo rhs = (EventMigrationCompletedInfo) other;
+            return Objects.equals(inTransform, rhs.inTransform)
+                    && Objects.equals(outTransform, rhs.outTransform);
+        }
+    }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     @NonNull
@@ -1054,6 +1093,14 @@ public class VcnGatewayConnection extends StateMachine {
         sendMessageAndAcquireWakeLock(EVENT_SESSION_CLOSED, token);
     }
 
+    private void migrationCompleted(
+            int token, @NonNull IpSecTransform inTransform, @NonNull IpSecTransform outTransform) {
+        sendMessageAndAcquireWakeLock(
+                EVENT_MIGRATION_COMPLETED,
+                token,
+                new EventMigrationCompletedInfo(inTransform, outTransform));
+    }
+
     private void childTransformCreated(
             int token, @NonNull IpSecTransform transform, int direction) {
         sendMessageAndAcquireWakeLock(
@@ -1149,7 +1196,9 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_SETUP_COMPLETED: // Fallthrough
                 case EVENT_DISCONNECT_REQUESTED: // Fallthrough
                 case EVENT_TEARDOWN_TIMEOUT_EXPIRED: // Fallthrough
-                case EVENT_SUBSCRIPTIONS_CHANGED:
+                case EVENT_SUBSCRIPTIONS_CHANGED: // Fallthrough
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED: // Fallthrough
+                case EVENT_MIGRATION_COMPLETED:
                     logUnexpectedEvent(msg.what);
                     break;
                 default:
@@ -1446,7 +1495,8 @@ public class VcnGatewayConnection extends StateMachine {
             final NetworkCapabilities caps =
                     buildNetworkCapabilities(mConnectionConfig, mUnderlying);
             final LinkProperties lp =
-                    buildConnectedLinkProperties(mConnectionConfig, tunnelIface, childConfig);
+                    buildConnectedLinkProperties(
+                            mConnectionConfig, tunnelIface, childConfig, mUnderlying);
 
             agent.sendNetworkCapabilities(caps);
             agent.sendLinkProperties(lp);
@@ -1458,7 +1508,8 @@ public class VcnGatewayConnection extends StateMachine {
             final NetworkCapabilities caps =
                     buildNetworkCapabilities(mConnectionConfig, mUnderlying);
             final LinkProperties lp =
-                    buildConnectedLinkProperties(mConnectionConfig, tunnelIface, childConfig);
+                    buildConnectedLinkProperties(
+                            mConnectionConfig, tunnelIface, childConfig, mUnderlying);
             final NetworkAgentConfig nac =
                     new NetworkAgentConfig.Builder()
                             .setLegacyType(ConnectivityManager.TYPE_MOBILE)
@@ -1627,10 +1678,34 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
                     handleSafeModeTimeoutExceeded();
                     break;
+                case EVENT_MIGRATION_COMPLETED:
+                    final EventMigrationCompletedInfo migrationCompletedInfo =
+                            (EventMigrationCompletedInfo) msg.obj;
+
+                    handleMigrationCompleted(migrationCompletedInfo);
+                    break;
                 default:
                     logUnhandledMessage(msg);
                     break;
             }
+        }
+
+        private void handleMigrationCompleted(EventMigrationCompletedInfo migrationCompletedInfo) {
+            applyTransform(
+                    mCurrentToken,
+                    mTunnelIface,
+                    mUnderlying.network,
+                    migrationCompletedInfo.inTransform,
+                    IpSecManager.DIRECTION_IN);
+
+            applyTransform(
+                    mCurrentToken,
+                    mTunnelIface,
+                    mUnderlying.network,
+                    migrationCompletedInfo.outTransform,
+                    IpSecManager.DIRECTION_OUT);
+
+            updateNetworkAgent(mTunnelIface, mNetworkAgent, mChildConfig);
         }
 
         private void handleUnderlyingNetworkChanged(@NonNull Message msg) {
@@ -1822,7 +1897,10 @@ public class VcnGatewayConnection extends StateMachine {
     private static LinkProperties buildConnectedLinkProperties(
             @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig,
             @NonNull IpSecTunnelInterface tunnelIface,
-            @NonNull VcnChildSessionConfiguration childConfig) {
+            @NonNull VcnChildSessionConfiguration childConfig,
+            @Nullable UnderlyingNetworkRecord underlying) {
+        final VcnControlPlaneIkeConfig controlPlaneConfig =
+                (VcnControlPlaneIkeConfig) gatewayConnectionConfig.getControlPlaneConfig();
         final LinkProperties lp = new LinkProperties();
 
         lp.setInterfaceName(tunnelIface.getInterfaceName());
@@ -1838,7 +1916,12 @@ public class VcnGatewayConnection extends StateMachine {
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null /*gateway*/,
                 null /*iface*/, RouteInfo.RTN_UNICAST));
 
-        lp.setMtu(gatewayConnectionConfig.getMaxMtu());
+        final int underlyingMtu = (underlying == null) ? 0 : underlying.linkProperties.getMtu();
+        lp.setMtu(
+                MtuUtils.getMtu(
+                        controlPlaneConfig.getChildSessionParams().getSaProposals(),
+                        gatewayConnectionConfig.getMaxMtu(),
+                        underlyingMtu));
 
         return lp;
     }
@@ -1919,8 +2002,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull IpSecTransform inIpSecTransform,
                 @NonNull IpSecTransform outIpSecTransform) {
             Slog.v(TAG, "ChildTransformsMigrated; token " + mToken);
-            onIpSecTransformCreated(inIpSecTransform, IpSecManager.DIRECTION_IN);
-            onIpSecTransformCreated(outIpSecTransform, IpSecManager.DIRECTION_OUT);
+            migrationCompleted(mToken, inIpSecTransform, outIpSecTransform);
         }
 
         @Override

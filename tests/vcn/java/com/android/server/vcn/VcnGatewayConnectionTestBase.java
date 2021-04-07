@@ -90,18 +90,28 @@ public class VcnGatewayConnectionTestBase {
     protected static final int TEST_SUB_ID = 5;
     protected static final long ELAPSED_REAL_TIME = 123456789L;
     protected static final String TEST_IPSEC_TUNNEL_IFACE = "IPSEC_IFACE";
+
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
             new UnderlyingNetworkRecord(
                     new Network(0),
                     new NetworkCapabilities(),
                     new LinkProperties(),
                     false /* blocked */);
+
+    static {
+        TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.setMtu(1500);
+    }
+
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_2 =
             new UnderlyingNetworkRecord(
                     new Network(1),
                     new NetworkCapabilities(),
                     new LinkProperties(),
                     false /* blocked */);
+
+    static {
+        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.setMtu(1460);
+    }
 
     protected static final TelephonySubscriptionSnapshot TEST_SUBSCRIPTION_SNAPSHOT =
             new TelephonySubscriptionSnapshot(

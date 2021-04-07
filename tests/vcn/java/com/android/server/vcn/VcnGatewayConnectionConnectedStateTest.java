@@ -47,14 +47,18 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
+import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.TemporaryFailureException;
+import android.net.vcn.VcnControlPlaneIkeConfig;
 import android.net.vcn.VcnManager.VcnErrorCode;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.vcn.util.MtuUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -153,7 +157,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     }
 
     @Test
-    public void testMigratedTransformsAreApplied() throws Exception {
+    public void testMigration() throws Exception {
+        triggerChildOpened();
+
         getChildSessionCallback()
                 .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
         mTestLooper.dispatchAll();
@@ -171,6 +177,17 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         }
 
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+
+        final List<ChildSaProposal> saProposals =
+                ((VcnControlPlaneIkeConfig) mConfig.getControlPlaneConfig())
+                        .getChildSessionParams()
+                        .getSaProposals();
+        final int expectedMtu =
+                MtuUtils.getMtu(
+                        saProposals,
+                        mConfig.getMaxMtu(),
+                        TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.getMtu());
+        verify(mNetworkAgent).sendLinkProperties(argThat(lp -> expectedMtu == lp.getMtu()));
     }
 
     private void triggerChildOpened() {
