@@ -3969,17 +3969,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // multilayer requests, returning as soon as a NetworkAgentInfo satisfies a request
                 // is important so as to not evaluate lower priority requests further in
                 // nri.mRequests.
-                final boolean isNetworkNeeded = candidate.isSatisfyingRequest(req.requestId)
-                        // Note that this catches two important cases:
-                        // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
-                        //    is currently satisfying the request.  This is desirable when
-                        //    cellular ends up validating but WiFi does not.
-                        // 2. Unvalidated WiFi will not be reaped when validated cellular
-                        //    is currently satisfying the request.  This is desirable when
-                        //    WiFi ends up validating and out scoring cellular.
-                        || nri.getSatisfier().getCurrentScore()
-                        < candidate.getCurrentScoreAsValidated();
-                return isNetworkNeeded;
+                final NetworkAgentInfo champion = req.equals(nri.getActiveRequest())
+                        ? nri.getSatisfier() : null;
+                // Note that this catches two important cases:
+                // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
+                //    is currently satisfying the request.  This is desirable when
+                //    cellular ends up validating but WiFi does not.
+                // 2. Unvalidated WiFi will not be reaped when validated cellular
+                //    is currently satisfying the request.  This is desirable when
+                //    WiFi ends up validating and out scoring cellular.
+                return mNetworkRanker.mightBeat(req, champion, candidate.getValidatedScoreable());
             }
         }
 
@@ -7811,7 +7810,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull final Collection<NetworkRequestInfo> networkRequests) {
         final NetworkReassignment changes = new NetworkReassignment();
 
-        // Gather the list of all relevant agents and sort them by score.
+        // Gather the list of all relevant agents.
         final ArrayList<NetworkAgentInfo> nais = new ArrayList<>();
         for (final NetworkAgentInfo nai : mNetworkAgentInfos) {
             if (!nai.everConnected) {
