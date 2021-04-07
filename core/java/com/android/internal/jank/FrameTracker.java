@@ -27,6 +27,7 @@ import static android.view.SurfaceControl.JankData.SURFACE_FLINGER_SCHEDULING;
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_METRICS_LOGGED;
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_BEGIN;
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_CANCEL;
+import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_END;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -215,7 +216,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
         }
         if (mListener != null) {
-            mListener.onNotifyCujEvents(mSession, ACTION_SESSION_BEGIN);
+            mListener.onCujEvents(mSession, ACTION_SESSION_BEGIN);
         }
     }
 
@@ -240,7 +241,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             }
             Trace.endAsyncSection(mSession.getName(), (int) mBeginVsyncId);
             mSession.setReason(reason);
-            InteractionJankMonitor.getInstance().removeTimeout(mSession.getCuj());
+            if (mListener != null) {
+                mListener.onCujEvents(mSession, ACTION_SESSION_END);
+            }
         }
         // We don't remove observer here,
         // will remove it when all the frame metrics in this duration are called back.
@@ -269,7 +272,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         // Notify the listener the session has been cancelled.
         // We don't notify the listeners if the session never begun.
         if (mListener != null) {
-            mListener.onNotifyCujEvents(mSession, ACTION_SESSION_CANCEL);
+            mListener.onCujEvents(mSession, ACTION_SESSION_CANCEL);
         }
     }
 
@@ -445,7 +448,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     maxFrameTimeNanos,
                     missedSfFramesCounts);
             if (mListener != null) {
-                mListener.onNotifyCujEvents(mSession, ACTION_METRICS_LOGGED);
+                mListener.onCujEvents(mSession, ACTION_METRICS_LOGGED);
             }
         }
         if (DEBUG) {
@@ -587,6 +590,6 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
          * @param session the CUJ session
          * @param action the specific action
          */
-        void onNotifyCujEvents(Session session, String action);
+        void onCujEvents(Session session, String action);
     }
 }
