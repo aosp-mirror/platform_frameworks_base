@@ -564,31 +564,6 @@ public class NetworkPolicyManager {
     }
 
     /**
-     * Figure out if networking is blocked for a given set of conditions.
-     *
-     * This is used by ConnectivityService via passing stale copies of conditions, so it must not
-     * take any locks.
-     *
-     * @param uid The target uid.
-     * @param uidRules The uid rules which are obtained from NetworkPolicyManagerService.
-     * @param isNetworkMetered True if the network is metered.
-     * @param isBackgroundRestricted True if data saver is enabled.
-     *
-     * @return true if networking is blocked for the UID under the specified conditions.
-     *
-     * @hide
-     */
-    public boolean checkUidNetworkingBlocked(int uid, int uidRules,
-            boolean isNetworkMetered, boolean isBackgroundRestricted) {
-        try {
-            return mService.checkUidNetworkingBlocked(uid, uidRules, isNetworkMetered,
-                    isBackgroundRestricted);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Check that the given uid is restricted from doing networking on metered networks.
      *
      * @param uid The target uid.

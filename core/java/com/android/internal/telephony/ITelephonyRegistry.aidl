@@ -60,7 +60,6 @@ interface ITelephonyRegistry {
     void notifyDataConnectionForSubscriber(
             int phoneId, int subId, in PreciseDataConnectionState preciseState);
     // Uses CellIdentity which is Parcelable here; will convert to CellLocation in client.
-    void notifyCellLocation(in CellIdentity cellLocation);
     void notifyCellLocationForSubscriber(in int subId, in CellIdentity cellLocation);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);

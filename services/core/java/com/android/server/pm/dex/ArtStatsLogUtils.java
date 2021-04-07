@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 /** Utils class to report ART metrics to statsd. */
@@ -39,6 +41,7 @@ public class ArtStatsLogUtils {
     private static final String TAG = ArtStatsLogUtils.class.getSimpleName();
     private static final String PROFILE_DEX_METADATA = "primary.prof";
     private static final String VDEX_DEX_METADATA = "primary.vdex";
+    private static final String BASE_APK= "base.apk";
 
 
     private static final int ART_COMPILATION_REASON_INSTALL_BULK_SECONDARY =
@@ -122,16 +125,29 @@ public class ArtStatsLogUtils {
                 ART_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK);
     }
 
+    private static final Map<String, Integer> ISA_MAP = new HashMap();
+
+    static {
+        ISA_MAP.put("arm", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_ARM);
+        ISA_MAP.put("arm64", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_ARM64);
+        ISA_MAP.put("x86", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_X86);
+        ISA_MAP.put("x86_64", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_X86_64);
+        ISA_MAP.put("mips", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_MIPS);
+        ISA_MAP.put("mips64", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_MIPS64);
+    }
+
     public static void writeStatsLog(
             ArtStatsLogger logger,
             long sessionId,
-            String path,
             String compilerFilter,
             int uid,
             long compileTime,
             String dexMetadataPath,
             int compilationReason,
-            int result) {
+            int result,
+            int apkType,
+            String isa,
+            String apkPath) {
         int dexMetadataType = getDexMetadataType(dexMetadataPath);
         logger.write(
                 sessionId,
@@ -140,7 +156,19 @@ public class ArtStatsLogUtils {
                 compilerFilter,
                 ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_RESULT_CODE,
                 result,
-                dexMetadataType);
+                dexMetadataType,
+                apkType,
+                isa);
+        logger.write(
+                sessionId,
+                uid,
+                compilationReason,
+                compilerFilter,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_BYTES,
+                getDexBytes(apkPath),
+                dexMetadataType,
+                apkType,
+                isa);
         logger.write(
                 sessionId,
                 uid,
@@ -148,7 +176,47 @@ public class ArtStatsLogUtils {
                 compilerFilter,
                 ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME,
                 compileTime,
-                dexMetadataType);
+                dexMetadataType,
+                apkType,
+                isa);
+    }
+
+    public static int getApkType(String path) {
+        if (path.equals(BASE_APK)) {
+            return ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE;
+        }
+        return ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_SPLIT;
+    }
+
+    private static long getDexBytes(String apkPath) {
+        StrictJarFile jarFile = null;
+        long dexBytes = 0;
+        try {
+            jarFile = new StrictJarFile(apkPath,
+                    /*verify=*/ false,
+                    /*signatureSchemeRollbackProtectionsEnforced=*/ false);
+            Iterator<ZipEntry> it = jarFile.iterator();
+            Pattern p = Pattern.compile("classes(\\d)*[.]dex");
+            Matcher m = p.matcher("");
+            while (it.hasNext()) {
+                ZipEntry entry = it.next();
+                m.reset(entry.getName());
+                if (m.matches()) {
+                    dexBytes += entry.getSize();
+                }
+            }
+            return dexBytes;
+        } catch (IOException ignore) {
+            Slog.e(TAG, "Error when parsing APK " + apkPath);
+            return -1L;
+        } finally {
+            try {
+                if (jarFile != null) {
+                    jarFile.close();
+                }
+            } catch (IOException ignore) {
+            }
+        }
     }
 
     private static int getDexMetadataType(String dexMetadataPath) {
@@ -207,7 +275,9 @@ public class ArtStatsLogUtils {
                 String compilerFilter,
                 int kind,
                 long value,
-                int dexMetadataType) {
+                int dexMetadataType,
+                int apkType,
+                String isa) {
             ArtStatsLog.write(
                     ArtStatsLog.ART_DATUM_REPORTED,
                     sessionId,
@@ -220,7 +290,10 @@ public class ArtStatsLogUtils {
                     ArtStatsLog.ART_DATUM_REPORTED__THREAD_TYPE__ART_THREAD_MAIN,
                     kind,
                     value,
-                    dexMetadataType);
+                    dexMetadataType,
+                    apkType,
+                    ISA_MAP.getOrDefault(isa,
+                            ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_UNKNOWN));
         }
     }
 }

@@ -33,12 +33,6 @@ import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
-import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
-import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
-import static android.net.NetworkPolicyManager.RULE_NONE;
-import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
-import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
-import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
@@ -49,7 +43,6 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
-import static android.os.Process.SYSTEM_UID;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEFAULT;
@@ -141,7 +134,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DataUnit;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Range;
 import android.util.RecurrenceRule;
 
@@ -1773,119 +1765,75 @@ public class NetworkPolicyManagerServiceTest {
                 true);
     }
 
-    /**
-     * Test that when StatsProvider triggers limit reached, new limit will be calculated and
-     * re-armed.
-     */
-    @Test
-    public void testStatsProviderLimitReached() throws Exception {
-        final int CYCLE_DAY = 15;
-
-        final NetworkStats stats = new NetworkStats(0L, 1);
+    private void increaseMockedTotalBytes(NetworkStats stats, long rxBytes, long txBytes) {
         stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
-                2999, 1, 2000, 1, 0);
+                rxBytes, 1, txBytes, 1, 0);
         when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
                 .thenReturn(stats.getTotalBytes());
         when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
                 .thenReturn(stats);
+    }
+
+    private void triggerOnStatsProviderWarningOrLimitReached() throws InterruptedException {
+        final NetworkPolicyManagerInternal npmi = LocalServices
+                .getService(NetworkPolicyManagerInternal.class);
+        npmi.onStatsProviderWarningOrLimitReached("TEST");
+        // Wait for processing of MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED.
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).forceUpdate();
+        // Wait for processing of MSG_*_INTERFACE_QUOTAS.
+        postMsgAndWaitForCompletion();
+    }
+
+    /**
+     * Test that when StatsProvider triggers warning and limit reached, new quotas will be
+     * calculated and re-armed.
+     */
+    @Test
+    public void testStatsProviderWarningAndLimitReached() throws Exception {
+        final int CYCLE_DAY = 15;
+
+        final NetworkStats stats = new NetworkStats(0L, 1);
+        increaseMockedTotalBytes(stats, 2999, 2000);
 
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
-        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, Long.MAX_VALUE);
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE,
+                Long.MAX_VALUE);
 
-        // Set limit to 10KB.
+        // Set warning to 7KB and limit to 10KB.
         setNetworkPolicies(new NetworkPolicy(
-                sTemplateMobileAll, CYCLE_DAY, TIMEZONE_UTC, WARNING_DISABLED, 10000L,
-                true));
+                sTemplateMobileAll, CYCLE_DAY, TIMEZONE_UTC, 7000L, 10000L, true));
         postMsgAndWaitForCompletion();
 
-        // Verifies that remaining quota is set to providers.
-        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, 10000L - 4999L);
-
+        // Verifies that remaining quotas are set to providers.
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2001L, 5001L);
         reset(mStatsService);
 
-        // Increase the usage.
-        stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
-                1000, 1, 999, 1, 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats.getTotalBytes());
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats);
+        // Increase the usage and simulates that limit reached fires earlier by provider,
+        // but actually the quota is not yet reached. Verifies that the limit reached leads to
+        // a force update and new quotas should be set.
+        increaseMockedTotalBytes(stats, 1000, 999);
+        triggerOnStatsProviderWarningOrLimitReached();
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2L, 3002L);
+        reset(mStatsService);
 
-        // Simulates that limit reached fires earlier by provider, but actually the quota is not
-        // yet reached.
-        final NetworkPolicyManagerInternal npmi = LocalServices
-                .getService(NetworkPolicyManagerInternal.class);
-        npmi.onStatsProviderWarningOrLimitReached("TEST");
+        // Increase the usage and simulate warning reached, the new warning should be unlimited
+        // since service will disable warning quota to stop lower layer from keep triggering
+        // warning reached event.
+        increaseMockedTotalBytes(stats, 1000L, 1000);
+        triggerOnStatsProviderWarningOrLimitReached();
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(
+                TEST_IFACE, Long.MAX_VALUE, 1002L);
+        reset(mStatsService);
 
-        // Verifies that the limit reached leads to a force update and new limit should be set.
-        postMsgAndWaitForCompletion();
-        verify(mStatsService).forceUpdate();
-        postMsgAndWaitForCompletion();
-        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, 10000L - 4999L - 1999L);
-    }
-
-    /**
-     * Exhaustively test checkUidNetworkingBlocked to output the expected results based on external
-     * conditions.
-     */
-    @Test
-    public void testCheckUidNetworkingBlocked() {
-        final ArrayList<Pair<Boolean, Integer>> expectedBlockedStates = new ArrayList<>();
-
-        // Metered network. Data saver on.
-        expectedBlockedStates.add(new Pair<>(true, RULE_NONE));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_METERED));
-        expectedBlockedStates.add(new Pair<>(true, RULE_ALLOW_ALL));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
-        verifyNetworkBlockedState(
-                true /* metered */, true /* backgroundRestricted */, expectedBlockedStates);
-        expectedBlockedStates.clear();
-
-        // Metered network. Data saver off.
-        expectedBlockedStates.add(new Pair<>(false, RULE_NONE));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_ALL));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
-        verifyNetworkBlockedState(
-                true /* metered */, false /* backgroundRestricted */, expectedBlockedStates);
-        expectedBlockedStates.clear();
-
-        // Non-metered network. Data saver on.
-        expectedBlockedStates.add(new Pair<>(false, RULE_NONE));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_REJECT_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_ALL));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
-        verifyNetworkBlockedState(
-                false /* metered */, true /* backgroundRestricted */, expectedBlockedStates);
-
-        // Non-metered network. Data saver off. The result is the same as previous case since
-        // the network is blocked only for RULE_REJECT_ALL regardless of data saver.
-        verifyNetworkBlockedState(
-                false /* metered */, false /* backgroundRestricted */, expectedBlockedStates);
-        expectedBlockedStates.clear();
-    }
-
-    private void verifyNetworkBlockedState(boolean metered, boolean backgroundRestricted,
-            ArrayList<Pair<Boolean, Integer>> expectedBlockedStateForRules) {
-
-        for (Pair<Boolean, Integer> pair : expectedBlockedStateForRules) {
-            final boolean expectedResult = pair.first;
-            final int rule = pair.second;
-            assertEquals(formatBlockedStateError(UID_A, rule, metered, backgroundRestricted),
-                    expectedResult, mService.checkUidNetworkingBlocked(UID_A, rule,
-                            metered, backgroundRestricted));
-            assertFalse(formatBlockedStateError(SYSTEM_UID, rule, metered, backgroundRestricted),
-                    mService.checkUidNetworkingBlocked(SYSTEM_UID, rule, metered,
-                            backgroundRestricted));
-        }
+        // Increase the usage that over the warning and limit, the new limit should set to 1 to
+        // block the network traffic.
+        increaseMockedTotalBytes(stats, 1000L, 1000);
+        triggerOnStatsProviderWarningOrLimitReached();
+        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE, 1L);
+        reset(mStatsService);
     }
 
     private void enableRestrictedMode(boolean enable) throws Exception {
