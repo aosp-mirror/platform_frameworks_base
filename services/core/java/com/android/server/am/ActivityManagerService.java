@@ -3489,9 +3489,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     // Clear its scheduled jobs
                     JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
-                    // Clearing data is akin to uninstalling. The app is force stopped before we
-                    // get to this point, so the reason won't be checked by the app.
-                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER, "clear data");
+                    // Clearing data is a user-initiated action.
+                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER,
+                            JobParameters.DEBUG_REASON_DATA_CLEARED, "clear data");
 
                     // Clear its pending alarms
                     AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
