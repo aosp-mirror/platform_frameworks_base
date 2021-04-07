@@ -179,6 +179,7 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.PropertyInvalidatedCache;
+import android.app.RemoteServiceException;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
@@ -2935,6 +2936,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void crashApplication(int uid, int initialPid, String packageName, int userId,
             String message, boolean force) {
+        crashApplicationWithType(uid, initialPid, packageName, userId, message, force,
+                RemoteServiceException.TYPE_ID);
+    }
+
+    @Override
+    public void crashApplicationWithType(int uid, int initialPid, String packageName, int userId,
+            String message, boolean force, int exceptionTypeId) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: crashApplication() from pid="
@@ -2947,7 +2955,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId,
-                    message, force);
+                    message, force, exceptionTypeId);
         }
     }
 
