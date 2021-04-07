@@ -389,7 +389,7 @@
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"సచేతనం (డిఫాల్ట్)"</item>
     <item msgid="9112200311983078311">"సహజం"</item>
-    <item msgid="6564241960833766170">"ప్రామాణికం"</item>
+    <item msgid="6564241960833766170">"స్టాండర్డ్"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"మెరుగైన రంగులు"</item>

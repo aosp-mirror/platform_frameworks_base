@@ -119,6 +119,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -431,6 +432,45 @@ public final class ActiveServices {
     boolean hasBackgroundServicesLocked(int callingUser) {
         ServiceMap smap = mServiceMap.get(callingUser);
         return smap != null ? smap.mStartingBackground.size() >= mMaxStartingBackground : false;
+    }
+
+    boolean hasForegroundServiceNotificationLocked(String pkg, int userId, String channelId) {
+        final ServiceMap smap = mServiceMap.get(userId);
+        if (smap != null) {
+            for (int i = 0; i < smap.mServicesByInstanceName.size(); i++) {
+                final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
+                if (sr.appInfo.packageName.equals(pkg) && sr.isForeground) {
+                    if (Objects.equals(sr.foregroundNoti.getChannelId(), channelId)) {
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.d(TAG_SERVICE, "Channel u" + userId + "/pkg=" + pkg
+                                    + "/channelId=" + channelId
+                                    + " has fg service notification");
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    void stopForegroundServicesForChannelLocked(String pkg, int userId, String channelId) {
+        final ServiceMap smap = mServiceMap.get(userId);
+        if (smap != null) {
+            for (int i = 0; i < smap.mServicesByInstanceName.size(); i++) {
+                final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
+                if (sr.appInfo.packageName.equals(pkg) && sr.isForeground) {
+                    if (Objects.equals(sr.foregroundNoti.getChannelId(), channelId)) {
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.d(TAG_SERVICE, "Stopping FGS u" + userId + "/pkg=" + pkg
+                                    + "/channelId=" + channelId
+                                    + " for conversation channel clear");
+                        }
+                        stopServiceLocked(sr);
+                    }
+                }
+            }
+        }
     }
 
     private ServiceMap getServiceMapLocked(int callingUser) {
