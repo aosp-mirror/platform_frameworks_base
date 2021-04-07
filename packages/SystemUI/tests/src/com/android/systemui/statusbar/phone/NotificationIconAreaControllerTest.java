@@ -25,7 +25,6 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -107,9 +106,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
 
     @Test
     public void testAppearResetsTranslation() {
-        mController.setupAodIcons(
-                mAodIcons,
-                KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL);
+        mController.setupAodIcons(mAodIcons);
         when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
         mController.appearAodIcons();
         verify(mAodIcons).setTranslationY(0);

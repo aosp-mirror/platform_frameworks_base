@@ -70,12 +70,5 @@
             android:letterSpacing="0.05"
             android:ellipsize="marquee"
             android:singleLine="true" />
-        <com.android.systemui.statusbar.phone.NotificationIconContainer
-            android:id="@+id/clock_notification_icon_container"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/notification_shelf_height"
-            android:layout_marginTop="@dimen/widget_vertical_padding"
-            android:visibility="invisible"
-        />
     </LinearLayout>
 </com.android.keyguard.KeyguardStatusView>

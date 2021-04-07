@@ -161,15 +161,14 @@ public class NotificationIconAreaController implements
     /**
      * Called by the Keyguard*ViewController whose view contains the aod icons.
      */
-    public void setupAodIcons(@NonNull NotificationIconContainer aodIcons,
-            int lockScreenMode) {
+    public void setupAodIcons(@NonNull NotificationIconContainer aodIcons) {
         boolean changed = mAodIcons != null;
         if (changed) {
             mAodIcons.setAnimationsEnabled(false);
             mAodIcons.removeAllViews();
         }
         mAodIcons = aodIcons;
-        mAodIcons.setOnLockScreen(true, lockScreenMode);
+        mAodIcons.setOnLockScreen(true);
         updateAodIconsVisibility(false /* animate */);
         updateAnimations();
         if (changed) {
