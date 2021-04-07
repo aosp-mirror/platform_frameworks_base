@@ -394,8 +394,8 @@ final class HistoricalRegistry {
         }
 
         if ((historyFlags & HISTORY_FLAG_DISCRETE) != 0) {
-            mDiscreteRegistry.getHistoricalDiscreteOps(result, beginTimeMillis, endTimeMillis,
-                    filter, uid, packageName, opNames, attributionTag,
+            mDiscreteRegistry.addFilteredDiscreteOpsToHistoricalOps(result, beginTimeMillis,
+                    endTimeMillis, filter, uid, packageName, opNames, attributionTag,
                     flags);
         }
 
@@ -428,8 +428,8 @@ final class HistoricalRegistry {
                 inMemoryAdjEndTimeMillis);
 
         if ((historyFlags & HISTORY_FLAG_DISCRETE) != 0) {
-            mDiscreteRegistry.getHistoricalDiscreteOps(result, beginTimeMillis, endTimeMillis,
-                    filter, uid, packageName, opNames, attributionTag, flags);
+            mDiscreteRegistry.addFilteredDiscreteOpsToHistoricalOps(result, beginTimeMillis,
+                    endTimeMillis, filter, uid, packageName, opNames, attributionTag, flags);
         }
 
         if ((historyFlags & HISTORY_FLAG_AGGREGATE) != 0) {
@@ -645,6 +645,7 @@ final class HistoricalRegistry {
                 mPersistence.clearHistoryDLocked(uid, packageName);
             }
         }
+        mDiscreteRegistry.clearHistory(uid, packageName);
     }
 
     void writeAndClearDiscreteHistory() {

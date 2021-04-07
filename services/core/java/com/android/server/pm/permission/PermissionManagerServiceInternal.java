@@ -184,6 +184,11 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     void stopShellPermissionIdentityDelegation();
 
     /**
+     * Get all delegated shell permissions.
+     */
+    @NonNull List<String> getDelegatedShellPermissions();
+
+    /**
      * Read legacy permissions from legacy permission settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose
@@ -210,11 +215,11 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * Callback when a storage volume is mounted, so that all packages on it become available.
      *
      * @param volumeUuid the UUID of the storage volume
-     * @param sdkVersionChanged whether the current SDK version is different from what it was when
-     *                          this volume was last mounted
+     * @param fingerprintChanged whether the current build fingerprint is different from what it was
+     *                           when this volume was last mounted
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    void onStorageVolumeMounted(@NonNull String volumeUuid, boolean sdkVersionChanged);
+    void onStorageVolumeMounted(@NonNull String volumeUuid, boolean fingerprintChanged);
 
     /**
      * Callback when a user has been created.

@@ -143,6 +143,7 @@ public interface QSTile {
         public SlashState slash;
         public boolean handlesLongClick = true;
         public boolean showRippleEffect = true;
+        public Drawable sideViewDrawable;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
@@ -163,7 +164,8 @@ public interface QSTile {
                     || !Objects.equals(other.dualTarget, dualTarget)
                     || !Objects.equals(other.slash, slash)
                     || !Objects.equals(other.handlesLongClick, handlesLongClick)
-                    || !Objects.equals(other.showRippleEffect, showRippleEffect);
+                    || !Objects.equals(other.showRippleEffect, showRippleEffect)
+                    || !Objects.equals(other.sideViewDrawable, sideViewDrawable);
             other.icon = icon;
             other.iconSupplier = iconSupplier;
             other.label = label;
@@ -179,6 +181,7 @@ public interface QSTile {
             other.slash = slash != null ? slash.copy() : null;
             other.handlesLongClick = handlesLongClick;
             other.showRippleEffect = showRippleEffect;
+            other.sideViewDrawable = sideViewDrawable;
             return changed;
         }
 
@@ -204,6 +207,7 @@ public interface QSTile {
             sb.append(",isTransient=").append(isTransient);
             sb.append(",state=").append(state);
             sb.append(",slash=\"").append(slash).append("\"");
+            sb.append(",sideViewDrawable").append(sideViewDrawable);
             return sb.append(']');
         }
 

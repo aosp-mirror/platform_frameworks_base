@@ -22253,10 +22253,10 @@ package android.media {
     field public static final int STATUS_USABLE_IN_FUTURE = 5; // 0x5
   }
 
-  public static class MediaDrm.LogMessage {
-    field @NonNull public final String message;
-    field public final int priority;
-    field public final long timestampMillis;
+  public static final class MediaDrm.LogMessage {
+    method @NonNull public String getMessage();
+    method public int getPriority();
+    method public long getTimestampMillis();
   }
 
   public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
@@ -35050,7 +35050,7 @@ package android.provider {
     field public static final String ACTION_APPLICATION_SETTINGS = "android.settings.APPLICATION_SETTINGS";
     field public static final String ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS = "android.settings.APP_NOTIFICATION_BUBBLE_SETTINGS";
     field public static final String ACTION_APP_NOTIFICATION_SETTINGS = "android.settings.APP_NOTIFICATION_SETTINGS";
-    field public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS = "com.android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
+    field public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS = "android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
     field public static final String ACTION_APP_SEARCH_SETTINGS = "android.settings.APP_SEARCH_SETTINGS";
     field public static final String ACTION_APP_USAGE_SETTINGS = "android.settings.action.APP_USAGE_SETTINGS";
     field public static final String ACTION_AUTO_ROTATE_SETTINGS = "android.settings.AUTO_ROTATE_SETTINGS";
@@ -40776,7 +40776,6 @@ package android.telephony {
     field public static final String KEY_HIDE_ENHANCED_4G_LTE_BOOL = "hide_enhanced_4g_lte_bool";
     field public static final String KEY_HIDE_IMS_APN_BOOL = "hide_ims_apn_bool";
     field public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL = "hide_lte_plus_data_icon_bool";
-    field public static final String KEY_HIDE_NO_CALLING_INDICATOR_ON_DATA_NETWORK_BOOL = "hide_no_calling_indicator_on_data_network_bool";
     field public static final String KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL = "hide_preferred_network_type_bool";
     field public static final String KEY_HIDE_PRESET_APN_DETAILS_BOOL = "hide_preset_apn_details_bool";
     field public static final String KEY_HIDE_SIM_LOCK_SETTINGS_BOOL = "hide_sim_lock_settings_bool";
@@ -40892,6 +40891,7 @@ package android.telephony {
     field public static final String KEY_UNLOGGABLE_NUMBERS_STRING_ARRAY = "unloggable_numbers_string_array";
     field public static final String KEY_USE_ACS_FOR_RCS_BOOL = "use_acs_for_rcs_bool";
     field public static final String KEY_USE_HFA_FOR_PROVISIONING_BOOL = "use_hfa_for_provisioning_bool";
+    field public static final String KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL = "use_ip_for_calling_indicator_bool";
     field public static final String KEY_USE_OTASP_FOR_PROVISIONING_BOOL = "use_otasp_for_provisioning_bool";
     field @Deprecated public static final String KEY_USE_RCS_PRESENCE_BOOL = "use_rcs_presence_bool";
     field public static final String KEY_USE_RCS_SIP_OPTIONS_BOOL = "use_rcs_sip_options_bool";
@@ -42374,7 +42374,7 @@ package android.telephony {
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingContacts(@NonNull java.util.List<android.net.Uri>, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingContacts(int, @NonNull java.util.List<android.net.Uri>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharingPreference(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
@@ -51681,8 +51681,8 @@ package android.view.inputmethod {
     method public void dump(android.util.Printer, String);
     method @Nullable public CharSequence getInitialSelectedText(int);
     method @Nullable public android.view.inputmethod.SurroundingText getInitialSurroundingText(@IntRange(from=0) int, @IntRange(from=0) int, int);
-    method @Nullable public CharSequence getInitialTextAfterCursor(int, int);
-    method @Nullable public CharSequence getInitialTextBeforeCursor(int, int);
+    method @Nullable public CharSequence getInitialTextAfterCursor(@IntRange(from=0) int, int);
+    method @Nullable public CharSequence getInitialTextBeforeCursor(@IntRange(from=0) int, int);
     method public final void makeCompatible(int);
     method public void setInitialSurroundingSubText(@NonNull CharSequence, int);
     method public void setInitialSurroundingText(@NonNull CharSequence);

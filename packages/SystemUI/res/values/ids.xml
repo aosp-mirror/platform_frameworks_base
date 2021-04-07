@@ -167,5 +167,11 @@
     <item type="id" name="accessibility_action_move_right"/>
     <item type="id" name="accessibility_action_move_up"/>
     <item type="id" name="accessibility_action_move_down"/>
+
+    <!-- Accessibility actions for Accessibility floating menu. -->
+    <item type="id" name="action_move_top_left"/>
+    <item type="id" name="action_move_top_right"/>
+    <item type="id" name="action_move_bottom_left"/>
+    <item type="id" name="action_move_bottom_right"/>
 </resources>
 

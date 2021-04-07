@@ -26,7 +26,7 @@ import android.service.controls.Control
 interface ControlActionCoordinator {
 
     // If launched from an Activity, continue within this stack
-    var activityContext: Context?
+    var activityContext: Context
 
     /**
      * Close any dialogs which may have been open

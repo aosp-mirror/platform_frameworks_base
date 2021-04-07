@@ -34,9 +34,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.Set;
@@ -248,8 +250,9 @@ public abstract class AttestationUtils {
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
 
+            Certificate[] certs = keyStore.getCertificateChain(keystoreAlias);
             X509Certificate[] certificateChain =
-                    (X509Certificate[]) keyStore.getCertificateChain(keystoreAlias);
+                Arrays.copyOf(certs, certs.length, X509Certificate[].class);
 
             keyStore.deleteEntry(keystoreAlias);
 

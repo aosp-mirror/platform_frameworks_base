@@ -1,0 +1,2 @@
+# soong-team@ as the platform_bootclasspath module is tightly coupled with Soong
+file:platform/build/soong:/OWNERS

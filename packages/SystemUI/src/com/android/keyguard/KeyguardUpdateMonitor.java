@@ -1777,6 +1777,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         break;
                     case MSG_TIME_FORMAT_UPDATE:
                         handleTimeFormatUpdate((String) msg.obj);
+                        break;
                     case MSG_REQUIRE_NFC_UNLOCK:
                         handleRequireUnlockForNfc();
                         break;

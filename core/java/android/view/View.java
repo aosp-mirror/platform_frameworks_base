@@ -19782,6 +19782,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
+        if (mAttachInfo == null) {
+            // View is not attached.
+            return;
+        }
+
         final int h = dr.getIntrinsicHeight();
         final int w = dr.getIntrinsicWidth();
         final Rect rect = mAttachInfo.mTmpInvalRect;
