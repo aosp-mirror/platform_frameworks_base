@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.provider.Settings
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -44,7 +44,6 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest WMShellFlickerTests:EnterSplitScreenNotSupportNonResizable`
  */
-@Postsubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -94,6 +93,7 @@ class EnterSplitScreenNotSupportNonResizable(
                 prevSupportNonResizableInMultiWindow)
     }
 
+    @Presubmit
     @Test
     fun dockedStackDividerIsInvisible() = testSpec.dockedStackDividerIsInvisible()
 
