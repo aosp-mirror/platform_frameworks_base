@@ -64,7 +64,7 @@ public:
     static constexpr auto STARTING_SIZE = PadAlign(sizeof(BufferHeader));
     using ItemHeader = OpBufferItemHeader<ItemTypes>;
 
-    OpBuffer() = default;
+    explicit OpBuffer() = default;
 
     // Prevent copying by default
     OpBuffer(const OpBuffer&) = delete;
@@ -135,7 +135,7 @@ public:
 
     template <typename F>
     void for_each(F&& f) const {
-        for_each(std::forward<F>(f), ItemTypesSequence{});
+        do_for_each(std::forward<F>(f), ItemTypesSequence{});
     }
 
     void clear();
@@ -225,7 +225,7 @@ private:
     }
 
     template <typename F, std::size_t... I>
-    void for_each(F&& f, std::index_sequence<I...>) const {
+    void do_for_each(F&& f, std::index_sequence<I...>) const {
         // Validate we're not empty
         if (isEmpty()) return;
 
