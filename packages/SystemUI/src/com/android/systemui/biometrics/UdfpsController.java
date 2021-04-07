@@ -36,6 +36,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -239,6 +240,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 }
                 // TODO: move isWithinSensorArea to UdfpsController.
                 if (udfpsView.isWithinSensorArea(event.getX(), event.getY())) {
+                    Trace.beginAsyncSection(
+                            "UdfpsController.mOnTouchListener#isWithinSensorArea", 1);
                     // The pointer that causes ACTION_DOWN is always at index 0.
                     // We need to persist its ID to track it during ACTION_MOVE that could include
                     // data for many other pointers because of multi-touch support.
@@ -265,6 +268,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                                 minor, major, v);
                         final long sinceLastLog = SystemClock.elapsedRealtime() - mTouchLogTime;
                         if (!isFingerDown) {
+                            Trace.endAsyncSection(
+                                    "UdfpsController.mOnTouchListener#isWithinSensorArea", 1);
                             onFingerDown((int) x, (int) y, minor, major);
                             Log.v(TAG, "onTouch | finger down: " + touchInfo);
                             mTouchLogTime = SystemClock.elapsedRealtime();
@@ -579,8 +584,11 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             Log.w(TAG, "Null view in onFingerDown");
             return;
         }
-        mView.startIllumination(() ->
-                mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major));
+        Trace.beginAsyncSection("UdfpsController#startIllumination", 1);
+        mView.startIllumination(() -> {
+            Trace.endAsyncSection("UdfpsController#startIllumination", 1);
+            mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
+        });
     }
 
     // This method can be called from the UI thread.
