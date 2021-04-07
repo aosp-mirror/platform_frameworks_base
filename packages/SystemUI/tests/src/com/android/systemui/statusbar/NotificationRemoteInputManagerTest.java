@@ -108,6 +108,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
         mRemoteInputManager.onPerformRemoveNotification(mEntry, mEntry.getKey());
 
+        assertFalse(mEntry.mRemoteEditImeVisible);
         verify(mController).removeRemoteInput(mEntry, null);
     }
 
