@@ -26,30 +26,19 @@
 
     <item>
         <vector
-                android:width="24dp"
-                android:height="24dp"
-                android:viewportWidth="24"
-                android:viewportHeight="24">
-
-            <group
-                android:translateX="1.500000"
-                android:translateY="1.500000">
-                <path
-                    android:fillType="evenOdd"
-                    android:strokeColor="#FFFFFF"
-                    android:strokeWidth="2"
-                    android:pathData="M 3.5 1.5 L 17.5 1.5 Q 19.5 1.5 19.5 3.5 L 19.5 17.5 Q 19.5 19.5 17.5 19.5 L 3.5 19.5 Q 1.5 19.5 1.5 17.5 L 1.5 3.5 Q 1.5 1.5 3.5 1.5 Z" />
-                <path
-                    android:fillType="evenOdd"
-                    android:strokeColor="#FFFFFF"
-                    android:strokeWidth="1.5"
-                    android:pathData="M 4.25 4.25 H 8.75 V 8.75 H 4.25 V 4.25 Z" />
-                <path
-                    android:fillColor="#FFFFFF"
-                    android:fillType="evenOdd"
-                    android:strokeWidth="1"
-                    android:pathData="M 12.5 13.92 L 15.59 17 L 17 15.59 L 13.91 12.5 L 16.5 12.5 L 16.5 10.5 L 10.5 10.5 L 10.5 16.5 L 12.5 16.5 Z" />
-            </group>
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <path
+                android:pathData="M2,12.05V22.05H22V2.05H12V4.05H20V20.05H4V12.05H2Z"
+                android:fillColor="#ffffff"/>
+            <path
+                android:pathData="M10,2.05H2V10.05H10V2.05Z"
+                android:fillColor="#ffffff"/>
+            <path
+                android:pathData="M18,11.05V13.05H14.41L18.95,17.59L17.54,19L13,14.46V18.05H11V11.05H18Z"
+                android:fillColor="#ffffff"/>
         </vector>
     </item>
 
