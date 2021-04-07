@@ -437,8 +437,11 @@ public class LocationTimeZoneManagerService extends Binder {
         }, BLOCKING_OP_WAIT_DURATION_MILLIS);
     }
 
-    /** Returns a snapshot of the current controller state for tests. */
-    @NonNull
+    /**
+     * Returns a snapshot of the current controller state for tests. Returns {@code null} if the
+     * service is stopped.
+     */
+    @Nullable
     LocationTimeZoneManagerServiceState getStateForTests() {
         enforceManageTimeZoneDetectorPermission();
 
