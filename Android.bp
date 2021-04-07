@@ -449,7 +449,6 @@ java_library {
     static_libs: [
         "app-compat-annotations",
         "framework-minus-apex",
-        "framework-connectivity.impl", // TODO(b/182859030): should be removed
         "framework-appsearch.impl", // TODO(b/146218515): should be removed
         "framework-updatable-stubs-module_libs_api",
     ],
