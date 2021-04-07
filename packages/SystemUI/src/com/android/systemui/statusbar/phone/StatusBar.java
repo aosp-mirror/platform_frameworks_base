@@ -1215,6 +1215,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         });
 
         ScrimView scrimBehind = mNotificationShadeWindowView.findViewById(R.id.scrim_behind);
+        ScrimView notificationsScrim = mNotificationShadeWindowView
+                .findViewById(R.id.scrim_notifications);
         ScrimView scrimInFront = mNotificationShadeWindowView.findViewById(R.id.scrim_in_front);
         ScrimView scrimForBubble = mBubblesManagerOptional.isPresent()
                 ? mBubblesManagerOptional.get().getScrimForBubble() : null;
@@ -1223,7 +1225,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mNotificationShadeWindowController.setScrimsVisibility(scrimsVisible);
             mLockscreenLockIconController.onScrimVisibilityChanged(scrimsVisible);
         });
-        mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
+        mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront, scrimForBubble);
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
         updateLightRevealScrimVisibility();
