@@ -128,18 +128,12 @@ public class ArtStatsLogUtils {
     private static final Map<String, Integer> ISA_MAP = new HashMap();
 
     static {
-        COMPILE_FILTER_MAP.put("arm", ArtStatsLog.
-                ART_DATUM_REPORTED__ISA__ART_ISA_ARM);
-        COMPILE_FILTER_MAP.put("arm64", ArtStatsLog.
-                ART_DATUM_REPORTED__ISA__ART_ISA_ARM64);
-        COMPILE_FILTER_MAP.put("x86", ArtStatsLog.
-                ART_DATUM_REPORTED__ISA__ART_ISA_X86);
-        COMPILE_FILTER_MAP.put("x86_64", ArtStatsLog.
-                ART_DATUM_REPORTED__ISA__ART_ISA_X86_64);
-        COMPILE_FILTER_MAP.put("mips", ArtStatsLog.
-                ART_DATUM_REPORTED__ISA__ART_ISA_MIPS);
-        COMPILE_FILTER_MAP.put("mips64", ArtStatsLog.
-                ART_DATUM_REPORTED__ISA__ART_ISA_MIPS64);
+        ISA_MAP.put("arm", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_ARM);
+        ISA_MAP.put("arm64", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_ARM64);
+        ISA_MAP.put("x86", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_X86);
+        ISA_MAP.put("x86_64", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_X86_64);
+        ISA_MAP.put("mips", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_MIPS);
+        ISA_MAP.put("mips64", ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_MIPS64);
     }
 
     public static void writeStatsLog(
