@@ -430,7 +430,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     // expanded notifications
     // the sliding/resizing panel within the notification window
     protected NotificationPanelViewController mNotificationPanelViewController;
-    protected LockscreenLockIconController mLockscreenLockIconController;
 
     // settings
     private QSPanelController mQSPanelController;
@@ -1221,7 +1220,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mScrimController.setScrimVisibleListener(scrimsVisible -> {
             mNotificationShadeWindowController.setScrimsVisibility(scrimsVisible);
-            mLockscreenLockIconController.onScrimVisibilityChanged(scrimsVisible);
         });
         mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
 
@@ -1519,12 +1517,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarWindowController = statusBarComponent.getStatusBarWindowController();
         mPhoneStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
         mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
-        mLockscreenLockIconController = statusBarComponent.getLockscreenLockIconController();
-        mLockscreenLockIconController.init();
+        statusBarComponent.getLockIconViewController().init();
         statusBarComponent.getAuthRippleController().init();
-
-        mNotificationPanelViewController.setLaunchAffordanceListener(
-                mLockscreenLockIconController::onShowingLaunchAffordanceChanged);
     }
 
     protected void startKeyguard() {
@@ -1561,7 +1555,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager.registerStatusBar(
                 /* statusBar= */ this, getBouncerContainer(),
                 mNotificationPanelViewController, mBiometricUnlockController,
-                mNotificationShadeWindowView.findViewById(R.id.lock_icon_container),
                 mStackScroller, mKeyguardBypassController);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
@@ -3877,8 +3870,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
-        mLockscreenLockIconController.setBouncerShowingScrimmed(bouncerShowing,
-                isBouncerShowingScrimmed());
         if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
         updateHideIconsForBouncer(true /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
@@ -3886,14 +3877,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mBouncerShowing) {
             updatePanelExpansionForKeyguard();
         }
-    }
-
-    /**
-     * Sets how hidden the bouncer is, where 0f is fully visible and 1f is fully hidden
-     * See {@link KeyguardBouncer#EXPANSION_VISIBLE} and {@link KeyguardBouncer#EXPANSION_HIDDEN}.
-     */
-    public void setBouncerHideAmount(float hideAmount) {
-        mLockscreenLockIconController.setBouncerHideAmount(hideAmount);
     }
 
     /**
@@ -4248,10 +4231,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void notifyBiometricAuthModeChanged() {
         mDozeServiceHost.updateDozing();
         updateScrimController();
-        mLockscreenLockIconController.onBiometricAuthModeChanged(
-                mBiometricUnlockController.isWakeAndUnlock(),
-                mBiometricUnlockController.isBiometricUnlock(),
-                mBiometricUnlockController.getBiometricType());
     }
 
     /**
@@ -4679,7 +4658,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     public void onBouncerPreHideAnimation() {
         mNotificationPanelViewController.onBouncerPreHideAnimation();
-        mLockscreenLockIconController.onBouncerPreHideAnimation();
+
     }
 
     /**

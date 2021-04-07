@@ -649,4 +649,11 @@
         <!-- sensorLocationY -->
         <!--sensorRadius -->
     </integer-array>
+
+    <!-- The properties of the lock icon in pixels. -->
+    <integer-array name="config_lock_icon_props">
+        <!-- X -->
+        <!-- Y -->
+        <!-- radius -->
+    </integer-array>
 </resources>

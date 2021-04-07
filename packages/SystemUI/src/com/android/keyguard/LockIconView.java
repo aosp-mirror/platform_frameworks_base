@@ -18,40 +18,41 @@ package com.android.keyguard;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.PointF;
 import android.graphics.RectF;
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.AttributeSet;
 import android.view.Surface;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 /**
- * A view positioned in the area of the UDPFS sensor.
+ * A view positioned under the notification shade.
  */
-public class DisabledUdfpsView extends ImageView {
+public class LockIconView extends ImageView {
     @NonNull private final RectF mSensorRect;
     @NonNull private final Context mContext;
 
-    // Used to obtain the sensor location.
-    @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
+    @NonNull private PointF mLockIconCenter = new PointF(0f, 0f);
+    private int mRadius;
 
-    public DisabledUdfpsView(Context context, AttributeSet attrs) {
+    public LockIconView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         mSensorRect = new RectF();
     }
 
-    public void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal properties) {
-        mSensorProps = properties;
+    void setLocation(@NonNull PointF center, int radius) {
+        mLockIconCenter = center;
+        mRadius = radius;
     }
 
     // The "h" and "w" are the display's height and width relative to its current rotation.
     private void updateSensorRect(int h, int w) {
         // mSensorProps coordinates assume portrait mode.
-        mSensorRect.set(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationX + mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
+        mSensorRect.set(mLockIconCenter.x - mRadius,
+                mLockIconCenter.y - mRadius,
+                mLockIconCenter.x + mRadius,
+                mLockIconCenter.y + mRadius);
 
         // Transform mSensorRect if the device is in landscape mode.
         switch (mContext.getDisplay().getRotation()) {
@@ -84,5 +85,9 @@ public class DisabledUdfpsView extends ImageView {
         final int w = getLayoutParams().width;
         final int h = getLayoutParams().height;
         updateSensorRect(h, w);
+    }
+
+    float getLocationTop() {
+        return mLockIconCenter.y - mRadius;
     }
 }
