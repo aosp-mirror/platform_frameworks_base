@@ -48,6 +48,7 @@ import static android.os.Process.INVALID_UID;
 
 import static com.android.modules.utils.build.SdkLevel.isAtLeastR;
 import static com.android.modules.utils.build.SdkLevel.isAtLeastS;
+import static com.android.net.module.util.NetworkCapabilitiesUtils.TRANSPORT_USB;
 import static com.android.testutils.MiscAsserts.assertEmpty;
 import static com.android.testutils.MiscAsserts.assertThrows;
 import static com.android.testutils.ParcelUtils.assertParcelSane;
@@ -959,6 +960,11 @@ public class NetworkCapabilitiesTest {
         assertNotEquals(512, nc.getLinkUpstreamBandwidthKbps());
     }
 
+    private int getMaxTransport() {
+        if (!isAtLeastS() && MAX_TRANSPORT == TRANSPORT_USB) return MAX_TRANSPORT - 1;
+        return MAX_TRANSPORT;
+    }
+
     @Test
     public void testSignalStrength() {
         final NetworkCapabilities nc = new NetworkCapabilities();
@@ -970,7 +976,7 @@ public class NetworkCapabilitiesTest {
     }
 
     private void assertNoTransport(NetworkCapabilities nc) {
-        for (int i = MIN_TRANSPORT; i <= MAX_TRANSPORT; i++) {
+        for (int i = MIN_TRANSPORT; i <= getMaxTransport(); i++) {
             assertFalse(nc.hasTransport(i));
         }
     }
@@ -987,7 +993,7 @@ public class NetworkCapabilitiesTest {
                 assertFalse(nc.hasTransport(i));
             }
         }
-        for (int i = MAX_TRANSPORT; i > maxTransportType; i--) {
+        for (int i = getMaxTransport(); i > maxTransportType; i--) {
             if (positiveSequence) {
                 assertFalse(nc.hasTransport(i));
             } else {
@@ -1001,12 +1007,12 @@ public class NetworkCapabilitiesTest {
         final NetworkCapabilities nc = new NetworkCapabilities();
         assertNoTransport(nc);
         // Test adding multiple transport types.
-        for (int i = MIN_TRANSPORT; i <= MAX_TRANSPORT; i++) {
+        for (int i = MIN_TRANSPORT; i <= getMaxTransport(); i++) {
             nc.addTransportType(i);
             checkCurrentTransportTypes(nc, i, true /* positiveSequence */);
         }
         // Test removing multiple transport types.
-        for (int i = MIN_TRANSPORT; i <= MAX_TRANSPORT; i++) {
+        for (int i = MIN_TRANSPORT; i <= getMaxTransport(); i++) {
             nc.removeTransportType(i);
             checkCurrentTransportTypes(nc, i, false /* positiveSequence */);
         }

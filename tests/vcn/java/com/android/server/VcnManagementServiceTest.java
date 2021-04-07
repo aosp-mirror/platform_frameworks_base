@@ -537,17 +537,6 @@ public class VcnManagementServiceTest {
     }
 
     @Test
-    public void testSetVcnConfigInSafeModeNotifiesStatusCallback() throws Exception {
-        setupSubscriptionAndStartVcn(TEST_SUBSCRIPTION_ID, TEST_UUID_2, false /* isActive */);
-        mVcnMgmtSvc.registerVcnStatusCallback(TEST_UUID_2, mMockStatusCallback, TEST_PACKAGE_NAME);
-        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
-
-        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
-
-        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_ACTIVE);
-    }
-
-    @Test
     public void testClearVcnConfigRequiresNonSystemServer() throws Exception {
         doReturn(Process.SYSTEM_UID).when(mMockDeps).getBinderCallingUid();
 
@@ -902,7 +891,9 @@ public class VcnManagementServiceTest {
     }
 
     private void triggerVcnSafeMode(
-            @NonNull ParcelUuid subGroup, @NonNull TelephonySubscriptionSnapshot snapshot)
+            @NonNull ParcelUuid subGroup,
+            @NonNull TelephonySubscriptionSnapshot snapshot,
+            boolean isInSafeMode)
             throws Exception {
         verify(mMockDeps)
                 .newVcn(
@@ -913,22 +904,32 @@ public class VcnManagementServiceTest {
                         mVcnCallbackCaptor.capture());
 
         VcnCallback vcnCallback = mVcnCallbackCaptor.getValue();
-        vcnCallback.onEnteredSafeMode();
+        vcnCallback.onSafeModeStatusChanged(isInSafeMode);
     }
 
-    @Test
-    public void testVcnEnteringSafeModeNotifiesPolicyListeners() throws Exception {
+    private void verifyVcnSafeModeChangesNotifiesPolicyListeners(boolean enterSafeMode)
+            throws Exception {
         TelephonySubscriptionSnapshot snapshot =
                 triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_1));
 
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
-        triggerVcnSafeMode(TEST_UUID_1, snapshot);
+        triggerVcnSafeMode(TEST_UUID_1, snapshot, enterSafeMode);
 
         verify(mMockPolicyListener).onPolicyChanged();
     }
 
-    private void triggerVcnStatusCallbackOnEnteredSafeMode(
+    @Test
+    public void testVcnEnteringSafeModeNotifiesPolicyListeners() throws Exception {
+        verifyVcnSafeModeChangesNotifiesPolicyListeners(true /* enterSafeMode */);
+    }
+
+    @Test
+    public void testVcnExitingSafeModeNotifiesPolicyListeners() throws Exception {
+        verifyVcnSafeModeChangesNotifiesPolicyListeners(false /* enterSafeMode */);
+    }
+
+    private void triggerVcnStatusCallbackOnSafeModeStatusChanged(
             @NonNull ParcelUuid subGroup,
             @NonNull String pkgName,
             int uid,
@@ -951,12 +952,13 @@ public class VcnManagementServiceTest {
 
         mVcnMgmtSvc.registerVcnStatusCallback(subGroup, mMockStatusCallback, pkgName);
 
-        triggerVcnSafeMode(subGroup, snapshot);
+        triggerVcnSafeMode(subGroup, snapshot, true /* enterSafeMode */);
     }
 
     @Test
-    public void testVcnStatusCallbackOnEnteredSafeModeWithCarrierPrivileges() throws Exception {
-        triggerVcnStatusCallbackOnEnteredSafeMode(
+    public void testVcnStatusCallbackOnSafeModeStatusChangedWithCarrierPrivileges()
+            throws Exception {
+        triggerVcnStatusCallbackOnSafeModeStatusChanged(
                 TEST_UUID_1,
                 TEST_PACKAGE_NAME,
                 TEST_UID,
@@ -967,8 +969,9 @@ public class VcnManagementServiceTest {
     }
 
     @Test
-    public void testVcnStatusCallbackOnEnteredSafeModeWithoutCarrierPrivileges() throws Exception {
-        triggerVcnStatusCallbackOnEnteredSafeMode(
+    public void testVcnStatusCallbackOnSafeModeStatusChangedWithoutCarrierPrivileges()
+            throws Exception {
+        triggerVcnStatusCallbackOnSafeModeStatusChanged(
                 TEST_UUID_1,
                 TEST_PACKAGE_NAME,
                 TEST_UID,
@@ -980,8 +983,9 @@ public class VcnManagementServiceTest {
     }
 
     @Test
-    public void testVcnStatusCallbackOnEnteredSafeModeWithoutLocationPermission() throws Exception {
-        triggerVcnStatusCallbackOnEnteredSafeMode(
+    public void testVcnStatusCallbackOnSafeModeStatusChangedWithoutLocationPermission()
+            throws Exception {
+        triggerVcnStatusCallbackOnSafeModeStatusChanged(
                 TEST_UUID_1,
                 TEST_PACKAGE_NAME,
                 TEST_UID,

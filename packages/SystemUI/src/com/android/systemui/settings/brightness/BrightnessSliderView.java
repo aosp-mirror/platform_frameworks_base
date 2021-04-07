@@ -17,18 +17,13 @@
 package com.android.systemui.settings.brightness;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.FrameLayout;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
@@ -37,23 +32,11 @@ import com.android.systemui.R;
 /**
  * {@code FrameLayout} used to show and manipulate a {@link ToggleSeekBar}.
  *
- * It can additionally control a {@link CompoundButton} and display a label. For the class to work,
- * add children before inflation with the following ids:
- * <ul>
- *     <li>{@code @id/slider} of type {@link ToggleSeekBar}</li>
- *     <li>{@code @id/toggle} of type {@link CompoundButton} (optional)</li>
- *     <li>{@code @id/label} of type {@link TextView} (optional)</li>
- * </ul>
  */
 public class BrightnessSliderView extends FrameLayout {
 
-    @Nullable
-    private CompoundButton mToggle;
     @NonNull
     private ToggleSeekBar mSlider;
-    @Nullable
-    private TextView mLabel;
-    private final CharSequence mText;
     private DispatchTouchEventListener mListener;
     private Gefingerpoken mOnInterceptListener;
 
@@ -62,31 +45,15 @@ public class BrightnessSliderView extends FrameLayout {
     }
 
     public BrightnessSliderView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public BrightnessSliderView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-
-        final TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.ToggleSliderView, defStyle, 0);
-        mText = a.getString(R.styleable.ToggleSliderView_text);
-
-        a.recycle();
+        super(context, attrs);
     }
 
     // Inflated from quick_settings_brightness_dialog or quick_settings_brightness_dialog_thick
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mToggle = findViewById(R.id.toggle);
 
         mSlider = requireViewById(R.id.slider);
-
-        mLabel = findViewById(R.id.label);
-        if (mLabel != null) {
-            mLabel.setText(mText);
-        }
         mSlider.setAccessibilityLabel(getContentDescription().toString());
     }
 
@@ -125,25 +92,11 @@ public class BrightnessSliderView extends FrameLayout {
     }
 
     /**
-     * Attaches a listener to the {@link CompoundButton} in the view (if present) so changes to its
-     * state can be observed
-     * @param checkListener use {@code null} to remove listener
-     */
-    public void setOnCheckedChangeListener(OnCheckedChangeListener checkListener) {
-        if (mToggle != null) {
-            mToggle.setOnCheckedChangeListener(checkListener);
-        }
-    }
-
-    /**
      * Enforces admin rules for toggling auto-brightness and changing value of brightness
      * @param admin
      * @see ToggleSeekBar#setEnforcedAdmin
      */
     public void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
-        if (mToggle != null) {
-            mToggle.setEnabled(admin == null);
-        }
         mSlider.setEnabled(admin == null);
         mSlider.setEnforcedAdmin(admin);
     }
@@ -154,26 +107,6 @@ public class BrightnessSliderView extends FrameLayout {
      */
     public void enableSlider(boolean enable) {
         mSlider.setEnabled(enable);
-    }
-
-    /**
-     * Sets the state of the {@link CompoundButton} if present
-     * @param checked
-     */
-    public void setChecked(boolean checked) {
-        if (mToggle != null) {
-            mToggle.setChecked(checked);
-        }
-    }
-
-    /**
-     * @return the state of the {@link CompoundButton} if present, or {@code true} if not.
-     */
-    public boolean isChecked() {
-        if (mToggle != null) {
-            return mToggle.isChecked();
-        }
-        return true;
     }
 
     /**

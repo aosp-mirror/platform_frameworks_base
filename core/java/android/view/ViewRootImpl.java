@@ -3209,7 +3209,9 @@ public final class ViewRootImpl implements ViewParent,
                 Log.d(mTag, "Relayout called with blastSync");
             }
             reportNextDraw();
-            mNextDrawUseBlastSync = true;
+            if (isHardwareEnabled()) {
+                mNextDrawUseBlastSync = true;
+            }
         }
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;

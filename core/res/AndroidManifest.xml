@@ -1261,7 +1261,7 @@
     <permission android:name="android.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS"
                 android:label="@string/permlab_exemptFromAudioRecordRestrictions"
                 android:description="@string/permdesc_exemptFromAudioRecordRestrictions"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows a calling app to continue a call which was started in another app.  An example is a
          video calling app that wants to continue a voice call on the user's mobile network.<p>
@@ -1689,7 +1689,7 @@
          such as the geofencing api.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.LOCATION_HARDWARE"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
     <uses-permission android:name="android.permission.LOCATION_HARDWARE"/>
 
     <!-- @SystemApi Allows an application to use the Context Hub.
@@ -2341,7 +2341,7 @@
          Does not include placing calls.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MODIFY_PHONE_STATE"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows read only access to precise phone state.
          Allows reading of detailed information about phone state for special-use applications
@@ -2470,7 +2470,7 @@
     <!-- @SystemApi Allows an application to control the in-call experience.
          @hide -->
     <permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows an application to receive STK related commands.
          @hide -->
@@ -3472,7 +3472,7 @@
     <!-- Allows an application to update device statistics.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.UPDATE_DEVICE_STATS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi @hide Allows an application to collect application operation statistics.
          Not for use by third party apps. -->
@@ -3832,12 +3832,10 @@
 
     <!-- @SystemApi Allows apps to use ui translation functions.
          <p>Protection level: signature|privileged
-         <p> TODO(b/177703453): Restrict to a specific Role instead of allowing access to any
-         privileged app.
          @hide Not for use by third-party applications.
     -->
     <permission android:name="android.permission.MANAGE_UI_TRANSLATION"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="signature|privileged|role" />
 
     <!-- Must be required by a android.service.contentsuggestions.ContentSuggestionsService,
          to ensure that only the system can bind to it.
@@ -4406,7 +4404,7 @@
          {@code USAGE_MEDIA}) or {@code USAGE_GAME}) usages are intended to be captured.
          <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to capture the audio played by other apps
          that have set an allow capture policy of
@@ -4424,7 +4422,7 @@
          <p>Not for use by third-party applications.</p>
          @hide -->
     <permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to capture the audio played by other apps
         with the {@code USAGE_VOICE_COMMUNICATION} usage.
@@ -4442,13 +4440,13 @@
         <p>Not for use by third-party applications.</p>
         @hide -->
     <permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to capture audio for hotword detection.
          <p>Not for use by third-party applications.</p>
          @hide -->
     <permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Puts an application in the chain of trust for sound trigger
          operations. Being in the chain of trust allows an application to
@@ -4463,7 +4461,7 @@
          <p>Not for use by third-party applications.</p>
          @hide -->
     <permission android:name="android.permission.MODIFY_AUDIO_ROUTING"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @TestApi Allows an application to query audio related state.
          @hide -->
@@ -4950,7 +4948,7 @@
          User permission is still required before access is granted.
          @hide -->
     <permission android:name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi @TestApi Allows an application to read the current set of notifications, including
          any metadata and intents attached.
@@ -5284,7 +5282,7 @@
          @hide
          @SystemApi -->
     <permission android:name="android.permission.MANAGE_SOUND_TRIGGER"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- Must be required by system/priv apps to run sound trigger recognition sessions while in
          battery saver mode.
@@ -5374,7 +5372,7 @@
     <!-- @SystemApi Allows an application to manage the music recognition service.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_MUSIC_RECOGNITION"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to manage speech recognition service.
      @hide  <p>Not for use by third-party applications.</p> -->
@@ -5389,12 +5387,12 @@
     <!-- @SystemApi Allows an application to manage the app predictions service.
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_APP_PREDICTIONS"
-        android:protectionLevel="signature|appPredictor" />
+        android:protectionLevel="signature|appPredictor|role" />
 
     <!-- @SystemApi Allows an application to manage the search ui service.
      @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_SEARCH_UI"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- @SystemApi Allows an application to manage the smartspace service.
      @hide  <p>Not for use by third-party applications.</p> -->
@@ -5424,12 +5422,12 @@
     <!-- @SystemApi Allows to access all app shortcuts.
          @hide -->
     <permission android:name="android.permission.ACCESS_SHORTCUTS"
-        android:protectionLevel="signature|appPredictor" />
+        android:protectionLevel="signature|appPredictor|role" />
 
     <!-- @SystemApi Allows unlimited calls to shortcut mutation APIs.
          @hide -->
     <permission android:name="android.permission.UNLIMITED_SHORTCUTS_API_CALLS"
-        android:protectionLevel="signature|appPredictor" />
+        android:protectionLevel="signature|appPredictor|role" />
 
     <!-- @SystemApi Allows an application to read the runtime profiles of other apps.
          @hide <p>Not for use by third-party applications. -->

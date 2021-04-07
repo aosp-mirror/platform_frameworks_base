@@ -5358,8 +5358,8 @@ public class Notification implements Parcelable
             int pillColor = getProtectionColor(p);
             contentView.setInt(R.id.expand_button, "setDefaultTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
-            // Use different highlighted colors except when low-priority mode prevents that
-            if (!p.mReduceHighlights) {
+            // Use different highlighted colors for conversations' unread count
+            if (p.mHighlightExpander) {
                 pillColor = getAccentTertiaryColor(p);
                 // TODO(b/183710694): The accent tertiary is currently too bright in dark mode, so
                 //  we need to pick a contrasting color.
@@ -5993,7 +5993,7 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_PUBLIC)
                     .fillTextsFrom(this);
             if (isLowPriority) {
-                params.reduceHighlights();
+                params.highlightExpander(false);
             }
             view = makeNotificationHeader(params);
             view.setBoolean(R.id.notification_header, "setExpandOnlyOnButton", true);
@@ -6016,7 +6016,7 @@ public class Notification implements Parcelable
         public RemoteViews makeLowPriorityContentView(boolean useRegularSubtext) {
             StandardTemplateParams p = mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_MINIMIZED)
-                    .reduceHighlights()
+                    .highlightExpander(false)
                     .fillTextsFrom(this);
             if (!useRegularSubtext || TextUtils.isEmpty(mParams.summaryText)) {
                 p.summaryText(createSummaryText());
@@ -8293,6 +8293,7 @@ public class Notification implements Parcelable
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(isCollapsed ? StandardTemplateParams.VIEW_TYPE_NORMAL
                             : StandardTemplateParams.VIEW_TYPE_BIG)
+                    .highlightExpander(isConversationLayout)
                     .hideProgress(true)
                     .title(conversationTitle)
                     .text(null)
@@ -12178,7 +12179,7 @@ public class Notification implements Parcelable
         int maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
         boolean hideLargeIcon;
         boolean allowColorization  = true;
-        boolean mReduceHighlights = false;
+        boolean mHighlightExpander = false;
 
         final StandardTemplateParams reset() {
             mViewType = VIEW_TYPE_UNSPECIFIED;
@@ -12202,7 +12203,7 @@ public class Notification implements Parcelable
             maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
             hideLargeIcon = false;
             allowColorization = true;
-            mReduceHighlights = false;
+            mHighlightExpander = false;
             return this;
         }
 
@@ -12310,8 +12311,8 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams reduceHighlights() {
-            this.mReduceHighlights = true;
+        final StandardTemplateParams highlightExpander(boolean highlight) {
+            this.mHighlightExpander = highlight;
             return this;
         }
 

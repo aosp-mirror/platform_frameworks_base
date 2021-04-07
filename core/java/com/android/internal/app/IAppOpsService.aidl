@@ -36,9 +36,9 @@ interface IAppOpsService {
     // be kept in sync with frameworks/native/libs/binder/include/binder/IAppOpsService.h
     // and not be reordered
     int checkOperation(int code, int uid, String packageName);
-    int noteOperation(int code, int uid, String packageName, @nullable String attributionTag,
+    SyncNotedAppOp noteOperation(int code, int uid, String packageName, @nullable String attributionTag,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
-    int startOperation(IBinder clientId, int code, int uid, String packageName,
+    SyncNotedAppOp startOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String attributionTag, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
     @UnsupportedAppUsage
@@ -53,10 +53,10 @@ interface IAppOpsService {
     // End of methods also called by native code.
     // Any new method exposed to native must be added after the last one, do not reorder
 
-    int noteProxyOperation(int code, in AttributionSource attributionSource,
+    SyncNotedAppOp noteProxyOperation(int code, in AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation);
-    int startProxyOperation(IBinder clientId, int code, in AttributionSource attributionSource,
+    SyncNotedAppOp startProxyOperation(IBinder clientId, int code, in AttributionSource attributionSource,
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage, boolean skipProxyOperation);
     void finishProxyOperation(IBinder clientId, int code, in AttributionSource attributionSource);
