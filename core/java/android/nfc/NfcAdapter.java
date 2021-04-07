@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Represents the local NFC adapter.
@@ -64,6 +66,8 @@ import java.util.List;
  */
 public final class NfcAdapter {
     static final String TAG = "NFC";
+
+    private final NfcControllerAlwaysOnStateListener mControllerAlwaysOnStateListener;
 
     /**
      * Intent to start an activity when a tag with NDEF payload is discovered.
@@ -350,22 +354,6 @@ public final class NfcAdapter {
             "android.nfc.extra.HANDOVER_TRANSFER_STATUS";
 
     /** @hide */
-    public static final String ACTION_ALWAYS_ON_STATE_CHANGED =
-            "android.nfc.action.ALWAYS_ON_STATE_CHANGED";
-
-    /**
-     * Used as an int extra field in {@link #ACTION_ALWAYS_ON_STATE_CHANGED}
-     * intents to request the current power state. Possible values are:
-     * {@link #STATE_OFF},
-     * {@link #STATE_TURNING_ON},
-     * {@link #STATE_ON},
-     * {@link #STATE_TURNING_OFF},
-     * @hide
-     */
-    public static final String EXTRA_ALWAYS_ON_STATE =
-            "android.nfc.extra.ALWAYS_ON_STATE";
-
-    /** @hide */
     public static final int HANDOVER_TRANSFER_STATUS_SUCCESS = 0;
     /** @hide */
     public static final int HANDOVER_TRANSFER_STATUS_FAILURE = 1;
@@ -427,6 +415,22 @@ public final class NfcAdapter {
      */
     public interface ReaderCallback {
         public void onTagDiscovered(Tag tag);
+    }
+
+    /**
+     * A callback to be invoked when NFC controller always on state changes.
+     * <p>Register your {@code ControllerAlwaysOnStateCallback} implementation with {@link
+     * NfcAdapter#registerControllerAlwaysOnStateCallback} and disable it with {@link
+     * NfcAdapter#unregisterControllerAlwaysOnStateCallback}.
+     * @see #registerControllerAlwaysOnStateCallback
+     * @hide
+     */
+    @SystemApi
+    public interface ControllerAlwaysOnStateCallback {
+        /**
+         * Called on NFC controller always on state changes
+         */
+        void onStateChanged(boolean isEnabled);
     }
 
     /**
@@ -744,6 +748,7 @@ public final class NfcAdapter {
         mNfcUnlockHandlers = new HashMap<NfcUnlockHandler, INfcUnlockHandler>();
         mTagRemovedListener = null;
         mLock = new Object();
+        mControllerAlwaysOnStateListener = new NfcControllerAlwaysOnStateListener(getService());
     }
 
     /**
@@ -2239,14 +2244,16 @@ public final class NfcAdapter {
     /**
      * Sets NFC controller always on feature.
      * <p>This API is for the NFCC internal state management. It allows to discriminate
-     * the controller function from the NFC function by keeping the NFC Controller on without
+     * the controller function from the NFC function by keeping the NFC controller on without
      * any NFC RF enabled if necessary.
-     * <p>This call is asynchronous. Listen for {@link #ACTION_ALWAYS_ON_STATE_CHANGED}
-     * broadcasts to find out when the operation is complete.
-     * <p>If this returns true, then either NFCC is already on, or
-     * a {@link #ACTION_ALWAYS_ON_STATE_CHANGED} broadcast will be sent to indicate
-     * a state transition.
-     * If this returns false, then there is some problem that prevents an attempt to turn NFCC on.
+     * <p>This call is asynchronous. Register a callback {@link #ControllerAlwaysOnStateCallback}
+     * by {@link #registerControllerAlwaysOnStateCallback} to find out when the operation is
+     * complete.
+     * <p>If this returns true, then either NFCC always on state has been set based on the value,
+     * or a {@link ControllerAlwaysOnStateCallback#onStateChanged(boolean)} will be invoked to
+     * indicate the state change.
+     * If this returns false, then there is some problem that prevents an attempt to turn NFCC
+     * always on.
      * @param value if true the NFCC will be kept on (with no RF enabled if NFC adapter is
      * disabled), if false the NFCC will follow completely the Nfc adapter state.
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
@@ -2284,7 +2291,6 @@ public final class NfcAdapter {
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
      * @hide
      */
-
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
     public boolean isControllerAlwaysOn() {
@@ -2313,7 +2319,6 @@ public final class NfcAdapter {
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
      * @hide
      */
-
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
     public boolean isControllerAlwaysOnSupported() {
@@ -2336,5 +2341,40 @@ public final class NfcAdapter {
             }
             return false;
         }
+    }
+
+    /**
+     * Register a {@link ControllerAlwaysOnStateCallback} to listen for NFC controller always on
+     * state changes
+     * <p>The provided callback will be invoked by the given {@link Executor}.
+     *
+     * @param executor an {@link Executor} to execute given callback
+     * @param callback user implementation of the {@link ControllerAlwaysOnStateCallback}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public void registerControllerAlwaysOnStateCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ControllerAlwaysOnStateCallback callback) {
+        mControllerAlwaysOnStateListener.register(executor, callback);
+    }
+
+    /**
+     * Unregister the specified {@link ControllerAlwaysOnStateCallback}
+     * <p>The same {@link ControllerAlwaysOnStateCallback} object used when calling
+     * {@link #registerControllerAlwaysOnStateCallback(Executor, ControllerAlwaysOnStateCallback)}
+     * must be used.
+     *
+     * <p>Callbacks are automatically unregistered when application process goes away
+     *
+     * @param callback user implementation of the {@link ControllerAlwaysOnStateCallback}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public void unregisterControllerAlwaysOnStateCallback(
+            @NonNull ControllerAlwaysOnStateCallback callback) {
+        mControllerAlwaysOnStateListener.unregister(callback);
     }
 }
