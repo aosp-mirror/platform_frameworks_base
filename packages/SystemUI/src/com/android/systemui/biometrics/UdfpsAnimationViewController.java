@@ -23,7 +23,6 @@ import android.graphics.RectF;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.ViewController;
 
@@ -47,7 +46,6 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
     @NonNull final DumpManager mDumpManger;
 
     private boolean mNotificationShadeExpanded;
-    private int mStatusBarState;
 
     protected UdfpsAnimationViewController(
             T view,
@@ -86,7 +84,6 @@ abstract class UdfpsAnimationViewController<T extends UdfpsAnimationView>
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("mStatusBarState=" + StatusBarState.toShortString(mStatusBarState));
         pw.println("mNotificationShadeExpanded=" + mNotificationShadeExpanded);
         pw.println("shouldPauseAuth()=" + shouldPauseAuth());
         pw.println("isPauseAuth=" + mView.isPauseAuth());

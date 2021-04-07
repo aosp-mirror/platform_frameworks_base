@@ -142,7 +142,7 @@ public interface NotificationShadeWindowController extends RemoteInputController
     default void setDozing(boolean dozing) {}
 
     /** Sets the state of whether plugin open is forced or not. */
-    default void setForcePluginOpen(boolean forcePluginOpen) {}
+    default void setForcePluginOpen(boolean forcePluginOpen, Object token) {}
 
     /** Gets whether we are forcing plugin open or not. */
     default boolean getForcePluginOpen() {
