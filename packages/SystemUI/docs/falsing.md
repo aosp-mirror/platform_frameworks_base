@@ -70,17 +70,17 @@ target. Match the methods with the gesture you expect the device owner to use.
 
 ### Single Tap
 
-`FalsingManager#isFalseTap(boolean robustCheck, double falsePenalty)`. This
-method tells the `FalsingManager` that you want to validate a single tap. It
+`FalsingManager#isSimpleTape()`. This method
+performs a only very basic checking, checking that observed `MotionEvent`s are
+all within some small x & y region ("touch slop"). Useful for only the most simple of scenarios,
+you probably want `FalsingManager#isFalseTap` method for most cases.
+
+`FalsingManager#isFalseTap(@Penalty int penalty)`. This
+method tells the `FalsingManager` that you want to thoroughly validate a single tap. It
 returns true if it thinks the tap should be rejected (i.e. the tap looks more
 like a swipe) and false otherwise.
 
-`robustCheck` determines what heuristics are used. If set to false, the method
-performs a only very basic checking, checking that observed `MotionEvent`s are
-all within some small x & y region ("touch slop").
-
-When `robustCheck` is set to true, several more advanced rules are additionally
-applied:
+It runs through the following heuristics to validate a tap:
 
 1.  If the device recognizes a face (i.e. face-auth) the tap is **accepted**.
 2.  If the tap is the _second_ tap in recent history and looks like a valid Double Tap
@@ -90,19 +90,18 @@ applied:
 4.  Otherwise the tap is **accepted**.
 
 All the above rules are applied only after first confirming the gesture does
-in fact look like a basic tap.
+in fact look like a simple tap.
 
-`falsePenalty` is a measure of how much the `HistoryTracker`'s belief should be
+`penalty` is a measure of how much the `HistoryTracker`'s belief should be
 penalized in the event that the tap is rejected. This value is only used if
-`robustCheck` is set to true.
+the gesture fails to validate as a simple tap.
 
-A value of `0` means no change in belief. A value of `1` means a _very_ strong
-confidence in a false tap. In general, as a single tap on the screen is not
-verifiable, a small value should be supplied - on the order of `0.1`. Pass `0`
-if you don't want to penalize belief at all. Pass a higher value
-the earlier in the UX flow your interaction occurs. Once an owner is farther
-along in a UX flow (multiple taps or swipes), its safer to assume that a single
-accidental tap should cause less of a penalty.
+The `@FalsingManager.Penalty` values are fairly straightforward, but note that you
+should generally be choosing `LOW_PENALTY`. It is inherently difficult to know if a
+tap is truly false or not, so a single mis-tap should apply only a small penalty.
+If the owner is further along in a UX flow, and is still mis-tapping, it may make more
+sense to increase the penalty as mis-taps should be less likely to occur after
+several successful gestures.
 
 ### Double Tap
 
