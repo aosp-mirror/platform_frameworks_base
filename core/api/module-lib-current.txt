@@ -121,6 +121,10 @@ package android.os {
     method public final void markVintfStability();
   }
 
+  public class Build {
+    method public static boolean isDebuggable();
+  }
+
   public static class Build.VERSION {
     field public static final int FIRST_SDK_INT;
   }
