@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.service.quicksettings.Tile;
+import android.view.View;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -107,7 +108,7 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    protected void handleLongClick() {
+    protected void handleLongClick(View view) {
         handleClick();
     }
 

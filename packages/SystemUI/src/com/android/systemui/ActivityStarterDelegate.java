@@ -18,6 +18,8 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
@@ -104,6 +106,14 @@ public class ActivityStarterDelegate implements ActivityStarter {
     public void postStartActivityDismissingKeyguard(Intent intent, int delay) {
         mActualStarter.ifPresent(
                 starter -> starter.get().postStartActivityDismissingKeyguard(intent, delay));
+    }
+
+    @Override
+    public void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
+        mActualStarter.ifPresent(
+                starter -> starter.get().postStartActivityDismissingKeyguard(intent, delay,
+                        animationController));
     }
 
     @Override
