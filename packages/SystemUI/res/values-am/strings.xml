@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ምክሮችን በመጫን ላይ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ሚዲያ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"የአሁኑን ክፍለ-ጊዜ ደብቅ።"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"የአሁኑ ክፍለ ጊዜ መደበቅ አይችልም።"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"አሰናብት"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ከቆመበት ቀጥል"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ቅንብሮች"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"አዲስ መቆጣጠሪያዎችን ለማየት የኃይል አዝራር ይያዙ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"መቆጣጠሪያዎችን አክል"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"መቆጣጠሪያዎችን ያርትዑ"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"ውጽዓቶችን ያክሉ"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"ቡድን"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 መሣሪያ ተመርጧል"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> መሣሪያዎች ተመርጠዋል"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ግንኙነት ተቋርጧል)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"ማገናኘት አልተቻለም። እንደገና ይሞክሩ።"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"አዲስ መሣሪያ ያጣምሩ"</string>
 </resources>

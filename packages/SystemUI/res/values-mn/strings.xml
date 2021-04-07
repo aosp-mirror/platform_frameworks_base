@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Дэлгэц бичлэг боловсруулж байна"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Дэлгэц бичих горимын үргэлжилж буй мэдэгдэл"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Бичлэгийг эхлүүлэх үү?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Бичих үед Андройд систем нь таны дэлгэц дээр харагдах эсвэл төхөөрөмж дээрээ тоглуулсан аливаа эмзэг мэдээллийг авах боломжтой. Үүнд нууц үг, төлбөрийн мэдээлэл, зураг, зурвас болон аудио багтана."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Бичих үед Андройд систем нь таны дэлгэц дээр харагдах эсвэл төхөөрөмж дээрээ тоглуулсан аливаа эмзэг мэдээллийг авах боломжтой. Үүнд нууц үг, төлбөрийн мэдээлэл, зураг, мессеж болон аудио багтана."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио бичих"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Төхөөрөмжийн аудио"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Хөгжим, дуудлага болон хонхны ая зэрэг таны төхөөрөмжийн дуу"</string>
@@ -504,7 +504,7 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Энэ функцийг ажиллуулж байгаа үйлчилгээ нь бичлэг хийх эсвэл дамжуулах үед таны дэлгэц дээр харагдах эсвэл таны төхөөрөмжөөс тоглуулах бүх мэдээлэлд хандах боломжтой байна. Үүнд нууц үг, төлбөрийн дэлгэрэнгүй, зураг болон таны тоглуулдаг аудио зэрэг мэдээлэл багтана."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Бичлэг хийх эсвэл дамжуулахыг эхлүүлэх үү?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-тай бичлэг хийж эсвэл дамжуулж эхлэх үү?"</string>
-    <string name="media_projection_remember_text" msgid="6896767327140422951">"Дахиж үл харуулах"</string>
+    <string name="media_projection_remember_text" msgid="6896767327140422951">"Дахиж бүү харуул"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Бүгдийг арилгах"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Удирдах"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Түүх"</string>
@@ -549,29 +549,29 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Таны байгууллага таны ажлын профайлд сертификатын зөвшөөрөл суулгасан байна. Таны аюулгүй сүлжээний ачааллыг өөрчлөх эсвэл хянах боломжтой."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Сертификатын зөвшөөрлийг энэ төхөөрөмжид суулгасан байна. Таны аюулгүй сүлжээний ачааллыг өөрчлөх эсвэл хянах боломжтой."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Таны админ төхөөрөмжийн ачааллыг хянадаг сүлжээний логийг асаасан байна."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Та имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Та имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP_0">%1$s</xliff:g>, <xliff:g id="VPN_APP_1">%2$s</xliff:g>-д холбогдсон байна."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Таны ажлын профайл <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна. Энэ нь таны имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Таны хувийн профайлыг имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбосон байна."</string>
+    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Та имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Та имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP_0">%1$s</xliff:g>, <xliff:g id="VPN_APP_1">%2$s</xliff:g>-д холбогдсон байна."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Таны ажлын профайл <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна. Энэ нь таны имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Таны хувийн профайлыг имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбосон байна."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Таны төхөөрөмжийг <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> удирддаг."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> таны төхөөрөмжийг удирдахын тулд <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>-г ашигладаг."</string>
     <string name="monitoring_description_do_body" msgid="7700878065625769970">"Таны админ тохиргоо, байгууллагын хандалт, апп, төхөөрөмжтэй холбоотой өгөгдөл болон таны төхөөрөмжийн байршлын мэдээллийг хянах, удирдах боломжтой."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Дэлгэрэнгүй үзэх"</string>
-    <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Таны имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Таны имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN тохиргоог нээх"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Итгэмжлэгдсэн мандат үнэмлэхийг нээх"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Таны админ төхөөрөмжийн ачааллыг хянадаг сүлжээний логийг асаасан байна.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
-    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Та апп-д VPN холболт хийхийг зөвшөөрсөн байна.\n\nЭнэхүү апп нь таны имэйл, апп, вэбсайт зэрэг төхөөрөмж болон сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны ажлын профайлыг удирддаг.\n\nТаны админ имэйл, апп болон вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу.\n\nТа сүлжээний үйл ажиллагааг хянах боломжтой VPN-д холбогдсон байна."</string>
+    <string name="monitoring_description_vpn" msgid="1685428000684586870">"Та апп-д VPN холболт хийхийг зөвшөөрсөн байна.\n\nЭнэхүү апп нь таны имэйл, апп, вебсайт зэрэг төхөөрөмж болон сүлжээний үйл ажиллагааг хянах боломжтой."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны ажлын профайлыг удирддаг.\n\nТаны админ имэйл, апп болон веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу.\n\nТа сүлжээний үйл ажиллагааг хянах боломжтой VPN-д холбогдсон байна."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
-    <string name="monitoring_description_app" msgid="376868879287922929">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вэбсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вэбсайт зэрэг сүлжээний хувийн үйл ажиллагааг хянах боломжтой."</string>
-    <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"Та имэйл, апп, вэб хуудас зэрэг хувийн сүлжээнийхээ үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон байна."</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь таны имэйл, апп, вэб хуудас зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%2$s</xliff:g>-д холбогдсон. \n\nДэлгэрэнгүй мэдээллийг авахын тулд админтай холбогдоно уу."</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь таны имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон. \n\nМөн таны сүлжээний хувийн үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон байна."</string>
+    <string name="monitoring_description_app" msgid="376868879287922929">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вебсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
+    <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вебсайт зэрэг сүлжээний хувийн үйл ажиллагааг хянах боломжтой."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"Та имэйл, апп, веб хуудас зэрэг хувийн сүлжээнийхээ үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон байна."</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь таны имэйл, апп, веб хуудас зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%2$s</xliff:g>-д холбогдсон. \n\nДэлгэрэнгүй мэдээллийг авахын тулд админтай холбогдоно уу."</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь таны имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон. \n\nМөн таны сүлжээний хувийн үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон байна."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent-р түгжээгүй байлгасан"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Таныг гараар нээх хүртэл төхөөрөмж түгжээтэй байх болно"</string>
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
@@ -653,8 +653,8 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"Сэрүүлэг"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Ажлын профайл"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Нислэгийн горим"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Вэбсайтын цонх нэмэх"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Вэбсайтын цонх дамжуулах"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Вебсайтын цонх нэмэх"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Вебсайтын цонх дамжуулах"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Та өмнө нь унтраагаагүй тохиолдолд <xliff:g id="WHEN">%1$s</xliff:g>-т сэрүүлгээ сонсохгүй"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>-т та дараагийн сэрүүлгээ сонсохгүй"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> цагт"</string>
@@ -776,7 +776,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Зүүн"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Баруун"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Гол хэсэг"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Чихтэй хуудас"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Таб"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Зай"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Оруулах"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Арилгах"</string>
@@ -826,7 +826,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Идэвхтэй"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Идэвхгүй"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Боломжгүй"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"Навигацийн самбар"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"Навигацын самбар"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Бүдүүвч"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Нэмэлт зүүн товчлуураар шивэх"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Нэмэлт баруун товчлуураар шивэх"</string>
@@ -848,7 +848,7 @@
     <string name="reset" msgid="8715144064608810383">"Шинэчлэх"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Товчлуурын өргөнг тохируулах"</string>
     <string name="clipboard" msgid="8517342737534284617">"Түр санах ой"</string>
-    <string name="accessibility_key" msgid="3471162841552818281">"Навигацийн товчлуурыг өөрчлөх"</string>
+    <string name="accessibility_key" msgid="3471162841552818281">"Навигацын товчлуурыг өөрчлөх"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Зүүн түлхүүрийн код"</string>
     <string name="right_keycode" msgid="2480715509844798438">"Баруун түлхүүрийн код"</string>
     <string name="left_icon" msgid="5036278531966897006">"Зүүн дүрс тэмдэг"</string>
@@ -862,12 +862,12 @@
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"Цаг, минут, секундийг харуулах"</item>
     <item msgid="1271006222031257266">"Цаг, минутыг харуулах (өгөгдмөл)"</item>
-    <item msgid="6135970080453877218">"Энэ дүрс тэмдгийг бүү үзүүл"</item>
+    <item msgid="6135970080453877218">"Энэ дүрс тэмдгийг бүү харуул"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"Хувийг тогтмол харуулах"</item>
     <item msgid="3805744470661798712">"Цэнэглэх үед хувийг тогтмол харуулах (өгөгдмөл)"</item>
-    <item msgid="8619482474544321778">"Энэ дүрс тэмдгийг бүү үзүүл"</item>
+    <item msgid="8619482474544321778">"Энэ дүрс тэмдгийг бүү харуул"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Бага ач холбогдолтой мэдэгдлийн дүрс тэмдгийг харуулах"</string>
     <string name="other" msgid="429768510980739978">"Бусад"</string>
@@ -948,7 +948,7 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Сэрэмжлүүлэг"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батарей"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Дэлгэцийн зураг дарах"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"Энгийн зурвас"</string>
+    <string name="notification_channel_general" msgid="4384774889645929705">"Энгийн мессеж"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Хадгалах сан"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Заавар"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Шуурхай апп"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Зөвлөмжүүдийг ачаалж байна"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Одоогийн харилцан үйлдлийг нуугаарай."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Одоогийн харилцан үйлдлийг нуух боломжгүй."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Хаах"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Үргэлжлүүлэх"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Тохиргоо"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Шинэ хяналтыг харахын тулд асаах товчийг удаан дарна уу"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Хяналт нэмэх"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Хяналтыг өөрчлөх"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Гаралт нэмэх"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Бүлэг"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 төхөөрөмж сонгосон"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> төхөөрөмж сонгосон"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (салсан)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Холбогдож чадсангүй. Дахин оролдоно уу."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Шинэ төхөөрөмж хослуулах"</string>
 </resources>

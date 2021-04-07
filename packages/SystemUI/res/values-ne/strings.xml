@@ -339,7 +339,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"Dessert Case"</string>
     <string name="start_dreams" msgid="9131802557946276718">"स्क्रिन सेभर"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"थप विकल्पहरूका लागि आइकनहरूमा छोइराख्नुहोस्"</string>
+    <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"थप विकल्पहरूका लागि आइकनहरूमा टच एण्ड होल्ड गर्नुहोस्"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"बाधा नपुऱ्याउनुहोस्"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"प्राथमिकता मात्र"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"अलार्महरू मात्र"</string>
@@ -366,7 +366,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"स्थान बन्द छ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"मिडिया उपकरण"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"आपतकालीन कल मात्र"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"आपत्‌कालीन कल मात्र"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"सेटिङहरू"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"समय"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"मलाई"</string>
@@ -591,16 +591,16 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"असक्षम पार्नुहोस्"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"आउटपुट यन्त्र बदल्नुहोस्"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"एप पिन गरिएको छ"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न पछाडि र परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न पछाडि र गृह नामक बटनहरूलाई छोइराख्नुहोस्।"</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न पछाडि र परिदृश्य बटनलाई टच एण्ड होल्ड गर्नुहोस्।"</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न पछाडि र गृह नामक बटनहरूलाई टच एण्ड होल्ड गर्नुहोस्।"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"तपाईंले यो एप अनपिन नगरेसम्म यो एप यहाँ देखिइरहने छ। अनपिन गर्न माथितिर स्वाइप गरी होल्ड गर्नुहोस्।"</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न गृह नामक बटनलाई छोइराख्नुहोस्।"</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न परिदृश्य बटनलाई टच एण्ड होल्ड गर्नुहोस्।"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न गृह नामक बटनलाई टच एण्ड होल्ड गर्नुहोस्।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"स्क्रिनमा व्यक्तिगत डेटा (जस्तै सम्पर्क ठेगाना र इमेलको सामग्री) देखिन सक्छ।"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"पिन गरिएको एपले अन्य एप खोल्न सक्छ।"</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"यो एप अनपनि गर्न पछाडि र विवरण नामक बटनहरूलाई छोइराख्नुहोस्"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"यो एप अनपनि गर्न पछाडि र होम बटनलाई छोइराख्नुहोस्"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"यो एप अनपिन गर्न माथितिर स्वाइप गरी स्क्रिनमा छोइराख्नुहोस्"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"यो एप अनपनि गर्न पछाडि र विवरण नामक बटनहरूलाई टच एण्ड होल्ड गर्नुहोस्"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"यो एप अनपनि गर्न पछाडि र होम बटनलाई टच एण्ड होल्ड गर्नुहोस्"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"यो एप अनपिन गर्न माथितिर स्वाइप गरी स्क्रिनमा टच एण्ड होल्ड गर्नुहोस्"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"बुझेँ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"धन्यवाद पर्दैन"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"एप पिन गरियो"</string>
@@ -684,8 +684,8 @@
     <string name="do_not_silence_block" msgid="4361847809775811849">"मौन नगर्नुहोस् वा नरोक्नुहोस्"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"सशक्त सूचना नियन्त्रण"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"अन छ"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"निष्क्रिय"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"सशक्त सूचना नियन्त्रणहरू मार्फत तपाईं अनुप्रयाेगका सूचनाहरूका लागि ० देखि ५ सम्मको महत्व सम्बन्धी स्तर सेट गर्न सक्नुहुन्छ। \n\n"<b>"स्तर ५"</b>" \n- सूचनाको सूचीको माथिल्लो भागमा देखाउने \n- पूर्ण स्क्रिनमा अवरोधका लागि अनुमति दिने \n- सधैँ चियाउने \n\n"<b>"स्तर ४"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- सधैँ चियाउने \n\n"<b>"स्तर ३"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- कहिल्यै नचियाउने \n\n"<b>"स्तर २"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- कहिल्यै नचियाउने \n- कहिल्यै पनि आवाज ननिकाल्ने र कम्पन नगर्ने \n\n"<b>"स्तर १"</b>" \n- पूर्ण स्क्रिनमा अवरोध रोक्ने \n- कहिल्यै नचियाउने \n- कहिल्यै पनि आवाज ननिकाल्ने वा कम्पन नगर्ने \n- लक स्क्रिन र वस्तुस्थिति पट्टीबाट लुकाउने \n- सूचनाको सूचीको तल्लो भागमा देखाउने \n\n"<b>"स्तर ०"</b>" \n- अनुप्रयोगका सबै सूचनाहरूलाई रोक्ने"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"अफ"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"सशक्त सूचना नियन्त्रणहरू मार्फत तपाईं अनुप्रयाेगका सूचनाहरूका लागि ० देखि ५ सम्मको महत्व सम्बन्धी स्तर सेट गर्न सक्नुहुन्छ। \n\n"<b>"स्तर ५"</b>" \n- सूचनाको सूचीको माथिल्लो भागमा देखाउने \n- पूर्ण स्क्रिनमा अवरोधका लागि अनुमति दिने \n- सधैँ चियाउने \n\n"<b>"स्तर ४"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- सधैँ चियाउने \n\n"<b>"स्तर ३"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- कहिल्यै नचियाउने \n\n"<b>"स्तर २"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- कहिल्यै नचियाउने \n- कहिल्यै पनि आवाज ननिकाल्ने र कम्पन नगर्ने \n\n"<b>"स्तर १"</b>" \n- पूर्ण स्क्रिनमा अवरोध रोक्ने \n- कहिल्यै नचियाउने \n- कहिल्यै पनि आवाज ननिकाल्ने वा कम्पन नगर्ने \n- लक स्क्रिन र वस्तुस्थिति पट्टीबाट लुकाउने \n- सूचनाको सूचीको तल्लो भागमा देखाउने \n\n"<b>"स्तर ०"</b>" \n- एपका सबै सूचनाहरूलाई रोक्ने"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"सूचनाहरू"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"तपाईं अब उप्रान्त यी सूचनाहरू देख्नु हुने छैन"</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"यी सूचनाहरू सानो बनाइने छ"</string>
@@ -705,7 +705,7 @@
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"सतर्क गराउने"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"सर्तक गराइरहनुहोस्"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"सूचनाहरू निष्क्रिय पार्नुहोस्"</string>
-    <string name="inline_keep_showing_app" msgid="4393429060390649757">"यो अनुप्रयोगका सूचनाहरू देखाउने क्रम जारी राख्ने हो?"</string>
+    <string name="inline_keep_showing_app" msgid="4393429060390649757">"यो एपका सूचनाहरू देखाउने क्रम जारी राख्ने हो?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"मौन"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"पूर्वनिर्धारित"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
@@ -824,7 +824,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"डेटा सेभर सक्रिय छ"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"डेटा सेभर बन्द छ"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"सक्रिय गर्नुहोस्"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"निष्क्रिय"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"अफ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"उपलब्ध छैन"</string>
     <string name="nav_bar" msgid="4642708685386136807">"नेभिगेशन पट्टी"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"लेआउट"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मिडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"हालको सत्र लुकाउनुहोस्।"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"हाल चलिरहेको सत्र लुकाउन सकिँदैन।"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"हटाउनुहोस्"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"सुचारु गर्नुहोस्"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिङ"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नयाँ नियन्त्रण सुविधाहरू हेर्न पावर बटन थिचिराख्नुहोस्"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"नियन्त्रण सुविधाहरू सम्पादन गर्नु…"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट यन्त्रहरू थप्नुहोस्"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"समूह"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"१ यन्त्र चयन गरियो"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> वटा यन्त्र चयन गरिए"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (डिस्कनेक्ट गरिएको)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"कनेक्ट गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नयाँ यन्त्रको जोडा बनाउनुहोस्"</string>
 </resources>

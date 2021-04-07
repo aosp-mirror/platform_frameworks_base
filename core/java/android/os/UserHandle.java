@@ -223,6 +223,14 @@ public final class UserHandle implements Parcelable {
     }
 
     /**
+     * Whether a UID belongs to a shared app gid.
+     * @hide
+     */
+    public static boolean isSharedAppGid(int uid) {
+        return getAppIdFromSharedAppGid(uid) != -1;
+    }
+
+    /**
      * Returns the user for a given uid.
      * @param uid A uid for an application running in a particular user.
      * @return A {@link UserHandle} for that user.

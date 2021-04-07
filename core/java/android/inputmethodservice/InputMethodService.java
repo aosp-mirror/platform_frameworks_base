@@ -71,6 +71,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Side;
+import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
@@ -104,7 +105,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collections;
+import java.util.ArrayList;
 
 /**
  * InputMethodService provides a standard implementation of an InputMethod,
@@ -850,10 +851,19 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /** Set region of the keyboard to be avoided from back gesture */
     private void setImeExclusionRect(int visibleTopInsets) {
-        View inputFrameRootView = mInputFrame.getRootView();
-        Rect r = new Rect(0, visibleTopInsets, inputFrameRootView.getWidth(),
-                inputFrameRootView.getHeight());
-        inputFrameRootView.setSystemGestureExclusionRects(Collections.singletonList(r));
+        View rootView = mInputFrame.getRootView();
+        android.graphics.Insets systemGesture =
+                rootView.getRootWindowInsets().getInsetsIgnoringVisibility(Type.systemGestures());
+        ArrayList<Rect> exclusionRects = new ArrayList<>();
+        exclusionRects.add(new Rect(0,
+                visibleTopInsets,
+                systemGesture.left,
+                rootView.getHeight()));
+        exclusionRects.add(new Rect(rootView.getWidth() - systemGesture.right,
+                visibleTopInsets,
+                rootView.getWidth(),
+                rootView.getHeight()));
+        rootView.setSystemGestureExclusionRects(exclusionRects);
     }
 
     /**
@@ -1205,7 +1215,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
         mWindow.getWindow().getAttributes().setFitInsetsTypes(statusBars() | navigationBars());
         mWindow.getWindow().getAttributes().setFitInsetsSides(Side.all() & ~Side.BOTTOM);
-        mWindow.getWindow().getAttributes().setFitInsetsIgnoringVisibility(true);
 
         // IME layout should always be inset by navigation bar, no matter its current visibility,
         // unless automotive requests it. Automotive devices may request the navigation bar to be

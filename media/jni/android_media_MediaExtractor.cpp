@@ -68,7 +68,7 @@ JMediaExtractor::JMediaExtractor(JNIEnv *env, jobject thiz)
     mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
 
-    mImpl = new NuMediaExtractor;
+    mImpl = new NuMediaExtractor(NuMediaExtractor::EntryPoint::SDK);
 }
 
 JMediaExtractor::~JMediaExtractor() {

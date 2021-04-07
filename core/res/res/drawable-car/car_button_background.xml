@@ -13,24 +13,48 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<!-- Default background styles for car buttons when enabled/disabled. -->
-<ripple
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?android:attr/colorControlHighlight">
+<!-- Default background styles for car buttons when enabled/disabled,
+     focused/unfocused, and pressed/unpressed -->
+<!-- TODO(b/175161842) Add rotary fill color -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true" android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="@*android:dimen/car_button_radius"/>
+            <solid android:color="@*android:color/car_grey_300"/>
+            <stroke android:width="8dp"
+                    android:color="#0059B3"/>
+        </shape>
+    </item>
+    <item android:state_focused="true" android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@*android:dimen/car_button_radius"/>
+            <solid android:color="?android:attr/colorButtonNormal"/>
+            <stroke android:width="4dp"
+                    android:color="#0059B3"/>
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@*android:dimen/car_button_radius"/>
+            <solid android:color="?android:attr/colorButtonNormal"/>
+            <stroke android:width="8dp"
+                    android:color="#0059B3"/>
+        </shape>
+    </item>
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="@*android:dimen/car_button_radius"/>
+            <solid android:color="@*android:color/car_grey_300"/>
+        </shape>
+    </item>
     <item>
-        <selector>
-            <item android:state_enabled="false">
-                <shape android:shape="rectangle">
-                    <corners android:radius="@*android:dimen/car_button_radius"/>
-                    <solid android:color="@*android:color/car_grey_300"/>
-                </shape>
-            </item>
+        <ripple android:color="?android:attr/colorControlHighlight">
             <item>
                 <shape android:shape="rectangle">
                     <corners android:radius="@*android:dimen/car_button_radius"/>
                     <solid android:color="?android:attr/colorButtonNormal"/>
                 </shape>
             </item>
-        </selector>
+        </ripple>
     </item>
-</ripple>
+</selector>

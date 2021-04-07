@@ -25,7 +25,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"‏SIM PUK اور نیا PIN کوڈ ٹائپ کریں"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"‏SIM PUK کوڈ"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"‏نیا SIM PIN کوڈ"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"پاسورڈ ٹائپ کرنے کیلئے ٹچ کریں"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"پاس ورڈ ٹائپ کرنے کیلئے ٹچ کریں"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"غیر مقفل کرنے کیلئے پاس ورڈ ٹائپ کریں"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"‏غیر مقفل کرنے کیلئے PIN ٹائپ کریں"</string>
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"‏اپنا PIN درج کریں"</string>
@@ -38,6 +38,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • تیزی سے چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آہستہ چارج ہو رہا ہے"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • بیٹری کی صحت کے لیے بہتر بنایا جا رہا ہے"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"اپنا چارجر منسلک کریں۔"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"غیر مقفل کرنے کیلئے مینو دبائیں۔"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"نیٹ ورک مقفل ہو گیا"</string>
@@ -72,7 +73,7 @@
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"‏\"<xliff:g id="CARRIER">%1$s</xliff:g>\" کیلئے SIM PIN درج کریں۔"</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"‏<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> موبائل سروس کے بغیر آلہ کا استعمال کرنے کیلئے eSIM غیر فعال کریں۔"</string>
     <string name="kg_pin_instructions" msgid="822353548385014361">"‏‫PIN درج کریں"</string>
-    <string name="kg_password_instructions" msgid="324455062831719903">"پاسورڈ درج کریں"</string>
+    <string name="kg_password_instructions" msgid="324455062831719903">"پاس ورڈ درج کریں"</string>
     <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"‏SIM اب غیر فعال ہوگیا ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔"</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"‏SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔"</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"‏پسندیدہ PIN کوڈ درج کریں"</string>
@@ -83,7 +84,7 @@
     <string name="kg_invalid_puk" msgid="1774337070084931186">"‏صحیح PUK کوڈ دوبارہ درج کریں۔ بار بار کی کوششیں SIM کو مستقل طور پر غیر فعال کر دیں گی۔"</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"پیٹرن کی بہت ساری کوششیں"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"‏آپ نے اپنا PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"آپ نے اپنا پاسورڈ <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"آپ نے اپنا پاس ورڈ <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"‏غلط SIM PIN کوڈ، اب آپ کو اپنا آلہ غیر مقفل کرنے کیلئے اپنے کیریئر سے رابطہ کرنا ہوگا۔"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
@@ -103,13 +104,13 @@
     <string name="airplane_mode" msgid="2528005343938497866">"ہوائی جہاز وضع"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"آلہ دوبارہ چالو ہونے کے بعد پیٹرن درکار ہوتا ہے"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"‏آلہ دوبارہ چالو ہونے کے بعد PIN درکار ہوتا ہے"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"آلہ دوبارہ چالو ہونے کے بعد پاسورڈ درکار ہوتا ہے"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"آلہ دوبارہ چالو ہونے کے بعد پاس ورڈ درکار ہوتا ہے"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"اضافی سیکیورٹی کیلئے پیٹرن درکار ہے"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"‏اضافی سیکیورٹی کیلئے PIN درکار ہے"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"اضافی سیکیورٹی کیلئے پاسورڈ درکار ہے"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"اضافی سیکیورٹی کیلئے پاس ورڈ درکار ہے"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"جب آپ پروفائل سوئچ کرتے ہیں تو پیٹرن درکار ہوتا ہے"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"‏جب آپ پروفائل سوئچ کرتے ہیں تو PIN درکار ہوتا ہے"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"جب آپ پروفائل سوئچ کرتے ہیں تو پاسورڈ درکار ہوتا ہے"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"جب آپ پروفائل سوئچ کرتے ہیں تو پاس ورڈ درکار ہوتا ہے"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"آلہ منتظم کی جانب سے مقفل ہے"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"آلہ کو دستی طور پر مقفل کیا گیا تھا"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
@@ -121,8 +122,8 @@
       <item quantity="one">‏آلہ <xliff:g id="NUMBER_0">%d</xliff:g> گھنٹہ سے غیر مقفل نہیں کیا گیا۔ PIN کی توثیق کریں۔</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
-      <item quantity="other">آلہ <xliff:g id="NUMBER_1">%d</xliff:g> گھنٹوں سے غیر مقفل نہیں کیا گيا۔ پاسورڈ کی توثیق کریں۔</item>
-      <item quantity="one">آلہ <xliff:g id="NUMBER_0">%d</xliff:g> گھنٹہ سے غیر مقفل نہیں کیا گیا۔ پاسورڈ کی توثیق کریں۔</item>
+      <item quantity="other">آلہ <xliff:g id="NUMBER_1">%d</xliff:g> گھنٹوں سے غیر مقفل نہیں کیا گيا۔ پاس ورڈ کی توثیق کریں۔</item>
+      <item quantity="one">آلہ <xliff:g id="NUMBER_0">%d</xliff:g> گھنٹہ سے غیر مقفل نہیں کیا گیا۔ پاس ورڈ کی توثیق کریں۔</item>
     </plurals>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"تسلیم شدہ نہیں ہے"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"تسلیم شدہ نہیں ہے"</string>

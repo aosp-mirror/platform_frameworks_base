@@ -19,6 +19,7 @@
 
 #include <android-base/stringprintf.h>
 #include <android/binder_ibinder.h>
+#include <log/log.h>
 #include <private/android_filesystem_config.h>
 
 #include "annotations.h"
@@ -216,13 +217,18 @@ void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
         last[2] = true;
         parseString(pos, /*depth=*/2, last, /*numAnnotations=*/0);
     }
-    // Check if at least one node was successfully parsed.
-    if (mValues.size() - 1 > firstUidInChainIndex) {
+
+    if (mValues.size() - 1 > INT8_MAX) {
+        mValid = false;
+    } else if (mValues.size() - 1 > firstUidInChainIndex) {
+        // At least one node was successfully parsed.
         mAttributionChainStartIndex = static_cast<int8_t>(firstUidInChainIndex);
         mAttributionChainEndIndex = static_cast<int8_t>(mValues.size() - 1);
     }
 
-    parseAnnotations(numAnnotations, firstUidInChainIndex);
+    if (mValid) {
+        parseAnnotations(numAnnotations, firstUidInChainIndex);
+    }
 
     pos[1] = pos[2] = 1;
     last[1] = last[2] = false;
@@ -234,7 +240,8 @@ bool LogEvent::checkPreviousValueType(Type expected) {
 }
 
 void LogEvent::parseIsUidAnnotation(uint8_t annotationType) {
-    if (mValues.empty() || !checkPreviousValueType(INT) || annotationType != BOOL_TYPE) {
+    if (mValues.empty() || mValues.size() - 1 > INT8_MAX || !checkPreviousValueType(INT)
+            || annotationType != BOOL_TYPE) {
         mValid = false;
         return;
     }
@@ -270,12 +277,24 @@ void LogEvent::parsePrimaryFieldFirstUidAnnotation(uint8_t annotationType,
         return;
     }
 
+    if (static_cast<int>(mValues.size() - 1) < firstUidInChainIndex) { // AttributionChain is empty.
+        mValid = false;
+        android_errorWriteLog(0x534e4554, "174485572");
+        return;
+    }
+
     const bool primaryField = readNextValue<uint8_t>();
     mValues[firstUidInChainIndex].mAnnotations.setPrimaryField(primaryField);
 }
 
 void LogEvent::parseExclusiveStateAnnotation(uint8_t annotationType) {
     if (mValues.empty() || annotationType != BOOL_TYPE) {
+        mValid = false;
+        return;
+    }
+
+    if (mValues.size() - 1 > INT8_MAX) {
+        android_errorWriteLog(0x534e4554, "174488848");
         mValid = false;
         return;
     }

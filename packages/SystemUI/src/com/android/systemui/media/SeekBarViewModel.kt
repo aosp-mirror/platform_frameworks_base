@@ -91,9 +91,9 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
         }
     private var playbackState: PlaybackState? = null
     private var callback = object : MediaController.Callback() {
-        override fun onPlaybackStateChanged(state: PlaybackState) {
+        override fun onPlaybackStateChanged(state: PlaybackState?) {
             playbackState = state
-            if (PlaybackState.STATE_NONE.equals(playbackState)) {
+            if (playbackState == null || PlaybackState.STATE_NONE.equals(playbackState)) {
                 clearController()
             } else {
                 checkIfPollingNeeded()

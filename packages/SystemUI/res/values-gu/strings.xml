@@ -330,10 +330,10 @@
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"સૂચનાઓની સેટિંગ્સ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> સેટિંગ"</string>
-    <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"સ્ક્રીન આપમેળે ફરશે."</string>
+    <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"સ્ક્રીન ઑટોમૅટિક રીતે ફરશે."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"સ્ક્રીન લેન્ડસ્કેપ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"સ્ક્રીન પોટ્રેટ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
-    <string name="accessibility_rotation_lock_off_changed" msgid="5772498370935088261">"સ્ક્રીન હવે આપમેળે ફરશે."</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="5772498370935088261">"સ્ક્રીન હવે ઑટોમૅટિક રીતે ફરશે."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"સ્ક્રીન હવે લેન્ડસ્કેપ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"સ્ક્રીન હવે પોટ્રેટ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="dessert_case" msgid="9104973640704357717">"ડેઝર્ટ કેસ"</string>
@@ -553,7 +553,7 @@
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"તમે <xliff:g id="VPN_APP_0">%1$s</xliff:g> અને <xliff:g id="VPN_APP_1">%2$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટ સહિત તમારી નેટવર્ક પ્રવૃત્તિનું નિરીક્ષણ કરી શકે છે."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"તમારી કાર્યાલયની પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"તમારી વ્યક્તિગત પ્રોફાઇલ <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
-    <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"તમારું ઉપકરણ <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે."</string>
+    <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"તમારું ડિવાઇસ <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> દ્વારા મેનેજ થાય છે."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, તમારા ઉપકરણનું સંચાલન કરવા માટે <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> નો ઉપયોગ કરે છે."</string>
     <string name="monitoring_description_do_body" msgid="7700878065625769970">"વ્યવસ્થાપક સેટિંગ્સ, કૉર્પોરેટ ઍક્સેસ, ઍપ્સ, તમારા ઉપકરણ સંબંદ્ધ ડેટા અને ઉપકરણની સ્થાન માહિતીનું નિરીક્ષણ અને સંચાલન કરી શકે છે."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
@@ -570,8 +570,8 @@
     <string name="monitoring_description_app" msgid="376868879287922929">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયા છો, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિત તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"તમારી કાર્યાલયની પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે. આ પ્રોફાઇલ <xliff:g id="APPLICATION">%2$s</xliff:g> સાથે કનેક્ટ થયેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિત તમારા કાર્યાલયના નેટવર્કની પ્રવૃત્તિનું નિયમન કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"તમારી કાર્યાલયની પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે. આ પ્રોફાઇલ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે.\n\nતમે <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> સાથે પણ કનેક્ટ કરેલું છે, જે તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"તમારી કાર્યાલયની પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા મેનેજ થાય છે. આ પ્રોફાઇલ <xliff:g id="APPLICATION">%2$s</xliff:g> સાથે કનેક્ટ થયેલ છે, જે ઇમેઇલ, ઍપ અને વેબસાઇટ સહિત તમારા કાર્યાલયના નેટવર્કની પ્રવૃત્તિનું નિયમન કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"તમારી કાર્યાલયની પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા મેનેજ થાય છે. આ પ્રોફાઇલ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ અને વેબસાઇટ સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે.\n\nતમે <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> સાથે પણ કનેક્ટ કરેલું છે, જે તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent દ્વારા અનલૉક રાખેલું"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"તમે ઉપકરણને મેન્યુઅલી અનલૉક કરશો નહીં ત્યાં સુધી તે લૉક રહેશે"</string>
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
@@ -584,7 +584,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"સાઉન્ડ સેટિંગ"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"વિસ્તૃત કરો"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"સંકુચિત કરો"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"મીડિયામાં કૅપ્શન આપમેળે ઉમેરો"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"મીડિયામાં કૅપ્શન ઑટોમૅટિક રીતે ઉમેરો"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"કૅપ્શન ટિપ બંધ કરો"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"કૅપ્શન ઓવરલે"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ચાલુ કરો"</string>
@@ -922,11 +922,11 @@
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"કદ બદલો"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ફોન વધુ પડતી ગરમીને લીધે બંધ થઇ ગયો છે"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\nવધુ માહિતી માટે ટૅપ કરો"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા આપમેળે બંધ થઇ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઇ શકે છે, જો તમે:\n • એવી ઍપ્લિકેશન વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વીડિઓ, અથવા નેવિગેટ કરતી ઍપ્લિકેશનો)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા ઑટોમૅટિક રીતે બંધ થઈ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઈ શકે છે, જો તમે:\n • એવી ઍપ વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વીડિયો, અથવા નેવિગેટ કરતી ઍપ)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ફોન ગરમ થઈ રહ્યો છે"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"ફોન ઠંડો થાય ત્યાં સુધી અમુક સુવિધાઓ મર્યાદિત હોય છે.\nવધુ માહિતી માટે ટૅપ કરો"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"તમારો ફોન આપમેળે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
+    <string name="high_temp_dialog_message" msgid="3793606072661253968">"તમારો ફોન ઑટોમૅટિક રીતે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ચાર્જરને અનપ્લગ કરો"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"આ ડિવાઇસને ચાર્જ કરવામાં કોઈ સમસ્યા છે. પાવર અડૅપ્ટર અનપ્લગ કરો અને કાળજી લેજો કદાચ કેબલ થોડો ગરમ થયો હોઈ શકે છે."</string>
@@ -951,7 +951,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"સામાન્ય સંદેશા"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"સ્ટોરેજ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"હિન્ટ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ઝટપટ ઍપ્લિકેશન"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ચાલી રહી છે"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે. વધુ જાણવા માટે ટૅપ કરો."</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"મીડિયા"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"હાલનું સત્ર છુપાવો."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"વર્તમાન સત્ર છુપાવી શકાતું નથી."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"છોડી દો"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"નવા નિયંત્રણ જોવા માટે પાવર બટનને દબાવી રાખો"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"નિયંત્રણો ઉમેરો"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"નિયંત્રણોમાં ફેરફાર કરો"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"આઉટપુટ ઉમેરો"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"ગ્રૂપ"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 ડિવાઇસ પસંદ કર્યું"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> ડિવાઇસ પસંદ કર્યા"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ડિસ્કનેક્ટ થયેલું)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"કનેક્ટ કરી શકાયું નહીં. ફરી પ્રયાસ કરો."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"નવા ડિવાઇસ સાથે જોડાણ કરો"</string>
 </resources>

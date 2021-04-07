@@ -3275,9 +3275,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     boolean hideCurrentInputLocked(IBinder windowToken, int flags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
-        if (mCurClient == null || mCurClient.curSession == null) {
-            return false;
-        }
         if ((flags&InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
                 && (mShowExplicitlyRequested || mShowForced)) {
             if (DEBUG) Slog.v(TAG, "Not hiding: explicit show not cancelled by non-explicit hide");

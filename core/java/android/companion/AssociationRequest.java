@@ -46,6 +46,7 @@ public final class AssociationRequest implements Parcelable {
 
     private final boolean mSingleDevice;
     private final List<DeviceFilter<?>> mDeviceFilters;
+    private String mCallingPackage;
 
     private AssociationRequest(
             boolean singleDevice, @Nullable List<DeviceFilter<?>> deviceFilters) {
@@ -57,6 +58,7 @@ public final class AssociationRequest implements Parcelable {
         this(
             in.readByte() != 0,
             in.readParcelableList(new ArrayList<>(), AssociationRequest.class.getClassLoader()));
+        setCallingPackage(in.readString());
     }
 
     /** @hide */
@@ -72,32 +74,45 @@ public final class AssociationRequest implements Parcelable {
         return mDeviceFilters;
     }
 
+    /** @hide */
+    public String getCallingPackage() {
+        return mCallingPackage;
+    }
+
+    /** @hide */
+    public void setCallingPackage(String pkg) {
+        mCallingPackage = pkg;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AssociationRequest that = (AssociationRequest) o;
-        return mSingleDevice == that.mSingleDevice &&
-                Objects.equals(mDeviceFilters, that.mDeviceFilters);
+        return mSingleDevice == that.mSingleDevice
+                && Objects.equals(mDeviceFilters, that.mDeviceFilters)
+                && Objects.equals(mCallingPackage, that.mCallingPackage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSingleDevice, mDeviceFilters);
+        return Objects.hash(mSingleDevice, mDeviceFilters, mCallingPackage);
     }
 
     @Override
     public String toString() {
-        return "AssociationRequest{" +
-                "mSingleDevice=" + mSingleDevice +
-                ", mDeviceFilters=" + mDeviceFilters +
-                '}';
+        return "AssociationRequest{"
+                + "mSingleDevice=" + mSingleDevice
+                + ", mDeviceFilters=" + mDeviceFilters
+                + ", mCallingPackage=" + mCallingPackage
+                + '}';
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte((byte) (mSingleDevice ? 1 : 0));
         dest.writeParcelableList(mDeviceFilters, flags);
+        dest.writeString(mCallingPackage);
     }
 
     @Override

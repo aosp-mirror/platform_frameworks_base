@@ -325,7 +325,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controla el posicionamiento y el nivel de zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Realizar gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Puedes tocar y pellizcar la pantalla, deslizar el dedo y hacer otros gestos."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos de huellas digitales"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos de huella digital"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Puede capturar los gestos realizados en el sensor de huellas digitales del dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Hacer captura"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede hacer capturas de la pantalla."</string>
@@ -823,7 +823,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"Introduce el código PIN para desbloquear."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"Código PIN incorrecto"</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"Para desbloquear el teléfono, pulsa la tecla de menú y, a continuación, pulsa 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Llamada de emergencia"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Número de emergencia"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"Sin servicio"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"Pantalla bloqueada"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Pulsa la tecla de menú para desbloquear el teléfono o realizar una llamada de emergencia."</string>
@@ -1629,7 +1629,7 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Al mantener pulsadas ambas teclas de volumen durante unos segundos se activa <xliff:g id="SERVICE">%1$s</xliff:g>, una función de accesibilidad. Esta función puede modificar el funcionamiento del dispositivo.\n\nPuedes asignar este acceso directo a otra función en Ajustes &gt; Accesibilidad."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activar"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"No activar"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"SÍ"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVADO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"¿Permitir que <xliff:g id="SERVICE">%1$s</xliff:g> pueda controlar totalmente tu dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si activas <xliff:g id="SERVICE">%1$s</xliff:g>, el dispositivo no utilizará el bloqueo de pantalla para mejorar el cifrado de datos."</string>
@@ -1770,7 +1770,7 @@
       <item quantity="other">Vuelve a intentarlo en <xliff:g id="COUNT">%d</xliff:g> segundos</item>
       <item quantity="one">Vuelve a intentarlo en 1 segundo</item>
     </plurals>
-    <string name="restr_pin_try_later" msgid="5897719962541636727">"Volver a intentar más tarde"</string>
+    <string name="restr_pin_try_later" msgid="5897719962541636727">"Reintentar más tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Modo de pantalla completa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para salir, desliza el dedo de arriba abajo."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>

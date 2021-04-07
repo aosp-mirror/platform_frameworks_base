@@ -60,8 +60,42 @@ public class MediaOutputSliceConstants {
             "com.android.settings.panel.action.MEDIA_OUTPUT_GROUP";
 
     /**
-     * An string extra specifying a media package name.
+     * A string extra specifying a media package name.
      */
     public static final String EXTRA_PACKAGE_NAME =
             "com.android.settings.panel.extra.PACKAGE_NAME";
+
+    /**
+     * An intent action to launch media output dialog.
+     */
+    public static final String ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG =
+            "com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG";
+
+    /**
+     * An intent action to dismiss media output dialog.
+     */
+    public static final String ACTION_DISMISS_MEDIA_OUTPUT_DIALOG =
+            "com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG";
+
+    /**
+     * Settings package name.
+     */
+    public static final String SETTINGS_PACKAGE_NAME = "com.android.settings";
+
+    /**
+     * An intent action to launch Bluetooth paring page.
+     */
+    public static final String ACTION_LAUNCH_BLUETOOTH_PAIRING =
+            "com.android.settings.action.LAUNCH_BLUETOOTH_PAIRING";
+
+    /**
+     * SystemUi package name.
+     */
+    public static final String SYSTEMUI_PACKAGE_NAME = "com.android.systemui";
+
+    /**
+     * An intent action to close settings panel.
+     */
+    public static final String ACTION_CLOSE_PANEL =
+            "com.android.settings.panel.action.CLOSE_PANEL";
 }

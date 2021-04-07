@@ -82,7 +82,7 @@
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Сликата на екранот се зачувува..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Сликата од екранот е зачувана"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Допрете за да ја видите сликата од екранот"</string>
-    <string name="screenshot_failed_title" msgid="3259148215671936891">"Не можеше да се зачува слика од екранот"</string>
+    <string name="screenshot_failed_title" msgid="3259148215671936891">"Не може да се зачува слика од екранот"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Повторно обидете се да направите слика од екранот"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Сликата од екранот не може да се зачува поради ограничена меморија"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Апликацијата или вашата организација не дозволува снимање слики од екранот"</string>
@@ -1055,7 +1055,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не се зачувани"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Видете други апликации"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Контролите не можеше да се вчитаат. Проверете ја апликацијата <xliff:g id="APP">%s</xliff:g> за да се уверите дека поставките за апликацијата не се променети."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Контролите не може да се вчитаат. Проверете ја апликацијата <xliff:g id="APP">%s</xliff:g> за да се уверите дека поставките за апликацијата не се променети."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Нема компатибилни контроли"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друга"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте во контроли за уредите"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Се вчитуваат препораки"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Аудиовизуелни содржини"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Сокриј ја тековнава сесија."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Тековната сесија не може да се сокрие."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Отфрли"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Продолжи"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Поставки"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Задржете го копчето за вклучување за да ги видите новите контроли"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додајте контроли"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Изменете ги контролите"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Додајте излези"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Група"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Избран е 1 уред"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Избрани се <xliff:g id="COUNT">%1$d</xliff:g> уреди"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (исклучен)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Не може да се поврзе. Обидете се повторно."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Спарете нов уред"</string>
 </resources>

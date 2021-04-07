@@ -267,7 +267,7 @@
     <string name="global_action_lockdown" msgid="2475471405907902963">"பூட்டு"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"புதிய அறிவிப்பு"</string>
-    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"விர்ச்சுவல் கீபோர்ட்"</string>
+    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"விர்ச்சுவல் கீபோர்டு"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"கைமுறை விசைப்பலகை"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"பாதுகாப்பு"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"கார் பயன்முறை"</string>
@@ -1307,7 +1307,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"அனலாக் ஆடியோ துணைக்கருவி கண்டறியப்பட்டது"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"இணைத்துள்ள சாதனமானது இந்த மொபைலுடன் இணங்கவில்லை. மேலும் அறிய, தட்டவும்."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB பிழைதிருத்தத்தை ஆஃப் செய்ய தட்டவும்"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB பிழைதிருத்தத்தை ஆஃப் செய்யத் தட்டவும்"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB பிழைதிருத்தத்தை முடக்க, தேர்ந்தெடுக்கவும்."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"வைஃபை பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"வைஃபை பிழைதிருத்தத்தை ஆஃப் செய்ய தட்டவும்"</string>

@@ -33,8 +33,8 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"USB арқылы зарядтау мүмкін емес"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Құрылғымен бірге берілген зарядтау құралын пайдаланыңыз"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Параметрлер"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Battery Saver функциясын қосу керек пе?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Battery Saver туралы ақпарат"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Батареяны үнемдеу режимін қосу керек пе?"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Батареяны үнемдеу режимі туралы ақпарат"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Қосу"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Battery saver функциясын қосу"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Параметрлер"</string>
@@ -497,7 +497,7 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Пайдаланушы жойылсын ба?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Осы пайдаланушының барлық қолданбалары мен деректері жойылады."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Жою"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Battery saver қосулы"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Батареяны үнемдеу режимі қосулы"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Өнімділікті және фондық деректерді азайтады"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Battery saver функциясын өшіру"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> жазу не трансляциялау кезінде экранда көрсетілетін немесе дыбысталатын барлық ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және аудиоматериалдар кіреді."</string>
@@ -765,7 +765,7 @@
       <item quantity="one">%d минут</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Батареяны пайдалану"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Зарядтау кезінде Батареяны үнемдеу режимі істемейді"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Батареяны үнемдеу режимі"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Өнімділікті және фондық деректерді азайтады"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> түймесі"</string>
@@ -981,7 +981,7 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына кез келген қолданбаның үзіндісін көрсетуге рұқсат беру"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Рұқсат беру"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Тыйым салу"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Түймені түртіп, Battery Saver функциясын реттеңіз"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Түймені түртіп, Батареяны үнемдеу режимін реттеңіз"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Батареяның заряды бітуге жақындағанда қосыңыз."</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Жоқ, рақмет"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Battery Saver кестесі қосылды"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Жүктеуге қатысты ұсыныстар"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мультимедиа"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ағымдағы сеансты жасыру"</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Қазіргі сеансты жасыру мүмкін емес."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Жабу"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Жалғастыру"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Параметрлер"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Жаңа басқару элементтерін көру үшін \"Қуат\" түймесін басып тұрыңыз."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Басқару элементтерін енгізу"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Басқару элементтерін өзгерту"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Шығыс сигналдарды қосу"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Топ"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 құрылғы таңдалды."</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> құрылғы таңдалды."</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (ажыратылған)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Қосылмады. Қайта қосылып көріңіз."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Жаңа құрылғымен жұптау"</string>
 </resources>

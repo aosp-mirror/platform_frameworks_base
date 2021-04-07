@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume notifiche"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Suoneria predefinita"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Predefinita (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Nessuna"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Nessuno"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Suonerie"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Suoni delle sveglie"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Suoni di notifica"</string>
@@ -1441,7 +1441,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Tocca per uscire dall\'app di guida."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Indietro"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Avanti"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"Ignora"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"Salta"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nessuna corrispondenza"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Trova nella pagina"</string>
     <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per estendere la durata della batteria, la funzionalità di risparmio energetico:\n\n• Attiva il tema scuro\n• Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\"\n\n"<annotation id="url">"Ulteriori informazioni"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Per estendere la durata della batteria, la funzionalità di risparmio energetico:\n\n• Attiva il tema scuro\n• Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per estendere la durata della batteria, la funzionalità di risparmio energetico:\n\n• Attiva il tema scuro\n• Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Hey Google\"\n\n"<annotation id="url">"Scopri di più"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Per estendere la durata della batteria, la funzionalità di risparmio energetico:\n\n• Attiva il tema scuro\n• Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Hey Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>

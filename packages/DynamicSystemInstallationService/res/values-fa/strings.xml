@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"سیستم پویا آماده است. برای استفاده از آن، دستگاه را بازراه‌اندازی کنید."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"درحال نصب"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"نصب نشد"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"راستی‌آزمایی تصویر انجام نشد. نصب را لغو کنید."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"اعتبارسنجی نسخه دیسک انجام نشد. نصب را لغو کنید."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"‏درحال‌حاضر سیستم پویا اجرا می‌شود. برای استفاده از نسخه اصلی Android، بازراه‌اندازی کنید."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"لغو کردن"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"صرف‌نظر کردن"</string>

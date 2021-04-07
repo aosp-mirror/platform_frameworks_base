@@ -799,7 +799,7 @@ public class RecentsAnimationController implements DeathRecipient {
         return w != null && w.mAttrs.type == TYPE_BASE_APPLICATION &&
                 ((w.mActivityRecord != null && mTargetActivityRecord == w.mActivityRecord)
                         || isAnimatingTask(w.getTask()))
-                && isTargetOverWallpaper();
+                && isTargetOverWallpaper() && w.isOnScreen();
     }
 
     /**

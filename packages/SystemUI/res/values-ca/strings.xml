@@ -33,10 +33,10 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"No es pot carregar per USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Fes servir el carregador original del dispositiu"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Configuració"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vols activar l\'estalvi de bateria?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vols activar la funció Estalvi de bateria?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Sobre la funció Estalvi de bateria"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activa"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activa l\'estalvi de bateria"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activa la funció Estalvi de bateria"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Configuració"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Gira pantalla automàticament"</string>
@@ -445,7 +445,7 @@
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personalitza"</string>
-    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
+    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades telefòniques."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificacions menys urgents a continuació"</string>
@@ -499,7 +499,7 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Suprimeix"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"S\'ha activat l\'estalvi de bateria"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactiva l\'estalvi de bateria"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactiva la funció Estalvi de bateria"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es veu en pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació visible a la teva pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio que reprodueixis."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vols començar a gravar o emetre contingut?"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Carregant les recomanacions"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimèdia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Amaga la sessió actual."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"La sessió actual no es pot amagar."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ignora"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reprèn"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Configuració"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén premut el botó d\'engegada per veure controls nous"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Afegeix controls"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Edita els controls"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Afegeix sortides"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Grup"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 dispositiu seleccionat"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"S\'han seleccionat <xliff:g id="COUNT">%1$d</xliff:g> dispositius"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desconnectat)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"No s\'ha pogut connectar. Torna-ho a provar."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Vincula un dispositiu nou"</string>
 </resources>

@@ -549,11 +549,10 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                            final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
-                                    || mNavigationBarPosition == NAV_BAR_RIGHT;
-                            if (mNavigationBar != null && sideAllowed
-                                    && !mSystemGestures.currentGestureStartedInRegion(
-                                            excludedRegion)) {
+                            final boolean excluded =
+                                    mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                            if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_RIGHT
+                                    || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
                                 requestTransientBars(mNavigationBar);
                             }
                             checkAltBarSwipeForTransientBars(ALT_BAR_RIGHT);
@@ -567,11 +566,10 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                            final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
-                                    || mNavigationBarPosition == NAV_BAR_LEFT;
-                            if (mNavigationBar != null && sideAllowed
-                                    && !mSystemGestures.currentGestureStartedInRegion(
-                                            excludedRegion)) {
+                            final boolean excluded =
+                                    mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                            if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_LEFT
+                                    || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
                                 requestTransientBars(mNavigationBar);
                             }
                             checkAltBarSwipeForTransientBars(ALT_BAR_LEFT);
@@ -3437,17 +3435,16 @@ public class DisplayPolicy {
             }
 
             final InsetsState requestedState = controlTarget.getRequestedInsetsState();
+            final InsetsSource nbSource = requestedState.peekSource(ITYPE_NAVIGATION_BAR);
+            final InsetsSource sbSource = requestedState.peekSource(ITYPE_STATUS_BAR);
+            final InsetsSource enbSource = requestedState.peekSource(ITYPE_EXTRA_NAVIGATION_BAR);
+            final InsetsSource cbSource = requestedState.peekSource(ITYPE_CLIMATE_BAR);
             final @InsetsType int restorePositionTypes =
-                    (requestedState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                    (nbSource != null && nbSource.isVisible() ? Type.navigationBars() : 0)
+                    | (sbSource != null && sbSource.isVisible() ? Type.statusBars() : 0)
+                    | (mExtraNavBarAlt != null && enbSource != null && enbSource.isVisible()
                             ? Type.navigationBars() : 0)
-                    | (requestedState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR)
-                            ? Type.statusBars() : 0)
-                    | (mExtraNavBarAlt != null
-                            && requestedState.getSourceOrDefaultVisibility(
-                                    ITYPE_EXTRA_NAVIGATION_BAR)
-                            ? Type.navigationBars() : 0)
-                    | (mClimateBarAlt != null
-                            && requestedState.getSourceOrDefaultVisibility(ITYPE_CLIMATE_BAR)
+                    | (mClimateBarAlt != null && cbSource != null && cbSource.isVisible()
                             ? Type.statusBars() : 0);
 
             if (swipeTarget == mNavigationBar

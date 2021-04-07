@@ -38,7 +38,7 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Укључи"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Укључи Уштеду батерије"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Подешавања"</string>
-    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"WiFi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Аутоматско ротирање екрана"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"УГАСИ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"АУТОM."</string>
@@ -224,7 +224,7 @@
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Роминг"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
-    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"WiFi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Нема SIM картице."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Мобилни подаци"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Мобилни подаци су укључени"</string>
@@ -263,8 +263,8 @@
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Закључан екран за посао"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Затвори"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wi-Fi је искључен."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"Wi-Fi је укључен."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"WiFi је искључен."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"WiFi је укључен."</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"Мобилна мрежа: <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"Батерија: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"Режим рада у авиону је искључен."</string>
@@ -373,19 +373,19 @@
     <string name="quick_settings_user_label" msgid="1253515509432672496">"Ја"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Корисник"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Нови корисник"</string>
-    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"WiFi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Веза није успостављена"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Нема мреже"</string>
-    <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi је искључен"</string>
-    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi је укључен"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Није доступна ниједна Wi-Fi мрежа"</string>
+    <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"WiFi је искључен"</string>
+    <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"WiFi је укључен"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Није доступна ниједна WiFi мрежа"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Укључује се..."</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Пребацивање екрана"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Пребацивање"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Неименовани уређај"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Спремно за пребацивање"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Није доступан ниједан уређај"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi није повезан"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"WiFi није повезан"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Осветљеност"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"АУТОМАТСКА"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Обрни боје"</string>
@@ -641,8 +641,8 @@
     <string name="output_none_found" msgid="5488087293120982770">"Није пронађен ниједан уређај"</string>
     <string name="output_none_found_service_off" msgid="935667567681386368">"Није пронађен ниједан уређај. Пробајте да укључите услугу <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
     <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth"</string>
-    <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
-    <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth и Wi-Fi"</string>
+    <string name="output_service_wifi" msgid="9003667810868222134">"WiFi"</string>
+    <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth и WiFi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Тјунер за кориснички интерфејс система"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Приказуј уграђени проценат батерије"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Приказивање нивоа напуњености батерије у процентима унутар иконе на статусној траци када се батерија не пуни"</string>
@@ -965,7 +965,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Мобилни подаци"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi је искључен"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"WiFi је искључен"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth је искључен"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Режим Не узнемиравај је искључен"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Аутоматско правило (<xliff:g id="ID_1">%s</xliff:g>) је укључило режим Не узнемиравај."</string>
@@ -977,7 +977,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Апликације покренуте у позадини"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Додирните за детаље о батерији и потрошњи података"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Желите да искључите мобилне податке?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нећете имати приступ подацима или интернету преко мобилног оператера <xliff:g id="CARRIER">%s</xliff:g>. Интернет ће бити доступан само преко Wi-Fi везе."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нећете имати приступ подацима или интернету преко мобилног оператера <xliff:g id="CARRIER">%s</xliff:g>. Интернет ће бити доступан само преко WiFi везе."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"мобилни оператер"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Подешавања не могу да верификују ваш одговор јер апликација скрива захтев за дозволу."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Желите ли да дозволите апликацији <xliff:g id="APP_0">%1$s</xliff:g> да приказује исечке из апликације <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -1080,6 +1080,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Учитавају се препоруке"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медији"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Сакријте актуелну сесију."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"Актуелна сесија не може да се сакрије."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Одбаци"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Настави"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Подешавања"</string>
@@ -1095,4 +1096,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Задржите дугме за укључивање да бисте видели нове контроле"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додај контроле"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Измени контроле"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Додајте излазе"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Група"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Изабран је 1 уређај"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Изабраних уређаја: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (веза је прекинута)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Повезивање није успело. Пробајте поново."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Упари нови уређај"</string>
 </resources>
