@@ -362,6 +362,18 @@ public final class Telephony {
 
         /**
          * Used to determine the currently configured default SMS package.
+         * <p>
+         * As of Android 11 apps will need specific permission to query other packages. To use
+         * this method an app must include in their AndroidManifest:
+         * <queries>
+         *   <intent>
+         *     <action android:name="android.provider.Telephony.SMS_DELIVER"/>
+         *   </intent>
+         * </queries>
+         * Which will allow them to query packages which declare intent filters that include
+         * the {@link android.provider.Telephony.Sms.Intents#SMS_DELIVER_ACTION} intent.
+         * </p>
+         *
          * @param context context of the requesting application
          * @return package name for the default SMS package or null
          */
