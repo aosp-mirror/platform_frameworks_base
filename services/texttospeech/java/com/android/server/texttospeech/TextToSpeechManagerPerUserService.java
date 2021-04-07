@@ -174,7 +174,7 @@ final class TextToSpeechManagerPerUserService extends
         try {
             callbackRunnable.runOrThrow();
         } catch (RemoteException ex) {
-            Slog.w(TAG, "Failed running callback method", ex);
+            Slog.i(TAG, "Failed running callback method: " + ex);
         }
     }
 

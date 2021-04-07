@@ -2427,9 +2427,8 @@ public class TextToSpeech {
                     @Override
                     public void onError(String errorInfo) {
                         Log.w(TAG, "System TTS connection error: " + errorInfo);
-                        // The connection was not established successfully - handle as
-                        // disconnection: clear the state and notify the user.
-                        onServiceDisconnected(/* componentName= */ null);
+                        // There is an error connecting to the engine - notify the listener.
+                        dispatchOnInit(ERROR);
                     }
                 });
 
