@@ -30,6 +30,8 @@ import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -117,10 +119,13 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     @Mock
     private FeatureFlags mFeatureFlags;
     @Captor
+    ArgumentCaptor<Intent> mIntentCaptor;
+    @Captor
     ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
     @Captor
     ArgumentCaptor<QuickAccessWalletClient.OnWalletCardsRetrievedCallback> mCallbackCaptor;
 
+    private Context mSpiedContext;
     private TestableLooper mTestableLooper;
     private QuickAccessWalletTile mTile;
 
@@ -129,8 +134,10 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
+        mSpiedContext = spy(mContext);
 
-        when(mHost.getContext()).thenReturn(mContext);
+        doNothing().when(mSpiedContext).startActivity(any(Intent.class));
+        when(mHost.getContext()).thenReturn(mSpiedContext);
         when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
         when(mFeatureFlags.isQuickAccessWalletEnabled()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
@@ -179,13 +186,43 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHandleClick_openGPay() {
+    public void testHandleClick_noCards_hasIntent_openWalletApp() {
         Intent intent = new Intent("WalletIntent");
         when(mQuickAccessWalletClient.createWalletIntent()).thenReturn(intent);
+        setUpWalletCard(/* hasCard= */ false);
+
         mTile.handleClick();
+        mTestableLooper.processAllMessages();
 
         verify(mActivityStarter, times(1))
                 .postStartActivityDismissingKeyguard(eq(intent), anyInt());
+    }
+
+    @Test
+    public void testHandleClick_noCards_noIntent_doNothing() {
+        when(mQuickAccessWalletClient.createWalletIntent()).thenReturn(null);
+        setUpWalletCard(/* hasCard= */ false);
+
+        mTile.handleClick();
+        mTestableLooper.processAllMessages();
+
+        verifyZeroInteractions(mActivityStarter);
+    }
+
+    @Test
+    public void testHandleClick_hasCards_startWalletActivity() {
+        setUpWalletCard(/* hasCard= */ true);
+
+        mTile.handleClick();
+        mTestableLooper.processAllMessages();
+
+        verify(mSpiedContext).startActivity(mIntentCaptor.capture());
+
+        Intent nextStartedIntent = mIntentCaptor.getValue();
+        String walletClassName = "com.android.systemui.wallet.ui.WalletActivity";
+
+        assertNotNull(nextStartedIntent);
+        assertThat(nextStartedIntent.getComponent().getClassName()).isEqualTo(walletClassName);
     }
 
     @Test
