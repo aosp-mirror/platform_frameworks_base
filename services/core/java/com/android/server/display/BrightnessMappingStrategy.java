@@ -440,9 +440,8 @@ public abstract class BrightnessMappingStrategy {
     }
 
     private float permissibleRatio(float currLux, float prevLux) {
-        return MathUtils.exp(MAX_GRAD
-                * (MathUtils.log(currLux + LUX_GRAD_SMOOTHING)
-                    - MathUtils.log(prevLux + LUX_GRAD_SMOOTHING)));
+        return MathUtils.pow((currLux + LUX_GRAD_SMOOTHING)
+                / (prevLux + LUX_GRAD_SMOOTHING), MAX_GRAD);
     }
 
     protected float inferAutoBrightnessAdjustment(float maxGamma, float desiredBrightness,

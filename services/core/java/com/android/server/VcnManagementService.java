@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_NOT_CONFIGURED;
@@ -35,13 +37,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.TelephonyNetworkSpecifier;
+import android.net.NetworkRequest;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
-import android.net.vcn.VcnManager;
 import android.net.vcn.VcnManager.VcnErrorCode;
 import android.net.vcn.VcnManager.VcnStatusCode;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
@@ -162,6 +164,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private final TelephonySubscriptionTracker mTelephonySubscriptionTracker;
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final BroadcastReceiver mPkgChangeReceiver;
+
+    @NonNull
+    private final TrackingNetworkCallback mTrackingNetworkCallback = new TrackingNetworkCallback();
 
     /** Can only be assigned when {@link #systemReady()} is called, since it uses AppOpsManager. */
     @Nullable private LocationPermissionChecker mLocationPermissionChecker;
@@ -359,6 +364,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     public void systemReady() {
         mContext.getSystemService(ConnectivityManager.class)
                 .registerNetworkProvider(mNetworkProvider);
+        mContext.getSystemService(ConnectivityManager.class)
+                .registerNetworkCallback(
+                        new NetworkRequest.Builder().clearCapabilities().build(),
+                        mTrackingNetworkCallback);
         mTelephonySubscriptionTracker.register();
         mLocationPermissionChecker = mDeps.newLocationPermissionChecker(mVcnContext.getContext());
     }
@@ -533,15 +542,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         if (mVcns.containsKey(subscriptionGroup)) {
             final Vcn vcn = mVcns.get(subscriptionGroup);
-            final boolean isActive = vcn.isActive();
             vcn.updateConfig(config);
-
-            // Only notify VcnStatusCallbacks if this VCN was previously in Safe Mode
-            if (!isActive) {
-                // TODO(b/181789060): invoke asynchronously after Vcn notifies through VcnCallback
-                notifyAllPermissionedStatusCallbacksLocked(
-                        subscriptionGroup, VCN_STATUS_CODE_ACTIVE);
-            }
         } else {
             startVcnLocked(subscriptionGroup, config);
         }
@@ -717,19 +718,29 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         });
     }
 
-    private int getSubIdForNetworkCapabilities(@NonNull NetworkCapabilities networkCapabilities) {
-        if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                && networkCapabilities.getNetworkSpecifier() instanceof TelephonyNetworkSpecifier) {
-            TelephonyNetworkSpecifier telephonyNetworkSpecifier =
-                    (TelephonyNetworkSpecifier) networkCapabilities.getNetworkSpecifier();
-            return telephonyNetworkSpecifier.getSubscriptionId();
-        } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                && networkCapabilities.getTransportInfo() instanceof WifiInfo) {
-            WifiInfo wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
-            return mDeps.getSubIdForWifiInfo(wifiInfo);
+    private ParcelUuid getSubGroupForNetworkCapabilities(
+            @NonNull NetworkCapabilities networkCapabilities) {
+        ParcelUuid subGrp = null;
+        final TelephonySubscriptionSnapshot snapshot;
+
+        // Always access mLastSnapshot under lock. Technically this can be treated as a volatile
+        // but for consistency and safety, always access under lock.
+        synchronized (mLock) {
+            snapshot = mLastSnapshot;
         }
 
-        return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        // If multiple subscription IDs exist, they MUST all point to the same subscription
+        // group. Otherwise undefined behavior may occur.
+        for (int subId : networkCapabilities.getSubIds()) {
+            // Verify that all subscriptions point to the same group
+            if (subGrp != null && !subGrp.equals(snapshot.getGroupForSubId(subId))) {
+                Slog.wtf(TAG, "Got multiple subscription groups for a single network");
+            }
+
+            subGrp = snapshot.getGroupForSubId(subId);
+        }
+
+        return subGrp;
     }
 
     /**
@@ -754,23 +765,19 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             // mutates
             final NetworkCapabilities ncCopy = new NetworkCapabilities(networkCapabilities);
 
-            final int subId = getSubIdForNetworkCapabilities(ncCopy);
+            final ParcelUuid subGrp = getSubGroupForNetworkCapabilities(ncCopy);
             boolean isVcnManagedNetwork = false;
             boolean isRestrictedCarrierWifi = false;
-            if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-                synchronized (mLock) {
-                    ParcelUuid subGroup = mLastSnapshot.getGroupForSubId(subId);
+            synchronized (mLock) {
+                final Vcn vcn = mVcns.get(subGrp);
+                if (vcn != null) {
+                    if (vcn.getStatus() == VCN_STATUS_CODE_ACTIVE) {
+                        isVcnManagedNetwork = true;
+                    }
 
-                    final Vcn vcn = mVcns.get(subGroup);
-                    if (vcn != null) {
-                        if (vcn.isActive()) {
-                            isVcnManagedNetwork = true;
-                        }
-
-                        if (ncCopy.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                            // Carrier WiFi always restricted if VCN exists (even in safe mode).
-                            isRestrictedCarrierWifi = true;
-                        }
+                    if (ncCopy.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        // Carrier WiFi always restricted if VCN exists (even in safe mode).
+                        isRestrictedCarrierWifi = true;
                     }
                 }
             }
@@ -787,8 +794,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
             }
 
+            final NetworkCapabilities result = ncBuilder.build();
             return new VcnUnderlyingNetworkPolicy(
-                    false /* isTearDownRequested */, ncBuilder.build());
+                    mTrackingNetworkCallback.requiresRestartForCarrierWifi(result), result);
         });
     }
 
@@ -875,20 +883,23 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 // now that callback is registered, send it the VCN's current status
                 final VcnConfig vcnConfig = mConfigs.get(subGroup);
                 final Vcn vcn = mVcns.get(subGroup);
-                final int vcnStatus;
+                final int vcnStatus =
+                        vcn == null ? VCN_STATUS_CODE_NOT_CONFIGURED : vcn.getStatus();
+                final int resultStatus;
                 if (vcnConfig == null || !isCallbackPermissioned(cbInfo, subGroup)) {
-                    vcnStatus = VcnManager.VCN_STATUS_CODE_NOT_CONFIGURED;
+                    resultStatus = VCN_STATUS_CODE_NOT_CONFIGURED;
                 } else if (vcn == null) {
-                    vcnStatus = VcnManager.VCN_STATUS_CODE_INACTIVE;
-                } else if (vcn.isActive()) {
-                    vcnStatus = VcnManager.VCN_STATUS_CODE_ACTIVE;
+                    resultStatus = VCN_STATUS_CODE_INACTIVE;
+                } else if (vcnStatus == VCN_STATUS_CODE_ACTIVE
+                        || vcnStatus == VCN_STATUS_CODE_SAFE_MODE) {
+                    resultStatus = vcnStatus;
                 } else {
-                    // TODO(b/181789060): create Vcn.getStatus() and Log.WTF() for unknown status
-                    vcnStatus = VcnManager.VCN_STATUS_CODE_SAFE_MODE;
+                    Slog.wtf(TAG, "Unknown VCN status: " + vcnStatus);
+                    resultStatus = VCN_STATUS_CODE_NOT_CONFIGURED;
                 }
 
                 try {
-                    cbInfo.mCallback.onVcnStatusChanged(vcnStatus);
+                    cbInfo.mCallback.onVcnStatusChanged(resultStatus);
                 } catch (RemoteException e) {
                     Slog.d(TAG, "VcnStatusCallback threw on VCN status change", e);
                 }
@@ -921,15 +932,58 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     // TODO(b/180452282): Make name more generic and implement directly with VcnManagementService
     /** Callback for Vcn signals sent up to VcnManagementService. */
     public interface VcnCallback {
-        /** Called by a Vcn to signal that it has entered safe mode. */
-        void onEnteredSafeMode();
+        /** Called by a Vcn to signal that its safe mode status has changed. */
+        void onSafeModeStatusChanged(boolean isInSafeMode);
 
         /** Called by a Vcn to signal that an error occurred. */
         void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage);
+    }
+
+    /**
+     * TrackingNetworkCallback tracks all active networks
+     *
+     * <p>This is used to ensure that no underlying networks have immutable capabilities changed
+     * without requiring a Network restart.
+     */
+    private class TrackingNetworkCallback extends ConnectivityManager.NetworkCallback {
+        private final Map<Network, NetworkCapabilities> mCaps = new ArrayMap<>();
+
+        @Override
+        public void onCapabilitiesChanged(Network network, NetworkCapabilities caps) {
+            synchronized (mCaps) {
+                mCaps.put(network, caps);
+            }
+        }
+
+        @Override
+        public void onLost(Network network) {
+            synchronized (mCaps) {
+                mCaps.remove(network);
+            }
+        }
+
+        private boolean requiresRestartForCarrierWifi(NetworkCapabilities caps) {
+            if (!caps.hasTransport(TRANSPORT_WIFI) || caps.getSubIds() == null) {
+                return false;
+            }
+
+            synchronized (mCaps) {
+                for (NetworkCapabilities existing : mCaps.values()) {
+                    if (existing.hasTransport(TRANSPORT_WIFI)
+                            && caps.getSubIds().equals(existing.getSubIds())) {
+                        // Restart if any immutable capabilities have changed
+                        return existing.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
+                                != caps.hasCapability(NET_CAPABILITY_NOT_RESTRICTED);
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 
     /** VcnCallbackImpl for Vcn signals sent up to VcnManagementService. */
@@ -941,21 +995,24 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         @Override
-        public void onEnteredSafeMode() {
+        public void onSafeModeStatusChanged(boolean isInSafeMode) {
             synchronized (mLock) {
                 // Ignore if this subscription group doesn't exist anymore
                 if (!mVcns.containsKey(mSubGroup)) {
                     return;
                 }
 
+                final int status =
+                        isInSafeMode ? VCN_STATUS_CODE_SAFE_MODE : VCN_STATUS_CODE_ACTIVE;
+
                 notifyAllPolicyListenersLocked();
-                notifyAllPermissionedStatusCallbacksLocked(mSubGroup, VCN_STATUS_CODE_SAFE_MODE);
+                notifyAllPermissionedStatusCallbacksLocked(mSubGroup, status);
             }
         }
 
         @Override
         public void onGatewayConnectionError(
-                @NonNull int[] networkCapabilities,
+                @NonNull String gatewayConnectionName,
                 @VcnErrorCode int errorCode,
                 @Nullable String exceptionClass,
                 @Nullable String exceptionMessage) {
@@ -971,7 +1028,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         Binder.withCleanCallingIdentity(
                                 () ->
                                         cbInfo.mCallback.onGatewayConnectionError(
-                                                networkCapabilities,
+                                                gatewayConnectionName,
                                                 errorCode,
                                                 exceptionClass,
                                                 exceptionMessage));

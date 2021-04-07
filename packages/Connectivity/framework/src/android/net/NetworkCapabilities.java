@@ -163,7 +163,6 @@ public final class NetworkCapabilities implements Parcelable {
      *                   {@link NetworkCapabilities}.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public NetworkCapabilities(@Nullable NetworkCapabilities nc, @RedactionType long redactions) {
         mRedactions = redactions;
         if (nc != null) {
@@ -274,6 +273,8 @@ public final class NetworkCapabilities implements Parcelable {
             NET_CAPABILITY_VEHICLE_INTERNAL,
             NET_CAPABILITY_NOT_VCN_MANAGED,
             NET_CAPABILITY_ENTERPRISE,
+            NET_CAPABILITY_VSIM,
+            NET_CAPABILITY_BIP,
     })
     public @interface NetCapability { }
 
@@ -493,8 +494,22 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_ENTERPRISE = 29;
 
+    /**
+     * Indicates that this network has ability to access the carrier's Virtual Sim service.
+     * @hide
+     */
+    @SystemApi
+    public static final int NET_CAPABILITY_VSIM = 30;
+
+    /**
+     * Indicates that this network has ability to support Bearer Independent Protol.
+     * @hide
+     */
+    @SystemApi
+    public static final int NET_CAPABILITY_BIP = 31;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_ENTERPRISE;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_BIP;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -538,43 +553,6 @@ public final class NetworkCapabilities implements Parcelable {
             | (1 << NET_CAPABILITY_NOT_VPN);
 
     /**
-     * Capabilities that suggest that a network is restricted.
-     * {@see #maybeMarkCapabilitiesRestricted}, {@see #FORCE_RESTRICTED_CAPABILITIES}
-     */
-    @VisibleForTesting
-    /* package */ static final long RESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_CBS)
-            | (1 << NET_CAPABILITY_DUN)
-            | (1 << NET_CAPABILITY_EIMS)
-            | (1 << NET_CAPABILITY_FOTA)
-            | (1 << NET_CAPABILITY_IA)
-            | (1 << NET_CAPABILITY_IMS)
-            | (1 << NET_CAPABILITY_MCX)
-            | (1 << NET_CAPABILITY_RCS)
-            | (1 << NET_CAPABILITY_VEHICLE_INTERNAL)
-            | (1 << NET_CAPABILITY_XCAP)
-            | (1 << NET_CAPABILITY_ENTERPRISE);
-
-    /**
-     * Capabilities that force network to be restricted.
-     * {@see #maybeMarkCapabilitiesRestricted}.
-     */
-    private static final long FORCE_RESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_OEM_PAID)
-            | (1 << NET_CAPABILITY_OEM_PRIVATE);
-
-    /**
-     * Capabilities that suggest that a network is unrestricted.
-     * {@see #maybeMarkCapabilitiesRestricted}.
-     */
-    @VisibleForTesting
-    /* package */ static final long UNRESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_INTERNET)
-            | (1 << NET_CAPABILITY_MMS)
-            | (1 << NET_CAPABILITY_SUPL)
-            | (1 << NET_CAPABILITY_WIFI_P2P);
-
-    /**
      * Capabilities that are managed by ConnectivityService.
      */
     private static final long CONNECTIVITY_MANAGED_CAPABILITIES =
@@ -614,8 +592,9 @@ public final class NetworkCapabilities implements Parcelable {
         // TODO: Consider adding unwanted capabilities to the public API and mention this
         // in the documentation.
         checkValidCapability(capability);
-        mNetworkCapabilities |= 1 << capability;
-        mUnwantedNetworkCapabilities &= ~(1 << capability);  // remove from unwanted capability list
+        mNetworkCapabilities |= 1L << capability;
+        // remove from unwanted capability list
+        mUnwantedNetworkCapabilities &= ~(1L << capability);
         return this;
     }
 
@@ -634,8 +613,8 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public void addUnwantedCapability(@NetCapability int capability) {
         checkValidCapability(capability);
-        mUnwantedNetworkCapabilities |= 1 << capability;
-        mNetworkCapabilities &= ~(1 << capability);  // remove from requested capabilities
+        mUnwantedNetworkCapabilities |= 1L << capability;
+        mNetworkCapabilities &= ~(1L << capability);  // remove from requested capabilities
     }
 
     /**
@@ -648,7 +627,7 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public @NonNull NetworkCapabilities removeCapability(@NetCapability int capability) {
         checkValidCapability(capability);
-        final long mask = ~(1 << capability);
+        final long mask = ~(1L << capability);
         mNetworkCapabilities &= mask;
         return this;
     }
@@ -663,7 +642,7 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public @NonNull NetworkCapabilities removeUnwantedCapability(@NetCapability int capability) {
         checkValidCapability(capability);
-        mUnwantedNetworkCapabilities &= ~(1 << capability);
+        mUnwantedNetworkCapabilities &= ~(1L << capability);
         return this;
     }
 
@@ -731,14 +710,14 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public boolean hasCapability(@NetCapability int capability) {
         return isValidCapability(capability)
-                && ((mNetworkCapabilities & (1 << capability)) != 0);
+                && ((mNetworkCapabilities & (1L << capability)) != 0);
     }
 
     /** @hide */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean hasUnwantedCapability(@NetCapability int capability) {
         return isValidCapability(capability)
-                && ((mUnwantedNetworkCapabilities & (1 << capability)) != 0);
+                && ((mUnwantedNetworkCapabilities & (1L << capability)) != 0);
     }
 
     /**
@@ -747,6 +726,23 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public boolean hasConnectivityManagedCapability() {
         return ((mNetworkCapabilities & CONNECTIVITY_MANAGED_CAPABILITIES) != 0);
+    }
+
+    /**
+     * Get the name of the given capability that carriers use.
+     * If the capability does not have a carrier-name, returns null.
+     *
+     * @param capability The capability to get the carrier-name of.
+     * @return The carrier-name of the capability, or null if it doesn't exist.
+     * @hide
+     */
+    @SystemApi
+    public static @Nullable String getCapabilityCarrierName(@NetCapability int capability) {
+        if (capability == NET_CAPABILITY_ENTERPRISE) {
+            return capabilityNameOf(capability);
+        } else {
+            return null;
+        }
     }
 
     private void combineNetCapabilities(@NonNull NetworkCapabilities nc) {
@@ -811,37 +807,12 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Deduces that all the capabilities it provides are typically provided by restricted networks
-     * or not.
-     *
-     * @return {@code true} if the network should be restricted.
-     * @hide
-     */
-    public boolean deduceRestrictedCapability() {
-        // Check if we have any capability that forces the network to be restricted.
-        final boolean forceRestrictedCapability =
-                (mNetworkCapabilities & FORCE_RESTRICTED_CAPABILITIES) != 0;
-
-        // Verify there aren't any unrestricted capabilities.  If there are we say
-        // the whole thing is unrestricted unless it is forced to be restricted.
-        final boolean hasUnrestrictedCapabilities =
-                (mNetworkCapabilities & UNRESTRICTED_CAPABILITIES) != 0;
-
-        // Must have at least some restricted capabilities.
-        final boolean hasRestrictedCapabilities =
-                (mNetworkCapabilities & RESTRICTED_CAPABILITIES) != 0;
-
-        return forceRestrictedCapability
-                || (hasRestrictedCapabilities && !hasUnrestrictedCapabilities);
-    }
-
-    /**
-     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if deducing the network is restricted.
+     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if inferring the network is restricted.
      *
      * @hide
      */
     public void maybeMarkCapabilitiesRestricted() {
-        if (deduceRestrictedCapability()) {
+        if (NetworkCapabilitiesUtils.inferRestrictedCapability(this)) {
             removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
     }
@@ -1141,7 +1112,9 @@ public final class NetworkCapabilities implements Parcelable {
      * app needs to hold {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission. If the
      * app targets SDK version greater than or equal to {@link Build.VERSION_CODES#S}, then they
      * also need to use {@link NetworkCallback#FLAG_INCLUDE_LOCATION_INFO} to get the info in their
-     * callback. The app will be blamed for location access if this field is included.
+     * callback. If the apps targets SDK version equal to {{@link Build.VERSION_CODES#R}, this field
+     * will always be included. The app will be blamed for location access if this field is
+     * included.
      * </p>
      */
     public int getOwnerUid() {
@@ -2163,6 +2136,8 @@ public final class NetworkCapabilities implements Parcelable {
             case NET_CAPABILITY_VEHICLE_INTERNAL:     return "VEHICLE_INTERNAL";
             case NET_CAPABILITY_NOT_VCN_MANAGED:      return "NOT_VCN_MANAGED";
             case NET_CAPABILITY_ENTERPRISE:           return "ENTERPRISE";
+            case NET_CAPABILITY_VSIM:                 return "VSIM";
+            case NET_CAPABILITY_BIP:                  return "BIP";
             default:                                  return Integer.toString(capability);
         }
     }
@@ -2390,9 +2365,15 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Gets the subscription ID set that associated to this network or request.
+     *
+     * <p>Instances of NetworkCapabilities will only have this field populated by the system if the
+     * receiver holds the NETWORK_FACTORY permission. In all other cases, it will be the empty set.
+     *
      * @return
+     * @hide
      */
     @NonNull
+    @SystemApi
     public Set<Integer> getSubIds() {
         return new ArraySet<>(mSubIds);
     }
@@ -2757,10 +2738,17 @@ public final class NetworkCapabilities implements Parcelable {
         /**
          * Set the subscription ID set.
          *
+         * <p>SubIds are populated in NetworkCapability instances from the system only for callers
+         * that hold the NETWORK_FACTORY permission. Similarly, the system will reject any
+         * NetworkRequests filed with a non-empty set of subIds unless the caller holds the
+         * NETWORK_FACTORY permission.
+         *
          * @param subIds a set that represent the subscription IDs. Empty if clean up.
          * @return this builder.
+         * @hide
          */
         @NonNull
+        @SystemApi
         public Builder setSubIds(@NonNull final Set<Integer> subIds) {
             mCaps.setSubIds(subIds);
             return this;

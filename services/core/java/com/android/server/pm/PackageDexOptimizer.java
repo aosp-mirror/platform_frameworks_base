@@ -258,23 +258,23 @@ public class PackageDexOptimizer {
                         packageStats, options.isDowngrade(), profileName, dexMetadataPath,
                         options.getCompilationReason());
 
-                // Only report metrics for base apk for now.
-                // TODO: add ISA and APK type to metrics.
                 // OTAPreopt doesn't have stats so don't report in that case.
-                if (pkg.getBaseCodePath().equals(path) && packageStats != null) {
+                if (packageStats != null) {
                     Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
                     try {
                         long sessionId = Math.randomLongInternal();
                         ArtStatsLogUtils.writeStatsLog(
                                 mArtStatsLogger,
                                 sessionId,
-                                path,
                                 compilerFilter,
                                 sharedGid,
                                 packageStats.getCompileTime(path),
                                 dexMetadataPath,
                                 options.getCompilationReason(),
-                                newResult);
+                                newResult,
+                                ArtStatsLogUtils.getApkType(path),
+                                dexCodeIsa,
+                                path);
                     } finally {
                         Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
                     }
@@ -489,9 +489,9 @@ public class PackageDexOptimizer {
         String classLoaderContext = null;
         if (dexUseInfo.isUnsupportedClassLoaderContext()
                 || dexUseInfo.isVariableClassLoaderContext()) {
-            // If we have an unknown (not yet set), or a variable class loader chain. Just extract
+            // If we have an unknown (not yet set), or a variable class loader chain. Just verify
             // the dex file.
-            compilerFilter = "extract";
+            compilerFilter = "verify";
         } else {
             classLoaderContext = dexUseInfo.getClassLoaderContext();
         }

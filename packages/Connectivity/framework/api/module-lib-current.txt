@@ -26,6 +26,9 @@ package android.net {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void startCaptivePortalApp(@NonNull android.net.Network);
     method public void systemReady();
+    field public static final String ACTION_PROMPT_LOST_VALIDATION = "android.net.action.PROMPT_LOST_VALIDATION";
+    field public static final String ACTION_PROMPT_PARTIAL_CONNECTIVITY = "android.net.action.PROMPT_PARTIAL_CONNECTIVITY";
+    field public static final String ACTION_PROMPT_UNVALIDATED = "android.net.action.PROMPT_UNVALIDATED";
     field public static final int BLOCKED_METERED_REASON_ADMIN_DISABLED = 262144; // 0x40000
     field public static final int BLOCKED_METERED_REASON_DATA_SAVER = 65536; // 0x10000
     field public static final int BLOCKED_METERED_REASON_MASK = -65536; // 0xffff0000
@@ -104,7 +107,6 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    ctor public NetworkCapabilities(@Nullable android.net.NetworkCapabilities, long);
     method @Nullable public java.util.Set<android.util.Range<java.lang.Integer>> getUids();
     method public boolean hasUnwantedCapability(int);
     field public static final long REDACT_ALL = -1L; // 0xffffffffffffffffL
@@ -120,6 +122,7 @@ package android.net {
   }
 
   public class NetworkRequest implements android.os.Parcelable {
+    method @NonNull public int[] getUnwantedCapabilities();
     method public boolean hasUnwantedCapability(int);
   }
 
@@ -175,10 +178,12 @@ package android.net {
   }
 
   public final class VpnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
-    ctor public VpnTransportInfo(int);
+    ctor public VpnTransportInfo(int, @Nullable String);
     method public int describeContents();
+    method @NonNull public android.net.VpnTransportInfo makeCopy(long);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnTransportInfo> CREATOR;
+    field @Nullable public final String sessionId;
     field public final int type;
   }
 

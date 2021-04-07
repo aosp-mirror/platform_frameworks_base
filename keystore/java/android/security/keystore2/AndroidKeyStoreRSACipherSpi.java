@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.hardware.security.keymint.KeyParameter;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.KeymasterUtils;
 import android.system.keystore2.Authorization;
 
 import java.security.AlgorithmParameters;

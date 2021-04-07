@@ -59,6 +59,10 @@ per-file ViewRootImpl.java = file:/services/core/java/com/android/server/input/O
 per-file ViewRootImpl.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ViewRootImpl.java = file:/core/java/android/view/inputmethod/OWNERS
 per-file AccessibilityInteractionController.java = file:/services/accessibility/OWNERS
+per-file OnReceiveContentListener.java = file:/core/java/android/service/autofill/OWNERS
+per-file OnReceiveContentListener.java = file:/core/java/android/widget/OWNERS
+per-file ContentInfo.java = file:/core/java/android/service/autofill/OWNERS
+per-file ContentInfo.java = file:/core/java/android/widget/OWNERS
 
 # WindowManager
 per-file DisplayCutout.aidl = file:/services/core/java/com/android/server/wm/OWNERS

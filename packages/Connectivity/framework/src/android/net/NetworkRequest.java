@@ -501,9 +501,14 @@ public class NetworkRequest implements Parcelable {
          * A network will satisfy this request only if it matches one of the subIds in this set.
          * An empty set matches all networks, including those without a subId.
          *
+         * <p>Registering a NetworkRequest with a non-empty set of subIds requires the
+         * NETWORK_FACTORY permission.
+         *
          * @param subIds A {@code Set} that represents subscription IDs.
+         * @hide
          */
         @NonNull
+        @SystemApi
         public Builder setSubIds(@NonNull Set<Integer> subIds) {
             mNetworkCapabilities.setSubIds(subIds);
             return this;
@@ -698,5 +703,44 @@ public class NetworkRequest implements Parcelable {
 
     public int hashCode() {
         return Objects.hash(requestId, legacyType, networkCapabilities, type);
+    }
+
+    /**
+     * Gets all the capabilities set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of capability values for this instance.
+     */
+    @NonNull
+    public @NetCapability int[] getCapabilities() {
+        // No need to make a defensive copy here as NC#getCapabilities() already returns
+        // a new array.
+        return networkCapabilities.getCapabilities();
+    }
+
+    /**
+     * Gets all the unwanted capabilities set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of unwanted capability values for this instance.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @NetCapability int[] getUnwantedCapabilities() {
+        // No need to make a defensive copy here as NC#getUnwantedCapabilities() already returns
+        // a new array.
+        return networkCapabilities.getUnwantedCapabilities();
+    }
+
+    /**
+     * Gets all the transports set on this {@code NetworkRequest} instance.
+     *
+     * @return an array of transport type values for this instance.
+     */
+    @NonNull
+    public @Transport int[] getTransportTypes() {
+        // No need to make a defensive copy here as NC#getTransportTypes() already returns
+        // a new array.
+        return networkCapabilities.getTransportTypes();
     }
 }

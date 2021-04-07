@@ -18,5 +18,5 @@
 package android.net;
 
 // @JavaOnlyStableParcelable only affects the parcelable when built as stable aidl (aidl_interface
-// build rule). IpPrefix is also used in cpp but only as non-stable aidl.
-@JavaOnlyStableParcelable parcelable IpPrefix cpp_header "binder/IpPrefix.h";
+// build rule).
+@JavaOnlyStableParcelable parcelable IpPrefix;

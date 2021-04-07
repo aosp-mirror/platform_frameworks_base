@@ -219,7 +219,7 @@ package android.net {
     method public void onAutomaticReconnectDisabled();
     method public void onBandwidthUpdateRequested();
     method public void onNetworkCreated();
-    method public void onNetworkDisconnected();
+    method public void onNetworkDestroyed();
     method public void onNetworkUnwanted();
     method public void onQosCallbackRegistered(int, @NonNull android.net.QosFilter);
     method public void onQosCallbackUnregistered(int);
@@ -238,6 +238,7 @@ package android.net {
     method public final void sendQosSessionLost(int, int, int);
     method public final void sendSocketKeepaliveEvent(int, int);
     method @Deprecated public void setLegacySubtype(int, @NonNull String);
+    method public void setTeardownDelayMs(@IntRange(from=0, to=0x1388) int);
     method public final void setUnderlyingNetworks(@Nullable java.util.List<android.net.Network>);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
@@ -272,15 +273,19 @@ package android.net {
 
   public final class NetworkCapabilities implements android.os.Parcelable {
     method @NonNull public int[] getAdministratorUids();
+    method @Nullable public static String getCapabilityCarrierName(int);
     method @Nullable public String getSsid();
+    method @NonNull public java.util.Set<java.lang.Integer> getSubIds();
     method @NonNull public int[] getTransportTypes();
     method public boolean isPrivateDnsBroken();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
+    field public static final int NET_CAPABILITY_BIP = 31; // 0x1f
     field public static final int NET_CAPABILITY_NOT_VCN_MANAGED = 28; // 0x1c
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
     field public static final int NET_CAPABILITY_OEM_PRIVATE = 26; // 0x1a
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
     field public static final int NET_CAPABILITY_VEHICLE_INTERNAL = 27; // 0x1b
+    field public static final int NET_CAPABILITY_VSIM = 30; // 0x1e
   }
 
   public static final class NetworkCapabilities.Builder {
@@ -324,6 +329,7 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
+    method @NonNull public android.net.NetworkRequest.Builder setSubIds(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   public final class NetworkScore implements android.os.Parcelable {

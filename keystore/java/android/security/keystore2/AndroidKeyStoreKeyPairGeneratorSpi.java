@@ -18,6 +18,7 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.KeyPurpose;
@@ -28,7 +29,6 @@ import android.os.RemoteException;
 import android.security.GenerateRkpKey;
 import android.security.GenerateRkpKeyException;
 import android.security.KeyPairGeneratorSpec;
-import android.security.KeyStore;
 import android.security.KeyStore2;
 import android.security.KeyStoreException;
 import android.security.KeyStoreSecurityLevel;
@@ -39,7 +39,6 @@ import android.security.keystore.AttestationUtils;
 import android.security.keystore.DeviceIdAttestationException;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.KeymasterUtils;
 import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.system.keystore2.Authorization;
@@ -270,7 +269,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 // Check that user authentication related parameters are acceptable. This method
                 // will throw an IllegalStateException if there are issues (e.g., secure lock screen
                 // not set up).
-                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(), mSpec);
+                KeyStore2ParameterUtils.addUserAuthArgs(new ArrayList<>(), mSpec);
             } catch (IllegalArgumentException | IllegalStateException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -572,7 +571,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             AndroidKeyStorePublicKey publicKey =
                     AndroidKeyStoreProvider.makeAndroidKeyStorePublicKeyFromKeyEntryResponse(
                             descriptor, metadata, iSecurityLevel, mKeymasterAlgorithm);
-            GenerateRkpKey keyGen = new GenerateRkpKey(KeyStore.getApplicationContext());
+            GenerateRkpKey keyGen = new GenerateRkpKey(ActivityThread
+                    .currentApplication());
             try {
                 if (mSpec.getAttestationChallenge() != null) {
                     keyGen.notifyKeyGenerated(securityLevel);
@@ -589,7 +589,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 case KeymasterDefs.KM_ERROR_HARDWARE_TYPE_UNAVAILABLE:
                     throw new StrongBoxUnavailableException("Failed to generated key pair.", e);
                 case ResponseCode.OUT_OF_KEYS:
-                    GenerateRkpKey keyGen = new GenerateRkpKey(KeyStore.getApplicationContext());
+                    GenerateRkpKey keyGen = new GenerateRkpKey(ActivityThread
+                            .currentApplication());
                     try {
                         keyGen.notifyEmpty(securityLevel);
                     } catch (RemoteException f) {
@@ -665,8 +666,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             if (idTypesSet.contains(AttestationUtils.ID_TYPE_IMEI)
                     || idTypesSet.contains(AttestationUtils.ID_TYPE_MEID)) {
                 telephonyService =
-                    (TelephonyManager) KeyStore.getApplicationContext().getSystemService(
-                        Context.TELEPHONY_SERVICE);
+                    (TelephonyManager) android.app.AppGlobals.getInitialApplication()
+                            .getSystemService(Context.TELEPHONY_SERVICE);
                 if (telephonyService == null) {
                     throw new DeviceIdAttestationException("Unable to access telephony service");
                 }
