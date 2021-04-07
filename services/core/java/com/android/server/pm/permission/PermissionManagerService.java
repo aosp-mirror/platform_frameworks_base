@@ -2085,6 +2085,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
+    @Nullable
+    private List<String> getDelegatedShellPermissionsInternal() {
+        synchronized (mLock) {
+            if (mCheckPermissionDelegate == null) {
+                return Collections.EMPTY_LIST;
+            }
+            return mCheckPermissionDelegate.getDelegatedPermissionNames();
+        }
+    }
+
     private void setCheckPermissionDelegateLocked(@Nullable CheckPermissionDelegate delegate) {
         if (delegate != null || mCheckPermissionDelegate != null) {
             PackageManager.invalidatePackageInfoCache();
@@ -3962,14 +3972,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * </ol>
      *
      * @param volumeUuid The volume UUID of the packages to be updated
-     * @param sdkVersionChanged whether the current SDK version is different from what it was when
-     *                          this volume was last mounted
+     * @param fingerprintChanged whether the current build fingerprint is different from what it was
+     *                           when this volume was last mounted
      */
-    private void updateAllPermissions(@NonNull String volumeUuid, boolean sdkVersionChanged) {
+    private void updateAllPermissions(@NonNull String volumeUuid, boolean fingerprintChanged) {
         PackageManager.corkPackageInfoCache();  // Prevent invalidation storm
         try {
             final int flags = UPDATE_PERMISSIONS_ALL |
-                    (sdkVersionChanged
+                    (fingerprintChanged
                             ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                             : 0);
             updatePermissions(null, null, volumeUuid, flags, mDefaultPermissionCallback);
@@ -4944,8 +4954,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return PermissionManagerService.this.getAppOpPermissionPackagesInternal(permissionName);
         }
         @Override
-        public void onStorageVolumeMounted(@Nullable String volumeUuid, boolean sdkVersionChanged) {
-            updateAllPermissions(volumeUuid, sdkVersionChanged);
+        public void onStorageVolumeMounted(@Nullable String volumeUuid, boolean fingerprintChanged) {
+            updateAllPermissions(volumeUuid, fingerprintChanged);
         }
         @Override
         public void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId) {
@@ -5039,6 +5049,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public void stopShellPermissionIdentityDelegation() {
             stopShellPermissionIdentityDelegationInternal();
+        }
+
+        @Override
+        @NonNull
+        public List<String> getDelegatedShellPermissions() {
+            return getDelegatedShellPermissionsInternal();
         }
 
         @Override
@@ -5234,6 +5250,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
          */
         int checkUidPermission(int uid, @NonNull String permissionName,
                 BiFunction<Integer, String, Integer> superImpl);
+
+        /**
+         * @return list of delegated permissions
+         */
+        List<String> getDelegatedPermissionNames();
     }
 
     private class ShellDelegate implements CheckPermissionDelegate {
@@ -5282,6 +5303,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
             }
             return superImpl.apply(uid, permissionName);
+        }
+
+        @Override
+        public List<String> getDelegatedPermissionNames() {
+            return mDelegatedPermissionNames == null
+                    ? null
+                    : new ArrayList<>(mDelegatedPermissionNames);
         }
 
         private boolean isDelegatedPermission(@NonNull String permissionName) {

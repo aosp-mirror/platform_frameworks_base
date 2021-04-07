@@ -20,11 +20,20 @@ import static android.provider.Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.service.quickaccesswallet.GetWalletCardsError;
+import android.service.quickaccesswallet.GetWalletCardsRequest;
+import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
+import android.service.quickaccesswallet.WalletCard;
 import android.service.quicksettings.Tile;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -40,19 +49,29 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 
+import java.util.List;
+import java.util.concurrent.Executor;
+
 import javax.inject.Inject;
 
 /** Quick settings tile: Quick access wallet **/
 public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
+    private static final String TAG = "QuickAccessWalletTile";
     private static final String FEATURE_CHROME_OS = "org.chromium.arc";
+
     private final CharSequence mLabel = mContext.getString(R.string.wallet_title);
+    private final WalletCardRetriever mCardRetriever = new WalletCardRetriever();
     // TODO(b/180959290): Re-create the QAW Client when the default NFC payment app changes.
     private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final KeyguardStateController mKeyguardStateController;
     private final PackageManager mPackageManager;
     private final SecureSettings mSecureSettings;
+    private final Executor mExecutor;
     private final FeatureFlags mFeatureFlags;
+
+    @VisibleForTesting Drawable mCardViewDrawable;
+    private boolean mHasCard;
 
     @Inject
     public QuickAccessWalletTile(
@@ -68,6 +87,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             KeyguardStateController keyguardStateController,
             PackageManager packageManager,
             SecureSettings secureSettings,
+            @Background Executor executor,
             FeatureFlags featureFlags) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -75,6 +95,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         mKeyguardStateController = keyguardStateController;
         mPackageManager = packageManager;
         mSecureSettings = secureSettings;
+        mExecutor = executor;
         mFeatureFlags = featureFlags;
     }
 
@@ -84,6 +105,14 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         State state = new State();
         state.handlesLongClick = false;
         return state;
+    }
+
+    @Override
+    protected void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
+        if (listening) {
+            queryWalletCards();
+        }
     }
 
     @Override
@@ -100,13 +129,26 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         state.icon = ResourceIcon.get(R.drawable.ic_qs_wallet);
         boolean isDeviceLocked = !mKeyguardStateController.isUnlocked();
         if (mQuickAccessWalletClient.isWalletFeatureAvailable()) {
-            state.state = isDeviceLocked ? Tile.STATE_INACTIVE : Tile.STATE_ACTIVE;
-            state.secondaryLabel = isDeviceLocked
-                    ? null
-                    : mContext.getString(R.string.wallet_secondary_label);
+            if (mHasCard) {
+                if (isDeviceLocked) {
+                    state.state = Tile.STATE_INACTIVE;
+                    state.secondaryLabel =
+                            mContext.getString(R.string.wallet_secondary_label_device_locked);
+                } else {
+                    state.state = Tile.STATE_ACTIVE;
+                    state.secondaryLabel =
+                            mContext.getString(R.string.wallet_secondary_label_active);
+                }
+            } else {
+                state.state = Tile.STATE_INACTIVE;
+                state.secondaryLabel = mContext.getString(R.string.wallet_secondary_label_no_card);
+            }
             state.stateDescription = state.secondaryLabel;
         } else {
             state.state = Tile.STATE_UNAVAILABLE;
+        }
+        if (!isDeviceLocked) {
+            state.sideViewDrawable = mCardViewDrawable;
         }
     }
 
@@ -132,5 +174,44 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     public CharSequence getTileLabel() {
         CharSequence qawLabel = mQuickAccessWalletClient.getServiceLabel();
         return qawLabel == null ? mLabel : qawLabel;
+    }
+
+    private void queryWalletCards() {
+        int cardWidth =
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_width);
+        int cardHeight =
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height);
+        int iconSizePx = mContext.getResources().getDimensionPixelSize(R.dimen.wallet_icon_size);
+        GetWalletCardsRequest request =
+                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, /* maxCards= */ 2);
+        mQuickAccessWalletClient.getWalletCards(mExecutor, request, mCardRetriever);
+    }
+
+    private class WalletCardRetriever implements
+            QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
+
+        @Override
+        public void onWalletCardsRetrieved(@NonNull GetWalletCardsResponse response) {
+            Log.i(TAG, "Successfully retrieved wallet cards.");
+            List<WalletCard> cards = response.getWalletCards();
+            if (cards.isEmpty()) {
+                Log.d(TAG, "No wallet cards exist.");
+                mCardViewDrawable = null;
+                mHasCard = false;
+                refreshState();
+                return;
+            }
+            mCardViewDrawable = cards.get(0).getCardImage().loadDrawable(mContext);
+            mHasCard = true;
+            refreshState();
+        }
+
+        @Override
+        public void onWalletCardRetrievalError(@NonNull GetWalletCardsError error) {
+            Log.w(TAG, "Error retrieve wallet cards");
+            mCardViewDrawable = null;
+            mHasCard = false;
+            refreshState();
+        }
     }
 }

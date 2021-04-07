@@ -18,6 +18,10 @@ package com.android.systemui.media
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.app.smartspace.SmartspaceConfig
+import android.app.smartspace.SmartspaceManager
+import android.app.smartspace.SmartspaceSession
+import android.app.smartspace.SmartspaceTarget
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -33,6 +37,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.net.Uri
+import android.os.Parcelable
 import android.os.UserHandle
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
@@ -45,6 +50,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
@@ -54,6 +60,7 @@ import java.io.FileDescriptor
 import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import javax.inject.Inject
 
 // URI fields to try loading album art from
@@ -99,9 +106,16 @@ class MediaDataManager(
     mediaDataCombineLatest: MediaDataCombineLatest,
     private val mediaDataFilter: MediaDataFilter,
     private val activityStarter: ActivityStarter,
+    private val smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
     private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean
-) : Dumpable {
+) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
+
+    companion object {
+        // UI surface label for subscribing Smartspace updates.
+        @JvmField
+        val SMARTSPACE_UI_SURFACE_LABEL = "media_data_manager"
+    }
 
     private val themeText = com.android.settingslib.Utils.getColorAttr(context,
             com.android.internal.R.attr.textColorPrimary).defaultColor
@@ -117,6 +131,8 @@ class MediaDataManager(
     // TODO(b/159539991#comment5): Move internal listeners to separate package.
     private val internalListeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
+    // There should ONLY be at most one Smartspace media recommendation.
+    private var smartspaceMediaTarget: SmartspaceTarget? = null
     internal var appsBlockedFromResume: MutableSet<String> = Utils.getBlockedMediaApps(context)
         set(value) {
             // Update list
@@ -128,6 +144,7 @@ class MediaDataManager(
                 removeAllForPackage(it)
             }
         }
+    private var smartspaceSession: SmartspaceSession? = null
 
     @Inject
     constructor(
@@ -143,11 +160,13 @@ class MediaDataManager(
         mediaDeviceManager: MediaDeviceManager,
         mediaDataCombineLatest: MediaDataCombineLatest,
         mediaDataFilter: MediaDataFilter,
-        activityStarter: ActivityStarter
+        activityStarter: ActivityStarter,
+        smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
             broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
             mediaSessionBasedFilter, mediaDeviceManager, mediaDataCombineLatest, mediaDataFilter,
-            activityStarter, Utils.useMediaResumption(context), Utils.useQsMediaPlayer(context))
+            activityStarter, smartspaceMediaDataProvider, Utils.useMediaResumption(context),
+            Utils.useQsMediaPlayer(context))
 
     private val appChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -200,9 +219,31 @@ class MediaDataManager(
         }
         // BroadcastDispatcher does not allow filters with data schemes
         context.registerReceiver(appChangeReceiver, uninstallFilter)
+
+        // Register for Smartspace data updates.
+        smartspaceMediaDataProvider.registerListener(this)
+        val smartspaceManager: SmartspaceManager =
+            context.getSystemService(SmartspaceManager::class.java)
+        smartspaceSession = smartspaceManager.createSmartspaceSession(
+            SmartspaceConfig.Builder(context, SMARTSPACE_UI_SURFACE_LABEL).build())
+        smartspaceSession?.let {
+            it.registerSmartspaceUpdates(
+                // Use a new thread listening to Smartspace updates instead of using the existing
+                // backgroundExecutor. SmartspaceSession has scheduled routine updates which can be
+                // unpredictable on test simulators, using the backgroundExecutor makes it's hard to
+                // test the threads numbers.
+                // Switch to use backgroundExecutor when SmartspaceSession has a good way to be
+                // mocked.
+                Executors.newCachedThreadPool(),
+                SmartspaceSession.Callback { targets ->
+                    smartspaceMediaDataProvider.onTargetsAvailable(targets)
+                })
+        }
+        smartspaceSession?.let { it.requestSmartspaceUpdate() }
     }
 
     fun destroy() {
+        smartspaceMediaDataProvider.unregisterListener(this)
         context.unregisterReceiver(appChangeReceiver)
     }
 
@@ -309,7 +350,7 @@ class MediaDataManager(
     private fun addInternalListener(listener: Listener) = internalListeners.add(listener)
 
     /**
-     * Notify internal listeners of loaded event.
+     * Notify internal listeners of media loaded event.
      *
      * External listeners registered with [addListener] will be notified after the event propagates
      * through the internal listener pipeline.
@@ -319,13 +360,33 @@ class MediaDataManager(
     }
 
     /**
-     * Notify internal listeners of removed event.
+     * Notify internal listeners of Smartspace media loaded event.
+     *
+     * External listeners registered with [addListener] will be notified after the event propagates
+     * through the internal listener pipeline.
+     */
+    private fun notifySmartspaceMediaDataLoaded(key: String, info: SmartspaceTarget) {
+        internalListeners.forEach { it.onSmartspaceMediaDataLoaded(key, info) }
+    }
+
+    /**
+     * Notify internal listeners of media removed event.
      *
      * External listeners registered with [addListener] will be notified after the event propagates
      * through the internal listener pipeline.
      */
     private fun notifyMediaDataRemoved(key: String) {
         internalListeners.forEach { it.onMediaDataRemoved(key) }
+    }
+
+    /**
+     * Notify internal listeners of Smartspace media removed event.
+     *
+     * External listeners registered with [addListener] will be notified after the event propagates
+     * through the internal listener pipeline.
+     */
+    private fun notifySmartspaceMediaDataRemoved(key: String) {
+        internalListeners.forEach { it.onSmartspaceMediaDataRemoved(key) }
     }
 
     /**
@@ -601,6 +662,49 @@ class MediaDataManager(
         }
     }
 
+    override fun onSmartspaceTargetsUpdated(targets: List<Parcelable>) {
+        Log.d(TAG, "My Smartspace media updates are here")
+        val mediaTargets = targets.filterIsInstance<SmartspaceTarget>()
+        when (mediaTargets.size) {
+            0 -> {
+                Log.d(TAG, "Empty Smartspace media target")
+                smartspaceMediaTarget?.let {
+                    notifySmartspaceMediaDataRemoved(it.smartspaceTargetId)
+                }
+                smartspaceMediaTarget = null
+            }
+            1 -> {
+                // TODO(b/182811956): Reactivate the resumable media sessions whose last active
+                //  time is within 3 hours.
+                // TODO(b/182813365): Wire this up with MediaTimeoutListener so the session can be
+                //  expired after 30 seconds.
+                val newMediaTarget = mediaTargets.get(0)
+                if (smartspaceMediaTarget != null &&
+                    smartspaceMediaTarget!!.smartspaceTargetId ==
+                    newMediaTarget.smartspaceTargetId) {
+                    // The same Smartspace updates can be received. Only send the first one.
+                    Log.d(TAG, "Same Smartspace media update exists. Skip loading data.")
+                } else {
+                    smartspaceMediaTarget?.let {
+                        notifySmartspaceMediaDataRemoved(it.smartspaceTargetId)
+                    }
+                    notifySmartspaceMediaDataLoaded(
+                        newMediaTarget.smartspaceTargetId, newMediaTarget)
+                    smartspaceMediaTarget = newMediaTarget
+                }
+            }
+            else -> {
+                // There should NOT be more than 1 Smartspace media update. When it happens, it
+                // indicates a bad state or an error. Reset the status accordingly.
+                Log.wtf(TAG, "More than 1 Smartspace Media Update. Resetting the status...")
+                smartspaceMediaTarget?.let {
+                    notifySmartspaceMediaDataRemoved(it.smartspaceTargetId)
+                }
+                smartspaceMediaTarget = null
+            }
+        }
+    }
+
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaEntries.remove(key)
@@ -685,10 +789,16 @@ class MediaDataManager(
          */
         fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {}
 
+        /** Called whenever there's new Smartspace media data loaded. */
+        fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {}
+
         /**
          * Called whenever a previously existing Media notification was removed
          */
         fun onMediaDataRemoved(key: String) {}
+
+        /** Called whenever a previously existing Smartspace media data was removed.  */
+        fun onSmartspaceMediaDataRemoved(key: String) {}
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {

@@ -32,6 +32,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -40,6 +41,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.net.ConnectivityManager;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
@@ -58,18 +61,28 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 /** Tests for VcnGatewayConnection.ConnectedState */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnectionTestBase {
     private VcnIkeSession mIkeSession;
+    private NetworkAgent mNetworkAgent;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
+
+        mNetworkAgent = mock(NetworkAgent.class);
+        doReturn(mNetworkAgent)
+                .when(mDeps)
+                .newNetworkAgent(any(), any(), any(), any(), anyInt(), any(), any(), any(), any());
 
         mGatewayConnection.setUnderlyingNetwork(TEST_UNDERLYING_NETWORK_RECORD_1);
 
@@ -159,21 +172,44 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
     }
 
-    @Test
-    public void testChildOpenedRegistersNetwork() throws Exception {
-        // Verify scheduled but not canceled when entering ConnectedState
-        verifySafeModeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+    private void triggerChildOpened() {
+        triggerChildOpened(Collections.singletonList(TEST_INTERNAL_ADDR), TEST_DNS_ADDR);
+    }
 
+    private void triggerChildOpened(List<LinkAddress> internalAddresses, InetAddress dnsAddress) {
         final VcnChildSessionConfiguration mMockChildSessionConfig =
                 mock(VcnChildSessionConfiguration.class);
-        doReturn(Collections.singletonList(TEST_INTERNAL_ADDR))
-                .when(mMockChildSessionConfig)
-                .getInternalAddresses();
-        doReturn(Collections.singletonList(TEST_DNS_ADDR))
+        doReturn(internalAddresses).when(mMockChildSessionConfig).getInternalAddresses();
+        doReturn(Collections.singletonList(dnsAddress))
                 .when(mMockChildSessionConfig)
                 .getInternalDnsServers();
 
         getChildSessionCallback().onOpened(mMockChildSessionConfig);
+    }
+
+    private void triggerValidation(int status) {
+        final ArgumentCaptor<Consumer<Integer>> validationCallbackCaptor =
+                ArgumentCaptor.forClass(Consumer.class);
+        verify(mDeps)
+                .newNetworkAgent(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        anyInt(),
+                        any(),
+                        any(),
+                        any(),
+                        validationCallbackCaptor.capture());
+
+        validationCallbackCaptor.getValue().accept(status);
+    }
+
+    @Test
+    public void testChildOpenedRegistersNetwork() throws Exception {
+        // Verify scheduled but not canceled when entering ConnectedState
+        verifySafeModeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+        triggerChildOpened();
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
@@ -182,15 +218,20 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 ArgumentCaptor.forClass(LinkProperties.class);
         final ArgumentCaptor<NetworkCapabilities> ncCaptor =
                 ArgumentCaptor.forClass(NetworkCapabilities.class);
-        verify(mConnMgr)
-                .registerNetworkAgent(
-                        any(),
-                        any(),
-                        lpCaptor.capture(),
+        verify(mDeps)
+                .newNetworkAgent(
+                        eq(mVcnContext),
+                        any(String.class),
                         ncCaptor.capture(),
+                        lpCaptor.capture(),
+                        anyInt(),
+                        argThat(nac -> nac.getLegacyType() == ConnectivityManager.TYPE_MOBILE),
                         any(),
                         any(),
-                        anyInt());
+                        any());
+        verify(mNetworkAgent).register();
+        verify(mNetworkAgent).markConnected();
+
         verify(mIpSecSvc)
                 .addAddressToTunnelInterface(
                         eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(TEST_INTERNAL_ADDR), any());
@@ -208,9 +249,78 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         // Now that Vcn Network is up, notify it as validated and verify the SafeMode alarm is
         // canceled
-        mGatewayConnection.mNetworkAgent.onValidationStatus(
-                NetworkAgent.VALIDATION_STATUS_VALID, null /* redirectUri */);
+        triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
         verify(mSafeModeTimeoutAlarm).cancel();
+        assertFalse(mGatewayConnection.isInSafeMode());
+    }
+
+    @Test
+    public void testInternalAndDnsAddressesChanged() throws Exception {
+        final List<LinkAddress> startingInternalAddrs =
+                Arrays.asList(new LinkAddress[] {TEST_INTERNAL_ADDR, TEST_INTERNAL_ADDR_2});
+        triggerChildOpened(startingInternalAddrs, TEST_DNS_ADDR);
+        mTestLooper.dispatchAll();
+
+        for (LinkAddress addr : startingInternalAddrs) {
+            verify(mIpSecSvc)
+                    .addAddressToTunnelInterface(
+                            eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(addr), any());
+        }
+
+        verify(mDeps)
+                .newNetworkAgent(
+                        any(),
+                        any(),
+                        any(),
+                        argThat(
+                                lp ->
+                                        startingInternalAddrs.equals(lp.getLinkAddresses())
+                                                && Collections.singletonList(TEST_DNS_ADDR)
+                                                        .equals(lp.getDnsServers())),
+                        anyInt(),
+                        any(),
+                        any(),
+                        any(),
+                        any());
+
+        // Trigger another connection event, and verify that the addresses change
+        final List<LinkAddress> newInternalAddrs =
+                Arrays.asList(new LinkAddress[] {TEST_INTERNAL_ADDR_2, TEST_INTERNAL_ADDR_3});
+        triggerChildOpened(newInternalAddrs, TEST_DNS_ADDR_2);
+        mTestLooper.dispatchAll();
+
+        // Verify addresses on tunnel network added/removed
+        for (LinkAddress addr : newInternalAddrs) {
+            verify(mIpSecSvc)
+                    .addAddressToTunnelInterface(
+                            eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(addr), any());
+        }
+        verify(mIpSecSvc)
+                .removeAddressFromTunnelInterface(
+                        eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(TEST_INTERNAL_ADDR), any());
+
+        // TODO(b/184579891): Also verify link properties updated and sent when sendLinkProperties
+        // is mockable
+
+        // Verify that IpSecTunnelInterface only created once
+        verify(mIpSecSvc).createTunnelInterface(any(), any(), any(), any(), any());
+        verifyNoMoreInteractions(mIpSecSvc);
+    }
+
+    @Test
+    public void testSuccessfulConnectionExitsSafeMode() throws Exception {
+        verifySafeModeTimeoutNotifiesCallbackAndUnregistersNetworkAgent(
+                mGatewayConnection.mConnectedState);
+
+        assertTrue(mGatewayConnection.isInSafeMode());
+        assertFalse(mGatewayConnection.isQuitting());
+
+        triggerChildOpened();
+        mTestLooper.dispatchAll();
+
+        triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
+
+        assertFalse(mGatewayConnection.isInSafeMode());
     }
 
     @Test

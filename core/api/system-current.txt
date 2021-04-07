@@ -364,13 +364,19 @@ package android {
     field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
+    field public static final int config_systemAmbientAudioIntelligence;
+    field public static final int config_systemAudioIntelligence;
     field public static final int config_systemAutomotiveCluster;
     field public static final int config_systemAutomotiveProjection;
     field public static final int config_systemContacts;
     field public static final int config_systemGallery = 17039399; // 0x1040027
+    field public static final int config_systemNotificationIntelligence;
     field public static final int config_systemShell;
     field public static final int config_systemSpeechRecognizer;
     field public static final int config_systemTelevisionNotificationHandler;
+    field public static final int config_systemTextIntelligence;
+    field public static final int config_systemUiIntelligence;
+    field public static final int config_systemVisualIntelligence;
     field public static final int config_systemWellbeing;
     field public static final int config_systemWifiCoexManager;
   }
@@ -14237,7 +14243,7 @@ package android.uwb {
   public final class UwbManager {
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public long elapsedRealtimeResolutionNanos();
     method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public android.os.PersistableBundle getSpecificationInfo();
-    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public android.os.CancellationSignal openRangingSession(@NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull android.uwb.RangingSession.Callback);
+    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.UWB_PRIVILEGED, android.Manifest.permission.UWB_RANGING}) public android.os.CancellationSignal openRangingSession(@NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull android.uwb.RangingSession.Callback);
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void registerAdapterStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.uwb.UwbManager.AdapterStateCallback);
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void unregisterAdapterStateCallback(@NonNull android.uwb.UwbManager.AdapterStateCallback);
   }

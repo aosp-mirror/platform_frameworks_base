@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -40,6 +41,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -77,6 +79,8 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     private MotionEvent mInterceptMotionEvent;
 
     private RecyclerView mListView;
+
+    private Rect mAvailableBounds = new Rect(100, 200, 300, 400);
 
     private int mMenuHalfWidth;
     private int mMenuHalfHeight;
@@ -337,6 +341,66 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         mListView.dispatchTouchEvent(upEvent);
 
         assertThat(mMenuView.mShapeType).isEqualTo(/* halfOval */ 1);
+    }
+
+    @Test
+    public void getAccessibilityActionList_matchResult() {
+        final AccessibilityNodeInfo infos = new AccessibilityNodeInfo();
+        mMenuView.onInitializeAccessibilityNodeInfo(infos);
+
+        assertThat(infos.getActionList().size()).isEqualTo(4);
+    }
+
+    @Test
+    public void accessibilityActionMove_moveTopLeft_success() {
+        final AccessibilityFloatingMenuView menuView =
+                spy(new AccessibilityFloatingMenuView(mContext));
+        doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+
+        final boolean isActionPerformed =
+                menuView.performAccessibilityAction(R.id.action_move_top_left, null);
+
+        assertThat(isActionPerformed).isTrue();
+        verify(menuView).snapToLocation(mAvailableBounds.left, mAvailableBounds.top);
+    }
+
+    @Test
+    public void accessibilityActionMove_moveTopRight_success() {
+        final AccessibilityFloatingMenuView menuView =
+                spy(new AccessibilityFloatingMenuView(mContext));
+        doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+
+        final boolean isActionPerformed =
+                menuView.performAccessibilityAction(R.id.action_move_top_right, null);
+
+        assertThat(isActionPerformed).isTrue();
+        verify(menuView).snapToLocation(mAvailableBounds.right, mAvailableBounds.top);
+    }
+
+    @Test
+    public void accessibilityActionMove_moveBottomLeft_success() {
+        final AccessibilityFloatingMenuView menuView =
+                spy(new AccessibilityFloatingMenuView(mContext));
+        doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+
+        final boolean isActionPerformed =
+                menuView.performAccessibilityAction(R.id.action_move_bottom_left, null);
+
+        assertThat(isActionPerformed).isTrue();
+        verify(menuView).snapToLocation(mAvailableBounds.left, mAvailableBounds.bottom);
+    }
+
+    @Test
+    public void accessibilityActionMove_moveBottomRight_success() {
+        final AccessibilityFloatingMenuView menuView =
+                spy(new AccessibilityFloatingMenuView(mContext));
+        doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+
+        final boolean isActionPerformed =
+                menuView.performAccessibilityAction(R.id.action_move_bottom_right, null);
+
+        assertThat(isActionPerformed).isTrue();
+        verify(menuView).snapToLocation(mAvailableBounds.right, mAvailableBounds.bottom);
     }
 
     @After
