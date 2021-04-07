@@ -55492,6 +55492,7 @@ package android.widget {
 
   public class RemoteViews implements android.view.LayoutInflater.Filter android.os.Parcelable {
     ctor public RemoteViews(String, int);
+    ctor public RemoteViews(@NonNull String, @LayoutRes int, @IdRes int);
     ctor public RemoteViews(android.widget.RemoteViews, android.widget.RemoteViews);
     ctor public RemoteViews(@NonNull java.util.Map<android.util.SizeF,android.widget.RemoteViews>);
     ctor public RemoteViews(android.widget.RemoteViews);
@@ -55565,7 +55566,6 @@ package android.widget {
     method public void setTextViewText(@IdRes int, CharSequence);
     method public void setTextViewTextSize(@IdRes int, int, float);
     method public void setUri(@IdRes int, String, android.net.Uri);
-    method public void setViewId(@IdRes int);
     method public void setViewLayoutHeight(@IdRes int, float, int);
     method public void setViewLayoutHeightDimen(@IdRes int, @DimenRes int);
     method public void setViewLayoutMargin(@IdRes int, int, float, int);
