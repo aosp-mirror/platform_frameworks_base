@@ -575,7 +575,7 @@ public class VcnGatewayConnection extends StateMachine {
      * <p>Set in Connected state, always @NonNull in Connected, Migrating states, @Nullable
      * otherwise.
      */
-    private NetworkAgent mNetworkAgent;
+    private VcnNetworkAgent mNetworkAgent;
 
     @Nullable private WakeupMessage mTeardownTimeoutAlarm;
     @Nullable private WakeupMessage mDisconnectRequestAlarm;
@@ -1441,7 +1441,7 @@ public class VcnGatewayConnection extends StateMachine {
     private abstract class ConnectedStateBase extends ActiveBaseState {
         protected void updateNetworkAgent(
                 @NonNull IpSecTunnelInterface tunnelIface,
-                @NonNull NetworkAgent agent,
+                @NonNull VcnNetworkAgent agent,
                 @NonNull VcnChildSessionConfiguration childConfig) {
             final NetworkCapabilities caps =
                     buildNetworkCapabilities(mConnectionConfig, mUnderlying);
@@ -1452,7 +1452,7 @@ public class VcnGatewayConnection extends StateMachine {
             agent.sendLinkProperties(lp);
         }
 
-        protected NetworkAgent buildNetworkAgent(
+        protected VcnNetworkAgent buildNetworkAgent(
                 @NonNull IpSecTunnelInterface tunnelIface,
                 @NonNull VcnChildSessionConfiguration childConfig) {
             final NetworkCapabilities caps =
@@ -1464,7 +1464,7 @@ public class VcnGatewayConnection extends StateMachine {
                             .setLegacyType(ConnectivityManager.TYPE_MOBILE)
                             .build();
 
-            final NetworkAgent agent =
+            final VcnNetworkAgent agent =
                     mDeps.newNetworkAgent(
                             mVcnContext,
                             TAG,
@@ -1993,12 +1993,12 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    NetworkAgent getNetworkAgent() {
+    VcnNetworkAgent getNetworkAgent() {
         return mNetworkAgent;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    void setNetworkAgent(@Nullable NetworkAgent networkAgent) {
+    void setNetworkAgent(@Nullable VcnNetworkAgent networkAgent) {
         mNetworkAgent = networkAgent;
     }
 
@@ -2086,8 +2086,8 @@ public class VcnGatewayConnection extends StateMachine {
             return new WakeupMessage(vcnContext.getContext(), handler, tag, runnable);
         }
 
-        /** Builds a new NetworkAgent. */
-        public NetworkAgent newNetworkAgent(
+        /** Builds a new VcnNetworkAgent. */
+        public VcnNetworkAgent newNetworkAgent(
                 @NonNull VcnContext vcnContext,
                 @NonNull String tag,
                 @NonNull NetworkCapabilities caps,
@@ -2095,27 +2095,18 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull int score,
                 @NonNull NetworkAgentConfig nac,
                 @NonNull NetworkProvider provider,
-                @NonNull Consumer<NetworkAgent> networkUnwantedCallback,
+                @NonNull Consumer<VcnNetworkAgent> networkUnwantedCallback,
                 @NonNull Consumer<Integer> validationStatusCallback) {
-            return new NetworkAgent(
-                    vcnContext.getContext(),
-                    vcnContext.getLooper(),
+            return new VcnNetworkAgent(
+                    vcnContext,
                     tag,
                     caps,
                     lp,
                     score,
                     nac,
-                    provider) {
-                @Override
-                public void onNetworkUnwanted() {
-                    networkUnwantedCallback.accept(this);
-                }
-
-                @Override
-                public void onValidationStatus(int status, @Nullable Uri redirectUri) {
-                    validationStatusCallback.accept(status);
-                }
-            };
+                    provider,
+                    networkUnwantedCallback,
+                    validationStatusCallback);
         }
 
         /** Gets the elapsed real time since boot, in millis. */
@@ -2229,6 +2220,75 @@ public class VcnGatewayConnection extends StateMachine {
          */
         public synchronized void release() {
             mImpl.release();
+        }
+    }
+
+    /** Proxy Implementation of NetworkAgent, used for testing. */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class VcnNetworkAgent {
+        private final NetworkAgent mImpl;
+
+        public VcnNetworkAgent(
+                @NonNull VcnContext vcnContext,
+                @NonNull String tag,
+                @NonNull NetworkCapabilities caps,
+                @NonNull LinkProperties lp,
+                @NonNull int score,
+                @NonNull NetworkAgentConfig nac,
+                @NonNull NetworkProvider provider,
+                @NonNull Consumer<VcnNetworkAgent> networkUnwantedCallback,
+                @NonNull Consumer<Integer> validationStatusCallback) {
+            mImpl =
+                    new NetworkAgent(
+                            vcnContext.getContext(),
+                            vcnContext.getLooper(),
+                            tag,
+                            caps,
+                            lp,
+                            score,
+                            nac,
+                            provider) {
+                        @Override
+                        public void onNetworkUnwanted() {
+                            networkUnwantedCallback.accept(VcnNetworkAgent.this);
+                        }
+
+                        @Override
+                        public void onValidationStatus(int status, @Nullable Uri redirectUri) {
+                            validationStatusCallback.accept(status);
+                        }
+                    };
+        }
+
+        /** Registers the underlying NetworkAgent */
+        public void register() {
+            mImpl.register();
+        }
+
+        /** Marks the underlying NetworkAgent as connected */
+        public void markConnected() {
+            mImpl.markConnected();
+        }
+
+        /** Unregisters the underlying NetworkAgent */
+        public void unregister() {
+            mImpl.unregister();
+        }
+
+        /** Sends new NetworkCapabilities for the underlying NetworkAgent */
+        public void sendNetworkCapabilities(@NonNull NetworkCapabilities caps) {
+            mImpl.sendNetworkCapabilities(caps);
+        }
+
+        /** Sends new LinkProperties for the underlying NetworkAgent */
+        public void sendLinkProperties(@NonNull LinkProperties lp) {
+            mImpl.sendLinkProperties(lp);
+        }
+
+        /** Retrieves the Network for the underlying NetworkAgent */
+        @Nullable
+        public Network getNetwork() {
+            return mImpl.getNetwork();
         }
     }
 }

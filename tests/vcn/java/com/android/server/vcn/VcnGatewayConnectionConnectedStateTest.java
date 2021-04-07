@@ -26,6 +26,7 @@ import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
 
 import static com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -73,13 +74,13 @@ import java.util.function.Consumer;
 @SmallTest
 public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnectionTestBase {
     private VcnIkeSession mIkeSession;
-    private NetworkAgent mNetworkAgent;
+    private VcnNetworkAgent mNetworkAgent;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        mNetworkAgent = mock(NetworkAgent.class);
+        mNetworkAgent = mock(VcnNetworkAgent.class);
         doReturn(mNetworkAgent)
                 .when(mDeps)
                 .newNetworkAgent(any(), any(), any(), any(), anyInt(), any(), any(), any(), any());
@@ -299,8 +300,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 .removeAddressFromTunnelInterface(
                         eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(TEST_INTERNAL_ADDR), any());
 
-        // TODO(b/184579891): Also verify link properties updated and sent when sendLinkProperties
-        // is mockable
+        verify(mNetworkAgent).sendLinkProperties(argThat(
+                lp -> newInternalAddrs.equals(lp.getLinkAddresses())
+                        && Collections.singletonList(TEST_DNS_ADDR_2).equals(lp.getDnsServers())));
 
         // Verify that IpSecTunnelInterface only created once
         verify(mIpSecSvc).createTunnelInterface(any(), any(), any(), any(), any());
@@ -323,11 +325,11 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         assertFalse(mGatewayConnection.isInSafeMode());
     }
 
-    private Consumer<NetworkAgent> setupNetworkAndGetUnwantedCallback() {
+    private Consumer<VcnNetworkAgent> setupNetworkAndGetUnwantedCallback() {
         triggerChildOpened();
         mTestLooper.dispatchAll();
 
-        final ArgumentCaptor<Consumer<NetworkAgent>> unwantedCallbackCaptor =
+        final ArgumentCaptor<Consumer<VcnNetworkAgent>> unwantedCallbackCaptor =
                 ArgumentCaptor.forClass(Consumer.class);
         verify(mDeps)
                 .newNetworkAgent(
@@ -346,7 +348,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
     @Test
     public void testUnwantedNetworkAgentTriggersTeardown() throws Exception {
-        final Consumer<NetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
+        final Consumer<VcnNetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
 
         unwantedCallback.accept(mNetworkAgent);
         mTestLooper.dispatchAll();
@@ -357,7 +359,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
     @Test
     public void testUnwantedNetworkAgentWithDisconnectedNetworkAgent() throws Exception {
-        final Consumer<NetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
+        final Consumer<VcnNetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
 
         mGatewayConnection.setNetworkAgent(null);
         unwantedCallback.accept(mNetworkAgent);
@@ -371,8 +373,8 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
     @Test
     public void testUnwantedNetworkAgentWithNewNetworkAgent() throws Exception {
-        final Consumer<NetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
-        final NetworkAgent testAgent = mock(NetworkAgent.class);
+        final Consumer<VcnNetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
+        final VcnNetworkAgent testAgent = mock(VcnNetworkAgent.class);
 
         mGatewayConnection.setNetworkAgent(testAgent);
         unwantedCallback.accept(mNetworkAgent);

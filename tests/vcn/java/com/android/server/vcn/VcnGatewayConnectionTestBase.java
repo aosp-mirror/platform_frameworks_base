@@ -18,6 +18,7 @@ package com.android.server.vcn;
 
 import static com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
 
 import static org.junit.Assert.assertEquals;
@@ -44,7 +45,6 @@ import android.net.IpSecTunnelInterfaceResponse;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
-import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.IkeSessionCallback;
@@ -278,8 +278,8 @@ public class VcnGatewayConnectionTestBase {
 
     protected void verifySafeModeTimeoutNotifiesCallbackAndUnregistersNetworkAgent(
             @NonNull State expectedState) {
-        // Set a NetworkAgent, and expect it to be unregistered and cleared
-        final NetworkAgent mockNetworkAgent = mock(NetworkAgent.class);
+        // Set a VcnNetworkAgent, and expect it to be unregistered and cleared
+        final VcnNetworkAgent mockNetworkAgent = mock(VcnNetworkAgent.class);
         mGatewayConnection.setNetworkAgent(mockNetworkAgent);
 
         // SafeMode timer starts when VcnGatewayConnection exits DisconnectedState (the initial
