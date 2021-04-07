@@ -163,12 +163,20 @@ public:
 
 private:
     std::vector<Pair<VectorDrawableRoot*, SkMatrix>> mVectorDrawables;
-
+    bool mHasHolePunches;
 public:
     void appendVD(VectorDrawableRoot* r) { appendVD(r, SkMatrix::I()); }
 
     void appendVD(VectorDrawableRoot* r, const SkMatrix& mat) {
         mVectorDrawables.push_back(Pair<VectorDrawableRoot*, SkMatrix>(r, mat));
+    }
+
+    void setHasHolePunches(bool hasHolePunches) {
+        mHasHolePunches = hasHolePunches;
+    }
+
+    bool hasHolePunches() {
+        return mHasHolePunches;
     }
 
     std::vector<AnimatedImageDrawable*> mAnimatedImages;
