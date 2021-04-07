@@ -5857,7 +5857,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return (bundle != null) ? bundle.getBoolean(key, defaultValue) : defaultValue;
     }
 
-    private class UidBlockedState {
+    @VisibleForTesting
+    static final class UidBlockedState {
         public int blockedReasons;
         public int allowedReasons;
         public int effectiveBlockedReasons;
@@ -5869,16 +5870,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         void updateEffectiveBlockedReasons() {
-            effectiveBlockedReasons = blockedReasons;
+            effectiveBlockedReasons = getEffectiveBlockedReasons(blockedReasons, allowedReasons);
+        }
+
+        @VisibleForTesting
+        static int getEffectiveBlockedReasons(int blockedReasons, int allowedReasons) {
+            int effectiveBlockedReasons = blockedReasons;
             // If the uid is not subject to any blocked reasons, then return early
             if (blockedReasons == BLOCKED_REASON_NONE) {
-                return;
+                return effectiveBlockedReasons;
             }
             if ((allowedReasons & ALLOWED_REASON_SYSTEM) != 0) {
-                effectiveBlockedReasons = (blockedReasons & ALLOWED_METERED_REASON_MASK);
+                effectiveBlockedReasons &= ALLOWED_METERED_REASON_MASK;
             }
             if ((allowedReasons & ALLOWED_METERED_REASON_SYSTEM) != 0) {
-                effectiveBlockedReasons = (blockedReasons & ~ALLOWED_METERED_REASON_MASK);
+                effectiveBlockedReasons &= ~ALLOWED_METERED_REASON_MASK;
             }
             if ((allowedReasons & ALLOWED_REASON_FOREGROUND) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_REASON_BATTERY_SAVER;
@@ -5904,6 +5910,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if ((allowedReasons & ALLOWED_METERED_REASON_USER_EXEMPTED) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
             }
+            return effectiveBlockedReasons;
         }
     }
 
