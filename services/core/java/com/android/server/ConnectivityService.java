@@ -3789,6 +3789,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void destroyNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
         try {
             mNetd.networkDestroy(networkAgent.network.getNetId());
+        } catch (RemoteException | ServiceSpecificException e) {
+            loge("Exception destroying network(networkDestroy): " + e);
+        }
+        try {
             mDnsResolver.destroyNetworkCache(networkAgent.network.getNetId());
         } catch (RemoteException | ServiceSpecificException e) {
             loge("Exception destroying network: " + e);
