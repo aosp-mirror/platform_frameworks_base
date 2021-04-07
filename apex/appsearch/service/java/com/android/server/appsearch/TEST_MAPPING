@@ -4,6 +4,9 @@
       "name": "CtsAppSearchTestCases"
     },
     {
+      "name": "CtsAppSearchHostTestCases"
+    },
+    {
       "name": "FrameworksServicesTests",
       "options": [
         {
