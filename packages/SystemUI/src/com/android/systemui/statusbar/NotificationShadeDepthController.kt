@@ -107,6 +107,13 @@ class NotificationShadeDepthController @Inject constructor(
                 else 0)
         }
 
+    var qsPanelExpansion = 0f
+        set(value) {
+            if (field == value) return
+            field = value
+            scheduleUpdate()
+        }
+
     /**
      * When launching an app from the shade, the animations progress should affect how blurry the
      * shade is, overriding the expansion amount.
@@ -158,8 +165,9 @@ class NotificationShadeDepthController @Inject constructor(
         updateScheduled = false
         val normalizedBlurRadius = MathUtils.constrain(shadeAnimation.radius,
                 blurUtils.minBlurRadius, blurUtils.maxBlurRadius)
-        val combinedBlur = (shadeSpring.radius * INTERACTION_BLUR_FRACTION +
+        var combinedBlur = (shadeSpring.radius * INTERACTION_BLUR_FRACTION +
                 normalizedBlurRadius * ANIMATION_BLUR_FRACTION).toInt()
+        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsPanelExpansion))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius).toFloat()
         shadeRadius *= 1f - brightnessMirrorSpring.ratio
         val launchProgress = notificationLaunchAnimationParams?.linearProgress ?: 0f
