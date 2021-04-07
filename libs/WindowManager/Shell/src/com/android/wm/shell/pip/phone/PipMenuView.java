@@ -374,7 +374,9 @@ public class PipMenuView extends FrameLayout {
     void setActions(Rect stackBounds, List<RemoteAction> actions) {
         mActions.clear();
         mActions.addAll(actions);
-        updateActionViews(stackBounds);
+        if (mMenuState == MENU_STATE_FULL) {
+            updateActionViews(stackBounds);
+        }
     }
 
     private void updateActionViews(Rect stackBounds) {
