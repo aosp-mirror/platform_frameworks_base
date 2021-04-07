@@ -454,6 +454,11 @@ public final class SystemServer implements Dumpable {
     private static native void startSensorService();
 
     /**
+     * Start the memtrack proxy service.
+     */
+    private static native void startMemtrackProxyService();
+
+    /**
      * Start all HIDL services that are run inside the system server. This may take some time.
      */
     private static native void startHidlServices();
@@ -1042,6 +1047,12 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartPowerStatsService");
         // Tracks rail data to be used for power statistics.
         mSystemServiceManager.startService(PowerStatsService.class);
+        t.traceEnd();
+
+        // Start MemtrackProxyService before ActivityManager, so that early calls
+        // to Memtrack::getMemory() don't fail.
+        t.traceBegin("MemtrackProxyService");
+        startMemtrackProxyService();
         t.traceEnd();
 
         // Activity manager runs the show.
