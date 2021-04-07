@@ -24,7 +24,9 @@ import android.annotation.Nullable;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.view.animation.DecelerateInterpolator;
@@ -44,6 +46,9 @@ public class ScrimDrawable extends Drawable {
     private int mMainColor;
     private ValueAnimator mColorAnimation;
     private int mMainColorTo;
+    private float mCornerRadius;
+    private Rect mBounds;
+    private ConcaveInfo mConcaveInfo;
 
     public ScrimDrawable() {
         mPaint = new Paint();
@@ -127,15 +132,67 @@ public class ScrimDrawable extends Drawable {
         return PixelFormat.TRANSLUCENT;
     }
 
+    /**
+     * Enable drawable shape to have rounded corners with provided radius
+     */
+    public void setRoundedCorners(float radius) {
+        mCornerRadius = radius;
+    }
+
+    /**
+     * Make bottom edge concave with provided corner radius
+     */
+    public void setBottomEdgeConcave(float radius) {
+        // only rounding top corners for clip out path
+        float[] cornerRadii = new float[]{radius, radius, radius, radius, 0, 0, 0, 0};
+        mConcaveInfo = new ConcaveInfo(radius, cornerRadii);
+    }
+
     @Override
     public void draw(@NonNull Canvas canvas) {
         mPaint.setColor(mMainColor);
         mPaint.setAlpha(mAlpha);
-        canvas.drawRect(getBounds(), mPaint);
+        if (mConcaveInfo != null) {
+            drawConcave(canvas);
+        }
+        canvas.drawRoundRect(getBounds().left, getBounds().top, getBounds().right,
+                getBounds().bottom + mCornerRadius,
+                /* x radius*/ mCornerRadius, /* y radius*/ mCornerRadius, mPaint);
+    }
+
+    private void drawConcave(Canvas canvas) {
+        // checking if width of clip out path needs to change
+        if (mBounds == null
+                || getBounds().right != mBounds.right
+                || getBounds().left != mBounds.left) {
+            mConcaveInfo.mPath.reset();
+            float left = getBounds().left;
+            float right = getBounds().right;
+            float top = 0f;
+            float bottom = mConcaveInfo.mPathOverlap;
+            mConcaveInfo.mPath.addRoundRect(left, top, right, bottom,
+                    mConcaveInfo.mCornerRadii, Path.Direction.CW);
+        }
+        mBounds = getBounds();
+        int translation = (int) (mBounds.bottom - mConcaveInfo.mPathOverlap);
+        canvas.translate(0, translation);
+        canvas.clipOutPath(mConcaveInfo.mPath);
+        canvas.translate(0, -translation);
     }
 
     @VisibleForTesting
     public int getMainColor() {
         return mMainColor;
+    }
+
+    private static class ConcaveInfo {
+        private final float mPathOverlap;
+        private final float[] mCornerRadii;
+        private final Path mPath = new Path();
+
+        ConcaveInfo(float pathOverlap, float[] cornerRadii) {
+            mPathOverlap = pathOverlap;
+            mCornerRadii = cornerRadii;
+        }
     }
 }
