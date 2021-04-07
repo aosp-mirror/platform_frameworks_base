@@ -244,7 +244,10 @@ public final class ConnectivityController extends RestrictingController implemen
                     getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
             uidStats.numReadyWithConnectivity--;
             if (jobStatus.madeActive != 0) {
-                uidStats.numRunning--;
+                // numRunning would be 0 if the UidStats object didn't exist before this method
+                // was called. getUidStats() handles logging, so just make sure we don't save a
+                // negative value.
+                uidStats.numRunning = Math.max(0, uidStats.numRunning - 1);
             }
             maybeRevokeStandbyExceptionLocked(jobStatus);
             postAdjustCallbacks();
