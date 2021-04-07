@@ -189,7 +189,7 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"આ ઉપકરણ પર તમારી કાર્યાલયની પ્રોફાઇલ હવે ઉપલબ્ધ નથી"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"પાસવર્ડના ઘણા વધુ પ્રયત્નો"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"વ્યવસ્થાપકે ડિવાઇસ વ્યક્તિગત ઉપયોગ માટે આપી દીધું છે"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"ઉપકરણ સંચાલિત છે"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ડિવાઇસ મેનેજ થયેલ છે"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ઍપ તમારા સ્થાનને ઍક્સેસ કરી શકે છે"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"વધુ જાણવા માટે તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો"</string>
@@ -312,7 +312,7 @@
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"કૉલ લૉગ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ફોન કૉલ લૉગ વાંચો અને લખો"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ફોન"</string>
-    <string name="permgroupdesc_phone" msgid="270048070781478204">"ફોન કૉલ કરો અને સંચાલિત કરો"</string>
+    <string name="permgroupdesc_phone" msgid="270048070781478204">"ફોન કૉલ કરો અને મેનેજ કરો"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"બૉડી સેન્સર"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"તમારા મહત્વપૂર્ણ ચિહ્નો વિશે સેન્સર ડેટા ઍક્સેસ કરો"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"વિંડો કન્ટેન્ટ પુનઃપ્રાપ્ત કરો"</string>
@@ -363,7 +363,7 @@
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"એપ્લિકેશનને WAP સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલ સંદેશાઓનું નિરીક્ષણ કરવાની અને કાઢી નાખવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"ચાલુ ઍપ્લિકેશનો પુનઃપ્રાપ્ત કરો"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"એપ્લિકેશનને વર્તમાનમાં અને તાજેતરમાં ચાલી રહેલ Tasks વિશેની વિગતવાર માહિતી પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને ઉપકરણ પર કઈ એપ્લિકેશન્સનો ઉપયોગ થાય છે તેના વિશેની માહિતી શોધવાની મંજૂરી આપી શકે છે."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"પ્રોફાઇલ અને ઉપકરણ માલિકોને સંચાલિત કરો"</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"પ્રોફાઇલ અને ડિવાઇસ માલિકોને મેનેજ કરો"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="7304240671781989283">"એપ્લિકેશન્સને પ્રોફાઇલ માલિકો અને ઉપકરણ માલિકો સેટ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_reorderTasks" msgid="7598562301992923804">"ચાલુ એપ્લિકેશન્સને ફરી ગોઠવો"</string>
     <string name="permdesc_reorderTasks" msgid="8796089937352344183">"ઍપ્લિકેશનને અગ્રભૂમિ અને પૃષ્ટભૂમિમાં Tasks ખસેડવાની મંજૂરી આપે છે. તમારા ઇનપુટ વિના ઍપ્લિકેશન આ કરી શકે છે."</string>
@@ -524,7 +524,7 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ઍપને સ્ક્રીન લૉકની જટિલતાનું લેવલ (ઊંચું, મધ્યમ, નીચું અથવા કોઈ નહીં) જાણવાની મંજૂરી આપે છે, જે સ્ક્રીન લૉકના પ્રકાર અને લંબાઈની સંભવિત શ્રેણી સૂચવે છે. ઍપ વપરાશકર્તાઓને સ્ક્રીન લૉકને ચોક્કસ લેવલ સુધી અપડેટ કરવાનું સૂચન પણ કરી શકે છે, પરંતુ વપરાશકર્તાઓ મુક્ત રીતે અવગણીને નૅવિગેટ કરી શકે છે. નોંધી લો કે સ્ક્રીન લૉકનો plaintextમાં સંગ્રહ કરવામાં આવતો નથી, તેથી ઍપને ચોક્કસ પાસવર્ડની જાણ હોતી નથી."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"બાયોમેટ્રિક હાર્ડવેરનો ઉપયોગ કરો"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ઍપને પ્રમાણીકરણ માટે બાયોમેટ્રિક હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ફિંગરપ્રિન્ટ હાર્ડવેરને સંચાલિત કરો"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ફિંગરપ્રિન્ટ હાર્ડવેરને મેનેજ કરો"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"ઍપને ઉપયોગ માટે ફિંગરપ્રિન્ટ નમૂના ઉમેરવા અને કાઢી નાખવા માટે પદ્ધતિઓની વિનંતી કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"ફિંગરપ્રિન્ટ હાર્ડવેરનો ઉપયોગ કરો"</string>
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"ઍપને પ્રમાણીકરણ માટે ફિંગરપ્રિન્ટ હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
@@ -627,8 +627,8 @@
     <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"એપ્લિકેશનને નવા ટેલિકોમ સિમ કનેક્શન્સની નોંધણી કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"નવા ટેલિકોમ કનેક્શન્સની નોંધણી કરો"</string>
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"એપ્લિકેશનને નવા ટેલિકોમ કનેક્શન્સની નોંધણી કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_connection_manager" msgid="3179365584691166915">"ટેલિકોમ કનેક્શન્સ સંચાલિત કરો"</string>
-    <string name="permdesc_connection_manager" msgid="1426093604238937733">"એપ્લિકેશનને ટેલીકોમ કનેક્શન્સને સંચાલિત કરવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_connection_manager" msgid="3179365584691166915">"ટેલિકોમ કનેક્શનને મેનેજ કરો"</string>
+    <string name="permdesc_connection_manager" msgid="1426093604238937733">"ઍપને ટેલિકોમ કનેક્શનને મેનેજ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ઇન-કૉલ સ્ક્રીન વડે ક્રિયાપ્રતિક્રિયા કરો"</string>
     <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"વપરાશકર્તા ઇન-કૉલ સ્ર્કીન ક્યારે અને કેવી રીતે જુએ છે તે નિયંત્રિત કરવાની એપ્લિકેશનને મંજૂરી આપે છે."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"ટેલિફોની સેવાઓ સાથે વાર્તાલાપ કરો"</string>
@@ -637,8 +637,8 @@
     <string name="permdesc_control_incall_experience" msgid="5896723643771737534">"એપ્લિકેશનને કૉલમાં વપરાશકર્તા અનુભવ પ્રદાન કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="8470402862501573795">"ઐતિહાસિક નેટવર્ક ઉપયોગ વાંચો"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"એપ્લિકેશનને ચોક્કસ નેટવર્ક્સ અને ઍપ્લિકેશનો માટે ઐતિહાસિક નેટવર્ક વપરાશ વાંચવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"નેટવર્ક નીતિ સંચાલિત કરો"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"ઍપ્લિકેશનને નેટવર્ક નીતિઓ સંચાલિત કરવાની અને ઍપ્લિકેશન-વિશિષ્ટ નિયમો નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"નેટવર્ક નીતિ મેનેજ કરો"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"ઍપને નેટવર્ક નીતિઓ મેનેજ કરવાની અને ઍપ-વિશિષ્ટ નિયમો નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"નેટવર્ક વપરાશ એકાઉન્ટિંગ સંશોધિત કરો"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"એપ્લિકેશનને કેવી રીતે ઍપ્લિકેશનો સામે નેટવર્ક વપરાશ ગણવામાં આવે છે તે સંશોધિત કરવાની મંજૂરી આપે છે. સામાન્ય ઍપ્લિકેશનો દ્વારા ઉપયોગમાં લેવા માટે નથી."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"ઍક્સેસ સૂચનાઓ"</string>
@@ -933,7 +933,7 @@
     <string name="double_tap_toast" msgid="7065519579174882778">"ટિપ: ઝૂમ વધારવા અને ઘટાડવા માટે બે વાર ટેપ કરો."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"સ્વતઃભરણ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"સ્વતઃભરણ સેટ કરો"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> સાથે આપમેળે ભરો"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> સાથે ઑટોમૅટિક રીતે ભરો"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -1426,8 +1426,8 @@
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"સૂચના રેંકર સેવા"</string>
     <string name="vpn_title" msgid="5906991595291514182">"VPN સક્રિય કર્યું"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"<xliff:g id="APP">%s</xliff:g> દ્વારા VPN સક્રિય થયું"</string>
-    <string name="vpn_text" msgid="2275388920267251078">"નેટવર્કને સંચાલિત કરવા માટે ટૅપ કરો."</string>
-    <string name="vpn_text_long" msgid="278540576806169831">"<xliff:g id="SESSION">%s</xliff:g> થી કનેક્ટ થયાં. નેટવર્કને સંચાલિત કરવા માટે ટૅપ કરો."</string>
+    <string name="vpn_text" msgid="2275388920267251078">"નેટવર્કને મેનેજ કરવા માટે ટૅપ કરો."</string>
+    <string name="vpn_text_long" msgid="278540576806169831">"<xliff:g id="SESSION">%s</xliff:g> થી કનેક્ટ થયાં. નેટવર્કને મેનેજ કરવા માટે ટૅપ કરો."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"હંમેશા-ચાલુ VPN કનેક્ટ થઈ રહ્યું છે…"</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"હંમેશા-ચાલુ VPN કનેક્ટ થયું"</string>
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"હંમેશાં-ચાલુ VPN થી ડિસ્કનેક્ટ થયું"</string>
@@ -1904,7 +1904,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g>ને પિન કરો"</string>
     <string name="unpin_target" msgid="3963318576590204447">"અનપિન કરો"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g>ને અનપિન કરો"</string>
-    <string name="app_info" msgid="6113278084877079851">"ઍપ્લિકેશન માહિતી"</string>
+    <string name="app_info" msgid="6113278084877079851">"ઍપની માહિતી"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"ડેમો પ્રારંભ કરી રહ્યાં છે…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"ઉપકરણ ફરીથી સેટ કરી રહ્યાં છે…"</string>

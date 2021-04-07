@@ -568,4 +568,10 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Set all associated companion app that belongs to an userId. */
     public abstract void setCompanionAppPackages(int userId, Set<String> companionAppPackages);
+
+    /**
+     * @param packageName The package to check
+     * @return Whether the package is the base of any locked task
+     */
+    public abstract boolean isBaseOfLockedTask(String packageName);
 }

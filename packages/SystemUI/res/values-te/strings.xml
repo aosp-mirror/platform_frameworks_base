@@ -119,7 +119,7 @@
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Macకు Android ఫైల్ బదిలీ యాప్ ఇన్‌స్టాల్ చేయండి"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"వెనుకకు"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"హోమ్"</string>
-    <string name="accessibility_menu" msgid="2701163794470513040">"మెను"</string>
+    <string name="accessibility_menu" msgid="2701163794470513040">"మెనూ"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"యాక్సెస్ సామర్థ్యం"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"స్క్రీన్‌ను తిప్పండి"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ఓవర్‌వ్యూ"</string>
@@ -912,7 +912,7 @@
     <string name="pip_phone_close" msgid="8801864042095341824">"మూసివేయి"</string>
     <string name="pip_phone_settings" msgid="5687538631925004341">"సెట్టింగ్‌లు"</string>
     <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"తీసివేయడానికి కిందికి లాగండి"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"మెను"</string>
+    <string name="pip_menu_title" msgid="6365909306215631910">"మెనూ"</string>
     <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> చిత్రంలో చిత్రం రూపంలో ఉంది"</string>
     <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి ట్యాప్ చేసి, దీన్ని ఆఫ్ చేయండి."</string>
     <string name="pip_play" msgid="333995977693142810">"ప్లే చేయి"</string>
@@ -943,7 +943,7 @@
     <string name="tuner_minus" msgid="5258518368944598545">"తీసివేత చిహ్నం"</string>
     <string name="tuner_left" msgid="5758862558405684490">"ఎడమ"</string>
     <string name="tuner_right" msgid="8247571132790812149">"కుడి"</string>
-    <string name="tuner_menu" msgid="363690665924769420">"మెను"</string>
+    <string name="tuner_menu" msgid="363690665924769420">"మెనూ"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> అనురవర్తనం"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"హెచ్చరికలు"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"బ్యాటరీ"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"సిఫార్సులు లోడ్ అవుతున్నాయి"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"మీడియా"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"ప్రస్తుత సెషన్‌ను దాచు."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"ప్రస్తుత సెషన్‌ను దాచడం సాధ్యం కాదు."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"విస్మరించు"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"కొనసాగించండి"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"సెట్టింగ్‌లు"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"కొత్త నియంత్రణలను చూడడానికి పవర్ బటన్‌ని నొక్కి పట్టుకోండి"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"నియంత్రణలను జోడించండి"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"నియంత్రణలను ఎడిట్ చేయండి"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"అవుట్‌పుట్‌లను జోడించండి"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"గ్రూప్"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 పరికరం ఎంచుకోబడింది"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> పరికరాలు ఎంచుకోబడ్డాయి"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (డిస్‌కనెక్ట్ అయ్యింది)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"కనెక్ట్ చేయడం సాధ్యపడలేదు. మళ్లీ ట్రై చేయండి."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"కొత్త పరికరాన్ని పెయిర్ చేయండి"</string>
 </resources>

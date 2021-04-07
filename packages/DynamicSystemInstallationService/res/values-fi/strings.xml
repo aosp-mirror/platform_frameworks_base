@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dynaaminen järjestelmä on valmis. Aloita sen käyttö käynnistämällä laite uudelleen."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Asennus käynnissä"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Asennus epäonnistui"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Kuvavahvistus epäonnistui. Keskeytä asennus."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Levykuvan vahvistus epäonnistui. Keskeytä asennus."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Käyttää tällä hetkellä dynaamista järjestelmää. Käynnistä uudelleen käyttääksesi alkuperäistä Android-versiota."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Peruuta"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Hylkää"</string>

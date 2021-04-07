@@ -36,7 +36,7 @@ public final class InputWindowHandle {
     private long ptr;
 
     // The input application handle.
-    public final InputApplicationHandle inputApplicationHandle;
+    public InputApplicationHandle inputApplicationHandle;
 
     // The token associates input data with a window and its input channel. The client input
     // channel and the server input channel will both contain this token.

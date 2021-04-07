@@ -310,7 +310,7 @@
     <string name="permgrouplab_camera" msgid="9090413408963547706">"กล้องถ่ายรูป"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ถ่ายภาพและบันทึกวิดีโอ"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"ประวัติการโทร"</string>
-    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"อ่านและเขียนประวัติการโทรของโทรศัพท์"</string>
+    <string name="permgroupdesc_calllog" msgid="2026996642917801803">"อ่านและเขียนบันทึกการโทรของโทรศัพท์"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"โทรศัพท์"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"โทรและจัดการการโทร"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"เซ็นเซอร์ร่างกาย"</string>
@@ -403,12 +403,12 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"อนุญาตให้แอปแก้ไขข้อมูลเกี่ยวกับรายชื่อติดต่อที่จัดเก็บไว้ในแท็บเล็ต สิทธิ์นี้ทำให้แอปลบข้อมูลรายชื่อติดต่อได้"</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"อนุญาตให้แอปแก้ไขข้อมูลเกี่ยวกับรายชื่อติดต่อที่จัดเก็บไว้ในอุปกรณ์ Android TV สิทธิ์นี้ทำให้แอปลบข้อมูลรายชื่อติดต่อได้"</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"อนุญาตให้แอปแก้ไขข้อมูลเกี่ยวกับรายชื่อติดต่อที่จัดเก็บไว้ในโทรศัพท์ สิทธิ์นี้ทำให้แอปลบข้อมูลรายชื่อติดต่อได้"</string>
-    <string name="permlab_readCallLog" msgid="1739990210293505948">"อ่านประวัติการโทร"</string>
+    <string name="permlab_readCallLog" msgid="1739990210293505948">"อ่านบันทึกการโทร"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"แอปนี้สามารถอ่านประวัติการโทรของคุณได้"</string>
-    <string name="permlab_writeCallLog" msgid="670292975137658895">"เขียนประวัติการโทร"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"อนุญาตให้แอปแก้ไขประวัติการโทรจากแท็บเล็ตของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"อนุญาตให้แอปแก้ไขประวัติการโทรจากอุปกรณ์ Android TV รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและสายโทรออก แอปที่เป็นอันตรายอาจใช้สิทธิ์นี้เพื่อลบหรือแก้ไขประวัติการโทรได้"</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"อนุญาตให้แอปแก้ไขประวัติการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
+    <string name="permlab_writeCallLog" msgid="670292975137658895">"เขียนบันทึกการโทร"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"อนุญาตให้แอปแก้ไขบันทึกการโทรจากแท็บเล็ตของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขบันทึกการโทรของคุณ"</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"อนุญาตให้แอปแก้ไขบันทึกการโทรจากอุปกรณ์ Android TV รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและสายโทรออก แอปที่เป็นอันตรายอาจใช้สิทธิ์นี้เพื่อลบหรือแก้ไขบันทึกการโทรได้"</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"อนุญาตให้แอปแก้ไขบันทึกการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขบันทึกการโทรของคุณ"</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"เข้าถึงเซ็นเซอร์ร่างกาย (เช่น ตัววัดอัตราการเต้นของหัวใจ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"อนุญาตให้แอปเข้าถึงข้อมูลจากเซ็นเซอร์ที่ตรวจสอบสภาพทางกายภาพ เช่น อัตราการเต้นของหัวใจ"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"อ่านกิจกรรมในปฏิทินและรายละเอียด"</string>
@@ -1792,7 +1792,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ลบโดยผู้ดูแลระบบ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ตกลง"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n• เปิดธีมมืด\n•ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Ok Google”\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n• เปิดธีมมืด\n• ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น “Ok Google”\n\n"<annotation id="url">"ดูข้อมูลเพิ่มเติม"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"โหมดประหยัดแบตเตอรี่จะดำเนินการดังต่อไปนี้เพื่อยืดอายุการใช้งานแบตเตอรี่\n\n• เปิดธีมมืด\n• ปิดหรือจำกัดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง และฟีเจอร์อื่นๆ อย่างเช่น \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>

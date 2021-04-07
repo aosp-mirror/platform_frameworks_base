@@ -43,5 +43,8 @@
         <!-- use for CarServiceTest -->
         <permission name="android.permission.SET_ACTIVITY_WATCHER"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+
+        <!-- use for rotary fragment to enable/disable packages related to rotary -->
+        <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
     </privapp-permissions>
 </permissions>

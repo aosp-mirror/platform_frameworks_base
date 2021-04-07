@@ -953,7 +953,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"सामान्य संदेश"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"जगह"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"संकेत"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"झटपट ऐप्लिकेशन"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> चल रहा है"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है. ज़्यादा जानने के लिए टैप करें."</string>
@@ -1076,6 +1076,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सुझाव लोड हो रहे हैं"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मीडिया"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"इस मीडिया सेशन को छिपाएं."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"मौजूदा मीडिया सत्र छिपाया नहीं जा सकता."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"खारिज करें"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"फिर से शुरू करें"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"सेटिंग"</string>
@@ -1091,4 +1092,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नए कंट्रोल देखने के लिए पावर बटन दबाकर रखें"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"कंट्राेल जोड़ें"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"कंट्रोल मेन्यू में बदलाव करें"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट जोड़ें"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"ग्रुप"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"एक डिवाइस चुना गया"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> डिवाइस चुने गए"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (डिसकनेक्ट किया गया)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"कनेक्ट नहीं किया जा सका. फिर से कोशिश करें."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नया डिवाइस जोड़ें"</string>
 </resources>

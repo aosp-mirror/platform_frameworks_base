@@ -491,8 +491,8 @@ public class DeviceStorageMonitorService extends SystemService {
                         com.android.internal.R.string.low_internal_storage_view_text);
             }
 
-            PendingIntent intent = PendingIntent.getActivityAsUser(context, 0, lowMemIntent, 0,
-                    null, UserHandle.CURRENT);
+            PendingIntent intent = PendingIntent.getActivityAsUser(context, 0, lowMemIntent,
+                    PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
             Notification notification =
                     new Notification.Builder(context, SystemNotificationChannels.ALERTS)
                             .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)

@@ -98,9 +98,9 @@
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi-тэлефанія"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"Статус SIM-карты"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"Стан SIM-карты з высокім прыярытэтам"</string>
-    <string name="peerTtyModeFull" msgid="337553730440832160">"Аднарангавая прылада запытала рэжым TTY FULL"</string>
-    <string name="peerTtyModeHco" msgid="5626377160840915617">"Аднарангавая прылада запытала рэжым TTY НСО"</string>
-    <string name="peerTtyModeVco" msgid="572208600818270944">"Аднарангавая прылада запытала рэжым TTY VCO"</string>
+    <string name="peerTtyModeFull" msgid="337553730440832160">"Аднарангавая прылада запытала рэжым поўнафункцыянальнага TTY"</string>
+    <string name="peerTtyModeHco" msgid="5626377160840915617">"Аднарангавая прылада запытала рэжым TTY з магчымасцю чуць суразмоўніка"</string>
+    <string name="peerTtyModeVco" msgid="572208600818270944">"Аднарангавая прылада запытала рэжым TTY з магчымасцю чуць суразмоўніка"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"Аднарангавая прылада запытала рэжым TTY OFF"</string>
     <string name="serviceClassVoice" msgid="2065556932043454987">"Голас"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"Дадзеныя"</string>
@@ -967,7 +967,7 @@
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"дадаць галасавое паведамленне"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"Дазваляе прыкладанням дадаваць паведамленні ў вашу скрыню галасавой пошты."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"змяніць дазволы геапазіцыянавання для браўзэра"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Дазваляе прыкладанням змяняць дазволы геалакацыі браўзэра. Шкоднасныя прыкладанні могуць выкарыстоўваць гэта, каб дазваляць адпраўку інфармацыі аб месцазнаходжанні выпадковым вэб-сайтам."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Дазваляе праграме змяняць дазволы геалакацыі браўзера. Шкодныя праграмы могуць выкарыстоўваць гэта, каб адпраўляць даныя аб месцазнаходжанні на любыя вэб-сайты."</string>
     <string name="save_password_message" msgid="2146409467245462965">"Вы хочаце, каб браўзэр запомніў гэты пароль?"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"Не зараз"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"Запомніць"</string>
@@ -1342,8 +1342,8 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Рэжым USB-мадэма"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI праз USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-прылада падключана"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Дакраніцеся, каб атрымаць іншыя параметры."</string>
-    <string name="usb_power_notification_message" msgid="7284765627437897702">"Зарадка падключанай прылады. Націсніце, каб убачыць іншыя параметры."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Дакраніцеся, каб убачыць іншыя параметры."</string>
+    <string name="usb_power_notification_message" msgid="7284765627437897702">"Падключаная прылада зараджаецца. Дакраніцеся, каб убачыць іншыя параметры."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Выяўлены аксесуар аналагавага аўдыя"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Далучаная прылада не сумяшчальная з гэтым тэлефонам. Націсніце, каб даведацца больш."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Адладка па USB падключана"</string>
@@ -1542,7 +1542,7 @@
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Не атрымалася запусціць <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Апублікаваць з дапамогай"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Адправiць з дапамогай прыкладання <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="982510275422590757">"Ручка для перасоўвання. Націсніце і ўтрымлівайце."</string>
+    <string name="content_description_sliding_handle" msgid="982510275422590757">"Маркер для перасоўвання. Дакраніцеся і ўтрымлівайце."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Прагартайце, каб разблакаваць."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Перайсці да пачатковай старонкі"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Перайсці ўверх"</string>

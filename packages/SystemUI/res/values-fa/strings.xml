@@ -142,7 +142,7 @@
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"برای لغو راستی‌آزمایی ضربه بزنید"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"لطفاً دوباره امتحان کنید"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"درحال جستجوی چهره"</string>
-    <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چهره احراز هویت شد"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"چهره اصالت‌سنجی شد"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تأیید شد"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"برای تکمیل، روی تأیید ضربه بزنید"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"راستی‌آزمایی‌شده"</string>
@@ -307,8 +307,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"حالت کار روشن شد."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"صرفه‌جویی داده خاموش شد."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"صرفه‌جویی داده روشن شد."</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"«حریم خصوصی حسگر» خاموش است."</string>
-    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"«حریم خصوصی حسگر» روشن است."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"«حریم‌خصوصی حسگر» خاموش است."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"«حریم‌خصوصی حسگر» روشن است."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"روشنایی نمایشگر"</string>
     <string name="accessibility_ambient_display_charging" msgid="7725523068728128968">"درحال شارژ شدن"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5716594205739750015">"‏داده 2G-3G موقتاً متوقف شده است"</string>
@@ -431,7 +431,7 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"دستگاه"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"برای تغییر برنامه‌ها،‌ تند به بالا بکشید"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"برای تغییر برنامه‌ها،‌ تند به‌بالا بکشید"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"برای جابه‌جایی سریع میان برنامه‌ها، به چپ بکشید"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تغییر وضعیت نمای کلی"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"شارژ کامل شد"</string>
@@ -450,8 +450,8 @@
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"اعلان‌های کمتر فوری در زیر"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"دوباره ضربه بزنید تا باز شود"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به بالا بکشید"</string>
-    <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به بالا بکشید"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به‌بالا بکشید"</string>
+    <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"این دستگاه به <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> تعلق دارد"</string>
     <string name="phone_hint" msgid="6682125338461375925">"انگشتتان را از نماد تلفن تند بکشید"</string>
@@ -604,7 +604,7 @@
     <string name="screen_pinning_positive" msgid="3285785989665266984">"متوجه شدم"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"نه متشکرم"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"برنامه پین شد"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"پین برنامه برداشته شد"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"سنجاق از برنامه برداشته شد"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> مخفی شود؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"دفعه بعد که آن را روشن کنید، در تنظیمات نشان داده می‌شود."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"پنهان کردن"</string>
@@ -786,8 +786,8 @@
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"قبلی"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"عقب بردن"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"جلو بردن سریع"</string>
-    <string name="keyboard_key_page_up" msgid="173914303254199845">"صفحه بعدی"</string>
-    <string name="keyboard_key_page_down" msgid="9035902490071829731">"صفحه قبلی"</string>
+    <string name="keyboard_key_page_up" msgid="173914303254199845">"صفحه بعد"</string>
+    <string name="keyboard_key_page_down" msgid="9035902490071829731">"صفحه قبل"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"حذف"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ابتدا"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"انتها"</string>
@@ -1074,6 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"درحال بار کردن توصیه‌ها"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"رسانه"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"جلسه فعلی پنهان شود."</string>
+    <string name="controls_media_active_session" msgid="1984383994625845642">"نمی‌توان جلسه فعلی را پنهان کرد."</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"رد کردن"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ازسرگیری"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"تنظیمات"</string>
@@ -1089,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"برای دیدن کنترل‌های جدید، دکمه روشن/خاموش را پایین نگه دارید"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"افزودن کنترل‌ها"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ویرایش کنترل‌ها"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"افزودن خروجی"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"گروه"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"۱ دستگاه انتخاب شد"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> دستگاه انتخاب شد"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (اتصال قطع شد)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"متصل نشد. دوباره امتحان کنید."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"مرتبط کردن دستگاه جدید"</string>
 </resources>

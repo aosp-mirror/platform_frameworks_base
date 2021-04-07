@@ -302,7 +302,7 @@
     <string name="permgrouplab_sms" msgid="795737735126084874">"Tekstiviestit"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"lähettää ja tarkastella tekstiviestejä"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"Tiedostot ja media"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"käyttää laitteellesi tallennettuja valokuvia, mediatiedostoja ja muita tiedostoja"</string>
+    <string name="permgroupdesc_storage" msgid="6351503740613026600">"käyttää laitteellesi tallennettuja kuvia, mediatiedostoja ja muita tiedostoja"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"tallentaa ääntä"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Liikkuminen"</string>
@@ -1914,7 +1914,7 @@
     <string name="app_category_game" msgid="4534216074910244790">"Pelit"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Musiikki ja ääni"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Elokuvat ja videot"</string>
-    <string name="app_category_image" msgid="7307840291864213007">"Kuvat ja valokuvat"</string>
+    <string name="app_category_image" msgid="7307840291864213007">"Kuvat ja kuvat"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Some ja viestintä"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Uutiset ja lehdet"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Kartat ja navigointi"</string>

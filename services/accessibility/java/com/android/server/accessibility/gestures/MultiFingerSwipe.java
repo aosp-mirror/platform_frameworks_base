@@ -294,7 +294,7 @@ class MultiFingerSwipe extends GestureMatcher {
                                 + Float.toString(mGestureDetectionThresholdPixels));
             }
             if (getState() == STATE_CLEAR) {
-                if (moveDelta < mTouchSlop) {
+                if (moveDelta < (mTargetFingerCount * mTouchSlop)) {
                     // This still counts as a touch not a swipe.
                     continue;
                 } else if (mStrokeBuffers[pointerIndex].size() == 0) {

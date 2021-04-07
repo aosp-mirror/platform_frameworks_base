@@ -61,7 +61,7 @@
     <string name="ColpMmi" msgid="4736462893284419302">"Қосылған желі идентификаторы"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Қосылған желі идентификаторын шектеу"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Қоңырауды басқа нөмірге бағыттау"</string>
-    <string name="CwMmi" msgid="3164609577675404761">"Күтудегі қоңырау"</string>
+    <string name="CwMmi" msgid="3164609577675404761">"Қоңырауды ұстап тұру"</string>
     <string name="BaMmi" msgid="7205614070543372167">"Қоңырауды бөгеу"</string>
     <string name="PwdMmi" msgid="3360991257288638281">"Құпия сөз өзгерту"</string>
     <string name="PinMmi" msgid="7133542099618330959">"PIN өзгерту"</string>
@@ -317,7 +317,7 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ағза күйінің көрсеткіштері туралы сенсор деректеріне қатынасу"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Терезе мазмұнын оқып отыру"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Ашық тұрған терезе мазмұнын тексеру."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Explore by Touch функциясын қосу"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Түртілген элементтерді дыбыстау функциясын қосу"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Түртілген элементтер дауыстап айтылады және экранды қимылдар арқылы зерттеуге болады."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Терілген мәтінді тексеру"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Несиелік карта нөмірі және құпия сөздер сияқты жеке деректі қоса."</string>
@@ -987,9 +987,9 @@
     <string name="searchview_description_clear" msgid="1989371719192982900">"Сұрақты өшіру"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"Сұрақ жіберу"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Дауыс арқылы іздеу"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Explore by Touch функциясы қосылсын ба?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Explore by Touch мүмкіндігін қосқысы келеді. Explore by Touch мүмкіндігі қосылған кезде, саусағыңыздың астындағы нәрсенің сипаттамаларын естисіз не көресіз немесе планшетпен өзара байланысу үшін қимылдайсыз."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Explore by Touch мүмкіндігін қосқысы келеді. Explore by Touch мүмкіндігі қосылған кезде, саусағыңыздың астындағы нәрсенің сипаттамаларын естисіз не көресіз немесе телефонмен өзара байланысу үшін қимылдайсыз."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Түртілген элементтерді дыбыстау функциясы қосылсын ба?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Түртілген элементтерді дыбыстау функциясын қосуға рұқсат сұрап тұр. Ол қосылған кезде, саусағыңыздың астындағы элементтің сипаттамасын естіп не көріп тұрасыз немесе планшетті қимылмен басқарасыз."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Түртілген элементтерді дыбыстау функциясын қосуға рұқсат сұрап тұр. Ол қосылған кезде, саусағыңыздың астындағы элементтің сипаттамасын естіп не көріп тұрасыз немесе телефонды қимылмен басқарасыз."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 ай бұрын"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Осыған дейін 1 ай бұрын"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1219,9 +1219,9 @@
     <string name="volume_music" msgid="7727274216734955095">"Mультимeдиа дыбыс деңгейі"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth арқылы ойнату"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Үнсіз қоңырау әуенін орнату"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Келетін қоңырау дыбысының қаттылығы"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Сөйлесу кезіндегі дыбыс деңгейі"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth қоңырауының қаттылығы"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Дабыл дыбысының қаттылығы"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Дабыл дыбысының деңгейі"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Хабар дыбысының қаттылығы"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Дыбыс қаттылығы"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth дыбысының қаттылығы"</string>
@@ -1307,7 +1307,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Аналогтық аудиожабдық анықталды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Жалғанған құрылғы бұл телефонмен үйлесімсіз. Қосымша ақпарат алу үшін түртіңіз."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB арқылы түзету қосылған"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB арқылы түзетуді өшіру үшін түртіңіз"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB арқылы түзетуді өшіру үшін түртіңіз."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB арқылы түзетуді өшіру үшін таңдаңыз."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Сымсыз түзету байланыстырылды"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Сымсыз түзетуді өшіру үшін түртіңіз."</string>

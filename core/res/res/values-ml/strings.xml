@@ -325,7 +325,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"ഡിസ്പ്ലേയുടെ സൂം നിലയും പൊസിഷനിംഗും നിയന്ത്രിക്കുക."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"ജെസ്‌റ്ററുകൾ നിർവഹിക്കുക"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ടാപ്പുചെയ്യാനോ സ്വൈപ്പുചെയ്യാനോ പിഞ്ചുചെയ്യാനോ മറ്റ് ജെസ്‌റ്ററുകൾ നിർവഹിക്കാനോ കഴിയും."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ഫിംഗർപ്രിന്റ് ജെസ്‌റ്ററുകൾ"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ഫിംഗർപ്രിന്റ് ജെസ്‌ച്ചറുകൾ"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ഉപകരണത്തിന്റെ ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"സ്ക്രീന്‍ഷോട്ട് എടുക്കുക"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ഡിസ്‌പ്ലേയുടെ സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിയും."</string>

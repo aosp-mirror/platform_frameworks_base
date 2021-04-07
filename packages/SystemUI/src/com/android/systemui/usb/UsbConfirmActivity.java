@@ -35,6 +35,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -58,6 +60,9 @@ public class UsbConfirmActivity extends AlertActivity
 
     @Override
     public void onCreate(Bundle icicle) {
+        getWindow().addSystemFlags(
+                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+
         super.onCreate(icicle);
 
         Intent intent = getIntent();

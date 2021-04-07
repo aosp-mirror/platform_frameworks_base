@@ -127,9 +127,11 @@ public abstract class SoftRestrictedPermissionPolicy {
                 final boolean isWhiteListed;
                 boolean shouldApplyRestriction;
                 final int targetSDK;
+                final boolean hasLegacyExternalStorage;
                 final boolean hasRequestedLegacyExternalStorage;
-                final boolean shouldPreserveLegacyExternalStorage;
+                final boolean hasRequestedPreserveLegacyExternalStorage;
                 final boolean hasWriteMediaStorageGrantedForUid;
+                final boolean isForcedScopedStorage;
 
                 if (appInfo != null) {
                     PackageManager pm = context.getPackageManager();
@@ -137,27 +139,27 @@ public abstract class SoftRestrictedPermissionPolicy {
                             LocalServices.getService(StorageManagerInternal.class);
                     int flags = pm.getPermissionFlags(permission, appInfo.packageName, user);
                     isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
+                    hasLegacyExternalStorage = smInternal.hasLegacyExternalStorage(appInfo.uid);
                     hasRequestedLegacyExternalStorage = hasUidRequestedLegacyExternalStorage(
                             appInfo.uid, context);
                     hasWriteMediaStorageGrantedForUid = hasWriteMediaStorageGrantedForUid(
                             appInfo.uid, context);
-                    shouldPreserveLegacyExternalStorage = pkg.hasPreserveLegacyExternalStorage()
-                            && smInternal.hasLegacyExternalStorage(appInfo.uid);
+                    hasRequestedPreserveLegacyExternalStorage =
+                            pkg.hasPreserveLegacyExternalStorage();
                     targetSDK = getMinimumTargetSDK(context, appInfo, user);
 
-                    shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0
-                            || (targetSDK > Build.VERSION_CODES.Q
-                            && !shouldPreserveLegacyExternalStorage)
-                            // If the device is configured to force this app into scoped storage,
-                            // then we should apply the restriction
-                            || sForcedScopedStorageAppWhitelist.contains(appInfo.packageName);
+                    shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+                    isForcedScopedStorage = sForcedScopedStorageAppWhitelist
+                            .contains(appInfo.packageName);
                 } else {
                     isWhiteListed = false;
                     shouldApplyRestriction = false;
                     targetSDK = 0;
+                    hasLegacyExternalStorage = false;
                     hasRequestedLegacyExternalStorage = false;
-                    shouldPreserveLegacyExternalStorage = false;
+                    hasRequestedPreserveLegacyExternalStorage = false;
                     hasWriteMediaStorageGrantedForUid = false;
+                    isForcedScopedStorage = false;
                 }
 
                 // We have a check in PermissionPolicyService.PermissionToOpSynchroniser.setUidMode
@@ -175,14 +177,53 @@ public abstract class SoftRestrictedPermissionPolicy {
                     }
                     @Override
                     public boolean mayAllowExtraAppOp() {
-                        return !shouldApplyRestriction
-                                && (hasRequestedLegacyExternalStorage
-                                        || hasWriteMediaStorageGrantedForUid
-                                        || shouldPreserveLegacyExternalStorage);
+                        // The only way to get LEGACY_STORAGE (if you didn't already have it)
+                        // is that all of the following must be true:
+                        // 1. The flag shouldn't be restricted
+                        if (shouldApplyRestriction) {
+                            return false;
+                        }
+
+                        // 2. The app shouldn't be in sForcedScopedStorageAppWhitelist
+                        if (isForcedScopedStorage) {
+                            return false;
+                        }
+
+                        // 3. The app has WRITE_MEDIA_STORAGE, OR
+                        //      the app already has legacy external storage or requested it,
+                        //      and is < R.
+                        return hasWriteMediaStorageGrantedForUid
+                                || ((hasLegacyExternalStorage || hasRequestedLegacyExternalStorage)
+                                    && targetSDK < Build.VERSION_CODES.R);
                     }
                     @Override
                     public boolean mayDenyExtraAppOpIfGranted() {
-                        return shouldApplyRestriction;
+                        // If you're an app targeting < R, you can keep the app op for
+                        // as long as you meet the conditions required to acquire it.
+                        if (targetSDK < Build.VERSION_CODES.R) {
+                            return !mayAllowExtraAppOp();
+                        }
+
+                        // For an app targeting R, the only way to lose LEGACY_STORAGE if you
+                        // already had it is in one or more of the following conditions:
+                        // 1. The flag became restricted
+                        if (shouldApplyRestriction) {
+                            return true;
+                        }
+
+                        // The package is now a part of the forced scoped storage whitelist
+                        if (isForcedScopedStorage) {
+                            return true;
+                        }
+
+                        // The package doesn't have WRITE_MEDIA_STORAGE,
+                        // AND didn't request legacy storage to be preserved
+                        if (!hasWriteMediaStorageGrantedForUid
+                                && !hasRequestedPreserveLegacyExternalStorage) {
+                            return true;
+                        }
+
+                        return false;
                     }
                 };
             }

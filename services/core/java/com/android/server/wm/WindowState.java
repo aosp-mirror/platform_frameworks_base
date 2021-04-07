@@ -943,7 +943,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedHeight = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mActivityRecord != null ? mActivityRecord.mInputApplicationHandle : null,
+                mActivityRecord != null
+                        ? mActivityRecord.getInputApplicationHandle(false /* update */) : null,
                     getDisplayId());
 
         // Make sure we initial all fields before adding to parentWindow, to prevent exception
@@ -1525,11 +1526,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getDisplayInfo();
     }
 
+    /**
+     * Returns the insets state for the client. Its sources may be the copies with visibility
+     * modification according to the state of transient bars.
+     */
     InsetsState getInsetsState() {
-        final InsetsState insetsState = mToken.getFixedRotationTransformInsetsState();
-        if (insetsState != null) {
-            return insetsState;
-        }
         return getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
     }
 

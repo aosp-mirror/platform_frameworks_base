@@ -28,13 +28,13 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"‏پیکربندی IP انجام نشد"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"اتصال ناموفق به دلیل شبکه با کیفیت پایین"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"‏اتصال Wi-Fi برقرار نشد"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"مشکل احراز هویت"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"مشکل اصالت‌سنجی"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"برقراری اتصال ممکن نیست"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"برقراری اتصال به «<xliff:g id="AP_NAME">%1$s</xliff:g>» ممکن نیست"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"گذرواژه را بررسی و دوباره امتحان کنید"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"در محدوده نیست"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"اتصال به‌صورت خودکار انجام نمی‌شود"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"بدون دسترسی به اینترنت"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"دسترسی به اینترنت ندارد"</string>
     <string name="saved_network" msgid="7143698034077223645">"ذخیره‌شده توسط <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"‏اتصال خودکار ازطریق %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"اتصال خودکار ازطریق ارائه‌دهنده رتبه‌بندی شبکه"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> مانده تا شارژ کامل"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - بهینه‌سازی برای سلامت باتری"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ناشناس"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"در حال شارژ شدن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"درحال شارژ شدن سریع"</string>
