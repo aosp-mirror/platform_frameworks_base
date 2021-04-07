@@ -5360,12 +5360,8 @@ public class Notification implements Parcelable
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
             // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
-                pillColor = getAccentTertiaryColor(p);
-                // TODO(b/183710694): The accent tertiary is currently too bright in dark mode, so
-                //  we need to pick a contrasting color.
-                textColor = ColorUtils.setAlphaComponent(
-                        ContrastColorUtil.resolvePrimaryColor(mContext, pillColor, mInNightMode),
-                        0xFF);
+                textColor = getBackgroundColor(p);
+                pillColor = getAccentColor(p);
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
@@ -6293,23 +6289,6 @@ public class Notification implements Parcelable
             }
             // TODO(b/181048615): What color should we use for the expander pill when colorized
             return ColorUtils.blendARGB(getPrimaryTextColor(p), getBackgroundColor(p), 0.8f);
-        }
-
-        /**
-         * Gets the tertiary accent color for colored UI elements. If we're tinting with the theme
-         * accent, this comes from the tertiary system accent palette, otherwise this would be
-         * identical to {@link #getSmallIconColor(StandardTemplateParams)}.
-         */
-        private @ColorInt int getAccentTertiaryColor(StandardTemplateParams p) {
-            if (isColorized(p)) {
-                return getPrimaryTextColor(p);
-            }
-            int color = obtainThemeColor(com.android.internal.R.attr.colorAccentTertiary,
-                    COLOR_INVALID);
-            if (color != COLOR_INVALID) {
-                return color;
-            }
-            return getContrastColor(p);
         }
 
         /**
