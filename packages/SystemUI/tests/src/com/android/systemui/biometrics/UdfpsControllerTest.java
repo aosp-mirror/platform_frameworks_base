@@ -100,8 +100,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private DumpManager mDumpManager;
     @Mock
-    private AuthRippleController mAuthRippleController;
-    @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private KeyguardViewMediator mKeyguardViewMediator;
@@ -157,7 +155,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mStatusBar,
                 mStatusBarKeyguardViewManager,
                 mDumpManager,
-                mAuthRippleController,
                 mKeyguardUpdateMonitor,
                 mKeyguardViewMediator);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());

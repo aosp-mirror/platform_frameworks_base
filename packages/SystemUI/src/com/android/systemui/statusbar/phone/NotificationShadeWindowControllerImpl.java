@@ -611,12 +611,21 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         apply(mCurrentState);
     }
 
+    private final Set<Object> mForceOpenTokens = new HashSet<>();
     @Override
-    public void setForcePluginOpen(boolean forcePluginOpen) {
-        mCurrentState.mForcePluginOpen = forcePluginOpen;
-        apply(mCurrentState);
-        if (mForcePluginOpenListener != null) {
-            mForcePluginOpenListener.onChange(forcePluginOpen);
+    public void setForcePluginOpen(boolean forceOpen, Object token) {
+        if (forceOpen) {
+            mForceOpenTokens.add(token);
+        } else {
+            mForceOpenTokens.remove(token);
+        }
+        final boolean previousForceOpenState = mCurrentState.mForcePluginOpen;
+        mCurrentState.mForcePluginOpen = !mForceOpenTokens.isEmpty();
+        if (previousForceOpenState != mCurrentState.mForcePluginOpen) {
+            apply(mCurrentState);
+            if (mForcePluginOpenListener != null) {
+                mForcePluginOpenListener.onChange(mCurrentState.mForcePluginOpen);
+            }
         }
     }
 

@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
@@ -82,6 +83,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Nullable private final List<FingerprintSensorPropertiesInternal> mFpProps;
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
     @Nullable private final List<FingerprintSensorPropertiesInternal> mUdfpsProps;
+    @Nullable private final PointF mFaceAuthSensorLocation;
 
     // TODO: These should just be saved from onSaveState
     private SomeArgs mCurrentDialogArgs;
@@ -261,10 +263,34 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     /**
-     * @return where the UDFPS exists on the screen in pixels.
+     * @return where the UDFPS exists on the screen in pixels in portrait mode.
      */
     public RectF getUdfpsRegion() {
-        return mUdfpsController == null ? null : mUdfpsController.getSensorLocation();
+        return mUdfpsController == null
+                ? null
+                : mUdfpsController.getSensorLocation();
+    }
+
+    /**
+     * @return where the UDFPS exists on the screen in pixels in portrait mode.
+     */
+    public PointF getUdfpsSensorLocation() {
+        if (mUdfpsController == null) {
+            return null;
+        }
+        return new PointF(mUdfpsController.getSensorLocation().centerX(),
+                mUdfpsController.getSensorLocation().centerY());
+    }
+
+    /**
+     * @return where the face authentication sensor exists relative to the screen in pixels in
+     * portrait mode.
+     */
+    public PointF getFaceAuthSensorLocation() {
+        if (mFaceProps == null || mFaceAuthSensorLocation == null) {
+            return null;
+        }
+        return new PointF(mFaceAuthSensorLocation.x, mFaceAuthSensorLocation.y);
     }
 
     /**
@@ -339,6 +365,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             }
         }
         mUdfpsProps = !udfpsProps.isEmpty() ? udfpsProps : null;
+        int[] faceAuthLocation = context.getResources().getIntArray(
+                com.android.systemui.R.array.config_face_auth_props);
+        if (faceAuthLocation == null || faceAuthLocation.length < 2) {
+            mFaceAuthSensorLocation = null;
+        } else {
+            mFaceAuthSensorLocation = new PointF(
+                    (float) faceAuthLocation[0],
+                    (float) faceAuthLocation[1]);
+        }
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
