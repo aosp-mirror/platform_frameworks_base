@@ -450,6 +450,15 @@ public class ConnectivityManager {
             "android.net.action.PROMPT_PARTIAL_CONNECTIVITY";
 
     /**
+     * Clear DNS Cache Action: This is broadcast when networks have changed and old
+     * DNS entries should be cleared.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String ACTION_CLEAR_DNS_CACHE = "android.net.action.CLEAR_DNS_CACHE";
+
+    /**
      * Invalid tethering type.
      * @see #startTethering(int, boolean, OnStartTetheringCallback)
      * @hide
