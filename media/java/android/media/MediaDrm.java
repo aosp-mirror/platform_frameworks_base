@@ -2991,13 +2991,16 @@ public final class MediaDrm implements AutoCloseable {
      * A {@link LogMessage} records an event in the {@link MediaDrm} framework
      * or vendor plugin.
      */
-    public static class LogMessage {
+    public static final class LogMessage {
+        private final long timestampMillis;
+        private final int priority;
+        private final String message;
 
         /**
          * Timing of the recorded event measured in milliseconds since the Epoch,
          * 1970-01-01 00:00:00 +0000 (UTC).
          */
-        public final long timestampMillis;
+        public final long getTimestampMillis() { return timestampMillis; }
 
         /**
          * Priority of the recorded event.
@@ -3013,13 +3016,13 @@ public final class MediaDrm implements AutoCloseable {
          * </ul>
          */
         @Log.Level
-        public final int priority;
+        public final int getPriority() { return priority; }
 
         /**
          * Description of the recorded event.
          */
         @NonNull
-        public final String message;
+        public final String getMessage() { return message; }
 
         private LogMessage(long timestampMillis, int priority, String message) {
             this.timestampMillis = timestampMillis;

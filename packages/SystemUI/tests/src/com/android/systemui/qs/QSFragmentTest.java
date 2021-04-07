@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -130,7 +131,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(PluginManager.class), mock(TunerService.class),
                 () -> mock(AutoTileManager.class), mock(DumpManager.class),
                 mock(BroadcastDispatcher.class), Optional.of(mock(StatusBar.class)),
-                mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class));
+                mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class),
+                mock(SecureSettings.class));
         qs.setHost(host);
 
         qs.setListening(true);

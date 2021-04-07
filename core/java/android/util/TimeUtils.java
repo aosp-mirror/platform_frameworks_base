@@ -30,6 +30,7 @@ import com.android.i18n.timezone.ZoneInfoDb;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,11 +44,39 @@ import java.util.List;
 public class TimeUtils {
     /** @hide */ public TimeUtils() {}
     /** {@hide} */
-    private static SimpleDateFormat sLoggingFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat sLoggingFormat =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /** @hide */
     public static final SimpleDateFormat sDumpDateFormat =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+    /**
+     * This timestamp is used in TimeUtils methods and by the SettingsUI to filter time zones
+     * to only "effective" ones in a country. It is compared against the notUsedAfter metadata that
+     * Android records for some time zones.
+     *
+     * <p>What is notUsedAfter?</p>
+     * Android chooses to avoid making users choose between functionally identical time zones at the
+     * expense of not being able to represent local times in the past.
+     *
+     * notUsedAfter exists because some time zones can "merge" with other time zones after a given
+     * point in time (i.e. they change to have identical transitions, offsets, display names, etc.).
+     * From the notUsedAfter time, the zone will express the same local time as the one it merged
+     * with.
+     *
+     * <p>Why hardcoded?</p>
+     * Rather than using System.currentTimeMillis(), a timestamp known to be in the recent past is
+     * used to ensure consistent behavior across devices and time, and avoid assumptions that the
+     * system clock on a device is currently set correctly. The fixed value should be updated
+     * occasionally, but it doesn't have to be very often as effective time zones for a country
+     * don't change very often.
+     *
+     * @hide
+     */
+    public static final Instant MIN_USE_DATE_OF_TIMEZONE =
+            Instant.ofEpochMilli(1546300800000L); // 1/1/2019 00:00 UTC
+
     /**
      * Tries to return a time zone that would have had the specified offset
      * and DST value at the specified moment in the specified country.
@@ -109,7 +138,7 @@ public class TimeUtils {
 
         List<String> timeZoneIds = new ArrayList<>();
         for (TimeZoneMapping timeZoneMapping : countryTimeZones.getTimeZoneMappings()) {
-            if (timeZoneMapping.isShownInPicker()) {
+            if (timeZoneMapping.isShownInPickerAt(MIN_USE_DATE_OF_TIMEZONE)) {
                 timeZoneIds.add(timeZoneMapping.getTimeZoneId());
             }
         }

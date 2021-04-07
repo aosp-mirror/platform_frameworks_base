@@ -46,6 +46,9 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
+import android.provider.Settings;
+import android.server.wm.settings.SettingsSession;
 import android.support.test.uiautomator.UiDevice;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.text.TextUtils;
@@ -61,6 +64,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Tests for {@link ActivityManager}.
@@ -314,6 +319,102 @@ public class ActivityManagerTest {
             am.forceStopPackage(TEST_APP);
             mContext.unregisterReceiver(receiver);
         }
+    }
+
+    @LargeTest
+    @Test
+    public void testAppFreezerWithAllowOomAdj() throws Exception {
+        final long waitFor = 5000;
+        boolean freezerWasEnabled = isFreezerEnabled();
+        SettingsSession<String> freezerEnabled = null;
+        SettingsSession<String> amConstantsSettings = null;
+        DeviceConfigSession<Long> freezerDebounceTimeout = null;
+        MyServiceConnection autoConnection = null;
+        try {
+            if (!freezerWasEnabled) {
+                freezerEnabled = new SettingsSession<>(
+                        Settings.Global.getUriFor(Settings.Global.CACHED_APPS_FREEZER_ENABLED),
+                        Settings.Global::getString, Settings.Global::putString);
+                freezerEnabled.set("enabled");
+                Thread.sleep(waitFor);
+                if (!isFreezerEnabled()) {
+                    // Still not enabled? Probably because the device doesn't support it.
+                    return;
+                }
+            }
+            freezerDebounceTimeout = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    CachedAppOptimizer.KEY_FREEZER_DEBOUNCE_TIMEOUT,
+                    DeviceConfig::getLong, CachedAppOptimizer.DEFAULT_FREEZER_DEBOUNCE_TIMEOUT);
+            freezerDebounceTimeout.set(waitFor);
+
+            final String activityManagerConstants = Settings.Global.ACTIVITY_MANAGER_CONSTANTS;
+            amConstantsSettings = new SettingsSession<>(
+                Settings.Global.getUriFor(activityManagerConstants),
+                Settings.Global::getString, Settings.Global::putString);
+
+            amConstantsSettings.set(
+                    ActivityManagerConstants.KEY_MAX_SERVICE_INACTIVITY + "=" + waitFor);
+
+            final Intent intent = new Intent();
+            intent.setClassName(TEST_APP, TEST_CLASS);
+
+            final CountDownLatch latch = new CountDownLatch(1);
+            autoConnection = new MyServiceConnection(latch);
+            mContext.bindService(intent, autoConnection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_ALLOW_OOM_MANAGEMENT);
+            try {
+                assertTrue("Timeout to bind to service " + intent.getComponent(),
+                        latch.await(AWAIT_TIMEOUT, TimeUnit.MILLISECONDS));
+            } catch (InterruptedException e) {
+                fail("Unable to bind to service " + intent.getComponent());
+            }
+            assertFalse(TEST_APP + " shouldn't be frozen now.", isAppFrozen(TEST_APP));
+
+            // Trigger oomAdjUpdate/
+            toggleScreenOn(false);
+            toggleScreenOn(true);
+
+            // Wait for the freezer kick in if there is any.
+            Thread.sleep(waitFor * 4);
+
+            // It still shouldn't be frozen, although it's been in cached state.
+            assertFalse(TEST_APP + " shouldn't be frozen now.", isAppFrozen(TEST_APP));
+        } finally {
+            toggleScreenOn(true);
+            if (amConstantsSettings != null) {
+                amConstantsSettings.close();
+            }
+            if (freezerEnabled != null) {
+                freezerEnabled.close();
+            }
+            if (freezerDebounceTimeout != null) {
+                freezerDebounceTimeout.close();
+            }
+            if (autoConnection != null) {
+                mContext.unbindService(autoConnection);
+            }
+        }
+    }
+
+    private boolean isFreezerEnabled() throws Exception {
+        final String output = runShellCommand("dumpsys activity settings");
+        final Matcher matcher = Pattern.compile("\\b" + CachedAppOptimizer.KEY_USE_FREEZER
+                + "\\b=\\b(true|false)\\b").matcher(output);
+        if (matcher.find()) {
+            return Boolean.parseBoolean(matcher.group(1));
+        }
+        return false;
+    }
+
+    private boolean isAppFrozen(String packageName) throws Exception {
+        final String output = runShellCommand("dumpsys activity p " + packageName);
+        final Matcher matcher = Pattern.compile("\\b" + ProcessCachedOptimizerRecord.IS_FROZEN
+                + "\\b=\\b(true|false)\\b").matcher(output);
+        if (matcher.find()) {
+            return Boolean.parseBoolean(matcher.group(1));
+        }
+        return false;
     }
 
     /**

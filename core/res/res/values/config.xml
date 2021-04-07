@@ -4834,4 +4834,17 @@
 
     <!-- Whether app hibernation deletes OAT artifact files as part of global hibernation. -->
     <bool name="config_hibernationDeletesOatArtifactsEnabled">true</bool>
+
+    <!-- On-device intelligent processor for system UI features. -->
+    <string name="config_systemUiIntelligence" translatable="false"></string>
+    <!-- On-device intelligent processor for ambient audio. -->
+    <string name="config_systemAmbientAudioIntelligence" translatable="false"></string>
+    <!-- On-device intelligent processor for audio. -->
+    <string name="config_systemAudioIntelligence" translatable="false"></string>
+    <!-- On-device intelligent processor for notification. -->
+    <string name="config_systemNotificationIntelligence" translatable="false"></string>
+    <!-- On-device intelligent processor for text. -->
+    <string name="config_systemTextIntelligence" translatable="false"></string>
+    <!-- On-device intelligent processor for visual features. -->
+    <string name="config_systemVisualIntelligence" translatable="false"></string>
 </resources>

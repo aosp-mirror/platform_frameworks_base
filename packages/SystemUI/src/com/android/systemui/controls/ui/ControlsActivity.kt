@@ -41,6 +41,14 @@ class ControlsActivity @Inject constructor(
 
         setContentView(R.layout.controls_fullscreen)
 
+        getLifecycle().addObserver(
+            ControlsAnimations.observerForAnimations(
+                requireViewById<ViewGroup>(R.id.control_detail_root),
+                window,
+                intent
+            )
+        )
+
         requireViewById<ViewGroup>(R.id.control_detail_root).apply {
             setOnApplyWindowInsetsListener {
                 v: View, insets: WindowInsets ->
@@ -61,7 +69,7 @@ class ControlsActivity @Inject constructor(
 
         parent = requireViewById<ViewGroup>(R.id.global_actions_controls)
         parent.alpha = 0f
-        uiController.show(parent, { animateExitAndFinish() }, this)
+        uiController.show(parent, { finish() }, this)
     }
 
     override fun onResume() {
@@ -71,16 +79,12 @@ class ControlsActivity @Inject constructor(
     }
 
     override fun onBackPressed() {
-        animateExitAndFinish()
+        finish()
     }
 
     override fun onStop() {
         super.onStop()
 
         uiController.hide()
-    }
-
-    private fun animateExitAndFinish() {
-        ControlsAnimations.exitAnimation(parent, { finish() }).start()
     }
 }

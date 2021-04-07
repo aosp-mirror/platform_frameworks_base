@@ -23,8 +23,7 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
 public interface ToggleSlider {
     interface Listener {
-        void onChanged(boolean tracking, boolean automatic, int value,
-                       boolean stopTracking);
+        void onChanged(boolean tracking, int value, boolean stopTracking);
     }
 
     void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin);
@@ -32,8 +31,6 @@ public interface ToggleSlider {
     boolean mirrorTouchEvent(MotionEvent ev);
 
     void setOnChangedListener(Listener l);
-    default void setChecked(boolean checked) {}
-    default boolean isChecked() { return false; }
     void setMax(int max);
     int getMax();
     void setValue(int value);

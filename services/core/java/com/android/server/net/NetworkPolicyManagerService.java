@@ -435,8 +435,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /**
      * Message to indicate that reasons for why an uid is blocked changed.
      * arg1 = uid
-     * arg2 = oldBlockedReasons
-     * obj = newBlockedReasons
+     * arg2 = newBlockedReasons
+     * obj = oldBlockedReasons
      */
     private static final int MSG_BLOCKED_REASON_CHANGED = 21;
 
@@ -4665,7 +4665,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", oldRule=" + uidRulesToString(oldUidRules & MASK_METERED_NETWORKS)
                     + ", newRule=" + uidRulesToString(newUidRules & MASK_METERED_NETWORKS)
                     + ", newUidRules=" + uidRulesToString(newUidRules)
-                    + ", oldUidRules=" + uidRulesToString(oldUidRules));
+                    + ", oldUidRules=" + uidRulesToString(oldUidRules)
+                    + ", oldBlockedMeteredReasons=" + NetworkPolicyManager.blockedReasonsToString(
+                    uidBlockedState.blockedReasons & BLOCKED_METERED_REASON_MASK)
+                    + ", oldBlockedMeteredEffectiveReasons="
+                    + NetworkPolicyManager.blockedReasonsToString(
+                    uidBlockedState.effectiveBlockedReasons & BLOCKED_METERED_REASON_MASK)
+                    + ", oldAllowedMeteredReasons=" + NetworkPolicyManager.blockedReasonsToString(
+                    uidBlockedState.allowedReasons & BLOCKED_METERED_REASON_MASK));
         }
 
         if (newUidRules == RULE_NONE) {
@@ -5606,17 +5613,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public boolean checkUidNetworkingBlocked(int uid, int uidRules,
-            boolean isNetworkMetered, boolean isBackgroundRestricted) {
-        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
-        // Log of invoking this function is disabled because it will be called very frequently. And
-        // metrics are unlikely needed on this method because the callers are external and this
-        // method doesn't take any locks or perform expensive operations.
-        return isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,
-                isBackgroundRestricted, null);
-    }
-
-    @Override
     public boolean isUidRestrictedOnMeteredNetworks(int uid) {
         mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
         final int uidRules;
@@ -5908,6 +5904,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             effectiveBlockedReasons = blockedReasons;
             // If the uid is not subject to any blocked reasons, then return early
             if (blockedReasons == BLOCKED_REASON_NONE) {
+                if (LOGV) {
+                    Log.v(TAG, "updateEffectiveBlockedReasons(): no blocked reasons");
+                }
                 return;
             }
             if ((allowedReasons & ALLOWED_REASON_SYSTEM) != 0) {
@@ -5939,6 +5938,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             if ((allowedReasons & ALLOWED_METERED_REASON_USER_EXEMPTED) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
+            }
+            if (LOGV) {
+                Log.v(TAG, "updateEffectiveBlockedReasons()"
+                        + ": blockedReasons=" + Integer.toBinaryString(blockedReasons)
+                        + ", effectiveReasons=" + Integer.toBinaryString(effectiveBlockedReasons));
             }
         }
     }

@@ -2569,6 +2569,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupDeviceOwner();
         mContext.packageName = admin1.getPackageName();
         setUpPackageManagerForAdmin(admin1, mContext.binder.callingUid);
+        mockEmptyPolicyExemptApps();
 
         String packageName = "com.google.android.test";
 
@@ -2598,6 +2599,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
         mContext.packageName = admin1.getPackageName();
         setUpPackageManagerForAdmin(admin1, mContext.binder.callingUid);
+        mockEmptyPolicyExemptApps();
 
         String packageName = "com.google.android.test";
 
@@ -7488,5 +7490,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void mockVendorPolicyExemptApps(String... apps) {
         Log.d(TAG, "Mocking R.array.vendor_policy_exempt_apps to return " + Arrays.toString(apps));
         when(mContext.resources.getStringArray(R.array.vendor_policy_exempt_apps)).thenReturn(apps);
+    }
+
+    private void mockEmptyPolicyExemptApps() {
+        when(mContext.getResources().getStringArray(R.array.policy_exempt_apps))
+                .thenReturn(new String[0]);
+        when(mContext.getResources().getStringArray(R.array.vendor_policy_exempt_apps))
+                .thenReturn(new String[0]);
     }
 }

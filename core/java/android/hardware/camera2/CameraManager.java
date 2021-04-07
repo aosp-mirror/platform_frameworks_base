@@ -1503,7 +1503,11 @@ public final class CameraManager {
         */
         public boolean cameraIdHasConcurrentStreamsLocked(String cameraId) {
             if (!mDeviceStatus.containsKey(cameraId)) {
-                Log.e(TAG, "cameraIdHasConcurrentStreamsLocked called on non existing camera id");
+                // physical camera ids aren't advertised in concurrent camera id combinations.
+                if (DEBUG) {
+                    Log.v(TAG, " physical camera id " + cameraId + " is hidden." +
+                            " Available logical camera ids : " + mDeviceStatus.toString());
+                }
                 return false;
             }
             for (Set<String> comb : mConcurrentCameraIdCombinations) {

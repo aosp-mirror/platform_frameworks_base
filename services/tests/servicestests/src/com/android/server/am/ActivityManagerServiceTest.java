@@ -44,6 +44,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -55,6 +58,7 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
+import android.app.SyncNotedAppOp;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -158,6 +162,14 @@ public class ActivityManagerServiceTest {
         mAms.mWaitForNetworkTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
+    }
+
+    private void mockNoteOperation() {
+        SyncNotedAppOp allowed = new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED,
+                AppOpsManager.OP_GET_USAGE_STATS, null);
+        when(mAppOpsService.noteOperation(eq(AppOpsManager.OP_GET_USAGE_STATS), eq(Process.myUid()),
+                nullable(String.class), nullable(String.class), any(Boolean.class),
+                nullable(String.class), any(Boolean.class))).thenReturn(allowed);
     }
 
     @After
@@ -509,8 +521,7 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUids_dispatchNeededChanges() throws RemoteException {
-        when(mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS, Process.myUid(), null,
-                null, false, null, false)).thenReturn(AppOpsManager.MODE_ALLOWED);
+        mockNoteOperation();
 
         final int[] changesToObserve = {
             ActivityManager.UID_OBSERVER_PROCSTATE,
@@ -635,6 +646,8 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUidChanges_procStateCutpoint() throws RemoteException {
+        mockNoteOperation();
+
         final IUidObserver observer = mock(IUidObserver.Stub.class);
 
         when(observer.asBinder()).thenReturn((IBinder) observer);
@@ -703,6 +716,8 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUidChanges_validateUidsUpdated() {
+        mockNoteOperation();
+
         final int[] changesForPendingItems = UID_RECORD_CHANGES;
 
         final int[] procStatesForPendingItems = {
