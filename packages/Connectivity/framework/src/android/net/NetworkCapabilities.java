@@ -1126,7 +1126,9 @@ public final class NetworkCapabilities implements Parcelable {
      * app needs to hold {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission. If the
      * app targets SDK version greater than or equal to {@link Build.VERSION_CODES#S}, then they
      * also need to use {@link NetworkCallback#FLAG_INCLUDE_LOCATION_INFO} to get the info in their
-     * callback. The app will be blamed for location access if this field is included.
+     * callback. If the apps targets SDK version equal to {{@link Build.VERSION_CODES#R}, this field
+     * will always be included. The app will be blamed for location access if this field is
+     * included.
      * </p>
      */
     public int getOwnerUid() {
