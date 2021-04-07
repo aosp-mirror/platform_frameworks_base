@@ -703,6 +703,10 @@ public class SmartReplyViewTest extends SysuiTestCase {
     // ============================= Smart Action tests ============================================
     // =============================================================================================
 
+    private View anyView() {
+        return any();
+    }
+
     @Test
     public void testTapSmartAction_waitsForKeyguard() throws InterruptedException {
         setSmartActions(TEST_ACTION_TITLES);
@@ -710,7 +714,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mView.getChildAt(2).performClick();
 
         verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any(),
-                any());
+                anyView());
     }
 
     @Test
@@ -721,7 +725,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         mView.getChildAt(2).performClick();
 
-        verify(mActivityStarter, never()).startPendingIntentDismissingKeyguard(any(), any(), any());
+        verify(mActivityStarter, never()).startPendingIntentDismissingKeyguard(any(), any(),
+                anyView());
     }
 
     @Test
@@ -734,7 +739,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mView.getChildAt(2).performClick();
 
         verify(mActivityStarter, times(1))
-                .startPendingIntentDismissingKeyguard(any(), any(), any());
+                .startPendingIntentDismissingKeyguard(any(), any(), anyView());
     }
 
     @Test
@@ -746,7 +751,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mView.getChildAt(2).performClick();
 
         verify(mActivityStarter, times(1))
-                .startPendingIntentDismissingKeyguard(any(), any(), any());
+                .startPendingIntentDismissingKeyguard(any(), any(), anyView());
     }
 
     @Test
