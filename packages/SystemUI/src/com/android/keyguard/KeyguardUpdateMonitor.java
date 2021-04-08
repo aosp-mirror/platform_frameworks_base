@@ -359,10 +359,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onChanged(BiometricSourceType type, boolean enabled, int userId)
                         throws RemoteException {
-                    if (type == BiometricSourceType.FACE) {
-                        mFaceSettingEnabledForUser.put(userId, enabled);
-                        updateFaceListeningState();
-                    }
+                    mHandler.post(() -> {
+                        if (type == BiometricSourceType.FACE) {
+                            mFaceSettingEnabledForUser.put(userId, enabled);
+                            updateFaceListeningState();
+                        }
+                    });
                 }
             };
 
