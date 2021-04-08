@@ -6601,7 +6601,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull final INetworkOfferCallback callback) {
         ensureRunningOnConnectivityServiceThread();
         for (final NetworkOfferInfo noi : mNetworkOffers) {
-            if (noi.offer.callback.equals(callback)) return noi;
+            if (noi.offer.callback.asBinder().equals(callback.asBinder())) return noi;
         }
         return null;
     }
