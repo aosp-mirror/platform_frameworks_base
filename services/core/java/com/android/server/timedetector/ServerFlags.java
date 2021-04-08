@@ -28,6 +28,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ServiceConfigAccessor;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
@@ -53,14 +55,15 @@ public final class ServerFlags {
      */
     @StringDef(prefix = "KEY_", value = {
             KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
-            KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_ENABLED_OVERRIDE,
-            KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_ENABLED_OVERRIDE,
+            KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
+            KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
             KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
             KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS,
             KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS,
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface DeviceConfigKey {}
 
     /**
@@ -75,19 +78,19 @@ public final class ServerFlags {
 
     /**
      * The key for the server flag that can override the device config for whether the primary
-     * location time zone provider is enabled or disabled.
+     * location time zone provider is enabled, disabled, or (for testing) in simulation mode.
      */
     @DeviceConfigKey
-    public static final String KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_ENABLED_OVERRIDE =
-            "primary_location_time_zone_provider_enabled_override";
+    public static final String KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE =
+            "primary_location_time_zone_provider_mode_override";
 
     /**
      * The key for the server flag that can override the device config for whether the secondary
-     * location time zone provider is enabled or disabled.
+     * location time zone provider is enabled or disabled, or (for testing) in simulation mode.
      */
     @DeviceConfigKey
-    public static final String KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_ENABLED_OVERRIDE =
-            "secondary_location_time_zone_provider_enabled_override";
+    public static final String KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE =
+            "secondary_location_time_zone_provider_mode_override";
 
     /**
      * The key for the minimum delay after location time zone detection has been enabled before the
@@ -193,6 +196,16 @@ public final class ServerFlags {
         synchronized (mListeners) {
             mListeners.put(listener, keys);
         }
+    }
+
+    /**
+     * Returns an optional string value from {@link DeviceConfig} from the system_time
+     * namespace, returns {@link Optional#empty()} if there is no explicit value set.
+     */
+    @NonNull
+    public Optional<String> getOptionalString(@DeviceConfigKey String key) {
+        String value = DeviceConfig.getProperty(NAMESPACE_SYSTEM_TIME, key);
+        return Optional.ofNullable(value);
     }
 
     /**

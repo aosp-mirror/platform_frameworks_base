@@ -17,6 +17,7 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -27,6 +28,10 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.timedetector.ServerFlags;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Objects;
@@ -40,13 +45,38 @@ import java.util.Set;
  */
 public final class ServiceConfigAccessor {
 
+    @StringDef(prefix = "PROVIDER_MODE_",
+            value = { PROVIDER_MODE_SIMULATED, PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED})
+    @Retention(RetentionPolicy.SOURCE)
+    @Target(ElementType.TYPE_USE)
+    @interface ProviderMode {}
+
+    /**
+     * The "simulated" provider mode.
+     * For use with {@link #getPrimaryLocationTimeZoneProviderMode()} and {@link
+     * #getSecondaryLocationTimeZoneProviderMode()}.
+     */
+    public static final @ProviderMode String PROVIDER_MODE_SIMULATED = "simulated";
+
+    /**
+     * The "disabled" provider mode. For use with {@link #getPrimaryLocationTimeZoneProviderMode()}
+     * and {@link #getSecondaryLocationTimeZoneProviderMode()}.
+     */
+    public static final @ProviderMode String PROVIDER_MODE_DISABLED = "disabled";
+
+    /**
+     * The "enabled" provider mode. For use with {@link #getPrimaryLocationTimeZoneProviderMode()}
+     * and {@link #getSecondaryLocationTimeZoneProviderMode()}.
+     */
+    public static final @ProviderMode String PROVIDER_MODE_ENABLED = "enabled";
+
     private static final Set<String> SERVER_FLAGS_KEYS_TO_WATCH = Collections.unmodifiableSet(
             new ArraySet<>(new String[] {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
-                    ServerFlags.KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_ENABLED_OVERRIDE,
-                    ServerFlags.KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_ENABLED_OVERRIDE,
+                    ServerFlags.KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
+                    ServerFlags.KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS
@@ -139,14 +169,28 @@ public final class ServiceConfigAccessor {
 
     /**
      * Returns {@code true} if the location-based time zone detection feature is supported on the
-     * device. This can be used during feature testing on builds that are capable of location time
-     * zone detection to enable / disable the feature for some users.
+     * device.
      */
     public boolean isGeoTimeZoneDetectionFeatureSupported() {
+        // For the feature to be enabled it must:
+        // 1) Be turned on in config.
+        // 2) Not be turned off via a server flag.
+        // 3) There must be at least one location time zone provider enabled / configured.
         return mGeoDetectionFeatureSupportedInConfig
-                && isGeoTimeZoneDetectionFeatureSupportedInternal();
+                && isGeoTimeZoneDetectionFeatureSupportedInternal()
+                && atLeastOneProviderIsEnabled();
     }
 
+    private boolean atLeastOneProviderIsEnabled() {
+        return !(Objects.equals(getPrimaryLocationTimeZoneProviderMode(), PROVIDER_MODE_DISABLED)
+                && Objects.equals(getSecondaryLocationTimeZoneProviderMode(),
+                PROVIDER_MODE_DISABLED));
+    }
+
+    /**
+     * Returns {@code true} if the location-based time zone detection feature is not explicitly
+     * disabled by a server flag.
+     */
     private boolean isGeoTimeZoneDetectionFeatureSupportedInternal() {
         final boolean defaultEnabled = true;
         return mServerFlags.getBoolean(
@@ -154,42 +198,49 @@ public final class ServiceConfigAccessor {
                 defaultEnabled);
     }
 
+    @NonNull
+    public String getPrimaryLocationTimeZoneProviderPackageName() {
+        return mContext.getResources().getString(
+                R.string.config_primaryLocationTimeZoneProviderPackageName);
+    }
+
+    @NonNull
+    public String getSecondaryLocationTimeZoneProviderPackageName() {
+        return mContext.getResources().getString(
+                R.string.config_secondaryLocationTimeZoneProviderPackageName);
+    }
+
     /**
      * Returns {@code true} if the primary location time zone provider can be used.
      */
-    public boolean isPrimaryLocationTimeZoneProviderEnabled() {
-        return getPrimaryLocationTimeZoneProviderEnabledOverride()
-                .orElse(isPrimaryLocationTimeZoneProviderEnabledInConfig());
-    }
-
-    private boolean isPrimaryLocationTimeZoneProviderEnabledInConfig() {
-        int providerEnabledConfigId = R.bool.config_enablePrimaryLocationTimeZoneProvider;
-        return getConfigBoolean(providerEnabledConfigId);
+    @NonNull
+    public @ProviderMode String getPrimaryLocationTimeZoneProviderMode() {
+        return mServerFlags.getOptionalString(
+                ServerFlags.KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE)
+                .orElse(getPrimaryLocationTimeZoneProviderModeFromConfig());
     }
 
     @NonNull
-    private Optional<Boolean> getPrimaryLocationTimeZoneProviderEnabledOverride() {
-        return mServerFlags.getOptionalBoolean(
-                ServerFlags.KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_ENABLED_OVERRIDE);
+    private @ProviderMode String getPrimaryLocationTimeZoneProviderModeFromConfig() {
+        int providerEnabledConfigId = R.bool.config_enablePrimaryLocationTimeZoneProvider;
+        return getConfigBoolean(providerEnabledConfigId)
+                ? PROVIDER_MODE_ENABLED : PROVIDER_MODE_DISABLED;
     }
 
     /**
-     * Returns {@code true} if the secondary location time zone provider can be used.
+     * Returns the mode for the secondary location time zone provider can be used.
      */
-    public boolean isSecondaryLocationTimeZoneProviderEnabled() {
-        return getSecondaryLocationTimeZoneProviderEnabledOverride()
-                .orElse(isSecondaryLocationTimeZoneProviderEnabledInConfig());
-    }
-
-    private boolean isSecondaryLocationTimeZoneProviderEnabledInConfig() {
-        int providerEnabledConfigId = R.bool.config_enableSecondaryLocationTimeZoneProvider;
-        return getConfigBoolean(providerEnabledConfigId);
+    public @ProviderMode String getSecondaryLocationTimeZoneProviderMode() {
+        return mServerFlags.getOptionalString(
+                ServerFlags.KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE)
+                .orElse(getSecondaryLocationTimeZoneProviderModeFromConfig());
     }
 
     @NonNull
-    private Optional<Boolean> getSecondaryLocationTimeZoneProviderEnabledOverride() {
-        return mServerFlags.getOptionalBoolean(
-                ServerFlags.KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_ENABLED_OVERRIDE);
+    private @ProviderMode String getSecondaryLocationTimeZoneProviderModeFromConfig() {
+        int providerEnabledConfigId = R.bool.config_enableSecondaryLocationTimeZoneProvider;
+        return getConfigBoolean(providerEnabledConfigId)
+                ? PROVIDER_MODE_ENABLED : PROVIDER_MODE_DISABLED;
     }
 
     /**

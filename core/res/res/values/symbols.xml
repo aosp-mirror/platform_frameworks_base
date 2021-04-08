@@ -2180,10 +2180,8 @@
   <java-symbol type="bool" name="config_enableGnssTimeUpdateService" />
   <java-symbol type="bool" name="config_enableGeolocationTimeZoneDetection" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneProvider" />
-  <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneProvider" />
-  <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
 
   <java-symbol type="layout" name="resolver_list" />
