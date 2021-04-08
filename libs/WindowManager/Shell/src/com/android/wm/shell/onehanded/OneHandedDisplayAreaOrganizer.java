@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.onehanded;
 
+import static android.os.UserHandle.myUserId;
+
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_EXIT;
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_TRIGGER;
 
@@ -61,6 +63,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     private final Rect mLastVisualDisplayBounds = new Rect();
     private final Rect mDefaultDisplayBounds = new Rect();
+    private final OneHandedSettingsUtil mOneHandedSettingsUtil;
 
     private boolean mIsInOneHanded;
     private int mEnterExitAnimationDurationMs;
@@ -109,12 +112,14 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      */
     public OneHandedDisplayAreaOrganizer(Context context,
             DisplayLayout displayLayout,
+            OneHandedSettingsUtil oneHandedSettingsUtil,
             OneHandedAnimationController animationController,
             OneHandedTutorialHandler tutorialHandler,
             OneHandedBackgroundPanelOrganizer oneHandedBackgroundGradientOrganizer,
             ShellExecutor mainExecutor) {
         super(mainExecutor);
         mDisplayLayout.set(displayLayout);
+        mOneHandedSettingsUtil = oneHandedSettingsUtil;
         updateDisplayBounds();
         mAnimationController = animationController;
         final int animationDurationConfig = context.getResources().getInteger(
@@ -166,6 +171,11 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      */
     public void onRotateDisplay(Context context, int toRotation, WindowContainerTransaction wct) {
         if (mDisplayLayout.rotation() == toRotation) {
+            return;
+        }
+
+        if (!mOneHandedSettingsUtil.getSettingsOneHandedModeEnabled(context.getContentResolver(),
+                myUserId())) {
             return;
         }
         mDisplayLayout.rotateTo(context.getResources(), toRotation);
