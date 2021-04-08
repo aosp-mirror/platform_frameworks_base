@@ -1850,6 +1850,9 @@ public final class ActiveServices {
                         showFgsBgRestrictedNotificationLocked(r);
                         updateServiceForegroundLocked(psr, true);
                         ignoreForeground = true;
+                        logForegroundServiceStateChanged(r,
+                                FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
+                                0);
                         if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
                                 r.appInfo.uid)) {
                             throw new ForegroundServiceStartNotAllowedException(msg);
@@ -1895,6 +1898,7 @@ public final class ActiveServices {
                         }
                         r.isForeground = true;
                         r.mStartForegroundCount++;
+                        r.mFgsEnterTime = SystemClock.uptimeMillis();
                         if (!stopProcStatsOp) {
                             ServiceState stracker = r.getTracker();
                             if (stracker != null) {
@@ -1904,18 +1908,17 @@ public final class ActiveServices {
                         } else {
                             stopProcStatsOp = false;
                         }
+                        postFgsNotificationLocked(r);
                         mAm.mAppOpsService.startOperation(
                                 AppOpsManager.getToken(mAm.mAppOpsService),
                                 AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName,
                                 null, true, false, "", false);
-                        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
-                                r.appInfo.uid, r.shortInstanceName,
+                        logForegroundServiceStateChanged(r,
                                 FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
-                                r.mAllowWhileInUsePermissionInFgs);
+                                0);
                         registerAppOpCallbackLocked(r);
                         mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
                     }
-                    postFgsNotificationLocked(r);
                     if (r.app != null) {
                         updateServiceForegroundLocked(psr, true);
                     }
@@ -1954,6 +1957,7 @@ public final class ActiveServices {
                 }
                 r.isForeground = false;
                 resetFgsRestrictionLocked(r);
+                r.mFgsExitTime = SystemClock.uptimeMillis();
                 ServiceState stracker = r.getTracker();
                 if (stracker != null) {
                     stracker.setForeground(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -1963,10 +1967,10 @@ public final class ActiveServices {
                         AppOpsManager.getToken(mAm.mAppOpsService),
                         AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
                 unregisterAppOpCallbackLocked(r);
-                FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
-                        r.appInfo.uid, r.shortInstanceName,
+                logForegroundServiceStateChanged(r,
                         FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
-                        r.mAllowWhileInUsePermissionInFgs);
+                        r.mFgsExitTime > r.mFgsEnterTime
+                                ? (int)(r.mFgsExitTime - r.mFgsEnterTime) : 0);
                 mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
                 if (r.app != null) {
                     mAm.updateLruProcessLocked(r.app, false, null);
@@ -2050,9 +2054,13 @@ public final class ActiveServices {
                 Slog.d(TAG_SERVICE, "FGS " + r + " non-deferred notification");
             }
             r.postNotification();
+            r.mFgsNotificationDeferred = false;
+            r.mFgsNotificationShown = true;
             return;
         }
 
+        r.mFgsNotificationDeferred = true;
+        r.mFgsNotificationShown = false;
         // schedule the actual notification post
         long when = now + mAm.mConstants.mFgsNotificationDeferralInterval;
         // If there are already deferred FGS notifications for this app,
@@ -2110,6 +2118,7 @@ public final class ActiveServices {
                         // the notification.
                         if (r.isForeground && r.app != null) {
                             r.postNotification();
+                            r.mFgsNotificationShown = true;
                         } else if (DEBUG_FOREGROUND_SERVICE) {
                             Slog.d(TAG_SERVICE, "  - service no longer running/fg, ignoring");
                         }
@@ -3085,6 +3094,12 @@ public final class ActiveServices {
         if (r != null) {
             r.mRecentCallingPackage = callingPackage;
             r.mRecentCallingUid = callingUid;
+            try {
+                r.mRecentCallerApplicationInfo =
+                        mAm.mContext.getPackageManager().getApplicationInfoAsUser(callingPackage,
+                                0, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+            }
             if (!mAm.validateAssociationAllowedLocked(callingPackage, callingUid, r.packageName,
                     r.appInfo.uid)) {
                 String msg = "association not allowed between packages "
@@ -4021,10 +4036,11 @@ public final class ActiveServices {
                     AppOpsManager.getToken(mAm.mAppOpsService),
                     AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
             unregisterAppOpCallbackLocked(r);
-            FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
-                    r.appInfo.uid, r.shortInstanceName,
+            r.mFgsExitTime = SystemClock.uptimeMillis();
+            logForegroundServiceStateChanged(r,
                     FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
-                    r.mAllowWhileInUsePermissionInFgs);
+                    r.mFgsExitTime > r.mFgsEnterTime
+                            ? (int)(r.mFgsExitTime - r.mFgsEnterTime) : 0);
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
         }
 
@@ -5969,5 +5985,30 @@ public final class ActiveServices {
             }
             r.mLoggedInfoAllowStartForeground = true;
         }
+    }
+
+    /**
+     * Log the statsd event for FGS.
+     * @param r ServiceRecord
+     * @param state one of ENTER/EXIT/DENIED event.
+     * @param durationMs Only meaningful for EXIT event, the duration from ENTER and EXIT state.
+     */
+    private void logForegroundServiceStateChanged(ServiceRecord r, int state, int durationMs) {
+        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                r.appInfo.uid,
+                r.shortInstanceName,
+                state,
+                r.mAllowWhileInUsePermissionInFgs,
+                r.mAllowStartForeground,
+                r.appInfo.targetSdkVersion,
+                r.mRecentCallingUid,
+                r.mRecentCallerApplicationInfo != null
+                        ? r.mRecentCallerApplicationInfo.targetSdkVersion : 0,
+                r.mInfoTempFgsAllowListReason != null
+                        ? r.mInfoTempFgsAllowListReason.mCallingUid : INVALID_UID,
+                r.mFgsNotificationDeferred,
+                r.mFgsNotificationShown,
+                durationMs,
+                r.mStartForegroundCount);
     }
 }
