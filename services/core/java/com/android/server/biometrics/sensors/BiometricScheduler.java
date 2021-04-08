@@ -422,9 +422,9 @@ public class BiometricScheduler {
                         + mCurrentOperation);
                 // This should trigger the internal onClientFinished callback, which clears the
                 // operation and starts the next one.
-                final Interruptable interruptable =
-                        (Interruptable) mCurrentOperation.mClientMonitor;
-                interruptable.onError(BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                final ErrorConsumer errorConsumer =
+                        (ErrorConsumer) mCurrentOperation.mClientMonitor;
+                errorConsumer.onError(BiometricConstants.BIOMETRIC_ERROR_CANCELED,
                         0 /* vendorCode */);
                 return;
             } else {
