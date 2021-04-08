@@ -1,6 +1,7 @@
 per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 per-file *Cpu* = file:CPU_OWNERS
+per-file *Binder* = file:BINDER_OWNERS
 
 # BatteryStats
 per-file BatterySipper.java = file:/BATTERY_STATS_OWNERS
