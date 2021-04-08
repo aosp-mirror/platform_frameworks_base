@@ -25214,6 +25214,7 @@ package android.media.session {
     method public float getPlaybackSpeed();
     method public long getPosition();
     method public int getState();
+    method public boolean isActive();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final long ACTION_FAST_FORWARD = 64L; // 0x40L
     field public static final long ACTION_PAUSE = 2L; // 0x2L
