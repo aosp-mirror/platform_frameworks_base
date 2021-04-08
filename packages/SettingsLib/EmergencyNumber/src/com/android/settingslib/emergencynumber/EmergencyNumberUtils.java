@@ -165,9 +165,8 @@ public class EmergencyNumberUtils {
     }
 
     private List<EmergencyNumber> getPromotedEmergencyNumbers(int categories) {
-        // TODO(b/171542607): Use platform API when its bug is fixed.
-        Map<Integer, List<EmergencyNumber>> allLists = filterEmergencyNumbersByCategories(
-                mTelephonyManager.getEmergencyNumberList(), categories);
+        Map<Integer, List<EmergencyNumber>> allLists = mTelephonyManager.getEmergencyNumberList(
+                categories);
         if (allLists == null || allLists.isEmpty()) {
             Log.w(TAG, "Unable to retrieve emergency number lists!");
             return new ArrayList<>();
@@ -211,29 +210,5 @@ public class EmergencyNumberUtils {
             Log.w(TAG, "No promoted emergency number found!");
         }
         return promotedEmergencyNumberLists.get(SubscriptionManager.getDefaultSubscriptionId());
-    }
-
-    /**
-     * Filter emergency numbers with categories.
-     */
-    private Map<Integer, List<EmergencyNumber>> filterEmergencyNumbersByCategories(
-            Map<Integer, List<EmergencyNumber>> emergencyNumberList, int categories) {
-        Map<Integer, List<EmergencyNumber>> filteredMap = new ArrayMap<>();
-        if (emergencyNumberList == null) {
-            return filteredMap;
-        }
-        for (Integer subscriptionId : emergencyNumberList.keySet()) {
-            List<EmergencyNumber> allNumbersForSub = emergencyNumberList.get(
-                    subscriptionId);
-            List<EmergencyNumber> numbersForCategoriesPerSub = new ArrayList<>();
-            for (EmergencyNumber number : allNumbersForSub) {
-                if (number.isInEmergencyServiceCategories(categories)) {
-                    numbersForCategoriesPerSub.add(number);
-                }
-            }
-            filteredMap.put(
-                    subscriptionId, numbersForCategoriesPerSub);
-        }
-        return filteredMap;
     }
 }
