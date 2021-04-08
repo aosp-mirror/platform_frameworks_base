@@ -2233,8 +2233,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (mFaceRunningState == BIOMETRIC_STATE_CANCELLING) {
             setFaceRunningState(BIOMETRIC_STATE_CANCELLING_RESTARTING);
             return;
+        } else if (mFaceRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
+            // Waiting for ERROR_CANCELED before requesting auth again
+            return;
         }
-        if (DEBUG) Log.v(TAG, "startListeningForFace()");
+        if (DEBUG) Log.v(TAG, "startListeningForFace(): " + mFaceRunningState);
         int userId = getCurrentUser();
         if (isUnlockWithFacePossible(userId)) {
             if (mFaceCancelSignal != null) {
