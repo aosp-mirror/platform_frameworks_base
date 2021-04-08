@@ -285,7 +285,7 @@ public class PeopleSpaceWidgetManager {
                 updateTilesByUri(key, sbn, action);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Exception: " + e);
+            Log.e(TAG, "Throwing exception: " + e);
         }
     }
 
@@ -498,7 +498,7 @@ public class PeopleSpaceWidgetManager {
         if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
             if (DEBUG) Log.i(TAG, "Adding notification to storage, appWidgetId: " + appWidgetId);
             storedTile = augmentTileFromNotification(mContext, storedTile, sbn);
-        } else if (storedTile.getNotificationKey().equals(sbn.getKey())) {
+        } else if (Objects.equals(storedTile.getNotificationKey(), sbn.getKey())) {
             if (DEBUG) {
                 Log.i(TAG, "Removing notification from storage, appWidgetId: " + appWidgetId);
             }
