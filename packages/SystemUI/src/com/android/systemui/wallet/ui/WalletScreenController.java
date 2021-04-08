@@ -42,6 +42,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,8 @@ import java.util.concurrent.TimeUnit;
 public class WalletScreenController implements
         WalletCardCarousel.OnSelectionListener,
         QuickAccessWalletClient.OnWalletCardsRetrievedCallback,
-        QuickAccessWalletClient.WalletServiceEventListener {
+        QuickAccessWalletClient.WalletServiceEventListener,
+        KeyguardStateController.Callback {
 
     private static final String TAG = "WalletScreenCtrl";
     private static final String PREFS_HAS_CARDS = "has_cards";
@@ -65,6 +67,7 @@ public class WalletScreenController implements
     private final ActivityStarter mActivityStarter;
     private final Executor mExecutor;
     private final Handler mHandler;
+    private final KeyguardStateController mKeyguardStateController;
     private final Runnable mSelectionRunnable = this::selectCard;
     private final SharedPreferences mPrefs;
     private final WalletView mWalletView;
@@ -72,7 +75,6 @@ public class WalletScreenController implements
 
     @VisibleForTesting String mSelectedCardId;
     @VisibleForTesting boolean mIsDismissed;
-    private boolean mIsDeviceLocked;
     private boolean mHasRegisteredListener;
 
     public WalletScreenController(
@@ -83,12 +85,13 @@ public class WalletScreenController implements
             Executor executor,
             Handler handler,
             UserTracker userTracker,
-            boolean isDeviceLocked) {
+            KeyguardStateController keyguardStateController) {
         mContext = context;
         mWalletClient = walletClient;
         mActivityStarter = activityStarter;
         mExecutor = executor;
         mHandler = handler;
+        mKeyguardStateController = keyguardStateController;
         mPrefs = userTracker.getUserContext().getSharedPreferences(TAG, Context.MODE_PRIVATE);
         mWalletView = walletView;
         mWalletView.setMinimumHeight(getExpectedMinHeight());
@@ -105,7 +108,6 @@ public class WalletScreenController implements
             // to decrease perceived latency.
             showEmptyStateView();
         }
-        mIsDeviceLocked = isDeviceLocked;
     }
 
     /**
@@ -122,11 +124,17 @@ public class WalletScreenController implements
         for (WalletCard card : walletCards) {
             data.add(new QAWalletCardViewInfo(mContext, card));
         }
+
+        // Get on main thread for UI updates.
         mHandler.post(() -> {
+            if (mIsDismissed) {
+                return;
+            }
             if (data.isEmpty()) {
                 showEmptyStateView();
             } else {
-                mWalletView.showCardCarousel(data, response.getSelectedIndex(), mIsDeviceLocked);
+                mWalletView.showCardCarousel(
+                        data, response.getSelectedIndex(), !mKeyguardStateController.isUnlocked());
             }
             // The empty state view will not be shown preemptively next time if cards were returned
             mPrefs.edit().putBoolean(PREFS_HAS_CARDS, !data.isEmpty()).apply();
@@ -140,10 +148,10 @@ public class WalletScreenController implements
      */
     @Override
     public void onWalletCardRetrievalError(@NonNull GetWalletCardsError error) {
-        if (mIsDismissed) {
-            return;
-        }
         mHandler.post(() -> {
+            if (mIsDismissed) {
+                return;
+            }
             mWalletView.showErrorMessage(error.getMessage());
         });
     }
@@ -167,6 +175,11 @@ public class WalletScreenController implements
             default:
                 Log.w(TAG, "onWalletServiceEvent: Unknown event type");
         }
+    }
+
+    @Override
+    public void onKeyguardFadingAwayChanged() {
+        queryWalletCards();
     }
 
     @Override

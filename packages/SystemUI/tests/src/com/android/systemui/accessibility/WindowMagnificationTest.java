@@ -118,6 +118,16 @@ public class WindowMagnificationTest extends SysuiTestCase {
     }
 
     @Test
+    public void onAccessibilityActionPerformed_enabled_notifyCallback() throws RemoteException {
+        mCommandQueue.requestWindowMagnificationConnection(true);
+        waitForIdleSync();
+
+        mWindowMagnification.onAccessibilityActionPerformed(Display.DEFAULT_DISPLAY);
+
+        verify(mConnectionCallback).onAccessibilityActionPerformed(eq(Display.DEFAULT_DISPLAY));
+    }
+
+    @Test
     public void onConfigurationChanged_updateModeSwitches() {
         final Configuration config = new Configuration();
         config.densityDpi = Configuration.DENSITY_DPI_ANY;

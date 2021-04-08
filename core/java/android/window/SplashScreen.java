@@ -17,8 +17,8 @@
 package android.window;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.UiThread;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.Context;
@@ -52,7 +52,13 @@ public interface SplashScreen {
      * @see OnExitAnimationListener#onSplashScreenExit(SplashScreenView)
      */
     @SuppressLint("ExecutorRegistration")
-    void setOnExitAnimationListener(@Nullable SplashScreen.OnExitAnimationListener listener);
+    void setOnExitAnimationListener(@NonNull SplashScreen.OnExitAnimationListener listener);
+
+    /**
+     * Clear exist listener
+     * @see #setOnExitAnimationListener
+     */
+    void clearOnExitAnimationListener();
 
     /**
      * Listens for the splash screen exit event.
@@ -63,15 +69,14 @@ public interface SplashScreen {
          * of the activity. The {@link SplashScreenView} represents the splash screen view
          * object, developer can make an exit animation based on this view.</p>
          *
-         * <p>If {@link SplashScreenView#remove} is not called after 5000ms, the method will be
-         * automatically called and the splash screen removed.</p>
-         *
-         * <p>This method is never invoked if your activity sets
-         * {@link #setOnExitAnimationListener} to <code>null</code>..
+         * <p>This method is never invoked if your activity clear the listener by
+         * {@link #clearOnExitAnimationListener}.
          *
          * @param view The view object which on top of this Activity.
          * @see #setOnExitAnimationListener
+         * @see #clearOnExitAnimationListener
          */
+        @UiThread
         void onSplashScreenExit(@NonNull SplashScreenView view);
     }
 
@@ -90,18 +95,28 @@ public interface SplashScreen {
 
         @Override
         public void setOnExitAnimationListener(
-                @Nullable SplashScreen.OnExitAnimationListener listener) {
+                @NonNull SplashScreen.OnExitAnimationListener listener) {
             if (mActivityToken == null) {
                 // This is not an activity.
                 return;
             }
             synchronized (mGlobal.mGlobalLock) {
-                mExitAnimationListener = listener;
                 if (listener != null) {
+                    mExitAnimationListener = listener;
                     mGlobal.addImpl(this);
-                } else {
-                    mGlobal.removeImpl(this);
                 }
+            }
+        }
+
+        @Override
+        public void clearOnExitAnimationListener() {
+            if (mActivityToken == null) {
+                // This is not an activity.
+                return;
+            }
+            synchronized (mGlobal.mGlobalLock) {
+                mExitAnimationListener = null;
+                mGlobal.removeImpl(this);
             }
         }
     }

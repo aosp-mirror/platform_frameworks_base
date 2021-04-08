@@ -894,10 +894,6 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_SIGNAL_STRENGTHS_CHANGED);
         }
 
-        if (telephonyCallback instanceof TelephonyCallback.AlwaysReportedSignalStrengthListener) {
-            eventList.add(TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED);
-        }
-
         if (telephonyCallback instanceof TelephonyCallback.CellInfoListener) {
             eventList.add(TelephonyCallback.EVENT_CELL_INFO_CHANGED);
         }

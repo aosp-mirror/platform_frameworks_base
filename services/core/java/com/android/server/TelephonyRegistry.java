@@ -29,6 +29,8 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -155,7 +157,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
         int phoneId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
-        int targetSdk;
 
         boolean matchTelephonyCallbackEvent(int event) {
             return (callback != null) && (this.eventList.contains(event));
@@ -227,6 +228,54 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return Binder.withCleanCallingIdentity(() -> CompatChanges.isChangeEnabled(
                     TelecomManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION, packageName,
                     userHandle));
+        }
+
+        /**
+         * To check the SDK version for
+         * {@link android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener} should add
+         * {@link android.Manifest.permission#READ_PHONE_STATE} since Android 12.
+         * @noinspection ConstantConditions
+         */
+        public boolean isActiveDataSubIdReadPhoneStateEnforcedInPlatformCompat(String packageName,
+                UserHandle userHandle) {
+            return Binder.withCleanCallingIdentity(() -> CompatChanges.isChangeEnabled(
+                    REQUIRE_READ_PHONE_STATE_PERMISSION_FOR_ACTIVE_DATA_SUB_ID, packageName,
+                    userHandle));
+        }
+
+        /**
+         * To check the SDK version for
+         * {@link android.telephony.TelephonyCallback.CellInfoListener} should add
+         * {@link android.Manifest.permission#READ_PHONE_STATE} since Android 12.
+         * @noinspection ConstantConditions
+         */
+        public boolean isCellInfoReadPhoneStateEnforcedInPlatformCompat(String packageName,
+                UserHandle userHandle) {
+            return Binder.withCleanCallingIdentity(() -> CompatChanges.isChangeEnabled(
+                    REQUIRE_READ_PHONE_STATE_PERMISSION_FOR_CELL_INFO, packageName, userHandle));
+        }
+
+        /**
+         * To check the SDK version for
+         * {@link android.telephony.TelephonyCallback.DisplayInfoListener} should remove
+         * {@link android.Manifest.permission#READ_PHONE_STATE} since Android 12.
+         * @noinspection ConstantConditions
+         */
+        public boolean isDisplayInfoReadPhoneStateEnforcedInPlatformCompat(String packageName,
+                UserHandle userHandle) {
+            return Binder.withCleanCallingIdentity(() -> CompatChanges.isChangeEnabled(
+                    REQUIRE_READ_PHONE_STATE_PERMISSION_FOR_DISPLAY_INFO, packageName, userHandle));
+        }
+
+        /**
+         * Support backward compatibility for {@link android.telephony.TelephonyDisplayInfo}.
+         *
+         * @noinspection ConstantConditions
+         */
+        public boolean isDisplayInfoNrAdvancedSupported(String packageName,
+                UserHandle userHandle) {
+            return Binder.withCleanCallingIdentity(() -> CompatChanges.isChangeEnabled(
+                    DISPLAY_INFO_NR_ADVANCED_SUPPORTED, packageName, userHandle));
         }
     }
 
@@ -346,6 +395,39 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      */
     private List<Map<Pair<Integer, ApnSetting>, PreciseDataConnectionState>>
             mPreciseDataConnectionStates;
+    /**
+     * Support backward compatibility for {@link android.telephony.TelephonyDisplayInfo}.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long DISPLAY_INFO_NR_ADVANCED_SUPPORTED = 181658987L;
+
+    /**
+     * To check the SDK version for
+     * {@link android.telephony.TelephonyCallback.DisplayInfoListener} should remove
+     * {@link android.Manifest.permission#READ_PHONE_STATE} since Android 12.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long REQUIRE_READ_PHONE_STATE_PERMISSION_FOR_DISPLAY_INFO = 183164979L;
+
+    /**
+     * To check the SDK version for
+     * {@link android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener} should add
+     * {@link android.Manifest.permission#READ_PHONE_STATE} since Android 12.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long REQUIRE_READ_PHONE_STATE_PERMISSION_FOR_ACTIVE_DATA_SUB_ID
+            = 182478738L;
+
+    /**
+     * To check the SDK version for {@link android.telephony.TelephonyCallback.CellInfoListener}
+     * should add {@link android.Manifest.permission#READ_PHONE_STATE} since Android 12.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long REQUIRE_READ_PHONE_STATE_PERMISSION_FOR_CELL_INFO = 184323934L;
 
     private static final Set<Integer> REQUIRE_PRECISE_PHONE_STATE_PERMISSION;
     static {
@@ -379,13 +461,46 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 || events.contains(TelephonyCallback.EVENT_BARRING_INFO_CHANGED);
     }
 
-    private boolean isPhoneStatePermissionRequired(Set<Integer> events, int targetSdk) {
-        return events.contains(TelephonyCallback.EVENT_CALL_FORWARDING_INDICATOR_CHANGED)
+    private boolean isPhoneStatePermissionRequired(Set<Integer> events, String callingPackage,
+            UserHandle userHandle) {
+        if (events.contains(TelephonyCallback.EVENT_CALL_FORWARDING_INDICATOR_CHANGED)
                 || events.contains(TelephonyCallback.EVENT_MESSAGE_WAITING_INDICATOR_CHANGED)
-                || events.contains(TelephonyCallback.EVENT_EMERGENCY_NUMBER_LIST_CHANGED)
-                || events.contains(TelephonyCallback.EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED)
-                || (targetSdk <= android.os.Build.VERSION_CODES.R ? events.contains(
-                TelephonyCallback.EVENT_DISPLAY_INFO_CHANGED) : false);
+                || events.contains(TelephonyCallback.EVENT_EMERGENCY_NUMBER_LIST_CHANGED)) {
+            return true;
+        }
+
+        // Only check READ_PHONE_STATE for CALL_STATE_CHANGED for Android 12 or above.
+        if ((events.contains(TelephonyCallback.EVENT_LEGACY_CALL_STATE_CHANGED)
+                || events.contains(TelephonyCallback.EVENT_CALL_STATE_CHANGED))
+                && mConfigurationProvider.isCallStateReadPhoneStateEnforcedInPlatformCompat(
+                        callingPackage, userHandle)) {
+            return true;
+        }
+
+        // Only check READ_PHONE_STATE for ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED for Android 12
+        // or above.
+        if (events.contains(TelephonyCallback.EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED)
+                && mConfigurationProvider.isActiveDataSubIdReadPhoneStateEnforcedInPlatformCompat(
+                        callingPackage, userHandle)) {
+            return true;
+        }
+
+        // Only check READ_PHONE_STATE for CELL_INFO_CHANGED for Android 12 or above.
+        if (events.contains(TelephonyCallback.EVENT_CELL_INFO_CHANGED)
+                && mConfigurationProvider.isCellInfoReadPhoneStateEnforcedInPlatformCompat(
+                        callingPackage, userHandle)) {
+            return true;
+        }
+
+        // Only check READ_PHONE_STATE for DISPLAY_INFO_CHANGED for Android 11 or older.
+        // READ_PHONE_STATE is not required anymore after Android 12.
+        if (events.contains(TelephonyCallback.EVENT_DISPLAY_INFO_CHANGED)
+                && !mConfigurationProvider.isDisplayInfoReadPhoneStateEnforcedInPlatformCompat(
+                        callingPackage, userHandle)) {
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isPrecisePhoneStatePermissionRequired(Set<Integer> events) {
@@ -902,12 +1017,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             remove(callback.asBinder());
             return;
         }
-        int callerTargetSdk = TelephonyPermissions.getTargetSdk(mContext, callingPackage);
+
         // Checks permission and throws SecurityException for disallowed operations. For pre-M
         // apps whose runtime permission has been revoked, we return immediately to skip sending
         // events to the app without crashing it.
-        if (!checkListenerPermission(events, subId, callingPackage, callingFeatureId,
-                "listen", callerTargetSdk)) {
+        if (!checkListenerPermission(events, subId, callingPackage, callingFeatureId, "listen")) {
             return;
         }
 
@@ -940,7 +1054,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
             r.phoneId = phoneId;
             r.eventList = events;
-            r.targetSdk = callerTargetSdk;
 
             if (DBG) {
                 log("listen:  Register r=" + r + " r.subId=" + r.subId + " phoneId=" + phoneId);
@@ -1773,7 +1886,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             TelephonyCallback.EVENT_DISPLAY_INFO_CHANGED)
                             && idMatchWithoutDefaultPhoneCheck(r.subId, subId)) {
                         try {
-                            if (r.targetSdk <= android.os.Build.VERSION_CODES.R) {
+                            if (!mConfigurationProvider.isDisplayInfoNrAdvancedSupported(
+                                    r.callingPackage, Binder.getCallingUserHandle())) {
                                 telephonyDisplayInfo =
                                         getBackwardCompatibleTelephonyDisplayInfo(
                                                 telephonyDisplayInfo);
@@ -2922,7 +3036,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private boolean checkListenerPermission(Set<Integer> events, int subId, String callingPackage,
-            @Nullable String callingFeatureId, String message, int targetSdk) {
+            @Nullable String callingFeatureId, String message) {
         LocationAccessPolicy.LocationPermissionQuery.Builder locationQueryBuilder =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
                         .setCallingPackage(callingPackage)
@@ -2958,23 +3072,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
 
-        if (isPhoneStatePermissionRequired(events, targetSdk)) {
+        if (isPhoneStatePermissionRequired(events, callingPackage, Binder.getCallingUserHandle())) {
             if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
                     mContext, subId, callingPackage, callingFeatureId, message)) {
                 isPermissionCheckSuccessful = false;
-            }
-        }
-
-        // Only check READ_PHONE_STATE for CALL_STATE_CHANGED for API 31+.
-        if (mConfigurationProvider.isCallStateReadPhoneStateEnforcedInPlatformCompat(callingPackage,
-                Binder.getCallingUserHandle())) {
-            if (events.contains(TelephonyCallback.EVENT_LEGACY_CALL_STATE_CHANGED)
-                    || events.contains(TelephonyCallback.EVENT_CALL_STATE_CHANGED)) {
-                if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
-                        mContext, subId, callingPackage, callingFeatureId, message)) {
-                    throw new SecurityException("CALL_STATE_CHANGED event requires "
-                            + "READ_PHONE_STATE");
-                }
             }
         }
 

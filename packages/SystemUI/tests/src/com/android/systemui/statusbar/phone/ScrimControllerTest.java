@@ -49,7 +49,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -79,6 +78,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     private ScrimController mScrimController;
     private ScrimView mScrimBehind;
+    private ScrimView mNotificationsScrim;
     private ScrimView mScrimInFront;
     private ScrimView mScrimForBubble;
     private ScrimState mScrimState;
@@ -103,8 +103,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private DockManager mDockManager;
-    @Mock
-    private BlurUtils mBlurUtils;
     @Mock
     private ConfigurationController mConfigurationController;
     @Mock
@@ -163,6 +161,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.onPreDraw();
         // Force finish all animations.
         mLooper.processAllMessages();
+        endAnimation(mNotificationsScrim);
         endAnimation(mScrimBehind);
         endAnimation(mScrimInFront);
         endAnimation(mScrimForBubble);
@@ -189,6 +188,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimBehind = spy(new ScrimView(getContext()));
         mScrimInFront = new ScrimView(getContext());
         mScrimForBubble = new ScrimView(getContext());
+        mNotificationsScrim = new ScrimView(getContext());
         mAlwaysOnEnabled = true;
         mLooper = TestableLooper.get(this);
         DejankUtils.setImmediate(true);
@@ -201,7 +201,6 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
         when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
-        when(mBlurUtils.supportsBlursOnWindows()).thenReturn(true);
 
         doAnswer((Answer<Void>) invocation -> {
             mScrimState = invocation.getArgument(0);
@@ -222,10 +221,11 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController = new ScrimController(mLightBarController,
                 mDozeParamenters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
-                mDockManager, mBlurUtils, mConfigurationController, mFeatureFlags,
+                mDockManager, mConfigurationController, mFeatureFlags,
                 new FakeExecutor(new FakeSystemClock()));
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
-        mScrimController.attachViews(mScrimBehind, mScrimInFront, mScrimForBubble);
+        mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront,
+                mScrimForBubble);
         mScrimController.setAnimatorListener(mAnimatorListener);
 
         mScrimController.setHasBackdrop(false);
@@ -264,7 +264,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 TRANSPARENT /* bubble */);
 
         assertScrimTint(false /* front */,
-                false /* behind */,
+                true /* behind */,
                 false /* bubble */);
     }
 
@@ -516,7 +516,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 TRANSPARENT /* bubble */);
 
         assertScrimTint(false /* front */,
-                false /* behind */,
+                true /* behind */,
                 false /* bubble */);
 
         // Back scrim should be visible after start dragging
@@ -586,7 +586,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void qsExpansion() {
         reset(mScrimBehind);
-        mScrimController.setQsExpansion(1f);
+        mScrimController.setQsPosition(1f, 999 /* value doesn't matter */);
         finishAnimationsImmediately();
 
         assertScrimAlpha(TRANSPARENT, OPAQUE, TRANSPARENT);
@@ -636,7 +636,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         // Make sure at the very end of the animation, we're reset to transparent
         assertScrimTint(false /* front */,
-                false /* behind */,
+                true /* behind */,
                 false  /* bubble */);
     }
 
@@ -947,7 +947,9 @@ public class ScrimControllerTest extends SysuiTestCase {
         if (scrim == mScrimInFront) {
             return "front";
         } else if (scrim == mScrimBehind) {
-            return "back";
+            return "behind";
+        } else if (scrim == mNotificationsScrim) {
+            return "notifications";
         } else if (scrim == mScrimForBubble) {
             return "bubble";
         }

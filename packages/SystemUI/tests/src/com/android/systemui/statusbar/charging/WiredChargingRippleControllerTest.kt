@@ -16,17 +16,17 @@
 
 package com.android.systemui.statusbar.charging
 
+import android.content.Context
 import android.testing.AndroidTestingRunner
 import android.view.View
-import android.view.ViewGroupOverlay
-import android.view.ViewRootImpl
+import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.capture
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +34,8 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.never
+import org.mockito.Mockito.any
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -47,55 +48,45 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var batteryController: BatteryController
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var configurationController: ConfigurationController
-    @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var rippleView: ChargingRippleView
-    @Mock private lateinit var viewHost: View
-    @Mock private lateinit var viewHostRootImpl: ViewRootImpl
-    @Mock private lateinit var viewGroupOverlay: ViewGroupOverlay
+    @Mock private lateinit var windowManager: WindowManager
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        `when`(viewHost.viewRootImpl).thenReturn(viewHostRootImpl)
-        `when`(viewHostRootImpl.view).thenReturn(viewHost)
-        `when`(viewHost.overlay).thenReturn(viewGroupOverlay)
         `when`(featureFlags.isChargingRippleEnabled).thenReturn(true)
-        `when`(keyguardStateController.isShowing).thenReturn(true)
         controller = WiredChargingRippleController(
                 commandRegistry, batteryController, configurationController,
-                featureFlags, context, keyguardStateController)
+                featureFlags, context)
         controller.rippleView = rippleView // Replace the real ripple view with a mock instance
-        controller.setViewHost(viewHost)
+        context.addMockSystemService(Context.WINDOW_SERVICE, windowManager)
     }
 
     @Test
-    fun testSetRippleViewAsOverlay() {
-        val listenerCaptor = ArgumentCaptor.forClass(View.OnAttachStateChangeListener::class.java)
-        verify(viewHost).addOnAttachStateChangeListener(listenerCaptor.capture())
-
-        // Fake attach to window
-        listenerCaptor.value.onViewAttachedToWindow(viewHost)
-        verify(viewGroupOverlay).add(rippleView)
-    }
-
-    @Test
-    fun testTriggerRipple() {
+    fun testTriggerRipple_UnlockedState() {
         val captor = ArgumentCaptor
                 .forClass(BatteryController.BatteryStateChangeCallback::class.java)
         verify(batteryController).addCallback(captor.capture())
 
-        val unusedBatteryLevel = 0
+        // Verify ripple added to window manager.
         captor.value.onBatteryLevelChanged(
-                unusedBatteryLevel,
-                false /* plugged in */,
-                false /* charging */)
-        verify(rippleView, never()).startRipple()
-
-        captor.value.onBatteryLevelChanged(
-                unusedBatteryLevel,
+                0 /* unusedBatteryLevel */,
                 false /* plugged in */,
                 true /* charging */)
-        verify(rippleView).startRipple()
+        val attachListenerCaptor =
+                ArgumentCaptor.forClass(View.OnAttachStateChangeListener::class.java)
+        verify(rippleView).addOnAttachStateChangeListener(attachListenerCaptor.capture())
+        verify(windowManager).addView(eq(rippleView), any<WindowManager.LayoutParams>())
+
+        // Verify ripple started
+        val runnableCaptor =
+                ArgumentCaptor.forClass(Runnable::class.java)
+        attachListenerCaptor.value.onViewAttachedToWindow(rippleView)
+        verify(rippleView).startRipple(runnableCaptor.capture())
+
+        // Verify ripple removed
+        runnableCaptor.value.run()
+        verify(windowManager).removeView(rippleView)
     }
 
     @Test

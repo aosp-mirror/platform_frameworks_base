@@ -1439,7 +1439,6 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public ComponentName getActiveServiceComponentName() {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
                 return mImpl != null ? mImpl.mComponent : null;
             }

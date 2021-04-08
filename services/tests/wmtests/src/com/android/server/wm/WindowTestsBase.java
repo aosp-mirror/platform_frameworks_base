@@ -1138,7 +1138,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 spyOn(rootTask);
             }
             doNothing().when(rootTask).startActivityLocked(
-                    any(), any(), anyBoolean(), anyBoolean(), any());
+                    any(), any(), anyBoolean(), anyBoolean(), any(), anyBoolean());
 
             // Create child task with activity.
             if (mCreateActivity) {

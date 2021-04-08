@@ -147,8 +147,7 @@ class CanvasFrontend final : public CanvasStateHelper {
 public:
     template<class... Args>
     CanvasFrontend(int width, int height, Args&&... args) : CanvasStateHelper(width, height),
-            mReceiver(std::forward<Args>(args)...) { }
-    ~CanvasFrontend() = default;
+            mReceiver(std::in_place, std::forward<Args>(args)...) { }
 
     void save(SaveFlags::Flags flags = SaveFlags::MatrixClip) {
         if (internalSave(flagsToSaveEntry(flags))) {
@@ -186,7 +185,10 @@ public:
         submit(std::move(op));
     }
 
-    const CanvasOpReceiver& receiver() const { return *mReceiver; }
+    const CanvasOpReceiver& receiver() const {
+        LOG_ALWAYS_FATAL_IF(!mReceiver.has_value());
+        return *mReceiver;
+    }
 
     CanvasOpReceiver finish() {
         auto ret = std::move(mReceiver.value());
@@ -205,6 +207,7 @@ private:
 
     template <CanvasOpType T>
     void submit(CanvasOp<T>&& op) {
+        LOG_ALWAYS_FATAL_IF(!mReceiver.has_value());
         mReceiver->push_container(CanvasOpContainer(std::move(op), transform()));
     }
 };

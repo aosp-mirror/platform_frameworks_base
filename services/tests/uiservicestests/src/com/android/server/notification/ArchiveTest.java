@@ -56,7 +56,7 @@ public class ArchiveTest extends UiServiceTestCase {
     }
 
     private StatusBarNotification getNotification(String pkg, int id, UserHandle user) {
-        Notification n = new Notification.Builder(getContext(), "test")
+        Notification n = new Notification.Builder(getContext(), "test" + id)
                 .setContentTitle("A")
                 .setWhen(1205)
                 .build();
@@ -134,6 +134,25 @@ public class ArchiveTest extends UiServiceTestCase {
         }
         mArchive.updateHistoryEnabled(USER_CURRENT, false);
 
+        List<StatusBarNotification> actual = Arrays.asList(mArchive.getArray(SIZE, true));
+        assertThat(actual).hasSize(expected.size());
+        for (StatusBarNotification sbn : actual) {
+            assertThat(expected).contains(sbn.getKey());
+        }
+    }
+
+    @Test
+    public void testRemoveChannelNotifications() {
+        List<String> expected = new ArrayList<>();
+        for (int i = 0; i < SIZE; i++) {
+            StatusBarNotification sbn = getNotification("pkg", i, UserHandle.of(USER_CURRENT));
+            mArchive.record(sbn, REASON_CANCEL);
+            if (i != 3) {
+                // Will delete notification for this user in channel "test3".
+                expected.add(sbn.getKey());
+            }
+        }
+        mArchive.removeChannelNotifications("pkg", USER_CURRENT, "test3");
         List<StatusBarNotification> actual = Arrays.asList(mArchive.getArray(SIZE, true));
         assertThat(actual).hasSize(expected.size());
         for (StatusBarNotification sbn : actual) {
