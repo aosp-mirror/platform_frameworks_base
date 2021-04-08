@@ -1,4 +1,4 @@
-package com.android.systemui.plugins.animation
+package com.android.systemui.animation
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -16,7 +16,6 @@ import android.view.RemoteAnimationTarget
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.WindowManager
-import android.view.animation.LinearInterpolator
 import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
@@ -37,13 +36,6 @@ class ActivityLaunchAnimator {
                 ANIMATION_DURATION - ANIMATION_DURATION_NAV_FADE_IN
         private const val LAUNCH_TIMEOUT = 1000L
 
-        // TODO(b/184121838): Use android.R.interpolator.fast_out_extra_slow_in instead.
-        // TODO(b/184121838): Move com.android.systemui.Interpolators in an animation library we can
-        // reuse here.
-        private val ANIMATION_INTERPOLATOR = PathInterpolator(0.4f, 0f, 0.2f, 1f)
-        private val LINEAR_INTERPOLATOR = LinearInterpolator()
-        private val ALPHA_IN_INTERPOLATOR = PathInterpolator(0.4f, 0f, 1f, 1f)
-        private val ALPHA_OUT_INTERPOLATOR = PathInterpolator(0f, 0f, 0.8f, 1f)
         private val NAV_FADE_IN_INTERPOLATOR = PathInterpolator(0f, 0f, 0f, 1f)
         private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)
 
@@ -349,7 +341,7 @@ class ActivityLaunchAnimator {
             val animator = ValueAnimator.ofFloat(0f, 1f)
             this.animator = animator
             animator.duration = ANIMATION_DURATION
-            animator.interpolator = LINEAR_INTERPOLATOR
+            animator.interpolator = Interpolators.LINEAR
 
             animator.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
@@ -367,8 +359,9 @@ class ActivityLaunchAnimator {
                     return@addUpdateListener
                 }
 
+                // TODO(b/184121838): Use android.R.interpolator.fast_out_extra_slow_in instead.
                 val linearProgress = animation.animatedFraction
-                val progress = ANIMATION_INTERPOLATOR.getInterpolation(linearProgress)
+                val progress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(linearProgress)
 
                 state.top = lerp(startTop, endTop, progress).roundToInt()
                 state.bottom = lerp(startBottom, endBottom, progress).roundToInt()
@@ -382,12 +375,12 @@ class ActivityLaunchAnimator {
                 val contentAlphaProgress = getProgress(linearProgress, 0,
                         ANIMATION_DURATION_FADE_OUT_CONTENT)
                 state.contentAlpha =
-                        1 - ALPHA_OUT_INTERPOLATOR.getInterpolation(contentAlphaProgress)
+                        1 - Interpolators.ALPHA_OUT.getInterpolation(contentAlphaProgress)
 
                 val backgroundAlphaProgress = getProgress(linearProgress,
                         ANIMATION_DURATION_FADE_OUT_CONTENT, ANIMATION_DURATION_FADE_IN_WINDOW)
                 state.backgroundAlpha =
-                        1 - ALPHA_IN_INTERPOLATOR.getInterpolation(backgroundAlphaProgress)
+                        1 - Interpolators.ALPHA_IN.getInterpolation(backgroundAlphaProgress)
 
                 applyStateToWindow(window, state)
                 navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }

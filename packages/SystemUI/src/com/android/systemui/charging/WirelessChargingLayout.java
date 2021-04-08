@@ -31,8 +31,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.charging.ChargingRippleView;
 
 import java.text.NumberFormat;

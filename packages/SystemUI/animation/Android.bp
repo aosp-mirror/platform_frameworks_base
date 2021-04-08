@@ -1,4 +1,4 @@
-// Copyright (C) 2016 The Android Open Source Project
+// Copyright (C) 2021 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,33 +23,16 @@ package {
 
 java_library {
 
-    name: "SystemUIPluginLib",
+    name: "SystemUIAnimationLib",
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
-        "bcsmartspace/src/**/*.java",
     ],
 
     static_libs: [
         "PluginCoreLib",
         "SystemUI-sensors",
-        "SystemUIAnimationLib",
     ],
-
-}
-
-android_app {
-
-    // Dummy to generate .toc files.
-    name: "PluginDummyLib",
-    platform_apis: true,
-    srcs: ["src/**/*.java"],
-
-    libs: ["SystemUIPluginLib"],
-
-    optimize: {
-        enabled: false,
-    },
 
 }

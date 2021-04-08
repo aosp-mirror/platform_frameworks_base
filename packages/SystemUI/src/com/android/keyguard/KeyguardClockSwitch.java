@@ -28,8 +28,8 @@ import android.widget.TextView;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;

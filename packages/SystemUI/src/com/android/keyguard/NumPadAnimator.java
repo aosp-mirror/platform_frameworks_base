@@ -27,8 +27,8 @@ import android.view.ContextThemeWrapper;
 
 import androidx.annotation.StyleRes;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 
 /**
  * Provides background color and radius animations for key pad buttons.
