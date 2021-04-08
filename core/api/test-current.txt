@@ -233,6 +233,8 @@ package android.app {
     field public static final String KEY_BG_STATE_SETTLE_TIME = "bg_state_settle_time";
     field public static final String KEY_FG_SERVICE_STATE_SETTLE_TIME = "fg_service_state_settle_time";
     field public static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
+    field public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
+    field public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE = "android:activity_recognition_source";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
     field public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
     field public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
