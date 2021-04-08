@@ -89,7 +89,7 @@ public final class RippleAnimationSession {
     }
 
     public boolean shouldAnimateSparkle() {
-        return mAnimateSparkle;
+        return mAnimateSparkle && ValueAnimator.getDurationScale() > 0;
     }
 
     public float getSparklePhase() {
