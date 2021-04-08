@@ -525,7 +525,7 @@ public final class TelephonyPermissions {
      *
      * @throws SecurityException if the caller does not have the required permission/privileges
      */
-    public static void enforeceCallingOrSelfReadPhoneStatePermissionOrCarrierPrivilege(
+    public static void enforceCallingOrSelfReadPhoneStatePermissionOrCarrierPrivilege(
             Context context, int subId, String message) {
         if (context.checkCallingOrSelfPermission(android.Manifest.permission.READ_PHONE_STATE)
                 == PERMISSION_GRANTED) {
@@ -545,7 +545,7 @@ public final class TelephonyPermissions {
      *
      * @throws SecurityException if the caller does not have the required permission/privileges
      */
-    public static void enforeceCallingOrSelfReadPrivilegedPhoneStatePermissionOrCarrierPrivilege(
+    public static void enforceCallingOrSelfReadPrivilegedPhoneStatePermissionOrCarrierPrivilege(
             Context context, int subId, String message) {
         if (context.checkCallingOrSelfPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
                 == PERMISSION_GRANTED) {
@@ -567,7 +567,7 @@ public final class TelephonyPermissions {
      *
      * @throws SecurityException if the caller does not have the required permission/privileges
      */
-    public static void enforeceCallingOrSelfReadPrecisePhoneStatePermissionOrCarrierPrivilege(
+    public static void enforceCallingOrSelfReadPrecisePhoneStatePermissionOrCarrierPrivilege(
             Context context, int subId, String message) {
         if (context.checkCallingOrSelfPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
                 == PERMISSION_GRANTED) {
