@@ -180,6 +180,7 @@ public class RippleDrawable extends LayerDrawable {
     private Matrix mMaskMatrix;
     private PorterDuffColorFilter mMaskColorFilter;
     private boolean mHasValidMask;
+    private int mComputedRadius = -1;
 
     /** The current ripple. May be actively animating or pending entry. */
     private RippleForeground mRipple;
@@ -385,9 +386,7 @@ public class RippleDrawable extends LayerDrawable {
             mRipple.onBoundsChange();
         }
 
-        mState.mMaxRadius = mState.mMaxRadius <= 0 && mState.mRippleStyle != STYLE_SOLID
-                ? (int) computeRadius()
-                : mState.mMaxRadius;
+        mComputedRadius = Math.round(computeRadius());
         invalidateSelf();
     }
 
@@ -918,7 +917,7 @@ public class RippleDrawable extends LayerDrawable {
             ColorFilter origFilter = p.getColorFilter();
             p.setColorFilter(mMaskColorFilter);
             p.setAlpha(alpha);
-            c.drawCircle(cx, cy, mState.mMaxRadius, p);
+            c.drawCircle(cx, cy, getComputedRadius(), p);
             p.setAlpha(origAlpha);
             p.setColorFilter(origFilter);
         }
@@ -930,11 +929,17 @@ public class RippleDrawable extends LayerDrawable {
         return radius;
     }
 
+    private int getComputedRadius() {
+        if (mState.mMaxRadius >= 0) return mState.mMaxRadius;
+        if (mComputedRadius >= 0) return mComputedRadius;
+        return (int) computeRadius();
+    }
+
     @NonNull
     private RippleAnimationSession.AnimationProperties<Float, Paint> createAnimationProperties(
             float x, float y, float cx, float cy, float w, float h) {
         Paint p = new Paint(mRipplePaint);
-        float radius = mState.mMaxRadius;
+        float radius = getComputedRadius();
         RippleAnimationSession.AnimationProperties<Float, Paint> properties;
         RippleShader shader = new RippleShader();
         int color = mMaskColorFilter == null
