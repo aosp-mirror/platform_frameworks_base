@@ -142,9 +142,9 @@ public class DragDownHelper implements Gefingerpoken {
                 }
                 return true;
             case MotionEvent.ACTION_UP:
-                if (!mFalsingManager.isUnlockingDisabled() && !isFalseTouch()
-                        && mDragDownCallback.onDraggedDown(mStartingChild,
-                        (int) (y - mInitialTouchY))) {
+                if (!mFalsingManager.isUnlockingDisabled() && mDragDownCallback.canDragDown()
+                        && !isFalseTouch()) {
+                    mDragDownCallback.onDraggedDown(mStartingChild, (int) (y - mInitialTouchY));
                     if (mStartingChild == null) {
                         cancelExpansion();
                     } else {
@@ -263,7 +263,10 @@ public class DragDownHelper implements Gefingerpoken {
         /**
          * @return true if the interaction is accepted, false if it should be cancelled
          */
-        boolean onDraggedDown(View startingChild, int dragLengthY);
+        boolean canDragDown();
+
+        /** Call when a view has been dragged. */
+        void onDraggedDown(View startingChild, int dragLengthY);
         void onDragDownReset();
 
         /**

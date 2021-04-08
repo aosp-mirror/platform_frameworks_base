@@ -5499,9 +5499,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.INPUT)
     private final DragDownCallback mDragDownCallback = new DragDownCallback() {
 
+        @Override
+        public boolean canDragDown() {
+            return mStatusBarState == StatusBarState.KEYGUARD
+                    && (mController.hasActiveNotifications() || mKeyguardMediaControllorVisible)
+                    || mController.isInLockedDownShade();
+        }
+
         /* Only ever called as a consequence of a lockscreen expansion gesture. */
         @Override
-        public boolean onDraggedDown(View startingChild, int dragLengthY) {
+        public void onDraggedDown(View startingChild, int dragLengthY) {
             boolean canDragDown =
                     mController.hasActiveNotifications() || mKeyguardMediaControllorVisible;
             if (mStatusBarState == StatusBarState.KEYGUARD && canDragDown) {
@@ -5519,16 +5526,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                         row.onExpandedByGesture(true /* drag down is always an open */);
                     }
                 }
-
-                return true;
             } else if (mController.isInLockedDownShade()) {
                 mStatusbarStateController.setLeaveOpenOnKeyguardHide(true);
                 mStatusBar.dismissKeyguardThenExecute(() -> false /* dismissAction */,
                         null /* cancelRunnable */, false /* afterKeyguardGone */);
-                return true;
-            } else {
-                // abort gesture.
-                return false;
             }
         }
 

@@ -24,6 +24,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.START;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
+import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
@@ -1450,11 +1451,7 @@ public class NotificationPanelViewController extends PanelViewController {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
-                if (mQsTracking) {
-                    flingQsWithCurrentVelocity(y,
-                            event.getActionMasked() == MotionEvent.ACTION_CANCEL);
-                    mQsTracking = false;
-                }
+                mQsTracking = false;
                 break;
         }
         return false;
@@ -1526,10 +1523,17 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void flingQsWithCurrentVelocity(float y, boolean isCancelMotionEvent) {
         float vel = getCurrentQSVelocity();
-        final boolean expandsQs = flingExpandsQs(vel);
+        boolean expandsQs = flingExpandsQs(vel);
         if (expandsQs) {
-            logQsSwipeDown(y);
+            if (mFalsingManager.isUnlockingDisabled() || isFalseTouch(QUICK_SETTINGS)) {
+                expandsQs = false;
+            } else {
+                logQsSwipeDown(y);
+            }
+        } else if (vel < 0) {
+            mFalsingManager.isFalseTouch(QS_COLLAPSE);
         }
+
         flingSettings(vel, expandsQs && !isCancelMotionEvent ? FLING_EXPAND : FLING_COLLAPSE);
     }
 
@@ -1545,9 +1549,6 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private boolean flingExpandsQs(float vel) {
-        if (mFalsingManager.isUnlockingDisabled() || isFalseTouch(QUICK_SETTINGS)) {
-            return false;
-        }
         if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
             return getQsExpansionFraction() > 0.5f;
         } else {
@@ -1556,9 +1557,6 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
-        if (!mKeyguardAffordanceHelperCallback.needsAntiFalsing()) {
-            return false;
-        }
         if (mFalsingManager.isClassifierEnabled()) {
             return mFalsingManager.isFalseTouch(interactionType);
         }
