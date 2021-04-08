@@ -9439,7 +9439,7 @@ package android.security.keystore {
   }
 
   public final class KeyGenParameterSpec implements java.security.spec.AlgorithmParameterSpec {
-    method @Nullable public int[] getAttestationIds();
+    method @NonNull public int[] getAttestationIds();
     method public int getNamespace();
   }
 
