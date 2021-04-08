@@ -17,6 +17,8 @@
 package com.android.internal.widget;
 
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.test.AndroidTestCase;
 
 import java.util.Arrays;
@@ -173,6 +175,81 @@ public class LockscreenCredentialTest extends AndroidTestCase {
         assertEquals(credential, credential.duplicate());
         credential = createPattern("5678");
         assertEquals(credential, credential.duplicate());
+    }
+
+    public void testPasswordToHistoryHash() {
+        String password = "1234";
+        LockscreenCredential credential = LockscreenCredential.createPassword(password);
+        String hashFactor = "6637D20C0798382D9F1304861C81DE222BC6CB7183623C67DA99B115A7AF702D";
+        String salt = "6d5331dd120077a0";
+        String expectedHash = "BCFB17409F2CD0A00D8627F76D080FB547B0B6A30CB7A375A34720D2312EDAC7";
+
+        assertThat(
+                credential.passwordToHistoryHash(salt.getBytes(), hashFactor.getBytes()))
+                .isEqualTo(expectedHash);
+        assertThat(
+                LockscreenCredential.passwordToHistoryHash(
+                        password.getBytes(), salt.getBytes(), hashFactor.getBytes()))
+                .isEqualTo(expectedHash);
+    }
+
+    public void testPasswordToHistoryHashInvalidInput() {
+        String password = "1234";
+        LockscreenCredential credential = LockscreenCredential.createPassword(password);
+        String hashFactor = "6637D20C0798382D9F1304861C81DE222BC6CB7183623C67DA99B115A7AF702D";
+        String salt = "6d5331dd120077a0";
+
+        assertThat(
+                credential.passwordToHistoryHash(/* salt= */ null, hashFactor.getBytes()))
+                .isNull();
+        assertThat(
+                LockscreenCredential.passwordToHistoryHash(
+                        password.getBytes(), /* salt= */ null, hashFactor.getBytes()))
+                .isNull();
+
+        assertThat(
+                credential.passwordToHistoryHash(salt.getBytes(), /* hashFactor= */ null))
+                .isNull();
+        assertThat(
+                LockscreenCredential.passwordToHistoryHash(
+                        password.getBytes(), salt.getBytes(), /* hashFactor= */ null))
+                .isNull();
+
+        assertThat(
+                LockscreenCredential.passwordToHistoryHash(
+                        /* password= */ null, salt.getBytes(), hashFactor.getBytes()))
+                .isNull();
+    }
+
+    public void testLegacyPasswordToHash() {
+        String password = "1234";
+        LockscreenCredential credential = LockscreenCredential.createPassword(password);
+        String salt = "6d5331dd120077a0";
+        String expectedHash =
+                "2DD04348ADBF8F4CABD7F722DC2E2887FAD4B6020A0C3E02C831E09946F0554FDC13B155";
+
+        assertThat(
+                credential.legacyPasswordToHash(salt.getBytes()))
+                .isEqualTo(expectedHash);
+        assertThat(
+                LockscreenCredential.legacyPasswordToHash(
+                        password.getBytes(), salt.getBytes()))
+                .isEqualTo(expectedHash);
+    }
+
+    public void testLegacyPasswordToHashInvalidInput() {
+        String password = "1234";
+        LockscreenCredential credential = LockscreenCredential.createPassword(password);
+        String salt = "6d5331dd120077a0";
+
+        assertThat(credential.legacyPasswordToHash(/* salt= */ null)).isNull();
+        assertThat(LockscreenCredential.legacyPasswordToHash(
+                password.getBytes(), /* salt= */ null)).isNull();
+
+        assertThat(
+                LockscreenCredential.legacyPasswordToHash(
+                        /* password= */ null, salt.getBytes()))
+                .isNull();
     }
 
     private LockscreenCredential createPattern(String patternString) {
