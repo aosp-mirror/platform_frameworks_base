@@ -442,15 +442,15 @@ public final class SystemServer implements Dumpable {
 
     private final SystemServerDumper mDumper = new SystemServerDumper();
 
-
     /**
      * The pending WTF to be logged into dropbox.
      */
     private static LinkedList<Pair<String, ApplicationErrorReport.CrashInfo>> sPendingWtfs;
 
-    /**
-     * Start the sensor service. This is a blocking call and can take time.
-     */
+    /** Start the IStats services. This is a blocking call and can take time. */
+    private static native void startIStatsService();
+
+    /** Start the sensor service. This is a blocking call and can take time. */
     private static native void startSensorService();
 
     /**
@@ -1027,6 +1027,10 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartPowerStatsService");
         // Tracks rail data to be used for power statistics.
         mSystemServiceManager.startService(PowerStatsService.class);
+        t.traceEnd();
+
+        t.traceBegin("StartIStatsService");
+        startIStatsService();
         t.traceEnd();
 
         // Start MemtrackProxyService before ActivityManager, so that early calls
