@@ -16,6 +16,7 @@
 
 package android.app.appsearch;
 
+import static android.app.appsearch.AppSearchResult.RESULT_INVALID_SCHEMA;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
 
@@ -27,6 +28,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.ArraySet;
 
 import com.android.internal.infra.AndroidFuture;
 
@@ -39,8 +41,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -55,23 +57,23 @@ public class AppSearchMigrationHelper implements Closeable {
     private final String mDatabaseName;
     private final int mUserId;
     private final File mMigratedFile;
-    private final Map<String, Integer> mCurrentVersionMap;
-    private final Map<String, Integer> mFinalVersionMap;
+    private final Set<String> mDestinationTypes;
     private boolean mAreDocumentsMigrated = false;
 
     AppSearchMigrationHelper(@NonNull IAppSearchManager service,
             @UserIdInt int userId,
-            @NonNull Map<String, Integer> currentVersionMap,
-            @NonNull Map<String, Integer> finalVersionMap,
             @NonNull String packageName,
-            @NonNull String databaseName) throws IOException {
+            @NonNull String databaseName,
+            @NonNull Set<AppSearchSchema> newSchemas) throws IOException {
         mService = Objects.requireNonNull(service);
-        mCurrentVersionMap = Objects.requireNonNull(currentVersionMap);
-        mFinalVersionMap = Objects.requireNonNull(finalVersionMap);
         mPackageName = Objects.requireNonNull(packageName);
         mDatabaseName = Objects.requireNonNull(databaseName);
         mUserId = userId;
         mMigratedFile = File.createTempFile(/*prefix=*/"appsearch", /*suffix=*/null);
+        mDestinationTypes = new ArraySet<>(newSchemas.size());
+        for (AppSearchSchema newSchema : newSchemas) {
+            mDestinationTypes.add(newSchema.getSchemaType());
+        }
     }
 
     /**
@@ -87,7 +89,8 @@ public class AppSearchMigrationHelper implements Closeable {
      *     GenericDocument} to new version.
      */
     @WorkerThread
-    public void queryAndTransform(@NonNull String schemaType, @NonNull Migrator migrator)
+    public void queryAndTransform(@NonNull String schemaType, @NonNull Migrator migrator,
+            int currentVersion, int finalVersion)
             throws IOException, AppSearchException, InterruptedException, ExecutionException {
         File queryFile = File.createTempFile(/*prefix=*/"appsearch", /*suffix=*/null);
         try (ParcelFileDescriptor fileDescriptor =
@@ -111,7 +114,7 @@ public class AppSearchMigrationHelper implements Closeable {
             if (!result.isSuccess()) {
                 throw new AppSearchException(result.getResultCode(), result.getErrorMessage());
             }
-            readAndTransform(queryFile, migrator);
+            readAndTransform(queryFile, migrator, currentVersion, finalVersion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } finally {
@@ -173,8 +176,9 @@ public class AppSearchMigrationHelper implements Closeable {
      *
      * <p>Save migrated {@link GenericDocument}s to the {@link #mMigratedFile}.
      */
-    private void readAndTransform(@NonNull File file, @NonNull Migrator migrator)
-            throws IOException {
+    private void readAndTransform(@NonNull File file, @NonNull Migrator migrator,
+            int currentVersion, int finalVersion)
+            throws IOException, AppSearchException {
         try (DataInputStream inputStream = new DataInputStream(new FileInputStream(file));
              DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(
                      mMigratedFile, /*append=*/ true))) {
@@ -187,15 +191,24 @@ public class AppSearchMigrationHelper implements Closeable {
                     // Nothing wrong. We just finished reading.
                 }
 
-                int currentVersion = mCurrentVersionMap.get(document.getSchemaType());
-                int finalVersion = mFinalVersionMap.get(document.getSchemaType());
-
                 GenericDocument newDocument;
                 if (currentVersion < finalVersion) {
                     newDocument = migrator.onUpgrade(currentVersion, finalVersion, document);
                 } else {
                     // currentVersion == finalVersion case won't trigger migration and get here.
                     newDocument = migrator.onDowngrade(currentVersion, finalVersion, document);
+                }
+
+                if (!mDestinationTypes.contains(newDocument.getSchemaType())) {
+                    // we exit before the new schema has been set to AppSearch. So no
+                    // observable changes will be applied to stored schemas and documents.
+                    // And the temp file will be deleted at close(), which will be triggered at
+                    // the end of try-with-resources block of SearchSessionImpl.
+                    throw new AppSearchException(
+                            RESULT_INVALID_SCHEMA,
+                            "Receive a migrated document with schema type: "
+                                    + newDocument.getSchemaType()
+                                    + ". But the schema types doesn't exist in the request");
                 }
                 writeBundleToOutputStream(outputStream, newDocument.getBundle());
             }
