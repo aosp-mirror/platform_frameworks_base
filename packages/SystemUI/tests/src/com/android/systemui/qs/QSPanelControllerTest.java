@@ -32,6 +32,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -94,6 +95,7 @@ public class QSPanelControllerTest extends SysuiTestCase {
     QSTileView mQSTileView;
     @Mock
     PagedTileLayout mPagedTileLayout;
+    FalsingManagerFake mFalsingManager = new FalsingManagerFake();
     @Mock
     FeatureFlags mFeatureFlags;
 
@@ -121,7 +123,7 @@ public class QSPanelControllerTest extends SysuiTestCase {
                 mQSTileHost, mQSCustomizerController, true, mMediaHost,
                 mQSTileRevealControllerFactory, mDumpManager, mMetricsLogger, mUiEventLogger,
                 mQSLogger, mBrightnessControllerFactory, mToggleSliderViewControllerFactory,
-                mFeatureFlags
+                mFalsingManager, mFeatureFlags
         );
 
         mController.init();
