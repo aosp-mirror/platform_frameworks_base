@@ -217,6 +217,11 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
             return 1;
         }
 
+        if (state == null) {
+            // Controller is stopped.
+            return 0;
+        }
+
         DualDumpOutputStream outputStream;
         boolean useProto = Objects.equals(DUMP_STATE_OPTION_PROTO, getNextOption());
         if (useProto) {
