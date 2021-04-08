@@ -18,5 +18,6 @@
     <size
         android:height="50dp"
         android:width="50dp" />
-        <solid android:color="#1A73E8" />
+    <solid android:color="@android:color/transparent" />
+    <stroke android:width="2dp" android:color="#AECBFA" />
 </shape>

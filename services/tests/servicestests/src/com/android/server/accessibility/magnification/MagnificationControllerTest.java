@@ -331,6 +331,29 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void onAccessibilityActionPerformed_magnifierEnabled_showMagnificationButton()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mMagnificationController.onAccessibilityActionPerformed(TEST_DISPLAY);
+
+        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+                eq(MODE_WINDOW));
+    }
+
+    @Test
+    public void onAccessibilityActionPerformed_capabilityNotAll_removeMagnificationButton()
+            throws RemoteException {
+        mMagnificationController.setMagnificationCapabilities(
+                ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mMagnificationController.onAccessibilityActionPerformed(TEST_DISPLAY);
+
+        verify(mWindowMagnificationManager).removeMagnificationButton(eq(TEST_DISPLAY));
+    }
+
+    @Test
     public void onWindowMagnificationActivationState_windowActivated_logWindowDuration() {
         mMagnificationController.onWindowMagnificationActivationState(TEST_DISPLAY, true);
 

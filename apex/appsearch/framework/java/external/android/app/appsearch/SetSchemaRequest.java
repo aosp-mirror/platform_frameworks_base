@@ -297,11 +297,26 @@ public final class SetSchemaRequest {
         }
 
         /**
-         * Sets the {@link Migrator}.
+         * Sets the {@link Migrator} associated with the given SchemaType.
+         *
+         * <p>The {@link Migrator} migrates all {@link GenericDocument}s under given schema type
+         * from the current version number stored in AppSearch to the final version set via {@link
+         * #setVersion}.
+         *
+         * <p>A {@link Migrator} will be invoked if the current version number stored in AppSearch
+         * is different from the final version set via {@link #setVersion} and {@link
+         * Migrator#shouldMigrate} returns {@code true}.
+         *
+         * <p>The target schema type of the output {@link GenericDocument} of {@link
+         * Migrator#onUpgrade} or {@link Migrator#onDowngrade} must exist in this {@link
+         * SetSchemaRequest}.
          *
          * @param schemaType The schema type to set migrator on.
-         * @param migrator The migrator translate a document from it's old version to a new
-         *     incompatible version.
+         * @param migrator The migrator translates a document from its current version to the final
+         *     version set via {@link #setVersion}.
+         * @see SetSchemaRequest.Builder#setVersion
+         * @see SetSchemaRequest.Builder#addSchemas
+         * @see AppSearchSession#setSchema
          */
         @NonNull
         @SuppressLint("MissingGetterMatchingBuilder") // Getter return plural objects.
@@ -313,10 +328,25 @@ public final class SetSchemaRequest {
         }
 
         /**
-         * Sets {@link Migrator}s.
+         * Sets a Map of {@link Migrator}s.
          *
-         * @param migrators A {@link Map} of migrators that translate a document from its old
-         *     version to a new incompatible version.
+         * <p>The {@link Migrator} migrates all {@link GenericDocument}s under given schema type
+         * from the current version number stored in AppSearch to the final version set via {@link
+         * #setVersion}.
+         *
+         * <p>A {@link Migrator} will be invoked if the current version number stored in AppSearch
+         * is different from the final version set via {@link #setVersion} and {@link
+         * Migrator#shouldMigrate} returns {@code true}.
+         *
+         * <p>The target schema type of the output {@link GenericDocument} of {@link
+         * Migrator#onUpgrade} or {@link Migrator#onDowngrade} must exist in this {@link
+         * SetSchemaRequest}.
+         *
+         * @param migrators A {@link Map} of migrators that translate a document from it's current
+         *     version to the final version set via {@link #setVersion}.
+         * @see SetSchemaRequest.Builder#setVersion
+         * @see SetSchemaRequest.Builder#addSchemas
+         * @see AppSearchSession#setSchema
          */
         @NonNull
         public Builder setMigrators(@NonNull Map<String, Migrator> migrators) {

@@ -18,6 +18,7 @@
 #include <SkPaintFilterCanvas.h>
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
+#include "TransformCanvas.h"
 #include "utils/TraceUtils.h"
 
 #include <include/effects/SkImageFilters.h>
@@ -255,6 +256,11 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
             if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
                 canvas->drawAnnotation(bounds, String8::format(
                     "SurfaceID|%" PRId64, renderNode->uniqueId()).c_str(), nullptr);
+            }
+
+            if (renderNode->hasHolePunches()) {
+                TransformCanvas transformCanvas(canvas);
+                displayList->draw(&transformCanvas);
             }
             canvas->drawImageRect(snapshotImage, bounds, bounds, sampling, &paint,
                                   SkCanvas::kStrict_SrcRectConstraint);

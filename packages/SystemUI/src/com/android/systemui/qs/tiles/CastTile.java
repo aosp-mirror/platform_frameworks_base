@@ -142,7 +142,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleLongClick() {
+    protected void handleLongClick(View view) {
         handleClick();
     }
 

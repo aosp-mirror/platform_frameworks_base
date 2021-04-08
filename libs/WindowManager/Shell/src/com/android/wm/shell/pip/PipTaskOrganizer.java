@@ -1011,6 +1011,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     /** Moves the PiP menu to the destination bounds. */
     public void finishResizeForMenu(Rect destinationBounds) {
+        if (!isInPip()) {
+            return;
+        }
         mPipMenuController.movePipMenu(null, null, destinationBounds);
         mPipMenuController.updateMenuBounds(destinationBounds);
     }

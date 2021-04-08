@@ -586,19 +586,6 @@ public class ZenModeHelper {
     }
 
     private void populateZenRule(AutomaticZenRule automaticZenRule, ZenRule rule, boolean isNew) {
-        if (isNew) {
-            rule.id = ZenModeConfig.newRuleId();
-            rule.creationTime = System.currentTimeMillis();
-            rule.component = automaticZenRule.getOwner();
-            rule.configurationActivity = automaticZenRule.getConfigurationActivity();
-            rule.pkg = (rule.component != null)
-                    ? rule.component.getPackageName()
-                    : rule.configurationActivity.getPackageName();
-        }
-
-        if (rule.enabled != automaticZenRule.isEnabled()) {
-            rule.snoozing = false;
-        }
         rule.name = automaticZenRule.getName();
         rule.condition = null;
         rule.conditionId = automaticZenRule.getConditionId();
@@ -607,6 +594,20 @@ public class ZenModeHelper {
         rule.zenPolicy = automaticZenRule.getZenPolicy();
         rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
                 automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
+        rule.configurationActivity = automaticZenRule.getConfigurationActivity();
+
+        if (isNew) {
+            rule.id = ZenModeConfig.newRuleId();
+            rule.creationTime = System.currentTimeMillis();
+            rule.component = automaticZenRule.getOwner();
+            rule.pkg = (rule.component != null)
+                    ? rule.component.getPackageName()
+                    : rule.configurationActivity.getPackageName();
+        }
+
+        if (rule.enabled != automaticZenRule.isEnabled()) {
+            rule.snoozing = false;
+        }
     }
 
     protected AutomaticZenRule createAutomaticZenRule(ZenRule rule) {

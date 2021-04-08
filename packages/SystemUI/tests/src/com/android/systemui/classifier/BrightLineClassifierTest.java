@@ -180,6 +180,17 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     }
 
     @Test
+    public void testIsFalseTap_EmptyRecentEvents() {
+        // Ensure we look at prior events if recent events has already been emptied.
+        when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(new ArrayList<>());
+        when(mFalsingDataProvider.getPriorMotionEvents()).thenReturn(mMotionEventList);
+
+        mBrightLineFalsingManager.isFalseTap(false, 0);
+        verify(mSingleTapClassfier).isTap(mMotionEventList);
+    }
+
+
+    @Test
     public void testIsFalseTap_RobustCheck_NoFaceAuth() {
         when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mPassedResult);
         when(mDoubleTapClassifier.classifyGesture(anyInt(), anyDouble(), anyDouble()))

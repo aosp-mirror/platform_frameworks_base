@@ -116,7 +116,6 @@ interface IVoiceInteractionManagerService {
     KeyphraseMetadata getEnrolledKeyphraseMetadata(String keyphrase, String bcp47Locale);
     /**
      * @return the component name for the currently active voice interaction service
-     * @RequiresPermission Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE
      */
     ComponentName getActiveServiceComponentName();
 
