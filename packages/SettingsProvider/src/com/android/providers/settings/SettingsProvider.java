@@ -1941,7 +1941,10 @@ public class SettingsProvider extends ContentProvider {
         if (ai.isSystemApp() || ai.isSignedWithPlatformKey()) {
             return;
         }
-        checkReadableAnnotation(settingsType, settingName);
+        if ((ai.flags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
+            // Skip checking readable annotations for test_only apps
+            checkReadableAnnotation(settingsType, settingName);
+        }
         if (!ai.isInstantApp()) {
             return;
         }
@@ -1983,9 +1986,9 @@ public class SettingsProvider extends ContentProvider {
 
         if (allFields.contains(settingName) && !readableFields.contains(settingName)) {
             throw new SecurityException(
-                    "Settings key: <" + settingName + "> is not readable. From S+, new public "
-                            + "settings keys need to be annotated with @Readable unless they are "
-                            + "annotated with @hide.");
+                    "Settings key: <" + settingName + "> is not readable. From S+, settings keys "
+                            + "annotated with @hide are restricted to system_server and system "
+                            + "apps only, unless they are annotated with @Readable.");
         }
     }
 
