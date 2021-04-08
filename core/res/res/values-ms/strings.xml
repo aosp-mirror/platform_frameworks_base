@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Apl berjalan"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apl yang menggunakan bateri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Pembesaran"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Penggunaan kebolehaksesan"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang menggunakan bateri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> apl sedang menggunakan bateri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Ketik untuk mendapatkan butiran tentang penggunaan kuasa bateri dan data"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Membenarkan apl menemukan dan berganding dengan peranti Bluetooth yang berdekatan"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"sambung kepada peranti Bluetooth yang digandingkan"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Membenarkan apl untuk menyambung kepada peranti Bluetooth yang digandingkan"</string>
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maklumat Perkhidmatan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>
@@ -573,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Pin, corak atau kata laluan tidak ditetapkan"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ralat semasa membuat pengesahan"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gunakan kunci skrin"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Masukkan kunci skrin untuk teruskan"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Cap jari separa dikesan"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses cap jari. Sila cuba lagi."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Bersihkan penderia"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Jari digerakkan terlalu cepat"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu perlahan. Sila cuba lagi."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Cuba cap jari lain"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Cuba selaraskan"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Cap jari disahkan"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Wajah disahkan"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Wajah disahkan, sila tekan sahkan"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Perkakasan cap jari tidak tersedia."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Tidak dapat menyediakan cap jari"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Sudah tamat masa untuk cap jari. Cuba lagi"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Pengendalian cap jari dibatalkan."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Pengendalian cap jari dibatalkan oleh pengguna."</string>
@@ -624,7 +619,7 @@
     <string name="face_setup_notification_title" msgid="550617822603450009">"Sediakan wajah buka kunci"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci telefon anda dengan melihat telefon anda"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Sediakan lebih banyak cara untuk membuka kunci"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketik untuk menambah cap jari"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketik untuk menambahkan cap jari"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gagal menangkap data wajah dgn tepat. Cuba lagi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Terlalu terang. Cuba pencahayaan yang lebih lembut."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Cuba pencahayaan yang lebih cerah."</string>
@@ -661,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Wajah <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Gunakan wajah buka kunci"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gunakan kunci wajah atau skrin"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gunakan wajah untuk teruskan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan wajah atau kunci skrin anda untuk meneruskan"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1248,7 +1242,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Sentiasa tunjukkan"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah dibina untuk versi yang tidak serasi dengan OS Android dan mungkin menunjukkan gelagat yang tidak dijangka. Versi kemas kini apl mungkin tersedia."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Sentiasa tunjukkan"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Semak kemas kini"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Semak kemaskinian"</string>
     <string name="smv_application" msgid="3775183542777792638">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon sedang mengemas kini…"</string>
@@ -1967,7 +1961,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Apl tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia sekarang."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Apl ini dibina untuk versi Android yang lebih lama dan mungkin tidak berfungsi dengan betul. Cuba semak kemas kini atau hubungi pembangun."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemas kini"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemaskinian"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Anda mempunyai mesej baharu"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Buka apl SMS untuk melihat"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Sesetengah fungsi mungkin terhad"</string>
@@ -2142,7 +2136,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Kandungan ini tidak boleh dikongsi dengan apl peribadi"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Kandungan ini tidak boleh dibuka dengan apl peribadi"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profil kerja dijeda"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Ketik untuk menghidupkan"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"Ketik untuk menghidupkan profil"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Tiada apl kerja"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Tiada apl peribadi"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Buka dalam <xliff:g id="APP">%s</xliff:g> pada profil peribadi?"</string>

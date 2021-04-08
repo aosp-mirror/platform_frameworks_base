@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Uygulama çalışıyor"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Pil kullanan uygulamalar"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Büyütme"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Erişilebilirlik kullanımı"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> pil kullanıyor"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> uygulama pil kullanıyor"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Pil ve veri kullanımı ile ilgili ayrıntılar için dokunun"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Uygulamaya, yakındaki Bluetooth cihazları keşfedip eşleme izni verir"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"eşlenen Bluetooth cihazlara bağlan"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Uygulamaya, eşlenen Bluetooth cihazlara bağlanma izni verir"</string>
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Tercih Edilen NFC Ödeme Hizmeti Bilgileri"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Uygulamaya, kayıtlı yardımlar ve rota hedefi gibi tercih edilen NFC ödeme hizmeti bilgilerini alma izni verir."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Yakın Alan İletişimini denetle"</string>
@@ -573,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN, desen veya şifre seti yok"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Kimlik doğrulama sırasında hata oluştu"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekran kilidi kullan"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Devam etmek için ekran kilidinizi girin"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Parmak izinin tümü algılanamadı"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Parmak izi işlenemedi. Lütfen tekrar deneyin."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Sensörü temizleyin"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Parmak çok hızlı hareket ettirildi"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Parmak hareketi çok yavaştı. Lütfen tekrar deneyin."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Başka bir parmak izi deneyin"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Çok parlak"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ayarlamayı deneyin"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Parmak izi kimlik doğrulaması yapıldı"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Yüz kimliği doğrulandı"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yüz kimliği doğrulandı, lütfen onayla\'ya basın"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Parmak izi donanımı kullanılamıyor."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Parmak izi ayarlanamıyor"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Parmak izi için zaman aşımı oluştu. Tekrar deneyin."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Parmak izi işlemi iptal edildi."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Parmak izi işlemi kullanıcı tarafından iptal edildi."</string>
@@ -661,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Yüz <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Yüz tanıma kilidi kullan"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Yüz tanıma veya ekran kilidi kullan"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Devam etmek için yüzünüzü kullanın"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Devam etmek için yüz veya ekran kilidinizi kullanın"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -728,36 +722,36 @@
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"sensör verilerine daha yüksek örnekleme hızında eriş"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Uygulamanın, sensör verilerini 200 Hz\'den daha yüksek bir hızda örneklemesine olanak tanır"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Şifre kuralları ayarla"</string>
-    <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetleyin."</string>
+    <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetler."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekran kilidini açma denemelerini izle"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Ekran kilidini açarken yapılan yanlış şifre girme denemelerini izle ve çok fazla sayıda yanlış şifre girme denemesi yapılmışsa tableti kilitle veya tabletteki tüm verileri sil."</string>
-    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip etme ve çok fazla sayıda hatalı şifre girildiğinde Android TV cihazınızı kilitleme veya Android TV cihazınızın tüm verilerini silme."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Ekran kilidini açarken yapılan yanlış şifre girişi denemelerini izle ve çok sayıda yanlış şifre girişi denemesi yapılmışsa telefonu kilitle veya telefonun tüm verilerini sil."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Ekran kilidini açarken yapılan yanlış şifre girme denemelerini izler ve çok fazla sayıda yanlış şifre girme denemesi yapılmışsa tableti kilitler veya tabletteki tüm verileri siler."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip eder ve çok fazla sayıda hatalı şifre girildiğinde Android TV cihazınızı kilitler veya Android TV cihazınızın tüm verilerini siler."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Ekran kilidini açarken yapılan yanlış şifre girişi denemelerini izler ve çok sayıda yanlış şifre girişi denemesi yapılmışsa telefonu kilitler veya telefonun tüm verilerini siler."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde tableti kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde Android TV cihazınızı kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde telefonu kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ekran kilidini değiştirme"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran kilidini değiştirme."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran kilidini değiştirir."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Ekranı kilitleme"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Ekranın nasıl ve ne zaman kilitlendiğini denetleme."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Ekranın nasıl ve ne zaman kilitleneceğini denetler."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Tüm verileri silme"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek tabletteki verileri uyarıda bulunmadan silme."</string>
-    <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek Android TV cihazınızdaki verileri uyarıda bulunmadan silme."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan silme."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek tabletteki verileri uyarıda bulunmadan siler."</string>
+    <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek Android TV cihazınızdaki verileri uyarıda bulunmadan siler."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan siler."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Kullanıcı verilerini sil"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Uyarı yapmadan bu kullanıcının bu tabletteki verilerini silin."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Uyarı yapmadan bu kullanıcının bu Android TV cihazındaki verilerini silme."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Uyarı yapmadan bu kullanıcının bu telefondaki verilerini silin."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Uyarı yapmadan bu kullanıcının bu Android TV cihazındaki verilerini siler."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Uyarı yapmadan bu kullanıcının bu telefondaki verilerini siler."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cihaz genelinde geçerli proxy\'i ayarla"</string>
-    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlayın. Genel proxy\'yi yalnızca cihaz sahibi ayarlayabilir."</string>
+    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlar. Genel proxy\'yi yalnızca cihaz sahibi ayarlayabilir."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Ekran kilidi şifresinin kullanma süresini ayarla"</string>
-    <string name="policydesc_expirePassword" msgid="9136524319325960675">"Ekran kilitleme şifresinin, PIN\'in veya desenin hangi sıklıkla değiştirileceğini ayarlayın."</string>
+    <string name="policydesc_expirePassword" msgid="9136524319325960675">"Ekran kilitleme şifresinin, PIN\'in veya desenin hangi sıklıkla değiştirileceğini ayarlar."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"Deplm şifrelemesini ayarla"</string>
-    <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Depolanan uygulama verilerinin şifrelenmiş olmasını zorunlu kılma."</string>
+    <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Depolanan uygulama verilerinin şifrelenmiş olmasını zorunlu kılar."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Kameraları devre dışı bırak"</string>
-    <string name="policydesc_disableCamera" msgid="3204405908799676104">"Tüm cihaz kameralarının kullanımını engelleme."</string>
+    <string name="policydesc_disableCamera" msgid="3204405908799676104">"Tüm cihaz kameralarının kullanımını engeller."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Ekran kilidinin bazı özelliklerini devre dışı bırakma"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Ekran kilidinin bazı özelliklerinin kullanılmasını önleme."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Bazı ekran kilidi özelliklerinin kullanılmasını engeller."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Ev"</item>
     <item msgid="7740243458912727194">"Mobil"</item>

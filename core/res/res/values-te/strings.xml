@@ -277,7 +277,7 @@
     <string name="notification_hidden_text" msgid="2835519769868187223">"కొత్త నోటిఫికేషన్"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"వర్చువల్ కీబోర్డ్"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"భౌతిక కీబోర్డ్"</string>
-    <string name="notification_channel_security" msgid="8516754650348238057">"భద్రత"</string>
+    <string name="notification_channel_security" msgid="8516754650348238057">"సెక్యూరిటీ"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"కార్‌ మోడ్"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"ఖాతా స్థితి"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"డెవలపర్ సందేశాలు"</string>
@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"యాప్ అమలవుతోంది"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"బ్యాటరీని ఉపయోగిస్తున్న యాప్‌లు"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"మాగ్నిఫికేషన్"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"యాక్సెసిబిలిటీ వినియోగం"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> బ్యాటరీని ఉపయోగిస్తోంది"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> యాప్‌లు బ్యాటరీని ఉపయోగిస్తున్నాయి"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"బ్యాటరీ మరియు డేటా వినియోగ వివరాల కోసం నొక్కండి"</string>
@@ -305,7 +304,7 @@
     <string name="user_owner_label" msgid="8628726904184471211">"వ్యక్తిగత ప్రొఫైల్‌కి మార్చు"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"కార్యాలయ ప్రొఫైల్‌కి మార్చు"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"కాంటాక్ట్‌లు"</string>
-    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ పరిచయాలను యాక్సెస్ చేయడానికి"</string>
+    <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ కాంటాక్ట్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"లొకేషన్"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"సమీపంలోని బ్లూటూత్ పరికరాలను కనుగొనడానికి, పెయిర్ చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"పెయిర్ చేసిన బ్లూటూత్ పరికరాలకు కనెక్ట్ అవ్వండి"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"పెయిర్ చేసిన బ్లూటూత్ పరికరాలకు కనెక్ట్ అవ్వడానికి యాప్‌ను అనుమతిస్తుంది"</string>
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారం"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారాన్ని, అంటే రిజిస్టర్ చేయబడిన సహాయక సాధనాలు, మార్గం, గమ్యస్థానం వంటి వాటిని పొందేందుకు యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"సమీప క్షేత్ర కమ్యూనికేషన్‌ను నియంత్రించడం"</string>
@@ -573,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"పిన్, ఆకృతి లేదా పాస్‌వర్డ్‌ సెట్ చేయబడలేదు"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"ప్రామాణీకరిస్తున్నప్పుడు ఎర్రర్ ఏర్పడింది"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"కొనసాగించడానికి మీ స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"పాక్షిక వేలిముద్ర గుర్తించబడింది"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"వేలిముద్రను ప్రాసెస్ చేయడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"సెన్సార్‌ను శుభ్రం చేయండి"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"వేలు చాలా వేగంగా తరలించబడింది"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"మరొక వేలిముద్రను ట్రై చేయండి"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"సర్దుబాటు చేయడానికి ట్రై చేయండి"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ముఖం ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ముఖం ప్రమాణీకరించబడింది, దయచేసి ధృవీకరించును నొక్కండి"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"వేలిముద్ర హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"వేలిముద్రను సెటప్ చేయడం సాధ్యం కాదు"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"వేలిముద్ర గడువు సమయం చేరుకుంది. మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"వేలిముద్ర కార్యకలాపం రద్దయింది."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"వేలిముద్ర చర్యని వినియోగదారు రద్దు చేసారు."</string>
@@ -621,14 +616,10 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"ఫేస్ అన్‌లాక్"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"మీ ముఖాన్ని తిరిగి నమోదు చేయండి"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"గుర్తింపును మెరుగుపరచడానికి, దయచేసి మీ ముఖంను తిరిగి నమోదు చేసుకోండి"</string>
-    <!-- no translation found for face_setup_notification_title (550617822603450009) -->
-    <skip />
-    <!-- no translation found for face_setup_notification_content (5463999831057751676) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_title (2002630611398849495) -->
-    <skip />
-    <!-- no translation found for fingerprint_setup_notification_content (205578121848324852) -->
-    <skip />
+    <string name="face_setup_notification_title" msgid="550617822603450009">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
+    <string name="face_setup_notification_content" msgid="5463999831057751676">"మీ ఫోన్‌ను చూడటం ద్వారా దాన్ని అన్‌లాక్ చేయండి"</string>
+    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"అన్‌లాక్ చేయడానికి మరిన్ని మార్గాలను సెటప్ చేయండి"</string>
+    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"వేలిముద్రను జోడించడానికి ట్యాప్ చేయండి"</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"ముఖం డేటా సరిగ్గా రాలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"వెలుతురు అధికంగా ఉంది. తక్కువ ఉండేలా చూడండి."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"చాలా చీకటిగా ఉంది. బాగా వెలుతురులో ప్రయత్నించండి."</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"ముఖ <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించండి"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ముఖం లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"కొనసాగించడానికి మీ ముఖాన్ని ఉపయోగించండి"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"కొనసాగించడానికి మీ ముఖం లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -761,7 +751,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"కెమెరాలను నిలిపివేయండి"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"అన్ని పరికర కెమెరాల వినియోగాన్ని నిరోధించండి."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"కొన్ని స్క్రీన్ లాక్ ఫీచర్‌లు నిలిపివేయండి"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"కొన్ని స్క్రీన్ లాక్ లక్షణాల వినియోగాన్ని నిరోధిస్తుంది."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"స్క్రీన్ లాక్‌కు చెందిన కొన్ని ఫీచర్‌ల వినియోగాన్ని నిరోధిస్తుంది."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"ఇల్లు"</item>
     <item msgid="7740243458912727194">"మొబైల్"</item>
@@ -1033,12 +1023,9 @@
     <string name="copied" msgid="4675902854553014676">"కాపీ చేయబడింది"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> నుండి పేస్ట్ చేయబడింది"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> క్లిప్‌బోర్డ్ నుండి పేస్ట్ చేయబడింది"</string>
-    <!-- no translation found for pasted_text (4298871641549173733) -->
-    <skip />
-    <!-- no translation found for pasted_image (4729097394781491022) -->
-    <skip />
-    <!-- no translation found for pasted_content (646276353060777131) -->
-    <skip />
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> మీరు కాపీ చేసిన టెక్స్ట్‌ను పేస్ట్ చేసింది"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> మీరు కాపీ చేసిన ఇమేజ్‌ను పేస్ట్ చేసింది"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> మీరు కాపీ చేసిన కంటెంట్‌ను పేస్ట్ చేసింది"</string>
     <string name="more_item_label" msgid="7419249600215749115">"ఎక్కువ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"మెనూ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1609,7 +1596,7 @@
     <string name="validity_period" msgid="1717724283033175968">"చెల్లుబాటు:"</string>
     <string name="issued_on" msgid="5855489688152497307">"జారీ చేసినది:"</string>
     <string name="expires_on" msgid="1623640879705103121">"గడువు ముగిసేది:"</string>
-    <string name="serial_number" msgid="3479576915806623429">"క్రమ సంఖ్య:"</string>
+    <string name="serial_number" msgid="3479576915806623429">"సీరియల్ నంబర్:"</string>
     <string name="fingerprints" msgid="148690767172613723">"వేలిముద్రలు:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 వేలిముద్ర:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 వేలిముద్ర:"</string>
@@ -1927,7 +1914,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS అభ్యర్థన USSD అభ్యర్థనకు మార్చబడింది"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"కొత్త SS అభ్యర్థనకు మార్చబడింది"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ఫిషింగ్ అలర్ట్"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"కార్యాలయ ప్రొఫైల్‌"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"హెచ్చరించబడింది"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"వెరిఫై చేయబడింది"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"విస్తరింపజేయి"</string>
@@ -2143,31 +2130,19 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"ఆఫీస్"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"వ్యక్తిగత వీక్షణ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"పని వీక్షణ"</string>
-    <!-- no translation found for resolver_cross_profile_blocked (3014597376026044840) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (9071442683080586643) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (1129960195389373279) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (6349766201904601544) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1679399548862724359) -->
-    <skip />
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"మీ IT అడ్మిన్ ద్వారా బ్లాక్ చేయబడింది"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"ఈ కంటెంట్ వర్క్ యాప్‌తో షేర్ చేయడం సాధ్యం కాదు"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ఈ కంటెంట్ వర్క్ యాప్‌తో తెరవడం సాధ్యం కాదు"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ఈ కంటెంట్ వ్యక్తిగత యాప్‌తో షేర్ చేయడం సాధ్యం కాదు"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ఈ కంటెంట్ వ్యక్తిగత యాప్‌తో తెరవడం సాధ్యం కాదు"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"కార్యాలయ ప్రొఫైల్ పాజ్ చేయబడింది"</string>
-    <!-- no translation found for resolver_switch_on_work (463709043650610420) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available (3298291360133337270) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available (6284837227019594881) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_personal (2937599899213467617) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (152208044699347924) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_personal_browser (776072682871133308) -->
-    <skip />
-    <!-- no translation found for miniresolver_use_work_browser (543575306251952994) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"ఆన్ చేయడానికి ట్యాప్ చేయి"</string>
+    <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
+    <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"వ్యక్తిగత ప్రొఫైల్‌లో <xliff:g id="APP">%s</xliff:g>లో తెరవాలా?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"వర్క్ ప్రొఫైల్‌లో <xliff:g id="APP">%s</xliff:g>లో తెరవాలా?"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"వ్యక్తిగత బ్రౌజర్‌ను ఉపయోగించు"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"వర్క్ బ్రౌజర్‌ను ఉపయోగించు"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM నెట్‌వర్క్ అన్‌లాక్ పిన్‌"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM నెట్‌వర్క్ సబ్‌సెట్ అన్‌లాక్ పిన్"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM కార్పొరేట్ అన్‌లాక్ పిన్"</string>
@@ -2280,8 +2255,7 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (2876703640772778215) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="2876703640772778215">"కొత్త మ్యాగ్నిఫికేషన్ సెట్టింగ్‌లు"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"మీరు ఇప్పుడు మీ స్క్రీన్ కొంత భాగాన్ని మాగ్నిఫై చేయవచ్చు"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"సెట్టింగ్‌లలో ఆన్ చేయండి"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"విస్మరించు"</string>
