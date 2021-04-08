@@ -505,6 +505,15 @@ applications that come with the platform
         <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
         <!-- Permission required for CTS test - CtsPermission5TestCases -->
         <permission name="android.permission.RENOUNCE_PERMISSIONS" />
+        <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
+        <permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
+        <permission name="android.permission.READ_LOGS" />
+        <permission name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
+        <permission name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
+        <permission name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS" />
+        <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
+        <permission name="android.permission.SET_MEDIA_KEY_LISTENER" />
+        <permission name="android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
