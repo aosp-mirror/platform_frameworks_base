@@ -382,6 +382,17 @@
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
+        <item name="offStateColor">@android:color/system_neutral1_800</item>
+        <item name="underSurfaceColor">@android:color/system_neutral1_1000</item>
+        <item name="android:colorBackground">@android:color/system_neutral1_900</item>
+    </style>
+
+    <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+        <item name="android:dialogCornerRadius">8dp</item>
+    </style>
+
+    <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+        <item name="android:dialogCornerRadius">@dimen/notification_corner_radius</item>
     </style>
 
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
@@ -588,10 +599,6 @@
         <item name="android:elevation">10dp</item>
     </style>
 
-    <style name="Theme.SystemUI.QuickSettings.Edit">
-        <item name="android:colorBackground">?android:attr/colorSecondary</item>
-    </style>
-
     <style name="MediaPlayer.Button" parent="@android:style/Widget.Material.Button.Borderless.Small">
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:tint">?android:attr/textColorPrimary</item>
@@ -628,7 +635,12 @@
     </style>
 
     <!-- Privacy dialog -->
-    <style name="PrivacyDialog" parent="ScreenRecord">
+    <style name="PrivacyDialog" parent="Theme.SystemUI.QuickSettings.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
 

@@ -681,7 +681,7 @@
         <activity
             android:name=".settings.brightness.BrightnessDialog"
             android:label="@string/quick_settings_brightness_dialog_title"
-            android:theme="@*android:style/Theme.DeviceDefault.SystemUI.Dialog"
+            android:theme="@style/Theme.SystemUI.QuickSettings.BrightnessDialog"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
