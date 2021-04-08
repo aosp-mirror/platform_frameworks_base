@@ -23,6 +23,7 @@ import static com.android.settingslib.emergencynumber.EmergencyNumberUtils.EMERG
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
@@ -126,7 +127,7 @@ public class EmergencyNumberUtilsTest {
         List<EmergencyNumber> numbersForSubId = new ArrayList<>();
         numbersForSubId.add(emergencyNumber);
         numbers.put(subId, numbersForSubId);
-        when(mTelephonyManager.getEmergencyNumberList()).thenReturn(numbers);
+        when(mTelephonyManager.getEmergencyNumberList(anyInt())).thenReturn(numbers);
         when(emergencyNumber.getNumber()).thenReturn(TELEPHONY_EMERGENCY_NUMBER);
     }
 }
