@@ -34,7 +34,6 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -59,18 +58,13 @@ import com.android.server.LocalServices;
 
 import com.google.android.collect.Lists;
 
-import libcore.util.HexEncoding;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * Utilities for the lock pattern and its settings.
@@ -186,7 +180,7 @@ public class LockPatternUtils {
     public static final String SYNTHETIC_PASSWORD_HANDLE_KEY = "sp-handle";
     public static final String SYNTHETIC_PASSWORD_ENABLED_KEY = "enable-sp";
     public static final int SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT = 1;
-    private static final String HISTORY_DELIMITER = ",";
+    public static final String PASSWORD_HISTORY_DELIMITER = ",";
 
     @UnsupportedAppUsage
     private final Context mContext;
@@ -559,9 +553,11 @@ public class LockPatternUtils {
         if(passwordHistoryLength == 0) {
             return false;
         }
-        String legacyHash = legacyPasswordToHash(passwordToCheck, userId);
-        String passwordHash = passwordToHistoryHash(passwordToCheck, hashFactor, userId);
-        String[] history = passwordHistory.split(HISTORY_DELIMITER);
+        byte[] salt = getSalt(userId).getBytes();
+        String legacyHash = LockscreenCredential.legacyPasswordToHash(passwordToCheck, salt);
+        String passwordHash = LockscreenCredential.passwordToHistoryHash(
+                passwordToCheck, salt, hashFactor);
+        String[] history = passwordHistory.split(PASSWORD_HISTORY_DELIMITER);
         // Password History may be too long...
         for (int i = 0; i < Math.min(passwordHistoryLength, history.length); i++) {
             if (history[i].equals(legacyHash) || history[i].equals(passwordHash)) {
@@ -701,18 +697,7 @@ public class LockPatternUtils {
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to save lock password", e);
         }
-
-        onPostPasswordChanged(newCredential, userHandle);
         return true;
-    }
-
-    private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
-        updateEncryptionPasswordIfNeeded(newCredential, userHandle);
-        if (newCredential.isPattern()) {
-            reportPatternWasChosen(userHandle);
-        }
-        updatePasswordHistory(newCredential, userHandle);
-        reportEnabledTrustAgentsChanged(userHandle);
     }
 
     private void updateCryptoUserInfo(int userId) {
@@ -781,100 +766,6 @@ public class LockPatternUtils {
         return getDeviceOwnerInfo() != null;
     }
 
-    /** Update the encryption password if it is enabled **/
-    private void updateEncryptionPassword(final int type, final byte[] password) {
-        if (!hasSecureLockScreen() && password != null && password.length != 0) {
-            throw new UnsupportedOperationException(
-                    "This operation requires the lock screen feature.");
-        }
-        if (!isDeviceEncryptionEnabled()) {
-            return;
-        }
-        final IBinder service = ServiceManager.getService("mount");
-        if (service == null) {
-            Log.e(TAG, "Could not find the mount service to update the encryption password");
-            return;
-        }
-
-        // TODO(b/120484642): This is a location where we still use a String for vold
-        String passwordString = password != null ? new String(password) : null;
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... dummy) {
-                IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
-                try {
-                    storageManager.changeEncryptionPassword(type, passwordString);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error changing encryption password", e);
-                }
-                return null;
-            }
-        }.execute();
-    }
-
-    /**
-     * Update device encryption password if calling user is USER_SYSTEM and device supports
-     * encryption.
-     */
-    private void updateEncryptionPasswordIfNeeded(LockscreenCredential credential, int userHandle) {
-        // Update the device encryption password.
-        if (userHandle != UserHandle.USER_SYSTEM || !isDeviceEncryptionEnabled()) {
-            return;
-        }
-        if (!shouldEncryptWithCredentials(true)) {
-            updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
-            return;
-        }
-        if (credential.isNone()) {
-            // Set the encryption password to default.
-            setCredentialRequiredToDecrypt(false);
-        }
-        updateEncryptionPassword(credential.getStorageCryptType(), credential.getCredential());
-    }
-
-    /**
-     * Store the hash of the *current* password in the password history list, if device policy
-     * enforces password history requirement.
-     */
-    private void updatePasswordHistory(LockscreenCredential password, int userHandle) {
-        if (password.isNone()) {
-            return;
-        }
-        if (password.isPattern()) {
-            // Do not keep track of historical patterns
-            return;
-        }
-        // Add the password to the password history. We assume all
-        // password hashes have the same length for simplicity of implementation.
-        String passwordHistory = getString(PASSWORD_HISTORY_KEY, userHandle);
-        if (passwordHistory == null) {
-            passwordHistory = "";
-        }
-        int passwordHistoryLength = getRequestedPasswordHistoryLength(userHandle);
-        if (passwordHistoryLength == 0) {
-            passwordHistory = "";
-        } else {
-            final byte[] hashFactor = getPasswordHistoryHashFactor(password, userHandle);
-            String hash = passwordToHistoryHash(password.getCredential(), hashFactor, userHandle);
-            if (hash == null) {
-                Log.e(TAG, "Compute new style password hash failed, fallback to legacy style");
-                hash = legacyPasswordToHash(password.getCredential(), userHandle);
-            }
-            if (TextUtils.isEmpty(passwordHistory)) {
-                passwordHistory = hash;
-            } else {
-                String[] history = passwordHistory.split(HISTORY_DELIMITER);
-                StringJoiner joiner = new StringJoiner(HISTORY_DELIMITER);
-                joiner.add(hash);
-                for (int i = 0; i < passwordHistoryLength - 1 && i < history.length; i++) {
-                    joiner.add(history[i]);
-                }
-                passwordHistory = joiner.toString();
-            }
-        }
-        setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
-    }
-
     /**
      * Determine if the device supports encryption, even if it's set to default. This
      * differs from isDeviceEncrypted() in that it returns true even if the device is
@@ -898,7 +789,11 @@ public class LockPatternUtils {
      * Clears the encryption password.
      */
     public void clearEncryptionPassword() {
-        updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
+        try {
+            getLockSettings().updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't clear encryption password");
+        }
     }
 
     /**
@@ -1045,56 +940,9 @@ public class LockPatternUtils {
      * @param password the gesture pattern.
      *
      * @return the hash of the pattern in a byte array.
-     * TODO: move to LockscreenCredential class
      */
     public String legacyPasswordToHash(byte[] password, int userId) {
-        if (password == null || password.length == 0) {
-            return null;
-        }
-
-        try {
-            // Previously the password was passed as a String with the following code:
-            // byte[] saltedPassword = (password + getSalt(userId)).getBytes();
-            // The code below creates the identical digest preimage using byte arrays:
-            byte[] salt = getSalt(userId).getBytes();
-            byte[] saltedPassword = Arrays.copyOf(password, password.length + salt.length);
-            System.arraycopy(salt, 0, saltedPassword, password.length, salt.length);
-            byte[] sha1 = MessageDigest.getInstance("SHA-1").digest(saltedPassword);
-            byte[] md5 = MessageDigest.getInstance("MD5").digest(saltedPassword);
-
-            byte[] combined = new byte[sha1.length + md5.length];
-            System.arraycopy(sha1, 0, combined, 0, sha1.length);
-            System.arraycopy(md5, 0, combined, sha1.length, md5.length);
-
-            final char[] hexEncoded = HexEncoding.encode(combined);
-            Arrays.fill(saltedPassword, (byte) 0);
-            return new String(hexEncoded);
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError("Missing digest algorithm: ", e);
-        }
-    }
-
-    /**
-     * Hash the password for password history check purpose.
-     * TODO: move to LockscreenCredential class
-     */
-    private String passwordToHistoryHash(byte[] passwordToHash, byte[] hashFactor, int userId) {
-        if (passwordToHash == null || passwordToHash.length == 0 || hashFactor == null) {
-            return null;
-        }
-        try {
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            sha256.update(hashFactor);
-            byte[] salt = getSalt(userId).getBytes();
-            byte[] saltedPassword = Arrays.copyOf(passwordToHash, passwordToHash.length
-                    + salt.length);
-            System.arraycopy(salt, 0, saltedPassword, passwordToHash.length, salt.length);
-            sha256.update(saltedPassword);
-            Arrays.fill(saltedPassword, (byte) 0);
-            return new String(HexEncoding.encode(sha256.digest()));
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError("Missing digest algorithm: ", e);
-        }
+        return LockscreenCredential.legacyPasswordToHash(password, getSalt(userId).getBytes());
     }
 
     /**
@@ -1396,14 +1244,6 @@ public class LockPatternUtils {
         }
     }
 
-    private boolean isDoNotAskCredentialsOnBootSet() {
-        return getDevicePolicyManager().getDoNotAskCredentialsOnBoot();
-    }
-
-    private boolean shouldEncryptWithCredentials(boolean defaultValue) {
-        return isCredentialRequiredToDecrypt(defaultValue) && !isDoNotAskCredentialsOnBootSet();
-    }
-
     private void throwIfCalledOnMainThread() {
         if (Looper.getMainLooper().isCurrentThread()) {
             throw new IllegalStateException("should not be called from the main thread.");
@@ -1590,12 +1430,7 @@ public class LockPatternUtils {
         credential.checkLength();
         LockSettingsInternal localService = getLockSettingsInternal();
 
-        if (!localService.setLockCredentialWithToken(credential, tokenHandle, token, userHandle)) {
-            return false;
-        }
-
-        onPostPasswordChanged(credential, userHandle);
-        return true;
+        return localService.setLockCredentialWithToken(credential, tokenHandle, token, userHandle);
     }
 
     /**
