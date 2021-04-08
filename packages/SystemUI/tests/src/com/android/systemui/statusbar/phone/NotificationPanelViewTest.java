@@ -82,6 +82,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
@@ -219,6 +220,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock
+    private NotificationShadeDepthController mNotificationShadeDepthController;
+    @Mock
     private AuthController mAuthController;
     @Mock
     private ScrimController mScrimController;
@@ -333,6 +336,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mScrimController,
                 mUserManager,
                 mMediaDataManager,
+                mNotificationShadeDepthController,
                 mAmbientState,
                 mFeatureFlags);
         mNotificationPanelViewController.initDependencies(

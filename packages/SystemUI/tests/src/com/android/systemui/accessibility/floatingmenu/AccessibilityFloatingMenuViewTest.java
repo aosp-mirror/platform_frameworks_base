@@ -348,59 +348,93 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         final AccessibilityNodeInfo infos = new AccessibilityNodeInfo();
         mMenuView.onInitializeAccessibilityNodeInfo(infos);
 
-        assertThat(infos.getActionList().size()).isEqualTo(4);
+        assertThat(infos.getActionList().size()).isEqualTo(5);
     }
 
     @Test
-    public void accessibilityActionMove_moveTopLeft_success() {
+    public void accessibilityActionMove_halfOval_moveTopLeft_success() {
         final AccessibilityFloatingMenuView menuView =
                 spy(new AccessibilityFloatingMenuView(mContext));
         doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+        menuView.setShapeType(/* halfOvalShape */ 1);
 
         final boolean isActionPerformed =
                 menuView.performAccessibilityAction(R.id.action_move_top_left, null);
 
         assertThat(isActionPerformed).isTrue();
+        assertThat(menuView.mShapeType).isEqualTo(/* ovalShape */ 0);
         verify(menuView).snapToLocation(mAvailableBounds.left, mAvailableBounds.top);
     }
 
     @Test
-    public void accessibilityActionMove_moveTopRight_success() {
+    public void accessibilityActionMove_halfOval_moveTopRight_success() {
         final AccessibilityFloatingMenuView menuView =
                 spy(new AccessibilityFloatingMenuView(mContext));
         doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+        menuView.setShapeType(/* halfOvalShape */ 1);
 
         final boolean isActionPerformed =
                 menuView.performAccessibilityAction(R.id.action_move_top_right, null);
 
         assertThat(isActionPerformed).isTrue();
+        assertThat(menuView.mShapeType).isEqualTo(/* ovalShape */ 0);
         verify(menuView).snapToLocation(mAvailableBounds.right, mAvailableBounds.top);
     }
 
     @Test
-    public void accessibilityActionMove_moveBottomLeft_success() {
+    public void accessibilityActionMove_halfOval_moveBottomLeft_success() {
         final AccessibilityFloatingMenuView menuView =
                 spy(new AccessibilityFloatingMenuView(mContext));
         doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+        menuView.setShapeType(/* halfOvalShape */ 1);
 
         final boolean isActionPerformed =
                 menuView.performAccessibilityAction(R.id.action_move_bottom_left, null);
 
         assertThat(isActionPerformed).isTrue();
+        assertThat(menuView.mShapeType).isEqualTo(/* ovalShape */ 0);
         verify(menuView).snapToLocation(mAvailableBounds.left, mAvailableBounds.bottom);
     }
 
     @Test
-    public void accessibilityActionMove_moveBottomRight_success() {
+    public void accessibilityActionMove_halfOval_moveBottomRight_success() {
         final AccessibilityFloatingMenuView menuView =
                 spy(new AccessibilityFloatingMenuView(mContext));
         doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+        menuView.setShapeType(/* halfOvalShape */ 1);
 
         final boolean isActionPerformed =
                 menuView.performAccessibilityAction(R.id.action_move_bottom_right, null);
 
         assertThat(isActionPerformed).isTrue();
+        assertThat(menuView.mShapeType).isEqualTo(/* ovalShape */ 0);
         verify(menuView).snapToLocation(mAvailableBounds.right, mAvailableBounds.bottom);
+    }
+
+    @Test
+    public void accessibilityActionMove_halfOval_moveOutEdgeAndShow_success() {
+        final AccessibilityFloatingMenuView menuView =
+                spy(new AccessibilityFloatingMenuView(mContext));
+        doReturn(mAvailableBounds).when(menuView).getAvailableBounds();
+        menuView.setShapeType(/* halfOvalShape */ 1);
+
+        final boolean isActionPerformed =
+                menuView.performAccessibilityAction(R.id.action_move_out_edge_and_show, null);
+
+        assertThat(isActionPerformed).isTrue();
+        assertThat(menuView.mShapeType).isEqualTo(/* ovalShape */ 0);
+    }
+
+    @Test
+    public void setupAccessibilityActions_oval_hasActionMoveToEdgeAndHide() {
+        final AccessibilityFloatingMenuView menuView = new AccessibilityFloatingMenuView(mContext);
+        menuView.setShapeType(/* ovalShape */ 0);
+
+        final AccessibilityNodeInfo infos = new AccessibilityNodeInfo();
+        menuView.onInitializeAccessibilityNodeInfo(infos);
+
+        assertThat(infos.getActionList().stream().anyMatch(
+                action -> action.getId() == R.id.action_move_to_edge_and_hide)).isTrue();
     }
 
     @After

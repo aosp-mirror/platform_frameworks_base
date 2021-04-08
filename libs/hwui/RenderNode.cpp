@@ -255,15 +255,19 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
 
     if (mDisplayList) {
         info.out.hasFunctors |= mDisplayList.hasFunctor();
+        mHasHolePunches = mDisplayList.hasHolePunches();
         bool isDirty = mDisplayList.prepareListAndChildren(
                 observer, info, childFunctorsNeedLayer,
-                [](RenderNode* child, TreeObserver& observer, TreeInfo& info,
-                   bool functorsNeedLayer) {
+                [this](RenderNode* child, TreeObserver& observer, TreeInfo& info,
+                       bool functorsNeedLayer) {
                     child->prepareTreeImpl(observer, info, functorsNeedLayer);
+                    mHasHolePunches |= child->hasHolePunches();
                 });
         if (isDirty) {
             damageSelf(info);
         }
+    } else {
+        mHasHolePunches = false;
     }
     pushLayerUpdate(info);
 

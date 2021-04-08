@@ -19,7 +19,9 @@ package com.android.internal.jank;
 import static android.content.Intent.FLAG_RECEIVER_REGISTERED_ONLY;
 
 import static com.android.internal.jank.FrameTracker.ChoreographerWrapper;
+import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NOT_BEGUN;
+import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
 import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
@@ -100,6 +102,7 @@ public class InteractionJankMonitor {
     private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
 
     public static final String ACTION_SESSION_BEGIN = ACTION_PREFIX + ".ACTION_SESSION_BEGIN";
+    public static final String ACTION_SESSION_END = ACTION_PREFIX + ".ACTION_SESSION_END";
     public static final String ACTION_SESSION_CANCEL = ACTION_PREFIX + ".ACTION_SESSION_CANCEL";
     public static final String ACTION_METRICS_LOGGED = ACTION_PREFIX + ".ACTION_METRICS_LOGGED";
     public static final String BUNDLE_KEY_CUJ_NAME = ACTION_PREFIX + ".CUJ_NAME";
@@ -275,16 +278,35 @@ public class InteractionJankMonitor {
     public FrameTracker createFrameTracker(View v, Session session) {
         final Context c = v.getContext().getApplicationContext();
         synchronized (this) {
-            boolean needListener = SystemProperties.getBoolean(PROP_NOTIFY_CUJ_EVENT, false);
-            FrameTrackerListener eventsListener =
-                    !needListener ? null : (s, act) -> notifyEvents(c, act, s);
-
+            FrameTrackerListener eventsListener = (s, act) -> handleCujEvents(c, act, s);
             return new FrameTracker(session, mWorker.getThreadHandler(),
                     new ThreadedRendererWrapper(v.getThreadedRenderer()),
                     new ViewRootWrapper(v.getViewRootImpl()), new SurfaceControlWrapper(),
                     new ChoreographerWrapper(Choreographer.getInstance()), mMetrics,
                     mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis, eventsListener);
         }
+    }
+
+    private void handleCujEvents(Context context, String action, Session session) {
+        // Clear the running and timeout tasks if the end / cancel was fired within the tracker.
+        // Or we might have memory leaks.
+        if (needRemoveTasks(action, session)) {
+            removeTimeout(session.getCuj());
+            removeTracker(session.getCuj());
+        }
+
+        // Notify the receivers if necessary.
+        if (session.shouldNotify()) {
+            notifyEvents(context, action, session);
+        }
+    }
+
+    private boolean needRemoveTasks(String action, Session session) {
+        final boolean badEnd = action.equals(ACTION_SESSION_END)
+                && session.getReason() != REASON_END_NORMAL;
+        final boolean badCancel = action.equals(ACTION_SESSION_CANCEL)
+                && session.getReason() != REASON_CANCEL_NORMAL;
+        return badEnd || badCancel;
     }
 
     private void notifyEvents(Context context, String action, Session session) {
@@ -299,7 +321,7 @@ public class InteractionJankMonitor {
         context.sendBroadcast(intent);
     }
 
-    void removeTimeout(@CujType int cujType) {
+    private void removeTimeout(@CujType int cujType) {
         synchronized (this) {
             Runnable timeout = mTimeoutActions.get(cujType);
             if (timeout != null) {
@@ -371,7 +393,7 @@ public class InteractionJankMonitor {
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
             tracker.end(FrameTracker.REASON_END_NORMAL);
-            mRunningTrackers.remove(cujType);
+            removeTracker(cujType);
             return true;
         }
     }
@@ -390,7 +412,7 @@ public class InteractionJankMonitor {
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
             tracker.cancel(FrameTracker.REASON_CANCEL_NORMAL);
-            mRunningTrackers.remove(cujType);
+            removeTracker(cujType);
             return true;
         }
     }
@@ -398,6 +420,12 @@ public class InteractionJankMonitor {
     private FrameTracker getTracker(@CujType int cuj) {
         synchronized (this) {
             return mRunningTrackers.get(cuj);
+        }
+    }
+
+    private void removeTracker(@CujType int cuj) {
+        synchronized (this) {
+            mRunningTrackers.remove(cuj);
         }
     }
 
@@ -516,9 +544,11 @@ public class InteractionJankMonitor {
         private long mTimeStamp;
         @FrameTracker.Reasons
         private int mReason = FrameTracker.REASON_END_UNKNOWN;
+        private boolean mShouldNotify;
 
         public Session(@CujType int cujType) {
             mCujType = cujType;
+            mShouldNotify = SystemProperties.getBoolean(PROP_NOTIFY_CUJ_EVENT, false);
         }
 
         @CujType
@@ -557,6 +587,11 @@ public class InteractionJankMonitor {
 
         public int getReason() {
             return mReason;
+        }
+
+        /** Determine if should notify the receivers of cuj events */
+        public boolean shouldNotify() {
+            return mShouldNotify;
         }
     }
 }

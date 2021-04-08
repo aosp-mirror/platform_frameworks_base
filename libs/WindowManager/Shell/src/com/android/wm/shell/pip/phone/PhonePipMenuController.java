@@ -16,13 +16,9 @@
 
 package com.android.wm.shell.pip.phone;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
 import android.annotation.Nullable;
-import android.app.ActivityTaskManager;
-import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -43,6 +39,7 @@ import android.view.WindowManagerGlobal;
 
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMediaController.ActionListener;
 import com.android.wm.shell.pip.PipMenuController;
@@ -59,7 +56,7 @@ import java.util.List;
  */
 public class PhonePipMenuController implements PipMenuController {
 
-    private static final String TAG = "PipMenuActController";
+    private static final String TAG = "PhonePipMenuController";
     private static final boolean DEBUG = false;
 
     public static final int MENU_STATE_NONE = 0;
@@ -99,6 +96,7 @@ public class PhonePipMenuController implements PipMenuController {
     private final RectF mTmpSourceRectF = new RectF();
     private final RectF mTmpDestinationRectF = new RectF();
     private final Context mContext;
+    private final PipBoundsState mPipBoundsState;
     private final PipMediaController mMediaController;
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
@@ -134,10 +132,11 @@ public class PhonePipMenuController implements PipMenuController {
         }
     };
 
-    public PhonePipMenuController(Context context, PipMediaController mediaController,
-            SystemWindows systemWindows, ShellExecutor mainExecutor,
-            Handler mainHandler) {
+    public PhonePipMenuController(Context context, PipBoundsState pipBoundsState,
+            PipMediaController mediaController, SystemWindows systemWindows,
+            ShellExecutor mainExecutor, Handler mainHandler) {
         mContext = context;
+        mPipBoundsState = pipBoundsState;
         mMediaController = mediaController;
         mSystemWindows = systemWindows;
         mMainExecutor = mainExecutor;
@@ -466,20 +465,11 @@ public class PhonePipMenuController implements PipMenuController {
      * Updates the PiP menu with the best set of actions provided.
      */
     private void updateMenuActions() {
-        if (isMenuVisible()) {
-            // Fetch the pinned stack bounds
-            Rect stackBounds = null;
-            try {
-                RootTaskInfo pinnedTaskInfo = ActivityTaskManager.getService().getRootTaskInfo(
-                        WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
-                if (pinnedTaskInfo != null) {
-                    stackBounds = pinnedTaskInfo.bounds;
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error showing PIP menu", e);
+        if (mPipMenuView != null) {
+            final ParceledListSlice<RemoteAction> menuActions = resolveMenuActions();
+            if (menuActions != null) {
+                mPipMenuView.setActions(mPipBoundsState.getBounds(), menuActions.getList());
             }
-
-            mPipMenuView.setActions(stackBounds, resolveMenuActions().getList());
         }
     }
 

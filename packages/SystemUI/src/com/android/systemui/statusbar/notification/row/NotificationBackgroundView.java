@@ -31,7 +31,8 @@ import android.view.View;
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
@@ -277,13 +278,14 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
-    public void setExpandAnimationParams(ActivityLaunchAnimator.ExpandAnimationParameters params) {
+    /** Set the current expand animation parameters. */
+    public void setExpandAnimationParams(ExpandAnimationParameters params) {
         mActualHeight = params.getHeight();
         mActualWidth = params.getWidth();
         float alphaProgress = Interpolators.ALPHA_IN.getInterpolation(
                 params.getProgress(
-                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_CONTENT /* delay */,
-                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_APP /* duration */));
+                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_OUT_CONTENT /* delay */,
+                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_IN_WINDOW /* duration */));
         mBackground.setAlpha((int) (mDrawableAlpha * (1.0f - alphaProgress)));
         invalidate();
     }

@@ -236,12 +236,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-final class RemoteServiceException extends AndroidRuntimeException {
-    public RemoteServiceException(String msg) {
-        super(msg);
-    }
-}
-
 /**
  * This manages the execution of the main thread in an
  * application process, scheduling and executing activities,
@@ -1274,8 +1268,9 @@ public final class ActivityThread extends ClientTransactionHandler
             sendMessage(H.DISPATCH_PACKAGE_BROADCAST, packages, cmd);
         }
 
-        public void scheduleCrash(String msg) {
-            sendMessage(H.SCHEDULE_CRASH, msg);
+        @Override
+        public void scheduleCrash(String msg, int typeId) {
+            sendMessage(H.SCHEDULE_CRASH, msg, typeId);
         }
 
         public void dumpActivity(ParcelFileDescriptor pfd, IBinder activitytoken,
@@ -1892,6 +1887,17 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
+    private void throwRemoteServiceException(String message, int typeId) {
+        // Use a switch to ensure all the type IDs are unique.
+        switch (typeId) {
+            case ForegroundServiceDidNotStartInTimeException.TYPE_ID: // 1
+                throw new ForegroundServiceDidNotStartInTimeException(message);
+            case RemoteServiceException.TYPE_ID: // 0
+            default:
+                throw new RemoteServiceException(message);
+        }
+    }
+
     class H extends Handler {
         public static final int BIND_APPLICATION        = 110;
         @UnsupportedAppUsage
@@ -2105,7 +2111,8 @@ public final class ActivityThread extends ClientTransactionHandler
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case SCHEDULE_CRASH:
-                    throw new RemoteServiceException((String)msg.obj);
+                    throwRemoteServiceException((String) msg.obj, msg.arg1);
+                    break;
                 case DUMP_HEAP:
                     handleDumpHeap((DumpHeapData) msg.obj);
                     break;

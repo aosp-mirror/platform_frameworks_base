@@ -610,6 +610,14 @@ public class BaseRecordingCanvas extends Canvas {
                 indices, indexOffset, indexCount, paint.getNativeInstance());
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public void punchHole(float left, float top, float right, float bottom, float rx, float ry) {
+        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry);
+    }
+
     @FastNative
     private static native void nDrawBitmap(long nativeCanvas, long bitmapHandle, float left,
             float top, long nativePaintOrZero, int canvasDensity, int screenDensity,
@@ -735,4 +743,8 @@ public class BaseRecordingCanvas extends Canvas {
     @FastNative
     private static native void nDrawTextOnPath(long nativeCanvas, String text, long nativePath,
             float hOffset, float vOffset, int flags, long nativePaint);
+
+    @FastNative
+    private static native void nPunchHole(long renderer, float left, float top, float right,
+            float bottom, float rx, float ry);
 }

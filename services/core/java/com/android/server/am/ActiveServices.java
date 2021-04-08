@@ -78,6 +78,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.ForegroundServiceDidNotStartInTimeException;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -4988,9 +4989,10 @@ public final class ActiveServices {
     }
 
     void serviceForegroundCrash(ProcessRecord app, CharSequence serviceRecord) {
-        mAm.crashApplication(app.uid, app.getPid(), app.info.packageName, app.userId,
+        mAm.crashApplicationWithType(app.uid, app.getPid(), app.info.packageName, app.userId,
                 "Context.startForegroundService() did not then call Service.startForeground(): "
-                    + serviceRecord, false /*force*/);
+                    + serviceRecord, false /*force*/,
+                ForegroundServiceDidNotStartInTimeException.TYPE_ID);
     }
 
     void scheduleServiceTimeoutLocked(ProcessRecord proc) {

@@ -531,7 +531,7 @@ public class TransactionParcelTests {
         }
 
         @Override
-        public void scheduleCrash(String s) throws RemoteException {
+        public void scheduleCrash(String s, int i) throws RemoteException {
         }
 
         @Override

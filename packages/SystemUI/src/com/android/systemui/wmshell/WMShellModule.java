@@ -157,11 +157,12 @@ public class WMShellModule {
     @WMSingleton
     @Provides
     static PhonePipMenuController providesPipPhoneMenuController(Context context,
-            PipMediaController pipMediaController, SystemWindows systemWindows,
+            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
+            SystemWindows systemWindows,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
-        return new PhonePipMenuController(context, pipMediaController, systemWindows,
-                mainExecutor, mainHandler);
+        return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
+                systemWindows, mainExecutor, mainHandler);
     }
 
     @WMSingleton

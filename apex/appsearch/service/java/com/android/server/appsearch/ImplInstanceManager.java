@@ -95,6 +95,23 @@ public final class ImplInstanceManager {
         }
     }
 
+    /**
+     * Remove an instance of {@link AppSearchImpl} for the given user.
+     *
+     * <p>This method should only be called if {@link AppSearchManagerService} receives an
+     * ACTION_USER_REMOVED, which the instance of given user should be removed.
+     *
+     * <p>If the user is removed, the "credential encrypted" system directory where icing lives will
+     * be auto-deleted. So we shouldn't worry about persist data or close the AppSearchImpl.
+     *
+     * @param userId The multi-user userId of the user that need to be removed.
+     */
+    @NonNull
+    public void removeAppSearchImplForUser(@UserIdInt int userId) {
+        synchronized (mInstancesLocked) {
+            mInstancesLocked.remove(userId);
+        }
+    }
 
     /**
      * Gets an instance of AppSearchImpl for the given user.

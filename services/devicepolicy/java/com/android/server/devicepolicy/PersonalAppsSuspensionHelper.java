@@ -39,13 +39,13 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.R;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,7 +109,7 @@ public final class PersonalAppsSuspensionHelper {
         }
 
         if (Log.isLoggable(LOG_TAG, Log.INFO)) {
-            Slog.i(LOG_TAG, "Packages subject to suspension: %s", String.join(",", result));
+            Slogf.i(LOG_TAG, "Packages subject to suspension: %s", String.join(",", result));
         }
         return result.toArray(new String[0]);
     }
@@ -123,7 +123,7 @@ public final class PersonalAppsSuspensionHelper {
         for (final ResolveInfo resolveInfo : matchingActivities) {
             if (resolveInfo.activityInfo == null
                     || TextUtils.isEmpty(resolveInfo.activityInfo.packageName)) {
-                Slog.wtf(LOG_TAG, "Could not find package name for launcher app %s", resolveInfo);
+                Slogf.wtf(LOG_TAG, "Could not find package name for launcher app %s", resolveInfo);
                 continue;
             }
             final String packageName = resolveInfo.activityInfo.packageName;
@@ -134,7 +134,7 @@ public final class PersonalAppsSuspensionHelper {
                     result.add(packageName);
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(LOG_TAG, "Could not find application info for launcher app: %s",
+                Slogf.e(LOG_TAG, "Could not find application info for launcher app: %s",
                         packageName);
             }
         }

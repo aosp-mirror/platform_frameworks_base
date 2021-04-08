@@ -16,6 +16,7 @@
 package com.android.server.appsearch;
 
 import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
+import static android.os.UserHandle.USER_NULL;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -34,7 +35,10 @@ import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.StorageInfo;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
@@ -46,6 +50,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -67,6 +72,7 @@ import java.util.Set;
 /** TODO(b/142567528): add comments when implement this class */
 public class AppSearchManagerService extends SystemService {
     private static final String TAG = "AppSearchManagerService";
+    private final Context mContext;
     private PackageManagerInternal mPackageManagerInternal;
     private ImplInstanceManager mImplInstanceManager;
     private UserManager mUserManager;
@@ -79,14 +85,60 @@ public class AppSearchManagerService extends SystemService {
 
     public AppSearchManagerService(Context context) {
         super(context);
+        mContext = context;
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.APP_SEARCH_SERVICE, new Stub());
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mImplInstanceManager = ImplInstanceManager.getInstance(getContext());
-        mUserManager = getContext().getSystemService(UserManager.class);
+        mImplInstanceManager = ImplInstanceManager.getInstance(mContext);
+        mUserManager = mContext.getSystemService(UserManager.class);
+        registerReceivers();
+    }
+
+    private void registerReceivers() {
+        mContext.registerReceiverAsUser(new UserActionReceiver(), UserHandle.ALL,
+                new IntentFilter(Intent.ACTION_USER_REMOVED), /*broadcastPermission=*/ null,
+                /*scheduler=*/ null);
+    }
+
+    private class UserActionReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+            switch (intent.getAction()) {
+                case Intent.ACTION_USER_REMOVED:
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
+                    if (userId == USER_NULL) {
+                        Slog.e(TAG, "userId is missing in the intent: " + intent);
+                        return;
+                    }
+                    handleUserRemoved(userId);
+                    break;
+                default:
+                    Slog.e(TAG, "Received unknown intent: " + intent);
+            }
+        }
+    }
+
+    /**
+     * Handles user removed action.
+     *
+     * <p>Only need to clear the AppSearchImpl instance. The data of AppSearch is saved in the
+     * "credential encrypted" system directory of each user. That directory will be auto-deleted
+     * when a user is removed.
+     *
+     * @param userId The multi-user userId of the user that need to be removed.
+     *
+     * @see android.os.Environment#getDataSystemCeDirectory
+     */
+    private void handleUserRemoved(@UserIdInt int userId) {
+        try {
+            mImplInstanceManager.removeAppSearchImplForUser(userId);
+            Slog.i(TAG, "Removed AppSearchImpl instance for user: " + userId);
+        } catch (Throwable t) {
+            Slog.e(TAG, "Unable to remove data for user: " + userId, t);
+        }
     }
 
     @Override
@@ -663,7 +715,7 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 verifyUserUnlocked(callingUserId);
-                mImplInstanceManager.getOrCreateAppSearchImpl(getContext(), callingUserId);
+                mImplInstanceManager.getOrCreateAppSearchImpl(mContext, callingUserId);
                 invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
             } catch (Throwable t) {
                 invokeCallbackOnError(callback, t);

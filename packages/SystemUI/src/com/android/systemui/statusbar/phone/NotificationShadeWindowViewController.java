@@ -92,7 +92,6 @@ public class NotificationShadeWindowViewController {
     private View mBrightnessMirror;
     private boolean mTouchActive;
     private boolean mTouchCancelled;
-    private boolean mExpandAnimationPending;
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarView mStatusBarView;
@@ -235,7 +234,7 @@ public class NotificationShadeWindowViewController {
                         || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
                     setTouchActive(false);
                 }
-                if (mTouchCancelled || mExpandAnimationRunning || mExpandAnimationPending) {
+                if (mTouchCancelled || mExpandAnimationRunning) {
                     return false;
                 }
                 mFalsingCollector.onTouchEvent(ev);
@@ -435,8 +434,6 @@ public class NotificationShadeWindowViewController {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.print("  mExpandAnimationPending=");
-        pw.println(mExpandAnimationPending);
         pw.print("  mExpandAnimationRunning=");
         pw.println(mExpandAnimationRunning);
         pw.print("  mTouchCancelled=");
@@ -445,19 +442,10 @@ public class NotificationShadeWindowViewController {
         pw.println(mTouchActive);
     }
 
-    public void setExpandAnimationPending(boolean pending) {
-        if (mExpandAnimationPending != pending) {
-            mExpandAnimationPending = pending;
-            mNotificationShadeWindowController
-                    .setLaunchingActivity(mExpandAnimationPending | mExpandAnimationRunning);
-        }
-    }
-
     public void setExpandAnimationRunning(boolean running) {
         if (mExpandAnimationRunning != running) {
             mExpandAnimationRunning = running;
-            mNotificationShadeWindowController
-                    .setLaunchingActivity(mExpandAnimationPending | mExpandAnimationRunning);
+            mNotificationShadeWindowController.setLaunchingActivity(mExpandAnimationRunning);
         }
     }
 
