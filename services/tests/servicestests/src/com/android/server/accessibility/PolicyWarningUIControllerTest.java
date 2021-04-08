@@ -119,36 +119,36 @@ public class PolicyWarningUIControllerTest {
         when(mAccessibilitySecurityPolicy.isA11yCategoryService(
                 mMockA11yServiceInfo)).thenReturn(false);
 
-        mFakeNotificationController.onReceive(mContext, createIntent(TEST_USER_ID,
-                PolicyWarningUIController.ACTION_SEND_NOTIFICATION,
-                TEST_COMPONENT_NAME.flattenToShortString()));
+        mFakeNotificationController.onReceive(mContext,
+                PolicyWarningUIController.createIntent(mContext, TEST_USER_ID,
+                        PolicyWarningUIController.ACTION_SEND_NOTIFICATION,
+                        TEST_COMPONENT_NAME));
 
         verify(mNotificationManager).notify(eq(TEST_COMPONENT_NAME.flattenToShortString()),
-                eq(NOTE_A11Y_VIEW_AND_CONTROL_ACCESS), any(
-                        Notification.class));
+                eq(NOTE_A11Y_VIEW_AND_CONTROL_ACCESS), any(Notification.class));
     }
 
     @Test
     public void receiveActionA11ySettings_launchA11ySettingsAndDismissNotification() {
         mFakeNotificationController.onReceive(mContext,
-                createIntent(TEST_USER_ID, PolicyWarningUIController.ACTION_A11Y_SETTINGS,
-                        TEST_COMPONENT_NAME.flattenToShortString()));
+                PolicyWarningUIController.createIntent(mContext, TEST_USER_ID,
+                        PolicyWarningUIController.ACTION_A11Y_SETTINGS,
+                        TEST_COMPONENT_NAME));
 
         verifyLaunchA11ySettings();
         verify(mNotificationManager).cancel(TEST_COMPONENT_NAME.flattenToShortString(),
                 NOTE_A11Y_VIEW_AND_CONTROL_ACCESS);
-        assertNotifiedSettingsEqual(TEST_USER_ID,
-                TEST_COMPONENT_NAME.flattenToShortString());
+        assertNotifiedSettingsEqual(TEST_USER_ID, TEST_COMPONENT_NAME.flattenToShortString());
     }
 
     @Test
     public void receiveActionDismissNotification_addToNotifiedSettings() {
-        mFakeNotificationController.onReceive(mContext, createIntent(TEST_USER_ID,
-                PolicyWarningUIController.ACTION_DISMISS_NOTIFICATION,
-                TEST_COMPONENT_NAME.flattenToShortString()));
+        mFakeNotificationController.onReceive(mContext,
+                PolicyWarningUIController.createIntent(mContext, TEST_USER_ID,
+                        PolicyWarningUIController.ACTION_DISMISS_NOTIFICATION,
+                        TEST_COMPONENT_NAME));
 
-        assertNotifiedSettingsEqual(TEST_USER_ID,
-                TEST_COMPONENT_NAME.flattenToShortString());
+        assertNotifiedSettingsEqual(TEST_USER_ID, TEST_COMPONENT_NAME.flattenToShortString());
     }
 
     @Test
@@ -172,8 +172,7 @@ public class PolicyWarningUIControllerTest {
 
         verify(mAlarmManager).set(eq(RTC_WAKEUP), anyLong(),
                 eq(PolicyWarningUIController.createPendingIntent(mContext, TEST_USER_ID,
-                        PolicyWarningUIController.ACTION_SEND_NOTIFICATION,
-                        TEST_COMPONENT_NAME.flattenToShortString())));
+                        PolicyWarningUIController.ACTION_SEND_NOTIFICATION, TEST_COMPONENT_NAME)));
     }
 
     @Test
@@ -184,8 +183,7 @@ public class PolicyWarningUIControllerTest {
 
         verify(mAlarmManager).cancel(
                 eq(PolicyWarningUIController.createPendingIntent(mContext, TEST_USER_ID,
-                        PolicyWarningUIController.ACTION_SEND_NOTIFICATION,
-                        TEST_COMPONENT_NAME.flattenToShortString())));
+                        PolicyWarningUIController.ACTION_SEND_NOTIFICATION, TEST_COMPONENT_NAME)));
     }
 
     private void assertNotifiedSettingsEqual(int userId, String settingString) {
@@ -194,14 +192,6 @@ public class PolicyWarningUIControllerTest {
                 Settings.Secure.NOTIFIED_NON_ACCESSIBILITY_CATEGORY_SERVICES,
                 userId);
         assertEquals(settingString, notifiedServicesSetting);
-    }
-
-    private Intent createIntent(int userId, String action, String serviceComponentName) {
-        final Intent intent = new Intent(action);
-        intent.setPackage(mContext.getPackageName())
-                .setIdentifier(serviceComponentName)
-                .putExtra(Intent.EXTRA_USER_ID, userId);
-        return intent;
     }
 
     private void verifyLaunchA11ySettings() {
