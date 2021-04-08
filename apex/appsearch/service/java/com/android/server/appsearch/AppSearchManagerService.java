@@ -169,8 +169,8 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull List<String> schemasNotDisplayedBySystem,
                 @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
                 boolean forceOverride,
-                @UserIdInt int userId,
                 int schemaVersion,
+                @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(packageName);
             Preconditions.checkNotNull(databaseName);
