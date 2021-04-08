@@ -60,7 +60,7 @@ static void startStatsAidlService() {
     const std::string instance = std::string() + IStats::descriptor + "/default";
     const binder_exception_t err =
             AServiceManager_addService(statsService->asBinder().get(), instance.c_str());
-    LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register %s: %d", instance.c_str(), err);
+    LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register AIDL %s: %d", instance.c_str(), err);
 }
 
 static void startStatsHidlService() {
@@ -69,12 +69,17 @@ static void startStatsHidlService() {
 
     android::sp<IStats> statsHal = new StatsHal();
     const android::status_t err = statsHal->registerAsService();
-    LOG_ALWAYS_FATAL_IF(err != android::OK, "Cannot register %s: %d", IStats::descriptor, err);
+    LOG_ALWAYS_FATAL_IF(err != android::OK, "Cannot register HIDL %s: %d", IStats::descriptor, err);
 }
 
 } // namespace
 
 namespace android {
+
+static void android_server_SystemServer_startIStatsService(JNIEnv* /* env */, jobject /* clazz */) {
+    startStatsHidlService();
+    startStatsAidlService();
+}
 
 static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jobject /* clazz */) {
     char propBuf[PROPERTY_VALUE_MAX];
@@ -129,9 +134,6 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     } else {
         ALOGW("%s is deprecated. Skipping registration.", ISchedulingPolicyService::descriptor);
     }
-
-    startStatsAidlService();
-    startStatsHidlService();
 }
 
 static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,
@@ -160,6 +162,7 @@ static void android_server_SystemServer_setIncrementalServiceSystemReady(JNIEnv*
  */
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
+        {"startIStatsService", "()V", (void*)android_server_SystemServer_startIStatsService},
         {"startSensorService", "()V", (void*)android_server_SystemServer_startSensorService},
         {"startMemtrackProxyService", "()V",
          (void*)android_server_SystemServer_startMemtrackProxyService},
