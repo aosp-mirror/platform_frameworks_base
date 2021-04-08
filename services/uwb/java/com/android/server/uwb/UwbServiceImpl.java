@@ -27,6 +27,7 @@ import android.uwb.IUwbAdapter;
 import android.uwb.IUwbAdapterStateCallbacks;
 import android.uwb.IUwbRangingCallbacks;
 import android.uwb.RangingReport;
+import android.uwb.RangingSession;
 import android.uwb.SessionHandle;
 
 import com.android.internal.annotations.GuardedBy;
@@ -36,7 +37,7 @@ import java.util.Map;
 /**
  * Implementation of {@link android.uwb.IUwbAdapter} binder service.
  */
-public class UwbServiceImpl extends IUwbAdapter.Stub {
+public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRecipient{
     private static final String TAG = "UwbServiceImpl";
 
     private final Context mContext;
@@ -55,16 +56,20 @@ public class UwbServiceImpl extends IUwbAdapter.Stub {
     /**
      * Wrapper for callback registered with vendor service. This wrapper is needed for performing
      * permission check before sending the callback to the external app.
+     *
+     * Access to these callbacks are synchronized.
      */
     private class UwbRangingCallbacksWrapper extends IUwbRangingCallbacks.Stub
             implements IBinder.DeathRecipient{
         private final SessionHandle mSessionHandle;
         private final IUwbRangingCallbacks mExternalCb;
+        private boolean mIsValid;
 
         UwbRangingCallbacksWrapper(@NonNull SessionHandle sessionHandle,
                 @NonNull IUwbRangingCallbacks externalCb) {
             mSessionHandle = sessionHandle;
             mExternalCb = externalCb;
+            mIsValid = true;
 
             // Link to death for external callback.
             linkToDeath();
@@ -75,7 +80,7 @@ public class UwbServiceImpl extends IUwbAdapter.Stub {
             try {
                 binder.linkToDeath(this, 0);
             } catch (RemoteException e) {
-                Log.e(TAG, "Unable to link to client death event.");
+                Log.e(TAG, "Unable to link to client death event.", e);
             }
         }
 
@@ -86,91 +91,136 @@ public class UwbServiceImpl extends IUwbAdapter.Stub {
             }
             IBinder binder = mExternalCb.asBinder();
             binder.unlinkToDeath(this, 0);
+            mIsValid = false;
         }
 
 
         @Override
-        public void onRangingOpened(SessionHandle sessionHandle) throws RemoteException {
+        public synchronized void onRangingOpened(SessionHandle sessionHandle)
+                throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingOpened(sessionHandle);
         }
 
         @Override
-        public void onRangingOpenFailed(SessionHandle sessionHandle,
+        public synchronized void onRangingOpenFailed(SessionHandle sessionHandle,
                 int reason, PersistableBundle parameters) throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingOpenFailed(sessionHandle, reason, parameters);
         }
 
         @Override
-        public void onRangingStarted(SessionHandle sessionHandle, PersistableBundle parameters)
+        public synchronized void onRangingStarted(SessionHandle sessionHandle,
+                PersistableBundle parameters)
                 throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingStarted(sessionHandle, parameters);
         }
 
         @Override
-        public void onRangingStartFailed(SessionHandle sessionHandle,
+        public synchronized void onRangingStartFailed(SessionHandle sessionHandle,
                 int reason, PersistableBundle parameters) throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingStartFailed(sessionHandle, reason, parameters);
         }
 
         @Override
-        public void onRangingReconfigured(SessionHandle sessionHandle, PersistableBundle parameters)
+        public synchronized void onRangingReconfigured(SessionHandle sessionHandle,
+                PersistableBundle parameters)
                 throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingReconfigured(sessionHandle, parameters);
         }
 
         @Override
-        public void onRangingReconfigureFailed(SessionHandle sessionHandle,
+        public synchronized void onRangingReconfigureFailed(SessionHandle sessionHandle,
                 int reason, PersistableBundle parameters) throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingReconfigureFailed(sessionHandle, reason, parameters);
         }
 
         @Override
-        public void onRangingStopped(SessionHandle sessionHandle, int reason,
+        public synchronized void onRangingStopped(SessionHandle sessionHandle, int reason,
                 PersistableBundle parameters)
                 throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingStopped(sessionHandle, reason, parameters);
         }
 
         @Override
-        public void onRangingStopFailed(SessionHandle sessionHandle, int reason,
+        public synchronized void onRangingStopFailed(SessionHandle sessionHandle, int reason,
                 PersistableBundle parameters) throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingStopFailed(sessionHandle, reason, parameters);
         }
 
         @Override
-        public void onRangingClosed(SessionHandle sessionHandle, int reason,
+        public synchronized void onRangingClosed(SessionHandle sessionHandle, int reason,
                 PersistableBundle parameters) throws RemoteException {
+            if (!mIsValid) return;
             mExternalCb.onRangingClosed(sessionHandle, reason, parameters);
             removeClientAndUnlinkToDeath();
         }
 
         @Override
-        public void onRangingResult(SessionHandle sessionHandle, RangingReport rangingReport)
+        public synchronized void onRangingResult(SessionHandle sessionHandle,
+                RangingReport rangingReport)
                 throws RemoteException {
+            if (!mIsValid) return;
             // TODO: Perform permission checks and noteOp.
             mExternalCb.onRangingResult(sessionHandle, rangingReport);
         }
 
         @Override
-        public void binderDied() {
+        public synchronized void binderDied() {
+            if (!mIsValid) return;
             Log.i(TAG, "Client died: ending session: " + mSessionHandle);
             try {
+                removeClientAndUnlinkToDeath();
                 stopRanging(mSessionHandle);
                 closeRanging(mSessionHandle);
-            } catch (RemoteException execption) {
-                Log.w(TAG, "Remote exception while handling client death");
-                removeClientAndUnlinkToDeath();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception while handling client death", e);
             }
         }
     }
 
-    private IUwbAdapter getVendorUwbAdapter() throws IllegalStateException {
+    private void linkToVendorServiceDeath() {
+        IBinder binder = mVendorUwbAdapter.asBinder();
+        try {
+            binder.linkToDeath(this, 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to link to vendor service death event.", e);
+        }
+    }
+
+    @Override
+    public void binderDied() {
+        Log.i(TAG, "Vendor service died: sending session close callbacks");
+        synchronized (mCallbacksMap) {
+            for (Map.Entry<SessionHandle, UwbRangingCallbacksWrapper> e : mCallbacksMap.entrySet()) {
+                try {
+                    e.getValue().mExternalCb.onRangingClosed(
+                            e.getKey(), RangingSession.Callback.REASON_UNKNOWN,
+                            new PersistableBundle());
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Failed to send session close callback " + e.getKey(), ex);
+                }
+            }
+            // Clear all sessions.
+            mCallbacksMap.clear();
+        }
+        mVendorUwbAdapter = null;
+    }
+
+    private synchronized IUwbAdapter getVendorUwbAdapter() throws IllegalStateException {
         if (mVendorUwbAdapter != null) return mVendorUwbAdapter;
         mVendorUwbAdapter = mUwbInjector.getVendorService();
         if (mVendorUwbAdapter == null) {
             throw new IllegalStateException("No vendor service found!");
         }
         Log.i(TAG, "Retrieved vendor service");
+        linkToVendorServiceDeath();
         return mVendorUwbAdapter;
     }
 
@@ -234,4 +284,5 @@ public class UwbServiceImpl extends IUwbAdapter.Stub {
     public void closeRanging(SessionHandle sessionHandle) throws RemoteException {
         getVendorUwbAdapter().closeRanging(sessionHandle);
     }
+
 }
