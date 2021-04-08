@@ -2678,7 +2678,7 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("RegisterAppOpsPolicy");
             try {
-                mActivityManagerService.setAppOpsPolicy(new AppOpsPolicy());
+                mActivityManagerService.setAppOpsPolicy(new AppOpsPolicy(mSystemContext));
             } catch (Throwable e) {
                 reportWtf("registering app ops policy", e);
             }

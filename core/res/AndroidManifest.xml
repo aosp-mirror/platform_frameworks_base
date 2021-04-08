@@ -4240,6 +4240,15 @@
     <permission android:name="android.permission.MANAGE_ROLE_HOLDERS"
                 android:protectionLevel="signature|installer" />
 
+    <!-- @SystemApi Allows an application to bypass role qualification. This allows switching role
+         holders to otherwise non eligible holders. Only the shell is allowed to do this, the
+         qualification for the shell role itself cannot be bypassed, and each role needs to
+         explicitly allow bypassing qualification in its definition. The bypass state will not be
+         persisted across reboot.
+     @hide -->
+    <permission android:name="android.permission.BYPASS_ROLE_QUALIFICATION"
+                android:protectionLevel="internal|role" />
+
     <!-- @SystemApi Allows an application to observe role holder changes.
          @hide -->
     <permission android:name="android.permission.OBSERVE_ROLE_HOLDERS"
