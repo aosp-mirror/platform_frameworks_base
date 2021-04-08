@@ -19,7 +19,6 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.util.SchemaMigrationUtil;
 import android.os.Bundle;
 import android.os.ParcelableException;
@@ -647,8 +646,8 @@ public final class AppSearchSession implements Closeable {
                     new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
                     schemasPackageAccessibleBundles,
                     request.isForceOverride(),
-                    mUserId,
                     request.getVersion(),
+                    mUserId,
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> {
@@ -661,7 +660,7 @@ public final class AppSearchSession implements Closeable {
                                             // Throw exception if there is any deleted types or
                                             // incompatible types. That's the only case we swallowed
                                             // in the AppSearchImpl#setSchema().
-                                            checkDeletedAndIncompatible(
+                                            SchemaMigrationUtil.checkDeletedAndIncompatible(
                                                     setSchemaResponse.getDeletedTypes(),
                                                     setSchemaResponse.getIncompatibleTypes());
                                         }
@@ -698,7 +697,7 @@ public final class AppSearchSession implements Closeable {
         workExecutor.execute(() -> {
             try {
                 // Migration process
-                // 1. Generate the current and the final version map.
+                // 1. Validate and retrieve all active migrators.
                 AndroidFuture<AppSearchResult<GetSchemaResponse>> getSchemaFuture =
                         new AndroidFuture<>();
                 getSchema(callbackExecutor, getSchemaFuture::complete);
@@ -709,11 +708,18 @@ public final class AppSearchSession implements Closeable {
                     return;
                 }
                 GetSchemaResponse getSchemaResponse = getSchemaResult.getResultValue();
-                Set<AppSearchSchema> currentSchemas = getSchemaResponse.getSchemas();
-                Map<String, Integer> currentVersionMap = SchemaMigrationUtil.buildVersionMap(
-                        currentSchemas, getSchemaResponse.getVersion());
-                Map<String, Integer> finalVersionMap = SchemaMigrationUtil.buildVersionMap(
-                        request.getSchemas(), request.getVersion());
+                int currentVersion = getSchemaResponse.getVersion();
+                int finalVersion = request.getVersion();
+                Map<String, Migrator> activeMigrators = SchemaMigrationUtil.getActiveMigrators(
+                        getSchemaResponse.getSchemas(), request.getMigrators(), currentVersion,
+                        finalVersion);
+
+                // No need to trigger migration if no migrator is active.
+                if (activeMigrators.isEmpty()) {
+                    setSchemaNoMigrations(request, schemaBundles, schemasPackageAccessibleBundles,
+                            callbackExecutor, callback);
+                    return;
+                }
 
                 // 2. SetSchema with forceOverride=false, to retrieve the list of
                 // incompatible/deleted types.
@@ -725,8 +731,8 @@ public final class AppSearchSession implements Closeable {
                         new ArrayList<>(request.getSchemasNotDisplayedBySystem()),
                         schemasPackageAccessibleBundles,
                         /*forceOverride=*/ false,
-                        mUserId,
                         request.getVersion(),
+                        mUserId,
                         new IAppSearchResultCallback.Stub() {
                             public void onResult(AppSearchResult result) {
                                 setSchemaFuture.complete(result);
@@ -741,46 +747,27 @@ public final class AppSearchSession implements Closeable {
                 SetSchemaResponse setSchemaResponse =
                         new SetSchemaResponse(setSchemaResult.getResultValue());
 
-                // 1. If forceOverride is false, check that all incompatible types will be migrated.
+                // 3. If forceOverride is false, check that all incompatible types will be migrated.
                 // If some aren't we must throw an error, rather than proceeding and deleting those
                 // types.
                 if (!request.isForceOverride()) {
-                    Set<String> unmigratedTypes =
-                            SchemaMigrationUtil.getUnmigratedIncompatibleTypes(
-                                    setSchemaResponse.getIncompatibleTypes(),
-                                    request.getMigrators(),
-                                    currentVersionMap,
-                                    finalVersionMap);
-
-                    // check if there are any unmigrated types or deleted types. If there are, we
-                    // will throw an exception.
-                    // Since the force override is false, the schema will not have been set if there
-                    // are any incompatible or deleted types.
-                    checkDeletedAndIncompatible(
-                            setSchemaResponse.getDeletedTypes(), unmigratedTypes);
+                    SchemaMigrationUtil.checkDeletedAndIncompatibleAfterMigration(setSchemaResponse,
+                            activeMigrators.keySet());
                 }
 
-                try (AppSearchMigrationHelper migrationHelper =
-                             new AppSearchMigrationHelper(
-                                     mService, mUserId, currentVersionMap, finalVersionMap,
-                                     mPackageName, mDatabaseName)) {
-                    Map<String, Migrator> migratorMap = request.getMigrators();
+                try (AppSearchMigrationHelper migrationHelper = new AppSearchMigrationHelper(
+                        mService, mUserId, mPackageName, mDatabaseName, request.getSchemas())) {
 
-                    // 2. Trigger migration for all migrators.
+                    // 4. Trigger migration for all migrators.
                     // TODO(b/177266929) trigger migration for all types together rather than
                     //  separately.
-                    Set<String> migratedTypes = new ArraySet<>();
-                    for (Map.Entry<String, Migrator> entry : migratorMap.entrySet()) {
-                        String schemaType = entry.getKey();
-                        Migrator migrator = entry.getValue();
-                        if (SchemaMigrationUtil.shouldTriggerMigration(
-                                schemaType, migrator, currentVersionMap, finalVersionMap)) {
-                            migrationHelper.queryAndTransform(schemaType, migrator);
-                            migratedTypes.add(schemaType);
-                        }
+                    for (Map.Entry<String, Migrator> entry : activeMigrators.entrySet()) {
+                        migrationHelper.queryAndTransform(/*schemaType=*/ entry.getKey(),
+                                /*migrator=*/ entry.getValue(), currentVersion,
+                                finalVersion);
                     }
 
-                    // 3. SetSchema a second time with forceOverride=true if the first attempted
+                    // 5. SetSchema a second time with forceOverride=true if the first attempted
                     // failed.
                     if (!setSchemaResponse.getIncompatibleTypes().isEmpty()
                             || !setSchemaResponse.getDeletedTypes().isEmpty()) {
@@ -809,13 +796,16 @@ public final class AppSearchSession implements Closeable {
                             // error in the first setSchema call, all other errors will be thrown at
                             // the first time.
                             callbackExecutor.execute(() -> callback.accept(
-                                    AppSearchResult.newFailedResult(setSchemaResult)));
+                                    AppSearchResult.newFailedResult(setSchema2Result)));
                             return;
                         }
                     }
 
                     SetSchemaResponse.Builder responseBuilder = setSchemaResponse.toBuilder()
-                            .addMigratedTypes(migratedTypes);
+                            .addMigratedTypes(activeMigrators.keySet());
+
+                    // 6. Put all the migrated documents into the index, now that the new schema is
+                    // set.
                     AppSearchResult<SetSchemaResponse> putResult =
                             migrationHelper.putMigratedDocuments(responseBuilder);
                     callbackExecutor.execute(() -> callback.accept(putResult));
@@ -825,18 +815,5 @@ public final class AppSearchSession implements Closeable {
                         AppSearchResult.throwableToFailedResult(t)));
             }
         });
-    }
-
-    /**  Checks the setSchema() call won't delete any types or has incompatible types. */
-    //TODO(b/177266929) move this method to util
-    private void checkDeletedAndIncompatible(Set<String> deletedTypes,
-            Set<String> incompatibleTypes)
-            throws AppSearchException {
-        if (!deletedTypes.isEmpty() || !incompatibleTypes.isEmpty()) {
-            String newMessage = "Schema is incompatible."
-                    + "\n  Deleted types: " + deletedTypes
-                    + "\n  Incompatible types: " + incompatibleTypes;
-            throw new AppSearchException(AppSearchResult.RESULT_INVALID_SCHEMA, newMessage);
-        }
     }
 }
