@@ -823,9 +823,9 @@
     <string name="permgroupdesc_camera">take pictures and record video</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_nearby_devices">Nearby Bluetooth Devices</string>
+    <string name="permgrouplab_nearby_devices">Nearby devices</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permgroupdesc_nearby_devices">discover and connect to nearby Bluetooth devices</string>
+    <string name="permgroupdesc_nearby_devices">discover and connect to nearby devices</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calllog">Call logs</string>
