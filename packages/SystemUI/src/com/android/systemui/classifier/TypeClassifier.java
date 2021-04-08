@@ -23,8 +23,10 @@ import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN;
 import static com.android.systemui.classifier.Classifier.PULSE_EXPAND;
+import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
+import static com.android.systemui.classifier.Classifier.SHADE_DRAG;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
 
 import javax.inject.Inject;
@@ -76,6 +78,12 @@ public class TypeClassifier extends FalsingClassifier {
                 break;
             case RIGHT_AFFORDANCE:  // Swiping from the bottom right corner for camera or similar.
                 wrongDirection = right || !up;
+                break;
+            case SHADE_DRAG:
+                wrongDirection = !vertical;
+                break;
+            case QS_COLLAPSE:
+                wrongDirection = !vertical || !up;
                 break;
             default:
                 wrongDirection = true;
