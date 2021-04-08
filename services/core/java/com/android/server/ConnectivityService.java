@@ -9790,7 +9790,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     for (final UserHandle ui : users) {
                         // Add the rules for all users as this policy is device wide.
-                        uids.get(pref).add(UserHandle.getUid(ui, uid));
+                        uids.get(pref).add(ui.getUid(uid));
                     }
                 } catch (PackageManager.NameNotFoundException e) {
                     // Although this may seem like an error scenario, it is ok that uninstalled
