@@ -21,8 +21,8 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackageRead;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
@@ -200,7 +200,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
      * The signature data of all APKs in this package, which must be exactly the same across the
      * base and splits.
      */
-    PackageParser.SigningDetails getSigningDetails();
+    SigningDetails getSigningDetails();
 
     /**
      * TODO(b/135203078): Move split stuff to an inner data class

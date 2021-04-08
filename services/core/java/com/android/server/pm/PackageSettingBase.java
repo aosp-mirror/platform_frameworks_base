@@ -27,9 +27,9 @@ import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.PackageManager.UninstallReason;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.PersistableBundle;
@@ -217,10 +217,10 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     public Signature[] getSignatures() {
-        return signatures.mSigningDetails.signatures;
+        return signatures.mSigningDetails.getSignatures();
     }
 
-    public PackageParser.SigningDetails getSigningDetails() {
+    public SigningDetails getSigningDetails() {
         return signatures.mSigningDetails;
     }
 

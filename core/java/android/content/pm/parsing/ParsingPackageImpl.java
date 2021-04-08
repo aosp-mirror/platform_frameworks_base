@@ -32,7 +32,7 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.Property;
-import android.content.pm.PackageParser;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedComponent;
@@ -292,7 +292,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @DataClass.ParcelWith(ForInternedString.class)
     protected String volumeUuid;
     @Nullable
-    private PackageParser.SigningDetails signingDetails;
+    private SigningDetails signingDetails;
 
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)
@@ -1708,7 +1708,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Nullable
     @Override
-    public PackageParser.SigningDetails getSigningDetails() {
+    public SigningDetails getSigningDetails() {
         return signingDetails;
     }
 
@@ -2255,7 +2255,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setSigningDetails(@Nullable PackageParser.SigningDetails value) {
+    public ParsingPackageImpl setSigningDetails(@Nullable SigningDetails value) {
         signingDetails = value;
         return this;
     }

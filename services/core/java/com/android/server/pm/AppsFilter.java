@@ -28,7 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
+import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -143,7 +143,7 @@ public class AppsFilter implements Watchable, Snappable {
     private final OverlayReferenceMapper mOverlayReferenceMapper;
     private final StateProvider mStateProvider;
 
-    private PackageParser.SigningDetails mSystemSigningDetails;
+    private SigningDetails mSystemSigningDetails;
     private Set<String> mProtectedBroadcasts = new ArraySet<>();
 
     private final Object mCacheLock = new Object();
@@ -914,7 +914,7 @@ public class AppsFilter implements Watchable, Snappable {
         }
     }
 
-    private static boolean isSystemSigned(@NonNull PackageParser.SigningDetails sysSigningDetails,
+    private static boolean isSystemSigned(@NonNull SigningDetails sysSigningDetails,
             PackageSetting pkgSetting) {
         return pkgSetting.isSystem()
                 && pkgSetting.signatures.mSigningDetails.signaturesMatchExactly(sysSigningDetails);

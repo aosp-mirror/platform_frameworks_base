@@ -34,9 +34,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
@@ -499,9 +499,9 @@ public class PackageManagerServiceUtils {
      */
     public static boolean comparePackageSignatures(PackageSetting pkgSetting,
             Signature[] signatures) {
-        return pkgSetting.signatures.mSigningDetails
-                == PackageParser.SigningDetails.UNKNOWN
-                || compareSignatures(pkgSetting.signatures.mSigningDetails.signatures, signatures)
+        final SigningDetails signingDetails = pkgSetting.signatures.mSigningDetails;
+        return signingDetails == SigningDetails.UNKNOWN
+                || compareSignatures(signingDetails.getSignatures(), signatures)
                 == PackageManager.SIGNATURE_MATCH;
     }
 
@@ -512,13 +512,13 @@ public class PackageManagerServiceUtils {
      * system upgrade) and {@code scannedSigs} will be in the newer format.
      */
     private static boolean matchSignaturesCompat(String packageName,
-            PackageSignatures packageSignatures, PackageParser.SigningDetails parsedSignatures) {
+            PackageSignatures packageSignatures, SigningDetails parsedSignatures) {
         ArraySet<Signature> existingSet = new ArraySet<Signature>();
-        for (Signature sig : packageSignatures.mSigningDetails.signatures) {
+        for (Signature sig : packageSignatures.mSigningDetails.getSignatures()) {
             existingSet.add(sig);
         }
         ArraySet<Signature> scannedCompatSet = new ArraySet<Signature>();
-        for (Signature sig : parsedSignatures.signatures) {
+        for (Signature sig : parsedSignatures.getSignatures()) {
             try {
                 Signature[] chainSignatures = sig.getChainSignatures();
                 for (Signature chainSig : chainSignatures) {
@@ -547,9 +547,9 @@ public class PackageManagerServiceUtils {
 
     private static boolean matchSignaturesRecover(
             String packageName,
-            PackageParser.SigningDetails existingSignatures,
-            PackageParser.SigningDetails parsedSignatures,
-            @PackageParser.SigningDetails.CertCapabilities int flags) {
+            SigningDetails existingSignatures,
+            SigningDetails parsedSignatures,
+            @SigningDetails.CertCapabilities int flags) {
         String msg = null;
         try {
             if (parsedSignatures.checkCapabilityRecover(existingSignatures, flags)) {
@@ -576,10 +576,10 @@ public class PackageManagerServiceUtils {
             PackageSetting disabledPkgSetting) {
         if (pkgSetting.signatures.mSigningDetails.checkCapability(
                 disabledPkgSetting.signatures.mSigningDetails,
-                PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                SigningDetails.CertCapabilities.INSTALLED_DATA)
                 || disabledPkgSetting.signatures.mSigningDetails.checkCapability(
                 pkgSetting.signatures.mSigningDetails,
-                PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
+                SigningDetails.CertCapabilities.ROLLBACK)) {
             return true;
         } else {
             logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
@@ -623,19 +623,19 @@ public class PackageManagerServiceUtils {
      * @throws PackageManagerException if the signatures did not match.
      */
     public static boolean verifySignatures(PackageSetting pkgSetting,
-            PackageSetting disabledPkgSetting, PackageParser.SigningDetails parsedSignatures,
+            PackageSetting disabledPkgSetting, SigningDetails parsedSignatures,
             boolean compareCompat, boolean compareRecover, boolean isRollback)
             throws PackageManagerException {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
-        if (pkgSetting.signatures.mSigningDetails.signatures != null) {
+        if (pkgSetting.signatures.mSigningDetails.getSignatures() != null) {
             // Already existing package. Make sure signatures match
             boolean match = parsedSignatures.checkCapability(
                     pkgSetting.signatures.mSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                    SigningDetails.CertCapabilities.INSTALLED_DATA)
                             || pkgSetting.signatures.mSigningDetails.checkCapability(
                                     parsedSignatures,
-                                    PackageParser.SigningDetails.CertCapabilities.ROLLBACK);
+                                    SigningDetails.CertCapabilities.ROLLBACK);
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(packageName, pkgSetting.signatures,
                         parsedSignatures);
@@ -646,12 +646,12 @@ public class PackageManagerServiceUtils {
                         packageName,
                         pkgSetting.signatures.mSigningDetails,
                         parsedSignatures,
-                        PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                        SigningDetails.CertCapabilities.INSTALLED_DATA)
                                 || matchSignaturesRecover(
                                         packageName,
                                         parsedSignatures,
                                         pkgSetting.signatures.mSigningDetails,
-                                        PackageParser.SigningDetails.CertCapabilities.ROLLBACK);
+                                        SigningDetails.CertCapabilities.ROLLBACK);
             }
 
             if (!match && isApkVerificationForced(disabledPkgSetting)) {
@@ -674,7 +674,7 @@ public class PackageManagerServiceUtils {
         // Check for shared user signatures
         if (pkgSetting.getSharedUser() != null
                 && pkgSetting.getSharedUser().signatures.mSigningDetails
-                        != PackageParser.SigningDetails.UNKNOWN) {
+                        != SigningDetails.UNKNOWN) {
 
             // Already existing package. Make sure signatures match.  In case of signing certificate
             // rotation, the packages with newer certs need to be ok with being sharedUserId with
@@ -684,10 +684,10 @@ public class PackageManagerServiceUtils {
             boolean match =
                     parsedSignatures.checkCapability(
                             pkgSetting.getSharedUser().signatures.mSigningDetails,
-                            PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)
+                            SigningDetails.CertCapabilities.SHARED_USER_ID)
                     || pkgSetting.getSharedUser().signatures.mSigningDetails.checkCapability(
                             parsedSignatures,
-                            PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID);
+                            SigningDetails.CertCapabilities.SHARED_USER_ID);
             // Special case: if the sharedUserId capability check failed it could be due to this
             // being the only package in the sharedUserId so far and the lineage being updated to
             // deny the sharedUserId capability of the previous key in the lineage.
@@ -704,11 +704,11 @@ public class PackageManagerServiceUtils {
                         matchSignaturesRecover(packageName,
                                 pkgSetting.getSharedUser().signatures.mSigningDetails,
                                 parsedSignatures,
-                                PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)
+                                SigningDetails.CertCapabilities.SHARED_USER_ID)
                         || matchSignaturesRecover(packageName,
                                 parsedSignatures,
                                 pkgSetting.getSharedUser().signatures.mSigningDetails,
-                                PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID);
+                                SigningDetails.CertCapabilities.SHARED_USER_ID);
                 compatMatch |= match;
             }
             if (!match) {
@@ -729,13 +729,13 @@ public class PackageManagerServiceUtils {
                     if (packageName.equals(shUidPkgSetting.name)) {
                         continue;
                     }
-                    PackageParser.SigningDetails shUidSigningDetails =
+                    SigningDetails shUidSigningDetails =
                             shUidPkgSetting.getSigningDetails();
                     // The capability check only needs to be performed against the package if it is
                     // signed with a key that is in the lineage of the package being installed.
                     if (parsedSignatures.hasAncestor(shUidSigningDetails)) {
                         if (!parsedSignatures.checkCapability(shUidSigningDetails,
-                                PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)) {
+                                SigningDetails.CertCapabilities.SHARED_USER_ID)) {
                             throw new PackageManagerException(
                                     INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                                     "Package " + packageName
