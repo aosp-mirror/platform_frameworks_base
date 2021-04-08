@@ -1177,12 +1177,12 @@
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> азыр иштеп жатат."</string>
     <string name="launch_warning_original" msgid="3332206576800169626">"Башында <xliff:g id="APP_NAME">%1$s</xliff:g> жүргүзүлгөн."</string>
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Шкала"</string>
-    <string name="screen_compat_mode_show" msgid="5080361367584709857">"Ар дайым көрсөтүлсүн"</string>
+    <string name="screen_compat_mode_show" msgid="5080361367584709857">"Ар дайым көрүнсүн"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Муну тутум жөндөөлөрүнөн кайра иштетүү &gt; Колдонмолор &gt; Жүктөлүп алынган."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу көрүнүштүн тандалган өлчөмүн экранда көрсөтө албайт жана туура эмес иштеши мүмкүн."</string>
-    <string name="unsupported_display_size_show" msgid="980129850974919375">"Ар дайым көрсөтүлсүн"</string>
+    <string name="unsupported_display_size_show" msgid="980129850974919375">"Ар дайым көрүнсүн"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> Android OS тутуму менен иштеген түзмөктүн шайкеш келбеген версиясы үчүн орнотулган колдонмо жана туура эмес иштеши мүмкүн. Колдонмонун жаңыртылган версиясы жеткиликтүү болушу мүмкүн."</string>
-    <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Ар дайым көрсөтүлсүн"</string>
+    <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Ар дайым көрүнсүн"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңыртууну издөө"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу (<xliff:g id="PROCESS">%2$s</xliff:g> процесси) өз алдынча иштеткен StrictMode саясатын бузду."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> процесси өзүнүн мажбурланган StrictMode саясатын бузуп койду."</string>

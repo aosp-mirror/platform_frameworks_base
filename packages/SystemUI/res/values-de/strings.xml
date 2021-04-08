@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kann klingeln oder vibrieren, abhängig von den Telefoneinstellungen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kann klingeln oder vibrieren, je nach Telefoneinstellungen. Unterhaltungen von <xliff:g id="APP_NAME">%1$s</xliff:g> werden standardmäßig als Bubble angezeigt."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Du wirst mit einer unverankerten Verknüpfung darauf aufmerksam gemacht."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wird oben im Bereich \"Unterhaltungen\" als unverankerte Bubble mit einem Profilbild auf dem Sperrbildschirm angezeigt"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wird oben im Bereich „Unterhaltungen“ als unverankerte Bubble angezeigt und erscheint mit einem Profilbild auf dem Sperrbildschirm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Einstellungen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine Funktionen für Unterhaltungen"</string>

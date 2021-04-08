@@ -68,7 +68,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ሁልጊዜ በዚህ አውታረ መረብ ላይ ፍቀድ"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"ፍቀድ"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ገመድ-አልባ debugging አይፈቀድም"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"በአሁኑ ጊዜ በመለያ ወደዚህ መሣሪያ የገባው ተጠቃሚ የገመድ-አልባ debuggingን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"በአሁኑ ጊዜ በመለያ ወደዚህ መሣሪያ የገባው ተጠቃሚ የገመድ-አልባ ማረምን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"የዩኤስቢ ወደብ ተሰናክሏል"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"መሣሪያዎን ከፈሳሽ ወይም ፍርስራሽ ለመጠበቅ ሲባል የዩኤስቢ ወደቡ ተሰናክሏል፣ እና ማናቸውም ተቀጥላዎችን አያገኝም።\n\nየዩኤስቢ ወደቡን እንደገና መጠቀም ችግር በማይኖረው ጊዜ ማሳወቂያ ይደርሰዎታል።"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ኃይል መሙያዎችን እና ተጨማሪ መሣሪያዎችን ፈልጎ ለማግኘት የነቃ የዩኤስቢ ወደብ"</string>
