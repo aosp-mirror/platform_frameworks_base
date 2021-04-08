@@ -1436,11 +1436,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     private @NativeHeapZeroInitialized int nativeHeapZeroInitialized = ZEROINIT_DEFAULT;
 
     /**
-     * If {@code true} this app requests optimized external storage access.
+     * If {@code true} this app requests raw external storage access.
      * The request may not be honored due to policy or other reasons.
      */
     @Nullable
-    private Boolean requestOptimizedExternalStorageAccess;
+    private Boolean requestRawExternalStorageAccess;
 
     /**
      * Represents the default policy. The actual policy used will depend on other properties of
@@ -1598,9 +1598,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (nativeHeapZeroInitialized != ZEROINIT_DEFAULT) {
                 pw.println(prefix + "nativeHeapZeroInitialized=" + nativeHeapZeroInitialized);
             }
-            if (requestOptimizedExternalStorageAccess != null) {
-                pw.println(prefix + "requestOptimizedExternalStorageAccess="
-                        + requestOptimizedExternalStorageAccess);
+            if (requestRawExternalStorageAccess != null) {
+                pw.println(prefix + "requestRawExternalStorageAccess="
+                        + requestRawExternalStorageAccess);
             }
         }
         super.dumpBack(pw, prefix);
@@ -1829,7 +1829,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         gwpAsanMode = orig.gwpAsanMode;
         memtagMode = orig.memtagMode;
         nativeHeapZeroInitialized = orig.nativeHeapZeroInitialized;
-        requestOptimizedExternalStorageAccess = orig.requestOptimizedExternalStorageAccess;
+        requestRawExternalStorageAccess = orig.requestRawExternalStorageAccess;
     }
 
     public String toString() {
@@ -1918,7 +1918,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(gwpAsanMode);
         dest.writeInt(memtagMode);
         dest.writeInt(nativeHeapZeroInitialized);
-        sForBoolean.parcel(requestOptimizedExternalStorageAccess, dest, parcelableFlags);
+        sForBoolean.parcel(requestRawExternalStorageAccess, dest, parcelableFlags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
@@ -2004,7 +2004,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         gwpAsanMode = source.readInt();
         memtagMode = source.readInt();
         nativeHeapZeroInitialized = source.readInt();
-        requestOptimizedExternalStorageAccess = sForBoolean.unparcel(source);
+        requestRawExternalStorageAccess = sForBoolean.unparcel(source);
     }
 
     /**
@@ -2121,10 +2121,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @return
      * <ul>
-     * <li>{@code true} if this app requested optimized external storage access
-     * <li>{@code false} if this app requests to disable optimized external storage access.
+     * <li>{@code true} if this app requested raw external storage access
+     * <li>{@code false} if this app requests to disable raw external storage access.
      * <li>{@code null} if the app didn't specify
-     * {@link android.R.styleable#AndroidManifestApplication_requestOptimizedExternalStorageAccess}
+     * {@link android.R.styleable#AndroidManifestApplication_requestRawExternalStorageAccess}
      * in its manifest file.
      * </ul>
      *
@@ -2132,8 +2132,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     @SystemApi
     @Nullable
-    public Boolean hasRequestOptimizedExternalStorageAccess() {
-        return requestOptimizedExternalStorageAccess;
+    public Boolean hasRequestRawExternalStorageAccess() {
+        return requestRawExternalStorageAccess;
     }
 
     /**
@@ -2421,8 +2421,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         nativeHeapZeroInitialized = value;
     }
     /** {@hide} */
-    public void setRequestOptimizedExternalStorageAccess(@Nullable Boolean value) {
-        requestOptimizedExternalStorageAccess = value;
+    public void setRequestRawExternalStorageAccess(@Nullable Boolean value) {
+        requestRawExternalStorageAccess = value;
     }
 
     /** {@hide} */
