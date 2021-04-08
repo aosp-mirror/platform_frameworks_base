@@ -2937,7 +2937,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (packageName != null) {
             caller = packageName + " " + caller;
         }
-        if (!canCloseSystemDialogs(pid, uid, process)) {
+        if (!canCloseSystemDialogs(pid, uid)) {
             // The app can't close system dialogs, throw only if it targets S+
             if (CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
                 throw new SecurityException(
@@ -2962,39 +2962,37 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return true;
     }
 
-    private boolean canCloseSystemDialogs(int pid, int uid,
-            @Nullable WindowProcessController process) {
+    private boolean canCloseSystemDialogs(int pid, int uid) {
         if (checkPermission(Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, pid, uid)
                 == PERMISSION_GRANTED) {
             return true;
         }
-        if (process == null) {
-            synchronized (mGlobalLock) {
-                process = mProcessMap.getProcess(pid);
+        synchronized (mGlobalLock) {
+            // Check all the processes from the given uid, especially since for PendingIntents sent
+            // the pid equals -1
+            ArraySet<WindowProcessController> processes = mProcessMap.getProcesses(uid);
+            if (processes != null) {
+                for (int i = 0, n = processes.size(); i < n; i++) {
+                    WindowProcessController process = processes.valueAt(i);
+                    // Check if the instrumentation of the process has the permission. This covers
+                    // the usual test started from the shell (which has the permission) case. This
+                    // is needed for apps targeting SDK level < S but we are also allowing for
+                    // targetSdk S+ as a convenience to avoid breaking a bunch of existing tests and
+                    // asking them to adopt shell permissions to do this.
+                    int sourceUid = process.getInstrumentationSourceUid();
+                    if (process.isInstrumenting() && sourceUid != -1 && checkPermission(
+                            Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, sourceUid)
+                            == PERMISSION_GRANTED) {
+                        return true;
+                    }
+                    // This is the notification trampoline use-case for example, where apps use
+                    // Intent.ACSD to close the shade prior to starting an activity.
+                    if (process.canCloseSystemDialogsByToken()) {
+                        return true;
+                    }
+                }
             }
-        }
-        if (process != null) {
-            // Check if the instrumentation of the process has the permission. This covers the
-            // usual test started from the shell (which has the permission) case. This is needed
-            // for apps targeting SDK level < S but we are also allowing for targetSdk S+ as a
-            // convenience to avoid breaking a bunch of existing tests and asking them to adopt
-            // shell permissions to do this.
-            // Note that these getters all read from volatile fields in WindowProcessController, so
-            // no need to lock.
-            int sourceUid = process.getInstrumentationSourceUid();
-            if (process.isInstrumenting() && sourceUid != -1 && checkPermission(
-                    Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, sourceUid)
-                    == PERMISSION_GRANTED) {
-                return true;
-            }
-            // This is the notification trampoline use-case for example, where apps use Intent.ACSD
-            // to close the shade prior to starting an activity.
-            if (process.canCloseSystemDialogsByToken()) {
-                return true;
-            }
-        }
-        if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
-            synchronized (mGlobalLock) {
+            if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
                 // This covers the case where the app is displaying some UI on top of the
                 // notification shade and wants to start an activity. The app then sends the intent
                 // in order to move the notification shade out of the way and show the activity to
@@ -5308,8 +5306,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean canCloseSystemDialogs(int pid, int uid) {
-            return ActivityTaskManagerService.this.canCloseSystemDialogs(pid, uid,
-                    null /* process */);
+            return ActivityTaskManagerService.this.canCloseSystemDialogs(pid, uid);
         }
 
         @Override
