@@ -52,6 +52,8 @@ public:
             const ::android::sp<IStorageHealthListener>& healthListener,
             const ::std::vector<::android::os::incremental::PerUidReadTimeouts>& perUidReadTimeouts,
             bool* _aidl_return) final;
+    binder::Status onInstallationComplete(int32_t storageId) final;
+
     binder::Status makeBindMount(int32_t storageId, const std::string& sourcePath,
                                  const std::string& targetFullPath, int32_t bindType,
                                  int32_t* _aidl_return) final;
