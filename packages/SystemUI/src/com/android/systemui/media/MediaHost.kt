@@ -1,6 +1,5 @@
 package com.android.systemui.media
 
-import android.app.smartspace.SmartspaceTarget
 import android.graphics.Rect
 import android.util.ArraySet
 import android.view.View
@@ -54,15 +53,7 @@ class MediaHost constructor(
             updateViewVisibility()
         }
 
-        override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
-            updateViewVisibility()
-        }
-
         override fun onMediaDataRemoved(key: String) {
-            updateViewVisibility()
-        }
-
-        override fun onSmartspaceMediaDataRemoved(key: String) {
             updateViewVisibility()
         }
     }

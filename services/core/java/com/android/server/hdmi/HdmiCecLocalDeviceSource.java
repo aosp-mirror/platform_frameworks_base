@@ -292,7 +292,6 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
 
     // Only source devices that react to routing control messages should implement
     // this method (e.g. a TV with built in switch).
-    // TODO(): decide which type will handle the routing when multi device type is supported
     protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
         // do nothing
     }
@@ -372,7 +371,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (!isActiveSource()) {
             return;
         }
-        // Wake up the device
+        // Wake up the device. This will also exit dream mode.
         mService.wakeUp();
         return;
     }

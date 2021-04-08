@@ -48,6 +48,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.wallet.ui.WalletActivity;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -117,8 +118,22 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     protected void handleClick() {
-        mActivityStarter.postStartActivityDismissingKeyguard(
-                mQuickAccessWalletClient.createWalletIntent(), /* delay= */ 0);
+        mUiHandler.post(() -> {
+            mHost.collapsePanels();
+            if (mHasCard) {
+                Intent intent = new Intent(mContext, WalletActivity.class)
+                        .setAction(Intent.ACTION_VIEW)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivity(intent);
+            } else {
+                if (mQuickAccessWalletClient.createWalletIntent() == null) {
+                    Log.w(TAG, "Could not get intent of the wallet app.");
+                    return;
+                }
+                mActivityStarter.postStartActivityDismissingKeyguard(
+                        mQuickAccessWalletClient.createWalletIntent(), /* delay= */ 0);
+            }
+        });
     }
 
     @Override
@@ -147,9 +162,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         } else {
             state.state = Tile.STATE_UNAVAILABLE;
         }
-        if (!isDeviceLocked) {
-            state.sideViewDrawable = mCardViewDrawable;
-        }
+        state.sideViewDrawable = isDeviceLocked ? null : mCardViewDrawable;
     }
 
     @Override

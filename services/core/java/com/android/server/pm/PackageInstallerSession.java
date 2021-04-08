@@ -948,14 +948,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 == PackageManager.PERMISSION_GRANTED);
         final int targetPackageUid = mPm.getPackageUid(packageName, 0, userId);
         final boolean isUpdate = targetPackageUid != -1;
-        final InstallSourceInfo installSourceInfo = isUpdate
+        final InstallSourceInfo existingInstallSourceInfo = isUpdate
                 ? mPm.getInstallSourceInfo(packageName)
                 : null;
-        final String installerPackageName = installSourceInfo != null
-                ? installSourceInfo.getInstallingPackageName()
+        final String existingInstallerPackageName = existingInstallSourceInfo != null
+                ? existingInstallSourceInfo.getInstallingPackageName()
                 : null;
         final boolean isInstallerOfRecord = isUpdate
-                && Objects.equals(installerPackageName, getInstallerPackageName());
+                && Objects.equals(existingInstallerPackageName, getInstallerPackageName());
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
@@ -972,7 +972,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return USER_ACTION_NOT_NEEDED;
         }
 
-        if (mPm.isInstallDisabledForPackage(installerPackageName, mInstallerUid, userId)) {
+        if (mPm.isInstallDisabledForPackage(getInstallerPackageName(), mInstallerUid, userId)) {
             // show the installer to account for device poslicy or unknown sources use cases
             return USER_ACTION_REQUIRED;
         }

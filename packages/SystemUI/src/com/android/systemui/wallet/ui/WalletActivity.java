@@ -28,8 +28,10 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.LifecycleActivity;
 
@@ -44,6 +46,7 @@ public class WalletActivity extends LifecycleActivity {
 
     private final QuickAccessWalletClient mQuickAccessWalletClient;
     private final KeyguardStateController mKeyguardStateController;
+    private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final ActivityStarter mActivityStarter;
     private final Executor mExecutor;
     private final Handler mHandler;
@@ -54,12 +57,14 @@ public class WalletActivity extends LifecycleActivity {
     public WalletActivity(
             QuickAccessWalletClient quickAccessWalletClient,
             KeyguardStateController keyguardStateController,
+            KeyguardDismissUtil keyguardDismissUtil,
             ActivityStarter activityStarter,
             @Background Executor executor,
-            @Background Handler handler,
+            @Main Handler handler,
             UserTracker userTracker) {
         mQuickAccessWalletClient = quickAccessWalletClient;
         mKeyguardStateController = keyguardStateController;
+        mKeyguardDismissUtil = keyguardDismissUtil;
         mActivityStarter = activityStarter;
         mExecutor = executor;
         mHandler = handler;
@@ -88,20 +93,30 @@ public class WalletActivity extends LifecycleActivity {
                 mExecutor,
                 mHandler,
                 mUserTracker,
-                !mKeyguardStateController.isUnlocked());
+                mKeyguardStateController);
+        // Clicking the wallet button will open the wallet app if the device is unlocked; bring up
+        // the security bouncer otherwise.
         walletView.getWalletButton().setOnClickListener(
-                v -> mActivityStarter.startActivity(
-                        mQuickAccessWalletClient.createWalletIntent(), true));
+                v -> {
+                    if (mKeyguardStateController.isUnlocked()) {
+                        mActivityStarter.startActivity(
+                                mQuickAccessWalletClient.createWalletIntent(), true);
+                    } else {
+                        mKeyguardDismissUtil.executeWhenUnlocked(() -> false, false);
+                    }
+                });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        mKeyguardStateController.addCallback(mWalletScreenController);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        mWalletScreenController.queryWalletCards();
     }
 
     @Override
@@ -116,6 +131,7 @@ public class WalletActivity extends LifecycleActivity {
 
     @Override
     protected void onDestroy() {
+        mKeyguardStateController.removeCallback(mWalletScreenController);
         mWalletScreenController.onDismissed();
         super.onDestroy();
     }

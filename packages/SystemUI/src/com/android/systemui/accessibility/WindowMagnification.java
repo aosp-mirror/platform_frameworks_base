@@ -195,6 +195,13 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     }
 
     @Override
+    public void onAccessibilityActionPerformed(int displayId) {
+        if (mWindowMagnificationConnectionImpl != null) {
+            mWindowMagnificationConnectionImpl.onAccessibilityActionPerformed(displayId);
+        }
+    }
+
+    @Override
     public void requestWindowMagnificationConnection(boolean connect) {
         if (connect) {
             setWindowMagnificationConnection();

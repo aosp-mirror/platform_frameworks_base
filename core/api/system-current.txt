@@ -28,6 +28,7 @@ package android {
     field public static final String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
     field public static final String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
+    field public static final String ASSOCIATE_COMPANION_DEVICES = "android.permission.ASSOCIATE_COMPANION_DEVICES";
     field public static final String BACKGROUND_CAMERA = "android.permission.BACKGROUND_CAMERA";
     field public static final String BACKUP = "android.permission.BACKUP";
     field public static final String BATTERY_PREDICTION = "android.permission.BATTERY_PREDICTION";
@@ -1923,6 +1924,7 @@ package android.bluetooth {
     method public boolean disableBLE();
     method public boolean enableBLE();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean enableNoAutoConnect();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void generateLocalOobData(int, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OobDataCallback);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public long getDiscoveryEndMillis();
     method public boolean isBleScanAlwaysAvailable();
     method public boolean isLeEnabled();
@@ -1934,10 +1936,16 @@ package android.bluetooth {
     field public static final int ACTIVE_DEVICE_ALL = 2; // 0x2
     field public static final int ACTIVE_DEVICE_AUDIO = 0; // 0x0
     field public static final int ACTIVE_DEVICE_PHONE_CALL = 1; // 0x1
+    field public static final int OOB_ERROR_ADAPTER_DISABLED = 2; // 0x2
+    field public static final int OOB_ERROR_ANOTHER_ACTIVE_REQUEST = 1; // 0x1
+    field public static final int OOB_ERROR_UNKNOWN = 0; // 0x0
   }
 
   public static interface BluetoothAdapter.OnMetadataChangedListener {
     method public void onMetadataChanged(@NonNull android.bluetooth.BluetoothDevice, int, @Nullable byte[]);
+  }
+
+  public static interface BluetoothAdapter.OobDataCallback {
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
@@ -2220,7 +2228,7 @@ package android.bluetooth.le {
 package android.companion {
 
   public final class CompanionDeviceManager {
-    method @RequiresPermission("android.permission.ASSOCIATE_COMPANION_DEVICES") public boolean associate(@NonNull String, @NonNull android.net.MacAddress);
+    method @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public boolean associate(@NonNull String, @NonNull android.net.MacAddress);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean canPairWithoutPrompt(@NonNull String, @NonNull String, int);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociatedForWifiConnection(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
   }
@@ -3005,10 +3013,17 @@ package android.graphics.fonts {
   }
 
   public static final class FontFamilyUpdateRequest.Font {
-    ctor public FontFamilyUpdateRequest.Font(@NonNull String, @NonNull android.graphics.fonts.FontStyle, @NonNull java.util.List<android.graphics.fonts.FontVariationAxis>);
     method @NonNull public java.util.List<android.graphics.fonts.FontVariationAxis> getAxes();
+    method @IntRange(from=0) public int getIndex();
     method @NonNull public String getPostScriptName();
     method @NonNull public android.graphics.fonts.FontStyle getStyle();
+  }
+
+  public static final class FontFamilyUpdateRequest.Font.Builder {
+    ctor public FontFamilyUpdateRequest.Font.Builder(@NonNull String, @NonNull android.graphics.fonts.FontStyle);
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.Font build();
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.Font.Builder setAxes(@NonNull java.util.List<android.graphics.fonts.FontVariationAxis>);
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.Font.Builder setIndex(@IntRange(from=0) int);
   }
 
   public static final class FontFamilyUpdateRequest.FontFamily {
@@ -7921,10 +7936,16 @@ package android.nfc {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableSecureNfc(boolean);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean isControllerAlwaysOn();
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean isControllerAlwaysOnSupported();
+    method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void registerControllerAlwaysOnStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.ControllerAlwaysOnStateCallback);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean removeNfcUnlockHandler(android.nfc.NfcAdapter.NfcUnlockHandler);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean setControllerAlwaysOn(boolean);
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, int);
+    method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void unregisterControllerAlwaysOnStateCallback(@NonNull android.nfc.NfcAdapter.ControllerAlwaysOnStateCallback);
     field public static final int FLAG_NDEF_PUSH_NO_CONFIRM = 1; // 0x1
+  }
+
+  public static interface NfcAdapter.ControllerAlwaysOnStateCallback {
+    method public void onStateChanged(boolean);
   }
 
   public static interface NfcAdapter.NfcUnlockHandler {
@@ -11364,15 +11385,15 @@ package android.telephony {
   }
 
   @Deprecated public class PhoneStateListener {
-    method @Deprecated public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
-    method @Deprecated public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber);
-    method @Deprecated public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
-    method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber, int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
     method @Deprecated public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
-    method @Deprecated public void onRadioPowerStateChanged(int);
-    method @Deprecated public void onSrvccStateChanged(int);
-    method @Deprecated public void onVoiceActivationStateChanged(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onRadioPowerStateChanged(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onSrvccStateChanged(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onVoiceActivationStateChanged(int);
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_CALL = 268435456; // 0x10000000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
@@ -11721,14 +11742,14 @@ package android.telephony {
   public class TelephonyCallback {
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED = 23; // 0x17
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED = 35; // 0x23
-    field @RequiresPermission("android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH") public static final int EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED = 10; // 0xa
+    field public static final int EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED = 10; // 0xa
     field @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_BARRING_INFO_CHANGED = 32; // 0x20
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_ATTRIBUTES_CHANGED = 27; // 0x1b
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_CALL_DISCONNECT_CAUSE_CHANGED = 26; // 0x1a
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_CALL_FORWARDING_INDICATOR_CHANGED = 4; // 0x4
     field public static final int EVENT_CALL_STATE_CHANGED = 6; // 0x6
     field public static final int EVENT_CARRIER_NETWORK_CHANGED = 17; // 0x11
-    field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_INFO_CHANGED = 11; // 0xb
+    field @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_CELL_INFO_CHANGED = 11; // 0xb
     field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_LOCATION_CHANGED = 5; // 0x5
     field public static final int EVENT_DATA_ACTIVATION_STATE_CHANGED = 19; // 0x13
     field public static final int EVENT_DATA_ACTIVITY_CHANGED = 8; // 0x8
@@ -11783,7 +11804,7 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.PhoneCapabilityListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
+    method public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
   }
 
   public static interface TelephonyCallback.PreciseCallStateListener {
@@ -13594,10 +13615,11 @@ package android.telephony.ims {
     method public int describeContents();
     method @Nullable public String getCallIdParameter();
     method @NonNull public byte[] getContent();
-    method @NonNull public byte[] getEncodedMessage();
+    method @Deprecated @NonNull public byte[] getEncodedMessage();
     method @NonNull public String getHeaderSection();
     method @NonNull public String getStartLine();
     method @NonNull public String getViaBranchParameter();
+    method @NonNull public byte[] toEncodedMessage();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipMessage> CREATOR;
   }

@@ -16,14 +16,14 @@
 
 #pragma once
 
+#include <deque>
+
 #include "RecordingCanvas.h"
 #include "RenderNodeDrawable.h"
 #include "TreeInfo.h"
 #include "hwui/AnimatedImageDrawable.h"
 #include "utils/LinearAllocator.h"
 #include "utils/Pair.h"
-
-#include <deque>
 
 namespace android {
 namespace uirenderer {
@@ -46,8 +46,10 @@ class FunctorDrawable;
 
 class SkiaDisplayList {
 public:
-    size_t getUsedSize() { return allocator.usedSize() + mDisplayList.usedSize(); }
-    size_t getAllocatedSize() { return allocator.allocatedSize() + mDisplayList.allocatedSize(); }
+    size_t getUsedSize() const { return allocator.usedSize() + mDisplayList.usedSize(); }
+    size_t getAllocatedSize() const {
+        return allocator.allocatedSize() + mDisplayList.allocatedSize();
+    }
 
     ~SkiaDisplayList() {
         /* Given that we are using a LinearStdAllocator to store some of the
@@ -109,6 +111,10 @@ public:
      */
     void syncContents(const WebViewSyncData& data);
 
+    void applyColorTransform(ColorTransform transform) {
+        mDisplayList.applyColorTransform(transform);
+    }
+
     /**
      * ONLY to be called by RenderNode::prepareTree in order to prepare this
      * list while the UI thread is blocked.  Here we can upload mutable bitmaps
@@ -154,15 +160,23 @@ public:
     std::deque<RenderNodeDrawable> mChildNodes;
     std::deque<FunctorDrawable*> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
+
 private:
     std::vector<Pair<VectorDrawableRoot*, SkMatrix>> mVectorDrawables;
+    bool mHasHolePunches;
 public:
-    void appendVD(VectorDrawableRoot* r) {
-        appendVD(r, SkMatrix::I());
-    }
+    void appendVD(VectorDrawableRoot* r) { appendVD(r, SkMatrix::I()); }
 
     void appendVD(VectorDrawableRoot* r, const SkMatrix& mat) {
         mVectorDrawables.push_back(Pair<VectorDrawableRoot*, SkMatrix>(r, mat));
+    }
+
+    void setHasHolePunches(bool hasHolePunches) {
+        mHasHolePunches = hasHolePunches;
+    }
+
+    bool hasHolePunches() {
+        return mHasHolePunches;
     }
 
     std::vector<AnimatedImageDrawable*> mAnimatedImages;

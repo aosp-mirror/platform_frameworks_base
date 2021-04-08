@@ -51,6 +51,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -85,6 +86,8 @@ public class WalletScreenControllerTest extends SysuiTestCase {
     ActivityStarter mActivityStarter;
     @Mock
     UserTracker mUserTracker;
+    @Mock
+    KeyguardStateController mKeyguardStateController;
     @Captor
     ArgumentCaptor<Intent> mIntentCaptor;
     @Captor
@@ -106,6 +109,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         when(mWalletClient.getShortcutShortLabel()).thenReturn(SHORTCUT_SHORT_LABEL);
         when(mWalletClient.getServiceLabel()).thenReturn(SERVICE_LABEL);
         when(mWalletClient.createWalletIntent()).thenReturn(mWalletIntent);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         mController = new WalletScreenController(
                 mContext,
                 mWalletView,
@@ -114,7 +118,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
                 MoreExecutors.directExecutor(),
                 new Handler(mTestableLooper.getLooper()),
                 mUserTracker,
-                /* isDeviceLocked= */false);
+                mKeyguardStateController);
     }
 
     @Test
@@ -203,6 +207,14 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         GetWalletCardsRequest request = mRequestCaptor.getValue();
 
         assertEquals(MAX_CARDS, request.getMaxCards());
+    }
+
+    @Test
+    public void onKeyguardFadingAwayChanged_queryCards() {
+        mController.onKeyguardFadingAwayChanged();
+
+        verify(mWalletClient).getWalletCards(any(), any(), mCallbackCaptor.capture());
+        assertEquals(mController, mCallbackCaptor.getValue());
     }
 
     @Test

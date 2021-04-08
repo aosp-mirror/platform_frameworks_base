@@ -189,7 +189,7 @@ public class QSTileImplTest extends SysuiTestCase {
 
     @Test
     public void testLongClick_Metrics() {
-        mTile.longClick();
+        mTile.longClick(null /* view */);
         verify(mMetricsLogger).write(argThat(new TileLogMatcher(ACTION_QS_LONG_PRESS)));
         assertEquals(1, mUiEventLoggerFake.numLogs());
         UiEventLoggerFake.FakeUiEvent event = mUiEventLoggerFake.get(0);
@@ -201,7 +201,7 @@ public class QSTileImplTest extends SysuiTestCase {
     public void testLongClick_log() {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
 
-        mTile.longClick();
+        mTile.longClick(null /* view */);
         verify(mQsLogger).logTileLongClick(SPEC, StatusBarState.SHADE, Tile.STATE_ACTIVE);
     }
 

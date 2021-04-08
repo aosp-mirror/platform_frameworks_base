@@ -756,31 +756,23 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 final float scale = mScale + A11Y_CHANGE_SCALE_DIFFERENCE;
                 mWindowMagnifierCallback.onPerformScaleAction(mDisplayId,
                         A11Y_ACTION_SCALE_RANGE.clamp(scale));
-                return true;
-            }
-            if (action == R.id.accessibility_action_zoom_out) {
+            } else if (action == R.id.accessibility_action_zoom_out) {
                 final float scale = mScale - A11Y_CHANGE_SCALE_DIFFERENCE;
                 mWindowMagnifierCallback.onPerformScaleAction(mDisplayId,
                         A11Y_ACTION_SCALE_RANGE.clamp(scale));
-                return true;
-            }
-            if (action == R.id.accessibility_action_move_up) {
+            } else if (action == R.id.accessibility_action_move_up) {
                 move(0, -mSourceBounds.height());
-                return true;
-            }
-            if (action == R.id.accessibility_action_move_down) {
+            } else if (action == R.id.accessibility_action_move_down) {
                 move(0, mSourceBounds.height());
-                return true;
-            }
-            if (action == R.id.accessibility_action_move_left) {
+            } else if (action == R.id.accessibility_action_move_left) {
                 move(-mSourceBounds.width(), 0);
-                return true;
-            }
-            if (action == R.id.accessibility_action_move_right) {
+            } else if (action == R.id.accessibility_action_move_right) {
                 move(mSourceBounds.width(), 0);
-                return true;
+            } else {
+                return false;
             }
-            return false;
+            mWindowMagnifierCallback.onAccessibilityActionPerformed(mDisplayId);
+            return true;
         }
     }
 }

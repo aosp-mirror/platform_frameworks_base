@@ -60,4 +60,11 @@ import android.graphics.Rect;
      */
     void onPerformScaleAction(int displayId, float scale);
 
+    /**
+     * Called when the accessibility action is performed.
+     *
+     * @param displayId The logical display id.
+     */
+    void onAccessibilityActionPerformed(int displayId);
+
 }

@@ -24,13 +24,15 @@
 #include <SkImage.h>
 #include <SkPicture.h>
 #include <SkRuntimeEffect.h>
-#include <hwui/Bitmap.h>
-#include <log/log.h>
-#include "CanvasProperty.h"
-#include "Points.h"
 
+#include <log/log.h>
+
+#include "hwui/Bitmap.h"
+#include "CanvasProperty.h"
 #include "CanvasOpTypes.h"
 #include "Layer.h"
+#include "Points.h"
+#include "RenderNode.h"
 
 #include <experimental/type_traits>
 #include <utility>
@@ -448,6 +450,11 @@ struct CanvasOp<CanvasOpType::DrawPicture> {
 template<>
 struct CanvasOp<CanvasOpType::DrawLayer> {
     sp<Layer> layer;
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawRenderNode> {
+    sp<RenderNode> renderNode;
 };
 
 // cleanup our macros

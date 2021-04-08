@@ -103,7 +103,9 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         CharSequence centerCardText = centerCard.getLabel();
         Drawable icon = centerCard.getIcon();
         if (icon != null) {
-            mIcon.setImageDrawable(resizeDrawable(getResources(), icon));
+            Drawable drawable = resizeDrawable(getResources(), icon);
+            drawable.setTint(mContext.getColor(R.color.GM2_blue_600));
+            mIcon.setImageDrawable(drawable);
             mIcon.setVisibility(VISIBLE);
         } else {
             mIcon.setVisibility(INVISIBLE);
@@ -126,7 +128,6 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mCardCarouselContainer.setVisibility(VISIBLE);
         mErrorView.setVisibility(GONE);
         if (isDeviceLocked) {
-            // TODO(b/182964813): Add click action to prompt device unlock.
             mWalletButton.setText(R.string.wallet_button_label_device_locked);
         } else {
             mWalletButton.setText(R.string.wallet_button_label_device_unlocked);

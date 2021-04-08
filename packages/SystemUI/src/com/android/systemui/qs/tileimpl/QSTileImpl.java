@@ -31,6 +31,7 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -43,6 +44,7 @@ import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
@@ -58,6 +60,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
@@ -276,7 +279,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_CLICK, 0, getMetricsSpec(),
                 getInstanceId());
         mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
-        mHandler.sendEmptyMessage(H.CLICK);
+        if (!mFalsingManager.isFalseTap(true, 0.1)) {
+            mHandler.sendEmptyMessage(H.CLICK);
+        }
     }
 
     public void secondaryClick() {
@@ -290,14 +295,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
     }
 
-    public void longClick() {
+    @Override
+    public void longClick(@Nullable View view) {
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_LONG_PRESS, 0, getMetricsSpec(),
                 getInstanceId());
         mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
-        mHandler.sendEmptyMessage(H.LONG_CLICK);
+        mHandler.obtainMessage(H.LONG_CLICK, view).sendToTarget();
     }
 
     public LogMaker populate(LogMaker logMaker) {
@@ -372,10 +378,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     /**
      * Handles long click on the tile by launching the {@link Intent} defined in
-     * {@link QSTileImpl#getLongClickIntent}
+     * {@link QSTileImpl#getLongClickIntent}.
+     *
+     * @param view The view from which the opening window will be animated.
      */
-    protected void handleLongClick() {
-        mActivityStarter.postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
+    protected void handleLongClick(@Nullable View view) {
+        ActivityLaunchAnimator.Controller animationController =
+                view != null ? ActivityLaunchAnimator.Controller.fromView(view) : null;
+        mActivityStarter.postStartActivityDismissingKeyguard(getLongClickIntent(), 0,
+                animationController);
     }
 
     /**
@@ -605,16 +616,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                                 mContext, mEnforcedAdmin);
                         mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
-                        if (!mFalsingManager.isFalseTap(true, 0.1)) {
-                            handleClick();
-                        }
+                        handleClick();
                     }
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
                     handleSecondaryClick();
                 } else if (msg.what == LONG_CLICK) {
                     name = "handleLongClick";
-                    handleLongClick();
+                    handleLongClick((View) msg.obj);
                 } else if (msg.what == REFRESH_STATE) {
                     name = "handleRefreshState";
                     handleRefreshState(msg.obj);

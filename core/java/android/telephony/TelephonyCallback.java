@@ -218,10 +218,9 @@ public class TelephonyCallback {
      * even in some situations such as the screen of the device is off.
      *
      * @hide
-     * @see AlwaysReportedSignalStrengthListener#onSignalStrengthsChanged
+     * @see TelephonyManager#setSignalStrengthUpdateRequest
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
     public static final int EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED = 10;
 
     /**
@@ -231,8 +230,10 @@ public class TelephonyCallback {
      * @see CellInfoListener#onCellInfoChanged
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
-    public static final int EVENT_CELL_INFO_CHANGED = 11;
+    @RequiresPermission(allOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION
+    })    public static final int EVENT_CELL_INFO_CHANGED = 11;
 
     /**
      * Event for {@link android.telephony.Annotation.PreciseCallStates} of ringing,
@@ -369,9 +370,10 @@ public class TelephonyCallback {
 
     /**
      * Event for changes to active data subscription ID. Active data subscription is
-     * the current subscription used to setup Cellular Internet data. For example,
-     * it could be the current active opportunistic subscription in use, or the
-     * subscription user selected as default data subscription in DSDS mode.
+     * the current subscription used to setup Cellular Internet data. The data is only active on the
+     * subscription at a time, even it is multi-SIM mode. For example, it could be the current
+     * active opportunistic subscription in use, or the subscription user selected as default data
+     * subscription in DSDS mode.
      *
      * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
@@ -668,8 +670,7 @@ public class TelephonyCallback {
          * @see ServiceState#STATE_OUT_OF_SERVICE
          * @see ServiceState#STATE_POWER_OFF
          */
-        @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-        public void onServiceStateChanged(@NonNull ServiceState serviceState);
+        void onServiceStateChanged(@NonNull ServiceState serviceState);
     }
 
     /**
@@ -687,7 +688,7 @@ public class TelephonyCallback {
          * {@link SubscriptionManager#getDefaultSubscriptionId()}.
          */
         @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-        public void onMessageWaitingIndicatorChanged(boolean mwi);
+        void onMessageWaitingIndicatorChanged(boolean mwi);
     }
 
     /**
@@ -706,7 +707,7 @@ public class TelephonyCallback {
          * {@link SubscriptionManager#getDefaultSubscriptionId()}.
          */
         @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-        public void onCallForwardingIndicatorChanged(boolean cfi);
+        void onCallForwardingIndicatorChanged(boolean cfi);
     }
 
     /**
@@ -724,7 +725,7 @@ public class TelephonyCallback {
          * {@link SubscriptionManager#getDefaultSubscriptionId()}.
          */
         @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        public void onCellLocationChanged(@NonNull CellLocation location);
+        void onCellLocationChanged(@NonNull CellLocation location);
     }
 
     /**
@@ -753,7 +754,7 @@ public class TelephonyCallback {
          * @param state the current call state
          */
         @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-        public void onCallStateChanged(@Annotation.CallState int state);
+        void onCallStateChanged(@Annotation.CallState int state);
     }
 
     /**
@@ -777,9 +778,8 @@ public class TelephonyCallback {
          * @see TelephonyManager#DATA_CONNECTED
          * @see TelephonyManager#DATA_SUSPENDED
          */
-        @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-        public void onDataConnectionStateChanged(@TelephonyManager.DataState int state,
-            @Annotation.NetworkType int networkType);
+        void onDataConnectionStateChanged(@TelephonyManager.DataState int state,
+                @Annotation.NetworkType int networkType);
     }
 
     /**
@@ -802,8 +802,7 @@ public class TelephonyCallback {
          * @see TelephonyManager#DATA_ACTIVITY_INOUT
          * @see TelephonyManager#DATA_ACTIVITY_DORMANT
          */
-        @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-        public void onDataActivity(@Annotation.DataActivityType int direction);
+        void onDataActivity(@Annotation.DataActivityType int direction);
     }
 
     /**
@@ -820,27 +819,7 @@ public class TelephonyCallback {
          * subscription ID. Otherwise, this callback applies to
          * {@link SubscriptionManager#getDefaultSubscriptionId()}.
          */
-        @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-        public void onSignalStrengthsChanged(@NonNull SignalStrength signalStrength);
-    }
-
-    /**
-     * Interface for network signal strengths callback which always reported from modem.
-     */
-    public interface AlwaysReportedSignalStrengthListener {
-        /**
-         * Callback always invoked from modem when network signal strengths changes on the
-         * registered subscription.
-         * Note, the registration subscription ID comes from {@link TelephonyManager} object
-         * which registers TelephonyCallback by
-         * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
-         * If this TelephonyManager object was created with
-         * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
-         * subscription ID. Otherwise, this callback applies to
-         * {@link SubscriptionManager#getDefaultSubscriptionId()}.
-         */
-        @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
-        public void onSignalStrengthsChanged(@NonNull SignalStrength signalStrength);
+        void onSignalStrengthsChanged(@NonNull SignalStrength signalStrength);
     }
 
     /**
@@ -860,8 +839,11 @@ public class TelephonyCallback {
          *
          * @param cellInfo is the list of currently visible cells.
          */
-        @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        public void onCellInfoChanged(@NonNull List<CellInfo> cellInfo);
+        @RequiresPermission(allOf = {
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.ACCESS_FINE_LOCATION
+        })
+        void onCellInfoChanged(@NonNull List<CellInfo> cellInfo);
     }
 
     /**
@@ -884,7 +866,7 @@ public class TelephonyCallback {
          * @param callState {@link PreciseCallState}
          */
         @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
-        public void onPreciseCallStateChanged(@NonNull PreciseCallState callState);
+        void onPreciseCallStateChanged(@NonNull PreciseCallState callState);
     }
 
     /**
@@ -905,8 +887,8 @@ public class TelephonyCallback {
          * @param preciseDisconnectCause {@link PreciseDisconnectCause}.
          */
         @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
-        public void onCallDisconnectCauseChanged(@Annotation.DisconnectCauses int disconnectCause,
-            @Annotation.PreciseDisconnectCauses int preciseDisconnectCause);
+        void onCallDisconnectCauseChanged(@Annotation.DisconnectCauses int disconnectCause,
+                @Annotation.PreciseDisconnectCauses int preciseDisconnectCause);
     }
 
     /**
@@ -926,7 +908,7 @@ public class TelephonyCallback {
          * @param imsReasonInfo {@link ImsReasonInfo} contains details on why IMS call failed.
          */
         @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
-        public void onImsCallDisconnectCauseChanged(@NonNull ImsReasonInfo imsReasonInfo);
+        void onImsCallDisconnectCauseChanged(@NonNull ImsReasonInfo imsReasonInfo);
     }
 
     /**
@@ -952,7 +934,7 @@ public class TelephonyCallback {
          * @param dataConnectionState {@link PreciseDataConnectionState}
          */
         @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
-        public void onPreciseDataConnectionStateChanged(
+        void onPreciseDataConnectionStateChanged(
             @NonNull PreciseDataConnectionState dataConnectionState);
     }
 
@@ -976,7 +958,7 @@ public class TelephonyCallback {
          * {@link SubscriptionManager#getDefaultSubscriptionId()}.
          */
         @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-        public void onSrvccStateChanged(@Annotation.SrvccState int srvccState);
+        void onSrvccStateChanged(@Annotation.SrvccState int srvccState);
     }
 
     /**
@@ -1000,7 +982,7 @@ public class TelephonyCallback {
          * @param state is the current SIM voice activation state
          */
         @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-        public void onVoiceActivationStateChanged(@Annotation.SimActivationState int state);
+        void onVoiceActivationStateChanged(@Annotation.SimActivationState int state);
 
     }
 
@@ -1021,8 +1003,7 @@ public class TelephonyCallback {
          *
          * @param state is the current SIM data activation state
          */
-        @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-        public void onDataActivationStateChanged(@Annotation.SimActivationState int state);
+        void onDataActivationStateChanged(@Annotation.SimActivationState int state);
     }
 
     /**
@@ -1043,8 +1024,7 @@ public class TelephonyCallback {
          * @param enabled indicates whether the current user mobile data state is enabled or
          *                disabled.
          */
-        @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-        public void onUserMobileDataStateChanged(boolean enabled);
+        void onUserMobileDataStateChanged(boolean enabled);
     }
 
     /**
@@ -1058,7 +1038,7 @@ public class TelephonyCallback {
          *
          * @param telephonyDisplayInfo The display information.
          */
-        public void onDisplayInfoChanged(@NonNull TelephonyDisplayInfo telephonyDisplayInfo);
+        void onDisplayInfoChanged(@NonNull TelephonyDisplayInfo telephonyDisplayInfo);
     }
 
     /**
@@ -1089,8 +1069,8 @@ public class TelephonyCallback {
          *                            empty.
          */
         @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-        public void onEmergencyNumberListChanged(
-            @NonNull Map<Integer, List<EmergencyNumber>> emergencyNumberList);
+        void onEmergencyNumberListChanged(@NonNull Map<Integer,
+                List<EmergencyNumber>> emergencyNumberList);
     }
 
     /**
@@ -1118,8 +1098,8 @@ public class TelephonyCallback {
          *                              {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
          */
         @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
-        public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber,
-            int subscriptionId);
+        void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber,
+                int subscriptionId);
     }
 
     /**
@@ -1139,8 +1119,8 @@ public class TelephonyCallback {
          * @param subscriptionId      The subscription ID used to send the emergency sms.
          */
         @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
-        public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber,
-            int subscriptionId);
+        void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber,
+                int subscriptionId);
     }
 
     /**
@@ -1156,8 +1136,7 @@ public class TelephonyCallback {
          *
          * @param capability the new phone capability
          */
-        @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-        public void onPhoneCapabilityChanged(@NonNull PhoneCapability capability);
+        void onPhoneCapabilityChanged(@NonNull PhoneCapability capability);
     }
 
     /**
@@ -1168,13 +1147,14 @@ public class TelephonyCallback {
          * Callback invoked when active data subscription ID changes.
          * Note, this callback triggers regardless of registered subscription.
          *
-         * @param subId current subscription used to setup Cellular Internet data.
+         * @param subId current subscription used to setup Cellular Internet data. The data is
+         *              only active on the subscription at a time, even it is multi-SIM mode.
          *              For example, it could be the current active opportunistic subscription
          *              in use, or the subscription user selected as default data subscription in
          *              DSDS mode.
          */
         @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-        public void onActiveDataSubscriptionIdChanged(int subId);
+        void onActiveDataSubscriptionIdChanged(int subId);
     }
 
     /**
@@ -1197,7 +1177,7 @@ public class TelephonyCallback {
          * @param state the modem radio power state
          */
         @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-        public void onRadioPowerStateChanged(@Annotation.RadioPowerState int state);
+        void onRadioPowerStateChanged(@Annotation.RadioPowerState int state);
     }
 
     /**
@@ -1221,7 +1201,7 @@ public class TelephonyCallback {
          * @param active If the carrier network change is or shortly will be active,
          *               {@code true} indicate that showing alternative UI, {@code false} otherwise.
          */
-        public void onCarrierNetworkChange(boolean active);
+        void onCarrierNetworkChange(boolean active);
     }
 
     /**
@@ -1263,9 +1243,8 @@ public class TelephonyCallback {
                 Manifest.permission.READ_PRECISE_PHONE_STATE,
                 Manifest.permission.ACCESS_FINE_LOCATION
         })
-        public void onRegistrationFailed(@NonNull CellIdentity cellIdentity,
-            @NonNull String chosenPlmn, @NetworkRegistrationInfo.Domain int domain, int causeCode,
-            int additionalCauseCode);
+        void onRegistrationFailed(@NonNull CellIdentity cellIdentity, @NonNull String chosenPlmn,
+                @NetworkRegistrationInfo.Domain int domain, int causeCode, int additionalCauseCode);
     }
 
     /**
@@ -1303,8 +1282,7 @@ public class TelephonyCallback {
          * long type value}.
          */
         @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-        void onAllowedNetworkTypesChanged(
-                @TelephonyManager.AllowedNetworkTypesReason int reason,
+        void onAllowedNetworkTypesChanged(@TelephonyManager.AllowedNetworkTypesReason int reason,
                 @TelephonyManager.NetworkTypeBitMask long allowedNetworkType);
     }
 
@@ -1348,7 +1326,7 @@ public class TelephonyCallback {
                 Manifest.permission.READ_PRECISE_PHONE_STATE,
                 Manifest.permission.ACCESS_FINE_LOCATION
         })
-        public void onBarringInfoChanged(@NonNull BarringInfo barringInfo);
+        void onBarringInfoChanged(@NonNull BarringInfo barringInfo);
     }
 
     /**
@@ -1361,7 +1339,7 @@ public class TelephonyCallback {
          * @param configs List of the current {@link PhysicalChannelConfig}s
          */
         @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
-        public void onPhysicalChannelConfigChanged(@NonNull List<PhysicalChannelConfig> configs);
+        void onPhysicalChannelConfigChanged(@NonNull List<PhysicalChannelConfig> configs);
     }
 
     /**
@@ -1379,8 +1357,7 @@ public class TelephonyCallback {
          *                See {@link TelephonyManager.DataEnabledReason}.
          */
         @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
-        public void onDataEnabledChanged(boolean enabled,
-            @TelephonyManager.DataEnabledReason int reason);
+        void onDataEnabledChanged(boolean enabled, @TelephonyManager.DataEnabledReason int reason);
     }
 
     /**

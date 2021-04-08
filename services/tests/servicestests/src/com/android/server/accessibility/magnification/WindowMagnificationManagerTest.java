@@ -313,6 +313,17 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
+    public void onAccessibilityActionPerformed_magnifierEnabled_notifyAction()
+            throws RemoteException {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, NaN, NaN);
+
+        mMockConnection.getConnectionCallback().onAccessibilityActionPerformed(TEST_DISPLAY);
+
+        verify(mMockCallback).onAccessibilityActionPerformed(eq(TEST_DISPLAY));
+    }
+
+    @Test
     public void binderDied_windowMagnifierIsEnabled_resetState() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);

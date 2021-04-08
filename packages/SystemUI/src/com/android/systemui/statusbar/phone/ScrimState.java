@@ -129,6 +129,13 @@ public enum ScrimState {
             mBehindAlpha = mDefaultScrimAlpha;
             mBubbleAlpha = 0f;
             mFrontAlpha = 0f;
+            mBehindTint = Color.BLACK;
+        }
+
+        // to make sure correct color is returned before "prepare" is called
+        @Override
+        public int getBehindTint() {
+            return Color.BLACK;
         }
     },
 
@@ -228,7 +235,7 @@ public enum ScrimState {
             mAnimateChange = !mLaunchingAffordanceWithPreview;
 
             mFrontTint = Color.TRANSPARENT;
-            mBehindTint = Color.TRANSPARENT;
+            mBehindTint = Color.BLACK;
             mBubbleTint = Color.TRANSPARENT;
             mBlankScreen = false;
 

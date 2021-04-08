@@ -17,6 +17,7 @@ package com.android.systemui.biometrics
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
@@ -24,9 +25,11 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.PathInterpolator
+import com.android.internal.graphics.ColorUtils
 import com.android.systemui.statusbar.charging.RippleShader
 
-private const val RIPPLE_ANIMATION_DURATION: Long = 950
+private const val RIPPLE_ANIMATION_DURATION: Long = 1533
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
 
 /**
@@ -36,42 +39,64 @@ private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
 class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private var rippleInProgress: Boolean = false
     private val rippleShader = RippleShader()
-    private val defaultColor: Int = 0xffffffff.toInt()
     private val ripplePaint = Paint()
 
     init {
-        rippleShader.color = defaultColor
+        rippleShader.color = 0xffffffff.toInt() // default color
         rippleShader.progress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
         ripplePaint.shader = rippleShader
-        visibility = View.GONE
+        visibility = GONE
     }
 
-    fun setSensorLocation(x: Float, y: Float) {
-        rippleShader.origin = PointF(x, y)
-        rippleShader.radius = maxOf(x, y, width - x, height - y).toFloat()
+    fun setSensorLocation(location: PointF) {
+        rippleShader.origin = location
+        rippleShader.radius = maxOf(location.x, location.y, width - location.x, height - location.y)
+            .toFloat()
     }
 
-    fun startRipple() {
+    fun startRipple(onAnimationEnd: Runnable?) {
         if (rippleInProgress) {
             return // Ignore if ripple effect is already playing
         }
+
         val animator = ValueAnimator.ofFloat(0f, 1f)
+        animator.interpolator = PathInterpolator(0.4f, 0f, 0f, 1f)
         animator.duration = RIPPLE_ANIMATION_DURATION
         animator.addUpdateListener { animator ->
             val now = animator.currentPlayTime
             rippleShader.progress = animator.animatedValue as Float
             rippleShader.time = now.toFloat()
+            rippleShader.distortionStrength = 1 - rippleShader.progress
             invalidate()
         }
-        animator.addListener(object : AnimatorListenerAdapter() {
+        val alphaInAnimator = ValueAnimator.ofInt(0, 127)
+        alphaInAnimator.duration = 167
+        alphaInAnimator.addUpdateListener { alphaInAnimator ->
+            rippleShader.color = ColorUtils.setAlphaComponent(rippleShader.color,
+                alphaInAnimator.animatedValue as Int)
+            invalidate()
+        }
+        val alphaOutAnimator = ValueAnimator.ofInt(127, 0)
+        alphaOutAnimator.startDelay = 417
+        alphaOutAnimator.duration = 1116
+        alphaOutAnimator.addUpdateListener { alphaOutAnimator ->
+            rippleShader.color = ColorUtils.setAlphaComponent(rippleShader.color,
+                alphaOutAnimator.animatedValue as Int)
+            invalidate()
+        }
+
+        val animatorSet = AnimatorSet()
+        animatorSet.playTogether(animator, alphaInAnimator, alphaOutAnimator)
+        animatorSet.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
+                onAnimationEnd?.run()
                 rippleInProgress = false
-                visibility = View.GONE
+                visibility = GONE
             }
         })
-        animator.start()
-        visibility = View.VISIBLE
+        animatorSet.start()
+        visibility = VISIBLE
         rippleInProgress = true
     }
 

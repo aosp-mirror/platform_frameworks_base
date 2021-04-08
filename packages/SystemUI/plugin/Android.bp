@@ -27,6 +27,7 @@ java_library {
 
     srcs: [
         "src/**/*.java",
+        "src/**/*.kt",
         "bcsmartspace/src/**/*.java",
     ],
 

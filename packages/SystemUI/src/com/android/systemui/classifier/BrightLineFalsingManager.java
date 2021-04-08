@@ -224,7 +224,9 @@ public class BrightLineFalsingManager implements FalsingManager {
         }
 
         FalsingClassifier.Result singleTapResult =
-                mSingleTapClassifier.isTap(mDataProvider.getRecentMotionEvents());
+                mSingleTapClassifier.isTap(mDataProvider.getRecentMotionEvents().isEmpty()
+                        ? mDataProvider.getPriorMotionEvents()
+                        : mDataProvider.getRecentMotionEvents());
         mPriorResults = Collections.singleton(singleTapResult);
 
         if (!singleTapResult.isFalse() && robustCheck) {

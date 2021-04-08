@@ -21,15 +21,12 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.AppGlobals;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
-import android.os.RemoteException;
-import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.util.ArraySet;
 
@@ -93,6 +90,8 @@ import java.util.Set;
 // TODO: Codegen applies method level annotations to argument vs the generated member (@SystemApi)
 // TODO: Codegen doesn't properly read/write IBinder members
 // TODO: Codegen doesn't properly handle Set arguments
+// TODO: Codegen requires @SystemApi annotations on fields which breaks
+//      android.signature.cts.api.AnnotationTest (need to update the test)
 // @DataClass(genEqualsHashCode = true, genConstructor = false, genBuilder = true)
 public final class AttributionSource implements Parcelable {
     /**
@@ -153,8 +152,6 @@ public final class AttributionSource implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
     @DataClass.ParcelWith(RenouncedPermissionsParcelling.class)
     private @Nullable Set<String> mRenouncedPermissions = null;
 
@@ -516,7 +513,7 @@ public final class AttributionSource implements Parcelable {
         private @Nullable String mPackageName;
         private @Nullable String mAttributionTag;
         private @Nullable IBinder mToken;
-        private @SystemApi @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) @Nullable Set<String> mRenouncedPermissions;
+        private @Nullable Set<String> mRenouncedPermissions;
         private @Nullable AttributionSource mNext;
 
         private long mBuilderFieldsSet = 0L;
