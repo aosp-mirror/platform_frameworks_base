@@ -2620,19 +2620,19 @@
     <string name="ongoing_privacy_dialog_last_separator">\u0020and\u0020</string>
 
     <!-- Text for privacy dialog, using sensitive app op (one of camera, location, microphone) right now [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_using_op"><xliff:g id="application_name" example="Photos">%1$s</xliff:g> is using the <xliff:g id="app_opp_name" example="camera">%2$s</xliff:g></string>
+    <string name="ongoing_privacy_dialog_using_op">Being used by <xliff:g id="application_name" example="Photos">%1$s</xliff:g></string>
 
     <!-- Text for privacy dialog, recently used sensitive app op (one of camera, location, microphone) [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_recent_op"><xliff:g id="application_name" example="Photos">%1$s</xliff:g> used the <xliff:g id="app_opp_name" example="camera">%2$s</xliff:g> recently</string>
+    <string name="ongoing_privacy_dialog_recent_op">Recently used by <xliff:g id="application_name" example="Photos">%1$s</xliff:g></string>
 
     <!-- Text for privacy dialog, indicating that the application is the enterprise version [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_enterprise">(enterprise)</string>
+    <string name="ongoing_privacy_dialog_enterprise">(work)</string>
 
     <!-- Text for privacy dialog, identifying the phone call app [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_dialog_phonecall">Phone call</string>
 
-    <!-- Text for privacy dialog, indicating that an app is using an op on behalf of another [CHAR LIMIT=NONE] -->
-    <string name="ongoing_privacy_dialog_attribution_text">(through <xliff:g id="attribution" example="Special app">%s</xliff:g>)</string>
+    <!-- Text for privacy dialog, indicating that an app (or multiple) is using an op on behalf of another [CHAR LIMIT=NONE] -->
+    <string name="ongoing_privacy_dialog_attribution_text">(through <xliff:g id="application name(s)" example="Maps, and Assistant">%s</xliff:g>)</string>
 
     <!-- Text for camera app op [CHAR LIMIT=20]-->
     <string name="privacy_type_camera">camera</string>
