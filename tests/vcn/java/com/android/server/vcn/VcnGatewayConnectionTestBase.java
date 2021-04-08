@@ -18,6 +18,7 @@ package com.android.server.vcn;
 
 import static com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
 
 import static org.junit.Assert.assertEquals;
@@ -44,7 +45,6 @@ import android.net.IpSecTunnelInterfaceResponse;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
-import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.IkeSessionCallback;
@@ -90,18 +90,28 @@ public class VcnGatewayConnectionTestBase {
     protected static final int TEST_SUB_ID = 5;
     protected static final long ELAPSED_REAL_TIME = 123456789L;
     protected static final String TEST_IPSEC_TUNNEL_IFACE = "IPSEC_IFACE";
+
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
             new UnderlyingNetworkRecord(
                     new Network(0),
                     new NetworkCapabilities(),
                     new LinkProperties(),
                     false /* blocked */);
+
+    static {
+        TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.setMtu(1500);
+    }
+
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_2 =
             new UnderlyingNetworkRecord(
                     new Network(1),
                     new NetworkCapabilities(),
                     new LinkProperties(),
                     false /* blocked */);
+
+    static {
+        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.setMtu(1460);
+    }
 
     protected static final TelephonySubscriptionSnapshot TEST_SUBSCRIPTION_SNAPSHOT =
             new TelephonySubscriptionSnapshot(
@@ -278,8 +288,8 @@ public class VcnGatewayConnectionTestBase {
 
     protected void verifySafeModeTimeoutNotifiesCallbackAndUnregistersNetworkAgent(
             @NonNull State expectedState) {
-        // Set a NetworkAgent, and expect it to be unregistered and cleared
-        final NetworkAgent mockNetworkAgent = mock(NetworkAgent.class);
+        // Set a VcnNetworkAgent, and expect it to be unregistered and cleared
+        final VcnNetworkAgent mockNetworkAgent = mock(VcnNetworkAgent.class);
         mGatewayConnection.setNetworkAgent(mockNetworkAgent);
 
         // SafeMode timer starts when VcnGatewayConnection exits DisconnectedState (the initial
