@@ -171,13 +171,13 @@ static const SkString stretchShader = SkString(R"(
 static const float ZERO = 0.f;
 static const float CONTENT_DISTANCE_STRETCHED = 1.f;
 
-sk_sp<SkImageFilter> StretchEffect::getImageFilter(const sk_sp<SkImage>& snapshotImage) const {
+sk_sp<SkShader> StretchEffect::getShader(const sk_sp<SkImage>& snapshotImage) const {
     if (isEmpty()) {
         return nullptr;
     }
 
-    if (mStretchFilter != nullptr) {
-        return mStretchFilter;
+    if (mStretchShader != nullptr) {
+        return mStretchShader;
     }
 
     float viewportWidth = stretchArea.width();
@@ -212,10 +212,9 @@ sk_sp<SkImageFilter> StretchEffect::getImageFilter(const sk_sp<SkImage>& snapsho
     mBuilder->uniform("viewportWidth").set(&viewportWidth, 1);
     mBuilder->uniform("viewportHeight").set(&viewportHeight, 1);
 
-    mStretchFilter = SkImageFilters::Shader(mBuilder->makeShader(nullptr, false),
-                                            SkRect{0, 0, viewportWidth, viewportHeight});
+    mStretchShader = mBuilder->makeShader(nullptr, false);
 
-    return mStretchFilter;
+    return mStretchShader;
 }
 
 sk_sp<SkRuntimeEffect> StretchEffect::getStretchEffect() {
