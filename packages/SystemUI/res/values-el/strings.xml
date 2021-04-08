@@ -479,7 +479,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Κατάργηση επισκέπτη;"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Όλες οι εφαρμογές και τα δεδομένα αυτής της περιόδου σύνδεσης θα διαγραφούν."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Κατάργηση"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Επισκέπτη , καλώς όρισες ξανά!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Kαλώς ορίσατε ξανά!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Θέλετε να συνεχίσετε την περίοδο σύνδεσής σας;"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Έναρξη από την αρχή"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ναι, συνέχεια"</string>
@@ -490,7 +490,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Αποσύνδεση τρέχοντα χρήστη"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ΑΠΟΣΥΝΔΕΣΗ ΧΡΗΣΤΗ"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Προσθήκη νέου χρήστη;"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει το χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Συμπληρώθηκε το όριο χρηστών"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Μπορείτε να προσθέσετε έως <xliff:g id="COUNT">%d</xliff:g> χρήστες.</item>

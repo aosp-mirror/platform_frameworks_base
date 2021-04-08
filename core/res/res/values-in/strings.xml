@@ -318,7 +318,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Mengambil konten jendela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Memeriksa konten jendela tempat Anda berinteraksi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Item yang diketuk akan diucapkan dengan jelas dan layar dapat dijelajahi menggunakan isyarat."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Item yang diketuk akan diucapkan dengan jelas dan layar dapat dijelajahi menggunakan gestur."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Mengamati teks yang Anda ketik"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Meliputi data pribadi seperti nomor kartu kredit dan sandi."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Mengontrol perbesaran layar"</string>

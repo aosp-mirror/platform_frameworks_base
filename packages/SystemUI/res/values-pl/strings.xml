@@ -483,7 +483,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Usunąć gościa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Wszystkie aplikacje i dane w tej sesji zostaną usunięte."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Usuń"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Witaj ponownie, gościu!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Witaj ponownie, Gościu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcesz kontynuować sesję?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Rozpocznij nową"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Tak, kontynuuj"</string>

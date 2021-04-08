@@ -1539,8 +1539,8 @@
     <string name="expires_on" msgid="1623640879705103121">"Expira el:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Número de serie:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Huellas digitales:"</string>
-    <string name="sha256_fingerprint" msgid="7103976380961964600">"Huella dactilar SHA-256"</string>
-    <string name="sha1_fingerprint" msgid="2339915142825390774">"Huella dactilar SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="7103976380961964600">"Huella digital SHA-256"</string>
+    <string name="sha1_fingerprint" msgid="2339915142825390774">"Huella digital SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Ver todas"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Elige actividad"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Compartir con"</string>

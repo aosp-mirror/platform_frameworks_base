@@ -1618,7 +1618,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"आपने अपना लॉक खोलने का पैटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से बनाया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और गलत प्रयासों के बाद, आपसे अपने Android TV डिवाइस को अपने ईमेल खाते का इस्तेमाल करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड बाद प्रयास करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड में फिर से प्रयास करें."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"निकालें"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाएं"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर ज़्यादा समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"सुलभता शॉर्टकट का इस्तेमाल करना चाहते हैं?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट के चालू होने पर, दाेनाें वॉल्यूम बटन (आवाज़ कम या ज़्यादा करने वाले बटन) को तीन सेकंड तक दबाने से, सुलभता सुविधा शुरू हाे जाएगी."</string>

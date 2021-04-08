@@ -476,12 +476,12 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Ցույց տալ դիտարկումը"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Նոր օգտատեր"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին:"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Հեռացնել"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր:"</string>
-    <string name="guest_wipe_session_message" msgid="3393823610257065457">"Դուք ցանկանու՞մ եք շարունակել ձեր գործողությունը:"</string>
-    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Սկսել"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր"</string>
+    <string name="guest_wipe_session_message" msgid="3393823610257065457">"Շարունակե՞լ աշխատաշրջանը։"</string>
+    <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Վերսկսել"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Այո, շարունակել"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Հյուր"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Հավելվածները և տվյալները ջնջելու համար հեռացրեք հյուրին"</string>
@@ -489,7 +489,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Ընթացիկ օգտատիրոջ դուրս գրում"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Ընթացիկ օգտատիրոջ դուրս գրում"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ԸՆԹԱՑԻԿ ՕԳՏՎՈՂԻ ԴՈՒՐՍ ԳՐՈՒՄ"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Ավելացնե՞լ նոր պրոֆիլ:"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Ավելացնե՞լ նոր օգտատեր"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Երբ նոր օգտատեր եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտատեր կարող է թարմացնել հավելվածները մյուս բոլոր հաշիվների համար:"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Սահմանաչափը սպառված է"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
