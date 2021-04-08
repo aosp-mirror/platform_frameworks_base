@@ -3193,6 +3193,9 @@
     <!-- Default not selected text used by accessibility for an element that can be selected or unselected. [CHAR LIMIT=NONE] -->
     <string name="not_selected">not selected</string>
 
+    <!-- Default state description for indeterminate progressbar. [CHAR LIMIT=NONE] -->
+    <string name="in_progress">in progress</string>
+
     <!-- Title of intent resolver dialog when selecting an application to run. -->
     <string name="whichApplication">Complete action using</string>
     <!-- Title of intent resolver dialog when selecting an application to run
