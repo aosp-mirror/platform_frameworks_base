@@ -1735,6 +1735,12 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
     },
+    "-108977760": {
+      "message": "Sandbox max bounds for uid %s to bounds %s. config to never sandbox = %s, config to always sandbox = %s, letterboxing from mismatch with parent bounds = %s, has mCompatDisplayInsets = %s, should create compatDisplayInsets = %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-106400104": {
       "message": "Preload recents with %s",
       "level": "DEBUG",
@@ -2886,12 +2892,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1237719089": {
-      "message": "Sandbox max bounds for uid %s to bounds %s. letterboxing from mismatch with parent bounds = %s, has mCompatDisplayInsets = %s, should create compatDisplayInsets = %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1246035185": {
       "message": "stopFreezingDisplayLocked: Returning waitingForConfig=%b, waitingForRemoteRotation=%b, mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, mClientFreezingScreen=%b, mOpeningApps.size()=%d",
