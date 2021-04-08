@@ -205,16 +205,26 @@ public final class IncrementalFileStorages {
     /**
      * Resets the states and unbinds storage instances for an installation session.
      */
-    public void cleanUp() {
-        if (mDefaultStorage == null) {
-            return;
+    public void cleanUpAndMarkComplete() {
+        IncrementalStorage defaultStorage = cleanUp();
+        if (defaultStorage != null) {
+            defaultStorage.onInstallationComplete();
+        }
+    }
+
+    private IncrementalStorage cleanUp() {
+        IncrementalStorage defaultStorage = mDefaultStorage;
+        mInheritedStorage = null;
+        mDefaultStorage = null;
+        if (defaultStorage == null) {
+            return null;
         }
 
         try {
             mIncrementalManager.unregisterLoadingProgressCallbacks(mStageDir.getAbsolutePath());
-            mDefaultStorage.unBind(mStageDir.getAbsolutePath());
+            defaultStorage.unBind(mStageDir.getAbsolutePath());
         } catch (IOException ignored) {
         }
-        mDefaultStorage = null;
+        return defaultStorage;
     }
 }

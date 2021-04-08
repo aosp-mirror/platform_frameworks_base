@@ -118,6 +118,9 @@ public:
         ReadLogsAllowed = 1 << 0,
         ReadLogsEnabled = 1 << 1,
         ReadLogsRequested = 1 << 2,
+
+        ReadTimeoutsEnabled = 1 << 3,
+        ReadTimeoutsRequested = 1 << 4,
     };
 
     struct LoadingProgress {
@@ -160,6 +163,7 @@ public:
                       const StorageHealthCheckParams& healthCheckParams,
                       StorageHealthListener healthListener,
                       std::vector<PerUidReadTimeouts> perUidReadTimeouts);
+    void onInstallationComplete(StorageId storage);
 
     int bind(StorageId storage, std::string_view source, std::string_view target, BindKind kind);
     int unbind(StorageId storage, std::string_view target);
@@ -316,7 +320,7 @@ private:
         } mHealthBase = {TimePoint::max(), kMaxBootClockTsUs};
         StorageHealthCheckParams mHealthCheckParams;
         int mStreamStatus = content::pm::IDataLoaderStatusListener::STREAM_HEALTHY;
-        std::vector<incfs::ReadInfo> mLastPendingReads;
+        std::vector<incfs::ReadInfoWithUid> mLastPendingReads;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 
@@ -364,13 +368,32 @@ private:
         void disallowReadLogs() { flags &= ~StorageFlags::ReadLogsAllowed; }
         int32_t readLogsAllowed() const { return (flags & StorageFlags::ReadLogsAllowed); }
 
-        void setReadLogsEnabled(bool value);
+        void setReadLogsEnabled(bool value) {
+            return setFlag(StorageFlags::ReadLogsEnabled, value);
+        }
         int32_t readLogsEnabled() const { return (flags & StorageFlags::ReadLogsEnabled); }
 
-        void setReadLogsRequested(bool value);
+        void setReadLogsRequested(bool value) {
+            return setFlag(StorageFlags::ReadLogsRequested, value);
+        }
         int32_t readLogsRequested() const { return (flags & StorageFlags::ReadLogsRequested); }
 
+        void setReadTimeoutsEnabled(bool value) {
+            return setFlag(StorageFlags::ReadTimeoutsEnabled, value);
+        }
+        int32_t readTimeoutsEnabled() const { return (flags & StorageFlags::ReadTimeoutsEnabled); }
+
+        void setReadTimeoutsRequested(bool value) {
+            return setFlag(StorageFlags::ReadTimeoutsRequested, value);
+        }
+        int32_t readTimeoutsRequested() const {
+            return (flags & StorageFlags::ReadTimeoutsRequested);
+        }
+
         static void cleanupFilesystem(std::string_view root);
+
+    private:
+        void setFlag(StorageFlags flag, bool value);
     };
 
     using IfsMountPtr = std::shared_ptr<IncFsMount>;
@@ -422,7 +445,7 @@ private:
     int makeDirs(const IncFsMount& ifs, StorageId storageId, std::string_view path, int mode);
 
     int disableReadLogsLocked(IncFsMount& ifs);
-    int applyStorageParamsLocked(IncFsMount& ifs, bool enableReadLogs);
+    int applyStorageParamsLocked(IncFsMount& ifs);
 
     LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
 
