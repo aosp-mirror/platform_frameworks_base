@@ -235,4 +235,37 @@ public class GameManagerServiceTests {
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
+
+    /**
+     * Test game modes are user-specific.
+     */
+    @Test
+    public void testGameModeMultipleUsers() {
+        GameManagerService gameManagerService = new GameManagerService(mMockContext);
+        gameManagerService.onUserStarting(USER_ID_1);
+        gameManagerService.onUserStarting(USER_ID_2);
+
+        mockModifyGameModeGranted();
+
+        // Set User 1 to Standard
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_STANDARD,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+
+        // Set User 2 to Performance and verify User 1 is still Standard
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE,
+                USER_ID_2);
+        assertEquals(GameManager.GAME_MODE_PERFORMANCE,
+                gameManagerService.getGameMode(mPackageName, USER_ID_2));
+        assertEquals(GameManager.GAME_MODE_STANDARD,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+
+        // Set User 1 to Battery and verify User 2 is still Performance
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY,
+                USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_BATTERY,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+        assertEquals(GameManager.GAME_MODE_PERFORMANCE,
+                gameManagerService.getGameMode(mPackageName, USER_ID_2));
+    }
 }
