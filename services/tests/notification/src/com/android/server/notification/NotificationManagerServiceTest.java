@@ -45,6 +45,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -124,6 +125,8 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private AudioManager mAudioManager;
     @Mock
     ActivityManager mActivityManager;
+    @Mock
+    ActivityManagerInternal mAmi;
     NotificationManagerService.WorkerHandler mHandler;
 
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
@@ -213,7 +216,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                     mPackageManager, mPackageManagerClient, mockLightsManager,
                     mListeners, mAssistants, mConditionProviders,
                     mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
-                    mGroupHelper);
+                    mGroupHelper, mAmi);
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
