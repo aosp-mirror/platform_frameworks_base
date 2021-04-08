@@ -26,10 +26,13 @@ import android.util.MathUtils;
 import android.util.Range;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /** Adapts a {@link VibrationEffect} to a specific device, taking into account its capabilities. */
 final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<VibratorInfo> {
+
+    private static final int RAMP_STEP_DURATION_MILLIS = 5;
 
     /** Adapts a sequence of {@link VibrationEffectSegment} to device's capabilities. */
     interface SegmentsAdapter {
@@ -38,16 +41,17 @@ final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<Vibr
          * Modifies the given segments list by adding/removing segments to it based on the
          * device capabilities specified by given {@link VibratorInfo}.
          *
-         * @param segments    List of {@link VibrationEffectSegment} to be adapter to the device.
-         * @param repeatIndex Repeat index on the current segment list.
+         * @param segments    List of {@link VibrationEffectSegment} to be modified.
+         * @param repeatIndex Repeat index of the vibration with given segment list.
          * @param info        The device vibrator info that the segments must be adapted to.
-         * @return The new repeat index on the modifies list.
+         * @return The new repeat index to be used for the modified list.
          */
         int apply(List<VibrationEffectSegment> segments, int repeatIndex, VibratorInfo info);
     }
 
     private final SegmentsAdapter mAmplitudeFrequencyAdapter;
     private final SegmentsAdapter mStepToRampAdapter;
+    private final SegmentsAdapter mRampToStepsAdapter;
 
     DeviceVibrationEffectAdapter() {
         this(new ClippingAmplitudeFrequencyAdapter());
@@ -56,6 +60,7 @@ final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<Vibr
     DeviceVibrationEffectAdapter(SegmentsAdapter amplitudeFrequencyAdapter) {
         mAmplitudeFrequencyAdapter = amplitudeFrequencyAdapter;
         mStepToRampAdapter = new StepToRampAdapter();
+        mRampToStepsAdapter = new RampToStepsAdapter(RAMP_STEP_DURATION_MILLIS);
     }
 
     @Override
@@ -68,7 +73,10 @@ final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<Vibr
         List<VibrationEffectSegment> newSegments = new ArrayList<>(composed.getSegments());
         int newRepeatIndex = composed.getRepeatIndex();
 
-        // Maps steps that should be handled by PWLE to ramps.
+        // Replace ramps with a sequence of fixed steps, or no-op if PWLE capability present.
+        newRepeatIndex = mRampToStepsAdapter.apply(newSegments, newRepeatIndex, info);
+
+        // Replace steps that should be handled by PWLE to ramps, or no-op if capability missing.
         // This should be done before frequency is converted from relative to absolute values.
         newRepeatIndex = mStepToRampAdapter.apply(newSegments, newRepeatIndex, info);
 
@@ -76,7 +84,6 @@ final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<Vibr
         // to absolute values in Hertz.
         newRepeatIndex = mAmplitudeFrequencyAdapter.apply(newSegments, newRepeatIndex, info);
 
-        // TODO(b/167947076): add ramp to step adapter
         // TODO(b/167947076): add filter that removes unsupported primitives
         // TODO(b/167947076): add filter that replaces unsupported prebaked with fallback
 
@@ -86,7 +93,7 @@ final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<Vibr
     /**
      * Adapter that converts step segments that should be handled as PWLEs to ramp segments.
      *
-     * <p>This leves the list unchanged if the device do not have compose PWLE capability.
+     * <p>This leaves the list unchanged if the device do not have compose PWLE capability.
      */
     private static final class StepToRampAdapter implements SegmentsAdapter {
         @Override
@@ -120,6 +127,71 @@ final class DeviceVibrationEffectAdapter implements VibrationEffectModifier<Vibr
         private RampSegment apply(StepSegment segment) {
             return new RampSegment(segment.getAmplitude(), segment.getAmplitude(),
                     segment.getFrequency(), segment.getFrequency(), (int) segment.getDuration());
+        }
+    }
+
+    /**
+     * Adapter that converts ramp segments that to a sequence of fixed step segments.
+     *
+     * <p>This leaves the list unchanged if the device have compose PWLE capability.
+     */
+    private static final class RampToStepsAdapter implements SegmentsAdapter {
+        private final int mStepDuration;
+
+        RampToStepsAdapter(int stepDuration) {
+            mStepDuration = stepDuration;
+        }
+
+        @Override
+        public int apply(List<VibrationEffectSegment> segments, int repeatIndex,
+                VibratorInfo info) {
+            if (info.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
+                // The vibrator have PWLE capability, so keep the segments unchanged.
+                return repeatIndex;
+            }
+            int segmentCount = segments.size();
+            for (int i = 0; i < segmentCount; i++) {
+                VibrationEffectSegment segment = segments.get(i);
+                if (!(segment instanceof RampSegment)) {
+                    continue;
+                }
+                List<StepSegment> steps = apply((RampSegment) segment);
+                segments.remove(i);
+                segments.addAll(i, steps);
+                int addedSegments = steps.size() - 1;
+                if (repeatIndex > i) {
+                    repeatIndex += addedSegments;
+                }
+                i += addedSegments;
+                segmentCount += addedSegments;
+            }
+            return repeatIndex;
+        }
+
+        private List<StepSegment> apply(RampSegment ramp) {
+            if (Float.compare(ramp.getStartAmplitude(), ramp.getEndAmplitude()) == 0) {
+                // Amplitude is the same, so return a single step to simulate this ramp.
+                return Arrays.asList(
+                        new StepSegment(ramp.getStartAmplitude(), ramp.getStartFrequency(),
+                                (int) ramp.getDuration()));
+            }
+
+            List<StepSegment> steps = new ArrayList<>();
+            int stepCount = (int) (ramp.getDuration() + mStepDuration - 1) / mStepDuration;
+            for (int i = 0; i < stepCount - 1; i++) {
+                float pos = (float) i / stepCount;
+                steps.add(new StepSegment(
+                        interpolate(ramp.getStartAmplitude(), ramp.getEndAmplitude(), pos),
+                        interpolate(ramp.getStartFrequency(), ramp.getEndFrequency(), pos),
+                        mStepDuration));
+            }
+            int duration = (int) ramp.getDuration() - mStepDuration * (stepCount - 1);
+            steps.add(new StepSegment(ramp.getEndAmplitude(), ramp.getEndFrequency(), duration));
+            return steps;
+        }
+
+        private static float interpolate(float start, float end, float position) {
+            return start + position * (end - start);
         }
     }
 
