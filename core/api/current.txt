@@ -12441,7 +12441,7 @@ package android.content.pm {
     method public void setAppIcon(@Nullable android.graphics.Bitmap);
     method public void setAppLabel(@Nullable CharSequence);
     method public void setAppPackageName(@Nullable String);
-    method public void setAutoRevokePermissionsMode(boolean);
+    method @Deprecated public void setAutoRevokePermissionsMode(boolean);
     method public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
