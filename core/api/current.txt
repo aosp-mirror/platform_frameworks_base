@@ -8552,8 +8552,8 @@ package android.appwidget {
     ctor public AppWidgetProviderInfo(android.os.Parcel);
     method public android.appwidget.AppWidgetProviderInfo clone();
     method public int describeContents();
+    method @NonNull public android.content.pm.ActivityInfo getActivityInfo();
     method public final android.os.UserHandle getProfile();
-    method @NonNull public android.content.pm.ActivityInfo getProviderInfo();
     method @Nullable public final CharSequence loadDescription(@NonNull android.content.Context);
     method public final android.graphics.drawable.Drawable loadIcon(@NonNull android.content.Context, int);
     method public final String loadLabel(android.content.pm.PackageManager);
