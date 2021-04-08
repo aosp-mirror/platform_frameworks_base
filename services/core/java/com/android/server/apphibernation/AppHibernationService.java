@@ -35,6 +35,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -418,19 +419,29 @@ public final class AppHibernationService extends SystemService {
         }
 
         if (diskStates != null) {
-            Set<String> installedPackages = new ArraySet<>();
+            Map<String, PackageInfo> installedPackages = new ArrayMap<>();
             for (int i = 0, size = packages.size(); i < size; i++) {
-                installedPackages.add(packages.get(i).packageName);
+                installedPackages.put(packages.get(i).packageName, packages.get(i));
             }
             for (int i = 0, size = diskStates.size(); i < size; i++) {
                 String packageName = diskStates.get(i).packageName;
-                if (!installedPackages.contains(packageName)) {
+                PackageInfo pkgInfo = installedPackages.get(packageName);
+                UserLevelState currentState = diskStates.get(i);
+                if (pkgInfo == null) {
                     Slog.w(TAG, String.format(
                             "No hibernation state associated with package %s user %d. Maybe"
                                     + "the package was uninstalled? ", packageName, userId));
                     continue;
                 }
-                userLevelStates.put(packageName, diskStates.get(i));
+                if (pkgInfo.applicationInfo != null
+                        && (pkgInfo.applicationInfo.flags &= ApplicationInfo.FLAG_STOPPED) == 0
+                        && currentState.hibernated) {
+                    // App is not stopped but is hibernated. Disk state is stale, so unhibernate
+                    // the app.
+                    currentState.hibernated = false;
+                    currentState.lastUnhibernatedMs = System.currentTimeMillis();
+                }
+                userLevelStates.put(packageName, currentState);
             }
         }
         mUserStates.put(userId, userLevelStates);
@@ -487,6 +498,15 @@ public final class AppHibernationService extends SystemService {
                 // Ensure user hasn't stopped in the time to execute.
                 if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
                     initializeUserHibernationStates(userId, storedStates);
+                    // Globally unhibernate a package if the unlocked user does not have it
+                    // hibernated.
+                    for (UserLevelState userState : mUserStates.get(userId).values()) {
+                        String pkgName = userState.packageName;
+                        GlobalLevelState globalState = mGlobalHibernationStates.get(pkgName);
+                        if (globalState.hibernated && !userState.hibernated) {
+                            setHibernatingGlobally(pkgName, false);
+                        }
+                    }
                 }
             }
         });
