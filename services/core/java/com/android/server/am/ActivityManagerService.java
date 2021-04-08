@@ -236,6 +236,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
 import android.location.LocationManager;
 import android.media.audiofx.AudioEffect;
+import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.Uri;
 import android.os.AppZygote;
@@ -16458,7 +16459,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         stats.noteCurrentTimeChangedLocked();
                     }
                     break;
-                case Intent.ACTION_CLEAR_DNS_CACHE:
+                case ConnectivityManager.ACTION_CLEAR_DNS_CACHE:
                     mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
                     break;
                 case Proxy.PROXY_CHANGE_ACTION:
