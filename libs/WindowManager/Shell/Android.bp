@@ -129,6 +129,4 @@ android_library {
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     manifest: "AndroidManifest.xml",
-
-    min_sdk_version: "26",
 }

@@ -42,17 +42,24 @@ class TransitionController {
     private static final String TAG = "TransitionController";
 
     private ITransitionPlayer mTransitionPlayer;
-    private final IBinder.DeathRecipient mTransitionPlayerDeath = () -> mTransitionPlayer = null;
     final ActivityTaskManagerService mAtm;
 
-    /** Currently playing transitions. When finished, records are removed from this list. */
+    /**
+     * Currently playing transitions (in the order they were started). When finished, records are
+     * removed from this list.
+     */
     private final ArrayList<Transition> mPlayingTransitions = new ArrayList<>();
 
-    /**
-     * The transition currently being constructed (collecting participants).
-     * TODO(shell-transitions): When simultaneous transitions are supported, merge this with
-     *                          mPlayingTransitions.
-     */
+    private final IBinder.DeathRecipient mTransitionPlayerDeath = () -> {
+        // clean-up/finish any playing transitions.
+        for (int i = 0; i < mPlayingTransitions.size(); ++i) {
+            mPlayingTransitions.get(i).cleanUpOnFailure();
+        }
+        mPlayingTransitions.clear();
+        mTransitionPlayer = null;
+    };
+
+    /** The transition currently being constructed (collecting participants). */
     private Transition mCollectingTransition = null;
 
     TransitionController(ActivityTaskManagerService atm) {

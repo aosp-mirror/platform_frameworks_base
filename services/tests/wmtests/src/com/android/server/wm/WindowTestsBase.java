@@ -1462,7 +1462,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         @Override
         public void onTransitionReady(IBinder transitToken, TransitionInfo transitionInfo,
-                SurfaceControl.Transaction transaction) throws RemoteException {
+                SurfaceControl.Transaction transaction, SurfaceControl.Transaction finishT)
+                throws RemoteException {
             mLastTransit = Transition.fromBinder(transitToken);
             mLastReady = transitionInfo;
         }
