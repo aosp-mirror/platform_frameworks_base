@@ -657,7 +657,6 @@ filegroup {
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/StringDef.java",
-        "core/java/android/annotation/SuppressLint.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",

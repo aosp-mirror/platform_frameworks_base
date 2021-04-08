@@ -479,7 +479,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"অতিথি আঁতৰাবনে?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ সকলো এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"আঁতৰাওক"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"আপোনাক পুনৰাই স্বাগতম জনাইছোঁ!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"অতিথি, আপোনাক পুনৰ স্বাগতম!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"আপুনি আপোনাৰ ছেশ্বন অব্যাহত ৰাখিব বিচাৰেনে?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আকৌ আৰম্ভ কৰক"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হয়, অব্যাহত ৰাখক"</string>

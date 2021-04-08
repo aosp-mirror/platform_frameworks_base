@@ -665,7 +665,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Иесіне оператордың хабар алмасу қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"оператор қызметтеріне қосылу"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Иесіне оператор қызметтеріне қосылуға мүмкіндік береді. Қалыпты қолданбалар үшін қажет болмайды."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"\"Мазаламау\" режиміне кіру"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Мазаламау режиміне кіру"</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"рұқсаттарды пайдалану туралы деректерді көру"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Пайдаланушы қолданбаға берілетін рұқсаттарды басқара алады. Ондай рұқсаттар әдеттегі қолданбаларға керек емес."</string>
@@ -1618,7 +1618,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс сызбадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың құлпын ашу үшін есептік жазбаңызға кіру керек болады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталап көріңіз."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін телефоныңызды есептік жазба арқылы ашу өтінішін аласыз. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Алып тастау"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Жою"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дыбыс деңгейін ұсынылған деңгейден көтеру керек пе?\n\nЖоғары дыбыс деңгейінде ұзақ кезеңдер бойы тыңдау есту қабілетіңізге зиян тигізуі мүмкін."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Арнайы мүмкіндік төте жолын пайдалану керек пе?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Түймелер тіркесімі қосулы кезде, екі дыбыс түймесін 3 секунд басып тұрсаңыз, \"Арнайы мүмкіндіктер\" функциясы іске қосылады."</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Бір функциядан екінші функцияға ауысу үшін үш саусақпен жоғары қарай сырғытып, ұстап тұрыңыз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ұлғайту"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> ауысу орындалуда…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> профиліне ауысу…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ішінен шығу…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Құрылғы иесі"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Қателік"</string>
@@ -1832,7 +1832,7 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін (келесі дабыл)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Өшірілгенге дейін"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"\"Мазаламау\" режимін өшіргенше"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Мазаламау режимін өшіргенше"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Тасалау"</string>
     <string name="zen_mode_feature_name" msgid="3785547207263754500">"Мазаламау"</string>
@@ -1987,10 +1987,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Қоңыраулар мен хабарландырулардың вибрациясы болады"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Қоңыраулар мен хабарландырулардың дыбыстық сигналы өшіріледі"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Жүйе өзгерістері"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"\"Мазаламау\" режимі"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Жаңа: \"Мазаламау\" режимі хабарландыруларды жасыруда"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Мазаламау режимі"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Жаңа: Мазаламау режимі хабарландыруларды жасыруда"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Толығырақ ақпарат алу және өзгерту үшін түртіңіз."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Мазаламау\" режимі өзгерді"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Мазаламау режимі өзгерді"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Түймені түртіп, неге тыйым салынатынын көріңіз."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Жүйе"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Параметрлер"</string>
