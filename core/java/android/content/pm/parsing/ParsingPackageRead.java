@@ -905,7 +905,7 @@ public interface ParsingPackageRead extends Parcelable {
     int getNativeHeapZeroInitialized();
 
     @Nullable
-    Boolean hasRequestOptimizedExternalStorageAccess();
+    Boolean hasRequestRawExternalStorageAccess();
 
     // TODO(b/135203078): Hide and enforce going through PackageInfoUtils
     ApplicationInfo toAppInfoWithoutState();

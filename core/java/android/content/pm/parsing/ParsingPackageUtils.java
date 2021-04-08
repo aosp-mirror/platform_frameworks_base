@@ -2019,9 +2019,9 @@ public class ParsingPackageUtils {
                         v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED);
             }
             if (sa.hasValue(
-                    R.styleable.AndroidManifestApplication_requestOptimizedExternalStorageAccess)) {
-                pkg.setRequestOptimizedExternalStorageAccess(sa.getBoolean(R.styleable
-                                .AndroidManifestApplication_requestOptimizedExternalStorageAccess,
+                    R.styleable.AndroidManifestApplication_requestRawExternalStorageAccess)) {
+                pkg.setRequestRawExternalStorageAccess(sa.getBoolean(R.styleable
+                                .AndroidManifestApplication_requestRawExternalStorageAccess,
                         false));
             }
         } finally {
