@@ -685,6 +685,21 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+
+        // Remove notifications with the specified user & channel ID.
+        public void removeChannelNotifications(String pkg, @UserIdInt int userId,
+                String channelId) {
+            for (int i = 0; i < mBuffer.size(); i++) {
+                final Pair<StatusBarNotification, Integer> pair = mBuffer.get(i);
+                if (pair.first != null
+                        && userId == pair.first.getNormalizedUserId()
+                        && pkg != null && pkg.equals(pair.first.getPackageName())
+                        && pair.first.getNotification() != null
+                        && Objects.equals(channelId, pair.first.getNotification().getChannelId())) {
+                    mBuffer.remove(i);
+                }
+            }
+        }
     }
 
     void loadDefaultApprovedServices(int userId) {
@@ -3625,6 +3640,8 @@ public class NotificationManagerService extends SystemService {
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
                     callingUser, REASON_CHANNEL_REMOVED, null);
             mPreferencesHelper.deleteNotificationChannel(pkg, callingUid, channelId);
+            // Remove from both recent notification archive and notification history
+            mArchive.removeChannelNotifications(pkg, callingUser, channelId);
             mHistoryManager.deleteNotificationChannel(pkg, callingUid, channelId);
             mListeners.notifyNotificationChannelChanged(pkg,
                     UserHandle.getUserHandleForUid(callingUid),
@@ -8181,8 +8198,10 @@ public class NotificationManagerService extends SystemService {
             summaries.remove(r.getSbn().getPackageName());
         }
 
-        // Save it for users of getHistoricalNotifications()
-        mArchive.record(r.getSbn(), reason);
+        // Save it for users of getHistoricalNotifications(), unless the whole channel was deleted
+        if (reason != REASON_CHANNEL_REMOVED) {
+            mArchive.record(r.getSbn(), reason);
+        }
 
         final long now = System.currentTimeMillis();
         final LogMaker logMaker = r.getItemLogMaker()

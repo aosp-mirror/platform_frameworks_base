@@ -35,11 +35,11 @@ import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
-import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.server.utils.Slogf;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -79,16 +79,16 @@ public class CertificateMonitor {
             X509Certificate cert = parseCert(certBuffer);
             pemCert = Credentials.convertToPem(cert);
         } catch (CertificateException | IOException ce) {
-            Slog.e(LOG_TAG, "Problem converting cert", ce);
+            Slogf.e(LOG_TAG, "Problem converting cert", ce);
             return null;
         }
 
         try (KeyChainConnection keyChainConnection = mInjector.keyChainBindAsUser(userHandle)) {
             return keyChainConnection.getService().installCaCertificate(pemCert);
         } catch (RemoteException e) {
-            Slog.e(LOG_TAG, "installCaCertsToKeyChain(): ", e);
+            Slogf.e(LOG_TAG, "installCaCertsToKeyChain(): ", e);
         } catch (InterruptedException e1) {
-            Slog.w(LOG_TAG, "installCaCertsToKeyChain(): ", e1);
+            Slogf.w(LOG_TAG, "installCaCertsToKeyChain(): ", e1);
             Thread.currentThread().interrupt();
         }
         return null;
@@ -100,9 +100,9 @@ public class CertificateMonitor {
                 keyChainConnection.getService().deleteCaCertificate(aliases[i]);
             }
         } catch (RemoteException e) {
-            Slog.e(LOG_TAG, "from CaCertUninstaller: ", e);
+            Slogf.e(LOG_TAG, "from CaCertUninstaller: ", e);
         } catch (InterruptedException ie) {
-            Slog.w(LOG_TAG, "CaCertUninstaller: ", ie);
+            Slogf.w(LOG_TAG, "CaCertUninstaller: ", ie);
             Thread.currentThread().interrupt();
         }
     }
@@ -147,7 +147,7 @@ public class CertificateMonitor {
         try {
             installedCerts = getInstalledCaCertificates(userHandle);
         } catch (RemoteException | RuntimeException e) {
-            Slog.e(LOG_TAG, e, "Could not retrieve certificates from KeyChain service for user %d",
+            Slogf.e(LOG_TAG, e, "Could not retrieve certificates from KeyChain service for user %d",
                     userId);
             return;
         }
@@ -170,7 +170,7 @@ public class CertificateMonitor {
         try {
             userContext = mInjector.createContextAsUser(userHandle);
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(LOG_TAG, e, "Create context as %s failed", userHandle);
+            Slogf.e(LOG_TAG, e, "Create context as %s failed", userHandle);
             return null;
         }
 

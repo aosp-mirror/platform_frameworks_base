@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.row;
 import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
@@ -79,6 +78,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -86,7 +86,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
-import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
+import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -2045,9 +2045,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         float extraWidthForClipping = params.getWidth() - getWidth();
         setExtraWidthForClipping(extraWidthForClipping);
         int top = params.getTop();
-        float interpolation = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(params.getProgress());
         int startClipTopAmount = params.getStartClipTopAmount();
-        int clipTopAmount = (int) MathUtils.lerp(startClipTopAmount, 0, interpolation);
+        int clipTopAmount = (int) MathUtils.lerp(startClipTopAmount, 0, params.getProgress());
         if (mNotificationParent != null) {
             float parentY = mNotificationParent.getTranslationY();
             top -= parentY;
@@ -2096,7 +2095,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (expandAnimationRunning) {
             contentView.animate()
                     .alpha(0f)
-                    .setDuration(ActivityLaunchAnimator.ANIMATION_DURATION_FADE_CONTENT)
+                    .setDuration(ActivityLaunchAnimator.ANIMATION_DURATION_FADE_OUT_CONTENT)
                     .setInterpolator(Interpolators.ALPHA_OUT);
             setAboveShelf(true);
             mExpandAnimationRunning = true;

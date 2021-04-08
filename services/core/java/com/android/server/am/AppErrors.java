@@ -486,7 +486,7 @@ class AppErrors {
      * @param message
      */
     void scheduleAppCrashLocked(int uid, int initialPid, String packageName, int userId,
-            String message, boolean force) {
+            String message, boolean force, int exceptionTypeId) {
         ProcessRecord proc = null;
 
         // Figure out which process to kill.  We don't trust that initialPid
@@ -518,7 +518,7 @@ class AppErrors {
             return;
         }
 
-        proc.scheduleCrashLocked(message);
+        proc.scheduleCrashLocked(message, exceptionTypeId);
         if (force) {
             // If the app is responsive, the scheduled crash will happen as expected
             // and then the delayed summary kill will be a no-op.

@@ -20,18 +20,6 @@
 #define LOG_TAG "Zygote"
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 
-/* Functions in the callchain during the fork shall not be protected with
-   Armv8.3-A Pointer Authentication, otherwise child will not be able to return. */
-#ifdef __ARM_FEATURE_PAC_DEFAULT
-#ifdef __ARM_FEATURE_BTI_DEFAULT
-#define NO_PAC_FUNC __attribute__((target("branch-protection=bti")))
-#else
-#define NO_PAC_FUNC __attribute__((target("branch-protection=none")))
-#endif /* __ARM_FEATURE_BTI_DEFAULT */
-#else /* !__ARM_FEATURE_PAC_DEFAULT */
-#define NO_PAC_FUNC
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
-
 #include <jni.h>
 #include <vector>
 #include <android-base/stringprintf.h>
@@ -42,7 +30,6 @@
 namespace android {
 namespace zygote {
 
-NO_PAC_FUNC
 pid_t ForkCommon(JNIEnv* env,bool is_system_server,
                  const std::vector<int>& fds_to_close,
                  const std::vector<int>& fds_to_ignore,
@@ -57,7 +44,6 @@ pid_t ForkCommon(JNIEnv* env,bool is_system_server,
  * communication is required. Is_priority_fork should be true if this is on the app startup
  * critical path. Purge specifies that unused pages should be purged before the fork.
  */
-NO_PAC_FUNC
 int forkApp(JNIEnv* env,
             int read_pipe_fd,
             int write_pipe_fd,

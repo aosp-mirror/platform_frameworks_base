@@ -148,7 +148,9 @@ class DistanceClassifier extends FalsingClassifier {
     Result calculateFalsingResult(
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
-        if (interactionType == Classifier.BRIGHTNESS_SLIDER) {
+        if (interactionType == Classifier.BRIGHTNESS_SLIDER
+                || interactionType == Classifier.UDFPS_AUTHENTICATION
+                || interactionType == Classifier.DISABLED_UDFPS_AFFORDANCE) {
             return Result.passed(0);
         }
 

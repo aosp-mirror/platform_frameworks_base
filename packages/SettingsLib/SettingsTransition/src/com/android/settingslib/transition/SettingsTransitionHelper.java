@@ -23,6 +23,8 @@ import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import androidx.core.os.BuildCompat;
+
 import com.google.android.material.transition.platform.MaterialSharedAxis;
 import com.google.android.material.transition.platform.SlideDistanceProvider;
 
@@ -47,8 +49,7 @@ public class SettingsTransitionHelper {
         transition.setDuration(DURATION);
 
         final Interpolator interpolator =
-                AnimationUtils.loadInterpolator(context,
-                        android.R.interpolator.fast_out_extra_slow_in);
+                AnimationUtils.loadInterpolator(context, R.interpolator.fast_out_extra_slow_in);
         transition.setInterpolator(interpolator);
 
         // TODO(b/177480673): Update fade through threshold once (cl/362065364) is released
@@ -64,6 +65,9 @@ public class SettingsTransitionHelper {
      * triggered when the page is launched/entering.
      */
     public static void applyForwardTransition(Activity activity) {
+        if (!BuildCompat.isAtLeastS()) {
+            return;
+        }
         if (activity == null) {
             Log.w(TAG, "applyForwardTransition: Invalid activity!");
             return;
@@ -87,6 +91,9 @@ public class SettingsTransitionHelper {
      * previously-started Activity.
      */
     public static void applyBackwardTransition(Activity activity) {
+        if (!BuildCompat.isAtLeastS()) {
+            return;
+        }
         if (activity == null) {
             Log.w(TAG, "applyBackwardTransition: Invalid activity!");
             return;

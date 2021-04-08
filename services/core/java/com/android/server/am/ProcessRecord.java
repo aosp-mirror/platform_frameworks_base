@@ -26,6 +26,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
+import android.app.RemoteServiceException;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProcessInfo;
 import android.content.pm.VersionedPackage;
@@ -949,6 +950,21 @@ class ProcessRecord implements WindowProcessListener {
 
     @GuardedBy("mService")
     void scheduleCrashLocked(String message) {
+        scheduleCrashLocked(message, RemoteServiceException.TYPE_ID);
+    }
+
+    /**
+     * Let an app process throw an exception on a binder thread, which typically crashes the
+     * process, unless it has an unhandled exception handler.
+     *
+     * See {@link ActivityThread#throwRemoteServiceException}.
+     *
+     * @param message exception message
+     * @param exceptionTypeId ID defined in {@link android.app.RemoteServiceException} or one
+     *                        of its subclasses.
+     */
+    @GuardedBy("mService")
+    void scheduleCrashLocked(String message, int exceptionTypeId) {
         // Checking killedbyAm should keep it from showing the crash dialog if the process
         // was already dead for a good / normal reason.
         if (!mKilledByAm) {
@@ -959,7 +975,7 @@ class ProcessRecord implements WindowProcessListener {
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    mThread.scheduleCrash(message);
+                    mThread.scheduleCrash(message, exceptionTypeId);
                 } catch (RemoteException e) {
                     // If it's already dead our work is done. If it's wedged just kill it.
                     // We won't get the crash dialog or the error reporting.

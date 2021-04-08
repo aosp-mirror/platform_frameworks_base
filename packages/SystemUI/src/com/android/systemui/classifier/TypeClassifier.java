@@ -42,6 +42,11 @@ public class TypeClassifier extends FalsingClassifier {
     Result calculateFalsingResult(
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
+        if (interactionType == Classifier.UDFPS_AUTHENTICATION
+                || interactionType == Classifier.DISABLED_UDFPS_AFFORDANCE) {
+            return Result.passed(0);
+        }
+
         boolean vertical = isVertical();
         boolean up = isUp();
         boolean right = isRight();

@@ -57,7 +57,6 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
-import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -117,7 +116,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private final AccessibilityManager mAccessibilityManager;
     private final KeyguardManager mKeyguardManager;
-    private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final IStatusBarService mBarService;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private boolean mReinflateNotificationsOnUserSwitched;
@@ -133,7 +132,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             NotificationStackScrollLayoutController stackScrollerController,
             DozeScrimController dozeScrimController,
             ScrimController scrimController,
-            ActivityLaunchAnimator activityLaunchAnimator,
+            NotificationShadeWindowController notificationShadeWindowController,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
             KeyguardIndicationController keyguardIndicationController,
@@ -152,7 +151,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
         mAboveShelfObserver = new AboveShelfObserver(stackScrollerController.getView());
-        mActivityLaunchAnimator = activityLaunchAnimator;
+        mNotificationShadeWindowController = notificationShadeWindowController;
         mAboveShelfObserver.setListener(statusBarWindow.findViewById(
                 R.id.notification_container_parent));
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -272,8 +271,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     @Override
     public boolean isCollapsing() {
         return mNotificationPanel.isCollapsing()
-                || mActivityLaunchAnimator.isAnimationPending()
-                || mActivityLaunchAnimator.isAnimationRunning();
+                || mNotificationShadeWindowController.isLaunchingActivity();
     }
 
     private void maybeEndAmbientPulse() {

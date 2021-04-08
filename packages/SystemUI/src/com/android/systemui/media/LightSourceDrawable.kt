@@ -184,8 +184,13 @@ class LightSourceDrawable : Drawable() {
         throw UnsupportedOperationException("Color filters are not supported")
     }
 
-    override fun setAlpha(value: Int) {
-        throw UnsupportedOperationException("Alpha is not supported")
+    override fun setAlpha(alpha: Int) {
+        if (alpha == paint.alpha) {
+            return
+        }
+
+        paint.alpha = alpha
+        invalidateSelf()
     }
 
     /**

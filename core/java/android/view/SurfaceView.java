@@ -33,7 +33,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RenderNode;
@@ -670,10 +669,16 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             if (mClipSurfaceToBounds && mClipBounds != null) {
                 mTmpRect.intersect(mClipBounds);
             }
-            canvas.drawRoundRect(mTmpRect.left, mTmpRect.top, mTmpRect.right, mTmpRect.bottom,
-                    mCornerRadius, mCornerRadius, mRoundedViewportPaint);
+            canvas.punchHole(
+                    mTmpRect.left,
+                    mTmpRect.top,
+                    mTmpRect.right,
+                    mTmpRect.bottom,
+                    mCornerRadius,
+                    mCornerRadius
+            );
         } else {
-            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+            canvas.punchHole(0f, 0f, getWidth(), getHeight(), 0f, 0f);
         }
     }
 

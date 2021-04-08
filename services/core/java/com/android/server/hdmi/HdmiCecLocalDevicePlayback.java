@@ -136,12 +136,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         if (!mService.isControlEnabled()) {
             return;
         }
-        if (isActiveSource()) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
-                    mAddress, mService.getPhysicalAddress()));
-        }
         boolean wasActiveSource = isActiveSource();
-        // Invalidate the internal active source record when goes to standby
+        // Invalidate the internal active source record when going to standby
         mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS,
                 "HdmiCecLocalDevicePlayback#onStandby()");
         boolean mTvSendStandbyOnSleep = mService.getHdmiCecConfig().getIntValue(
@@ -167,6 +163,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                                         Constants.ADDR_BROADCAST));
                         break;
                     case HdmiControlManager.POWER_CONTROL_MODE_NONE:
+                        mService.sendCecCommand(
+                                HdmiCecMessageBuilder.buildInactiveSource(mAddress,
+                                        mService.getPhysicalAddress()));
                         break;
                 }
                 break;
@@ -256,18 +255,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         wakeUpIfActiveSource();
         return super.handleUserControlPressed(message);
-    }
-
-    @Override
-    protected void wakeUpIfActiveSource() {
-        if (!isActiveSource()) {
-            return;
-        }
-        // Wake up the device if the power is in standby mode, or its screen is off -
-        // which can happen if the device is holding a partial lock.
-        if (mService.isPowerStandbyOrTransient() || !mService.getPowerManager().isScreenOn()) {
-            mService.wakeUp();
-        }
     }
 
     @ServiceThreadOnly

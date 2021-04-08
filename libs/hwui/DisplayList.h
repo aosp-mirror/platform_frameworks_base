@@ -72,6 +72,10 @@ public:
         return mImpl && !(mImpl->isEmpty());
     }
 
+    [[nodiscard]] bool hasHolePunches() const {
+        return mImpl && mImpl->hasHolePunches();
+    }
+
     [[nodiscard]] bool containsProjectionReceiver() const {
         return mImpl && mImpl->containsProjectionReceiver();
     }

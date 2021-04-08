@@ -697,9 +697,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
         HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);
+        HdmiCecMessage inactiveSource = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageToTv);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageBroadcast);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSource);
     }
 
     @Test
@@ -719,9 +722,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
         HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);
+        HdmiCecMessage inactiveSource = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageToTv);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageBroadcast);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSource);
     }
 
     @Test
@@ -741,9 +747,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
         HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);
+        HdmiCecMessage inactiveSource = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageToTv);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageBroadcast);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSource);
     }
 
     @Test
@@ -763,9 +772,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
         HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);
+        HdmiCecMessage inactiveSource = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(standbyMessageToTv);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageBroadcast);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSource);
     }
 
     @Test
@@ -785,9 +797,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
         HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);
+        HdmiCecMessage inactiveSource = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageToTv);
         assertThat(mNativeWrapper.getResultMessages()).contains(standbyMessageBroadcast);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(inactiveSource);
     }
 
     @Test
@@ -807,9 +822,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
         HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);
+        HdmiCecMessage inactiveSource = HdmiCecMessageBuilder.buildInactiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageToTv);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessageBroadcast);
+        assertThat(mNativeWrapper.getResultMessages()).contains(inactiveSource);
     }
 
     @Test

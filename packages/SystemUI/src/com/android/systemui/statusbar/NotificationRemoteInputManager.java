@@ -576,6 +576,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             mKeysKeptForRemoteInputHistory.remove(key);
         }
         if (mRemoteInputController.isRemoteInputActive(entry)) {
+            entry.mRemoteEditImeVisible = false;
             mRemoteInputController.removeRemoteInput(entry, null);
         }
     }

@@ -12535,6 +12535,7 @@ package android.content.pm {
     method public abstract int getInstantAppCookieMaxBytes();
     method @NonNull public abstract android.content.pm.InstrumentationInfo getInstrumentationInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable public abstract android.content.Intent getLaunchIntentForPackage(@NonNull String);
+    method @NonNull public android.content.IntentSender getLaunchIntentSenderForPackage(@NonNull String);
     method @Nullable public abstract android.content.Intent getLeanbackLaunchIntentForPackage(@NonNull String);
     method @NonNull public java.util.Set<java.lang.String> getMimeGroup(@NonNull String);
     method @NonNull public android.content.pm.ModuleInfo getModuleInfo(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -18826,10 +18827,10 @@ package android.hardware.display {
   public final class DeviceProductInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getConnectionToSinkType();
-    method public int getManufactureWeek();
-    method public int getManufactureYear();
+    method @IntRange(from=0xffffffff, to=53) public int getManufactureWeek();
+    method @IntRange(from=0xffffffff) public int getManufactureYear();
     method @NonNull public String getManufacturerPnpId();
-    method public int getModelYear();
+    method @IntRange(from=0xffffffff) public int getModelYear();
     method @Nullable public String getName();
     method @NonNull public String getProductId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -35477,8 +35478,8 @@ package android.provider {
 
   public static final class SimPhonebookContract.SimRecords {
     method @NonNull public static android.net.Uri getContentUri(int, int);
-    method @WorkerThread public static int getEncodedNameLength(@NonNull android.content.ContentResolver, @NonNull String);
-    method @NonNull public static android.net.Uri getItemUri(int, int, int);
+    method @IntRange(from=0) @WorkerThread public static int getEncodedNameLength(@NonNull android.content.ContentResolver, @NonNull String);
+    method @NonNull public static android.net.Uri getItemUri(int, int, @IntRange(from=1) int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-contact_v2";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-contact_v2";
     field public static final String ELEMENTARY_FILE_TYPE = "elementary_file_type";
@@ -41920,42 +41921,42 @@ package android.telephony {
   @Deprecated public class PhoneStateListener {
     ctor @Deprecated public PhoneStateListener();
     ctor @Deprecated public PhoneStateListener(@NonNull java.util.concurrent.Executor);
-    method @Deprecated public void onActiveDataSubscriptionIdChanged(int);
-    method @Deprecated public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onActiveDataSubscriptionIdChanged(int);
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onCallDisconnectCauseChanged(int, int);
-    method @Deprecated public void onCallForwardingIndicatorChanged(boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onCallForwardingIndicatorChanged(boolean);
     method @Deprecated @RequiresPermission(value=android.Manifest.permission.READ_PHONE_STATE, conditional=true) public void onCallStateChanged(int, String);
-    method @Deprecated public void onCellInfoChanged(java.util.List<android.telephony.CellInfo>);
-    method @Deprecated public void onCellLocationChanged(android.telephony.CellLocation);
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onCellInfoChanged(java.util.List<android.telephony.CellInfo>);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void onCellLocationChanged(android.telephony.CellLocation);
     method @Deprecated public void onDataActivity(int);
     method @Deprecated public void onDataConnectionStateChanged(int);
     method @Deprecated public void onDataConnectionStateChanged(int, int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onDisplayInfoChanged(@NonNull android.telephony.TelephonyDisplayInfo);
-    method @Deprecated public void onEmergencyNumberListChanged(@NonNull java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>>);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onEmergencyNumberListChanged(@NonNull java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
-    method @Deprecated public void onMessageWaitingIndicatorChanged(boolean);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPreciseDataConnectionStateChanged(@NonNull android.telephony.PreciseDataConnectionState);
-    method @Deprecated public void onRegistrationFailed(@NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onMessageWaitingIndicatorChanged(boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onPreciseDataConnectionStateChanged(@NonNull android.telephony.PreciseDataConnectionState);
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onRegistrationFailed(@NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
     method @Deprecated public void onServiceStateChanged(android.telephony.ServiceState);
     method @Deprecated public void onSignalStrengthChanged(int);
     method @Deprecated public void onSignalStrengthsChanged(android.telephony.SignalStrength);
     method @Deprecated public void onUserMobileDataStateChanged(boolean);
-    field @Deprecated public static final int LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE = 4194304; // 0x400000
-    field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_BARRING_INFO = -2147483648; // 0x80000000
+    field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE = 4194304; // 0x400000
+    field @Deprecated @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int LISTEN_BARRING_INFO = -2147483648; // 0x80000000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
-    field @Deprecated public static final int LISTEN_CALL_FORWARDING_INDICATOR = 8; // 0x8
+    field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int LISTEN_CALL_FORWARDING_INDICATOR = 8; // 0x8
     field @Deprecated public static final int LISTEN_CALL_STATE = 32; // 0x20
-    field @Deprecated public static final int LISTEN_CELL_INFO = 1024; // 0x400
-    field @Deprecated public static final int LISTEN_CELL_LOCATION = 16; // 0x10
+    field @Deprecated @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int LISTEN_CELL_INFO = 1024; // 0x400
+    field @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int LISTEN_CELL_LOCATION = 16; // 0x10
     field @Deprecated public static final int LISTEN_DATA_ACTIVITY = 128; // 0x80
     field @Deprecated public static final int LISTEN_DATA_CONNECTION_STATE = 64; // 0x40
     field @Deprecated public static final int LISTEN_DISPLAY_INFO_CHANGED = 1048576; // 0x100000
-    field @Deprecated public static final int LISTEN_EMERGENCY_NUMBER_LIST = 16777216; // 0x1000000
+    field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int LISTEN_EMERGENCY_NUMBER_LIST = 16777216; // 0x1000000
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES = 134217728; // 0x8000000
-    field @Deprecated public static final int LISTEN_MESSAGE_WAITING_INDICATOR = 4; // 0x4
+    field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int LISTEN_MESSAGE_WAITING_INDICATOR = 4; // 0x4
     field @Deprecated public static final int LISTEN_NONE = 0; // 0x0
     field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
-    field @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int LISTEN_REGISTRATION_FAILURE = 1073741824; // 0x40000000
+    field @Deprecated @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int LISTEN_REGISTRATION_FAILURE = 1073741824; // 0x40000000
     field @Deprecated public static final int LISTEN_SERVICE_STATE = 1; // 0x1
     field @Deprecated public static final int LISTEN_SIGNAL_STRENGTH = 2; // 0x2
     field @Deprecated public static final int LISTEN_SIGNAL_STRENGTHS = 256; // 0x100
@@ -42454,10 +42455,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onActiveDataSubscriptionIdChanged(int);
   }
 
-  public static interface TelephonyCallback.AlwaysReportedSignalStrengthListener {
-    method @RequiresPermission("android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH") public void onSignalStrengthsChanged(@NonNull android.telephony.SignalStrength);
-  }
-
   public static interface TelephonyCallback.BarringInfoListener {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onBarringInfoChanged(@NonNull android.telephony.BarringInfo);
   }
@@ -42479,7 +42476,7 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.CellInfoListener {
-    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void onCellInfoChanged(@NonNull java.util.List<android.telephony.CellInfo>);
+    method @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void onCellInfoChanged(@NonNull java.util.List<android.telephony.CellInfo>);
   }
 
   public static interface TelephonyCallback.CellLocationListener {
@@ -42487,15 +42484,15 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.DataActivationStateListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataActivationStateChanged(int);
+    method public void onDataActivationStateChanged(int);
   }
 
   public static interface TelephonyCallback.DataActivityListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataActivity(int);
+    method public void onDataActivity(int);
   }
 
   public static interface TelephonyCallback.DataConnectionStateListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onDataConnectionStateChanged(int, int);
+    method public void onDataConnectionStateChanged(int, int);
   }
 
   public static interface TelephonyCallback.DisplayInfoListener {
@@ -42527,15 +42524,15 @@ package android.telephony {
   }
 
   public static interface TelephonyCallback.ServiceStateListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onServiceStateChanged(@NonNull android.telephony.ServiceState);
+    method public void onServiceStateChanged(@NonNull android.telephony.ServiceState);
   }
 
   public static interface TelephonyCallback.SignalStrengthsListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onSignalStrengthsChanged(@NonNull android.telephony.SignalStrength);
+    method public void onSignalStrengthsChanged(@NonNull android.telephony.SignalStrength);
   }
 
   public static interface TelephonyCallback.UserMobileDataStateListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onUserMobileDataStateChanged(boolean);
+    method public void onUserMobileDataStateChanged(boolean);
   }
 
   public final class TelephonyDisplayInfo implements android.os.Parcelable {
@@ -50824,6 +50821,7 @@ package android.view.accessibility {
     field @NonNull public static final android.os.Parcelable.Creator<android.view.accessibility.AccessibilityNodeInfo> CREATOR;
     field public static final String EXTRA_DATA_RENDERING_INFO_KEY = "android.view.accessibility.extra.DATA_RENDERING_INFO_KEY";
     field public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH = "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";
+    field public static final int EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH = 20000; // 0x4e20
     field public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX = "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX";
     field public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY = "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_KEY";
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
@@ -56740,18 +56738,19 @@ package android.widget.inline {
 package android.window {
 
   public interface SplashScreen {
-    method public void setOnExitAnimationListener(@Nullable android.window.SplashScreen.OnExitAnimationListener);
+    method public void clearOnExitAnimationListener();
+    method public void setOnExitAnimationListener(@NonNull android.window.SplashScreen.OnExitAnimationListener);
   }
 
   public static interface SplashScreen.OnExitAnimationListener {
-    method public void onSplashScreenExit(@NonNull android.window.SplashScreenView);
+    method @UiThread public void onSplashScreenExit(@NonNull android.window.SplashScreenView);
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {
-    method public long getIconAnimationDurationMillis();
-    method public long getIconAnimationStartMillis();
+    method @Nullable public java.time.Duration getIconAnimationDuration();
+    method @Nullable public java.time.Instant getIconAnimationStart();
     method @Nullable public android.view.View getIconView();
-    method public void remove();
+    method @UiThread public void remove();
   }
 
 }
