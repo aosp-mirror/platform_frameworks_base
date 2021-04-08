@@ -55,8 +55,8 @@ public:
     }
     binder::Status setIncFsMountOptions(
             const ::android::os::incremental::IncrementalFileSystemControlParcel& control,
-            bool enableReadLogs) const final {
-        return mInterface->setIncFsMountOptions(control, enableReadLogs);
+            bool enableReadLogs, bool enableReadTimeouts) const final {
+        return mInterface->setIncFsMountOptions(control, enableReadLogs, enableReadTimeouts);
     }
 
 private:
@@ -233,8 +233,9 @@ public:
     ErrorCode reserveSpace(const Control& control, FileId id, IncFsSize size) const final {
         return incfs::reserveSpace(control, id, size);
     }
-    WaitResult waitForPendingReads(const Control& control, std::chrono::milliseconds timeout,
-                                   std::vector<incfs::ReadInfo>* pendingReadsBuffer) const final {
+    WaitResult waitForPendingReads(
+            const Control& control, std::chrono::milliseconds timeout,
+            std::vector<incfs::ReadInfoWithUid>* pendingReadsBuffer) const final {
         return incfs::waitForPendingReads(control, timeout, pendingReadsBuffer);
     }
     ErrorCode setUidReadTimeouts(const Control& control,

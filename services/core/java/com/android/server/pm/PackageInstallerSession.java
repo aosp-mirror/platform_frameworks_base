@@ -4152,7 +4152,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (stageDir != null && !params.isStaged) {
             try {
                 if (incrementalFileStorages != null) {
-                    incrementalFileStorages.cleanUp();
+                    incrementalFileStorages.cleanUpAndMarkComplete();
                 }
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {
@@ -4178,7 +4178,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         try {
             if (incrementalFileStorages != null) {
-                incrementalFileStorages.cleanUp();
+                incrementalFileStorages.cleanUpAndMarkComplete();
             }
             mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
         } catch (InstallerException ignored) {
