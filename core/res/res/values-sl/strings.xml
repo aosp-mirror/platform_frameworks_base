@@ -544,9 +544,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Aplikaciji omogoča odkrivanje naprav Bluetooth v bližini in seznanjanje z njimi."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"povezovanje s seznanjenimi napravami Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Aplikaciji omogoča povezovanje s seznanjenimi napravami Bluetooth."</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Podatki o prednostni storitvi za plačevanje prek povezave NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikaciji omogoča pridobivanje podatkov o prednostni storitvi za plačevanje prek povezave NFC, kot so registrirani pripomočki in cilj preusmeritve."</string>
@@ -582,8 +582,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nastavljena ni nobena koda PIN, vzorec ali geslo"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Napaka pri preverjanju pristnosti"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Uporaba odklepanja s poverilnico"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Odklenite zaslon, če želite nadaljevati."</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Zaznan je delni prstni odtis."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Prstnega odtisa ni bilo mogoče obdelati. Poskusite znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Očistite tipalo."</string>
@@ -663,8 +662,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Obraz <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Uporaba odklepanja z obrazom"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Uporaba odklepanja z obrazom ali s poverilnico"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Uporabite obraz, če želite nadaljevati."</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Za nadaljevanje uporabite obraz ali odklepanje s poverilnico."</string>
   <string-array name="face_error_vendor">
   </string-array>

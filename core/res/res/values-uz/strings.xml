@@ -538,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Ilovaga yaqin-atrofdagi Bluetooth qurilmalarini topish va juftlashish uchun ruxsat beradi"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"juftlangan Bluetooth qurilmalariga ulanish"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Ilovaga juftlangan Bluetooth qurilmalariga ulanish uchun ruxsat beradi"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Asosiy NFC toʻlov xizmati haqidagi axborot"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Bu ilovaga asosiy NFC toʻlov xizmati haqidagi axborotni olish imkonini beradi (masalan, qayd qilingan AID identifikatorlari va marshrutning yakuniy manzili)."</string>
@@ -576,8 +576,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN kod, grafik kalit yoki parol sozlanmagan"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Autentifikatsiya amalga oshmadi"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekran qulfi"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Ekran qulfini kiritish bilan davom eting"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Barmoq izi qismi aniqlandi"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Barmoq izi aniqlanmadi. Qaytadan urining."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Sensorni tozalang"</string>
@@ -657,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Yuz <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Yuz bilan ochish"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Yuz bilan ochish yoki ekran qulfi"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Yuz tekshiruvi bilan davom eting"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Davom etish uchun yuz tekshiruvi yoki ekran qulfidan foydalaning"</string>
   <string-array name="face_error_vendor">
   </string-array>

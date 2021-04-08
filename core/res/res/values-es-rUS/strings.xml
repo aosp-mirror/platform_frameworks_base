@@ -538,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que la app descubra dispositivos Bluetooth cercanos y se conecte a ellos"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conectarse a dispositivos Bluetooth vinculados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que la app se conecte a dispositivos Bluetooth vinculados"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información sobre servicio de pago NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que la app reciba información del servicio de pago NFC preferido, como el servicio de asistencia registrado y el destino de la ruta."</string>
@@ -616,7 +616,7 @@
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Vuelve a registrar tu rostro"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mejorar el reconocimiento, vuelve a registrar tu rostro"</string>
-    <string name="face_setup_notification_title" msgid="550617822603450009">"Configurar Desbloqueo facial"</string>
+    <string name="face_setup_notification_title" msgid="550617822603450009">"Configura Desbloqueo facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloquear el dispositivo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Presiona para agregar una huella dactilar"</string>
@@ -1023,9 +1023,9 @@
     <string name="copied" msgid="4675902854553014676">"Copiado"</string>
     <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pegó contenido de <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g>"</string>
     <string name="pasted_from_clipboard" msgid="6295556725844421812">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pegó contenido del portapapeles"</string>
-    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pegó texto que copiaste"</string>
-    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pegó una imagen que copiaste"</string>
-    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> pegó el contenido que copiaste"</string>
+    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> accedió a texto del portapapeles"</string>
+    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> accedió a una imagen del portapapeles"</string>
+    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> accedió al contenido del portapapeles"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Más"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menú+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -2131,16 +2131,16 @@
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Vista personal"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Vista de trabajo"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Tu administrador de IT impide compartir este contenido"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"No se puede compartir este contenido con apps de trabajo"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"No se pueden usar apps de trabajo para compartir este contenido"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"No se puede abrir este contenido con apps de trabajo"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No se puede compartir este contenido con apps personales"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No se pueden usar apps personales para compartir este contenido"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"No se puede abrir este contenido con apps personales"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"El perfil de trabajo está en pausa"</string>
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Presionar para activar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"El contenido no es compatible con apps de trabajo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"El contenido no es compatible con apps personales"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"¿Quieres abrir <xliff:g id="APP">%s</xliff:g> con tu perfil personal?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"¿Quieres abrir <xliff:g id="APP">%s</xliff:g> con tu perfil de trabajo?"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"¿Quieres abrir el contenido en <xliff:g id="APP">%s</xliff:g> con tu perfil personal?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"¿Quieres abrir el contenido en <xliff:g id="APP">%s</xliff:g> con tu perfil de trabajo?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar un navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar un navegador de trabajo"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo del dispositivo para la red de tarjeta SIM"</string>

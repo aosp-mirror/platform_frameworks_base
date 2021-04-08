@@ -538,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Επιτρέπει στην εφαρμογή την ανακάλυψη και τη σύζευξη κοντινών συσκευών Bluetooth"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"σύνδεση σε συζευγμένες συσκευές Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Επιτρέπει στην εφαρμογή τη σύνδεση σε συζευγμένες συσκευές Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Πληροφορίες προτιμώμενης υπηρεσίας πληρωμών NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Επιτρέπει στην εφαρμογή να λαμβάνει πληροφορίες προτιμώμενης υπηρεσίας πληρωμής NFC, όπως καταχωρημένα βοηθήματα και προορισμό διαδρομής."</string>
@@ -576,8 +576,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Δεν έχει οριστεί PIN, μοτίβο ή κωδικός πρόσβασης"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Σφάλμα κατά τον έλεγχο ταυτότητας"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Χρήση κλειδώματος οθόνης"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Χρησιμοποιήστε το κλείδωμα οθόνης για να συνεχίσετε"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Εντοπίστηκε μέρους του δακτυλικού αποτυπώματος"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Δεν ήταν δυνατή η επεξεργασία του δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Καθαρίστε τον αισθητήρα"</string>
@@ -657,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Πρόσωπο <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Χρήση Face Unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Χρήση προσώπου ή κλειδώματος οθόνης"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Χρησιμοποιήστε το πρόσωπό σας για να συνεχίσετε"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Χρησιμοποιήστε το πρόσωπό σας ή το κλείδωμα οθόνης για συνέχεια"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -733,7 +731,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Παρακολουθήστε τον αριθμό των εσφαλμένων κωδικών πρόσβασης που πληκτρολογούνται κατά το ξεκλείδωμα της οθόνης και κλειδώστε τη συσκευή Android TV ή διαγράψτε όλα τα δεδομένα χρήστη σε περίπτωση εισαγωγής εσφαλμένων κωδικών πρόσβασης πάρα πολλές φορές."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Παρακολουθήστε τον αριθμό των εσφαλμένων κωδικών πρόσβασης που πληκτρολογούνται κατά το ξεκλείδωμα της οθόνης και κλειδώστε το τηλέφωνο ή διαγράψτε όλα τα δεδομένα του χρήστη, σε περίπτωση εισαγωγής πάρα πολλών εσφαλμένων κωδικών πρόσβασης."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Αλλαγή του κλειδώματος οθόνης"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Αλλαγή του κλειδώματος οθόνης"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Αλλαγή του κλειδώματος οθόνης."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Κλείδωμα οθόνης"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Έλεγχος του τρόπου και του χρόνου κλειδώματος της οθόνης."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Διαγραφή όλων των δεδομένων"</string>
