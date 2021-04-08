@@ -11665,7 +11665,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         new IncrementalHealthListener(parsedPackage.getPackageName()));
                 final IncrementalStatesCallback incrementalStatesCallback =
                         new IncrementalStatesCallback(parsedPackage.getPackageName(),
-                                UserHandle.getUid(UserHandle.ALL, pkgSetting.appId),
+                                UserHandle.getUid(UserHandle.USER_ALL, pkgSetting.appId),
                                 getInstalledUsers(pkgSetting, UserHandle.USER_ALL));
                 pkgSetting.setIncrementalStatesCallback(incrementalStatesCallback);
                 mIncrementalManager.registerLoadingProgressCallback(parsedPackage.getPath(),
