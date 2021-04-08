@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
 import java.util.Locale;
@@ -70,6 +71,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final KeyguardSliceViewController mKeyguardSliceViewController;
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final BatteryController mBatteryController;
 
     /**
      * Clock for both small and large sizes
@@ -118,7 +120,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             BroadcastDispatcher broadcastDispatcher,
             PluginManager pluginManager,
             FeatureFlags featureFlags,
-            @Main Executor uiExecutor) {
+            @Main Executor uiExecutor,
+            BatteryController batteryController) {
         super(keyguardClockSwitch);
         mResources = resources;
         mStatusBarStateController = statusBarStateController;
@@ -130,6 +133,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mPluginManager = pluginManager;
         mIsSmartspaceEnabled = featureFlags.isSmartspaceEnabled();
         mUiExecutor = uiExecutor;
+        mBatteryController = batteryController;
     }
 
     /**
@@ -156,14 +160,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             new AnimatableClockController(
                 mView.findViewById(R.id.animatable_clock_view),
                 mStatusBarStateController,
-                mBroadcastDispatcher);
+                mBroadcastDispatcher,
+                mBatteryController);
         mClockViewController.init();
 
         mLargeClockViewController =
             new AnimatableClockController(
                 mView.findViewById(R.id.animatable_clock_view_large),
                 mStatusBarStateController,
-                mBroadcastDispatcher);
+                mBroadcastDispatcher,
+                mBatteryController);
         mLargeClockViewController.init();
 
         // If a smartspace plugin is detected, replace the existing smartspace
