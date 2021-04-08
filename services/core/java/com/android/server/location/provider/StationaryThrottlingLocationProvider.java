@@ -206,7 +206,7 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
                 if (D) {
                     Log.d(TAG, mName + " provider stationary throttled");
                 }
-                EVENT_LOG.logProviderStationaryThrottled(mName, true);
+                EVENT_LOG.logProviderStationaryThrottled(mName, true, mOutgoingRequest);
             }
 
             if (mDeliverLastLocationCallback != null) {
@@ -224,7 +224,7 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
             }
         } else {
             if (oldThrottlingIntervalMs != INTERVAL_DISABLED) {
-                EVENT_LOG.logProviderStationaryThrottled(mName, false);
+                EVENT_LOG.logProviderStationaryThrottled(mName, false, mOutgoingRequest);
                 if (D) {
                     Log.d(TAG, mName + " provider stationary unthrottled");
                 }
