@@ -4437,8 +4437,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean okToAnimate() {
-        return mDefaultDisplayPolicy.isAwake() && !mDeviceGoingToSleep;
+    public boolean okToAnimate(boolean ignoreScreenOn) {
+        return (ignoreScreenOn || mDefaultDisplayPolicy.isAwake()) && !mDeviceGoingToSleep;
     }
 
     /** {@inheritDoc} */
