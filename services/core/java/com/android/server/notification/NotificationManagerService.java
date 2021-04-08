@@ -1317,26 +1317,16 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
 
-                    int flags = data.getFlags();
                     boolean flagChanged = false;
                     if (data.isNotificationSuppressed() != isNotifSuppressed) {
                         flagChanged = true;
-                        if (isNotifSuppressed) {
-                            flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
-                        } else {
-                            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
-                        }
+                        data.setSuppressNotification(isNotifSuppressed);
                     }
                     if (data.isBubbleSuppressed() != isBubbleSuppressed) {
                         flagChanged = true;
-                        if (isBubbleSuppressed) {
-                            flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
-                        } else {
-                            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
-                        }
+                        data.setSuppressBubble(isBubbleSuppressed);
                     }
                     if (flagChanged) {
-                        data.setFlags(flags);
                         r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
                         mHandler.post(
                                 new EnqueueNotificationRunnable(r.getUser().getIdentifier(), r,

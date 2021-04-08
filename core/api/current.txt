@@ -5882,8 +5882,8 @@ package android.app {
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setDesiredHeightResId(@DimenRes int);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setIcon(@NonNull android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setIntent(@NonNull android.app.PendingIntent);
-    method @NonNull public android.app.Notification.BubbleMetadata.Builder setSuppressBubble(boolean);
     method @NonNull public android.app.Notification.BubbleMetadata.Builder setSuppressNotification(boolean);
+    method @NonNull public android.app.Notification.BubbleMetadata.Builder setSuppressableBubble(boolean);
   }
 
   public static class Notification.Builder {
