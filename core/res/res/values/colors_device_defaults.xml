@@ -34,7 +34,7 @@
     <color name="quaternary_device_default_settings">@color/quaternary_material_settings</color>
 
     <color name="accent_device_default_light">@color/system_accent1_600</color>
-    <color name="accent_device_default_dark">@color/system_accent1_200</color>
+    <color name="accent_device_default_dark">@color/system_accent1_100</color>
     <color name="accent_device_default">@color/accent_device_default_light</color>
     <color name="accent_primary_device_default">@color/system_accent1_100</color>
     <color name="accent_secondary_device_default">@color/system_accent2_100</color>
