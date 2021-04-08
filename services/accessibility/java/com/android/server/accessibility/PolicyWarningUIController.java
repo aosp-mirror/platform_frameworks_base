@@ -158,24 +158,29 @@ public class PolicyWarningUIController {
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.HOUR, SEND_NOTIFICATION_DELAY_HOURS);
         mAlarmManager.set(RTC_WAKEUP, cal.getTimeInMillis(),
-                createPendingIntent(mContext, userId, ACTION_SEND_NOTIFICATION,
-                        service.flattenToShortString()));
+                createPendingIntent(mContext, userId, ACTION_SEND_NOTIFICATION, service));
     }
 
     private void cancelAlarm(int userId, ComponentName service) {
         mAlarmManager.cancel(
-                createPendingIntent(mContext, userId, ACTION_SEND_NOTIFICATION,
-                        service.flattenToShortString()));
+                createPendingIntent(mContext, userId, ACTION_SEND_NOTIFICATION, service));
     }
 
     protected static PendingIntent createPendingIntent(Context context, int userId, String action,
-            String serviceComponentName) {
+            ComponentName serviceComponentName) {
+        return PendingIntent.getBroadcast(context, 0,
+                createIntent(context, userId, action, serviceComponentName),
+                PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    protected static Intent createIntent(Context context, int userId, String action,
+            ComponentName serviceComponentName) {
         final Intent intent = new Intent(action);
         intent.setPackage(context.getPackageName())
-                .setIdentifier(serviceComponentName)
+                .setIdentifier(serviceComponentName.flattenToShortString())
+                .putExtra(Intent.EXTRA_COMPONENT_NAME, serviceComponentName)
                 .putExtra(Intent.EXTRA_USER_ID, userId);
-        return PendingIntent.getBroadcast(context, 0, intent,
-                PendingIntent.FLAG_IMMUTABLE);
+        return intent;
     }
 
     /** A sub class to handle notifications and settings on the main thread. */
@@ -204,10 +209,9 @@ public class PolicyWarningUIController {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            final String service = intent.getIdentifier();
-            final ComponentName componentName = ComponentName.unflattenFromString(service);
-            if (TextUtils.isEmpty(action) || TextUtils.isEmpty(service)
-                    || componentName == null) {
+            final ComponentName componentName = intent.getParcelableExtra(
+                    Intent.EXTRA_COMPONENT_NAME);
+            if (TextUtils.isEmpty(action) || componentName == null) {
                 return;
             }
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_SYSTEM);
@@ -215,7 +219,8 @@ public class PolicyWarningUIController {
                 trySendNotification(userId, componentName);
             } else if (ACTION_A11Y_SETTINGS.equals(action)) {
                 launchSettings(userId, componentName);
-                mNotificationManager.cancel(service, NOTE_A11Y_VIEW_AND_CONTROL_ACCESS);
+                mNotificationManager.cancel(componentName.flattenToShortString(),
+                        NOTE_A11Y_VIEW_AND_CONTROL_ACCESS);
                 onNotificationCanceled(userId, componentName);
             } else if (ACTION_DISMISS_NOTIFICATION.equals(action)) {
                 onNotificationCanceled(userId, componentName);
@@ -257,8 +262,7 @@ public class PolicyWarningUIController {
                                 mContext.getPackageManager());
                         final int size = mContext.getResources().getDimensionPixelSize(
                                 android.R.dimen.app_icon_size);
-                        sendNotification(userId, componentName.flattenToShortString(),
-                                displayName,
+                        sendNotification(userId, componentName, displayName,
                                 ImageUtils.buildScaledBitmap(drawable, size, size));
                     }
                     break;
@@ -289,7 +293,8 @@ public class PolicyWarningUIController {
             }
         }
 
-        private void sendNotification(int userId, String serviceComponentName, CharSequence name,
+        private void sendNotification(int userId, ComponentName serviceComponentName,
+                CharSequence name,
                 Bitmap bitmap) {
             final Notification.Builder notificationBuilder = new Notification.Builder(mContext,
                     SystemNotificationChannels.ACCESSIBILITY_SECURITY_POLICY);
@@ -315,7 +320,8 @@ public class PolicyWarningUIController {
             if (bitmap != null) {
                 notificationBuilder.setLargeIcon(bitmap);
             }
-            mNotificationManager.notify(serviceComponentName, NOTE_A11Y_VIEW_AND_CONTROL_ACCESS,
+            mNotificationManager.notify(serviceComponentName.flattenToShortString(),
+                    NOTE_A11Y_VIEW_AND_CONTROL_ACCESS,
                     notificationBuilder.build());
         }
 
