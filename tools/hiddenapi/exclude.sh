@@ -48,7 +48,7 @@ SHA=$1
 PACKAGES=$(for t in $TEAMS; do echo $(eval echo \${${t}_PACKAGES}); done)
 RE=$(echo ${PACKAGES} | sed "s/ /|/g")
 EXIT_CODE=0
-for file in $(git show --name-only --pretty=format: $SHA | grep "config/hiddenapi-.*txt"); do
+for file in $(git show --name-only --pretty=format: $SHA | grep "boot/hiddenapi/hiddenapi-.*txt"); do
     ENTRIES=$(grep -E "^\+L(${RE})/" <(git diff ${SHA}~1 ${SHA} $file) | sed "s|^\+||" || echo)
     if [[ -n "${ENTRIES}" ]]; then
       echo -e "\e[1m\e[31m$file $SHA contains the following entries\e[0m"
