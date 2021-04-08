@@ -319,6 +319,7 @@ public class PeopleSpaceUtils {
         CharSequence content = (isMissedCall && !hasMessageText)
                 ? context.getString(R.string.missed_call) : message.getText();
         Uri dataUri = message != null ? message.getDataUri() : null;
+        if (DEBUG) Log.d(TAG, "Notification message has text: " + hasMessageText);
 
         return tile
                 .toBuilder()
