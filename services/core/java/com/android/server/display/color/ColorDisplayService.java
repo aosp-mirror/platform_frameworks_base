@@ -630,8 +630,12 @@ public final class ColorDisplayService extends SystemService {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return;
         }
-        final int strength = Secure.getIntForUser(getContext().getContentResolver(),
-                Secure.REDUCE_BRIGHT_COLORS_LEVEL, 0, mCurrentUser);
+        int strength = Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.REDUCE_BRIGHT_COLORS_LEVEL, NOT_SET, mCurrentUser);
+        if (strength == NOT_SET) {
+            strength = getContext().getResources().getInteger(
+                    R.integer.config_reduceBrightColorsStrengthDefault);
+        }
         mReduceBrightColorsTintController.setMatrix(strength);
         if (mReduceBrightColorsListener != null) {
             mReduceBrightColorsListener.onReduceBrightColorsStrengthChanged(strength);

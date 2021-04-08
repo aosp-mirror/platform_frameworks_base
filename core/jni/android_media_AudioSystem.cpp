@@ -26,6 +26,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
+#include <android/media/AudioVibratorInfo.h>
 #include <audiomanager/AudioManager.h>
 #include <media/AudioPolicy.h>
 #include <media/AudioSystem.h>
@@ -176,10 +177,15 @@ static struct {
     jmethodID postRoutingUpdatedFromNative;
 } gAudioPolicyEventHandlerMethods;
 
-static struct { jmethodID add; } gListMethods;
+jclass gListClass;
+static struct {
+    jmethodID add;
+    jmethodID get;
+    jmethodID size;
+} gListMethods;
 
 static jclass gAudioDescriptorClass;
-static jmethodID gAudiODescriptorCstor;
+static jmethodID gAudioDescriptorCstor;
 
 //
 // JNI Initialization for OpenSLES routing
@@ -194,6 +200,13 @@ jclass gClsAudioRecordRoutingProxy;
 
 jclass gAudioProfileClass;
 jmethodID gAudioProfileCstor;
+
+jclass gVibratorClass;
+static struct {
+    jmethodID getId;
+    jmethodID getResonantFrequency;
+    jmethodID getQFactor;
+} gVibratorMethods;
 
 static Mutex gLock;
 
@@ -1351,7 +1364,7 @@ static jint convertAudioPortFromNative(JNIEnv *env, jobject *jAudioPort,
                                 reinterpret_cast<const jbyte *>(extraAudioDescriptor.descriptor));
         jAudioDescriptor =
                 ScopedLocalRef<jobject>(env,
-                                        env->NewObject(gAudioDescriptorClass, gAudiODescriptorCstor,
+                                        env->NewObject(gAudioDescriptorClass, gAudioDescriptorCstor,
                                                        standard, encapsulationType,
                                                        jDescriptor.get()));
         env->CallBooleanMethod(jAudioDescriptors, gArrayListMethods.add, jAudioDescriptor.get());
@@ -2627,6 +2640,29 @@ android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
     return jStatus;
 }
 
+static jint android_media_AudioSystem_setVibratorInfos(JNIEnv *env, jobject thiz,
+                                                       jobject jVibrators) {
+    if (!env->IsInstanceOf(jVibrators, gListClass)) {
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    const jint size = env->CallIntMethod(jVibrators, gListMethods.size);
+    std::vector<media::AudioVibratorInfo> vibratorInfos;
+    for (jint i = 0; i < size; ++i) {
+        ScopedLocalRef<jobject> jVibrator(env,
+                                          env->CallObjectMethod(jVibrators, gListMethods.get, i));
+        if (!env->IsInstanceOf(jVibrator.get(), gVibratorClass)) {
+            return (jint)AUDIO_JAVA_BAD_VALUE;
+        }
+        media::AudioVibratorInfo vibratorInfo;
+        vibratorInfo.id = env->CallIntMethod(jVibrator.get(), gVibratorMethods.getId);
+        vibratorInfo.resonantFrequency =
+                env->CallFloatMethod(jVibrator.get(), gVibratorMethods.getResonantFrequency);
+        vibratorInfo.qFactor = env->CallFloatMethod(jVibrator.get(), gVibratorMethods.getQFactor);
+        vibratorInfos.push_back(vibratorInfo);
+    }
+    return (jint)check_AudioSystem_Command(AudioSystem::setVibratorInfos(vibratorInfos));
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] =
@@ -2757,7 +2793,9 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_setUserIdDeviceAffinities},
          {"removeUserIdDeviceAffinities", "(I)I",
           (void *)android_media_AudioSystem_removeUserIdDeviceAffinities},
-         {"setCurrentImeUid", "(I)I", (void *)android_media_AudioSystem_setCurrentImeUid}};
+         {"setCurrentImeUid", "(I)I", (void *)android_media_AudioSystem_setCurrentImeUid},
+         {"setVibratorInfos", "(Ljava/util/List;)I",
+          (void *)android_media_AudioSystem_setVibratorInfos}};
 
 static const JNINativeMethod gEventHandlerMethods[] = {
     {"native_setup",
@@ -2959,7 +2997,10 @@ int register_android_media_AudioSystem(JNIEnv *env)
             android::GetMethodIDOrDie(env, gClsAudioRecordRoutingProxy, "native_release", "()V");
 
     jclass listClass = FindClassOrDie(env, "java/util/List");
+    gListClass = MakeGlobalRefOrDie(env, listClass);
     gListMethods.add = GetMethodIDOrDie(env, listClass, "add", "(Ljava/lang/Object;)Z");
+    gListMethods.get = GetMethodIDOrDie(env, listClass, "get", "(I)Ljava/lang/Object;");
+    gListMethods.size = GetMethodIDOrDie(env, listClass, "size", "()I");
 
     jclass audioProfileClass = FindClassOrDie(env, "android/media/AudioProfile");
     gAudioProfileClass = MakeGlobalRefOrDie(env, audioProfileClass);
@@ -2967,7 +3008,14 @@ int register_android_media_AudioSystem(JNIEnv *env)
 
     jclass audioDescriptorClass = FindClassOrDie(env, "android/media/AudioDescriptor");
     gAudioDescriptorClass = MakeGlobalRefOrDie(env, audioDescriptorClass);
-    gAudiODescriptorCstor = GetMethodIDOrDie(env, audioDescriptorClass, "<init>", "(II[B)V");
+    gAudioDescriptorCstor = GetMethodIDOrDie(env, audioDescriptorClass, "<init>", "(II[B)V");
+
+    jclass vibratorClass = FindClassOrDie(env, "android/os/Vibrator");
+    gVibratorClass = MakeGlobalRefOrDie(env, vibratorClass);
+    gVibratorMethods.getId = GetMethodIDOrDie(env, vibratorClass, "getId", "()I");
+    gVibratorMethods.getResonantFrequency =
+            GetMethodIDOrDie(env, vibratorClass, "getResonantFrequency", "()F");
+    gVibratorMethods.getQFactor = GetMethodIDOrDie(env, vibratorClass, "getQFactor", "()F");
 
     AudioSystem::addErrorCallback(android_media_AudioSystem_error_callback);
 

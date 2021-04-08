@@ -91,10 +91,12 @@ public class CpuPowerCalculator extends PowerCalculator {
 
     private void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
             BatteryUsageStatsQuery query, Result result) {
-        calculatePowerAndDuration(u, BatteryStats.STATS_SINCE_CHARGED,
-                query.shouldForceUsePowerProfileModel(), result);
+        final long consumptionUC = u.getCpuMeasuredBatteryConsumptionUC();
+        final int powerModel = getPowerModel(consumptionUC, query);
+        calculatePowerAndDuration(u, powerModel, consumptionUC, BatteryStats.STATS_SINCE_CHARGED,
+                result);
 
-        app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, result.powerMah)
+        app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, result.powerMah, powerModel)
                 .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU, result.durationMs)
                 .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND,
                         result.durationFgMs)
@@ -114,7 +116,9 @@ public class CpuPowerCalculator extends PowerCalculator {
     }
 
     private void calculateApp(BatterySipper app, BatteryStats.Uid u, int statsType, Result result) {
-        calculatePowerAndDuration(u, statsType, false, result);
+        final long consumptionUC = u.getCpuMeasuredBatteryConsumptionUC();
+        final int powerModel = getPowerModel(consumptionUC);
+        calculatePowerAndDuration(u, powerModel, consumptionUC, statsType, result);
 
         app.cpuPowerMah = result.powerMah;
         app.cpuTimeMs = result.durationMs;
@@ -122,16 +126,20 @@ public class CpuPowerCalculator extends PowerCalculator {
         app.packageWithHighestDrain = result.packageWithHighestDrain;
     }
 
-    private void calculatePowerAndDuration(BatteryStats.Uid u, int statsType,
-            boolean forceUsePowerProfileModel, Result result) {
+    private void calculatePowerAndDuration(BatteryStats.Uid u,
+            @BatteryConsumer.PowerModel int powerModel, long consumptionUC, int statsType,
+            Result result) {
         long durationMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
 
         final double powerMah;
-        final long consumptionUC = u.getCpuMeasuredBatteryConsumptionUC();
-        if (forceUsePowerProfileModel || consumptionUC == BatteryStats.POWER_DATA_UNAVAILABLE) {
-            powerMah = calculateUidModeledPowerMah(u, statsType);
-        } else {
-            powerMah = uCtoMah(consumptionUC);
+        switch(powerModel) {
+            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+                powerMah = uCtoMah(consumptionUC);
+                break;
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+            default:
+                powerMah = calculateUidModeledPowerMah(u, statsType);
+                break;
         }
 
         if (DEBUG && (durationMs != 0 || powerMah != 0)) {

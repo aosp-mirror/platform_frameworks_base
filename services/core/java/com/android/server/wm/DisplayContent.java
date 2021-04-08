@@ -776,6 +776,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (mTmpInitial) {
                 w.resetContentChanged();
             }
+            w.mSurfacePlacementNeeded = true;
             w.mLayoutNeeded = false;
             w.prelayout();
             final boolean firstLayout = !w.isLaidOut();
@@ -818,6 +819,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                     w.resetContentChanged();
                 }
+                w.mSurfacePlacementNeeded = true;
                 w.mLayoutNeeded = false;
                 w.prelayout();
                 getDisplayPolicy().layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
@@ -3750,6 +3752,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     void setImeInputTarget(WindowState target) {
         mImeInputTarget = target;
+        boolean canScreenshot = mImeInputTarget == null || !mImeInputTarget.isSecureLocked();
+        if (mImeWindowsContainer.setCanScreenshot(canScreenshot)) {
+            mWmService.requestTraversal();
+        }
     }
 
     @VisibleForTesting
@@ -3867,7 +3873,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void updateImeInputAndControlTarget(WindowState target) {
         if (mImeInputTarget != target) {
             ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
-            mImeInputTarget = target;
+            setImeInputTarget(target);
             updateImeControlTarget();
         }
     }

@@ -76,6 +76,9 @@ public final class TransitionInfo implements Parcelable {
     /** The container is the recipient of a transferred starting-window */
     public static final int FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT = 1 << 3;
 
+    /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
+    public static final int FLAG_FIRST_CUSTOM = 1 << 4;
+
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
             FLAG_NONE,
@@ -252,7 +255,8 @@ public final class TransitionInfo implements Parcelable {
      * Indication that `change` is independent of parents (ie. it has a different type of
      * transition vs. "going along for the ride")
      */
-    public static boolean isIndependent(TransitionInfo.Change change, TransitionInfo info) {
+    public static boolean isIndependent(@NonNull TransitionInfo.Change change,
+            @NonNull TransitionInfo info) {
         // If the change has no parent (it is root), then it is independent
         if (change.getParent() == null) return true;
 
@@ -343,7 +347,7 @@ public final class TransitionInfo implements Parcelable {
          * Sets the taskinfo of this container if this is a task. WARNING: this takes the
          * reference, so don't modify it afterwards.
          */
-        public void setTaskInfo(ActivityManager.RunningTaskInfo taskInfo) {
+        public void setTaskInfo(@Nullable ActivityManager.RunningTaskInfo taskInfo) {
             mTaskInfo = taskInfo;
         }
 
@@ -424,8 +428,8 @@ public final class TransitionInfo implements Parcelable {
             return mEndRotation;
         }
 
-        @Override
         /** @hide */
+        @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeTypedObject(mContainer, flags);
             dest.writeTypedObject(mParent, flags);
@@ -454,8 +458,8 @@ public final class TransitionInfo implements Parcelable {
                     }
                 };
 
-        @Override
         /** @hide */
+        @Override
         public int describeContents() {
             return 0;
         }

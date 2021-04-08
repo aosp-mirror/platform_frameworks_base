@@ -161,22 +161,22 @@ public class NotificationGroupingUtil {
 
     private void sanitizeTopLineViews(ExpandableNotificationRow row) {
         if (row.isSummaryWithChildren()) {
-            sanitizeTopLine(row.getNotificationViewWrapper().getNotificationHeader());
+            sanitizeTopLine(row.getNotificationViewWrapper().getNotificationHeader(), row);
             return;
         }
         final NotificationContentView layout = row.getPrivateLayout();
-        sanitizeChild(layout.getContractedChild());
-        sanitizeChild(layout.getHeadsUpChild());
-        sanitizeChild(layout.getExpandedChild());
+        sanitizeChild(layout.getContractedChild(), row);
+        sanitizeChild(layout.getHeadsUpChild(), row);
+        sanitizeChild(layout.getExpandedChild(), row);
     }
 
-    private void sanitizeChild(View child) {
+    private void sanitizeChild(View child, ExpandableNotificationRow row) {
         if (child != null) {
-            sanitizeTopLine(child.findViewById(R.id.notification_top_line));
+            sanitizeTopLine(child.findViewById(R.id.notification_top_line), row);
         }
     }
 
-    private void sanitizeTopLine(ViewGroup rowHeader) {
+    private void sanitizeTopLine(ViewGroup rowHeader, ExpandableNotificationRow row) {
         if (rowHeader == null) {
             return;
         }
@@ -195,7 +195,7 @@ public class NotificationGroupingUtil {
         }
         // in case no view is visible we make sure the time is visible
         int timeVisibility = !hasVisibleText
-                || mRow.getEntry().getSbn().getNotification().showsTime()
+                || row.getEntry().getSbn().getNotification().showsTime()
                 ? View.VISIBLE : View.GONE;
         time.setVisibility(timeVisibility);
         View left = null;

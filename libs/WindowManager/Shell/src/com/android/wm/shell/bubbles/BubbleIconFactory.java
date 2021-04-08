@@ -93,7 +93,7 @@ public class BubbleIconFactory extends BaseIconFactory {
             final float ringStrokeWidth = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.importance_ring_stroke_width);
             final int importantConversationColor = mContext.getResources().getColor(
-                    com.android.settingslib.R.color.important_conversation, null);
+                    R.color.important_conversation, null);
             Bitmap badgeAndRing = Bitmap.createBitmap(userBadgedBitmap.getWidth(),
                     userBadgedBitmap.getHeight(), userBadgedBitmap.getConfig());
             Canvas c = new Canvas(badgeAndRing);

@@ -1409,7 +1409,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private int getClientStateLocked(AccessibilityUserState userState) {
-        return userState.getClientStateLocked(mUiAutomationManager.isUiAutomationRunningLocked());
+        return userState.getClientStateLocked(
+            mUiAutomationManager.isUiAutomationRunningLocked(),
+            mA11yController.isAccessibilityTracingEnabled());
     }
 
     private InteractionBridge getInteractionBridge() {
@@ -3322,7 +3324,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             mConnectionId = service.mId;
 
-            mClient = AccessibilityInteractionClient.getInstance();
+            mClient = AccessibilityInteractionClient.getInstance(mContext);
             mClient.addConnection(mConnectionId, service);
 
             //TODO: (multi-display) We need to support multiple displays.
@@ -3866,6 +3868,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    public void startTrace() {
+        if (!mA11yController.isAccessibilityTracingEnabled()) {
+            mA11yController.startTrace();
+            final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+            scheduleUpdateClientsIfNeededLocked(userState);
+        }
+    }
+
+    @Override
+    public void stopTrace() {
+        if (mA11yController.isAccessibilityTracingEnabled()) {
+            mA11yController.stopTrace();
+            final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+            scheduleUpdateClientsIfNeededLocked(userState);
+        }
+    }
+
+    @Override
     public void logTrace(String where) {
         logTrace(where, "");
     }
@@ -3874,5 +3894,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void logTrace(String where, String callingParams) {
         mA11yController.logTrace(where, callingParams, "".getBytes(),
                 Binder.getCallingUid(), Thread.currentThread().getStackTrace());
+    }
+
+    @Override
+    public void logTrace(long timestamp, String where, String callingParams, int processId,
+            long threadId, int callingUid, StackTraceElement[] callStack) {
+        if (mA11yController.isAccessibilityTracingEnabled()) {
+            mA11yController.logTrace(where, callingParams, "".getBytes(), callingUid, callStack,
+                    timestamp, processId, threadId);
+        }
     }
 }

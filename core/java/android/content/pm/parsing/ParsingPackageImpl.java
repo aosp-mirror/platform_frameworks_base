@@ -72,7 +72,6 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringValueMap;
 import com.android.internal.util.Parcelling.BuiltIn.ForStringSet;
 
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -227,6 +226,14 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
     protected List<String> adoptPermissions = emptyList();
+    /**
+     * @deprecated consider migrating to {@link #getUsesPermissions} which has
+     *             more parsed details, such as flags
+     */
+    @NonNull
+    @Deprecated
+    @DataClass.ParcelWith(ForInternedStringList.class)
+    protected List<String> requestedPermissions = emptyList();
 
     @NonNull
     private List<ParsedUsesPermission> usesPermissions = emptyList();
@@ -393,7 +400,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Nullable
     @DataClass.ParcelWith(ForBoolean.class)
-    private Boolean requestOptimizedExternalStorageAccess;
+    private Boolean requestRawExternalStorageAccess;
 
     // TODO(chiuwinson): Non-null
     @Nullable
@@ -701,6 +708,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl addUsesPermission(ParsedUsesPermission permission) {
         this.usesPermissions = CollectionUtils.add(this.usesPermissions, permission);
+
+        // Continue populating legacy data structures to avoid performance
+        // issues until all that code can be migrated
+        this.requestedPermissions = CollectionUtils.add(this.requestedPermissions, permission.name);
+
         return this;
     }
 
@@ -1074,7 +1086,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.setGwpAsanMode(gwpAsanMode);
         appInfo.setMemtagMode(memtagMode);
         appInfo.setNativeHeapZeroInitialized(nativeHeapZeroInitialized);
-        appInfo.setRequestOptimizedExternalStorageAccess(requestOptimizedExternalStorageAccess);
+        appInfo.setRequestRawExternalStorageAccess(requestRawExternalStorageAccess);
         appInfo.setBaseCodePath(mBaseApkPath);
         appInfo.setBaseResourcePath(mBaseApkPath);
         appInfo.setCodePath(mPath);
@@ -1142,6 +1154,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeByteArray(this.restrictUpdateHash);
         dest.writeStringList(this.originalPackages);
         sForInternedStringList.parcel(this.adoptPermissions, dest, flags);
+        sForInternedStringList.parcel(this.requestedPermissions, dest, flags);
         dest.writeTypedList(this.usesPermissions);
         sForInternedStringList.parcel(this.implicitPermissions, dest, flags);
         sForStringSet.parcel(this.upgradeKeySets, dest, flags);
@@ -1210,7 +1223,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeMap(this.mProperties);
         dest.writeInt(this.memtagMode);
         dest.writeInt(this.nativeHeapZeroInitialized);
-        sForBoolean.parcel(this.requestOptimizedExternalStorageAccess, dest, flags);
+        sForBoolean.parcel(this.requestRawExternalStorageAccess, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1264,6 +1277,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.restrictUpdateHash = in.createByteArray();
         this.originalPackages = in.createStringArrayList();
         this.adoptPermissions = sForInternedStringList.unparcel(in);
+        this.requestedPermissions = sForInternedStringList.unparcel(in);
         this.usesPermissions = in.createTypedArrayList(ParsedUsesPermission.CREATOR);
         this.implicitPermissions = sForInternedStringList.unparcel(in);
         this.upgradeKeySets = sForStringSet.unparcel(in);
@@ -1331,10 +1345,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.gwpAsanMode = in.readInt();
         this.minExtensionVersions = in.readSparseIntArray();
         this.mBooleans = in.readLong();
-        this.mProperties = in.createTypedArrayMap(Property.CREATOR);
+        this.mProperties = in.readHashMap(boot);
         this.memtagMode = in.readInt();
         this.nativeHeapZeroInitialized = in.readInt();
-        this.requestOptimizedExternalStorageAccess = sForBoolean.unparcel(in);
+        this.requestRawExternalStorageAccess = sForBoolean.unparcel(in);
         assignDerivedFields();
     }
 
@@ -1558,15 +1572,14 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return adoptPermissions;
     }
 
+    /**
+     * @deprecated consider migrating to {@link #getUsesPermissions} which has
+     *             more parsed details, such as flags
+     */
     @NonNull
     @Override
+    @Deprecated
     public List<String> getRequestedPermissions() {
-        final List<ParsedUsesPermission> usesPermissions = getUsesPermissions();
-        final int size = usesPermissions.size();
-        final List<String> requestedPermissions = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            requestedPermissions.add(usesPermissions.get(i).name);
-        }
         return requestedPermissions;
     }
 
@@ -2118,8 +2131,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Nullable
     @Override
-    public Boolean hasRequestOptimizedExternalStorageAccess() {
-        return requestOptimizedExternalStorageAccess;
+    public Boolean hasRequestRawExternalStorageAccess() {
+        return requestRawExternalStorageAccess;
     }
 
     @Override
@@ -2573,8 +2586,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setRequestOptimizedExternalStorageAccess(@Nullable Boolean value) {
-        requestOptimizedExternalStorageAccess = value;
+    public ParsingPackageImpl setRequestRawExternalStorageAccess(@Nullable Boolean value) {
+        requestRawExternalStorageAccess = value;
         return this;
     }
     @Override

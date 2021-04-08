@@ -122,6 +122,8 @@ public class MediaRouter {
                     mIsBluetoothA2dpOn = mAudioService.isBluetoothA2dpOn();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error querying Bluetooth A2DP state", e);
+                    //TODO: When we reach here, mIsBluetoothA2dpOn may not be synced with
+                    // mBluetoothA2dpRoute.
                 }
                 mHandler.post(new Runnable() {
                     @Override public void run() {
@@ -403,18 +405,18 @@ public class MediaRouter {
             }
         }
 
-        void updateSelectedRouteForId(String routeId) {
-            RouteInfo selectedRoute = isBluetoothA2dpOn()
+        void handleGroupRouteSelected(String routeId) {
+            RouteInfo routeToSelect = isBluetoothA2dpOn()
                     ? mBluetoothA2dpRoute : mDefaultAudioVideo;
             final int count = mRoutes.size();
             for (int i = 0; i < count; i++) {
                 final RouteInfo route = mRoutes.get(i);
                 if (TextUtils.equals(route.mGlobalRouteId, routeId)) {
-                    selectedRoute = route;
+                    routeToSelect = route;
                 }
             }
-            if (selectedRoute != mSelectedRoute) {
-                selectRouteStatic(selectedRoute.mSupportedTypes, selectedRoute, false);
+            if (routeToSelect != mSelectedRoute) {
+                selectRouteStatic(routeToSelect.mSupportedTypes, routeToSelect, /*explicit=*/false);
             }
         }
 
@@ -675,10 +677,10 @@ public class MediaRouter {
             }
 
             @Override
-            public void onSelectedRouteChanged(String routeId) {
+            public void onGroupRouteSelected(String groupRouteId) {
                 mHandler.post(() -> {
                     if (Client.this == mClient) {
-                        updateSelectedRouteForId(routeId);
+                        handleGroupRouteSelected(groupRouteId);
                     }
                 });
             }
@@ -689,9 +691,9 @@ public class MediaRouter {
             public void onGlobalA2dpChanged(boolean a2dpOn) {
                 mHandler.post(() -> {
                     if (mSelectedRoute == mDefaultAudioVideo && a2dpOn) {
-                        setSelectedRoute(mBluetoothA2dpRoute, false);
+                        setSelectedRoute(mBluetoothA2dpRoute, /*explicit=*/false);
                     } else if (mSelectedRoute == mBluetoothA2dpRoute && !a2dpOn) {
-                        setSelectedRoute(mDefaultAudioVideo, false);
+                        setSelectedRoute(mDefaultAudioVideo, /*explicit=*/false);
                     }
                 });
             }

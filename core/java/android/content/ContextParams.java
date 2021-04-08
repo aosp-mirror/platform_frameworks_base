@@ -16,10 +16,13 @@
 
 package android.content;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
+import android.content.pm.PackageManager;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -53,10 +56,11 @@ public final class ContextParams {
 
     private ContextParams(@Nullable String attributionTag,
             @Nullable AttributionSource next,
-            @NonNull Set<String> renouncedPermissions) {
+            @Nullable Set<String> renouncedPermissions) {
         mAttributionTag = attributionTag;
         mNext = next;
-        mRenouncedPermissions = renouncedPermissions;
+        mRenouncedPermissions = (renouncedPermissions != null)
+                ? renouncedPermissions : Collections.emptySet();
     }
 
     /**
@@ -149,8 +153,8 @@ public final class ContextParams {
          * @see AttributionSource
          */
         @NonNull
-        public Builder setNextAttributionSource(@NonNull AttributionSource next) {
-            mNext = Objects.requireNonNull(next);
+        public Builder setNextAttributionSource(@Nullable AttributionSource next) {
+            mNext = next;
             return this;
         }
 
@@ -177,9 +181,15 @@ public final class ContextParams {
         @SystemApi
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
         public @NonNull Builder setRenouncedPermissions(
-                @NonNull Set<String> renouncedPermissions) {
-            mRenouncedPermissions = Collections.unmodifiableSet(
-                    Objects.requireNonNull(renouncedPermissions));
+                @Nullable Set<String> renouncedPermissions) {
+            // This is not a security check but a fail fast - the OS enforces the permission too
+            if (renouncedPermissions != null && !renouncedPermissions.isEmpty()
+                    && ActivityThread.currentApplication().checkSelfPermission(Manifest.permission
+                    .RENOUNCE_PERMISSIONS) != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Renouncing permissions requires: "
+                        + Manifest.permission.RENOUNCE_PERMISSIONS);
+            }
+            mRenouncedPermissions = renouncedPermissions;
             return this;
         }
 

@@ -555,6 +555,13 @@ public class KeyguardBouncer {
         pw.println("  mIsAnimatingAway: " + mIsAnimatingAway);
     }
 
+    /** Update keyguard position based on a tapped X coordinate. */
+    public void updateKeyguardPosition(float x) {
+        if (mKeyguardViewController != null) {
+            mKeyguardViewController.updateKeyguardPosition(x);
+        }
+    }
+
     public interface BouncerExpansionCallback {
         void onFullyShown();
         void onStartingToHide();

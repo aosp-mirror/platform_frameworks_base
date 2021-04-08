@@ -124,7 +124,7 @@ open class KeyguardBypassController : Dumpable {
         biometricSourceType: BiometricSourceType,
         isStrongBiometric: Boolean
     ): Boolean {
-        if (bypassEnabled) {
+        if (biometricSourceType == BiometricSourceType.FACE && bypassEnabled) {
             val can = canBypass()
             if (!can && (isPulseExpanding || qSExpanded)) {
                 pendingUnlock = PendingUnlock(biometricSourceType, isStrongBiometric)

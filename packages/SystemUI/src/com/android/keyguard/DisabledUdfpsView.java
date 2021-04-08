@@ -22,14 +22,13 @@ import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.AttributeSet;
 import android.view.Surface;
-import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 /**
- * A full screen view with an oval target where the UDFPS sensor is.
- * Controlled by {@link DisabledUdfpsController}.
+ * A view positioned in the area of the UDPFS sensor.
  */
-public class DisabledUdfpsView extends Button {
+public class DisabledUdfpsView extends ImageView {
     @NonNull private final RectF mSensorRect;
     @NonNull private final Context mContext;
 

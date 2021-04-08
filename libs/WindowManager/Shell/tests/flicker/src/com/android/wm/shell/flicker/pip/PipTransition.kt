@@ -33,12 +33,12 @@ import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.helpers.PipAppHelper
-import com.android.wm.shell.flicker.removeAllTasksButHome
 import com.android.wm.shell.flicker.testapp.Components
 import org.junit.Test
 
@@ -131,13 +131,13 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
                     removeAllTasksButHome()
                     if (!eachRun) {
                         pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
-                        wmHelper.waitPipWindowShown()
+                        wmHelper.waitFor { it.wmState.hasPipWindow() }
                     }
                 }
                 eachRun {
                     if (eachRun) {
                         pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
-                        wmHelper.waitPipWindowShown()
+                        wmHelper.waitFor { it.wmState.hasPipWindow() }
                     }
                 }
             }

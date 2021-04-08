@@ -131,7 +131,7 @@ public class StartingSurfaceDrawerTests {
         final Handler mainLoop = new Handler(Looper.getMainLooper());
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, android.R.style.Theme);
-        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder, false);
         waitHandlerIdle(mainLoop);
         verify(mStartingSurfaceDrawer).postAddWindow(eq(taskId), eq(mBinder), any(), any(), any());
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
@@ -148,7 +148,7 @@ public class StartingSurfaceDrawerTests {
         final Handler mainLoop = new Handler(Looper.getMainLooper());
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, 0);
-        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder, false);
         waitHandlerIdle(mainLoop);
         verify(mStartingSurfaceDrawer).postAddWindow(eq(taskId), eq(mBinder), any(), any(), any());
         assertNotEquals(mStartingSurfaceDrawer.mViewThemeResId, 0);

@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"தொகுப்பு நிறுவி"</string>
     <string name="install" msgid="711829760615509273">"நிறுவு"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"முடிந்தது"</string>
     <string name="cancel" msgid="1018267193425558088">"ரத்துசெய்"</string>
     <string name="installing" msgid="4921993079741206516">"நிறுவுகிறது…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ஐ நிறுவுகிறது…"</string>
     <string name="install_done" msgid="5987363587661783896">"ஆப்ஸ் நிறுவப்பட்டது."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"இந்த ஆப்ஸை நிறுவ விரும்புகிறீர்களா?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"ஏற்கனவே உள்ள ஆப்ஸில் புதுப்பிப்பை நிறுவ விரும்புகிறீர்களா? ஏற்கனவே உள்ள உங்கள் தரவை இழக்கமாட்டீர்கள்."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"உள்ளமைக்கப்பட்ட ஆப்ஸில் புதுப்பிப்பை நிறுவ விரும்புகிறீர்களா? ஏற்கனவே உள்ள உங்கள் தரவை இழக்கமாட்டீர்கள்."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ஆப்ஸ் நிறுவப்படவில்லை."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"இந்தத் தொகுப்பு நிறுவப்படுவதிலிருந்து தடுக்கப்பட்டது."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"இந்தத் தொகுப்பு ஏற்கனவே உள்ள தொகுப்புடன் முரண்படுவதால் ஆப்ஸ் நிறுவப்படவில்லை."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wearரில் நிறுவல்கள்/நிறுவல் நீக்கங்கள் செய்ய இயலாது"</string>
     <string name="message_staging" msgid="8032722385658438567">"ஆப்ஸ் தயாராகிறது…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"அறியப்படாதது"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"உங்கள் பாதுகாப்பிற்காக, இந்த மூலத்திலிருந்து பெற்ற அறியப்படாத ஆப்ஸை டேப்லெட்டில் நிறுவ அனுமதியில்லை."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"உங்கள் பாதுகாப்பிற்காக, இந்த மூலத்திலிருந்து பெற்ற அறியப்படாத ஆப்ஸை டிவியில் நிறுவ அனுமதியில்லை."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"உங்கள் பாதுகாப்பிற்காக, இந்த மூலத்திலிருந்து பெற்ற அறியப்படாத ஆப்ஸை மொபைலில் நிறுவ அனுமதியில்லை."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"அறியப்படாத ஆப்ஸால் உங்கள் மொபைலும் தனிப்பட்ட தரவும் மிக எளிதாகப் பாதிப்புக்குள்ளாகலாம். இந்த ஆப்ஸை நிறுவுவதன் மூலம், இதைப் பயன்படுத்தும்போது மொபைலில் ஏதேனும் சிக்கல் ஏற்பட்டாலோ உங்களது தரவை இழந்தாலோ அதற்கு நீங்களே பொறுப்பாவீர்கள் என்பதை ஏற்கிறீர்கள்."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"அறியப்படாத ஆப்ஸால் உங்கள் டேப்லெட்டும் தனிப்பட்ட தரவும் மிக எளிதாகப் பாதிப்புக்குள்ளாகலாம். இந்த ஆப்ஸை நிறுவுவதன் மூலம், இதைப் பயன்படுத்தும்போது டேப்லெட்டில் ஏதேனும் சிக்கல் ஏற்பட்டாலோ உங்களது தரவை இழந்தாலோ அதற்கு நீங்களே பொறுப்பாவீர்கள் என்பதை ஏற்கிறீர்கள்."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"அறியப்படாத ஆப்ஸால் உங்கள் டிவியும் தனிப்பட்ட தரவும் மிக எளிதாகப் பாதிப்புக்குள்ளாகலாம். இந்த ஆப்ஸை நிறுவுவதன் மூலம், இதைப் பயன்படுத்தும்போது டிவியில் ஏதேனும் சிக்கல் ஏற்பட்டாலோ உங்களது தரவை இழந்தாலோ அதற்கு நீங்களே பொறுப்பாவீர்கள் என்பதை ஏற்கிறீர்கள்."</string>

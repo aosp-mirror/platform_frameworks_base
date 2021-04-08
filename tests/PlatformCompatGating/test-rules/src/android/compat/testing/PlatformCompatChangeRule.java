@@ -117,6 +117,7 @@ public class PlatformCompatChangeRule extends CoreCompatChangeRule {
             uiAutomation.adoptShellPermissionIdentity(
                     Manifest.permission.LOG_COMPAT_CHANGE,
                     Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG,
+                    Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD,
                     Manifest.permission.READ_COMPAT_CHANGE_CONFIG);
         }
     }

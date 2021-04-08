@@ -111,6 +111,9 @@ public final class AccessibilityManager {
     public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000010;
 
     /** @hide */
+    public static final int STATE_FLAG_ACCESSIBILITY_TRACING_ENABLED = 0x00000020;
+
+    /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
 
     /** @hide */
@@ -231,6 +234,9 @@ public final class AccessibilityManager {
 
     @UnsupportedAppUsage(trackingBug = 123768939L)
     boolean mIsHighTextContrastEnabled;
+
+    // Whether accessibility tracing is enabled or not
+    boolean mIsAccessibilityTracingEnabled = false;
 
     AccessibilityPolicy mAccessibilityPolicy;
 
@@ -1004,6 +1010,17 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Gets accessibility tracing enabled state.
+     *
+     * @hide
+     */
+    public boolean isAccessibilityTracingEnabled() {
+        synchronized (mLock) {
+            return mIsAccessibilityTracingEnabled;
+        }
+    }
+
+    /**
      * Get the preparers that are registered for an accessibility ID
      *
      * @param id The ID of interest
@@ -1197,6 +1214,8 @@ public final class AccessibilityManager {
                 (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
         final boolean highTextContrastEnabled =
                 (stateFlags & STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED) != 0;
+        final boolean accessibilityTracingEnabled =
+                (stateFlags & STATE_FLAG_ACCESSIBILITY_TRACING_ENABLED) != 0;
 
         final boolean wasEnabled = isEnabled();
         final boolean wasTouchExplorationEnabled = mIsTouchExplorationEnabled;
@@ -1218,6 +1237,8 @@ public final class AccessibilityManager {
         if (wasHighTextContrastEnabled != highTextContrastEnabled) {
             notifyHighTextContrastStateChanged();
         }
+
+        updateAccessibilityTracingState(accessibilityTracingEnabled);
     }
 
     /**
@@ -1671,6 +1692,15 @@ public final class AccessibilityManager {
             final HighTextContrastChangeListener listener = listeners.keyAt(i);
             listeners.valueAt(i).post(() ->
                     listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
+        }
+    }
+
+    /**
+     * Update mIsAccessibilityTracingEnabled.
+     */
+    private void updateAccessibilityTracingState(boolean enabled) {
+        synchronized (mLock) {
+            mIsAccessibilityTracingEnabled = enabled;
         }
     }
 

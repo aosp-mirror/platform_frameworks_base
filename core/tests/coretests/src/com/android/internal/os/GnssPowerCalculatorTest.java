@@ -19,7 +19,6 @@ package com.android.internal.os;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
-import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
 
@@ -54,14 +53,15 @@ public class GnssPowerCalculatorTest {
         GnssPowerCalculator calculator =
                 new GnssPowerCalculator(mStatsRule.getPowerProfile());
 
-        mStatsRule.apply(new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build(),
-                calculator);
+        mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
 
         UidBatteryConsumer consumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_GNSS))
                 .isEqualTo(1000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS))
                 .isWithin(PRECISION).of(0.1);
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 
     @Test
@@ -87,11 +87,15 @@ public class GnssPowerCalculatorTest {
                 .isEqualTo(1000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS))
                 .isWithin(PRECISION).of(2.77777);
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
 
         UidBatteryConsumer consumer2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
         assertThat(consumer2.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_GNSS))
                 .isEqualTo(2000);
         assertThat(consumer2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_GNSS))
                 .isWithin(PRECISION).of(5.55555);
+        assertThat(consumer2.getPowerModel(BatteryConsumer.POWER_COMPONENT_GNSS))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
     }
 }

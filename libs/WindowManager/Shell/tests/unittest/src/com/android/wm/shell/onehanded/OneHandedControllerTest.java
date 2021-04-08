@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.content.om.IOverlayManager;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.util.ArrayMap;
 import android.view.Display;
@@ -53,6 +54,8 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedControllerTest extends OneHandedTestCase {
+    private int mCurrentUser = UserHandle.myUserId();
+
     Display mDisplay;
     DisplayLayout mDisplayLayout;
     OneHandedController mSpiedOneHandedController;
@@ -100,13 +103,13 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         when(mMockBackgroundOrganizer.getBackgroundSurface()).thenReturn(mMockLeash);
-        when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any())).thenReturn(
+        when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(
                 mDefaultEnabled);
-        when(mMockSettingsUitl.getSettingsOneHandedModeTimeout(any())).thenReturn(
+        when(mMockSettingsUitl.getSettingsOneHandedModeTimeout(any(), anyInt())).thenReturn(
                 OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
-        when(mMockSettingsUitl.getSettingsTapsAppToExit(any())).thenReturn(
+        when(mMockSettingsUitl.getSettingsTapsAppToExit(any(), anyInt())).thenReturn(
                 mDefaultTapAppToExitEnabled);
-        when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any())).thenReturn(
+        when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
                 mDefaultSwipeToNotificationEnabled);
 
         when(mMockDisplayAreaOrganizer.getLastDisplayBounds()).thenReturn(

@@ -21,6 +21,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -159,9 +160,11 @@ public final class MediaRouter2 {
      * Finally, it will have no effect to call {@link #setOnGetControllerHintsListener}.
      *
      * @param clientPackageName the package name of the app to control
+     * @throws SecurityException if the caller doesn't have MODIFY_AUDIO_ROUTING permission.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     @Nullable
     public static MediaRouter2 getInstance(@NonNull Context context,
             @NonNull String clientPackageName) {
@@ -179,13 +182,20 @@ public final class MediaRouter2 {
         synchronized (sSystemRouterLock) {
             MediaRouter2 instance = sSystemMediaRouter2Map.get(clientPackageName);
             if (instance == null) {
-                // TODO: Add permission check here using MODIFY_AUDIO_ROUTING.
                 if (sManager == null) {
+                    IMediaRouterService serviceBinder = IMediaRouterService.Stub.asInterface(
+                            ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
+                    try {
+                        // MediaRouterService will throw a SecurityException if the caller
+                        // doesn't have MODIFY_AUDIO_ROUTING permission.
+                        serviceBinder.checkModifyAudioRoutingPermission();
+                    } catch (RemoteException e) {
+                        e.rethrowAsRuntimeException();
+                    }
                     sManager = MediaRouter2Manager.getInstance(context.getApplicationContext());
                 }
                 instance = new MediaRouter2(context, clientPackageName);
                 sSystemMediaRouter2Map.put(clientPackageName, instance);
-                // TODO: Remove router instance once it is not needed.
                 instance.registerManagerCallbackForSystemRouter();
             }
             return instance;
@@ -281,9 +291,9 @@ public final class MediaRouter2 {
         mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
                 sManager.getPreferredFeatures(clientPackageName), true).build();
         updateAllRoutesFromManager();
-        mMediaRouterService = null; // TODO: Make this non-null and check permission.
 
         // Only used by non-system MediaRouter2.
+        mMediaRouterService = null;
         mPackageName = null;
     }
 

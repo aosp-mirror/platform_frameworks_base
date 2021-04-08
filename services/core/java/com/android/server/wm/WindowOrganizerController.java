@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
@@ -38,6 +39,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -190,6 +192,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (transition == null) {
                     if (type < 0) {
                         throw new IllegalArgumentException("Can't create transition with no type");
+                    }
+                    if (mTransitionController.getTransitionPlayer() == null) {
+                        Slog.w(TAG, "Using shell transitions API for legacy transitions.");
+                        if (t == null) {
+                            throw new IllegalArgumentException("Can't use legacy transitions in"
+                                    + " compatibility mode with no WCT.");
+                        }
+                        applyTransaction(t, -1 /* syncId */, null);
+                        return null;
                     }
                     transition = mTransitionController.createTransition(type);
                 }
@@ -346,6 +357,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 }
                             }
                             effects |= sanitizeAndApplyHierarchyOp(wc, hop);
+                            break;
+                        case HIERARCHY_OP_TYPE_LAUNCH_TASK:
+                            Bundle launchOpts = hop.getLaunchOptions();
+                            int taskId = launchOpts.getInt(
+                                    WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
+                            launchOpts.remove(
+                                    WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
+                            mService.startActivityFromRecents(taskId, launchOpts);
+                            break;
                     }
                 }
             }

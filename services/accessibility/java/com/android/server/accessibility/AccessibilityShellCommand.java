@@ -108,16 +108,12 @@ final class AccessibilityShellCommand extends ShellCommand {
     }
 
     private int startTrace() {
-        WindowManagerInternal.AccessibilityControllerInternal ac =
-                mWindowManagerService.getAccessibilityController();
-        ac.startTrace();
+        mService.startTrace();
         return 0;
     }
 
     private int stopTrace() {
-        WindowManagerInternal.AccessibilityControllerInternal ac =
-                mWindowManagerService.getAccessibilityController();
-        ac.stopTrace();
+        mService.stopTrace();
         return 0;
     }
 

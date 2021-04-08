@@ -62,9 +62,10 @@ public class ScreenPowerCalculator extends PowerCalculator {
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final PowerAndDuration totalPowerAndDuration = new PowerAndDuration();
 
-        final boolean useEnergyData = calculateTotalDurationAndPower(totalPowerAndDuration,
-                batteryStats, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED,
-                query.shouldForceUsePowerProfileModel());
+        final long consumptionUC = batteryStats.getScreenOnMeasuredBatteryConsumptionUC();
+        final int powerModel = getPowerModel(consumptionUC, query);
+        calculateTotalDurationAndPower(totalPowerAndDuration, powerModel, batteryStats,
+                rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED, consumptionUC);
 
         double totalAppPower = 0;
 
@@ -73,29 +74,32 @@ public class ScreenPowerCalculator extends PowerCalculator {
         // but the method depends on the data source.
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
-        if (useEnergyData) {
-            final PowerAndDuration appPowerAndDuration = new PowerAndDuration();
-            for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
-                final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
-                calculateAppUsingMeasuredEnergy(appPowerAndDuration, app.getBatteryStatsUid(),
+        switch (powerModel) {
+            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+                final PowerAndDuration appPowerAndDuration = new PowerAndDuration();
+                for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
+                    final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
+                    calculateAppUsingMeasuredEnergy(appPowerAndDuration, app.getBatteryStatsUid(),
+                            rawRealtimeUs);
+                    app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN,
+                                    appPowerAndDuration.durationMs)
+                            .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
+                                    appPowerAndDuration.powerMah, powerModel);
+                    totalAppPower += appPowerAndDuration.powerMah;
+                }
+                break;
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+            default:
+                smearScreenBatteryDrain(uidBatteryConsumerBuilders, totalPowerAndDuration,
                         rawRealtimeUs);
-                app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN,
-                                appPowerAndDuration.durationMs)
-                        .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
-                                appPowerAndDuration.powerMah);
-                totalAppPower += appPowerAndDuration.powerMah;
-            }
-        } else {
-            smearScreenBatteryDrain(uidBatteryConsumerBuilders, totalPowerAndDuration,
-                    rawRealtimeUs);
-            totalAppPower = totalPowerAndDuration.powerMah;
+                totalAppPower = totalPowerAndDuration.powerMah;
         }
 
         builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
                 .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE,
                         totalPowerAndDuration.durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE,
-                        Math.max(totalPowerAndDuration.powerMah, totalAppPower))
+                        Math.max(totalPowerAndDuration.powerMah, totalAppPower), powerModel)
                 .setPowerConsumedByApps(totalAppPower);
     }
 
@@ -106,8 +110,10 @@ public class ScreenPowerCalculator extends PowerCalculator {
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
         final PowerAndDuration totalPowerAndDuration = new PowerAndDuration();
-        final boolean useEnergyData = calculateTotalDurationAndPower(totalPowerAndDuration,
-                batteryStats, rawRealtimeUs, statsType, false);
+        final long consumptionUC = batteryStats.getScreenOnMeasuredBatteryConsumptionUC();
+        final int powerModel = getPowerModel(consumptionUC);
+        calculateTotalDurationAndPower(totalPowerAndDuration, powerModel, batteryStats,
+                rawRealtimeUs, statsType, consumptionUC);
         if (totalPowerAndDuration.powerMah == 0) {
             return;
         }
@@ -121,41 +127,42 @@ public class ScreenPowerCalculator extends PowerCalculator {
 
         // Now deal with each app's BatterySipper. The results are stored in the screenPowerMah
         // field, which is considered smeared, but the method depends on the data source.
-        if (useEnergyData) {
-            final PowerAndDuration appPowerAndDuration = new PowerAndDuration();
-            for (int i = sippers.size() - 1; i >= 0; i--) {
-                final BatterySipper app = sippers.get(i);
-                if (app.drainType == BatterySipper.DrainType.APP) {
-                    calculateAppUsingMeasuredEnergy(appPowerAndDuration, app.uidObj, rawRealtimeUs);
-                    app.screenPowerMah = appPowerAndDuration.powerMah;
+        switch (powerModel) {
+            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+                final PowerAndDuration appPowerAndDuration = new PowerAndDuration();
+                for (int i = sippers.size() - 1; i >= 0; i--) {
+                    final BatterySipper app = sippers.get(i);
+                    if (app.drainType == BatterySipper.DrainType.APP) {
+                        calculateAppUsingMeasuredEnergy(appPowerAndDuration, app.uidObj,
+                                rawRealtimeUs);
+                        app.screenPowerMah = appPowerAndDuration.powerMah;
+                    }
                 }
-            }
-        } else {
-            smearScreenBatterySipper(sippers, bs, rawRealtimeUs);
+                break;
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+            default:
+                smearScreenBatterySipper(sippers, bs, rawRealtimeUs);
         }
     }
 
     /**
-     * Stores duration and power information in totalPowerAndDuration and returns true if measured
-     * energy data is available and should be used by the model.
+     * Stores duration and power information in totalPowerAndDuration.
      */
-    private boolean calculateTotalDurationAndPower(PowerAndDuration totalPowerAndDuration,
-            BatteryStats batteryStats, long rawRealtimeUs, int statsType,
-            boolean forceUsePowerProfileModel) {
+    private void calculateTotalDurationAndPower(PowerAndDuration totalPowerAndDuration,
+            @BatteryConsumer.PowerModel int powerModel, BatteryStats batteryStats,
+            long rawRealtimeUs, int statsType, long consumptionUC) {
         totalPowerAndDuration.durationMs = calculateDuration(batteryStats, rawRealtimeUs,
                 statsType);
 
-        if (!forceUsePowerProfileModel) {
-            final long chargeUC = batteryStats.getScreenOnMeasuredBatteryConsumptionUC();
-            if (chargeUC != BatteryStats.POWER_DATA_UNAVAILABLE) {
-                totalPowerAndDuration.powerMah = uCtoMah(chargeUC);
-                return true;
-            }
+        switch (powerModel) {
+            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+                totalPowerAndDuration.powerMah = uCtoMah(consumptionUC);
+                break;
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+            default:
+                totalPowerAndDuration.powerMah = calculateTotalPowerFromBrightness(batteryStats,
+                        rawRealtimeUs, statsType, totalPowerAndDuration.durationMs);
         }
-
-        totalPowerAndDuration.powerMah = calculateTotalPowerFromBrightness(batteryStats,
-                rawRealtimeUs, statsType, totalPowerAndDuration.durationMs);
-        return false;
     }
 
     private void calculateAppUsingMeasuredEnergy(PowerAndDuration appPowerAndDuration,
@@ -245,7 +252,8 @@ public class ScreenPowerCalculator extends PowerCalculator {
                 final long durationMs = activityTimeArray.get(app.getUid(), 0);
                 final double powerMah = totalScreenPowerMah * durationMs / totalActivityTimeMs;
                 app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_SCREEN, durationMs)
-                        .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, powerMah);
+                        .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, powerMah,
+                                BatteryConsumer.POWER_MODEL_POWER_PROFILE);
             }
         }
     }

@@ -18,9 +18,13 @@ package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.graphics.ColorFilter;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.PathShape;
+import android.util.PathParser;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,15 +36,30 @@ import com.android.systemui.R;
  * sensor area.
  */
 public abstract class UdfpsDrawable extends Drawable {
-    @NonNull protected final Context mContext;
-    @NonNull protected final Drawable mFingerprintDrawable;
+    static final float DEFAULT_STROKE_WIDTH = 3f;
+
+    @NonNull final Context mContext;
+    @NonNull final ShapeDrawable mFingerprintDrawable;
+    private final Paint mPaint;
     private boolean mIlluminationShowing;
 
     int mAlpha = 255; // 0 - 255
     public UdfpsDrawable(@NonNull Context context) {
         mContext = context;
-        mFingerprintDrawable = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
+        final String fpPath = context.getResources().getString(R.string.config_udfpsIcon);
+        mFingerprintDrawable = new ShapeDrawable(
+                new PathShape(PathParser.createPathFromPathData(fpPath), 72, 72));
         mFingerprintDrawable.mutate();
+
+        mPaint = mFingerprintDrawable.getPaint();
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        setStrokeWidth(DEFAULT_STROKE_WIDTH);
+    }
+
+    void setStrokeWidth(float strokeWidth) {
+        mPaint.setStrokeWidth(strokeWidth);
+        invalidateSelf();
     }
 
     /**

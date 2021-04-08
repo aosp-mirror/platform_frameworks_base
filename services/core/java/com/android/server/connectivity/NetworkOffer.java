@@ -40,7 +40,7 @@ import java.util.Set;
  *
  * @hide
  */
-public class NetworkOffer {
+public class NetworkOffer implements NetworkRanker.Scoreable {
     @NonNull public final FullScore score;
     @NonNull public final NetworkCapabilities caps;
     @NonNull public final INetworkOfferCallback callback;
@@ -64,6 +64,20 @@ public class NetworkOffer {
         this.caps = Objects.requireNonNull(caps);
         this.callback = Objects.requireNonNull(callback);
         this.providerId = providerId;
+    }
+
+    /**
+     * Get the score filter of this offer
+     */
+    @Override @NonNull public FullScore getScore() {
+        return score;
+    }
+
+    /**
+     * Get the capabilities filter of this offer
+     */
+    @Override @NonNull public NetworkCapabilities getCaps() {
+        return caps;
     }
 
     /**

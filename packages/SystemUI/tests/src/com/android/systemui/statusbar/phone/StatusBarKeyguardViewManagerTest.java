@@ -283,4 +283,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         verify(mBouncer).updateResources();
     }
+
+    @Test
+    public void updateKeyguardPosition_delegatesToBouncer() {
+        mStatusBarKeyguardViewManager.updateKeyguardPosition(1.0f);
+
+        verify(mBouncer).updateKeyguardPosition(1.0f);
+    }
 }

@@ -219,6 +219,15 @@ public final class MediaFormat {
     private Map<String, Object> mMap;
 
     /**
+     * A key describing the log session ID for MediaCodec. The log session ID is a random 32-byte
+     * hexadecimal string that is used to associate metrics from multiple media codec instances
+     * to the same playback or recording session.
+     * The associated value is a string.
+     * @hide
+     */
+    public static final String LOG_SESSION_ID = "log-session-id";
+
+    /**
      * A key describing the mime type of the MediaFormat.
      * The associated value is a string.
      */
@@ -1067,6 +1076,17 @@ public final class MediaFormat {
      * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
      */
     public static final String KEY_AUDIO_SESSION_ID = "audio-session-id";
+
+    /**
+     * A key describing the audio hardware sync ID of the AudioTrack associated
+     * to a tunneled video codec. The associated value is an integer.
+     *
+     * @hide
+     *
+     * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
+     * @see AudioManager#getAudioHwSyncForSession
+     */
+    public static final String KEY_AUDIO_HW_SYNC = "audio-hw-sync";
 
     /**
      * A key for boolean AUTOSELECT behavior for the track. Tracks with AUTOSELECT=true

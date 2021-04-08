@@ -1949,7 +1949,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean addStartingWindow(String pkg, int resolvedTheme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
-            boolean allowTaskSnapshot, boolean activityCreated) {
+            boolean allowTaskSnapshot, boolean activityCreated, boolean samePackage) {
         // If the display is frozen, we won't do anything until the actual window is
         // displayed so there is no reason to put in the starting window.
         if (!okToDisplay()) {
@@ -1971,7 +1971,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         false /* restoreFromDisk */, false /* isLowResolution */);
         final int typeParameter = mWmService.mStartingSurfaceController
                 .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
-                        allowTaskSnapshot, activityCreated);
+                        allowTaskSnapshot, activityCreated, samePackage);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, snapshot);
 
@@ -2880,6 +2880,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mAtmService.deferWindowLayout();
         try {
+            final Transition newTransition = (!mAtmService.getTransitionController().isCollecting()
+                    && mAtmService.getTransitionController().getTransitionPlayer() != null)
+                    ? mAtmService.getTransitionController().createTransition(TRANSIT_CLOSE) : null;
             makeFinishingLocked();
             // Make a local reference to its task since this.task could be set to null once this
             // activity is destroyed and detached from task.
@@ -2911,6 +2914,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
             final int transit = endTask ? TRANSIT_OLD_TASK_CLOSE : TRANSIT_OLD_ACTIVITY_CLOSE;
+            if (newTransition != null) {
+                mAtmService.getTransitionController().requestStartTransition(newTransition,
+                        endTask ? task : null, null /* remote */);
+            }
             if (isState(RESUMED)) {
                 if (endTask) {
                     mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
@@ -6134,11 +6141,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void showStartingWindow(boolean taskSwitch) {
         showStartingWindow(null /* prev */, false /* newTask */, taskSwitch,
-                0 /* splashScreenTheme */);
+                0 /* splashScreenTheme */, true /* samePackage */);
     }
 
     void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch,
-            int splashScreenTheme) {
+            int splashScreenTheme, boolean samePackage) {
         if (mTaskOverlay) {
             // We don't show starting window for overlay activities.
             return;
@@ -6158,7 +6165,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(),
-                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal());
+                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal(),
+                samePackage);
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
@@ -8500,7 +8508,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 record.mAdapter.mRootTaskBounds, task.getWindowConfiguration(),
                 false /*isNotInRecents*/,
                 record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,
-                record.mStartBounds, task.getPictureInPictureParams());
+                record.mStartBounds, task.getTaskInfo());
     }
 
     @Override

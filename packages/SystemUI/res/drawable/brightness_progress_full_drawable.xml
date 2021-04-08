@@ -17,7 +17,8 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
     android:autoMirrored="true">
-    <item android:id="@+id/slider_foreground">
+    <item android:id="@+id/slider_foreground"
+        android:height="@dimen/rounded_slider_height">
         <shape>
             <size android:height="@dimen/rounded_slider_height" />
             <solid android:color="?android:attr/colorControlActivated" />

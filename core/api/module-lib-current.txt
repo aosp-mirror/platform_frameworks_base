@@ -61,11 +61,8 @@ package android.content {
 
   public abstract class Context {
     method @NonNull public android.os.UserHandle getUser();
+    field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
-  }
-
-  public class Intent implements java.lang.Cloneable android.os.Parcelable {
-    field public static final String ACTION_CLEAR_DNS_CACHE = "android.intent.action.CLEAR_DNS_CACHE";
   }
 
 }
@@ -74,14 +71,6 @@ package android.content.pm {
 
   public abstract class PackageManager {
     method @NonNull public String getPermissionControllerPackageName();
-  }
-
-}
-
-package android.content.rollback {
-
-  public class RollbackManagerFrameworkInitializer {
-    method public static void initialize();
   }
 
 }

@@ -75,6 +75,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -109,8 +111,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A service that collects, aggregates, and persists application usage data.
@@ -139,6 +143,10 @@ public class UsageStatsService extends SystemService implements
     // For migration purposes, indicates whether to keep the legacy usage stats directory or not
     private static final boolean KEEP_LEGACY_DIR = false;
 
+    private static final File COMMON_USAGE_STATS_DE_DIR =
+            new File(Environment.getDataSystemDeDirectory(), "usagestats");
+    private static final String GLOBAL_COMPONENT_USAGE_FILE_NAME = "globalcomponentusage";
+
     private static final char TOKEN_DELIMITER = '/';
 
     // Handler message types.
@@ -149,6 +157,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_REPORT_EVENT_TO_ALL_USERID = 4;
     static final int MSG_UNLOCKED_USER = 5;
     static final int MSG_PACKAGE_REMOVED = 6;
+    static final int MSG_ON_START = 7;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -165,6 +174,11 @@ public class UsageStatsService extends SystemService implements
     private final CopyOnWriteArraySet<Integer> mUserUnlockedStates = new CopyOnWriteArraySet<>();
     private final SparseIntArray mUidToKernelCounter = new SparseIntArray();
     int mUsageSource;
+
+    private long mRealTimeSnapshot;
+    private long mSystemTimeSnapshot;
+    // A map storing last time global usage of packages, measured in milliseconds since the epoch.
+    private final Map<String, Long> mLastTimeComponentUsedGlobal = new ArrayMap<>();
 
     /** Manages the standby state of apps. */
     AppStandbyInternal mAppStandby;
@@ -279,9 +293,14 @@ public class UsageStatsService extends SystemService implements
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
                 null, mHandler);
 
+        mRealTimeSnapshot = SystemClock.elapsedRealtime();
+        mSystemTimeSnapshot = System.currentTimeMillis();
+
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishLocalService(AppStandbyInternal.class, mAppStandby);
         publishBinderServices();
+
+        mHandler.obtainMessage(MSG_ON_START).sendToTarget();
     }
 
     @VisibleForTesting
@@ -705,6 +724,7 @@ public class UsageStatsService extends SystemService implements
             // orderly shutdown, the last event is DEVICE_SHUTDOWN.
             reportEventToAllUserId(event);
             flushToDiskLocked();
+            persistGlobalComponentUsageLocked();
         }
 
         mAppStandby.flushToDisk();
@@ -783,6 +803,60 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    private void loadGlobalComponentUsageLocked() {
+        final File[] packageUsageFile = COMMON_USAGE_STATS_DE_DIR.listFiles(
+                (dir, name) -> TextUtils.equals(name, GLOBAL_COMPONENT_USAGE_FILE_NAME));
+        if (packageUsageFile == null || packageUsageFile.length == 0) {
+            return;
+        }
+
+        final AtomicFile af = new AtomicFile(packageUsageFile[0]);
+        final Map<String, Long> tmpUsage = new ArrayMap<>();
+        try {
+            try (FileInputStream in = af.openRead()) {
+                UsageStatsProtoV2.readGlobalComponentUsage(in, tmpUsage);
+            }
+            // only add to in memory map if the read was successful
+            final Map.Entry<String, Long>[] entries =
+                    (Map.Entry<String, Long>[]) tmpUsage.entrySet().toArray();
+            final int size = entries.length;
+            for (int i = 0; i < size; ++i) {
+                // In memory data is usually the most up-to-date, so skip the packages which already
+                // have usage data.
+                mLastTimeComponentUsedGlobal.putIfAbsent(
+                        entries[i].getKey(), entries[i].getValue());
+            }
+        } catch (Exception e) {
+            // Most likely trying to read a corrupted file - log the failure
+            Slog.e(TAG, "Could not read " + packageUsageFile[0]);
+        }
+    }
+
+    private void persistGlobalComponentUsageLocked() {
+        if (mLastTimeComponentUsedGlobal.isEmpty()) {
+            return;
+        }
+
+        if (!COMMON_USAGE_STATS_DE_DIR.mkdirs() && !COMMON_USAGE_STATS_DE_DIR.exists()) {
+            throw new IllegalStateException("Common usage stats DE directory does not exist: "
+                    + COMMON_USAGE_STATS_DE_DIR.getAbsolutePath());
+        }
+        final File lastTimePackageFile = new File(COMMON_USAGE_STATS_DE_DIR,
+                GLOBAL_COMPONENT_USAGE_FILE_NAME);
+        final AtomicFile af = new AtomicFile(lastTimePackageFile);
+        FileOutputStream fos = null;
+        try {
+            fos = af.startWrite();
+            UsageStatsProtoV2.writeGlobalComponentUsage(fos, mLastTimeComponentUsedGlobal);
+            af.finishWrite(fos);
+            fos = null;
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to write " + lastTimePackageFile.getAbsolutePath());
+        } finally {
+            af.failWrite(fos); // when fos is null (successful write), this will no-op
+        }
+    }
+
     private void reportEventOrAddToQueue(int userId, Event event) {
         if (mUserUnlockedStates.contains(userId)) {
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
@@ -801,6 +875,28 @@ public class UsageStatsService extends SystemService implements
                 mHandler.sendEmptyMessageDelayed(MSG_FLUSH_TO_DISK, FLUSH_INTERVAL);
             }
         }
+    }
+
+    /**
+     * Assuming the event's timestamp is measured in milliseconds since boot,
+     * convert it to a system wall time. System and real time snapshots are updated before
+     * conversion.
+     */
+    private void convertToSystemTimeLocked(Event event) {
+        final long actualSystemTime = System.currentTimeMillis();
+        if (ENABLE_TIME_CHANGE_CORRECTION) {
+            final long actualRealtime = SystemClock.elapsedRealtime();
+            final long expectedSystemTime =
+                    (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
+            final long diffSystemTime = actualSystemTime - expectedSystemTime;
+            if (Math.abs(diffSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS) {
+                // The time has changed.
+                Slog.i(TAG, "Time changed in by " + (diffSystemTime / 1000) + " seconds");
+                mRealTimeSnapshot = actualRealtime;
+                mSystemTimeSnapshot = actualSystemTime;
+            }
+        }
+        event.mTimeStamp = Math.max(0, event.mTimeStamp - mRealTimeSnapshot) + mSystemTimeSnapshot;
     }
 
     /**
@@ -939,6 +1035,12 @@ public class UsageStatsService extends SystemService implements
                     } catch (IllegalArgumentException iae) {
                         Slog.w(TAG, "Failed to note usage stop", iae);
                     }
+                    break;
+                case Event.USER_INTERACTION:
+                    // Fall through
+                case Event.APP_COMPONENT_USED:
+                    convertToSystemTimeLocked(event);
+                    mLastTimeComponentUsedGlobal.put(event.mPackage, event.mTimeStamp);
                     break;
             }
 
@@ -1444,7 +1546,11 @@ public class UsageStatsService extends SystemService implements
                     }
                     break;
                 }
-
+                case MSG_ON_START:
+                    synchronized (mLock) {
+                        loadGlobalComponentUsageLocked();
+                    }
+                    break;
                 default:
                     super.handleMessage(msg);
                     break;
@@ -2093,6 +2199,16 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void forceUsageSourceSettingRead() {
             readUsageSourceSetting();
+        }
+
+        @Override
+        public long getLastTimeAnyComponentUsed(String packageName) {
+            synchronized (mLock) {
+                // Truncate the returned milliseconds to the boundary of the last day before exact
+                // time for privacy reasons.
+                return mLastTimeComponentUsedGlobal.getOrDefault(packageName, 0L)
+                        / TimeUnit.DAYS.toMillis(1) * TimeUnit.DAYS.toMillis(1);
+            }
         }
     }
 

@@ -150,6 +150,7 @@ public class DisplayLayout {
         mDensityDpi = dl.mDensityDpi;
         mHasNavigationBar = dl.mHasNavigationBar;
         mHasStatusBar = dl.mHasStatusBar;
+        mNavBarFrameHeight = dl.mNavBarFrameHeight;
         mNonDecorInsets.set(dl.mNonDecorInsets);
         mStableInsets.set(dl.mStableInsets);
     }

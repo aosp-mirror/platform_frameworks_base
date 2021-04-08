@@ -44,6 +44,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -55,6 +58,7 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
+import android.app.SyncNotedAppOp;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -68,6 +72,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.IntArray;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
@@ -117,7 +122,8 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_GONE,
         UidRecord.CHANGE_GONE | UidRecord.CHANGE_IDLE,
         UidRecord.CHANGE_IDLE,
-        UidRecord.CHANGE_ACTIVE
+        UidRecord.CHANGE_ACTIVE,
+        UidRecord.CHANGE_CAPABILITY,
     };
 
     private static PackageManagerInternal sPackageManagerInternal;
@@ -158,6 +164,14 @@ public class ActivityManagerServiceTest {
         mAms.mWaitForNetworkTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
+    }
+
+    private void mockNoteOperation() {
+        SyncNotedAppOp allowed = new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED,
+                AppOpsManager.OP_GET_USAGE_STATS, null);
+        when(mAppOpsService.noteOperation(eq(AppOpsManager.OP_GET_USAGE_STATS), eq(Process.myUid()),
+                nullable(String.class), nullable(String.class), any(Boolean.class),
+                nullable(String.class), any(Boolean.class))).thenReturn(allowed);
     }
 
     @After
@@ -509,16 +523,17 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUids_dispatchNeededChanges() throws RemoteException {
-        when(mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS, Process.myUid(), null,
-                null, false, null, false)).thenReturn(AppOpsManager.MODE_ALLOWED);
+        mockNoteOperation();
 
         final int[] changesToObserve = {
             ActivityManager.UID_OBSERVER_PROCSTATE,
             ActivityManager.UID_OBSERVER_GONE,
             ActivityManager.UID_OBSERVER_IDLE,
             ActivityManager.UID_OBSERVER_ACTIVE,
+            ActivityManager.UID_OBSERVER_CAPABILITY,
             ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE
                     | ActivityManager.UID_OBSERVER_ACTIVE | ActivityManager.UID_OBSERVER_IDLE
+                    | ActivityManager.UID_OBSERVER_CAPABILITY
         };
         final IUidObserver[] observers = new IUidObserver.Stub[changesToObserve.length];
         for (int i = 0; i < observers.length; ++i) {
@@ -542,7 +557,16 @@ public class ActivityManagerServiceTest {
             ActivityManager.PROCESS_STATE_NONEXISTENT,
             ActivityManager.PROCESS_STATE_CACHED_EMPTY,
             ActivityManager.PROCESS_STATE_CACHED_ACTIVITY,
-            ActivityManager.PROCESS_STATE_TOP
+            ActivityManager.PROCESS_STATE_TOP,
+            ActivityManager.PROCESS_STATE_TOP,
+        };
+        final int[] capabilitiesForPendingUidRecords = {
+            ActivityManager.PROCESS_CAPABILITY_ALL,
+            ActivityManager.PROCESS_CAPABILITY_NONE,
+            ActivityManager.PROCESS_CAPABILITY_NONE,
+            ActivityManager.PROCESS_CAPABILITY_NONE,
+            ActivityManager.PROCESS_CAPABILITY_NONE,
+            ActivityManager.PROCESS_CAPABILITY_NETWORK,
         };
         final Map<Integer, ChangeRecord> changeItems = new HashMap<>();
         for (int i = 0; i < changesForPendingUidRecords.length; ++i) {
@@ -551,6 +575,7 @@ public class ActivityManagerServiceTest {
             pendingChange.uid = i;
             pendingChange.procState = procStatesForPendingUidRecords[i];
             pendingChange.procStateSeq = i;
+            pendingChange.capability = capabilitiesForPendingUidRecords[i];
             changeItems.put(changesForPendingUidRecords[i], pendingChange);
             addPendingUidChange(pendingChange);
         }
@@ -595,20 +620,26 @@ public class ActivityManagerServiceTest {
                             verify(observer).onUidGone(changeItem.uid, changeItem.ephemeral);
                         });
             }
-            if ((changeToObserve & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
+            if ((changeToObserve & ActivityManager.UID_OBSERVER_PROCSTATE) != 0
+                    || (changeToObserve & ActivityManager.UID_OBSERVER_CAPABILITY) != 0) {
                 // Observer listens to uid procState changes, so change items corresponding to
                 // UidRecord.CHANGE_PROCSTATE or UidRecord.CHANGE_IDLE or UidRecord.CHANGE_ACTIVE
                 // needs to be delivered to this observer.
-                final int[] changesToVerify = {
-                        UidRecord.CHANGE_PROCSTATE,
-                        UidRecord.CHANGE_ACTIVE,
-                        UidRecord.CHANGE_IDLE
-                };
-                verifyObserverReceivedChanges(observerToTest, changesToVerify, changeItems,
+                final IntArray changesToVerify = new IntArray();
+                if ((changeToObserve & ActivityManager.UID_OBSERVER_PROCSTATE) == 0) {
+                    changesToVerify.add(UidRecord.CHANGE_CAPABILITY);
+                } else {
+                    changesToVerify.add(UidRecord.CHANGE_PROCSTATE);
+                    changesToVerify.add(UidRecord.CHANGE_ACTIVE);
+                    changesToVerify.add(UidRecord.CHANGE_IDLE);
+                    changesToVerify.add(UidRecord.CHANGE_CAPABILITY);
+                }
+                verifyObserverReceivedChanges(observerToTest, changesToVerify.toArray(),
+                        changeItems,
                         (observer, changeItem) -> {
                             verify(observer).onUidStateChanged(changeItem.uid,
                                     changeItem.procState, changeItem.procStateSeq,
-                                    ActivityManager.PROCESS_CAPABILITY_NONE);
+                                    changeItem.capability);
                         });
             }
             // Verify there are no other callbacks for this observer.
@@ -635,6 +666,8 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUidChanges_procStateCutpoint() throws RemoteException {
+        mockNoteOperation();
+
         final IUidObserver observer = mock(IUidObserver.Stub.class);
 
         when(observer.asBinder()).thenReturn((IBinder) observer);
@@ -703,6 +736,8 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUidChanges_validateUidsUpdated() {
+        mockNoteOperation();
+
         final int[] changesForPendingItems = UID_RECORD_CHANGES;
 
         final int[] procStatesForPendingItems = {
@@ -710,11 +745,11 @@ public class ActivityManagerServiceTest {
             ActivityManager.PROCESS_STATE_CACHED_EMPTY,
             ActivityManager.PROCESS_STATE_CACHED_ACTIVITY,
             ActivityManager.PROCESS_STATE_SERVICE,
-            ActivityManager.PROCESS_STATE_RECEIVER
+            ActivityManager.PROCESS_STATE_RECEIVER,
         };
         final ArrayList<ChangeRecord> pendingItemsForUids =
-                new ArrayList<>(changesForPendingItems.length);
-        for (int i = 0; i < changesForPendingItems.length; ++i) {
+                new ArrayList<>(procStatesForPendingItems.length);
+        for (int i = 0; i < procStatesForPendingItems.length; ++i) {
             final ChangeRecord item = new ChangeRecord();
             item.uid = i;
             item.change = changesForPendingItems[i];

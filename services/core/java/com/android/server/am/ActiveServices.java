@@ -24,6 +24,8 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
+import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
+import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
 import static android.os.PowerWhitelistManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerWhitelistManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerWhitelistManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
@@ -70,11 +72,13 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.ForegroundServiceDidNotStartInTimeException;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -131,6 +135,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
@@ -187,6 +192,15 @@ public final class ActiveServices {
     // calling startForeground() before we ANR + stop it.
     static final int SERVICE_START_FOREGROUND_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
+    // Foreground service types that always get immediate notification display,
+    // expressed in the same bitmask format that ServiceRecord.foregroundServiceType
+    // uses.
+    static final int FGS_IMMEDIATE_DISPLAY_MASK =
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
+
     final ActivityManagerService mAm;
 
     // Maximum number of services that we allow to start in the background
@@ -225,6 +239,11 @@ public final class ActiveServices {
     final ArrayList<ServiceRecord> mPendingFgsNotifications = new ArrayList<>();
 
     /**
+     * Uptime at which a given uid becomes eliglible again for FGS notification deferral
+     */
+    final SparseLongArray mFgsDeferralEligible = new SparseLongArray();
+
+    /**
      * Map of services that are asked to be brought up (start/binding) but not ready to.
      */
     private ArrayMap<ServiceRecord, ArrayList<Runnable>> mPendingBringups = new ArrayMap<>();
@@ -235,6 +254,12 @@ public final class ActiveServices {
     /** Mapping from uid to their foreground service AppOpCallbacks (if they have one). */
     @GuardedBy("mAm")
     private final SparseArray<AppOpCallback> mFgsAppOpCallbacks = new SparseArray<>();
+
+    /**
+     * The list of packages with the service restart backoff disabled.
+     */
+    @GuardedBy("mAm")
+    private final ArraySet<String> mRestartBackoffDisabledPackages = new ArraySet<>();
 
     /**
      * For keeping ActiveForegroundApps retaining state while the screen is off.
@@ -1965,16 +1990,34 @@ public final class ActiveServices {
         }
     }
 
+    private boolean withinFgsDeferRateLimit(final int uid, final long now) {
+        final long eligible = mFgsDeferralEligible.get(uid, 0L);
+        if (DEBUG_FOREGROUND_SERVICE) {
+            if (now < eligible) {
+                Slog.d(TAG_SERVICE, "FGS transition for uid " + uid
+                        + " within rate limit, showing immediately");
+            }
+        }
+        return now < eligible;
+    }
+
     // TODO: remove as part of fixing b/173627642
     @SuppressWarnings("AndroidFrameworkCompatChange")
     private void postFgsNotificationLocked(ServiceRecord r) {
+        final int uid = r.appInfo.uid;
+        final long now = SystemClock.uptimeMillis();
         final boolean isLegacyApp = (r.appInfo.targetSdkVersion < Build.VERSION_CODES.S);
+
+        // Is the behavior enabled at all?
         boolean showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled;
+        if (!showNow) {
+            // Did the app have another FGS notification deferred recently?
+            showNow = withinFgsDeferRateLimit(uid, now);
+        }
         if (!showNow) {
             // Legacy apps' FGS notifications are not deferred unless the relevant
             // DeviceConfig element has been set
-            showNow = mAm.mConstants.mFlagFgsNotificationDeferralApiGated
-                    && isLegacyApp;
+            showNow = isLegacyApp && mAm.mConstants.mFlagFgsNotificationDeferralApiGated;
         }
         if (!showNow) {
             // has the app forced deferral?
@@ -1987,15 +2030,12 @@ public final class ActiveServices {
                 }
                 // or is this an type of FGS that always shows immediately?
                 if (!showNow) {
-                    switch (r.foregroundServiceType) {
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL:
-                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:
-                            if (DEBUG_FOREGROUND_SERVICE) {
-                                Slog.d(TAG_SERVICE, "FGS " + r
-                                        + " type gets immediate display");
-                            }
-                            showNow = true;
+                    if ((r.foregroundServiceType & FGS_IMMEDIATE_DISPLAY_MASK) != 0) {
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.d(TAG_SERVICE, "FGS " + r
+                                    + " type gets immediate display");
+                        }
+                        showNow = true;
                     }
                 }
             } else {
@@ -2014,8 +2054,6 @@ public final class ActiveServices {
         }
 
         // schedule the actual notification post
-        final int uid = r.appInfo.uid;
-        final long now = SystemClock.uptimeMillis();
         long when = now + mAm.mConstants.mFgsNotificationDeferralInterval;
         // If there are already deferred FGS notifications for this app,
         // inherit that deferred-show timestamp
@@ -2033,6 +2071,9 @@ public final class ActiveServices {
                 when = Math.min(when, pending.fgDisplayTime);
             }
         }
+
+        final long nextEligible = when + mAm.mConstants.mFgsNotificationDeferralExclusionTime;
+        mFgsDeferralEligible.put(uid, nextEligible);
         r.fgDisplayTime = when;
         mPendingFgsNotifications.add(r);
         if (DEBUG_FOREGROUND_SERVICE) {
@@ -3272,25 +3313,32 @@ public final class ActiveServices {
                 }
             }
 
-            r.nextRestartTime = now + r.restartDelay;
+            if (isServiceRestartBackoffEnabledLocked(r.packageName)) {
+                r.nextRestartTime = now + r.restartDelay;
 
-            // Make sure that we don't end up restarting a bunch of services
-            // all at the same time.
-            boolean repeat;
-            do {
-                repeat = false;
+                // Make sure that we don't end up restarting a bunch of services
+                // all at the same time.
+                boolean repeat;
                 final long restartTimeBetween = mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN;
-                for (int i=mRestartingServices.size()-1; i>=0; i--) {
-                    ServiceRecord r2 = mRestartingServices.get(i);
-                    if (r2 != r && r.nextRestartTime >= (r2.nextRestartTime-restartTimeBetween)
-                            && r.nextRestartTime < (r2.nextRestartTime+restartTimeBetween)) {
-                        r.nextRestartTime = r2.nextRestartTime + restartTimeBetween;
-                        r.restartDelay = r.nextRestartTime - now;
-                        repeat = true;
-                        break;
+                do {
+                    repeat = false;
+                    for (int i = mRestartingServices.size() - 1; i >= 0; i--) {
+                        final ServiceRecord r2 = mRestartingServices.get(i);
+                        if (r2 != r
+                                && r.nextRestartTime >= (r2.nextRestartTime - restartTimeBetween)
+                                && r.nextRestartTime < (r2.nextRestartTime + restartTimeBetween)) {
+                            r.nextRestartTime = r2.nextRestartTime + restartTimeBetween;
+                            r.restartDelay = r.nextRestartTime - now;
+                            repeat = true;
+                            break;
+                        }
                     }
-                }
-            } while (repeat);
+                } while (repeat);
+            } else {
+                // It's been forced to ignore the restart backoff, fix the delay here.
+                r.restartDelay = mAm.mConstants.SERVICE_RESTART_DURATION;
+                r.nextRestartTime = now + r.restartDelay;
+            }
 
         } else {
             // Persistent processes are immediately restarted, so there is no
@@ -3310,15 +3358,22 @@ public final class ActiveServices {
 
         cancelForegroundNotificationLocked(r);
 
+        performScheduleRestartLocked(r, "Scheduling", reason, SystemClock.uptimeMillis());
+
+        return true;
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mAm")
+    void performScheduleRestartLocked(ServiceRecord r, @NonNull String scheduling,
+            @NonNull String reason, @UptimeMillisLong long now) {
         mAm.mHandler.removeCallbacks(r.restarter);
         mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
-        r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
-        Slog.w(TAG, "Scheduling restart of crashed service "
+        r.nextRestartTime = now + r.restartDelay;
+        Slog.w(TAG, scheduling + " restart of crashed service "
                 + r.shortInstanceName + " in " + r.restartDelay + "ms for " + reason);
         EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
                 r.userId, r.shortInstanceName, r.restartDelay);
-
-        return true;
     }
 
     final void performServiceRestartLocked(ServiceRecord r) {
@@ -3381,6 +3436,52 @@ public final class ActiveServices {
                 r.restartTracker = null;
             }
         }
+    }
+
+    /**
+     * Toggle service restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    @GuardedBy("mAm")
+    void setServiceRestartBackoffEnabledLocked(@NonNull String packageName, boolean enable,
+            @NonNull String reason) {
+        if (!enable) {
+            if (mRestartBackoffDisabledPackages.contains(packageName)) {
+                // Already disabled, do nothing.
+                return;
+            }
+            mRestartBackoffDisabledPackages.add(packageName);
+
+            final long now = SystemClock.uptimeMillis();
+            for (int i = 0, size = mRestartingServices.size(); i < size; i++) {
+                final ServiceRecord r = mRestartingServices.get(i);
+                if (TextUtils.equals(r.packageName, packageName)) {
+                    final long remaining = r.nextRestartTime - now;
+                    if (remaining > mAm.mConstants.SERVICE_RESTART_DURATION) {
+                        r.restartDelay = mAm.mConstants.SERVICE_RESTART_DURATION;
+                        r.nextRestartTime = now + r.restartDelay;
+                        performScheduleRestartLocked(r, "Rescheduling", reason, now);
+                    }
+                }
+            }
+        } else {
+            removeServiceRestartBackoffEnabledLocked(packageName);
+            // For the simplicity, we are not going to reschedule its pending restarts
+            // when we turn the backoff policy back on.
+        }
+    }
+
+    @GuardedBy("mAm")
+    private void removeServiceRestartBackoffEnabledLocked(@NonNull String packageName) {
+        mRestartBackoffDisabledPackages.remove(packageName);
+    }
+
+    /**
+     * @return {@code false} if the given package has been disable from enforcing the service
+     * restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    @GuardedBy("mAm")
+    boolean isServiceRestartBackoffEnabledLocked(@NonNull String packageName) {
+        return !mRestartBackoffDisabledPackages.contains(packageName);
     }
 
     private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
@@ -4431,6 +4532,7 @@ public final class ActiveServices {
                 mPendingBringups.removeAt(i);
             }
         }
+        removeServiceRestartBackoffEnabledLocked(packageName);
     }
 
     void cleanUpServices(int userId, ComponentName component, Intent baseIntent) {
@@ -4887,9 +4989,10 @@ public final class ActiveServices {
     }
 
     void serviceForegroundCrash(ProcessRecord app, CharSequence serviceRecord) {
-        mAm.crashApplication(app.uid, app.getPid(), app.info.packageName, app.userId,
+        mAm.crashApplicationWithType(app.uid, app.getPid(), app.info.packageName, app.userId,
                 "Context.startForegroundService() did not then call Service.startForeground(): "
-                    + serviceRecord, false /*force*/);
+                    + serviceRecord, false /*force*/,
+                ForegroundServiceDidNotStartInTimeException.TYPE_ID);
     }
 
     void scheduleServiceTimeoutLocked(ProcessRecord proc) {
@@ -5769,6 +5872,17 @@ public final class ActiveServices {
                     UserHandle.getUserId(callingUid), callingUid);
             if (isCompanionApp) {
                 ret = REASON_COMPANION_DEVICE_MANAGER;
+            }
+        }
+
+        if (ret == REASON_DENIED) {
+            final AppOpsManager appOpsManager = mAm.getAppOpsManager();
+            if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, callingUid,
+                    callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                ret = REASON_OP_ACTIVATE_VPN;
+            } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
+                    callingUid, callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                ret = REASON_OP_ACTIVATE_PLATFORM_VPN;
             }
         }
 

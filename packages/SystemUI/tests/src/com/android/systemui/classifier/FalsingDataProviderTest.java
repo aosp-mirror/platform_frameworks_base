@@ -16,9 +16,12 @@
 
 package com.android.systemui.classifier;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.closeTo;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
@@ -26,6 +29,7 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.classifier.FalsingDataProvider.GestureFinalizedListener;
 import com.android.systemui.utils.leaks.FakeBatteryController;
 
 import org.junit.After;
@@ -67,19 +71,19 @@ public class FalsingDataProviderTest extends ClassifierTest {
         mDataProvider.onMotionEvent(appendUpEvent(6, 5));
         List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
 
-        assertThat(motionEventList.size(), is(3));
-        assertThat(motionEventList.get(0).getActionMasked(), is(MotionEvent.ACTION_DOWN));
-        assertThat(motionEventList.get(1).getActionMasked(), is(MotionEvent.ACTION_MOVE));
-        assertThat(motionEventList.get(2).getActionMasked(), is(MotionEvent.ACTION_UP));
-        assertThat(motionEventList.get(0).getEventTime(), is(1L));
-        assertThat(motionEventList.get(1).getEventTime(), is(2L));
-        assertThat(motionEventList.get(2).getEventTime(), is(3L));
-        assertThat(motionEventList.get(0).getX(), is(2f));
-        assertThat(motionEventList.get(1).getX(), is(4f));
-        assertThat(motionEventList.get(2).getX(), is(6f));
-        assertThat(motionEventList.get(0).getY(), is(9f));
-        assertThat(motionEventList.get(1).getY(), is(7f));
-        assertThat(motionEventList.get(2).getY(), is(5f));
+        assertThat(motionEventList.size()).isEqualTo(3);
+        assertThat(motionEventList.get(0).getActionMasked()).isEqualTo(MotionEvent.ACTION_DOWN);
+        assertThat(motionEventList.get(1).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
+        assertThat(motionEventList.get(2).getActionMasked()).isEqualTo(MotionEvent.ACTION_UP);
+        assertThat(motionEventList.get(0).getEventTime()).isEqualTo(1L);
+        assertThat(motionEventList.get(1).getEventTime()).isEqualTo(2L);
+        assertThat(motionEventList.get(2).getEventTime()).isEqualTo(3L);
+        assertThat(motionEventList.get(0).getX()).isEqualTo(2f);
+        assertThat(motionEventList.get(1).getX()).isEqualTo(4f);
+        assertThat(motionEventList.get(2).getX()).isEqualTo(6f);
+        assertThat(motionEventList.get(0).getY()).isEqualTo(9f);
+        assertThat(motionEventList.get(1).getY()).isEqualTo(7f);
+        assertThat(motionEventList.get(2).getY()).isEqualTo(5f);
     }
 
     @Test
@@ -88,28 +92,28 @@ public class FalsingDataProviderTest extends ClassifierTest {
         mDataProvider.onMotionEvent(appendMoveEvent(4, 7, 800));
         List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
 
-        assertThat(motionEventList.size(), is(2));
-        assertThat(motionEventList.get(0).getActionMasked(), is(MotionEvent.ACTION_DOWN));
-        assertThat(motionEventList.get(1).getActionMasked(), is(MotionEvent.ACTION_MOVE));
-        assertThat(motionEventList.get(0).getEventTime(), is(1L));
-        assertThat(motionEventList.get(1).getEventTime(), is(800L));
-        assertThat(motionEventList.get(0).getX(), is(2f));
-        assertThat(motionEventList.get(1).getX(), is(4f));
-        assertThat(motionEventList.get(0).getY(), is(9f));
-        assertThat(motionEventList.get(1).getY(), is(7f));
+        assertThat(motionEventList.size()).isEqualTo(2);
+        assertThat(motionEventList.get(0).getActionMasked()).isEqualTo(MotionEvent.ACTION_DOWN);
+        assertThat(motionEventList.get(1).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
+        assertThat(motionEventList.get(0).getEventTime()).isEqualTo(1L);
+        assertThat(motionEventList.get(1).getEventTime()).isEqualTo(800L);
+        assertThat(motionEventList.get(0).getX()).isEqualTo(2f);
+        assertThat(motionEventList.get(1).getX()).isEqualTo(4f);
+        assertThat(motionEventList.get(0).getY()).isEqualTo(9f);
+        assertThat(motionEventList.get(1).getY()).isEqualTo(7f);
 
         mDataProvider.onMotionEvent(appendUpEvent(6, 5, 1200));
 
         // Still two events, but event a is gone.
-        assertThat(motionEventList.size(), is(2));
-        assertThat(motionEventList.get(0).getActionMasked(), is(MotionEvent.ACTION_MOVE));
-        assertThat(motionEventList.get(1).getActionMasked(), is(MotionEvent.ACTION_UP));
-        assertThat(motionEventList.get(0).getEventTime(), is(800L));
-        assertThat(motionEventList.get(1).getEventTime(), is(1200L));
-        assertThat(motionEventList.get(0).getX(), is(4f));
-        assertThat(motionEventList.get(1).getX(), is(6f));
-        assertThat(motionEventList.get(0).getY(), is(7f));
-        assertThat(motionEventList.get(1).getY(), is(5f));
+        assertThat(motionEventList.size()).isEqualTo(2);
+        assertThat(motionEventList.get(0).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
+        assertThat(motionEventList.get(1).getActionMasked()).isEqualTo(MotionEvent.ACTION_UP);
+        assertThat(motionEventList.get(0).getEventTime()).isEqualTo(800L);
+        assertThat(motionEventList.get(1).getEventTime()).isEqualTo(1200L);
+        assertThat(motionEventList.get(0).getX()).isEqualTo(4f);
+        assertThat(motionEventList.get(1).getX()).isEqualTo(6f);
+        assertThat(motionEventList.get(0).getY()).isEqualTo(7f);
+        assertThat(motionEventList.get(1).getY()).isEqualTo(5f);
     }
 
     @Test
@@ -126,19 +130,19 @@ public class FalsingDataProviderTest extends ClassifierTest {
         mDataProvider.onMotionEvent(motionEventA);
         List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
 
-        assertThat(motionEventList.size(), is(3));
-        assertThat(motionEventList.get(0).getActionMasked(), is(MotionEvent.ACTION_MOVE));
-        assertThat(motionEventList.get(1).getActionMasked(), is(MotionEvent.ACTION_MOVE));
-        assertThat(motionEventList.get(2).getActionMasked(), is(MotionEvent.ACTION_MOVE));
-        assertThat(motionEventList.get(0).getEventTime(), is(1L));
-        assertThat(motionEventList.get(1).getEventTime(), is(2L));
-        assertThat(motionEventList.get(2).getEventTime(), is(3L));
-        assertThat(motionEventList.get(0).getX(), is(2f));
-        assertThat(motionEventList.get(1).getX(), is(4f));
-        assertThat(motionEventList.get(2).getX(), is(6f));
-        assertThat(motionEventList.get(0).getY(), is(9f));
-        assertThat(motionEventList.get(1).getY(), is(7f));
-        assertThat(motionEventList.get(2).getY(), is(5f));
+        assertThat(motionEventList.size()).isEqualTo(3);
+        assertThat(motionEventList.get(0).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
+        assertThat(motionEventList.get(1).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
+        assertThat(motionEventList.get(2).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
+        assertThat(motionEventList.get(0).getEventTime()).isEqualTo(1L);
+        assertThat(motionEventList.get(1).getEventTime()).isEqualTo(2L);
+        assertThat(motionEventList.get(2).getEventTime()).isEqualTo(3L);
+        assertThat(motionEventList.get(0).getX()).isEqualTo(2f);
+        assertThat(motionEventList.get(1).getX()).isEqualTo(4f);
+        assertThat(motionEventList.get(2).getX()).isEqualTo(6f);
+        assertThat(motionEventList.get(0).getY()).isEqualTo(9f);
+        assertThat(motionEventList.get(1).getY()).isEqualTo(7f);
+        assertThat(motionEventList.get(2).getY()).isEqualTo(5f);
     }
 
     @Test
@@ -147,18 +151,18 @@ public class FalsingDataProviderTest extends ClassifierTest {
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(1, 1));
-        assertThat((double) mDataProvider.getAngle(), closeTo(Math.PI / 4, .001));
+        assertThat((double) mDataProvider.getAngle()).isWithin(.001).of(Math.PI / 4);
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(-1, -1));
-        assertThat((double) mDataProvider.getAngle(), closeTo(5 * Math.PI / 4, .001));
+        assertThat((double) mDataProvider.getAngle()).isWithin(.001).of(5 * Math.PI / 4);
         mDataProvider.onSessionEnd();
 
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(2, 0));
-        assertThat((double) mDataProvider.getAngle(), closeTo(0, .001));
+        assertThat((double) mDataProvider.getAngle()).isWithin(.001).of(0);
         mDataProvider.onSessionEnd();
     }
 
@@ -168,17 +172,17 @@ public class FalsingDataProviderTest extends ClassifierTest {
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(1, 1));
-        assertThat(mDataProvider.isHorizontal(), is(false));
+        assertThat(mDataProvider.isHorizontal()).isFalse();
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(2, 1));
-        assertThat(mDataProvider.isHorizontal(), is(true));
+        assertThat(mDataProvider.isHorizontal()).isTrue();
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(-3, -1));
-        assertThat(mDataProvider.isHorizontal(), is(true));
+        assertThat(mDataProvider.isHorizontal()).isTrue();
         mDataProvider.onSessionEnd();
     }
 
@@ -188,17 +192,17 @@ public class FalsingDataProviderTest extends ClassifierTest {
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(1, 0));
-        assertThat(mDataProvider.isVertical(), is(false));
+        assertThat(mDataProvider.isVertical()).isFalse();
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(0, 1));
-        assertThat(mDataProvider.isVertical(), is(true));
+        assertThat(mDataProvider.isVertical()).isTrue();
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(-3, -10));
-        assertThat(mDataProvider.isVertical(), is(true));
+        assertThat(mDataProvider.isVertical()).isTrue();
         mDataProvider.onSessionEnd();
     }
 
@@ -208,17 +212,17 @@ public class FalsingDataProviderTest extends ClassifierTest {
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(1, 1));
-        assertThat(mDataProvider.isRight(), is(true));
+        assertThat(mDataProvider.isRight()).isTrue();
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(0, 1));
-        assertThat(mDataProvider.isRight(), is(false));
+        assertThat(mDataProvider.isRight()).isFalse();
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(-3, -10));
-        assertThat(mDataProvider.isRight(), is(false));
+        assertThat(mDataProvider.isRight()).isFalse();
         mDataProvider.onSessionEnd();
     }
 
@@ -230,25 +234,60 @@ public class FalsingDataProviderTest extends ClassifierTest {
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(1, -1));
-        assertThat(mDataProvider.isUp(), is(true));
+        assertThat(mDataProvider.isUp()).isTrue();
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(0, 0));
-        assertThat(mDataProvider.isUp(), is(false));
+        assertThat(mDataProvider.isUp()).isFalse();
         mDataProvider.onSessionEnd();
 
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(-3, 10));
-        assertThat(mDataProvider.isUp(), is(false));
+        assertThat(mDataProvider.isUp()).isFalse();
         mDataProvider.onSessionEnd();
     }
 
     @Test
     public void test_isWirelessCharging() {
-        assertThat(mDataProvider.isWirelessCharging(), is(false));
+        assertThat(mDataProvider.isWirelessCharging()).isFalse();
 
         mFakeBatteryController.setWirelessCharging(true);
-        assertThat(mDataProvider.isWirelessCharging(), is(true));
+        assertThat(mDataProvider.isWirelessCharging()).isTrue();
+    }
+
+    @Test
+    public void test_GestureFinalizedListener() {
+        GestureFinalizedListener listener = mock(GestureFinalizedListener.class);
+
+        mDataProvider.addGestureCompleteListener(listener);
+
+        mDataProvider.onMotionEvent(appendDownEvent(0, 0));
+        mDataProvider.onMotionEventComplete();
+        verify(listener, never()).onGestureFinalized(anyLong());
+        mDataProvider.onMotionEvent(appendMoveEvent(0, 0));
+        mDataProvider.onMotionEventComplete();
+        verify(listener, never()).onGestureFinalized(anyLong());
+        mDataProvider.onMotionEvent(appendUpEvent(0, 0, 100));
+        verify(listener, never()).onGestureFinalized(anyLong());
+
+        mDataProvider.onMotionEventComplete();
+        verify(listener).onGestureFinalized(100);
+    }
+
+    @Test
+    public void test_GestureFinalizedListener_SkipCompletion() {
+        GestureFinalizedListener listener = mock(GestureFinalizedListener.class);
+
+        mDataProvider.addGestureCompleteListener(listener);
+
+        mDataProvider.onMotionEvent(appendDownEvent(0, 0));
+        mDataProvider.onMotionEvent(appendMoveEvent(0, 0));
+        mDataProvider.onMotionEvent(appendUpEvent(0, 0, 100));
+        verify(listener, never()).onGestureFinalized(anyLong());
+
+        // The start of a new gesture should finalized the prior one.
+        mDataProvider.onMotionEvent(appendDownEvent(0, 200));
+        verify(listener).onGestureFinalized(100);
     }
 }

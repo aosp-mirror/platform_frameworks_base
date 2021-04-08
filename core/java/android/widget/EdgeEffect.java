@@ -626,20 +626,31 @@ public class EdgeEffect {
             // assume rotations of increments of 90 degrees
             float x = mTmpPoints[10] - mTmpPoints[8];
             float width = right - left;
-            float vecX = dampStretchVector(Math.max(-1f, Math.min(1f, x / width)));
+            float vecX = 0f;
+            if (width > 0) {
+                vecX = dampStretchVector(Math.max(-1f, Math.min(1f, x / width)));
+            }
+
             float y = mTmpPoints[11] - mTmpPoints[9];
             float height = bottom - top;
-            float vecY = dampStretchVector(Math.max(-1f, Math.min(1f, y / height)));
-            renderNode.stretch(
-                    left,
-                    top,
-                    right,
-                    bottom,
-                    vecX,
-                    vecY,
-                    mWidth,
-                    mHeight
-            );
+            float vecY = 0f;
+            if (height > 0) {
+                vecY = dampStretchVector(Math.max(-1f, Math.min(1f, y / height)));
+            }
+
+            boolean hasStretchVectors = Float.compare(vecX, 0) != 0 || Float.compare(vecY, 0) != 0;
+            if (right > left && bottom > top && mWidth > 0 && mHeight > 0 && hasStretchVectors) {
+                renderNode.stretch(
+                        left,
+                        top,
+                        right,
+                        bottom,
+                        vecX,
+                        vecY,
+                        mWidth,
+                        mHeight
+                );
+            }
         } else {
             // This is TYPE_STRETCH and drawing into a Canvas that isn't a Recording Canvas,
             // so no effect can be shown. Just end the effect.

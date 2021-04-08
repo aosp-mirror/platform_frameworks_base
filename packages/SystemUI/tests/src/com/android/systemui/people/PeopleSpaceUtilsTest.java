@@ -239,37 +239,38 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetTilesReturnsSortedListWithMultipleRecentConversations() throws Exception {
+    public void testGetRecentTilesReturnsSortedListWithOnlyRecentConversations() throws Exception {
         // Ensure the less-recent Important conversation is before more recent conversations.
         ConversationChannelWrapper newerNonImportantConversation = getConversationChannelWrapper(
                 SHORTCUT_ID_1, false, 3);
+        ConversationChannelWrapper newerImportantConversation = getConversationChannelWrapper(
+                SHORTCUT_ID_1 + 1, true, 3);
         ConversationChannelWrapper olderImportantConversation = getConversationChannelWrapper(
-                SHORTCUT_ID_1 + 1,
+                SHORTCUT_ID_1 + 2,
                 true, 1);
         when(mNotificationManager.getConversations(anyBoolean())).thenReturn(
                 new ParceledListSlice(Arrays.asList(
-                        newerNonImportantConversation, olderImportantConversation)));
+                        newerNonImportantConversation, newerImportantConversation,
+                        olderImportantConversation)));
 
         // Ensure the non-Important conversation is sorted between these recent conversations.
         ConversationChannel recentConversationBeforeNonImportantConversation =
                 getConversationChannel(
-                        SHORTCUT_ID_1 + 2, 4);
+                        SHORTCUT_ID_1 + 3, 4);
         ConversationChannel recentConversationAfterNonImportantConversation =
-                getConversationChannel(SHORTCUT_ID_1 + 3,
+                getConversationChannel(SHORTCUT_ID_1 + 4,
                         2);
         when(mPeopleManager.getRecentConversations()).thenReturn(
                 new ParceledListSlice(Arrays.asList(recentConversationAfterNonImportantConversation,
                         recentConversationBeforeNonImportantConversation)));
 
-        List<String> orderedShortcutIds = PeopleSpaceUtils.getTiles(
+        List<String> orderedShortcutIds = PeopleSpaceUtils.getRecentTiles(
                 mContext, mNotificationManager, mPeopleManager,
                 mLauncherApps, mNotificationEntryManager)
                 .stream().map(tile -> tile.getId()).collect(Collectors.toList());
 
+        // Check for sorted recent conversations.
         assertThat(orderedShortcutIds).containsExactly(
-                // Even though the oldest conversation, should be first since "important"
-                olderImportantConversation.getShortcutInfo().getId(),
-                // Non-priority conversations should be sorted within recent conversations.
                 recentConversationBeforeNonImportantConversation.getShortcutInfo().getId(),
                 newerNonImportantConversation.getShortcutInfo().getId(),
                 recentConversationAfterNonImportantConversation.getShortcutInfo().getId())
@@ -277,7 +278,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetTilesReturnsSortedListWithMultipleImportantAndRecentConversations()
+    public void testGetPriorityTilesReturnsSortedListWithOnlyImportantConversations()
             throws Exception {
         // Ensure the less-recent Important conversation is before more recent conversations.
         ConversationChannelWrapper newerNonImportantConversation = getConversationChannelWrapper(
@@ -303,19 +304,15 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new ParceledListSlice(Arrays.asList(recentConversationAfterNonImportantConversation,
                         recentConversationBeforeNonImportantConversation)));
 
-        List<String> orderedShortcutIds = PeopleSpaceUtils.getTiles(
+        List<String> orderedShortcutIds = PeopleSpaceUtils.getPriorityTiles(
                 mContext, mNotificationManager, mPeopleManager,
                 mLauncherApps, mNotificationEntryManager)
                 .stream().map(tile -> tile.getId()).collect(Collectors.toList());
 
+        // Check for sorted priority conversations.
         assertThat(orderedShortcutIds).containsExactly(
-                // Important conversations should be sorted at the beginning.
                 newerImportantConversation.getShortcutInfo().getId(),
-                olderImportantConversation.getShortcutInfo().getId(),
-                // Non-priority conversations should be sorted within recent conversations.
-                recentConversationBeforeNonImportantConversation.getShortcutInfo().getId(),
-                newerNonImportantConversation.getShortcutInfo().getId(),
-                recentConversationAfterNonImportantConversation.getShortcutInfo().getId())
+                olderImportantConversation.getShortcutInfo().getId())
                 .inOrder();
     }
 

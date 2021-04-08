@@ -406,6 +406,8 @@ public class SmartspacePerUserService extends
                         + callbackCount + " callbacks.");
             }
             service.onCreateSmartspaceSessionLocked(mSmartspaceConfig, mSessionId, token);
+            mCallbacks.broadcast(
+                    callback -> service.registerSmartspaceUpdatesLocked(mSessionId, callback));
         }
     }
 }

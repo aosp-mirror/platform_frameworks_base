@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 import android.net.NetworkCapabilities;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
-import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
@@ -99,13 +98,14 @@ public class MobileRadioPowerCalculatorTest {
         MobileRadioPowerCalculator calculator =
                 new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
 
-        mStatsRule.apply(new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build(),
-                calculator);
+        mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
 
         SystemBatteryConsumer consumer =
                 mStatsRule.getSystemBatteryConsumer(SystemBatteryConsumer.DRAIN_TYPE_MOBILE_RADIO);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(2.2444);
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
         assertThat(consumer.getConsumedPower())
                 .isWithin(PRECISION).of(2.2444);
         assertThat(consumer.getPowerConsumedByApps())
@@ -114,6 +114,8 @@ public class MobileRadioPowerCalculatorTest {
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(0.8);
+        assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 
     @Test
@@ -163,11 +165,15 @@ public class MobileRadioPowerCalculatorTest {
         // 100000000 uAs * (1 mA / 1000 uA) * (1 h / 3600 s) + 1.53934 (apps)= 4.31711 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(4.31711);
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
         assertThat(consumer.getPowerConsumedByApps())
                 .isWithin(PRECISION).of(1.53934);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(1.53934);
+        assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
     }
 }

@@ -257,6 +257,8 @@ applications that come with the platform
         <permission name="android.permission.READ_DEVICE_CONFIG" />
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
         <permission name="android.permission.MODIFY_QUIET_MODE"/>
+        <!-- Permissions required to check if an app is in the foreground or not during IO -->
+        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
@@ -427,6 +429,7 @@ applications that come with the platform
         <permission name="android.permission.LOG_COMPAT_CHANGE" />
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
         <permission name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD" />
         <!-- Permissions required to test ambient display. -->
         <permission name="android.permission.READ_DREAM_STATE" />
         <permission name="android.permission.WRITE_DREAM_STATE" />
@@ -466,6 +469,8 @@ applications that come with the platform
         <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
         <permission name="android.permission.HDMI_CEC"/>
+        <!-- Permission required for CTS test - MediaPlayerTest -->
+        <permission name="android.permission.BIND_IMS_SERVICE" />
         <!-- Permission needed for CTS test - WifiManagerTest -->
         <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
@@ -495,6 +500,12 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
         <!-- Permission required for CTS test - ResourceObserverNativeTest -->
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
+        <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+        <permission name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
+        <!-- Permission required for CTS test - SystemMediaRouter2Test -->
+        <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
+        <!-- Permission required for CTS test - CtsPermission5TestCases -->
+        <permission name="android.permission.RENOUNCE_PERMISSIONS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

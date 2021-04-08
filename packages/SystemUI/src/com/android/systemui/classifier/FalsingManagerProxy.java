@@ -131,8 +131,13 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public boolean isFalseTap(boolean robustCheck, double falsePenalty) {
-        return mInternalFalsingManager.isFalseTap(robustCheck, falsePenalty);
+    public boolean isSimpleTap() {
+        return mInternalFalsingManager.isSimpleTap();
+    }
+
+    @Override
+    public boolean isFalseTap(@Penalty int penalty) {
+        return mInternalFalsingManager.isFalseTap(penalty);
     }
 
     @Override

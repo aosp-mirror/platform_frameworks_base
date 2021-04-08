@@ -2633,7 +2633,10 @@ public class SubscriptionManager {
         if (subInfo != null) {
             overrideConfig.mcc = subInfo.getMcc();
             overrideConfig.mnc = subInfo.getMnc();
-            if (overrideConfig.mnc == 0) overrideConfig.mnc = Configuration.MNC_ZERO;
+            if (overrideConfig.mnc == 0) {
+                overrideConfig.mnc = Configuration.MNC_ZERO;
+                cacheKey = null;
+            }
         }
 
         if (useRootLocale) {
@@ -2867,6 +2870,10 @@ public class SubscriptionManager {
      * Checks whether the app with the given context is authorized to manage the given subscription
      * according to its metadata.
      *
+     * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
+     * true). To check for permissions for non-embedded subscription as well,
+     * {@see android.telephony.TelephonyManager#hasCarrierPrivileges}.
+     *
      * @param info The subscription to check.
      * @return whether the app is authorized to manage this subscription per its metadata.
      */
@@ -2878,6 +2885,10 @@ public class SubscriptionManager {
      * Checks whether the given app is authorized to manage the given subscription. An app can only
      * be authorized if it is included in the {@link android.telephony.UiccAccessRule} of the
      * {@link android.telephony.SubscriptionInfo} with the access status.
+     *
+     * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
+     * true). To check for permissions for non-embedded subscription as well,
+     * {@see android.telephony.TelephonyManager#hasCarrierPrivileges}.
      *
      * @param info The subscription to check.
      * @param packageName Package name of the app to check.
@@ -3482,8 +3493,8 @@ public class SubscriptionManager {
      * @param subscriptionId the unique Subscription ID in database
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDeviceToDeviceStatusSharingPreference(
-            @DeviceToDeviceStatusSharingPreference int sharing, int subscriptionId) {
+    public void setDeviceToDeviceStatusSharingPreference(int subscriptionId,
+            @DeviceToDeviceStatusSharingPreference int sharing) {
         if (VDBG) {
             logd("[setDeviceToDeviceStatusSharing] + sharing: " + sharing + " subId: "
                     + subscriptionId);
@@ -3514,8 +3525,8 @@ public class SubscriptionManager {
      * @param subscriptionId The unique Subscription ID in database
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDeviceToDeviceStatusSharingContacts(@NonNull List<Uri> contacts,
-            int subscriptionId) {
+    public void setDeviceToDeviceStatusSharingContacts(int subscriptionId,
+            @NonNull List<Uri> contacts) {
         String contactString = serializeUriLists(contacts);
         if (VDBG) {
             logd("[setDeviceToDeviceStatusSharingContacts] + contacts: " + contactString

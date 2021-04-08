@@ -346,6 +346,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         position = findPositionForRootTask(position, task, true /* adding */);
 
         super.addChild(task, position);
+        if (mPreferredTopFocusableRootTask != null
+                && task.isFocusable()
+                && mPreferredTopFocusableRootTask.compareTo(task) < 0) {
+            // Clear preferred top because the adding focusable task has a higher z-order.
+            mPreferredTopFocusableRootTask = null;
+        }
         mAtmService.updateSleepIfNeededLocked();
         onRootTaskOrderChanged(task);
     }
@@ -438,6 +444,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
         // Update the top resumed activity because the preferred top focusable task may be changed.
         mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded();
+
+        final ActivityRecord r = child.getResumedActivity();
+        if (r != null && r == mRootWindowContainer.getTopResumedActivity()) {
+            mAtmService.setResumedActivityUncheckLocked(r, "positionChildAt");
+        }
 
         if (mChildren.indexOf(child) != oldPosition) {
             onRootTaskOrderChanged(child);

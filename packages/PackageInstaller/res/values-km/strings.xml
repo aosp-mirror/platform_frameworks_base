@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"កម្មវិធី​ដំឡើង​កញ្ចប់"</string>
     <string name="install" msgid="711829760615509273">"ដំឡើង"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"រួចរាល់"</string>
     <string name="cancel" msgid="1018267193425558088">"បោះបង់"</string>
     <string name="installing" msgid="4921993079741206516">"កំពុងដំឡើង…"</string>
     <string name="installing_app" msgid="1165095864863849422">"កំពុង​ដំឡើង <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"បាន​ដំឡើង​កម្មវិធី។"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"តើ​អ្នក​ចង់​ដំឡើង​កម្មវិធី​នេះ​ដែរទេ?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"តើ​អ្នក​ចង់​ដំឡើងកំណែ​ថ្មី​សម្រាប់​កម្មវិធី​ដែលមាន​ស្រាប់​នេះ​ដែរទេ? ទិន្នន័យ​ដែល​មាន​ស្រាប់​របស់​អ្នក​នឹង​មិន​បាត់​បង់​ទេ។"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"តើ​អ្នក​ចង់​ដំឡើងកំណែ​ថ្មី​សម្រាប់​កម្មវិធី​ដែលភ្ជាប់​មក​ជាមួយនេះ​ដែរទេ? ទិន្នន័យ​ដែល​មាន​ស្រាប់​របស់​អ្នក​នឹង​មិន​បាត់​បង់​ទេ។"</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"មិន​បាន​ដំឡើង​កម្មវិធីទេ។"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"កញ្ចប់ត្រូវបានទប់ស្កាត់​មិន​ឱ្យ​ដំឡើង។"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"កម្មវិធីមិនបានដំឡើងទេ ដោយសារកញ្ចប់កម្មវិធីមិនត្រូវគ្នាជាមួយកញ្ចប់ដែលមានស្រាប់។"</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"សកម្មភាព​ដំឡើង/លុបចេញមិនអាចប្រើ​នៅលើ Wear បានទេ។"</string>
     <string name="message_staging" msgid="8032722385658438567">"កំពុងសាកល្បងកម្មវិធី…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"មិនស្គាល់"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"ដើម្បីសុវតិ្ថភាពរបស់អ្នក ថេប្លេតរបស់អ្នកមិនត្រូវបានអនុញ្ញាតឱ្យដំឡើងកម្មវិធីដែលមិនស្គាល់ពីប្រភពនេះទេ។"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"ដើម្បីសុវតិ្ថភាពរបស់អ្នក ទូរទស្សន៍របស់អ្នកមិនត្រូវបានអនុញ្ញាតឱ្យ​ដំឡើងកម្មវិធីដែលមិនស្គាល់ពីប្រភពនេះទេ។"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"ដើម្បីសុវតិ្ថភាពរបស់អ្នក ទូរសព្ទរបស់អ្នកមិនត្រូវបានអនុញ្ញាតឱ្យដំឡើងកម្មវិធីដែលមិនស្គាល់ពីប្រភពនេះទេ។"</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ទូរសព្ទ និងទិន្នន័យផ្ទាល់ខ្លួនរបស់អ្នកងាយនឹងរងគ្រោះពីការវាយប្រហារពីកម្មវិធីដែលមិនស្គាល់។ ប្រសិនបើដំឡើងកម្មវិធីនេះ មានន័យថាអ្នកទទួលខុសត្រូវលើការខូចខាតទាំងឡាយចំពោះទូរសព្ទ ឬការបាត់បង់ទិន្នន័យរបស់អ្នក ដែលអាចបណ្ដាលមកពីការប្រើប្រាស់កម្មវិធីនេះ។"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ថេប្លេត និងទិន្នន័យផ្ទាល់ខ្លួនរបស់អ្នកងាយនឹងរងគ្រោះពីការវាយប្រហារពីកម្មវិធីដែលមិនស្គាល់។ ប្រសិនបើដំឡើងកម្មវិធីនេះ មានន័យថាអ្នកទទួលខុសត្រូវលើការខូចខាតទាំងឡាយចំពោះថេប្លេត ឬការបាត់បង់ទិន្នន័យរបស់អ្នក ដែលអាចបណ្ដាលមកពីការប្រើប្រាស់កម្មវិធីនេះ។"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ទូរទស្សន៍ និងទិន្នន័យផ្ទាល់ខ្លួនរបស់អ្នកងាយនឹងរងគ្រោះពីការវាយប្រហារពីកម្មវិធីដែលមិនស្គាល់។ ប្រសិនបើដំឡើងកម្មវិធីនេះ មានន័យថាអ្នកទទួលខុសត្រូវលើការខូចខាតទាំងឡាយចំពោះទូរទស្សន៍ ឬការបាត់បង់ទិន្នន័យរបស់អ្នក ដែលអាចបណ្ដាលមកពីការប្រើប្រាស់កម្មវិធីនេះ។"</string>

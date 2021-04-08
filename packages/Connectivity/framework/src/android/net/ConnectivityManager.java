@@ -450,6 +450,15 @@ public class ConnectivityManager {
             "android.net.action.PROMPT_PARTIAL_CONNECTIVITY";
 
     /**
+     * Clear DNS Cache Action: This is broadcast when networks have changed and old
+     * DNS entries should be cleared.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String ACTION_CLEAR_DNS_CACHE = "android.net.action.CLEAR_DNS_CACHE";
+
+    /**
      * Invalid tethering type.
      * @see #startTethering(int, boolean, OnStartTetheringCallback)
      * @hide
@@ -1193,7 +1202,8 @@ public class ConnectivityManager {
      *
      * @return a {@link Network} object for the current default network for the
      *         given UID or {@code null} if no default network is currently active
-     * TODO: b/183465229 Cleanup getActiveNetworkForUid once b/165835257 is fixed
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     @Nullable
@@ -3143,18 +3153,27 @@ public class ConnectivityManager {
     }
 
     /**
-     * Set a network-independent global http proxy.  This is not normally what you want
-     * for typical HTTP proxies - they are general network dependent.  However if you're
-     * doing something unusual like general internal filtering this may be useful.  On
-     * a private network where the proxy is not accessible, you may break HTTP using this.
+     * Set a network-independent global HTTP proxy.
      *
-     * @param p A {@link ProxyInfo} object defining the new global
-     *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
+     * This sets an HTTP proxy that applies to all networks and overrides any network-specific
+     * proxy. If set, HTTP libraries that are proxy-aware will use this global proxy when
+     * accessing any network, regardless of what the settings for that network are.
+     *
+     * Note that HTTP proxies are by nature typically network-dependent, and setting a global
+     * proxy is likely to break networking on multiple networks. This method is only meant
+     * for device policy clients looking to do general internal filtering or similar use cases.
+     *
+     * {@see #getGlobalProxy}
+     * {@see LinkProperties#getHttpProxy}
+     *
+     * @param p A {@link ProxyInfo} object defining the new global HTTP proxy. Calling this
+     *          method with a {@code null} value will clear the global HTTP proxy.
      * @hide
      */
+    // Used by Device Policy Manager to set the global proxy.
     @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
-    public void setGlobalProxy(@Nullable ProxyInfo p) {
+    public void setGlobalProxy(@Nullable final ProxyInfo p) {
         try {
             mService.setGlobalProxy(p);
         } catch (RemoteException e) {
@@ -3466,6 +3485,8 @@ public class ConnectivityManager {
          * not include location sensitive info.
          * </p>
          */
+        // Note: Some existing fields which are location sensitive may still be included without
+        // this flag if the app targets SDK < S (to maintain backwards compatibility).
         public static final int FLAG_INCLUDE_LOCATION_INFO = 1 << 0;
 
         /** @hide */

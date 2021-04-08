@@ -210,6 +210,7 @@ public class QSDetail extends LinearLayout {
             mDetailAdapter = adapter;
             listener = mHideGridContentWhenDone;
             setVisibility(View.VISIBLE);
+            updateDetailText();
         } else {
             if (wasShowingDetail) {
                 Dependency.get(MetricsLogger.class).hidden(mDetailAdapter.getMetricsCategory());
@@ -223,18 +224,8 @@ public class QSDetail extends LinearLayout {
             mQsPanelController.setGridContentVisibility(true);
             mQsPanelCallback.onScanStateChanged(false);
         }
-        updateDetailText();
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-
-        if (mShouldAnimate) {
-            animateDetailVisibleDiff(x, y, visibleDiff, listener);
-        } else {
-            if (showingDetail) {
-                showImmediately();
-            } else {
-                hideImmediately();
-            }
-        }
+        animateDetailVisibleDiff(x, y, visibleDiff, listener);
     }
 
     protected void animateDetailVisibleDiff(int x, int y, boolean visibleDiff, AnimatorListener listener) {
@@ -242,25 +233,14 @@ public class QSDetail extends LinearLayout {
             mAnimatingOpen = mDetailAdapter != null;
             if (mFullyExpanded || mDetailAdapter != null) {
                 setAlpha(1);
-                mClipper.animateCircularClip(x, y, mDetailAdapter != null, listener);
+                mClipper.updateCircularClip(mShouldAnimate, x, y, mDetailAdapter != null, listener);
             } else {
                 animate().alpha(0)
-                        .setDuration(FADE_DURATION)
+                        .setDuration(mShouldAnimate ? FADE_DURATION : 0)
                         .setListener(listener)
                         .start();
             }
         }
-    }
-
-    void showImmediately() {
-        setVisibility(VISIBLE);
-        mClipper.cancelAnimator();
-        mClipper.showBackground();
-    }
-
-    public void hideImmediately() {
-        mClipper.cancelAnimator();
-        setVisibility(View.GONE);
     }
 
     protected void setupDetailFooter(DetailAdapter adapter) {

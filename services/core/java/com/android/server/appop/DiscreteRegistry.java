@@ -44,6 +44,7 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -83,12 +84,16 @@ import java.util.List;
  */
 
 final class DiscreteRegistry {
-    static final String TIMELINE_FILE_SUFFIX = "tl";
+    static final String DISCRETE_HISTORY_FILE_SUFFIX = "tl";
     private static final String TAG = DiscreteRegistry.class.getSimpleName();
 
     private static final String PROPERTY_DISCRETE_HISTORY_CUTOFF = "discrete_history_cutoff_millis";
     private static final String PROPERTY_DISCRETE_HISTORY_QUANTIZATION =
             "discrete_history_quantization_millis";
+    private static final String PROPERTY_DISCRETE_FLAGS = "discrete_history_op_flags";
+    private static final String PROPERTY_DISCRETE_OPS_LIST = "discrete_history_ops_cslist";
+    private static final String DEFAULT_DISCRETE_OPS = OP_CAMERA + "," + OP_RECORD_AUDIO + ","
+            + OP_FINE_LOCATION + "," + OP_COARSE_LOCATION;
     private static final long DEFAULT_DISCRETE_HISTORY_CUTOFF = Duration.ofHours(24).toMillis();
     private static final long MAXIMUM_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(30).toMillis();
     private static final long DEFAULT_DISCRETE_HISTORY_QUANTIZATION =
@@ -96,6 +101,9 @@ final class DiscreteRegistry {
 
     private static long sDiscreteHistoryCutoff;
     private static long sDiscreteHistoryQuantization;
+    private static int[] sDiscreteOps;
+    private static int sDiscreteFlags;
+
 
     private static final String TAG_HISTORY = "h";
     private static final String ATTR_VERSION = "v";
@@ -155,6 +163,10 @@ final class DiscreteRegistry {
                 PROPERTY_DISCRETE_HISTORY_CUTOFF, DEFAULT_DISCRETE_HISTORY_CUTOFF);
         sDiscreteHistoryQuantization = DeviceConfig.getLong(DeviceConfig.NAMESPACE_PRIVACY,
                 PROPERTY_DISCRETE_HISTORY_QUANTIZATION, DEFAULT_DISCRETE_HISTORY_QUANTIZATION);
+        sDiscreteFlags = DeviceConfig.getInt(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_DISCRETE_FLAGS, OP_FLAGS_DISCRETE);
+        sDiscreteOps = parseOpsList(DeviceConfig.getString(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_DISCRETE_OPS_LIST, DEFAULT_DISCRETE_OPS));
     }
 
     private void setDiscreteHistoryParameters(DeviceConfig.Properties p) {
@@ -174,19 +186,15 @@ final class DiscreteRegistry {
                         sDiscreteHistoryQuantization);
             }
         }
-    }
-
-    private void createDiscreteAccessDir() {
-        if (!mDiscreteAccessDir.exists()) {
-            if (!mDiscreteAccessDir.mkdirs()) {
-                Slog.e(TAG, "Failed to create DiscreteRegistry directory");
-            }
-            FileUtils.setPermissions(mDiscreteAccessDir.getPath(),
-                    FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH, -1, -1);
+        if (p.getKeyset().contains(PROPERTY_DISCRETE_FLAGS)) {
+            sDiscreteFlags = p.getInt(PROPERTY_DISCRETE_FLAGS, OP_FLAGS_DISCRETE);
+        }
+        if (p.getKeyset().contains(PROPERTY_DISCRETE_OPS_LIST)) {
+            sDiscreteOps = parseOpsList(p.getString(PROPERTY_DISCRETE_OPS_LIST,
+                    DEFAULT_DISCRETE_OPS));
         }
     }
 
-    /* can be called only after HistoricalRegistry.isPersistenceInitialized() check */
     void recordDiscreteAccess(int uid, String packageName, int op, @Nullable String attributionTag,
             @AppOpsManager.OpFlags int flags, @AppOpsManager.UidState int uidState, long accessTime,
             long accessDuration) {
@@ -202,30 +210,8 @@ final class DiscreteRegistry {
     void writeAndClearAccessHistory() {
         synchronized (mOnDiskLock) {
             if (mDiscreteAccessDir == null) {
-                Slog.e(TAG, "State not saved - persistence not initialized.");
+                Slog.d(TAG, "State not saved - persistence not initialized.");
                 return;
-            }
-            final File[] files = mDiscreteAccessDir.listFiles();
-            if (files != null && files.length > 0) {
-                for (File f : files) {
-                    final String fileName = f.getName();
-                    if (!fileName.endsWith(TIMELINE_FILE_SUFFIX)) {
-                        continue;
-                    }
-                    try {
-                        long timestamp = Long.valueOf(fileName.substring(0,
-                                fileName.length() - TIMELINE_FILE_SUFFIX.length()));
-                        if (Instant.now().minus(sDiscreteHistoryCutoff,
-                                ChronoUnit.MILLIS).toEpochMilli() > timestamp) {
-                            f.delete();
-                            Slog.e(TAG, "Deleting file " + fileName);
-
-                        }
-                    } catch (Throwable t) {
-                        Slog.e(TAG, "Error while cleaning timeline files: " + t.getMessage() + " "
-                                + t.getStackTrace());
-                    }
-                }
             }
             DiscreteOps discreteOps;
             synchronized (mInMemoryLock) {
@@ -233,47 +219,23 @@ final class DiscreteRegistry {
                 mDiscreteOps = new DiscreteOps();
                 mCachedOps = null;
             }
-            if (discreteOps.isEmpty()) {
-                return;
-            }
-            long currentTimeStamp = Instant.now().toEpochMilli();
-            try {
-                final File file = new File(mDiscreteAccessDir,
-                        currentTimeStamp + TIMELINE_FILE_SUFFIX);
-                discreteOps.writeToFile(file);
-            } catch (Throwable t) {
-                Slog.e(TAG,
-                        "Error writing timeline state: " + t.getMessage() + " "
-                                + Arrays.toString(t.getStackTrace()));
+            deleteOldDiscreteHistoryFilesLocked();
+            if (!discreteOps.isEmpty()) {
+                persistDiscreteOpsLocked(discreteOps);
             }
         }
     }
 
-    void getHistoricalDiscreteOps(AppOpsManager.HistoricalOps result, long beginTimeMillis,
-            long endTimeMillis, @AppOpsManager.HistoricalOpsRequestFilter int filter, int uidFilter,
+    void addFilteredDiscreteOpsToHistoricalOps(AppOpsManager.HistoricalOps result,
+            long beginTimeMillis, long endTimeMillis,
+            @AppOpsManager.HistoricalOpsRequestFilter int filter, int uidFilter,
             @Nullable String packageNameFilter, @Nullable String[] opNamesFilter,
             @Nullable String attributionTagFilter, @AppOpsManager.OpFlags int flagsFilter) {
-        DiscreteOps discreteOps = getAndCacheDiscreteOps();
+        DiscreteOps discreteOps = getAllDiscreteOps();
         discreteOps.filter(beginTimeMillis, endTimeMillis, filter, uidFilter, packageNameFilter,
                 opNamesFilter, attributionTagFilter, flagsFilter);
         discreteOps.applyToHistoricalOps(result);
         return;
-    }
-
-    private DiscreteOps getAndCacheDiscreteOps() {
-        DiscreteOps discreteOps = new DiscreteOps();
-
-        synchronized (mOnDiskLock) {
-            synchronized (mInMemoryLock) {
-                discreteOps.merge(mDiscreteOps);
-            }
-            if (mCachedOps == null) {
-                mCachedOps = new DiscreteOps();
-                readDiscreteOpsFromDisk(mCachedOps);
-            }
-            discreteOps.merge(mCachedOps);
-        }
-        return discreteOps;
     }
 
     private void readDiscreteOpsFromDisk(DiscreteOps discreteOps) {
@@ -285,11 +247,11 @@ final class DiscreteRegistry {
             if (files != null && files.length > 0) {
                 for (File f : files) {
                     final String fileName = f.getName();
-                    if (!fileName.endsWith(TIMELINE_FILE_SUFFIX)) {
+                    if (!fileName.endsWith(DISCRETE_HISTORY_FILE_SUFFIX)) {
                         continue;
                     }
                     long timestamp = Long.valueOf(fileName.substring(0,
-                            fileName.length() - TIMELINE_FILE_SUFFIX.length()));
+                            fileName.length() - DISCRETE_HISTORY_FILE_SUFFIX.length()));
                     if (timestamp < beginTimeMillis) {
                         continue;
                     }
@@ -304,8 +266,19 @@ final class DiscreteRegistry {
             synchronized (mInMemoryLock) {
                 mDiscreteOps = new DiscreteOps();
             }
-            FileUtils.deleteContentsAndDir(mDiscreteAccessDir);
-            createDiscreteAccessDir();
+            clearOnDiskHistoryLocked();
+        }
+    }
+
+    void clearHistory(int uid, String packageName) {
+        synchronized (mOnDiskLock) {
+            DiscreteOps discreteOps;
+            synchronized (mInMemoryLock) {
+                discreteOps = getAllDiscreteOps();
+                clearHistory();
+            }
+            discreteOps.clearHistory(uid, packageName);
+            persistDiscreteOpsLocked(discreteOps);
         }
     }
 
@@ -314,7 +287,7 @@ final class DiscreteRegistry {
             @AppOpsManager.HistoricalOpsRequestFilter int filter, int dumpOp,
             @NonNull SimpleDateFormat sdf, @NonNull Date date, @NonNull String prefix,
             int nDiscreteOps) {
-        DiscreteOps discreteOps = getAndCacheDiscreteOps();
+        DiscreteOps discreteOps = getAllDiscreteOps();
         String[] opNamesFilter = dumpOp == OP_NONE ? null
                 : new String[]{AppOpsManager.opToPublicName(dumpOp)};
         discreteOps.filter(0, Instant.now().toEpochMilli(), filter, uidFilter, packageNameFilter,
@@ -322,32 +295,26 @@ final class DiscreteRegistry {
         discreteOps.dump(pw, sdf, date, prefix, nDiscreteOps);
     }
 
-    public static boolean isDiscreteOp(int op, int uid, @AppOpsManager.OpFlags int flags) {
-        if (!isDiscreteOp(op)) {
-            return false;
-        }
-        if (!isDiscreteUid(uid)) {
-            return false;
-        }
-        if ((flags & (OP_FLAGS_DISCRETE)) == 0) {
-            return false;
-        }
-        return true;
+    private void clearOnDiskHistoryLocked() {
+        mCachedOps = null;
+        FileUtils.deleteContentsAndDir(mDiscreteAccessDir);
+        createDiscreteAccessDir();
     }
 
-    static boolean isDiscreteOp(int op) {
-        if (op != OP_CAMERA && op != OP_RECORD_AUDIO && op != OP_FINE_LOCATION
-                && op != OP_COARSE_LOCATION) {
-            return false;
-        }
-        return true;
-    }
+    private DiscreteOps getAllDiscreteOps() {
+        DiscreteOps discreteOps = new DiscreteOps();
 
-    static boolean isDiscreteUid(int uid) {
-        if (uid < Process.FIRST_APPLICATION_UID) {
-            return false;
+        synchronized (mOnDiskLock) {
+            synchronized (mInMemoryLock) {
+                discreteOps.merge(mDiscreteOps);
+            }
+            if (mCachedOps == null) {
+                mCachedOps = new DiscreteOps();
+                readDiscreteOpsFromDisk(mCachedOps);
+            }
+            discreteOps.merge(mCachedOps);
+            return discreteOps;
         }
-        return true;
     }
 
     private final class DiscreteOps {
@@ -396,6 +363,15 @@ final class DiscreteRegistry {
             }
         }
 
+        private void clearHistory(int uid, String packageName) {
+            if (mUids.containsKey(uid)) {
+                mUids.get(uid).clearPackage(packageName);
+                if (mUids.get(uid).isEmpty()) {
+                    mUids.remove(uid);
+                }
+            }
+        }
+
         private void applyToHistoricalOps(AppOpsManager.HistoricalOps result) {
             int nUids = mUids.size();
             for (int i = 0; i < nUids; i++) {
@@ -403,8 +379,7 @@ final class DiscreteRegistry {
             }
         }
 
-        private void writeToFile(File f) throws Exception {
-            FileOutputStream stream = new FileOutputStream(f);
+        private void writeToStream(FileOutputStream stream) throws Exception {
             TypedXmlSerializer out = Xml.resolveSerializer(stream);
 
             out.startDocument(null, true);
@@ -420,7 +395,6 @@ final class DiscreteRegistry {
             }
             out.endTag(null, TAG_HISTORY);
             out.endDocument();
-            stream.close();
         }
 
         private void dump(@NonNull PrintWriter pw, @NonNull SimpleDateFormat sdf,
@@ -472,6 +446,60 @@ final class DiscreteRegistry {
         }
     }
 
+    private void createDiscreteAccessDir() {
+        if (!mDiscreteAccessDir.exists()) {
+            if (!mDiscreteAccessDir.mkdirs()) {
+                Slog.e(TAG, "Failed to create DiscreteRegistry directory");
+            }
+            FileUtils.setPermissions(mDiscreteAccessDir.getPath(),
+                    FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH, -1, -1);
+        }
+    }
+
+    private void persistDiscreteOpsLocked(DiscreteOps discreteOps) {
+        long currentTimeStamp = Instant.now().toEpochMilli();
+        final AtomicFile file = new AtomicFile(new File(mDiscreteAccessDir,
+                currentTimeStamp + DISCRETE_HISTORY_FILE_SUFFIX));
+        FileOutputStream stream = null;
+        try {
+            stream = file.startWrite();
+            discreteOps.writeToStream(stream);
+            file.finishWrite(stream);
+        } catch (Throwable t) {
+            Slog.e(TAG,
+                    "Error writing timeline state: " + t.getMessage() + " "
+                            + Arrays.toString(t.getStackTrace()));
+            if (stream != null) {
+                file.failWrite(stream);
+            }
+        }
+    }
+
+    private void deleteOldDiscreteHistoryFilesLocked() {
+        final File[] files = mDiscreteAccessDir.listFiles();
+        if (files != null && files.length > 0) {
+            for (File f : files) {
+                final String fileName = f.getName();
+                if (!fileName.endsWith(DISCRETE_HISTORY_FILE_SUFFIX)) {
+                    continue;
+                }
+                try {
+                    long timestamp = Long.valueOf(fileName.substring(0,
+                            fileName.length() - DISCRETE_HISTORY_FILE_SUFFIX.length()));
+                    if (Instant.now().minus(sDiscreteHistoryCutoff,
+                            ChronoUnit.MILLIS).toEpochMilli() > timestamp) {
+                        f.delete();
+                        Slog.e(TAG, "Deleting file " + fileName);
+
+                    }
+                } catch (Throwable t) {
+                    Slog.e(TAG, "Error while cleaning timeline files: " + t.getMessage() + " "
+                            + t.getStackTrace());
+                }
+            }
+        }
+    }
+
     private void createDiscreteAccessDirLocked() {
         if (!mDiscreteAccessDir.exists()) {
             if (!mDiscreteAccessDir.mkdirs()) {
@@ -519,6 +547,10 @@ final class DiscreteRegistry {
                     mPackages.removeAt(i);
                 }
             }
+        }
+
+        private void clearPackage(String packageName) {
+            mPackages.remove(packageName);
         }
 
         void addDiscreteAccess(int op, @NonNull String packageName, @Nullable String attributionTag,
@@ -876,6 +908,26 @@ final class DiscreteRegistry {
         }
     }
 
+    private static int[] parseOpsList(String opsList) {
+        String[] strArr;
+        if (opsList.isEmpty()) {
+            strArr = new String[0];
+        } else {
+            strArr = opsList.split(",");
+        }
+        int nOps = strArr.length;
+        int[] result = new int[nOps];
+        try {
+            for (int i = 0; i < nOps; i++) {
+                result[i] = Integer.parseInt(strArr[i]);
+            }
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Failed to parse Discrete ops list: " + e.getMessage());
+            return parseOpsList(DEFAULT_DISCRETE_OPS);
+        }
+        return result;
+    }
+
     private static List<DiscreteOpEvent> stableListMerge(List<DiscreteOpEvent> a,
             List<DiscreteOpEvent> b) {
         int nA = a.size();
@@ -910,6 +962,26 @@ final class DiscreteRegistry {
             }
         }
         return result;
+    }
+
+    private static boolean isDiscreteOp(int op, int uid, @AppOpsManager.OpFlags int flags) {
+        if (!ArrayUtils.contains(sDiscreteOps, op)) {
+            return false;
+        }
+        if (!isDiscreteUid(uid)) {
+            return false;
+        }
+        if ((flags & (sDiscreteFlags)) == 0) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isDiscreteUid(int uid) {
+        if (uid < Process.FIRST_APPLICATION_UID) {
+            return false;
+        }
+        return true;
     }
 }
 

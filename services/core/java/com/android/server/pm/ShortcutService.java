@@ -1050,7 +1050,8 @@ public class ShortcutService extends IShortcutService.Stub {
             file.failWrite(os);
         }
 
-        getUserShortcutsLocked(userId).logSharingShortcutStats(mMetricsLogger);
+        final ShortcutUser user = getUserShortcutsLocked(userId);
+        user.logSharingShortcutStats(mMetricsLogger);
     }
 
     @GuardedBy("mLock")
@@ -5076,17 +5077,6 @@ public class ShortcutService extends IShortcutService.Stub {
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
-        }
-    }
-
-    @VisibleForTesting
-    void updatePackageShortcutForTest(String packageName, String shortcutId, int userId,
-            Consumer<ShortcutInfo> cb) {
-        synchronized (mLock) {
-            final ShortcutPackage pkg = getPackageShortcutForTest(packageName, userId);
-            if (pkg == null) return;
-
-            pkg.mutateShortcut(shortcutId, null, cb);
         }
     }
 

@@ -52,8 +52,8 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_T2_SYSTEM_ID, FRONTEND_STATUS_TYPE_INTERLEAVINGS,
             FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS, FRONTEND_STATUS_TYPE_TS_DATA_RATES,
             FRONTEND_STATUS_TYPE_MODULATIONS_EXT, FRONTEND_STATUS_TYPE_ROLL_OFF,
-            FRONTEND_STATUS_TYPE_IS_MISO, FRONTEND_STATUS_TYPE_IS_LINEAR,
-            FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES})
+            FRONTEND_STATUS_TYPE_IS_MISO_ENABLED, FRONTEND_STATUS_TYPE_IS_LINEAR,
+            FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -218,7 +218,7 @@ public class FrontendStatus {
     /**
      * If the frontend currently supports MISO or not. Only supported in Tuner HAL 1.1 or higher.
      */
-    public static final int FRONTEND_STATUS_TYPE_IS_MISO =
+    public static final int FRONTEND_STATUS_TYPE_IS_MISO_ENABLED =
             android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.IS_MISO;
     /**
      * If the frontend code rate is linear or not. Only supported in Tuner HAL 1.1 or higher.
@@ -228,7 +228,7 @@ public class FrontendStatus {
     /**
      * If short frames is enabled or not. Only supported in Tuner HAL 1.1 or higher.
      */
-    public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES =
+    public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED =
             android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.IS_SHORT_FRAMES;
 
     /** @hide */
@@ -465,7 +465,7 @@ public class FrontendStatus {
      */
     public boolean isDemodLocked() {
         if (mIsDemodLocked == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("DemodLocked status is empty");
         }
         return mIsDemodLocked;
     }
@@ -474,7 +474,7 @@ public class FrontendStatus {
      */
     public int getSnr() {
         if (mSnr == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Snr status is empty");
         }
         return mSnr;
     }
@@ -485,7 +485,7 @@ public class FrontendStatus {
      */
     public int getBer() {
         if (mBer == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Ber status is empty");
         }
         return mBer;
     }
@@ -497,7 +497,7 @@ public class FrontendStatus {
      */
     public int getPer() {
         if (mPer == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Per status is empty");
         }
         return mPer;
     }
@@ -508,7 +508,7 @@ public class FrontendStatus {
      */
     public int getPerBer() {
         if (mPerBer == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("PerBer status is empty");
         }
         return mPerBer;
     }
@@ -517,7 +517,7 @@ public class FrontendStatus {
      */
     public int getSignalQuality() {
         if (mSignalQuality == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("SignalQuality status is empty");
         }
         return mSignalQuality;
     }
@@ -526,7 +526,7 @@ public class FrontendStatus {
      */
     public int getSignalStrength() {
         if (mSignalStrength == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("SignalStrength status is empty");
         }
         return mSignalStrength;
     }
@@ -535,7 +535,7 @@ public class FrontendStatus {
      */
     public int getSymbolRate() {
         if (mSymbolRate == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("SymbolRate status is empty");
         }
         return mSymbolRate;
     }
@@ -546,7 +546,7 @@ public class FrontendStatus {
     @FrontendSettings.InnerFec
     public long getInnerFec() {
         if (mInnerFec == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("InnerFec status is empty");
         }
         return mInnerFec;
     }
@@ -556,7 +556,7 @@ public class FrontendStatus {
     @FrontendModulation
     public int getModulation() {
         if (mModulation == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Modulation status is empty");
         }
         return mModulation;
     }
@@ -566,7 +566,7 @@ public class FrontendStatus {
     @FrontendSettings.FrontendSpectralInversion
     public int getSpectralInversion() {
         if (mInversion == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("SpectralInversion status is empty");
         }
         return mInversion;
     }
@@ -576,7 +576,7 @@ public class FrontendStatus {
     @Lnb.Voltage
     public int getLnbVoltage() {
         if (mLnbVoltage == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("LnbVoltage status is empty");
         }
         return mLnbVoltage;
     }
@@ -585,7 +585,7 @@ public class FrontendStatus {
      */
     public int getPlpId() {
         if (mPlpId == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("PlpId status is empty");
         }
         return mPlpId;
     }
@@ -594,7 +594,7 @@ public class FrontendStatus {
      */
     public boolean isEwbs() {
         if (mIsEwbs == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Ewbs status is empty");
         }
         return mIsEwbs;
     }
@@ -603,7 +603,7 @@ public class FrontendStatus {
      */
     public int getAgc() {
         if (mAgc == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Agc status is empty");
         }
         return mAgc;
     }
@@ -612,7 +612,7 @@ public class FrontendStatus {
      */
     public boolean isLnaOn() {
         if (mIsLnaOn == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("LnaOn status is empty");
         }
         return mIsLnaOn;
     }
@@ -622,7 +622,7 @@ public class FrontendStatus {
     @NonNull
     public boolean[] getLayerErrors() {
         if (mIsLayerErrors == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("LayerErrors status is empty");
         }
         return mIsLayerErrors;
     }
@@ -631,7 +631,7 @@ public class FrontendStatus {
      */
     public int getMer() {
         if (mMer == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Mer status is empty");
         }
         return mMer;
     }
@@ -642,7 +642,7 @@ public class FrontendStatus {
      */
     public int getFreqOffset() {
         if (mFreqOffset == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("FreqOffset status is empty");
         }
         return mFreqOffset;
     }
@@ -652,7 +652,7 @@ public class FrontendStatus {
     @DvbtFrontendSettings.Hierarchy
     public int getHierarchy() {
         if (mHierarchy == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Hierarchy status is empty");
         }
         return mHierarchy;
     }
@@ -661,7 +661,7 @@ public class FrontendStatus {
      */
     public boolean isRfLocked() {
         if (mIsRfLocked == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("isRfLocked status is empty");
         }
         return mIsRfLocked;
     }
@@ -671,7 +671,7 @@ public class FrontendStatus {
     @NonNull
     public Atsc3PlpTuningInfo[] getAtsc3PlpTuningInfo() {
         if (mPlpInfo == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Atsc3PlpTuningInfo status is empty");
         }
         return mPlpInfo;
     }
@@ -687,7 +687,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getBers status");
         if (mBers == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Bers status is empty");
         }
         return mBers;
     }
@@ -704,7 +704,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getCodeRates status");
         if (mCodeRates == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("CodeRates status is empty");
         }
         return mCodeRates;
     }
@@ -720,7 +720,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getBandwidth status");
         if (mBandwidth == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Bandwidth status is empty");
         }
         return mBandwidth;
     }
@@ -736,7 +736,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getGuardInterval status");
         if (mGuardInterval == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("GuardInterval status is empty");
         }
         return mGuardInterval;
     }
@@ -752,7 +752,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getTransmissionMode status");
         if (mTransmissionMode == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("TransmissionMode status is empty");
         }
         return mTransmissionMode;
     }
@@ -768,7 +768,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getUec status");
         if (mUec == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Uec status is empty");
         }
         return mUec;
     }
@@ -784,7 +784,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getSystemId status");
         if (mSystemId == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("SystemId status is empty");
         }
         return mSystemId;
     }
@@ -801,7 +801,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getInterleaving status");
         if (mInterleaving == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Interleaving status is empty");
         }
         return mInterleaving;
     }
@@ -819,7 +819,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getIsdbtSegment status");
         if (mIsdbtSegment == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("IsdbtSegment status is empty");
         }
         return mIsdbtSegment;
     }
@@ -835,7 +835,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getTsDataRate status");
         if (mTsDataRate == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("TsDataRate status is empty");
         }
         return mTsDataRate;
     }
@@ -852,7 +852,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getExtendedModulations status");
         if (mModulationsExt == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("ExtendedModulations status is empty");
         }
         return mModulationsExt;
     }
@@ -868,7 +868,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getRollOff status");
         if (mRollOff == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("RollOff status is empty");
         }
         return mRollOff;
     }
@@ -883,7 +883,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "isMisoEnabled status");
         if (mIsMisoEnabled == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("isMisoEnabled status is empty");
         }
         return mIsMisoEnabled;
     }
@@ -898,7 +898,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "isLinear status");
         if (mIsLinear == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("isLinear status is empty");
         }
         return mIsLinear;
     }
@@ -913,7 +913,7 @@ public class FrontendStatus {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "isShortFramesEnabled status");
         if (mIsShortFrames == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("isShortFramesEnabled status is empty");
         }
         return mIsShortFrames;
     }

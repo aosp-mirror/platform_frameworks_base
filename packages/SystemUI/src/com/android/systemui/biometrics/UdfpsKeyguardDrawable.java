@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -27,6 +28,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
 
@@ -37,6 +39,7 @@ public class UdfpsKeyguardDrawable extends UdfpsDrawable implements DozeReceiver
 
     private static final String TAG = "UdfpsAnimationKeyguard";
     private final int mAmbientDisplayColor;
+    static final float DEFAULT_AOD_STROKE_WIDTH = 1f;
 
     @NonNull private final Context mContext;
     private int mLockScreenColor;
@@ -48,22 +51,31 @@ public class UdfpsKeyguardDrawable extends UdfpsDrawable implements DozeReceiver
     private float mBurnInOffsetX;
     private float mBurnInOffsetY;
 
+    private final ValueAnimator mHintAnimator = ValueAnimator.ofFloat(
+            UdfpsKeyguardDrawable.DEFAULT_STROKE_WIDTH,
+            .5f,
+            UdfpsKeyguardDrawable.DEFAULT_STROKE_WIDTH);
+
     UdfpsKeyguardDrawable(@NonNull Context context) {
         super(context);
         mContext = context;
 
-        // TODO: move burn-in to view
         mMaxBurnInOffsetX = context.getResources()
                 .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
         mMaxBurnInOffsetY = context.getResources()
                 .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
 
+        mHintAnimator.setDuration(2000);
+        mHintAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mHintAnimator.addUpdateListener(anim -> setStrokeWidth((float) anim.getAnimatedValue()));
+
         mLockScreenColor = Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor);
         mAmbientDisplayColor = Color.WHITE;
-        updateAodPositionAndColor();
+
+        updateIcon();
     }
 
-    private void updateAodPositionAndColor() {
+    private void updateIcon() {
         mBurnInOffsetX = MathUtils.lerp(0f,
                 getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
                         - mMaxBurnInOffsetX,
@@ -75,12 +87,14 @@ public class UdfpsKeyguardDrawable extends UdfpsDrawable implements DozeReceiver
 
         mFingerprintDrawable.setTint(ColorUtils.blendARGB(mLockScreenColor,
                 mAmbientDisplayColor, mInterpolatedDarkAmount));
+        setStrokeWidth(MathUtils.lerp(DEFAULT_STROKE_WIDTH, DEFAULT_AOD_STROKE_WIDTH,
+                mInterpolatedDarkAmount));
         invalidateSelf();
     }
 
     @Override
     public void dozeTimeTick() {
-        updateAodPositionAndColor();
+        updateIcon();
     }
 
     @Override
@@ -88,17 +102,25 @@ public class UdfpsKeyguardDrawable extends UdfpsDrawable implements DozeReceiver
         if (isIlluminationShowing()) {
             return;
         }
+        canvas.save();
+        canvas.translate(mBurnInOffsetX, mBurnInOffsetY);
         mFingerprintDrawable.draw(canvas);
+        canvas.restore();
+    }
+
+    void animateHint() {
+        mHintAnimator.start();
     }
 
     void onDozeAmountChanged(float linear, float eased) {
+        mHintAnimator.cancel();
         mInterpolatedDarkAmount = eased;
-        updateAodPositionAndColor();
+        updateIcon();
     }
 
     void setLockScreenColor(int color) {
         if (mLockScreenColor == color) return;
         mLockScreenColor = color;
-        updateAodPositionAndColor();
+        updateIcon();
     }
 }

@@ -19,6 +19,9 @@ package com.android.keyguard;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -196,6 +199,46 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mKeyguardSecurityContainer.onApplyWindowInsets(insets);
         mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
         verify(mSecurityViewFlipper).measure(FAKE_MEASURE_SPEC, expectedHeightMeasureSpec);
+    }
+
+    private void setupForUpdateKeyguardPosition(SecurityMode securityMode) {
+        setUpKeyguard(
+                /* deviceConfigCanUseOneHandedKeyguard= */true,
+                /* sysuiResourceCanUseOneHandedKeyguard= */ true,
+                securityMode);
+
+        mKeyguardSecurityContainer.measure(FAKE_MEASURE_SPEC, FAKE_MEASURE_SPEC);
+        mKeyguardSecurityContainer.layout(0, 0, SCREEN_WIDTH, SCREEN_WIDTH);
+
+        // Start off left-aligned. This should happen anyway, but just do this to ensure
+        // definitely move to the left.
+        mKeyguardSecurityContainer.updateKeyguardPosition(0.0f);
+
+        // Clear any interactions with the mock so we know the interactions definitely come from the
+        // below testing.
+        reset(mSecurityViewFlipper);
+    }
+
+    @Test
+    public void updateKeyguardPosition_movesKeyguard() {
+        setupForUpdateKeyguardPosition(ONE_HANDED_SECURITY_MODE);
+
+        mKeyguardSecurityContainer.updateKeyguardPosition((SCREEN_WIDTH / 4f) * 3f);
+        verify(mSecurityViewFlipper).setTranslationX(SCREEN_WIDTH / 2.0f);
+
+        mKeyguardSecurityContainer.updateKeyguardPosition(0.0f);
+        verify(mSecurityViewFlipper).setTranslationX(0.0f);
+    }
+
+    @Test
+    public void updateKeyguardPosition_doesntMoveTwoHandedKeyguard() {
+        setupForUpdateKeyguardPosition(TWO_HANDED_SECURITY_MODE);
+
+        mKeyguardSecurityContainer.updateKeyguardPosition((SCREEN_WIDTH / 4f) * 3f);
+        verify(mSecurityViewFlipper, never()).setTranslationX(anyInt());
+
+        mKeyguardSecurityContainer.updateKeyguardPosition(0.0f);
+        verify(mSecurityViewFlipper, never()).setTranslationX(anyInt());
     }
 
     private void setUpKeyguard(

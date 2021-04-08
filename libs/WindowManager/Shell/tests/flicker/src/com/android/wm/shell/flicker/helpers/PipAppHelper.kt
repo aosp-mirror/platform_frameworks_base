@@ -26,8 +26,6 @@ import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
 import com.android.wm.shell.flicker.pip.tv.isFocusedOrHasFocusedChild
-import com.android.wm.shell.flicker.pip.waitPipWindowGone
-import com.android.wm.shell.flicker.pip.waitPipWindowShown
 import com.android.wm.shell.flicker.testapp.Components
 
 class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
@@ -64,7 +62,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         stringExtras: Map<String, String>
     ) {
         super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
-        wmHelper.waitPipWindowShown()
+        wmHelper.waitFor { it.wmState.hasPipWindow() }
     }
 
     private fun focusOnObject(selector: BySelector): Boolean {
@@ -86,7 +84,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         clickObject(ENTER_PIP_BUTTON_ID)
 
         // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper?.waitPipWindowShown() ?: SystemClock.sleep(3_000)
+        wmHelper?.waitFor { it.wmState.hasPipWindow() } ?: SystemClock.sleep(3_000)
     }
 
     fun clickStartMediaSessionButton() {
@@ -139,7 +137,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
 
         // Wait for animation to complete.
-        wmHelper.waitPipWindowGone()
+        wmHelper.waitFor { !it.wmState.hasPipWindow() }
         wmHelper.waitForHomeActivityVisible()
     }
 
@@ -169,7 +167,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         val windowRect = windowRegion.bounds
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
-        wmHelper.waitPipWindowGone()
+        wmHelper.waitFor { !it.wmState.hasPipWindow() }
         wmHelper.waitForAppTransitionIdle()
     }
 

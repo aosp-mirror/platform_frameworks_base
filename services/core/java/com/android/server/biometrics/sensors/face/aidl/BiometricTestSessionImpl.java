@@ -48,7 +48,7 @@ import java.util.Set;
  */
 public class BiometricTestSessionImpl extends ITestSession.Stub {
 
-    private static final String TAG = "BiometricTestSessionImpl";
+    private static final String TAG = "face/aidl/BiometricTestSessionImpl";
 
     @NonNull private final Context mContext;
     private final int mSensorId;
@@ -230,10 +230,12 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     public void cleanupInternalState(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
+        Slog.d(TAG, "cleanupInternalState: " + userId);
         mProvider.scheduleInternalCleanup(mSensorId, userId, new BaseClientMonitor.Callback() {
             @Override
             public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                 try {
+                    Slog.d(TAG, "onClientStarted: " + clientMonitor);
                     mCallback.onCleanupStarted(clientMonitor.getTargetUserId());
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
@@ -244,6 +246,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                     boolean success) {
                 try {
+                    Slog.d(TAG, "onClientFinished: " + clientMonitor);
                     mCallback.onCleanupFinished(clientMonitor.getTargetUserId());
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);

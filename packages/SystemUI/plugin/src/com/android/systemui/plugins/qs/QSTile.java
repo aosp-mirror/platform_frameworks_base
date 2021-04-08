@@ -15,10 +15,12 @@
 package com.android.systemui.plugins.qs;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
+import android.view.View;
 
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -53,10 +55,16 @@ public interface QSTile {
     void removeCallbacks();
 
     QSIconView createTileView(Context context);
-    
+
     void click();
     void secondaryClick();
-    void longClick();
+
+    /**
+     * The tile was long clicked.
+     *
+     * @param view The view that was clicked.
+     */
+    void longClick(@Nullable View view);
 
     void userSwitch(int currentUser);
     int getMetricsCategory();
@@ -143,6 +151,7 @@ public interface QSTile {
         public SlashState slash;
         public boolean handlesLongClick = true;
         public boolean showRippleEffect = true;
+        public Drawable sideViewDrawable;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
@@ -163,7 +172,8 @@ public interface QSTile {
                     || !Objects.equals(other.dualTarget, dualTarget)
                     || !Objects.equals(other.slash, slash)
                     || !Objects.equals(other.handlesLongClick, handlesLongClick)
-                    || !Objects.equals(other.showRippleEffect, showRippleEffect);
+                    || !Objects.equals(other.showRippleEffect, showRippleEffect)
+                    || !Objects.equals(other.sideViewDrawable, sideViewDrawable);
             other.icon = icon;
             other.iconSupplier = iconSupplier;
             other.label = label;
@@ -179,6 +189,7 @@ public interface QSTile {
             other.slash = slash != null ? slash.copy() : null;
             other.handlesLongClick = handlesLongClick;
             other.showRippleEffect = showRippleEffect;
+            other.sideViewDrawable = sideViewDrawable;
             return changed;
         }
 
@@ -204,6 +215,7 @@ public interface QSTile {
             sb.append(",isTransient=").append(isTransient);
             sb.append(",state=").append(state);
             sb.append(",slash=\"").append(slash).append("\"");
+            sb.append(",sideViewDrawable").append(sideViewDrawable);
             return sb.append(']');
         }
 

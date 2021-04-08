@@ -665,51 +665,6 @@ def check_cjk_punctuation():
             assert_font_supports_none_of_chars(record.font, cjk_punctuation, name)
 
 
-def getPostScriptName(font):
-  ttf = open_font(font)
-  nameTable = ttf['name']
-  for name in nameTable.names:
-    if name.nameID == 6 and name.platformID == 3 and name.platEncID == 1 and name.langID == 0x0409:
-      return str(name)
-
-
-def getSuffix(font):
-  file_path, index = font
-  with open(path.join(_fonts_dir, file_path), 'rb') as f:
-    tag = f.read(4)
-    isCollection = tag == b'ttcf'
-
-  ttf = open_font(font)
-  isType1 = ('CFF ' in ttf or 'CFF2' in ttf)
-
-  if isType1:
-    if isCollection:
-      return '.otc'
-    else:
-      return '.otf'
-  else:
-    if isCollection:
-      return '.ttc'
-    else:
-      return '.ttf'
-
-
-def check_canonical_name():
-  for record in _all_fonts:
-    file_name, index = record.font
-
-    if index and index != 0:
-      continue
-
-    psName = getPostScriptName(record.font)
-    assert psName, 'PostScript must be defined'
-
-    suffix = getSuffix(record.font)
-    canonicalName = '%s%s' % (psName, suffix)
-
-    assert file_name == canonicalName, (
-        '%s is not a canonical name. Must be %s' % (file_name, canonicalName))
-
 def main():
     global _fonts_dir
     target_out = sys.argv[1]
@@ -726,8 +681,6 @@ def main():
     check_hyphens(hyphens_dir)
 
     check_cjk_punctuation()
-
-    check_canonical_name()
 
     check_emoji = sys.argv[2]
     if check_emoji == 'true':

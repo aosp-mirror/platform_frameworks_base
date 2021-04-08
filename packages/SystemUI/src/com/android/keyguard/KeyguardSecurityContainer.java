@@ -267,6 +267,13 @@ public class KeyguardSecurityContainer extends FrameLayout {
         updateSecurityViewLocation(false);
     }
 
+    /** Update keyguard position based on a tapped X coordinate. */
+    public void updateKeyguardPosition(float x) {
+        if (mOneHandedMode) {
+            moveBouncerForXCoordinate(x, /* animate= */false);
+        }
+    }
+
     /** Return whether the one-handed keyguard should be enabled. */
     private boolean canUseOneHandedBouncer() {
         // Is it enabled?
@@ -488,9 +495,13 @@ public class KeyguardSecurityContainer extends FrameLayout {
             return;
         }
 
+        moveBouncerForXCoordinate(event.getX(), /* animate= */true);
+    }
+
+    private void moveBouncerForXCoordinate(float x, boolean animate) {
         // Did the tap hit the "other" side of the bouncer?
-        if ((mIsSecurityViewLeftAligned && (event.getX() > getWidth() / 2f))
-                || (!mIsSecurityViewLeftAligned && (event.getX() < getWidth() / 2f))) {
+        if ((mIsSecurityViewLeftAligned && (x > getWidth() / 2f))
+                || (!mIsSecurityViewLeftAligned && (x < getWidth() / 2f))) {
             mIsSecurityViewLeftAligned = !mIsSecurityViewLeftAligned;
 
             Settings.Global.putInt(
@@ -499,7 +510,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     mIsSecurityViewLeftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
                             : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
 
-            updateSecurityViewLocation(true);
+            updateSecurityViewLocation(animate);
         }
     }
 

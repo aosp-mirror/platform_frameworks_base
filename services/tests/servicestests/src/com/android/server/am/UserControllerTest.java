@@ -80,7 +80,6 @@ import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.am.UserState.KeyEvictedCallback;
 import com.android.server.pm.UserManagerInternal;
@@ -124,7 +123,6 @@ public class UserControllerTest {
     private static final long HANDLER_WAIT_TIME_MS = 100;
 
     private UserController mUserController;
-    private LockPatternUtils mLockPatternUtils;
     private TestInjector mInjector;
     private final HashMap<Integer, UserState> mUserStates = new HashMap<>();
 
@@ -163,13 +161,6 @@ public class UserControllerTest {
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
             doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
-
-            // Make it appear that calling unlockUserKey() is needed.
-            doReturn(true).when(mInjector).isFileEncryptedNativeOnly();
-            mLockPatternUtils = mock(LockPatternUtils.class);
-            when(mLockPatternUtils.isSecure(anyInt())).thenReturn(false);
-            doReturn(mLockPatternUtils).when(mInjector).getLockPatternUtils();
-
             // All UserController params are set to default.
             mUserController = new UserController(mInjector);
             setUpUser(TEST_USER_ID, NO_USERINFO_FLAGS);
@@ -559,20 +550,6 @@ public class UserControllerTest {
         setUpAndStartUserInBackground(TEST_USER_ID3);
         assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID3, /* delayedLocking= */ false,
                 /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
-    }
-
-    /**
-     * Test that if a user has a lock screen credential set, then UserController
-     * doesn't bother trying to unlock their storage key without a credential
-     * token, as it will never work.
-     */
-    @Test
-    public void testSecureUserUnlockNotAttempted() throws Exception {
-        when(mLockPatternUtils.isSecure(eq(TEST_USER_ID1))).thenReturn(true);
-        setUpUser(TEST_USER_ID1, 0);
-        mUserController.startUser(TEST_USER_ID1, /* foreground= */ false);
-        verify(mInjector.mStorageManagerMock, times(0))
-                .unlockUserKey(eq(TEST_USER_ID1), anyInt(), any(), any());
     }
 
     @Test

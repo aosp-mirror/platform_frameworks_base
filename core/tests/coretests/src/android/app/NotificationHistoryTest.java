@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -322,6 +324,48 @@ public class NotificationHistoryTest {
 
         // 1 package names and 8 * 2 unique channel names and ids and 3 conversation ids
         assertThat(history.getPooledStringsToWrite().length).isEqualTo(20);
+        assertThat(history.getNotificationsToWrite())
+                .containsExactlyElementsIn(postRemoveExpectedEntries);
+    }
+
+    @Test
+    public void testRemoveChannelFromWrite() {
+        NotificationHistory history = new NotificationHistory();
+
+        List<HistoricalNotification> postRemoveExpectedEntries = new ArrayList<>();
+        Set<String> postRemoveExpectedStrings = new HashSet<>();
+        for (int i = 1; i <= 10; i++) {
+            HistoricalNotification n = getHistoricalNotification("pkg", i);
+
+            // Remove channel numbers 5 and 6
+            if (i != 5 && i != 6) {
+                postRemoveExpectedStrings.add(n.getPackage());
+                postRemoveExpectedStrings.add(n.getChannelName());
+                postRemoveExpectedStrings.add(n.getChannelId());
+                if (n.getConversationId() != null) {
+                    postRemoveExpectedStrings.add(n.getConversationId());
+                }
+                postRemoveExpectedEntries.add(n);
+            }
+
+            history.addNotificationToWrite(n);
+        }
+        // add second notification with the same channel id that will also be removed
+        history.addNotificationToWrite(getHistoricalNotification("pkg", 6));
+
+        history.poolStringsFromNotifications();
+
+        assertThat(history.getNotificationsToWrite().size()).isEqualTo(11);
+        // 1 package name and 20 unique channel names and ids and 5 conversation ids
+        assertThat(history.getPooledStringsToWrite().length).isEqualTo(26);
+
+        history.removeChannelFromWrite("pkg", "channelId5");
+        history.removeChannelFromWrite("pkg", "channelId6");
+
+        // 1 package names and 8 * 2 unique channel names and ids and 4 conversation ids
+        assertThat(history.getPooledStringsToWrite().length).isEqualTo(21);
+        assertThat(Arrays.asList(history.getPooledStringsToWrite()))
+                .containsExactlyElementsIn(postRemoveExpectedStrings);
         assertThat(history.getNotificationsToWrite())
                 .containsExactlyElementsIn(postRemoveExpectedEntries);
     }

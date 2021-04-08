@@ -31,7 +31,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.view.Choreographer;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -375,12 +374,5 @@ public class DependencyProvider {
     @SysUISingleton
     public ModeSwitchesController providesModeSwitchesController(Context context) {
         return new ModeSwitchesController(context);
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    public QuickAccessWalletClient provideQuickAccessWalletClient(Context context) {
-        return QuickAccessWalletClient.create(context);
     }
 }

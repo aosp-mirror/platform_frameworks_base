@@ -18,6 +18,7 @@
 #include <SkPaintFilterCanvas.h>
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
+#include "TransformCanvas.h"
 #include "utils/TraceUtils.h"
 
 #include <include/effects/SkImageFilters.h>
@@ -179,20 +180,7 @@ static bool layerNeedsPaint(const sk_sp<SkImage>& snapshotImage, const LayerProp
         paint->setColorFilter(sk_ref_sp(properties.getColorFilter()));
 
         sk_sp<SkImageFilter> imageFilter = sk_ref_sp(properties.getImageFilter());
-        sk_sp<SkImageFilter> stretchFilter =
-                properties.getStretchEffect().getImageFilter(snapshotImage);
-        sk_sp<SkImageFilter> filter;
-        if (imageFilter && stretchFilter) {
-            filter = SkImageFilters::Compose(
-                  std::move(stretchFilter),
-                  std::move(imageFilter)
-            );
-        } else if (stretchFilter) {
-            filter = std::move(stretchFilter);
-        } else {
-            filter = std::move(imageFilter);
-        }
-        paint->setImageFilter(std::move(filter));
+        paint->setImageFilter(std::move(imageFilter));
         return true;
     }
     return false;
@@ -256,8 +244,21 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                 canvas->drawAnnotation(bounds, String8::format(
                     "SurfaceID|%" PRId64, renderNode->uniqueId()).c_str(), nullptr);
             }
-            canvas->drawImageRect(snapshotImage, bounds, bounds, sampling, &paint,
-                                  SkCanvas::kStrict_SrcRectConstraint);
+
+            if (renderNode->hasHolePunches()) {
+                TransformCanvas transformCanvas(canvas);
+                displayList->draw(&transformCanvas);
+            }
+
+            const StretchEffect& stretch = properties.layerProperties().getStretchEffect();
+            if (stretch.isEmpty()) {
+                canvas->drawImageRect(snapshotImage, bounds, bounds, sampling, &paint,
+                                      SkCanvas::kStrict_SrcRectConstraint);
+            } else {
+                sk_sp<SkShader> stretchShader = stretch.getShader(snapshotImage);
+                paint.setShader(stretchShader);
+                canvas->drawRect(bounds, paint);
+            }
 
             if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {
                 renderNode->getSkiaLayer()->hasRenderedSinceRepaint = true;

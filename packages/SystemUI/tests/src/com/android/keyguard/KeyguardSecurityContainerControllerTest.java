@@ -177,4 +177,10 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardSecurityContainerController.updateResources();
         verify(mView, times(1)).updateLayoutForSecurityMode(any());
     }
+
+    @Test
+    public void updateKeyguardPosition_callsThroughToView() {
+        mKeyguardSecurityContainerController.updateKeyguardPosition(1.0f);
+        verify(mView).updateKeyguardPosition(1.0f);
+    }
 }

@@ -24,7 +24,6 @@ import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PictureInPictureParams;
@@ -55,11 +54,12 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.ExecutorUtils;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.onehanded.OneHandedController;
+import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.IPip;
 import com.android.wm.shell.pip.IPipAnimationListener;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
@@ -74,6 +74,7 @@ import com.android.wm.shell.pip.PipUtils;
 
 import java.io.PrintWriter;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -94,6 +95,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipBoundsState mPipBoundsState;
     private PipTouchHandler mTouchHandler;
     private PipTransitionController mPipTransitionController;
+    private TaskStackListenerImpl mTaskStackListener;
+    private Optional<OneHandedController> mOneHandedController;
     protected final PipImpl mImpl;
 
     private final Rect mTmpInsetBounds = new Rect();
@@ -239,7 +242,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
-            TaskStackListenerImpl taskStackListener, ShellExecutor mainExecutor) {
+            TaskStackListenerImpl taskStackListener,
+            Optional<OneHandedController> oneHandedController,
+            ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             Slog.w(TAG, "Device doesn't support Pip feature");
             return null;
@@ -248,7 +253,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
                 pipBoundsState, pipMediaController, phonePipMenuController, pipTaskOrganizer,
                 pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
-                taskStackListener, mainExecutor)
+                taskStackListener, oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -264,6 +269,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
+            Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor
     ) {
         // Ensure that we are the primary user's SystemUI.
@@ -284,13 +290,20 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mMenuController = phonePipMenuController;
         mTouchHandler = pipTouchHandler;
         mAppOpsListener = pipAppOpsListener;
+        mOneHandedController = oneHandedController;
         mPipTransitionController = pipTransitionController;
+        mTaskStackListener = taskStackListener;
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
                 INPUT_CONSUMER_PIP, mainExecutor);
+        //TODO: move this to ShellInit when PipController can be injected
+        mMainExecutor.execute(this::init);
+    }
+
+    public void init() {
         mPipTransitionController.registerPipTransitionCallback(this);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             mPipBoundsState.setDisplayId(displayId);
-            onDisplayChanged(displayController.getDisplayLayout(displayId),
+            onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
                     false /* saveRestoreSnapFraction */);
         });
         mPipBoundsState.setOnMinimalSizeChangeCallback(
@@ -315,13 +328,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mPipInputConsumer.setInputListener(mTouchHandler::handleTouchEvent);
             mPipInputConsumer.setRegistrationListener(mTouchHandler::onRegistrationChanged);
         }
-        displayController.addDisplayChangingController(mRotationController);
-        displayController.addDisplayWindowListener(mDisplaysChangedListener);
+        mDisplayController.addDisplayChangingController(mRotationController);
+        mDisplayController.addDisplayWindowListener(mDisplaysChangedListener);
 
         // Ensure that we have the display info in case we get calls to update the bounds before the
         // listener calls back
-        mPipBoundsState.setDisplayId(context.getDisplayId());
-        mPipBoundsState.setDisplayLayout(new DisplayLayout(context, context.getDisplay()));
+        mPipBoundsState.setDisplayId(mContext.getDisplayId());
+        mPipBoundsState.setDisplayLayout(new DisplayLayout(mContext, mContext.getDisplay()));
 
         try {
             mWindowManagerShellWrapper.addPinnedStackListener(mPinnedTaskListener);
@@ -343,7 +356,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         // Handle for system task stack changes.
-        taskStackListener.addListener(
+        mTaskStackListener.addListener(
                 new TaskStackListenerCallback() {
                     @Override
                     public void onActivityPinned(String packageName, int userId, int taskId,
@@ -374,6 +387,21 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                                 clearedTask /* skipAnimation */);
                     }
                 });
+
+        mOneHandedController.ifPresent(controller -> {
+            controller.asOneHanded().registerTransitionCallback(
+                    new OneHandedTransitionCallback() {
+                        @Override
+                        public void onStartFinished(Rect bounds) {
+                            mTouchHandler.setOhmOffset(bounds.top);
+                        }
+
+                        @Override
+                        public void onStopFinished(Rect bounds) {
+                            mTouchHandler.setOhmOffset(bounds.top);
+                        }
+                    });
+        });
     }
 
     @Override

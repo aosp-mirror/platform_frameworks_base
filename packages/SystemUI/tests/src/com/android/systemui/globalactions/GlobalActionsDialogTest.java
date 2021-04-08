@@ -33,12 +33,10 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
-import android.content.ContentResolver;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
@@ -60,15 +58,10 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.controls.controller.ControlsController;
-import com.android.systemui.controls.dagger.ControlsComponent;
-import com.android.systemui.controls.management.ControlsListingController;
-import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
-import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -77,6 +70,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -105,9 +99,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private DevicePolicyManager mDevicePolicyManager;
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
-    @Mock private ConnectivityManager mConnectivityManager;
     @Mock private TelephonyListenerManager mTelephonyListenerManager;
-    @Mock private ContentResolver mContentResolver;
+    @Mock private GlobalSettings mGlobalSettings;
     @Mock private Resources mResources;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private ActivityStarter mActivityStarter;
@@ -120,11 +113,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private IStatusBarService mStatusBarService;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
-    @Mock private ControlsUiController mControlsUiController;
     @Mock private IWindowManager mWindowManager;
     @Mock private Executor mBackgroundExecutor;
-    @Mock private ControlsListingController mControlsListingController;
-    @Mock private ControlsController mControlsController;
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private RingerModeTracker mRingerModeTracker;
     @Mock private RingerModeLiveData mRingerModeLiveData;
@@ -132,10 +122,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock GlobalActionsPanelPlugin mWalletPlugin;
     @Mock GlobalActionsPanelPlugin.PanelViewController mWalletController;
     @Mock private Handler mHandler;
-    @Mock private UserContextProvider mUserContextProvider;
     @Mock private UserTracker mUserTracker;
     @Mock private SecureSettings mSecureSettings;
-    private ControlsComponent mControlsComponent;
 
     private TestableLooper mTestableLooper;
 
@@ -146,18 +134,6 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
-        when(mUserContextProvider.getUserContext()).thenReturn(mContext);
-        mControlsComponent = new ControlsComponent(
-                true,
-                mContext,
-                () -> mControlsController,
-                () -> mControlsUiController,
-                () -> mControlsListingController,
-                mLockPatternUtils,
-                mKeyguardStateController,
-                mUserTracker,
-                mSecureSettings
-        );
 
         mGlobalActionsDialog = new GlobalActionsDialog(mContext,
                 mWindowManagerFuncs,
@@ -166,9 +142,9 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mDevicePolicyManager,
                 mLockPatternUtils,
                 mBroadcastDispatcher,
-                mConnectivityManager,
                 mTelephonyListenerManager,
-                mContentResolver,
+                mGlobalSettings,
+                mSecureSettings,
                 null,
                 mResources,
                 mConfigurationController,
@@ -188,9 +164,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mUiEventLogger,
                 mRingerModeTracker,
                 mSysUiState,
-                mHandler,
-                mControlsComponent,
-                mUserContextProvider
+                mHandler
         );
         mGlobalActionsDialog.setZeroDialogPressDelayForTesting();
 
@@ -513,14 +487,15 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
         when(mActivityManager.getCurrentUser()).thenReturn(newUserInfo());
         when(mLockPatternUtils.getStrongAuthForUser(anyInt())).thenReturn(STRONG_AUTH_NOT_REQUIRED);
-        mGlobalActionsDialog.mShowLockScreenCardsAndControls = false;
+        mGlobalActionsDialog.mShowLockScreenCards = false;
         setupDefaultActions();
         when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
         when(mWalletController.getPanelContent()).thenReturn(new FrameLayout(mContext));
 
         mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
 
-        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        GlobalActionsDialog.ActionsDialog dialog =
+                (GlobalActionsDialog.ActionsDialog) mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.VISIBLE);
 
@@ -529,21 +504,22 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotShowLockScreenMessage_whenWalletOrControlsShownOnLockScreen()
+    public void testShouldNotShowLockScreenMessage_whenWalletShownOnLockScreen()
             throws RemoteException {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         mGlobalActionsDialog.mDialog = null;
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
         when(mActivityManager.getCurrentUser()).thenReturn(newUserInfo());
         when(mLockPatternUtils.getStrongAuthForUser(anyInt())).thenReturn(STRONG_AUTH_NOT_REQUIRED);
-        mGlobalActionsDialog.mShowLockScreenCardsAndControls = true;
+        mGlobalActionsDialog.mShowLockScreenCards = true;
         setupDefaultActions();
         when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
         when(mWalletController.getPanelContent()).thenReturn(new FrameLayout(mContext));
 
         mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
 
-        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        GlobalActionsDialog.ActionsDialog dialog =
+                (GlobalActionsDialog.ActionsDialog) mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.GONE);
 
@@ -552,7 +528,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotShowLockScreenMessage_whenControlsAndWalletBothDisabled()
+    public void testShouldNotShowLockScreenMessage_whenWalletBothDisabled()
             throws RemoteException {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         mGlobalActionsDialog.mDialog = null;
@@ -560,15 +536,15 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
 
         when(mActivityManager.getCurrentUser()).thenReturn(newUserInfo());
         when(mLockPatternUtils.getStrongAuthForUser(anyInt())).thenReturn(STRONG_AUTH_NOT_REQUIRED);
-        mGlobalActionsDialog.mShowLockScreenCardsAndControls = true;
+        mGlobalActionsDialog.mShowLockScreenCards = true;
         setupDefaultActions();
         when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
         when(mWalletController.getPanelContent()).thenReturn(null);
-        when(mControlsUiController.getAvailable()).thenReturn(false);
 
         mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
 
-        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        GlobalActionsDialog.ActionsDialog dialog =
+                (GlobalActionsDialog.ActionsDialog) mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.GONE);
 

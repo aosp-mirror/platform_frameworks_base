@@ -13,42 +13,101 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<androidx.core.widget.NestedScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scroll"
+    android:id="@+id/top_level"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+    <TextView
+        android:id="@+id/select_conversation_title"
+        android:text="@string/select_conversation_title"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="24sp"/>
 
-    <LinearLayout
-        android:id="@+id/people_space_layout"
+    <TextView
+        android:id="@+id/select_conversation"
+        android:text="@string/select_conversation_text"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:clipChildren="false"
-        android:clipToPadding="false">
+        android:layout_gravity="center_horizontal"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:padding="24dp" />
 
-        <TextView
-            android:id="@+id/select_conversation_title"
-            android:gravity="center"
-            android:text="@string/select_conversation_title"
-            android:layout_width="wrap_content"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-            android:textSize="24sp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"/>
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/select_conversation"
-            android:gravity="center"
-            android:text="@string/select_conversation_text"
+        <LinearLayout
+            android:id="@+id/scroll_layout"
             android:layout_width="match_parent"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-            android:textSize="16sp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:padding="24dp" />
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
 
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+            <LinearLayout
+                android:id="@+id/priority"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="35dp">
+                <TextView
+                    android:id="@+id/priority_header"
+                    android:text="@string/priority_conversations"
+                    android:layout_width="wrap_content"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                    android:textColor="?android:attr/colorAccent"
+                    android:textSize="14sp"
+                    android:paddingStart="16dp"
+                    android:layout_height="wrap_content"/>
+
+                <LinearLayout
+                    android:id="@+id/priority_tiles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/rounded_bg_full_large_radius"
+                    android:clipToOutline="true">
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/recent"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/recent_header"
+                    android:gravity="start"
+                    android:text="@string/recent_conversations"
+                    android:layout_width="wrap_content"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                    android:textColor="?android:attr/colorAccent"
+                    android:textSize="14sp"
+                    android:paddingStart="16dp"
+                    android:layout_height="wrap_content"/>
+
+                <LinearLayout
+                    android:id="@+id/recent_tiles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/rounded_bg_full_large_radius"
+                    android:clipToOutline="true">
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

@@ -419,6 +419,14 @@ public class NotificationManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Importance {}
 
+    /** @hide */
+    @IntDef(prefix = { "BUBBLE_PREFERENCE_" }, value = {
+            BUBBLE_PREFERENCE_NONE, BUBBLE_PREFERENCE_SELECTED,
+            BUBBLE_PREFERENCE_ALL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BubblePreference {}
+
     /**
      * Activity Action: Launch an Automatic Zen Rule configuration screen
      * <p>
@@ -1326,7 +1334,6 @@ public class NotificationManager {
         }
     }
 
-
     /**
      * Gets whether all notifications posted by this app can appear outside of the
      * notification shade, floating over other apps' content.
@@ -1342,6 +1349,21 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.areBubblesAllowed(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether bubbles are enabled at the feature level for the current user. When enabled,
+     * notifications able to bubble will display an affordance allowing the user to bubble them.
+     *
+     * @see Notification.Builder#setBubbleMetadata(Notification.BubbleMetadata)
+     */
+    public boolean areBubblesEnabled() {
+        INotificationManager service = getService();
+        try {
+            return service.areBubblesEnabled(mContext.getUser());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1365,7 +1387,7 @@ public class NotificationManager {
      * @see Notification#getBubbleMetadata()
      * @return the users' bubble preference for the app.
      */
-    public int getBubblePreference() {
+    public @BubblePreference int getBubblePreference() {
         INotificationManager service = getService();
         try {
             return service.getBubblePreferenceForPackage(mContext.getPackageName(),

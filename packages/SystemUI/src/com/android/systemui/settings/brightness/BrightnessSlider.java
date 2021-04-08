@@ -21,7 +21,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
 import androidx.annotation.Nullable;
@@ -52,7 +51,6 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     private final BrightnessSliderView mBrightnessSliderView;
     private BrightnessMirrorController mMirrorController;
     private boolean mTracking;
-    private final boolean mUseMirror;
     private final FalsingManager mFalsingManager;
 
     private final Gefingerpoken mOnInterceptListener = new Gefingerpoken() {
@@ -75,11 +73,9 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     BrightnessSlider(
             View rootView,
             BrightnessSliderView brightnessSliderView,
-            boolean useMirror,
             FalsingManager falsingManager) {
         super(rootView);
         mBrightnessSliderView = brightnessSliderView;
-        mUseMirror = useMirror;
         mFalsingManager = falsingManager;
     }
 
@@ -97,14 +93,12 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     @Override
     protected void onViewAttached() {
         mBrightnessSliderView.setOnSeekBarChangeListener(mSeekListener);
-        mBrightnessSliderView.setOnCheckedChangeListener(mCheckListener);
         mBrightnessSliderView.setOnInterceptListener(mOnInterceptListener);
     }
 
     @Override
     protected void onViewDetached() {
         mBrightnessSliderView.setOnSeekBarChangeListener(null);
-        mBrightnessSliderView.setOnCheckedChangeListener(null);
         mBrightnessSliderView.setOnDispatchTouchEventListener(null);
         mBrightnessSliderView.setOnInterceptListener(null);
     }
@@ -134,7 +128,6 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     private void setMirror(ToggleSlider toggleSlider) {
         mMirror = toggleSlider;
         if (mMirror != null) {
-            mMirror.setChecked(mBrightnessSliderView.isChecked());
             mMirror.setMax(mBrightnessSliderView.getMax());
             mMirror.setValue(mBrightnessSliderView.getValue());
             mBrightnessSliderView.setOnDispatchTouchEventListener(this::mirrorTouchEvent);
@@ -152,7 +145,6 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
      */
     @Override
     public void setMirrorControllerAndMirror(BrightnessMirrorController c) {
-        if (!mUseMirror) return;
         mMirrorController = c;
         if (c != null) {
             setMirror(c.getToggleSlider());
@@ -166,16 +158,6 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
     @Override
     public void setOnChangedListener(Listener l) {
         mListener = l;
-    }
-
-    @Override
-    public void setChecked(boolean checked) {
-        mBrightnessSliderView.setChecked(checked);
-    }
-
-    @Override
-    public boolean isChecked() {
-        return mBrightnessSliderView.isChecked();
     }
 
     @Override
@@ -209,7 +191,7 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (mListener != null) {
-                mListener.onChanged(mTracking, isChecked(), progress, false);
+                mListener.onChanged(mTracking, progress, false);
             }
         }
 
@@ -218,11 +200,8 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
             mTracking = true;
 
             if (mListener != null) {
-                mListener.onChanged(mTracking, isChecked(),
-                        getValue(), false);
+                mListener.onChanged(mTracking, getValue(), false);
             }
-
-            setChecked(false);
 
             if (mMirrorController != null) {
                 mMirrorController.showMirror();
@@ -235,8 +214,7 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
             mTracking = false;
 
             if (mListener != null) {
-                mListener.onChanged(mTracking, isChecked(),
-                        getValue(), true);
+                mListener.onChanged(mTracking, getValue(), true);
             }
 
             if (mMirrorController != null) {
@@ -245,35 +223,15 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
         }
     };
 
-    private final CompoundButton.OnCheckedChangeListener mCheckListener =
-            new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton toggle, boolean checked) {
-            enableSlider(!checked);
-
-            if (mListener != null) {
-                mListener.onChanged(mTracking, checked, getValue(), false);
-            }
-
-            if (mMirror != null) {
-                mMirror.setChecked(checked);
-            }
-        }
-    };
-
     /**
      * Creates a {@link BrightnessSlider} with its associated view.
-     *
-     * The views inflated are determined by {@link BrightnessControllerSettings#useThickSlider()}.
      */
     public static class Factory {
 
-        BrightnessControllerSettings mSettings;
         private final FalsingManager mFalsingManager;
 
         @Inject
-        public Factory(BrightnessControllerSettings settings, FalsingManager falsingManager) {
-            mSettings = settings;
+        public Factory(FalsingManager falsingManager) {
             mFalsingManager = falsingManager;
         }
 
@@ -288,20 +246,18 @@ public class BrightnessSlider extends ViewController<View> implements ToggleSlid
             int layout = getLayout();
             ViewGroup root = (ViewGroup) LayoutInflater.from(context)
                     .inflate(layout, viewRoot, false);
-            return fromTree(root, mSettings.useMirrorOnThickSlider());
+            return fromTree(root);
         }
 
-        private BrightnessSlider fromTree(ViewGroup root, boolean useMirror) {
+        private BrightnessSlider fromTree(ViewGroup root) {
             BrightnessSliderView v = root.requireViewById(R.id.brightness_slider);
 
-            return new BrightnessSlider(root, v, useMirror, mFalsingManager);
+            return new BrightnessSlider(root, v, mFalsingManager);
         }
 
         /** Get the layout to inflate based on what slider to use */
         private int getLayout() {
-            return mSettings.useThickSlider()
-                    ? R.layout.quick_settings_brightness_dialog_thick
-                    : R.layout.quick_settings_brightness_dialog;
+            return R.layout.quick_settings_brightness_dialog;
         }
     }
 }

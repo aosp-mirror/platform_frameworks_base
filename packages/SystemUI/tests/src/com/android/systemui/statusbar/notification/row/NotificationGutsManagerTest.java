@@ -51,6 +51,7 @@ import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
+import android.graphics.Color;
 import android.os.Binder;
 import android.os.Handler;
 import android.provider.Settings;
@@ -486,7 +487,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         Notification.Builder nb = new Notification.Builder(mContext,
                 mTestNotificationChannel.getId())
                                         .setContentTitle("foo")
-                                        .setColorized(true)
+                                        .setColorized(true).setColor(Color.RED)
                                         .setFlag(Notification.FLAG_CAN_COLORIZE, true)
                                         .setSmallIcon(android.R.drawable.sym_def_app_icon);
 

@@ -41,6 +41,7 @@ import android.os.UserHandle;
 import android.os.ZygoteProcess;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
+import android.security.keystore2.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -182,12 +183,6 @@ public class ZygoteInit {
         System.loadLibrary("android");
         System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
-
-        try {
-            System.loadLibrary("sfplugin_ccodec");
-        } catch (Error | RuntimeException e) {
-            // tolerate missing sfplugin_ccodec which is only present on Codec 2 devices
-        }
     }
 
     native private static void nativePreloadAppProcessHALs();
@@ -222,10 +217,8 @@ public class ZygoteInit {
         long startTime = SystemClock.uptimeMillis();
         Trace.traceBegin(
                 Trace.TRACE_TAG_DALVIK, "Starting installation of AndroidKeyStoreProvider");
-        // AndroidKeyStoreProvider.install() manipulates the list of JCA providers to insert
-        // preferred providers. Note this is not done via security.properties as the JCA providers
-        // are not on the classpath in the case of, for example, raw dalvikvm runtimes.
-        android.security.keystore2.AndroidKeyStoreProvider.install();
+
+        AndroidKeyStoreProvider.install();
         Log.i(TAG, "Installed AndroidKeyStoreProvider in "
                 + (SystemClock.uptimeMillis() - startTime) + "ms.");
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);

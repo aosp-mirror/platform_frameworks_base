@@ -22,9 +22,9 @@
   <dimen name="volume_dialog_panel_transparent_padding">24dp</dimen>
   <dimen name="volume_dialog_slider_width">4dp</dimen>
   <dimen name="volume_dialog_slider_corner_radius">@dimen/volume_dialog_slider_width</dimen>
+  <dimen name="volume_dialog_background_blur_radius">100dp</dimen>
 
   <dimen name="tv_volume_dialog_bubble_size">36dp</dimen>
-  <dimen name="tv_volume_dialog_corner_radius">36dp</dimen>
   <dimen name="tv_volume_dialog_row_padding">6dp</dimen>
   <dimen name="tv_volume_number_text_size">16sp</dimen>
   <dimen name="tv_volume_seek_bar_thumb_diameter">24dp</dimen>

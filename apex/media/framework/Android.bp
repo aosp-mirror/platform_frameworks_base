@@ -133,9 +133,6 @@ java_sdk_library {
         ":updatable-media-srcs",
     ],
 
-    api_lint: {
-        enabled: false,
-    },
     impl_library_visibility: ["//frameworks/av/apex:__subpackages__"],
 }
 

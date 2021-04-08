@@ -42,6 +42,8 @@
         android:padding="6dp"
         android:src="@drawable/ic_screenshot_share"
         android:layout_marginRight="8dp"
+        android:contentDescription="@*android:string/share"
+        android:tooltipText="@*android:string/share"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/preview" />
@@ -50,8 +52,9 @@
         android:id="@+id/preview"
         android:layout_width="0px"
         android:layout_height="0px"
-        android:layout_marginBottom="42dp"
         android:paddingHorizontal="48dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="42dp"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
         app:layout_constraintTop_toBottomOf="@id/save"
@@ -66,7 +69,8 @@
         android:id="@+id/crop_view"
         android:layout_width="0px"
         android:layout_height="0px"
-        android:layout_marginBottom="42dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="42dp"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
         app:layout_constraintTop_toTopOf="@id/preview"
@@ -115,4 +119,3 @@
     />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

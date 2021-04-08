@@ -32,6 +32,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.FileUtils;
+import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -1531,16 +1532,24 @@ public class ExifInterface {
         if (fileDescriptor == null) {
             throw new NullPointerException("fileDescriptor cannot be null");
         }
-        FileDescriptor modernFd = FileUtils.convertToModernFd(fileDescriptor);
+        // If a file descriptor has a modern file descriptor, this means that the file can be
+        // transcoded and not using the modern file descriptor will trigger the transcoding
+        // operation. Thus, to avoid unnecessary transcoding, need to convert to modern file
+        // descriptor if it exists. As of Android S, transcoding is not supported for image files,
+        // so this is for protecting against non-image files sent to ExifInterface, but support may
+        // be added in the future.
+        ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(fileDescriptor);
         if (modernFd != null) {
-            fileDescriptor = modernFd;
+            fileDescriptor = modernFd.getFileDescriptor();
         }
 
         mAssetInputStream = null;
         mFilename = null;
 
         boolean isFdDuped = false;
-        if (isSeekableFD(fileDescriptor)) {
+        // Can't save attributes to files with transcoding because apps get a different copy of
+        // that file when they're not using it through framework libraries like ExifInterface.
+        if (isSeekableFD(fileDescriptor) && modernFd == null) {
             mSeekableFileDescriptor = fileDescriptor;
             // Keep the original file descriptor in order to save attributes when it's seekable.
             // Otherwise, just close the given file descriptor after reading it because the save
@@ -2545,27 +2554,22 @@ public class ExifInterface {
 
     private void initForFilename(String filename) throws IOException {
         FileInputStream in = null;
-        FileInputStream legacyInputStream = null;
         mAssetInputStream = null;
         mFilename = filename;
         mIsInputStream = false;
         try {
             in = new FileInputStream(filename);
-            FileDescriptor modernFd = FileUtils.convertToModernFd(in.getFD());
+            ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(in.getFD());
             if (modernFd != null) {
-                legacyInputStream = in;
-                in = new FileInputStream(modernFd);
-            }
-
-            if (isSeekableFD(in.getFD())) {
-                mSeekableFileDescriptor = in.getFD();
-            } else {
+                closeQuietly(in);
+                in = new FileInputStream(modernFd.getFileDescriptor());
                 mSeekableFileDescriptor = null;
+            } else if (isSeekableFD(in.getFD())) {
+                mSeekableFileDescriptor = in.getFD();
             }
             loadAttributes(in);
         } finally {
             closeQuietly(in);
-            closeQuietly(legacyInputStream);
         }
     }
 

@@ -186,6 +186,7 @@ import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyCache;
@@ -298,7 +299,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** The owner has {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW} */
     final boolean mOwnerCanAddInternalSystemWindow;
     final WindowId mWindowId;
-    WindowToken mToken;
+    @NonNull WindowToken mToken;
     // The same object as mToken if this is an app window and null for non-app windows.
     ActivityRecord mActivityRecord;
 
@@ -511,6 +512,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * when in that case until the layout is done.
      */
     boolean mLayoutNeeded;
+
+    /**
+     * If the application is not currently visible but requires a layout,
+     * then make sure we call performSurfacePlacement as well. This is set
+     * in layout if mLayoutNeeded is set until surface placement is done.
+     */
+    boolean mSurfacePlacementNeeded;
 
     /** Currently running an exit animation? */
     boolean mAnimatingExit;
@@ -1814,11 +1822,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean isVisibleRequested() {
-        if (mToken != null && (mActivityRecord != null || mToken.asWallpaperToken() != null)) {
-            // Currently only ActivityRecord and WallpaperToken support visibleRequested.
+        if (shouldCheckTokenVisibleRequested()) {
             return isVisible() && mToken.isVisibleRequested();
         }
         return isVisible();
+    }
+
+    /**
+     * Returns {@code true} if {@link WindowToken#isVisibleRequested()} should be considered
+     * before dispatching the latest configuration. Currently only {@link
+     * ActivityRecord#isVisibleRequested()} and {@link WallpaperWindowToken#isVisibleRequested()}
+     * implement explicit visible-requested.
+     */
+    boolean shouldCheckTokenVisibleRequested() {
+        return mActivityRecord != null || mToken.asWallpaperToken() != null;
     }
 
     /**
@@ -1851,7 +1868,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mHasSurface || isParentWindowHidden() || mAnimatingExit || mDestroying) {
             return false;
         }
-        final boolean isWallpaper = mToken != null && mToken.asWallpaperToken() != null;
+        final boolean isWallpaper = mToken.asWallpaperToken() != null;
         return !isWallpaper || mToken.isVisible();
     }
 
@@ -2053,7 +2070,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // When there is keyguard, wallpaper could be placed over the secure app
         // window but invisible. We need to check wallpaper visibility explicitly
         // to determine if it's occluding apps.
-        final boolean isWallpaper = mToken != null && mToken.asWallpaperToken() != null;
+        final boolean isWallpaper = mToken.asWallpaperToken() != null;
         return ((!isWallpaper && mAttrs.format == PixelFormat.OPAQUE)
                 || (isWallpaper && mToken.isVisible()))
                 && isDrawn() && !isAnimating(TRANSITION | PARENTS);
@@ -3340,8 +3357,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void sendAppVisibilityToClients() {
         super.sendAppVisibilityToClients();
 
-        if (mToken == null) return;
-
         final boolean clientVisible = mToken.isClientVisible();
         // TODO(shell-transitions): This is currently only applicable to app windows, BUT we
         //                          want to extend the "starting" concept to other windows.
@@ -3734,8 +3749,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If this is an activity or wallpaper and is invisible or going invisible, don't report
         // either since it is going away. This is likely during a transition so we want to preserve
         // the original state.
-        if ((mActivityRecord != null || mToken.asWallpaperToken() != null)
-                && !mToken.isVisibleRequested()) {
+        if (shouldCheckTokenVisibleRequested() && !mToken.isVisibleRequested()) {
             return;
         }
 
@@ -4274,7 +4288,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.println(prefix + "mEmbeddedDisplayContents=" + mEmbeddedDisplayContents);
         }
         if (dumpAll) {
-            pw.println(prefix + "mRequestedInsetsState: " + mRequestedInsetsState);
+            final String visibilityString = mRequestedInsetsState.toSourceVisibilityString();
+            if (!visibilityString.isEmpty()) {
+                pw.println(prefix + "Requested visibility: " + visibilityString);
+            }
         }
     }
 
@@ -5028,7 +5045,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Cancel the existing exit animation for the next enter animation.
             if (isAnimating()) {
                 cancelAnimation();
-                destroySurfaceUnchecked();
             }
             mAnimatingExit = false;
         }
@@ -5169,10 +5185,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @param outMatrix Matrix to fill in the transformation.
      */
     void getTransformationMatrix(float[] float9, Matrix outMatrix) {
-        float9[Matrix.MSCALE_X] = mWinAnimator.mDsDx;
-        float9[Matrix.MSKEW_Y] = mWinAnimator.mDtDx;
-        float9[Matrix.MSKEW_X] = mWinAnimator.mDtDy;
-        float9[Matrix.MSCALE_Y] = mWinAnimator.mDsDy;
+        float9[Matrix.MSCALE_X] = mGlobalScale;
+        float9[Matrix.MSKEW_Y] = 0;
+        float9[Matrix.MSKEW_X] = 0;
+        float9[Matrix.MSCALE_Y] = mGlobalScale;
         transformSurfaceInsetsPosition(mTmpPoint, mAttrs.surfaceInsets);
         int x = mSurfacePosition.x + mTmpPoint.x;
         int y = mSurfacePosition.y + mTmpPoint.y;
@@ -5348,11 +5364,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    private void updateGlobalScaleIfNeeded() {
-        if (mLastGlobalScale != mGlobalScale) {
+    private void updateScaleIfNeeded() {
+        if (mLastGlobalScale != mGlobalScale || mLastHScale != mHScale ||
+            mLastVScale != mVScale ) {
             getPendingTransaction().setMatrix(getSurfaceControl(),
-                mGlobalScale, 0, 0, mGlobalScale);
+                mGlobalScale*mHScale, 0, 0, mGlobalScale*mVScale);
             mLastGlobalScale = mGlobalScale;
+            mLastHScale = mHScale;
+            mLastVScale = mVScale;
         }
     }
 
@@ -5361,9 +5380,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mIsDimming = false;
         applyDims();
         updateSurfacePositionNonOrganized();
-        // Send information to SufaceFlinger about the priority of the current window.
+        // Send information to SurfaceFlinger about the priority of the current window.
         updateFrameRateSelectionPriorityIfNeeded();
-        if (isVisibleRequested()) updateGlobalScaleIfNeeded();
+        if (isVisibleRequested()) updateScaleIfNeeded();
 
         mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
         super.prepareSurfaces();
@@ -5375,13 +5394,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mSurfaceControl == null) {
             return;
         }
-        if (mWmService.mWindowPlacerLocked.isLayoutDeferred() || isGoneForLayout()) {
+
+        if ((mWmService.mWindowPlacerLocked.isLayoutDeferred() || isGoneForLayout())
+                && !mSurfacePlacementNeeded) {
             // Since this relies on mWindowFrames, changes made while layout is deferred are
             // likely to be invalid. Similarly, if it's goneForLayout, mWindowFrames may not be
             // up-to-date and thus can't be relied on.
             return;
         }
 
+        mSurfacePlacementNeeded = false;
         transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
                 mSurfacePosition);
 

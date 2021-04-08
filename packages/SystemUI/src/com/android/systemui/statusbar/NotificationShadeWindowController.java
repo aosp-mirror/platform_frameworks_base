@@ -90,8 +90,13 @@ public interface NotificationShadeWindowController extends RemoteInputController
     /** Sets the state of whether the user activities are forced or not. */
     default void setForceUserActivity(boolean forceUserActivity) {}
 
-    /** Sets the state of whether the user activities are forced or not. */
+    /** Sets the state of whether an activity is launching or not. */
     default void setLaunchingActivity(boolean launching) {}
+
+    /** Get whether an activity is launching or not. */
+    default boolean isLaunchingActivity() {
+        return false;
+    }
 
     /** Sets the state of whether the scrim is visible or not. */
     default void setScrimsVisibility(int scrimsVisibility) {}
@@ -137,7 +142,7 @@ public interface NotificationShadeWindowController extends RemoteInputController
     default void setDozing(boolean dozing) {}
 
     /** Sets the state of whether plugin open is forced or not. */
-    default void setForcePluginOpen(boolean forcePluginOpen) {}
+    default void setForcePluginOpen(boolean forcePluginOpen, Object token) {}
 
     /** Gets whether we are forcing plugin open or not. */
     default boolean getForcePluginOpen() {

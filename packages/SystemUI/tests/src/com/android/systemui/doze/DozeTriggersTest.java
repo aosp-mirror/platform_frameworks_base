@@ -27,7 +27,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.AlarmManager;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
@@ -70,8 +69,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Mock
     private DozeHost mHost;
     @Mock
-    private AlarmManager mAlarmManager;
-    @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private DockManager mDockManager;
@@ -89,8 +86,14 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        AmbientDisplayConfiguration config = DozeConfigurationUtil.createMockConfig();
-        DozeParameters parameters = DozeConfigurationUtil.createMockParameters();
+        setupDozeTriggers(
+                DozeConfigurationUtil.createMockConfig(),
+                DozeConfigurationUtil.createMockParameters());
+    }
+
+    private void setupDozeTriggers(
+            AmbientDisplayConfiguration config,
+            DozeParameters dozeParameters) throws Exception {
         mSensors = spy(new FakeSensorManager(mContext));
         mTapSensor = mSensors.getFakeTapSensor().getSensor();
         WakeLock wakeLock = new WakeLockFake();
@@ -101,10 +104,10 @@ public class DozeTriggersTest extends SysuiTestCase {
         thresholdSensor.setLoaded(true);
         mProximitySensor = new FakeProximitySensor(thresholdSensor,  null, mExecutor);
 
-        mTriggers = new DozeTriggers(mContext, mHost, mAlarmManager, config, parameters,
+        mTriggers = new DozeTriggers(mContext, mHost, config, dozeParameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
                 mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
-                mAuthController, mExecutor, mExecutor);
+                mAuthController, mExecutor);
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }

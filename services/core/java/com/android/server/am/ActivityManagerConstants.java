@@ -199,6 +199,15 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL =
             "deferred_fgs_notification_interval";
 
+    /**
+     * Time in milliseconds; once an FGS notification for a given uid has been
+     * deferred, no subsequent FGS notification from that uid will be deferred
+     * until this amount of time has passed.  Default is two minutes
+     * (2 * 60 * 1000) unless overridden.
+     */
+    private static final String KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME =
+            "deferred_fgs_notification_exclusion_time";
+
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
 
@@ -398,6 +407,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // the foreground state.
     volatile long mFgsNotificationDeferralInterval = 10_000;
 
+    // Rate limit: minimum time after an app's FGS notification is deferred
+    // before another FGS notifiction from that app can be deferred.
+    volatile long mFgsNotificationDeferralExclusionTime = 2 * 60 * 1000L;
+
     /*
      * At boot time, broadcast receiver ACTION_BOOT_COMPLETED, ACTION_LOCKED_BOOT_COMPLETED and
      * ACTION_PRE_BOOT_COMPLETED are temp allowlisted to start FGS for a duration of time in
@@ -579,6 +592,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL:
                                 updateFgsNotificationDeferralInterval();
+                                break;
+                            case KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME:
+                                updateFgsNotificationDeferralExclusionTime();
                                 break;
                             case KEY_OOMADJ_UPDATE_POLICY:
                                 updateOomAdjUpdatePolicy();
@@ -872,6 +888,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL,
                 /*default value*/ 10_000L);
+    }
+
+    private void updateFgsNotificationDeferralExclusionTime() {
+        mFgsNotificationDeferralExclusionTime = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME,
+                /*default value*/ 2 * 60 * 1000L);
     }
 
     private void updateOomAdjUpdatePolicy() {

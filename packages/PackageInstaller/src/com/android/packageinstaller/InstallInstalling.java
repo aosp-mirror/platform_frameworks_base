@@ -35,7 +35,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.content.PackageHelper;
@@ -60,9 +59,6 @@ public class InstallInstalling extends AlertActivity {
 
     private static final String BROADCAST_ACTION =
             "com.android.packageinstaller.ACTION_INSTALL_COMMIT";
-
-    /** Listens to changed to the session and updates progress bar */
-    private PackageInstaller.SessionCallback mSessionCallback;
 
     /** Task that sends the package to the package installer */
     private InstallingAsyncTask mInstallingTask;
@@ -185,8 +181,6 @@ public class InstallInstalling extends AlertActivity {
             }
 
             mCancelButton = mAlert.getButton(DialogInterface.BUTTON_NEGATIVE);
-
-            mSessionCallback = new InstallSessionCallback();
         }
     }
 
@@ -219,13 +213,6 @@ public class InstallInstalling extends AlertActivity {
 
         startActivity(failureIntent);
         finish();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        getPackageManager().getPackageInstaller().registerSessionCallback(mSessionCallback);
     }
 
     @Override
@@ -264,13 +251,6 @@ public class InstallInstalling extends AlertActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-
-        getPackageManager().getPackageInstaller().unregisterSessionCallback(mSessionCallback);
-    }
-
-    @Override
     protected void onDestroy() {
         if (mInstallingTask != null) {
             mInstallingTask.cancel(true);
@@ -303,38 +283,6 @@ public class InstallInstalling extends AlertActivity {
             launchSuccess();
         } else {
             launchFailure(statusCode, legacyStatus, statusMessage);
-        }
-    }
-
-
-    private class InstallSessionCallback extends PackageInstaller.SessionCallback {
-        @Override
-        public void onCreated(int sessionId) {
-            // empty
-        }
-
-        @Override
-        public void onBadgingChanged(int sessionId) {
-            // empty
-        }
-
-        @Override
-        public void onActiveChanged(int sessionId, boolean active) {
-            // empty
-        }
-
-        @Override
-        public void onProgressChanged(int sessionId, float progress) {
-            if (sessionId == mSessionId) {
-                ProgressBar progressBar = requireViewById(R.id.progress);
-                progressBar.setMax(Integer.MAX_VALUE);
-                progressBar.setProgress((int) (Integer.MAX_VALUE * progress));
-            }
-        }
-
-        @Override
-        public void onFinished(int sessionId, boolean success) {
-            // empty, finish is handled by InstallResultReceiver
         }
     }
 

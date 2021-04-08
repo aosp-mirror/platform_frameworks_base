@@ -42,7 +42,7 @@ import java.text.NumberFormat;
  */
 public class WirelessChargingLayout extends FrameLayout {
     public static final int UNKNOWN_BATTERY_LEVEL = -1;
-    private static final long RIPPLE_ANIMATION_DURATION = 2000;
+    private static final long RIPPLE_ANIMATION_DURATION = 1133;
     private ChargingRippleView mRippleView;
 
     public WirelessChargingLayout(Context context) {

@@ -32,6 +32,7 @@ import android.view.IRecentsAnimationController;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
@@ -49,11 +50,30 @@ import com.android.systemui.shared.recents.model.ThumbnailData;
  */
 @DataClass
 public class RemoteTransitionCompat implements Parcelable {
+    private static final String TAG = "RemoteTransitionCompat";
+
     @NonNull final IRemoteTransition mTransition;
     @Nullable TransitionFilter mFilter = null;
 
     RemoteTransitionCompat(IRemoteTransition transition) {
         mTransition = transition;
+    }
+
+    public RemoteTransitionCompat(RemoteTransitionRunner runner) {
+        mTransition = new IRemoteTransition.Stub() {
+            @Override
+            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+                    IRemoteTransitionFinishedCallback finishedCallback) {
+                final Runnable finishAdapter = () ->  {
+                    try {
+                        finishedCallback.onTransitionFinished(null /* wct */);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to call transition finished callback", e);
+                    }
+                };
+                runner.startAnimation(info, t, finishAdapter);
+            }
+        };
     }
 
     /** Constructor specifically for recents animation */
@@ -138,9 +158,9 @@ public class RemoteTransitionCompat implements Parcelable {
         }
 
         @Override public void setFinishTaskBounds(int taskId, Rect destinationBounds,
-                Rect windowCrop, float[] float9) {
+                PictureInPictureSurfaceTransaction finishTransaction) {
             if (mWrapped != null) {
-                mWrapped.setFinishTaskBounds(taskId, destinationBounds, windowCrop, float9);
+                mWrapped.setFinishTaskBounds(taskId, destinationBounds, finishTransaction);
             }
         }
 

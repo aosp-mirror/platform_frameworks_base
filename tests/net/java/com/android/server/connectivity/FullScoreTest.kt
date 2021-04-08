@@ -56,7 +56,7 @@ class FullScoreTest {
             if (vpn) addTransportType(NetworkCapabilities.TRANSPORT_VPN)
             if (validated) addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         }.build()
-        return mixInScore(nc, nac)
+        return mixInScore(nc, nac, false /* avoidBadWifi */)
     }
 
     @Test

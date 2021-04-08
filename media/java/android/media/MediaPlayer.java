@@ -46,6 +46,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
@@ -96,7 +97,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.Executor;
-
 
 /**
  * MediaPlayer class can be used to control playback of audio/video files and streams.
@@ -1268,11 +1268,11 @@ public class MediaPlayer extends PlayerBase
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException {
-        FileDescriptor modernFd = FileUtils.convertToModernFd(fd);
+        ParcelFileDescriptor modernFd = FileUtils.convertToModernFd(fd);
         if (modernFd == null) {
             _setDataSource(fd, offset, length);
         } else {
-            _setDataSource(modernFd, offset, length);
+            _setDataSource(modernFd.getFileDescriptor(), offset, length);
         }
     }
 

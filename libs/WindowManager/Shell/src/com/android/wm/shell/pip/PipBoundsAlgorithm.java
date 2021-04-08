@@ -57,9 +57,10 @@ public class PipBoundsAlgorithm {
     private int mOverridableMinSize;
     private Point mScreenEdgeInsets;
 
-    public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState) {
+    public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState,
+            @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
         mPipBoundsState = pipBoundsState;
-        mSnapAlgorithm = new PipSnapAlgorithm();
+        mSnapAlgorithm = pipSnapAlgorithm;
         reloadResources(context);
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which

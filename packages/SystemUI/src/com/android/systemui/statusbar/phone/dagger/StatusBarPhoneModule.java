@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -99,6 +100,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -206,6 +208,8 @@ public interface StatusBarPhoneModule {
             NotificationIconAreaController notificationIconAreaController,
             BrightnessSlider.Factory brightnessSliderFactory,
             WiredChargingRippleController chargingRippleAnimationController,
+            OngoingCallController ongoingCallController,
+            TunerService tunerService,
             FeatureFlags featureFlags) {
         return new StatusBar(
                 context,
@@ -288,6 +292,8 @@ public interface StatusBarPhoneModule {
                 notificationIconAreaController,
                 brightnessSliderFactory,
                 chargingRippleAnimationController,
+                ongoingCallController,
+                tunerService,
                 featureFlags);
     }
 }

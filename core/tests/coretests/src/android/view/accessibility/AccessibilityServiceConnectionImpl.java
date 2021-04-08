@@ -163,4 +163,7 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
     public void setGestureDetectionPassthroughRegion(int displayId, Region region) {}
 
     public void setFocusAppearance(int strokeWidth, int color) {}
+
+    public void logTrace(long timestamp, String where, String callingParams, int processId,
+            long threadId, int callingUid, Bundle callingStack) {}
 }

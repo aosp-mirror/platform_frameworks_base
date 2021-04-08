@@ -21,15 +21,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 
-import androidx.annotation.Nullable;
 import androidx.slice.Clock;
 
 import com.android.internal.app.AssistUtils;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.navigationbar.NavigationBarController;
-
-import java.util.EnumMap;
-import java.util.Map;
 
 import javax.inject.Named;
 
@@ -51,28 +46,6 @@ public abstract class AssistModule {
                 new HandlerThread("AssistHandleThread");
         backgroundHandlerThread.start();
         return backgroundHandlerThread.getThreadHandler();
-    }
-
-    @Provides
-    @SysUISingleton
-    static Map<AssistHandleBehavior, AssistHandleBehaviorController.BehaviorController>
-            provideAssistHandleBehaviorControllerMap(
-                    AssistHandleOffBehavior offBehavior,
-                    AssistHandleLikeHomeBehavior likeHomeBehavior,
-                    AssistHandleReminderExpBehavior reminderExpBehavior) {
-        Map<AssistHandleBehavior, AssistHandleBehaviorController.BehaviorController> map =
-                new EnumMap<>(AssistHandleBehavior.class);
-        map.put(AssistHandleBehavior.OFF, offBehavior);
-        map.put(AssistHandleBehavior.LIKE_HOME, likeHomeBehavior);
-        map.put(AssistHandleBehavior.REMINDER_EXP, reminderExpBehavior);
-        return map;
-    }
-
-    @Provides
-    @Nullable
-    static AssistHandleViewController provideAssistHandleViewController(
-            NavigationBarController navigationBarController) {
-        return navigationBarController.getAssistHandlerViewController();
     }
 
     @Provides

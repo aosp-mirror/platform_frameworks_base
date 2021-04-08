@@ -1385,7 +1385,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             mService.waitForBitmapSavesForTest();
             assertWith(getCallerShortcuts())
                     .forShortcutWithId("s1", si -> {
-                        Log.d("ShortcutManagerTest1", si.toString());
                         assertTrue(si.hasIconFile());
                     });
 
@@ -1703,8 +1702,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Because setDynamicShortcuts will update the timestamps when ranks are changing,
         // we explicitly set timestamps here.
-        updateCallerShortcut("s1", si -> si.setTimestamp(5000));
-        updateCallerShortcut("s2", si -> si.setTimestamp(1000));
+        getCallerShortcut("s1").setTimestamp(5000);
+        getCallerShortcut("s2").setTimestamp(1000);
 
         setCaller(CALLING_PACKAGE_2);
         final ShortcutInfo s2_2 = makeShortcut("s2");
@@ -1714,9 +1713,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 makeComponent(ShortcutActivity.class));
         assertTrue(mManager.setDynamicShortcuts(list(s2_2, s2_3, s2_4)));
 
-        updateCallerShortcut("s2", si -> si.setTimestamp(1500));
-        updateCallerShortcut("s3", si -> si.setTimestamp(3000));
-        updateCallerShortcut("s4", si -> si.setTimestamp(500));
+        getCallerShortcut("s2").setTimestamp(1500);
+        getCallerShortcut("s3").setTimestamp(3000);
+        getCallerShortcut("s4").setTimestamp(500);
 
         setCaller(CALLING_PACKAGE_3);
         final ShortcutInfo s3_2 = makeShortcutWithLocusId("s3", makeLocusId("l2"));
@@ -1724,7 +1723,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         assertTrue(mManager.setDynamicShortcuts(list(s3_2)));
 
-        updateCallerShortcut("s3", si -> si.setTimestamp(START_TIME + 5000));
+        getCallerShortcut("s3").setTimestamp(START_TIME + 5000);
 
         setCaller(LAUNCHER_1);
 
@@ -7687,7 +7686,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         assertEquals("http://www/", si.getIntent().getData().toString());
                         assertEquals("foo/bar", si.getIntent().getType());
                         assertEquals(
-                                new ComponentName("abc", "abc.xyz"), si.getIntent().getComponent());
+                                new ComponentName("abc", ".xyz"), si.getIntent().getComponent());
 
                         assertEquals(set("cat1", "cat2"), si.getIntent().getCategories());
                         assertEquals("value1", si.getIntent().getStringExtra("key1"));

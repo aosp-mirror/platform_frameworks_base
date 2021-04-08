@@ -4165,6 +4165,7 @@ public abstract class Context {
      * @see android.net.PacProxyManager
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String PAC_PROXY_SERVICE = "pac_proxy";
 
     /**
@@ -6475,7 +6476,7 @@ public abstract class Context {
      */
     @Deprecated
     public @NonNull Context createFeatureContext(@Nullable String attributionTag) {
-        return createContext(new ContextParams.Builder()
+        return createContext(new ContextParams.Builder(getParams())
                 .setAttributionTag(attributionTag)
                 .build());
     }

@@ -21,6 +21,7 @@ import android.os.Message;
 import android.telephony.SubscriptionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
@@ -31,6 +32,8 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 
 /**
@@ -60,12 +63,9 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     private int mHistoryIndex;
     private String mLastCallback;
 
-    public CallbackHandler() {
-        super(Looper.getMainLooper());
-    }
-
+    @Inject
     @VisibleForTesting
-    CallbackHandler(Looper looper) {
+    CallbackHandler(@Main Looper looper) {
         super(looper);
     }
 

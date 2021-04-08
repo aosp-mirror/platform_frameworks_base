@@ -105,7 +105,6 @@ public class NotificationChildrenContainer extends ViewGroup {
     private ViewGroup mCurrentHeader;
     private boolean mIsConversation;
 
-    private boolean mTintWithThemeAccent;
     private boolean mShowGroupCountInExpander;
     private boolean mShowDividersWhenExpanded;
     private boolean mHideDividersDuringExpand;
@@ -149,8 +148,6 @@ public class NotificationChildrenContainer extends ViewGroup {
                 com.android.internal.R.dimen.notification_content_margin);
         mEnableShadowOnChildNotifications =
                 res.getBoolean(R.bool.config_enableShadowOnChildNotifications);
-        mTintWithThemeAccent =
-                res.getBoolean(com.android.internal.R.bool.config_tintNotificationsWithTheme);
         mShowGroupCountInExpander =
                 res.getBoolean(R.bool.config_showNotificationGroupCountInExpander);
         mShowDividersWhenExpanded =
@@ -1223,14 +1220,11 @@ public class NotificationChildrenContainer extends ViewGroup {
             return;
         }
         int color = mContainingNotification.getNotificationColor();
-        if (mTintWithThemeAccent) {
-            // We're using the theme accent, color with the accent color instead of the notif color
-            Resources.Theme theme = new ContextThemeWrapper(mContext,
-                    com.android.internal.R.style.Theme_DeviceDefault_DayNight).getTheme();
-            TypedArray ta = theme.obtainStyledAttributes(
-                    new int[]{com.android.internal.R.attr.colorAccent});
+        Resources.Theme theme = new ContextThemeWrapper(mContext,
+                com.android.internal.R.style.Theme_DeviceDefault_DayNight).getTheme();
+        try (TypedArray ta = theme.obtainStyledAttributes(
+                new int[]{com.android.internal.R.attr.colorAccent})) {
             color = ta.getColor(0, color);
-            ta.recycle();
         }
         mHybridGroupManager.setOverflowNumberColor(mOverflowNumber, color);
     }

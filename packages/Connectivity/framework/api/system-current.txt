@@ -232,6 +232,7 @@ package android.net {
     method @NonNull public android.net.Network register();
     method public final void sendLinkProperties(@NonNull android.net.LinkProperties);
     method public final void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
+    method public final void sendNetworkScore(@NonNull android.net.NetworkScore);
     method public final void sendNetworkScore(@IntRange(from=0, to=99) int);
     method public final void sendQosCallbackError(int, int);
     method public final void sendQosSessionAvailable(int, int, @NonNull android.net.QosSessionAttributes);
@@ -275,6 +276,7 @@ package android.net {
     method @NonNull public int[] getAdministratorUids();
     method @Nullable public static String getCapabilityCarrierName(int);
     method @Nullable public String getSsid();
+    method @NonNull public java.util.Set<java.lang.Integer> getSubIds();
     method @NonNull public int[] getTransportTypes();
     method public boolean isPrivateDnsBroken();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
@@ -335,12 +337,15 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
+    method @NonNull public android.net.NetworkRequest.Builder setSubIds(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   public final class NetworkScore implements android.os.Parcelable {
     method public int describeContents();
     method public int getKeepConnectedReason();
     method public int getLegacyInt();
+    method public boolean isExiting();
+    method public boolean isTransportPrimary();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkScore> CREATOR;
     field public static final int KEEP_CONNECTED_FOR_HANDOVER = 1; // 0x1
@@ -350,8 +355,10 @@ package android.net {
   public static final class NetworkScore.Builder {
     ctor public NetworkScore.Builder();
     method @NonNull public android.net.NetworkScore build();
+    method @NonNull public android.net.NetworkScore.Builder setExiting(boolean);
     method @NonNull public android.net.NetworkScore.Builder setKeepConnectedReason(int);
     method @NonNull public android.net.NetworkScore.Builder setLegacyInt(int);
+    method @NonNull public android.net.NetworkScore.Builder setTransportPrimary(boolean);
   }
 
   public final class OemNetworkPreferences implements android.os.Parcelable {

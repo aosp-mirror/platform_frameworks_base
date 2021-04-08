@@ -3173,8 +3173,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int[] gids = (flags & PackageManager.GET_GIDS) == 0 ? EMPTY_INT_ARRAY
                         : mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
                 // Compute granted permissions only if package has requested permissions
-                final Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
-                        ? Collections.emptySet()
+                final Set<String> permissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
+                        || ArrayUtils.isEmpty(p.getRequestedPermissions())) ? Collections.emptySet()
                         : mPermissionManager.getGrantedPermissions(ps.name, userId);
 
                 PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
@@ -4217,8 +4217,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // aware/unaware components they want to see, so fall through and
                 // give them what they want
             } else {
+                final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
                 // Caller expressed no opinion, so match based on user state
-                if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
+                if (umInternal.isUserUnlockingOrUnlocked(userId)) {
                     flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
                 } else {
                     flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -5965,7 +5966,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 backgroundHandler,
                 SYSTEM_PARTITIONS,
                 (i, pm) -> new ComponentResolver(i.getUserManagerService(), pm.mPmInternal, lock),
-                (i, pm) -> PermissionManagerService.create(context),
+                (i, pm) -> PermissionManagerService.create(context,
+                        i.getSystemConfig().getAvailableFeatures()),
                 (i, pm) -> new UserManagerService(context, pm,
                         new UserDataPreparer(installer, installLock, context, onlyCore),
                         lock),
@@ -6469,20 +6471,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
 
-            // Clean up orphaned packages for which the code path doesn't exist
-            // and they are an update to a system app - caused by bug/32321269
-            final WatchedArrayMap<String, PackageSetting> packageSettings =
-                mSettings.getPackagesLocked();
-            final int packageSettingCount = packageSettings.size();
-            for (int i = packageSettingCount - 1; i >= 0; i--) {
-                PackageSetting ps = packageSettings.valueAt(i);
-                if (!isExternal(ps) && (ps.getPath() == null || !ps.getPath().exists())
-                        && mSettings.getDisabledSystemPkgLPr(ps.name) != null) {
-                    packageSettings.removeAt(i);
-                    mSettings.enableSystemPackageLPw(ps.name);
-                }
-            }
-
             if (!mOnlyCore && mFirstBoot) {
                 requestCopyPreoptedFiles(mInjector);
             }
@@ -6530,6 +6518,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
+
+            final WatchedArrayMap<String, PackageSetting> packageSettings =
+                mSettings.getPackagesLocked();
 
             // Save the names of pre-existing packages prior to scanning, so we can determine
             // which system packages are completely new due to an upgrade.
@@ -6890,19 +6881,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " seconds");
 
             mPermissionManager.readLegacyPermissionStateTEMP();
-            // If the platform SDK has changed since the last time we booted,
+            // If the build fingerprint has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
             // cases get permissions that the user didn't initially explicitly
             // allow...  it would be nice to have some better way to handle
             // this situation.
-            final boolean sdkUpdated = (ver.sdkVersion != mSdkVersion);
-            if (sdkUpdated) {
-                Slog.i(TAG, "Platform changed from " + ver.sdkVersion + " to "
-                        + mSdkVersion + "; regranting permissions for internal storage");
+            if (mIsUpgrade) {
+                Slog.i(TAG, "Build fingerprint changed from " + ver.fingerprint + " to "
+                        + Build.FINGERPRINT + "; regranting permissions for internal storage");
             }
             mPermissionManager.onStorageVolumeMounted(
-                    StorageManager.UUID_PRIVATE_INTERNAL, sdkUpdated);
+                    StorageManager.UUID_PRIVATE_INTERNAL, mIsUpgrade);
             ver.sdkVersion = mSdkVersion;
 
             // If this is the first boot or an update from pre-M, and it is a normal
@@ -7208,7 +7198,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         updateSharedLibrariesLocked(pkg, stubPkgSetting, null, null,
                                 Collections.unmodifiableMap(mPackages));
                     } catch (PackageManagerException e) {
-                        Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
+                        Slog.w(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
                     final int[] userIds = mUserManager.getUserIds();
                     for (final int userId : userIds) {
@@ -7460,7 +7450,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else if (matches.size() == 0) {
-            Log.e(TAG, "There should probably be a verifier, but, none were found");
+            Log.w(TAG, "There should probably be a verifier, but, none were found");
             return null;
         }
         throw new RuntimeException("There must be exactly one verifier; found " + matches);
@@ -8213,9 +8203,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // 11. Free storage service cache
             StorageManagerInternal smInternal =
                     mInjector.getLocalService(StorageManagerInternal.class);
-            // TODO(b/170481432): Decide what value of bytes needs to be sent instead of
-            // sending the bytes parameter of freeStorage
-            smInternal.freeCache(volumeUuid, bytes);
+            long freeBytesRequired = bytes - file.getUsableSpace();
+            if (freeBytesRequired > 0) {
+                smInternal.freeCache(volumeUuid, freeBytesRequired);
+            }
             if (file.getUsableSpace() >= bytes) return;
         } else {
             try {
@@ -12281,18 +12272,17 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public ArraySet<String> getOptimizablePackages() {
         ArraySet<String> pkgs = new ArraySet<>();
-        final boolean hibernationEnabled = AppHibernationService.isAppHibernationEnabled();
-        AppHibernationManagerInternal appHibernationManager =
-                mInjector.getLocalService(AppHibernationManagerInternal.class);
         synchronized (mLock) {
             for (AndroidPackage p : mPackages.values()) {
-                // Checking hibernation state is an inexpensive call.
-                boolean isHibernating = hibernationEnabled
-                        && appHibernationManager.isHibernatingGlobally(p.getPackageName());
-                if (PackageDexOptimizer.canOptimizePackage(p) && !isHibernating) {
+                if (PackageDexOptimizer.canOptimizePackage(p)) {
                     pkgs.add(p.getPackageName());
                 }
             }
+        }
+        if (AppHibernationService.isAppHibernationEnabled()) {
+            AppHibernationManagerInternal appHibernationManager =
+                    mInjector.getLocalService(AppHibernationManagerInternal.class);
+            pkgs.removeIf(pkgName -> appHibernationManager.isHibernatingGlobally(pkgName));
         }
         return pkgs;
     }
@@ -12589,10 +12579,21 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mInstallLock")
     void removeCodePathLI(File codePath) {
         if (codePath.isDirectory()) {
-            File codePathParent = codePath.getParentFile();
+            final File codePathParent = codePath.getParentFile();
+            final boolean needRemoveParent = codePathParent.getName().startsWith(RANDOM_DIR_PREFIX);
             try {
+                final boolean isIncremental = (mIncrementalManager != null && isIncrementalPath(
+                        codePath.getAbsolutePath()));
+                if (isIncremental) {
+                    if (needRemoveParent) {
+                        mIncrementalManager.rmPackageDir(codePathParent);
+                    } else {
+                        mIncrementalManager.rmPackageDir(codePath);
+                    }
+                }
+
                 mInstaller.rmPackageDir(codePath.getAbsolutePath());
-                if (codePathParent.getName().startsWith(RANDOM_DIR_PREFIX)) {
+                if (needRemoveParent) {
                     mInstaller.rmPackageDir(codePathParent.getAbsolutePath());
                     removeCachedResult(codePathParent);
                 }
@@ -15253,7 +15254,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
-            if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+            if (umInternal.isUserUnlockingOrUnlocked(userId)) {
                 Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
                 if (includeStopped) {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
@@ -18134,16 +18136,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (codeFile == null || !codeFile.exists()) {
                 return false;
             }
-
-            final boolean isIncremental = (mIncrementalManager != null && isIncrementalPath(
-                    codeFile.getAbsolutePath()));
-
             removeCodePathLI(codeFile);
-
-            if (isIncremental) {
-                mIncrementalManager.onPackageRemoved(codeFile);
-            }
-
             return true;
         }
 
@@ -21463,6 +21456,8 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             if (outInfo != null) {
                 outInfo.uid = ps.appId;
+                outInfo.broadcastAllowList = mAppsFilter.getVisibilityAllowList(ps,
+                        allUserHandles, mSettings.getPackagesLocked());
             }
         }
 
@@ -22833,7 +22828,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
-            Slog.e(TAG, "There should probably be exactly one storage manager; found "
+            Slog.w(TAG, "There should probably be exactly one storage manager; found "
                     + matches.size() + ": matches=" + matches);
             return null;
         }
@@ -23471,10 +23466,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         if (shouldUnhibernate) {
-            AppHibernationManagerInternal ah =
-                    mInjector.getLocalService(AppHibernationManagerInternal.class);
-            ah.setHibernatingForUser(packageName, userId, false);
-            ah.setHibernatingGlobally(packageName, false);
+            mHandler.post(() -> {
+                AppHibernationManagerInternal ah =
+                        mInjector.getLocalService(AppHibernationManagerInternal.class);
+                ah.setHibernatingForUser(packageName, userId, false);
+                ah.setHibernatingGlobally(packageName, false);
+            });
         }
     }
 
@@ -24618,12 +24615,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         synchronized (mLock) {
-            final boolean sdkUpdated = (ver.sdkVersion != mSdkVersion);
-            if (sdkUpdated) {
-                logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
-                        + mSdkVersion + "; regranting permissions for " + volumeUuid);
+            final boolean isUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+            if (isUpgrade) {
+                logCriticalInfo(Log.INFO, "Build fingerprint changed from " + ver.fingerprint
+                        + " to " + Build.FINGERPRINT + "; regranting permissions for "
+                        + volumeUuid);
             }
-            mPermissionManager.onStorageVolumeMounted(volumeUuid, sdkUpdated);
+            mPermissionManager.onStorageVolumeMounted(volumeUuid, isUpgrade);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();
@@ -24784,7 +24782,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int fileToDeleteCount = filesToDelete.size();
             for (int i = 0; i < fileToDeleteCount; i++) {
                 File fileToDelete = filesToDelete.get(i);
-                logCriticalInfo(Log.WARN, "Destroying orphaned" + fileToDelete);
+                logCriticalInfo(Log.WARN, "Destroying orphaned at " + fileToDelete);
                 synchronized (mInstallLock) {
                     removeCodePathLI(fileToDelete);
                 }
@@ -25025,7 +25023,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // already held, since it's invoked as a side-effect of
                     // executeBatchLI()
                     if (e != null) {
-                        logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
+                        logCriticalInfo(Log.WARN, "Failed to create app data for " + packageName
                                 + ", but trying to recover: " + e);
                         destroyAppDataLeafLIF(pkg, userId, flags);
                         try {

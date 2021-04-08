@@ -58,8 +58,8 @@ package android {
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
-    field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
-    field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
+    field public static final int config_systemAutomotiveCluster;
+    field public static final int config_systemAutomotiveProjection;
     field public static final int config_systemGallery = 17039399; // 0x1040027
   }
 
@@ -233,6 +233,8 @@ package android.app {
     field public static final String KEY_BG_STATE_SETTLE_TIME = "bg_state_settle_time";
     field public static final String KEY_FG_SERVICE_STATE_SETTLE_TIME = "fg_service_state_settle_time";
     field public static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
+    field public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
+    field public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE = "android:activity_recognition_source";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
     field public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
     field public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
@@ -279,6 +281,11 @@ package android.app {
   public abstract class HomeVisibilityListener {
     ctor public HomeVisibilityListener();
     method public abstract void onHomeVisibilityChanged(boolean);
+  }
+
+  public class KeyguardManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean checkLock(int, @Nullable byte[]);
+    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean setLock(int, @Nullable byte[], int, @Nullable byte[]);
   }
 
   public class Notification implements android.os.Parcelable {
@@ -355,11 +362,13 @@ package android.app {
   public final class UiAutomation {
     method public void destroy();
     method @NonNull public android.os.ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String);
+    method @NonNull public java.util.Set<java.lang.String> getAdoptedShellPermissions();
     method @Deprecated public boolean grantRuntimePermission(String, String, android.os.UserHandle);
     method public boolean injectInputEvent(@NonNull android.view.InputEvent, boolean, boolean);
     method @Deprecated public boolean revokeRuntimePermission(String, String, android.os.UserHandle);
     method public void syncInputTransactions();
     method public void syncInputTransactions(boolean);
+    field @NonNull public static final java.util.Set<java.lang.String> ALL_PERMISSIONS;
   }
 
   public class UiModeManager {
@@ -666,6 +675,7 @@ package android.content {
   public final class AttributionSource implements android.os.Parcelable {
     ctor public AttributionSource(int, @Nullable String, @Nullable String);
     ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable android.content.AttributionSource);
+    ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable java.util.Set<java.lang.String>, @Nullable android.content.AttributionSource);
   }
 
   public final class AutofillOptions implements android.os.Parcelable {
@@ -1985,6 +1995,7 @@ package android.permission {
 
   public final class PermissionManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
+    method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
   }
 
 }
@@ -2897,6 +2908,10 @@ package android.view.inputmethod {
 
   public final class InlineSuggestionsResponse implements android.os.Parcelable {
     method @NonNull public static android.view.inputmethod.InlineSuggestionsResponse newInlineSuggestionsResponse(@NonNull java.util.List<android.view.inputmethod.InlineSuggestion>);
+  }
+
+  public final class InputMethodInfo implements android.os.Parcelable {
+    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
   }
 
   public final class InputMethodManager {

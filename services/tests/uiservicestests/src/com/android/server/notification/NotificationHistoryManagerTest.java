@@ -366,7 +366,7 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     @Test
     public void testDeleteConversation_userUnlocked() {
         String pkg = "pkg";
-        Set<String> convos  = Set.of("convo", "another");
+        Set<String> convos = Set.of("convo", "another");
         NotificationHistoryDatabase userHistory = mock(NotificationHistoryDatabase.class);
 
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
@@ -375,6 +375,20 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.deleteConversations(pkg, 1, convos);
 
         verify(userHistory, times(1)).deleteConversations(pkg, convos);
+    }
+
+    @Test
+    public void testDeleteNotificationChannel_userUnlocked() {
+        String pkg = "pkg";
+        String channelId = "channelId";
+        NotificationHistoryDatabase userHistory = mock(NotificationHistoryDatabase.class);
+
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistory);
+
+        mHistoryManager.deleteNotificationChannel(pkg, 1, channelId);
+
+        verify(userHistory, times(1)).deleteNotificationChannel(pkg, channelId);
     }
 
     @Test

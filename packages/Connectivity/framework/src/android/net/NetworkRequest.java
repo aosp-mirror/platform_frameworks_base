@@ -500,9 +500,14 @@ public class NetworkRequest implements Parcelable {
          * A network will satisfy this request only if it matches one of the subIds in this set.
          * An empty set matches all networks, including those without a subId.
          *
+         * <p>Registering a NetworkRequest with a non-empty set of subIds requires the
+         * NETWORK_FACTORY permission.
+         *
          * @param subIds A {@code Set} that represents subscription IDs.
+         * @hide
          */
         @NonNull
+        @SystemApi
         public Builder setSubIds(@NonNull Set<Integer> subIds) {
             mNetworkCapabilities.setSubIds(subIds);
             return this;
@@ -653,25 +658,6 @@ public class NetworkRequest implements Parcelable {
         return "NetworkRequest [ " + type + " id=" + requestId +
                 (legacyType != ConnectivityManager.TYPE_NONE ? ", legacyType=" + legacyType : "") +
                 ", " + networkCapabilities.toString() + " ]";
-    }
-
-    private int typeToProtoEnum(Type t) {
-        switch (t) {
-            case NONE:
-                return NetworkRequestProto.TYPE_NONE;
-            case LISTEN:
-                return NetworkRequestProto.TYPE_LISTEN;
-            case TRACK_DEFAULT:
-                return NetworkRequestProto.TYPE_TRACK_DEFAULT;
-            case REQUEST:
-                return NetworkRequestProto.TYPE_REQUEST;
-            case BACKGROUND_REQUEST:
-                return NetworkRequestProto.TYPE_BACKGROUND_REQUEST;
-            case TRACK_SYSTEM_DEFAULT:
-                return NetworkRequestProto.TYPE_TRACK_SYSTEM_DEFAULT;
-            default:
-                return NetworkRequestProto.TYPE_UNKNOWN;
-        }
     }
 
     public boolean equals(@Nullable Object obj) {

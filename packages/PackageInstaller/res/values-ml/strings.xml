@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"പാക്കേജ് ഇൻസ്‌റ്റാളർ"</string>
     <string name="install" msgid="711829760615509273">"ഇൻസ്‌റ്റാൾ‌ ചെയ്യുക"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"പൂർത്തിയായി"</string>
     <string name="cancel" msgid="1018267193425558088">"റദ്ദാക്കുക"</string>
     <string name="installing" msgid="4921993079741206516">"ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു…"</string>
     <string name="install_done" msgid="5987363587661783896">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തു."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യണോ?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"നിലവിലുള്ള ഈ ആപ്പിന്റെ അപ്‌ഡേറ്റ് ഇൻസ്‌റ്റാൾ ചെയ്യണോ നിലവിലുള്ള ഡാറ്റ നഷ്‌ടപ്പെടില്ല."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"ഈ അടങ്ങിയ ആപ്പിന് ഒരു അപ്‌ഡേറ്റ് ഇൻസ്‌റ്റാൾ ചെയ്യണോ? നിലവിലുള്ള ഡാറ്റ നഷ്‌ടപ്പെടില്ല."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തിട്ടില്ല."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"പാക്കേജ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നത് ബ്ലോക്ക് ചെയ്‌തു."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"പാക്കേജിന് നിലവിലുള്ള പാക്കേജുമായി പൊരുത്തക്കേടുള്ളതിനാൽ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തില്ല."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"ഇൻസ്‌റ്റാൾ/അൺഇൻസ്‌റ്റാൾ ചെയ്യുന്നത് Wear പിന്തുണയ്‌ക്കുന്നില്ല."</string>
     <string name="message_staging" msgid="8032722385658438567">"ആപ്പ് തയ്യാറാക്കുന്നു…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"അജ്ഞാതം"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"നിങ്ങളുടെ സുരക്ഷയ്ക്കായി, ഈ ഉറവിടത്തിൽ നിന്നുള്ള, അജ്ഞാത ആപ്പുകൾ ഡാബ്‌ലെറ്റിൽ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നത് അനുവദനീയമല്ല."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"നിങ്ങളുടെ സുരക്ഷയ്ക്കായി, ഈ ഉറവിടത്തിൽ നിന്നുള്ള, അജ്ഞാത ആപ്പുകൾ ടിവിയിൽ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നത് അനുവദനീയമല്ല."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"നിങ്ങളുടെ സുരക്ഷയ്ക്കായി, ഈ ഉറവിടത്തിൽ നിന്നുള്ള, അജ്ഞാത ആപ്പുകൾ ഫോണിൽ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നത് അനുവദനീയമല്ല."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ഫോണും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ഫോണിന് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റിന് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ടിവിയും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ടിവിക്ക് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>

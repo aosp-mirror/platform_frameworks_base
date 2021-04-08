@@ -239,6 +239,9 @@ public class LogicalDisplayMapperTest {
         displayDeviceInfo.width = width;
         displayDeviceInfo.height = height;
         displayDeviceInfo.flags = flags;
+        displayDeviceInfo.supportedModes = new Display.Mode[1];
+        displayDeviceInfo.supportedModes[0] = new Display.Mode(1, width, height, 60f);
+        displayDeviceInfo.modeId = 1;
         displayDeviceInfo.address = new DisplayAddressImpl();
         return device;
     }

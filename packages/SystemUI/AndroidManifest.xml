@@ -275,6 +275,8 @@
     <!-- Permission to make accessibility service access Bubbles -->
     <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
 
+    <uses-permission android:name="android.permission.MANAGE_SMARTSPACE" />
+
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
@@ -583,7 +585,7 @@
             android:label="@string/people_tile_title"
             android:enabled="true"
             android:exported="true"
-            android:theme="@android:style/Theme.Material.NoActionBar">
+            android:theme="@style/Theme.PeopleTileConfigActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
@@ -679,7 +681,7 @@
         <activity
             android:name=".settings.brightness.BrightnessDialog"
             android:label="@string/quick_settings_brightness_dialog_title"
-            android:theme="@*android:style/Theme.DeviceDefault.QuickSettings.Dialog"
+            android:theme="@*android:style/Theme.DeviceDefault.SystemUI.Dialog"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
@@ -754,6 +756,18 @@
         <activity android:name=".controls.ui.ControlsActivity"
                   android:label="@string/quick_controls_title"
                   android:theme="@style/Theme.ControlsActivity"
+                  android:excludeFromRecents="true"
+                  android:showWhenLocked="true"
+                  android:showForAllUsers="true"
+                  android:finishOnTaskLaunch="true"
+                  android:launchMode="singleInstance"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <activity android:name=".wallet.ui.WalletActivity"
+                  android:label="@string/wallet_title"
+                  android:theme="@style/Wallet.Theme"
                   android:excludeFromRecents="true"
                   android:showWhenLocked="true"
                   android:showForAllUsers="true"

@@ -176,6 +176,7 @@
     <uses-permission android:name="android.permission.SET_TIME_ZONE" />
     <uses-permission android:name="android.permission.DISABLE_HIDDEN_API_CHECKS" />
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
+    <uses-permission android:name="android.permission.BYPASS_ROLE_QUALIFICATION" />
     <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
     <uses-permission android:name="android.permission.STATUS_BAR" />
@@ -265,10 +266,11 @@
     <!-- permissions required for CTS test - PhoneStateListenerTest -->
     <uses-permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH" />
 
-    <!-- Permissions required for ganting and logging -->
+    <!-- Permissions required for granting and logging -->
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
     <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
 
     <!-- Permission required for CTS test - BatterySaverTest -->
     <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
@@ -405,6 +407,9 @@
     <!-- Permission required for CTS test - CtsHdmiCecHostTestCases -->
     <uses-permission android:name="android.permission.HDMI_CEC" />
 
+    <!-- Permission needed for CTS test - MediaPlayerTest -->
+    <uses-permission android:name="android.permission.BIND_IMS_SERVICE" />
+
     <!-- Permission needed for CTS test - WifiManagerTest -->
     <uses-permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
     <uses-permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
@@ -449,8 +454,20 @@
     <!-- Permission required for CTS test - ResourceObserverNativeTest -->
     <uses-permission android:name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
 
+    <!-- Permission required for CTS test - CtsPermission5TestCases -->
+    <uses-permission android:name="android.permission.RENOUNCE_PERMISSIONS" />
+
     <!-- Permission required for CTS test - android.widget.cts.ToastTest -->
     <uses-permission android:name="android.permission.UNLIMITED_TOASTS" />
+
+    <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
+    <uses-permission android:name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
+
+    <!-- Permission required for CTS test - SystemMediaRouter2Test -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
+
+    <!-- Permission required for CTS test - CtsRotationResolverServiceDeviceTestCases -->
+    <uses-permission android:name="android.permission.MANAGE_ROTATION_RESOLVER" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

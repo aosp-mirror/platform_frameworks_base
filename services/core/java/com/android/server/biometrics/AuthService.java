@@ -48,10 +48,12 @@ import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -70,6 +72,9 @@ import java.util.List;
 public class AuthService extends SystemService {
     private static final String TAG = "AuthService";
     private static final boolean DEBUG = false;
+    private static final String SETTING_HIDL_DISABLED =
+            "com.android.server.biometrics.AuthService.hidlDisabled";
+    private static final int DEFAULT_HIDL_DISABLED = 0;
 
     private final Injector mInjector;
 
@@ -141,6 +146,18 @@ public class AuthService extends SystemService {
         @VisibleForTesting
         public AppOpsManager getAppOps(Context context) {
             return context.getSystemService(AppOpsManager.class);
+        }
+
+        /**
+         * Allows to ignore HIDL HALs on debug builds based on a secure setting.
+         */
+        @VisibleForTesting
+        public boolean isHidlDisabled(Context context) {
+            if (Build.IS_ENG || Build.IS_USERDEBUG) {
+                return Settings.Secure.getIntForUser(context.getContentResolver(),
+                        SETTING_HIDL_DISABLED, DEFAULT_HIDL_DISABLED, UserHandle.USER_CURRENT) == 1;
+            }
+            return false;
         }
     }
 
@@ -561,12 +578,14 @@ public class AuthService extends SystemService {
     public void onStart() {
         mBiometricService = mInjector.getBiometricService();
 
-        final String[] configs = mInjector.getConfiguration(getContext());
-        for (String config : configs) {
-            try {
-                registerAuthenticator(new SensorConfig(config));
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
+        if (!mInjector.isHidlDisabled(getContext())) {
+            final String[] configs = mInjector.getConfiguration(getContext());
+            for (String config : configs) {
+                try {
+                    registerAuthenticator(new SensorConfig(config));
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception", e);
+                }
             }
         }
 

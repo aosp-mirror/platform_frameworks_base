@@ -44,14 +44,15 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final long measuredEnergyUC = batteryStats.getScreenDozeMeasuredBatteryConsumptionUC();
+        final int powerModel = getPowerModel(measuredEnergyUC, query);
         final long durationMs = calculateDuration(batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
-        final double powerMah = getMeasuredOrEstimatedPower(
-                batteryStats.getScreenDozeMeasuredBatteryConsumptionUC(),
-                mPowerEstimator, durationMs, query.shouldForceUsePowerProfileModel());
+        final double powerMah = getMeasuredOrEstimatedPower(powerModel,
+                measuredEnergyUC, mPowerEstimator, durationMs);
         builder.getOrCreateSystemBatteryConsumerBuilder(
                         SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, powerMah)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, powerMah, powerModel)
                 .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE, durationMs);
     }
 
@@ -64,10 +65,12 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
     @Override
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
+        final long measuredEnergyUC = batteryStats.getScreenDozeMeasuredBatteryConsumptionUC();
         final long durationMs = calculateDuration(batteryStats, rawRealtimeUs, statsType);
-        final double powerMah = getMeasuredOrEstimatedPower(
+        final int powerModel = getPowerModel(measuredEnergyUC);
+        final double powerMah = getMeasuredOrEstimatedPower(powerModel,
                 batteryStats.getScreenDozeMeasuredBatteryConsumptionUC(),
-                mPowerEstimator, durationMs, false);
+                mPowerEstimator, durationMs);
         if (powerMah > 0) {
             BatterySipper bs = new BatterySipper(BatterySipper.DrainType.AMBIENT_DISPLAY, null, 0);
             bs.usagePowerMah = powerMah;

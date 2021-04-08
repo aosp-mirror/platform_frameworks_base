@@ -69,7 +69,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
     private lateinit var executor: FakeExecutor
     private lateinit var deviceConfigProxy: DeviceConfigProxy
 
-    fun PrivacyItemController(): PrivacyItemController {
+    fun createPrivacyItemController(): PrivacyItemController {
         return PrivacyItemController(
                 appOpsController,
                 executor,
@@ -77,6 +77,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
                 deviceConfigProxy,
                 userTracker,
                 logger,
+                FakeSystemClock(),
                 dumpManager)
     }
 
@@ -86,7 +87,7 @@ class PrivacyItemControllerFlagsTest : SysuiTestCase() {
         executor = FakeExecutor(FakeSystemClock())
         deviceConfigProxy = DeviceConfigProxyFake()
 
-        privacyItemController = PrivacyItemController()
+        privacyItemController = createPrivacyItemController()
         privacyItemController.addCallback(callback)
 
         executor.runAllReady()

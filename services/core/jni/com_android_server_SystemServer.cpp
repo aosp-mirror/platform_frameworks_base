@@ -24,11 +24,13 @@
 #include <nativehelper/JNIHelp.h>
 
 #include <android/binder_manager.h>
+#include <android/binder_stability.h>
 #include <android/hidl/manager/1.2/IServiceManager.h>
 #include <binder/IServiceManager.h>
 #include <hidl/HidlTransportSupport.h>
 #include <incremental_service.h>
 
+#include <memtrackproxy/MemtrackProxy.h>
 #include <schedulerservice/SchedulingPolicyService.h>
 #include <sensorservice/SensorService.h>
 #include <sensorservicehidl/SensorManager.h>
@@ -58,7 +60,7 @@ static void startStatsAidlService() {
     const std::string instance = std::string() + IStats::descriptor + "/default";
     const binder_exception_t err =
             AServiceManager_addService(statsService->asBinder().get(), instance.c_str());
-    LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register %s: %d", instance.c_str(), err);
+    LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register AIDL %s: %d", instance.c_str(), err);
 }
 
 static void startStatsHidlService() {
@@ -67,12 +69,17 @@ static void startStatsHidlService() {
 
     android::sp<IStats> statsHal = new StatsHal();
     const android::status_t err = statsHal->registerAsService();
-    LOG_ALWAYS_FATAL_IF(err != android::OK, "Cannot register %s: %d", IStats::descriptor, err);
+    LOG_ALWAYS_FATAL_IF(err != android::OK, "Cannot register HIDL %s: %d", IStats::descriptor, err);
 }
 
 } // namespace
 
 namespace android {
+
+static void android_server_SystemServer_startIStatsService(JNIEnv* /* env */, jobject /* clazz */) {
+    startStatsHidlService();
+    startStatsAidlService();
+}
 
 static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jobject /* clazz */) {
     char propBuf[PROPERTY_VALUE_MAX];
@@ -81,6 +88,21 @@ static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jo
         SensorService::publish(false /* allowIsolated */,
                                IServiceManager::DUMP_FLAG_PRIORITY_CRITICAL);
     }
+}
+
+static void android_server_SystemServer_startMemtrackProxyService(JNIEnv* env,
+                                                                  jobject /* clazz */) {
+    using aidl::android::hardware::memtrack::MemtrackProxy;
+
+    const char* memtrackProxyService = "memtrack.proxy";
+
+    std::shared_ptr<MemtrackProxy> memtrack_proxy = ndk::SharedRefBase::make<MemtrackProxy>();
+    auto binder = memtrack_proxy->asBinder();
+
+    AIBinder_forceDowngradeToLocalStability(binder.get());
+
+    const binder_exception_t err = AServiceManager_addService(binder.get(), memtrackProxyService);
+    LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register %s: %d", memtrackProxyService, err);
 }
 
 static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /* clazz */) {
@@ -112,9 +134,6 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     } else {
         ALOGW("%s is deprecated. Skipping registration.", ISchedulingPolicyService::descriptor);
     }
-
-    startStatsAidlService();
-    startStatsHidlService();
 }
 
 static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,
@@ -143,7 +162,10 @@ static void android_server_SystemServer_setIncrementalServiceSystemReady(JNIEnv*
  */
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
+        {"startIStatsService", "()V", (void*)android_server_SystemServer_startIStatsService},
         {"startSensorService", "()V", (void*)android_server_SystemServer_startSensorService},
+        {"startMemtrackProxyService", "()V",
+         (void*)android_server_SystemServer_startMemtrackProxyService},
         {"startHidlServices", "()V", (void*)android_server_SystemServer_startHidlServices},
         {"initZygoteChildHeapProfiling", "()V",
          (void*)android_server_SystemServer_initZygoteChildHeapProfiling},

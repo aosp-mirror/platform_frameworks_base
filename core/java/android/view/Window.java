@@ -1703,29 +1703,31 @@ public abstract class Window {
     public abstract void setBackgroundDrawable(Drawable drawable);
 
     /**
+     * <p>
      * Blurs the screen behind the window within the bounds of the window.
-     *
+     * </p><p>
      * The density of the blur is set by the blur radius. The radius defines the size
      * of the neighbouring area, from which pixels will be averaged to form the final
      * color for each pixel. The operation approximates a Gaussian blur.
      * A radius of 0 means no blur. The higher the radius, the denser the blur.
-     *
+     * </p><p>
      * The window background drawable is drawn on top of the blurred region. The blur
      * region bounds and rounded corners will mimic those of the background drawable.
-     *
+     * </p><p>
      * For the blur region to be visible, the window has to be translucent. See
      * {@link android.R.styleable#Window_windowIsTranslucent}.
-     *
+     * </p><p>
      * Note the difference with {@link WindowManager.LayoutParams#setBlurBehindRadius},
      * which blurs the whole screen behind the window. Background blur blurs the screen behind
      * only within the bounds of the window.
-     *
+     * </p><p>
      * Some devices might not support cross-window blur due to GPU limitations. It can also be
      * disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
      * when minimal post processing is requested. In such situations, no blur will be computed or
      * drawn, resulting in a transparent window background. To avoid this, the app might want to
      * change its theme to one that does not use blurs. To listen for cross-window blur
      * enabled/disabled events, use {@link WindowManager#addCrossWindowBlurEnabledListener}.
+     * </p>
      *
      * @param blurRadius The blur radius to use for window background blur in pixels
      *
@@ -2715,6 +2717,16 @@ public abstract class Window {
      * @see View#getWindowInsetsController()
      */
     public @Nullable WindowInsetsController getInsetsController() {
+        return null;
+    }
+
+    /**
+     * This will be null before a content view is added, e.g. via
+     * {@link #setContentView} or {@link #addContentView}.
+     *
+     * @return The {@link android.view.ViewRoot} interface for this Window
+     */
+    public @Nullable ViewRoot getViewRoot() {
         return null;
     }
 }

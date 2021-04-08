@@ -2053,26 +2053,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = childrenCount - 1; i >= 0; i--) {
                 final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
                 final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
-                View childWithAccessibilityFocus =
-                        event.isTargetAccessibilityFocus()
-                                ? findChildWithAccessibilityFocus()
-                                : null;
 
                 if (!child.canReceivePointerEvents()
                         || !isTransformedTouchPointInView(x, y, child, null)) {
-
-                    // If there is a view that has accessibility focus we want it
-                    // to get the event first and if not handled we will perform a
-                    // normal dispatch. We may do a double iteration but this is
-                    // safer given the timeframe.
-                    if (childWithAccessibilityFocus != null) {
-                        if (childWithAccessibilityFocus != child) {
-                            continue;
-                        }
-                        childWithAccessibilityFocus = null;
-                        i = childrenCount - 1;
-                    }
-                    event.setTargetAccessibilityFocus(false);
                     continue;
                 }
                 final PointerIcon pointerIcon =
@@ -2730,8 +2713,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                     childrenCount, i, customOrder);
                             final View child = getAndVerifyPreorderedView(
                                     preorderedList, children, childIndex);
+
+                            // If there is a view that has accessibility focus we want it
+                            // to get the event first and if not handled we will perform a
+                            // normal dispatch. We may do a double iteration but this is
+                            // safer given the timeframe.
+                            if (childWithAccessibilityFocus != null) {
+                                if (childWithAccessibilityFocus != child) {
+                                    continue;
+                                }
+                                childWithAccessibilityFocus = null;
+                                i = childrenCount - 1;
+                            }
+
                             if (!child.canReceivePointerEvents()
                                     || !isTransformedTouchPointInView(x, y, child, null)) {
+                                ev.setTargetAccessibilityFocus(false);
                                 continue;
                             }
 

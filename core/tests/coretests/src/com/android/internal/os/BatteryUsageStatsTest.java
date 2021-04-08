@@ -103,7 +103,10 @@ public class BatteryUsageStatsTest {
     }
 
     public void validateBatteryUsageStats(BatteryUsageStats batteryUsageStats) {
-        assertThat(batteryUsageStats.getConsumedPower()).isEqualTo(21500);
+        // Camera: (10100 + 10200) - 20000 (consumed by apps) = 300
+        // App: 300 + 400 + 500 = 1200
+        // Total: 1500
+        assertThat(batteryUsageStats.getConsumedPower()).isEqualTo(1500);
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(20);
         assertThat(batteryUsageStats.getDischargedPowerRange().getLower()).isEqualTo(1000);
         assertThat(batteryUsageStats.getDischargedPowerRange().getUpper()).isEqualTo(2000);

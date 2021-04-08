@@ -96,6 +96,7 @@ public class AuthServiceTest {
         when(mInjector.getFaceService()).thenReturn(mFaceService);
         when(mInjector.getIrisService()).thenReturn(mIrisService);
         when(mInjector.getAppOps(any())).thenReturn(mAppOpsManager);
+        when(mInjector.isHidlDisabled(any())).thenReturn(false);
     }
 
     @Test

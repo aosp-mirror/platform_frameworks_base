@@ -2468,7 +2468,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // to the client erroneously accepting a configuration that would have otherwise caused
             // an activity restart. We instead hand back the last reported
             // {@link MergedConfiguration}.
-            if (shouldRelayout) {
+            if (shouldRelayout && (!win.shouldCheckTokenVisibleRequested()
+                    || win.mToken.isVisibleRequested())) {
                 win.getMergedConfiguration(mergedConfiguration);
             } else {
                 win.getLastReportedMergedConfiguration(mergedConfiguration);

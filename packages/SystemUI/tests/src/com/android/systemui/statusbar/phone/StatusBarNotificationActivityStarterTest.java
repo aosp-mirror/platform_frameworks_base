@@ -35,7 +35,6 @@ import static org.mockito.Mockito.when;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -54,6 +53,7 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -63,9 +63,9 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
@@ -136,6 +136,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock
     private NotificationActivityStarter mNotificationActivityStarter;
+    @Mock
+    private ActivityLaunchAnimator mActivityLaunchAnimator;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private NotificationTestHelper mNotificationTestHelper;
@@ -213,11 +215,14 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(MetricsLogger.class),
                         mock(StatusBarNotificationActivityStarterLogger.class),
                         mOnUserInteractionCallback)
-                .setStatusBar(mStatusBar)
-                .setNotificationPresenter(mock(NotificationPresenter.class))
-                .setNotificationPanelViewController(mock(NotificationPanelViewController.class))
-                .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class))
-                .build();
+                        .setStatusBar(mStatusBar)
+                        .setNotificationPresenter(mock(NotificationPresenter.class))
+                        .setNotificationPanelViewController(
+                                mock(NotificationPanelViewController.class))
+                        .setActivityLaunchAnimator(mActivityLaunchAnimator)
+                        .setNotificationAnimatorControllerProvider(
+                                mock(NotificationLaunchAnimatorControllerProvider.class))
+                        .build();
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
         doAnswer(mCallOnDismiss).when(mActivityStarter).dismissKeyguardThenExecute(
@@ -254,14 +259,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mShadeController, atLeastOnce()).collapsePanel();
 
-        verify(mContentIntent).sendAndReturnResult(
-                any(Context.class),
-                anyInt() /* code */,
-                any() /* fillInIntent */,
-                any() /* PendingIntent.OnFinished */,
-                any() /* Handler */,
-                any() /* requiredPermission */,
-                any() /* Bundle options */);
+        verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(eq(null), any());
 
         verify(mAssistManager).hideAssist();
 

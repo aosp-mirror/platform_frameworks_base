@@ -34,7 +34,7 @@ import android.telephony.SignalStrength;
 
 interface IBatteryStats {
     // These first methods are also called by native code, so must
-    // be kept in sync with frameworks/native/libs/binder/include/binder/IBatteryStats.h
+    // be kept in sync with frameworks/native/libs/binder/include_batterystats/batterystats/IBatteryStats.h
     void noteStartSensor(int uid, int sensor);
     void noteStopSensor(int uid, int sensor);
     void noteStartVideo(int uid);

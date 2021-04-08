@@ -905,8 +905,8 @@ public class DisplayPolicy {
                         && win.mActivityRecord.fillsParent()
                         && (win.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
                         && attrs.getFitInsetsTypes() != 0) {
-                    throw new RuntimeException("Illegal attributes: Main activity window that isn't"
-                            + " translucent trying to fit insets: "
+                    throw new IllegalArgumentException("Illegal attributes: Main activity window"
+                            + " that isn't translucent trying to fit insets: "
                             + attrs.getFitInsetsTypes()
                             + " attrs=" + attrs);
                 }

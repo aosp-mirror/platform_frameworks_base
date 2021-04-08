@@ -120,4 +120,14 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
             }
         }
     }
+
+    void onAccessibilityActionPerformed(int displayId) {
+        if (mConnectionCallback != null) {
+            try {
+                mConnectionCallback.onAccessibilityActionPerformed(displayId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to inform an accessibility action is already performed", e);
+            }
+        }
+    }
 }

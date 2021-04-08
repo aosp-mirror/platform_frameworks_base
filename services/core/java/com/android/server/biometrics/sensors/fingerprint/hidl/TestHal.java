@@ -16,12 +16,19 @@
 
 package com.android.server.biometrics.sensors.fingerprint.hidl;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.hardware.biometrics.fingerprint.V2_1.FingerprintError;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
 import android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.RemoteException;
 import android.util.Slog;
+
+import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
+
+import java.util.List;
 
 /**
  * Test HAL that provides only provides no-ops.
@@ -29,8 +36,17 @@ import android.util.Slog;
 public class TestHal extends IBiometricsFingerprint.Stub {
     private static final String TAG = "fingerprint.hidl.TestHal";
 
+    @NonNull
+    private final Context mContext;
+    private final int mSensorId;
+
     @Nullable
     private IBiometricsFingerprintClientCallback mCallback;
+
+    TestHal(@NonNull Context context, int sensorId) {
+        mContext = context;
+        mSensorId = sensorId;
+    }
 
     @Override
     public boolean isUdfps(int sensorId) {
@@ -96,7 +112,18 @@ public class TestHal extends IBiometricsFingerprint.Stub {
     public int remove(int gid, int fid) throws RemoteException {
         Slog.w(TAG, "Remove");
         if (mCallback != null) {
-            mCallback.onRemoved(0 /* deviceId */, fid, gid, 0 /* remaining */);
+            if (fid == 0) {
+                // For this HAL interface, remove(0) means to remove all enrollments.
+                final List<Fingerprint> fingerprints = FingerprintUtils.getInstance(mSensorId)
+                        .getBiometricsForUser(mContext, gid);
+                for (int i = 0; i < fingerprints.size(); i++) {
+                    final Fingerprint fp = fingerprints.get(i);
+                    mCallback.onRemoved(0 /* deviceId */, fp.getBiometricId(), gid,
+                            fingerprints.size() - i - 1);
+                }
+            } else {
+                mCallback.onRemoved(0 /* deviceId */, fid, gid, 0 /* remaining */);
+            }
         }
         return 0;
     }

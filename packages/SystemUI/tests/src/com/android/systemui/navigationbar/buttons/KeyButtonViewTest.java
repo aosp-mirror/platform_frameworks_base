@@ -24,6 +24,7 @@ import static android.view.KeyEvent.KEYCODE_0;
 import static android.view.KeyEvent.KEYCODE_APP_SWITCH;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.KeyEvent.KEYCODE_HOME;
+import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
 import static com.android.systemui.navigationbar.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_BACK_BUTTON_LONGPRESS;
 import static com.android.systemui.navigationbar.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_BACK_BUTTON_TAP;
@@ -88,7 +89,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
     }
 
     @Test
-        public void testLogOverviewPress() {
+    public void testLogOverviewPress() {
         checkmetrics(KEYCODE_APP_SWITCH, ACTION_UP, 0, NAVBAR_OVERVIEW_BUTTON_TAP);
     }
 
@@ -132,6 +133,22 @@ public class KeyButtonViewTest extends SysuiTestCase {
     @Test
     public void testNoLogArbitraryKeys() {
         checkmetrics(KEYCODE_0, ACTION_UP, 0, null);
+    }
+
+    @Test
+    public void testEventInjectedOnAbortGesture() {
+        mKeyButtonView.setCode(KEYCODE_HOME);
+        mKeyButtonView.abortCurrentGesture();
+        verify(mInputManager, times(1))
+                .injectInputEvent(any(KeyEvent.class), any(Integer.class));
+    }
+
+    @Test
+    public void testNoEventInjectedOnAbortUnknownGesture() {
+        mKeyButtonView.setCode(KEYCODE_UNKNOWN);
+        mKeyButtonView.abortCurrentGesture();
+        verify(mInputManager, never())
+                .injectInputEvent(any(KeyEvent.class), any(Integer.class));
     }
 
     private void checkmetrics(int code, int action, int flag,

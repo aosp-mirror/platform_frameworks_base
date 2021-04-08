@@ -112,8 +112,20 @@ public interface FalsingCollector {
     /** */
     void onBouncerHidden();
 
-    /** */
+    /**
+     * Call this to record a MotionEvent in the {@link com.android.systemui.plugins.FalsingManager}.
+     *
+     * Be sure to call {@link #onMotionEventComplete()} after the rest of SystemUI is done with the
+     * MotionEvent.
+     */
     void onTouchEvent(MotionEvent ev);
+
+    /**
+     * Call this once SystemUI has completed all processing of a given MotionEvent.
+     *
+     * See {@link #onTouchEvent(MotionEvent)}.
+     */
+    void onMotionEventComplete();
 
     /** */
     void avoidGesture();

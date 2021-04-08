@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -28,7 +29,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 
 public class AuthBiometricFaceView extends AuthBiometricView {
@@ -38,15 +38,15 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     // Delay before dismissing after being authenticated/confirmed.
     private static final int HIDE_DELAY_MS = 500;
 
-    public static class IconController extends Animatable2.AnimationCallback {
-        Context mContext;
-        ImageView mIconView;
-        TextView mTextView;
-        Handler mHandler;
-        boolean mLastPulseLightToDark; // false = dark to light, true = light to dark
-        @BiometricState int mState;
+    protected static class IconController extends Animatable2.AnimationCallback {
+        protected Context mContext;
+        protected ImageView mIconView;
+        protected TextView mTextView;
+        protected Handler mHandler;
+        protected boolean mLastPulseLightToDark; // false = dark to light, true = light to dark
+        protected @BiometricState int mState;
 
-        IconController(Context context, ImageView iconView, TextView textView) {
+        protected IconController(Context context, ImageView iconView, TextView textView) {
             mContext = context;
             mIconView = iconView;
             mTextView = textView;
@@ -54,15 +54,15 @@ public class AuthBiometricFaceView extends AuthBiometricView {
             showStaticDrawable(R.drawable.face_dialog_pulse_dark_to_light);
         }
 
-        void animateOnce(int iconRes) {
+        protected void animateOnce(int iconRes) {
             animateIcon(iconRes, false);
         }
 
-        public void showStaticDrawable(int iconRes) {
+        protected void showStaticDrawable(int iconRes) {
             mIconView.setImageDrawable(mContext.getDrawable(iconRes));
         }
 
-        void animateIcon(int iconRes, boolean repeat) {
+        protected void animateIcon(int iconRes, boolean repeat) {
             final AnimatedVectorDrawable icon =
                     (AnimatedVectorDrawable) mContext.getDrawable(iconRes);
             mIconView.setImageDrawable(icon);
@@ -73,12 +73,12 @@ public class AuthBiometricFaceView extends AuthBiometricView {
             icon.start();
         }
 
-        void startPulsing() {
+        protected void startPulsing() {
             mLastPulseLightToDark = false;
             animateIcon(R.drawable.face_dialog_pulse_dark_to_light, true);
         }
 
-        void pulseInNextDirection() {
+        protected void pulseInNextDirection() {
             int iconRes = mLastPulseLightToDark ? R.drawable.face_dialog_pulse_dark_to_light
                     : R.drawable.face_dialog_pulse_light_to_dark;
             animateIcon(iconRes, true /* repeat */);
@@ -93,7 +93,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
             }
         }
 
-        public void updateState(int lastState, int newState) {
+        protected void updateState(int lastState, int newState) {
             final boolean lastStateIsErrorIcon =
                     lastState == STATE_ERROR || lastState == STATE_HELP;
 
@@ -138,7 +138,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         }
     }
 
-    @VisibleForTesting IconController mIconController;
+    protected IconController mIconController;
 
     public AuthBiometricFaceView(Context context) {
         this(context, null);
@@ -174,14 +174,21 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mIconController = new IconController(mContext, mIconView, mIndicatorView);
+    protected boolean supportsManualRetry() {
+        return true;
+    }
+
+    @NonNull
+    protected IconController getIconController() {
+        if (mIconController == null) {
+            mIconController = new IconController(mContext, mIconView, mIndicatorView);
+        }
+        return mIconController;
     }
 
     @Override
     public void updateState(@BiometricState int newState) {
-        mIconController.updateState(mState, newState);
+        getIconController().updateState(mState, newState);
 
         if (newState == STATE_AUTHENTICATING_ANIMATING_IN ||
                 (newState == STATE_AUTHENTICATING && getSize() == AuthDialog.SIZE_MEDIUM)) {
@@ -195,11 +202,13 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     @Override
     public void onAuthenticationFailed(String failureReason) {
         if (getSize() == AuthDialog.SIZE_MEDIUM) {
-            mTryAgainButton.setVisibility(View.VISIBLE);
-            mConfirmButton.setVisibility(View.GONE);
+            if (supportsManualRetry()) {
+                mTryAgainButton.setVisibility(View.VISIBLE);
+                mConfirmButton.setVisibility(View.GONE);
+            }
         }
 
-        // Do this last since wa want to know if the button is being animated (in the case of
+        // Do this last since we want to know if the button is being animated (in the case of
         // small -> medium dialog)
         super.onAuthenticationFailed(failureReason);
     }

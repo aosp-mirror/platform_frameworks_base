@@ -92,9 +92,13 @@ interface IUwbRangingCallbacks {
    * Called when the ranging session has been stopped
    *
    * @param sessionHandle the session the callback is being invoked for
+   * @param reason the reason the session was stopped
+   * @param parameters protocol specific parameters
    */
 
-  void onRangingStopped(in SessionHandle sessionHandle);
+  void onRangingStopped(in SessionHandle sessionHandle,
+                        RangingChangeReason reason,
+                        in PersistableBundle parameters);
 
   /**
    * Called when a ranging session fails to stop

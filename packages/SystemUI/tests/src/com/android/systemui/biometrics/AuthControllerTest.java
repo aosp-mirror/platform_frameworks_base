@@ -509,20 +509,6 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mUdfpsController).onAodInterrupt(eq(pos), eq(pos), eq(majorMinor), eq(majorMinor));
     }
 
-    @Test
-    public void testOnBiometricAuthenticated_OnCancelAodInterrupt() {
-        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        mAuthController.onBiometricAuthenticated();
-        verify(mUdfpsController).onCancelAodInterrupt();
-    }
-
-    @Test
-    public void testOnBiometricError_OnCancelAodInterrupt() {
-        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        mAuthController.onBiometricError(0, 0, 0);
-        verify(mUdfpsController).onCancelAodInterrupt();
-    }
-
     // Helpers
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {

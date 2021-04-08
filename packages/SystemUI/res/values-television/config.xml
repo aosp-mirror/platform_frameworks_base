@@ -60,4 +60,7 @@
 
     <!-- The duraction of the hide animation for the volume dialog in milliseconds -->
     <integer name="config_dialogHideAnimationDurationMs">400</integer>
+
+    <!-- Whether to use window background blur for the volume dialog. -->
+    <bool name="config_volumeDialogUseBackgroundBlur">true</bool>
 </resources>

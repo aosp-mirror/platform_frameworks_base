@@ -132,9 +132,12 @@ public class BatteryUsageStatsProvider {
         // TODO(b/174186358): read extra time component number from configuration
         final int customTimeComponentCount = 0;
 
-        final BatteryUsageStats.Builder batteryUsageStatsBuilder =
-                new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount)
-                        .setStatsStartTimestamp(mStats.getStartClockTime());
+        final boolean includePowerModels = (query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
+
+        final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
+                customPowerComponentCount, customTimeComponentCount, includePowerModels);
+        batteryUsageStatsBuilder.setStatsStartTimestamp(mStats.getStartClockTime());
 
         SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
         for (int i = uidStats.size() - 1; i >= 0; i--) {

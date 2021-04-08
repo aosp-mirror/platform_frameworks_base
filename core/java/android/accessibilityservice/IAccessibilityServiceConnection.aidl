@@ -117,4 +117,7 @@ interface IAccessibilityServiceConnection {
     void setTouchExplorationPassthroughRegion(int displayId, in Region region);
 
     void setFocusAppearance(int strokeWidth, int color);
+
+    oneway void logTrace(long timestamp, String where, String callingParams, int processId,
+        long threadId, int callingUid, in Bundle serializedCallingStackInBundle);
 }

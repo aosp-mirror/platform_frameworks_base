@@ -43,7 +43,7 @@ public class QSTileView extends QSTileBaseView {
     protected TextView mLabel;
     protected TextView mSecondLine;
     private ImageView mPadLock;
-    private int mState;
+    protected int mState;
     protected ViewGroup mLabelContainer;
     private View mExpandIndicator;
     private View mExpandSpace;
@@ -133,14 +133,7 @@ public class QSTileView extends QSTileBaseView {
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
         if (!Objects.equals(mLabel.getText(), state.label) || mState != state.state) {
-            ColorStateList labelColor;
-            if (state.state == Tile.STATE_ACTIVE) {
-                labelColor = mColorLabelActive;
-            } else if (state.state == Tile.STATE_INACTIVE) {
-                labelColor = mColorLabelInactive;
-            } else {
-                labelColor = mColorLabelUnavailable;
-            }
+            ColorStateList labelColor = getLabelColor(state.state);
             changeLabelColor(labelColor);
             mState = state.state;
             mLabel.setText(state.label);
@@ -161,6 +154,15 @@ public class QSTileView extends QSTileBaseView {
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
+    }
+
+    protected final ColorStateList getLabelColor(int state) {
+        if (state == Tile.STATE_ACTIVE) {
+            return mColorLabelActive;
+        } else if (state == Tile.STATE_INACTIVE) {
+            return mColorLabelInactive;
+        }
+        return mColorLabelUnavailable;
     }
 
     protected void changeLabelColor(ColorStateList color) {

@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"软件包安装程序"</string>
     <string name="install" msgid="711829760615509273">"安装"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"完成"</string>
     <string name="cancel" msgid="1018267193425558088">"取消"</string>
     <string name="installing" msgid="4921993079741206516">"正在安装…"</string>
     <string name="installing_app" msgid="1165095864863849422">"正在安装<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"已安装应用。"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"要安装此应用吗？"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"要为此应用安装更新吗？您现有的数据将不会丢失。"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"要为此内置应用安装更新吗？您现有的数据将不会丢失。"</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"未安装应用。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"系统已禁止安装该软件包。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"应用未安装：软件包与现有软件包存在冲突。"</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear 不支持安装/卸载操作。"</string>
     <string name="message_staging" msgid="8032722385658438567">"正在准备安装应用…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"未知"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"出于安全考虑，已禁止您的平板电脑安装来自此来源的未知应用。"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"出于安全考虑，已禁止您的电视安装来自此来源的未知应用。"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"出于安全考虑，已禁止您的手机安装来自此来源的未知应用。"</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"来历不明的应用很可能会损害您的手机和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何手机损坏或数据丢失情况，您负有全部责任。"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"来历不明的应用很可能会损害您的平板电脑和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何平板电脑损坏或数据丢失情况，您负有全部责任。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"来历不明的应用很可能会损害您的电视和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何电视损坏或数据丢失情况，您负有全部责任。"</string>

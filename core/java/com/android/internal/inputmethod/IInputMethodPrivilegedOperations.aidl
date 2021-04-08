@@ -29,7 +29,7 @@ import com.android.internal.inputmethod.IVoidResultCallback;
  * Actual operations are implemented and handled by InputMethodManagerService.
  */
 oneway interface IInputMethodPrivilegedOperations {
-    void setImeWindowStatus(int vis, int backDisposition, in IVoidResultCallback resultCallback);
+    void setImeWindowStatusAsync(int vis, int backDisposition);
     void reportStartInput(in IBinder startInputToken, in IVoidResultCallback resultCallback);
     void createInputContentUriToken(in Uri contentUri, in String packageName,
             in IIInputContentUriTokenResultCallback resultCallback);

@@ -896,11 +896,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     };
 
     /**
-     * This change id forces the packages it is applied to to be resizable. We only allow resizing
-     * in fullscreen windowing mode, but not forcing the app into resizable multi-windowing mode.
+     * This change id forces the packages it is applied to be resizable. It won't change whether
+     * the app can be put into multi-windowing mode, but allow the app to resize when the window
+     * container resizes, such as display size change.
      * @hide
      */
     @ChangeId
+    @Overridable
     @Disabled
     @TestApi
     public static final long FORCE_RESIZE_APP = 174042936L; // buganizer id
@@ -910,6 +912,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     @ChangeId
+    @Overridable
     @Disabled
     @TestApi
     public static final long FORCE_NON_RESIZE_APP = 181136395L; // buganizer id

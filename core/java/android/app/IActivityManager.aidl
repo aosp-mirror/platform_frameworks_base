@@ -321,6 +321,8 @@ interface IActivityManager {
     boolean isTopActivityImmersive();
     void crashApplication(int uid, int initialPid, in String packageName, int userId,
             in String message, boolean force);
+    void crashApplicationWithType(int uid, int initialPid, in String packageName, int userId,
+            in String message, boolean force, int exceptionTypeId);
     /** @deprecated -- use getProviderMimeTypeAsync */
     @UnsupportedAppUsage(maxTargetSdk = 29, publicAlternatives =
             "Use {@link android.content.ContentResolver#getType} public API instead.")
@@ -570,6 +572,12 @@ interface IActivityManager {
      * started from the shell.
      */
     void stopDelegateShellPermissionIdentity();
+
+    /**
+     * Method for the shell UID to get currently adopted permissions for an active instrumentation.
+     * An active instrumentation is one running and started from the shell.
+     */
+    List<String> getDelegatedShellPermissions();
 
     /** Returns a file descriptor that'll be closed when the system server process dies. */
     ParcelFileDescriptor getLifeMonitor();

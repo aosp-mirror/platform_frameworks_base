@@ -159,7 +159,15 @@ class PackageParsingPerfTest {
             PARALLEL_MAX_THREADS, "package-parsing-test",
             Process.THREAD_PRIORITY_FOREGROUND)
 
-        fun submit(file: File) = service.submit { queue.put(parse(file)) }
+        fun submit(file: File) {
+                service.submit {
+                    try {
+                        queue.put(parse(file))
+                    } catch (e: Exception) {
+                        queue.put(e)
+                    }
+                }
+        }
 
         fun take() = queue.poll(QUEUE_POLL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 

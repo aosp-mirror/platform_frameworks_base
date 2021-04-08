@@ -196,9 +196,9 @@ cc_test_host {
     ],
     defaults: ["aapt2_defaults"],
     data: [
-         "integration-tests/CompileTest/**/*",
-         "integration-tests/CommandTests/**/*",
-         "integration-tests/ConvertTest/**/*"
+        "integration-tests/CompileTest/**/*",
+        "integration-tests/CommandTests/**/*",
+        "integration-tests/ConvertTest/**/*",
     ],
 }
 
@@ -232,6 +232,9 @@ genrule {
         "cp $(in) $(genDir)/protos && " +
         "$(location :soong_zip) -o $(out) -C $(genDir)/protos -D $(genDir)/protos",
     dist: {
-        targets: ["sdk_repo", "aapt2_artifacts"],
+        targets: [
+            "sdk_repo",
+            "aapt2_artifacts",
+        ],
     },
 }

@@ -23,7 +23,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.util.Log;
+import android.os.BatteryConsumer;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -58,12 +58,12 @@ public class SystemServiceCallLoadTest {
             assertNotNull(resolveInfo);
         }
 
-        mPowerMetricsCollector.dumpMetrics();
+        mPowerMetricsCollector.reportMetrics();
 
-        Log.i(TAG, "==");
-        Log.i(TAG, "Total system server calls made " + mPowerMetricsCollector.getIterationCount());
+        mPowerMetricsCollector.report(
+                "Total system server calls made: " + mPowerMetricsCollector.getIterationCount());
 
-        mPowerMetricsCollector.dumpMetricAsPercentageOfDrainedPower(
-                PowerMetrics.METRIC_SYSTEM_SERVICE_CPU_POWER);
+        mPowerMetricsCollector.reportMetricAsPercentageOfDrainedPower(
+                BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES);
     }
 }

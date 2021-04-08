@@ -19,8 +19,7 @@ package com.android.systemui.people;
 import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.pm.LauncherApps;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,11 +36,9 @@ public class PeopleSpaceTileView extends LinearLayout {
 
     private View mTileView;
     private TextView mNameView;
-    private TextView mStatusView;
-    private ImageView mPackageIconView;
     private ImageView mPersonIconView;
 
-    public PeopleSpaceTileView(Context context, ViewGroup view, String shortcutId) {
+    public PeopleSpaceTileView(Context context, ViewGroup view, String shortcutId, boolean isLast) {
         super(context);
         mTileView = view.findViewWithTag(shortcutId);
         if (mTileView == null) {
@@ -50,10 +47,13 @@ public class PeopleSpaceTileView extends LinearLayout {
             view.addView(mTileView, LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT);
             mTileView.setTag(shortcutId);
+
+            // If it's not the last conversation in this section, add a divider.
+            if (!isLast) {
+                inflater.inflate(R.layout.people_space_activity_list_divider, view, true);
+            }
         }
         mNameView = mTileView.findViewById(R.id.tile_view_name);
-        mStatusView = mTileView.findViewById(R.id.tile_view_status);
-        mPackageIconView = mTileView.findViewById(R.id.tile_view_package_icon);
         mPersonIconView = mTileView.findViewById(R.id.tile_view_person_icon);
     }
 
@@ -62,19 +62,9 @@ public class PeopleSpaceTileView extends LinearLayout {
         mNameView.setText(name);
     }
 
-    /** Sets the status text on the tile. */
-    public void setStatus(String status) {
-        mStatusView.setText(status);
-    }
-
-    /** Sets the package drawable on the tile. */
-    public void setPackageIcon(Drawable drawable) {
-        mPackageIconView.setImageDrawable(drawable);
-    }
-
-    /** Sets the person bitmap on the tile. */
-    public void setPersonIcon(Icon icon) {
-        mPersonIconView.setImageIcon(icon);
+    /** Sets the person and package drawable on the tile. */
+    public void setPersonIcon(Bitmap bitmap) {
+        mPersonIconView.setImageBitmap(bitmap);
     }
 
     /** Sets the click listener of the tile. */

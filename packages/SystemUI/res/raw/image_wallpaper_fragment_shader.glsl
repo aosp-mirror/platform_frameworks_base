@@ -46,7 +46,7 @@ void main() {
     // Transform it using the S curve created by the smoothstep. This will increase the contrast.
     lum = smoothstep(0., 1., lum) + 0.001;
 
-    lum = relativeExposureCompensation(lum, mix(-15., 10., uExposure));
+    lum = relativeExposureCompensation(lum, mix(-5., 10., uExposure));
     lum = mix(clamp(lum, 0.0, 1.0), 1.0, normalizedRange(uExposure, 0.55, 1.0));
     color.rgb *= lum;
 

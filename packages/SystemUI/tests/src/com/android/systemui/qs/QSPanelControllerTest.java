@@ -108,7 +108,7 @@ public class QSPanelControllerTest extends SysuiTestCase {
         when(mQSPanel.createRegularTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
-        when(mQSTileHost.createTileView(eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
+        when(mQSTileHost.createTileView(any(), eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mToggleSliderViewControllerFactory.create(any(), any()))
                 .thenReturn(mBrightnessSlider);
         when(mBrightnessControllerFactory.create(any(ToggleSlider.class)))

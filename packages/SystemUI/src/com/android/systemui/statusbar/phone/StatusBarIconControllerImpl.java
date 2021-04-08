@@ -224,33 +224,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     }
 
     /**
-     * Accept a list of CallIndicatorIconStates, and show the call strength icons.
-     * @param slot StatusBar slot for the call strength icons
-     * @param states All of the no Calling & SMS icon states
-     */
-    @Override
-    public void setCallStrengthIcons(String slot, List<CallIndicatorIconState> states) {
-        Slot callStrengthSlot = getSlot(slot);
-        int callStrengthSlotIndex = getSlotIndex(slot);
-        Collections.reverse(states);
-        for (CallIndicatorIconState state : states) {
-            if (!state.isNoCalling) {
-                StatusBarIconHolder holder = callStrengthSlot.getHolderForTag(state.subId);
-                if (holder == null) {
-                    holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
-                    setIcon(callStrengthSlotIndex, holder);
-                } else {
-                    holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
-                            Icon.createWithResource(mContext, state.callStrengthResId), 0, 0,
-                            state.callStrengthDescription));
-                    setIcon(callStrengthSlotIndex, holder);
-                }
-            }
-            setIconVisibility(slot, !state.isNoCalling, state.subId);
-        }
-    }
-
-    /**
      * Accept a list of CallIndicatorIconStates, and show the no calling icons.
      * @param slot StatusBar slot for the no calling icons
      * @param states All of the no Calling & SMS icon states

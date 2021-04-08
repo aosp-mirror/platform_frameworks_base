@@ -127,8 +127,10 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     performLongClick();
                     mLongClicked = true;
                 } else {
-                    sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                    if (mCode != KEYCODE_UNKNOWN) {
+                        sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
+                        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                    }
                     mLongClicked = true;
                 }
             }
@@ -434,6 +436,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     @Override
     public void abortCurrentGesture() {
         Log.d("b/63783866", "KeyButtonView.abortCurrentGesture");
+        if (mCode != KeyEvent.KEYCODE_UNKNOWN) {
+            sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
+        }
         setPressed(false);
         mRipple.abortDelayedRipple();
         mGestureAborted = true;

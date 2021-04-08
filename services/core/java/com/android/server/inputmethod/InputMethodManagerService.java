@@ -2623,8 +2623,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                 // Dispatch display id for InputMethodService to update context display.
-                executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOO(
-                        MSG_INITIALIZE_IME, mCurTokenDisplayId, mCurMethod, mCurToken));
+                executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOOO(
+                        MSG_INITIALIZE_IME, mCurTokenDisplayId, mCurMethod, mCurToken,
+                        mMethodMap.get(mCurMethodId).getConfigChanges()));
                 scheduleNotifyImeUidToAudioService(mCurMethodUid);
                 if (mCurClient != null) {
                     clearClientSessionLocked(mCurClient);
@@ -3540,15 +3541,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         InputBindResult res = null;
         // We shows the IME when the system allows the IME focused target window to restore the
         // IME visibility (e.g. switching to the app task when last time the IME is visible).
-        if (isTextEditor && mWindowManagerInternal.shouldRestoreImeVisibility(windowToken)) {
-            if (attribute != null) {
-                res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                        attribute, startInputFlags, startInputReason);
-                showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
-                        SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY);
-            } else {
-                res = InputBindResult.NULL_EDITOR_INFO;
-            }
+        // Note that we don't restore IME visibility for some cases (e.g. when the soft input
+        // state is ALWAYS_HIDDEN or STATE_HIDDEN with forward navigation).
+        // Because the app might leverage these flags to hide soft-keyboard with showing their own
+        // UI for input.
+        if (isTextEditor && attribute != null
+                && shouldRestoreImeVisibility(windowToken, softInputMode)) {
+            res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
+                    startInputFlags, startInputReason);
+            showCurrentInputLocked(windowToken, InputMethodManager.SHOW_IMPLICIT, null,
+                    SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY);
             return res;
         }
 
@@ -3670,6 +3672,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return res;
+    }
+
+    private boolean shouldRestoreImeVisibility(IBinder windowToken,
+            @SoftInputModeFlags int softInputMode) {
+        switch (softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE) {
+            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+                return false;
+            case LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+                if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                    return false;
+                }
+        }
+        return mWindowManagerInternal.shouldRestoreImeVisibility(windowToken);
     }
 
     private boolean isImeVisible() {
@@ -4477,7 +4492,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     final IBinder token = (IBinder) args.arg2;
                     ((IInputMethod) args.arg1).initializeInternal(token, msg.arg1,
-                            new InputMethodPrivilegedOperationsImpl(this, token));
+                            new InputMethodPrivilegedOperationsImpl(this, token),
+                            (int) args.arg3);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -5973,10 +5989,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void setImeWindowStatus(int vis, int backDisposition,
-                IVoidResultCallback resultCallback) {
-            CallbackUtils.onResult(resultCallback,
-                    () -> mImms.setImeWindowStatus(mToken, vis, backDisposition));
+        public void setImeWindowStatusAsync(int vis, int backDisposition) {
+            mImms.setImeWindowStatus(mToken, vis, backDisposition);
         }
 
         @BinderThread

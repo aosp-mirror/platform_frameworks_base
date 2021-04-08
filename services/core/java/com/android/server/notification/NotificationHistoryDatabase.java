@@ -175,6 +175,11 @@ public class NotificationHistoryDatabase {
         mFileWriteHandler.post(rcr);
     }
 
+    public void deleteNotificationChannel(String pkg, String channelId) {
+        RemoveChannelRunnable rcr = new RemoveChannelRunnable(pkg, channelId);
+        mFileWriteHandler.post(rcr);
+    }
+
     public void addNotification(final HistoricalNotification notification) {
         synchronized (mLock) {
             mBuffer.addNewNotificationToWrite(notification);
@@ -499,6 +504,49 @@ public class NotificationHistoryDatabase {
                         }
                     } catch (Exception e) {
                         Slog.e(TAG, "Cannot clean up file on conversation removal "
+                                + af.getBaseFile().getName(), e);
+                    }
+                }
+            }
+        }
+    }
+
+    final class RemoveChannelRunnable implements Runnable {
+        private String mPkg;
+        private String mChannelId;
+        private NotificationHistory mNotificationHistory;
+
+        RemoveChannelRunnable(String pkg, String channelId) {
+            mPkg = pkg;
+            mChannelId = channelId;
+        }
+
+        @VisibleForTesting
+        void setNotificationHistory(NotificationHistory nh) {
+            mNotificationHistory = nh;
+        }
+
+        @Override
+        public void run() {
+            if (DEBUG) Slog.d(TAG, "RemoveChannelRunnable");
+            synchronized (mLock) {
+                // Remove from pending history
+                mBuffer.removeChannelFromWrite(mPkg, mChannelId);
+
+                Iterator<AtomicFile> historyFileItr = mHistoryFiles.iterator();
+                while (historyFileItr.hasNext()) {
+                    final AtomicFile af = historyFileItr.next();
+                    try {
+                        NotificationHistory notificationHistory = mNotificationHistory != null
+                                ? mNotificationHistory
+                                : new NotificationHistory();
+                        readLocked(af, notificationHistory,
+                                new NotificationHistoryFilter.Builder().build());
+                        if (notificationHistory.removeChannelFromWrite(mPkg, mChannelId)) {
+                            writeLocked(af, notificationHistory);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Cannot clean up file on channel removal "
                                 + af.getBaseFile().getName(), e);
                     }
                 }

@@ -21,6 +21,8 @@
     <!-- [CHAR LIMIT=15] -->
     <string name="install">Install</string>
     <!-- [CHAR LIMIT=15] -->
+    <string name="update">Update</string>
+    <!-- [CHAR LIMIT=15] -->
     <string name="done">Done</string>
     <!-- [CHAR LIMIT=15] -->
     <string name="cancel">Cancel</string>
@@ -32,15 +34,9 @@
     <string name="install_done">App installed.</string>
     <!-- Message for installing a new app that requires some permissions [CHAR LIMIT=NONE] -->
     <!-- Message for installing a new app that does not require permissions [CHAR LIMIT=NONE] -->
-    <string name="install_confirm_question">Do you want to install this application?</string>
+    <string name="install_confirm_question">Do you want to install this app?</string>
     <!-- Message for updating an existing app [CHAR LIMIT=NONE] -->
-    <string name="install_confirm_question_update">Do you want to install an update
-            to this existing application?  Your existing data will not
-            be lost.</string>
-    <!-- Message for updating an existing system app [CHAR LIMIT=NONE] -->
-    <string name="install_confirm_question_update_system">Do you want to install an update
-            to this built-in application?  Your existing data will not
-            be lost.</string>
+    <string name="install_confirm_question_update">Do you want to update this app?</string>
     <!-- [CHAR LIMIT=100] -->
     <string name="install_failed">App not installed.</string>
     <!-- Reason displayed when installation fails because the package was blocked
@@ -186,13 +182,13 @@
     <string name="app_name_unknown">Unknown</string>
 
     <!-- Text to show in warning dialog on the tablet when the app source is not trusted [CHAR LIMIT=NONE] -->
-    <string name="untrusted_external_source_warning" product="tablet">For your security, your tablet is not allowed to install unknown apps from this source.</string>
+    <string name="untrusted_external_source_warning" product="tablet">For your security, your tablet currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
 
     <!-- Text to show in warning dialog on the tv when the app source is not trusted [CHAR LIMIT=NONE] -->
-    <string name="untrusted_external_source_warning" product="tv">For your security, your TV is not allowed to install unknown apps from this source.</string>
+    <string name="untrusted_external_source_warning" product="tv">For your security, your TV currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
 
     <!-- Text to show in warning dialog on the phone when the app source is not trusted [CHAR LIMIT=NONE] -->
-    <string name="untrusted_external_source_warning" product="default">For your security, your phone is not allowed to install unknown apps from this source.</string>
+    <string name="untrusted_external_source_warning" product="default">For your security, your phone currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
 
     <!-- Text to show in warning dialog on the phone when the app source cannot be identified [CHAR LIMIT=NONE] -->
     <string name="anonymous_source_warning" product="default">

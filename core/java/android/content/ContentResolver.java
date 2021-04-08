@@ -3884,6 +3884,7 @@ public abstract class ContentResolver implements ContentInterface {
     @UnsupportedAppUsage
     private final Context mContext;
 
+    @Deprecated
     @UnsupportedAppUsage
     final String mPackageName;
     final int mTargetSdkVersion;

@@ -282,5 +282,10 @@ public final class AppHibernationServiceTest {
         public HibernationStateDiskStore<UserLevelState> getUserLevelDiskStore(int userId) {
             return mock(HibernationStateDiskStore.class);
         }
+
+        @Override
+        public boolean isOatArtifactDeletionEnabled() {
+            return true;
+        }
     }
 }

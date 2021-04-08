@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Инсталатор на пакет"</string>
     <string name="install" msgid="711829760615509273">"Инсталирај"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Готово"</string>
     <string name="cancel" msgid="1018267193425558088">"Откажи"</string>
     <string name="installing" msgid="4921993079741206516">"Се инсталира…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Се инсталира <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Апликацијата е инсталирана."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Дали сакате да ја инсталирате апликацијава?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Дали сакате да инсталирате ажурирање на оваа постоечка апликација? Постоечките податоци нема да се изгубат."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Дали сакате да инсталирате ажурирање на оваа вградена апликација? Постоечките податоци нема да се изгубат."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Апликацијата не е инсталирана."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Инсталирањето на пакетот е блокирано."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Апликација што не е инсталирана како пакет е во конфликт со постоечки пакет."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Дејствата „Инсталирај/деинсталирај“ не се поддржани на Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Апликацијата се поставува…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Непозната"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"За ваша безбедност, таблетот нема дозвола за инсталирање непознати апликации од изворов."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"За ваша безбедност, телевизорот нема дозвола за инсталирање непознати апликации од изворов."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"За ваша безбедност, телефонот нема дозвола за инсталирање непознати апликации од изворов."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Телефонот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на телефонот или губењето податоци што може да произлезат од нејзиното користење."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Таблетот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на таблетот или губењето податоци што може да произлезат од нејзиното користење."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Телевизорот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на телевизорот или губењето податоци што може да произлезат од нејзиното користење."</string>

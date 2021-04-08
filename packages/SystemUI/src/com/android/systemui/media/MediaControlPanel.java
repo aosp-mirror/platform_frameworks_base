@@ -16,6 +16,7 @@
 
 package com.android.systemui.media;
 
+import static android.app.Notification.safeCharSequence;
 import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 
 import android.app.PendingIntent;
@@ -48,6 +49,8 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
+import com.android.systemui.plugins.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.util.animation.TransitionLayout;
 
@@ -100,11 +103,12 @@ public class MediaControlPanel {
     // This will provide the corners for the album art.
     private final ViewOutlineProvider mViewOutlineProvider;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+
     /**
      * Initialize a new control panel
-     * @param context
+     *
      * @param backgroundExecutor background executor, used for processing artwork
-     * @param activityStarter activity starter
+     * @param activityStarter    activity starter
      */
     @Inject
     public MediaControlPanel(Context context, @Background Executor backgroundExecutor,
@@ -146,6 +150,7 @@ public class MediaControlPanel {
 
     /**
      * Get the view holder used to display media controls
+     *
      * @return the view holder
      */
     @Nullable
@@ -155,6 +160,7 @@ public class MediaControlPanel {
 
     /**
      * Get the view controller used to display media controls
+     *
      * @return the media view controller
      */
     @NonNull
@@ -164,7 +170,7 @@ public class MediaControlPanel {
 
     /**
      * Sets the listening state of the player.
-     *
+     * <p>
      * Should be set to true when the QS panel is open. Otherwise, false. This is a signal to avoid
      * unnecessary work when the QS panel is closed.
      *
@@ -176,6 +182,7 @@ public class MediaControlPanel {
 
     /**
      * Get the context
+     *
      * @return context
      */
     public Context getContext() {
@@ -243,7 +250,8 @@ public class MediaControlPanel {
         if (clickIntent != null) {
             mViewHolder.getPlayer().setOnClickListener(v -> {
                 if (mMediaViewController.isGutsVisible()) return;
-                mActivityStarter.postStartActivityDismissingKeyguard(clickIntent);
+                mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
+                        buildLaunchAnimatorController(mViewHolder.getPlayer()));
             });
         }
 
@@ -266,7 +274,7 @@ public class MediaControlPanel {
 
         // Song name
         TextView titleText = mViewHolder.getTitleText();
-        titleText.setText(data.getSong());
+        titleText.setText(safeCharSequence(data.getSong()));
 
         // App title
         TextView appName = mViewHolder.getAppName();
@@ -277,7 +285,7 @@ public class MediaControlPanel {
 
         // Artist name
         TextView artistText = mViewHolder.getArtistText();
-        artistText.setText(data.getArtist());
+        artistText.setText(safeCharSequence(data.getArtist()));
 
         // Transfer chip
         mViewHolder.getSeamless().setVisibility(View.VISIBLE);
@@ -395,8 +403,42 @@ public class MediaControlPanel {
         mMediaViewController.refreshState();
     }
 
+    @Nullable
+    private ActivityLaunchAnimator.Controller buildLaunchAnimatorController(
+            TransitionLayout player) {
+        // TODO(b/174236650): Make sure that the carousel indicator also fades out.
+        // TODO(b/174236650): Instrument the animation to measure jank.
+        return new GhostedViewLaunchAnimatorController(player) {
+            @Override
+            protected float getCurrentTopCornerRadius() {
+                return ((IlluminationDrawable) player.getBackground()).getCornerRadius();
+            }
+
+            @Override
+            protected float getCurrentBottomCornerRadius() {
+                // TODO(b/184121838): Make IlluminationDrawable support top and bottom radius.
+                return getCurrentTopCornerRadius();
+            }
+
+            @Override
+            protected void setBackgroundCornerRadius(Drawable background, float topCornerRadius,
+                    float bottomCornerRadius) {
+                // TODO(b/184121838): Make IlluminationDrawable support top and bottom radius.
+                float radius = Math.min(topCornerRadius, bottomCornerRadius);
+                ((IlluminationDrawable) background).setCornerRadiusOverride(radius);
+            }
+
+            @Override
+            public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
+                super.onLaunchAnimationEnd(isExpandingFullyAbove);
+                ((IlluminationDrawable) player.getBackground()).setCornerRadiusOverride(null);
+            }
+        };
+    }
+
     /**
      * Close the guts for this player.
+     *
      * @param immediate {@code true} if it should be closed without animation
      */
     public void closeGuts(boolean immediate) {
@@ -426,7 +468,7 @@ public class MediaControlPanel {
         if (bounds.width() > mAlbumArtSize || bounds.height() > mAlbumArtSize) {
             float offsetX = (bounds.width() - mAlbumArtSize) / 2.0f;
             float offsetY = (bounds.height() - mAlbumArtSize) / 2.0f;
-            bounds.offset((int) -offsetX,(int) -offsetY);
+            bounds.offset((int) -offsetX, (int) -offsetY);
         }
         drawable.setBounds(bounds);
         return drawable;
@@ -434,6 +476,7 @@ public class MediaControlPanel {
 
     /**
      * Get the current media controller
+     *
      * @return the controller
      */
     public MediaController getController() {
@@ -442,6 +485,7 @@ public class MediaControlPanel {
 
     /**
      * Check whether the media controlled by this player is currently playing
+     *
      * @return whether it is playing, or false if no controller information
      */
     public boolean isPlaying() {
@@ -450,6 +494,7 @@ public class MediaControlPanel {
 
     /**
      * Check whether the given controller is currently playing
+     *
      * @param controller media controller to check
      * @return whether it is playing, or false if no controller information
      */
@@ -467,7 +512,7 @@ public class MediaControlPanel {
     }
 
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
-        set.setVisibility(actionId, visible? ConstraintSet.VISIBLE : ConstraintSet.GONE);
+        set.setVisibility(actionId, visible ? ConstraintSet.VISIBLE : ConstraintSet.GONE);
         set.setAlpha(actionId, visible ? 1.0f : 0.0f);
     }
 }

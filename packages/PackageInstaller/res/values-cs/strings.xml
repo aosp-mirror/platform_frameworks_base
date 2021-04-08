@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Instalátor balíčků"</string>
     <string name="install" msgid="711829760615509273">"Instalovat"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"Hotovo"</string>
     <string name="cancel" msgid="1018267193425558088">"Zrušit"</string>
     <string name="installing" msgid="4921993079741206516">"Instalace…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Instalace balíčku <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplikace je nainstalována."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Chcete tuto aplikaci nainstalovat?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Chcete nainstalovat aktualizaci této existující aplikace? Stávající data nebudou ztracena."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Chcete nainstalovat aktualizaci této integrované aplikace? Stávající data nebudou ztracena."</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Aplikaci nelze nainstalovat."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalace balíčku byla zablokována."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikaci nelze nainstalovat, protože balíček je v konfliktu se stávajícím balíčkem."</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Akce instalace/odinstalace nejsou v zařízení Wear podporovány."</string>
     <string name="message_staging" msgid="8032722385658438567">"Příprava instalace…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Neznámé"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Z bezpečnostních důvodů do tabletu není dovoleno instalovat neznámé aplikace z tohoto zdroje."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Z bezpečnostních důvodů do televize není dovoleno instalovat neznámé aplikace z tohoto zdroje."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Z bezpečnostních důvodů do telefonu není dovoleno instalovat neznámé aplikace z tohoto zdroje."</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefon a osobní údaje jsou zranitelnější vůči útoku ze strany neznámých aplikací. Instalací této aplikace přijímáte odpovědnost za případné škody na telefonu nebo ztrátu dat, která může být používáním aplikace způsobena."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tablet a osobní údaje jsou zranitelnější vůči útoku ze strany neznámých aplikací. Instalací této aplikace přijímáte odpovědnost za případné škody na tabletu nebo ztrátu dat, která může být používáním aplikace způsobena."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Televize a osobní údaje jsou zranitelnější vůči útoku ze strany neznámých aplikací. Instalací této aplikace přijímáte odpovědnost za případné škody na televizi nebo ztrátu dat, která může být používáním aplikace způsobena."</string>

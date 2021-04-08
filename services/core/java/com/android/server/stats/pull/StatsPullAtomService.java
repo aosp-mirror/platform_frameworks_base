@@ -51,6 +51,9 @@ import static android.util.MathUtils.constrain;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC;
+import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
+import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__MANUAL;
+import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
@@ -111,6 +114,7 @@ import android.os.IThermalService;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
@@ -148,6 +152,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
+import com.android.internal.os.DmabufInfoReader;
 import com.android.internal.os.KernelCpuBpfTracking;
 import com.android.internal.os.KernelCpuThreadReader;
 import com.android.internal.os.KernelCpuThreadReaderDiff;
@@ -183,6 +188,8 @@ import com.android.server.stats.pull.netstats.NetworkStatsExt;
 import com.android.server.stats.pull.netstats.SubInfo;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
+import com.android.server.timezonedetector.MetricsTimeZoneDetectorState;
+import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 
 import libcore.io.IoUtils;
 
@@ -198,6 +205,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -407,6 +415,7 @@ public class StatsPullAtomService extends SystemService {
     private final Object mBuildInformationLock = new Object();
     private final Object mRoleHolderLock = new Object();
     private final Object mTimeZoneDataInfoLock = new Object();
+    private final Object mTimeZoneDetectionInfoLock = new Object();
     private final Object mExternalStorageInfoLock = new Object();
     private final Object mAppsOnExternalStorageInfoLock = new Object();
     private final Object mFaceSettingsLock = new Object();
@@ -528,6 +537,8 @@ public class StatsPullAtomService extends SystemService {
                         synchronized (mProcessSystemIonHeapSizeLock) {
                             return pullProcessSystemIonHeapSizeLocked(atomTag, data);
                         }
+                    case FrameworkStatsLog.PROCESS_DMABUF_MEMORY:
+                        return pullProcessDmabufMemory(atomTag, data);
                     case FrameworkStatsLog.SYSTEM_MEMORY:
                         return pullSystemMemory(atomTag, data);
                     case FrameworkStatsLog.TEMPERATURE:
@@ -638,6 +649,10 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.TIME_ZONE_DATA_INFO:
                         synchronized (mTimeZoneDataInfoLock) {
                             return pullTimeZoneDataInfoLocked(atomTag, data);
+                        }
+                    case FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE:
+                        synchronized (mTimeZoneDetectionInfoLock) {
+                            return pullTimeZoneDetectorStateLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.EXTERNAL_STORAGE_INFO:
                         synchronized (mExternalStorageInfoLock) {
@@ -818,6 +833,7 @@ public class StatsPullAtomService extends SystemService {
         registerIonHeapSize();
         registerProcessSystemIonHeapSize();
         registerSystemMemory();
+        registerProcessDmabufMemory();
         registerTemperature();
         registerCoolingDevice();
         registerBinderCallsStats();
@@ -843,6 +859,7 @@ public class StatsPullAtomService extends SystemService {
         registerBuildInformation();
         registerRoleHolder();
         registerTimeZoneDataInfo();
+        registerTimeZoneDetectorState();
         registerExternalStorageInfo();
         registerAppsOnExternalStorageInfo();
         registerFaceSettings();
@@ -2183,6 +2200,43 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
+    private void registerProcessDmabufMemory() {
+        int tagId = FrameworkStatsLog.PROCESS_DMABUF_MEMORY;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullProcessDmabufMemory(int atomTag, List<StatsEvent> pulledData) {
+        List<ProcessMemoryState> managedProcessList =
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .getMemoryStateForProcesses();
+        managedProcessList.sort(Comparator.comparingInt(x -> x.oomScore));
+        for (ProcessMemoryState process : managedProcessList) {
+            if (process.uid == Process.SYSTEM_UID) {
+                continue;
+            }
+            DmabufInfoReader.ProcessDmabuf proc = DmabufInfoReader.getProcessStats(process.pid);
+            if (proc == null || (proc.retainedBuffersCount <= 0 && proc.mappedBuffersCount <= 0)) {
+                continue;
+            }
+            pulledData.add(
+                    FrameworkStatsLog.buildStatsEvent(
+                            atomTag,
+                            process.uid,
+                            process.processName,
+                            process.oomScore,
+                            proc.retainedSizeKb,
+                            proc.retainedBuffersCount,
+                            proc.mappedSizeKb,
+                            proc.mappedBuffersCount));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
     private void registerSystemMemory() {
         int tagId = FrameworkStatsLog.SYSTEM_MEMORY;
         mStatsManager.setPullAtomCallback(
@@ -3209,6 +3263,57 @@ public class StatsPullAtomService extends SystemService {
 
         pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, tzDbVersion));
         return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerTimeZoneDetectorState() {
+        int tagId = FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullTimeZoneDetectorStateLocked(int atomTag, List<StatsEvent> pulledData) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            TimeZoneDetectorInternal timeZoneDetectorInternal =
+                    LocalServices.getService(TimeZoneDetectorInternal.class);
+            MetricsTimeZoneDetectorState metricsState =
+                    timeZoneDetectorInternal.generateMetricsState();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                    metricsState.isTelephonyDetectionSupported(),
+                    metricsState.isGeoDetectionSupported(),
+                    metricsState.isUserLocationEnabled(),
+                    metricsState.getAutoDetectionEnabledSetting(),
+                    metricsState.getGeoDetectionEnabledSetting(),
+                    convertToMetricsDetectionMode(metricsState.getDetectionMode()),
+                    metricsState.getDeviceTimeZoneIdOrdinal(),
+                    metricsState.getLatestManualSuggestionProtoBytes(),
+                    metricsState.getLatestTelephonySuggestionProtoBytes(),
+                    metricsState.getLatestGeolocationSuggestionProtoBytes()
+            ));
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "Getting time zone detection state failed: ", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private int convertToMetricsDetectionMode(int detectionMode) {
+        switch (detectionMode) {
+            case MetricsTimeZoneDetectorState.DETECTION_MODE_MANUAL:
+                return TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__MANUAL;
+            case MetricsTimeZoneDetectorState.DETECTION_MODE_GEO:
+                return TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
+            case MetricsTimeZoneDetectorState.DETECTION_MODE_TELEPHONY:
+                return TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
+            default:
+                throw new IllegalArgumentException("" + detectionMode);
+        }
     }
 
     private void registerExternalStorageInfo() {

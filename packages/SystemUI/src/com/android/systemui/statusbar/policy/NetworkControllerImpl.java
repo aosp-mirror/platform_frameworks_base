@@ -85,6 +85,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -171,6 +172,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private NetworkCapabilities mLastDefaultNetworkCapabilities;
     // Handler that all broadcasts are received on.
     private final Handler mReceiverHandler;
+    private final Looper mBgLooper;
+    private final Executor mBgExecutor;
     // Handler that all callbacks are made on.
     private final CallbackHandler mCallbackHandler;
 
@@ -198,6 +201,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public NetworkControllerImpl(
             Context context,
             @Background Looper bgLooper,
+            @Background Executor bgExecutor,
+            SubscriptionManager subscriptionManager,
+            CallbackHandler callbackHandler,
             DeviceProvisionedController deviceProvisionedController,
             BroadcastDispatcher broadcastDispatcher,
             ConnectivityManager connectivityManager,
@@ -212,8 +218,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 telephonyListenerManager,
                 wifiManager,
                 networkScoreManager,
-                SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
-                new CallbackHandler(),
+                subscriptionManager,
+                Config.readConfig(context),
+                bgLooper,
+                bgExecutor,
+                callbackHandler,
                 accessPointController,
                 new DataUsageController(context),
                 new SubscriptionDefaults(),
@@ -230,6 +239,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             WifiManager wifiManager,
             NetworkScoreManager networkScoreManager,
             SubscriptionManager subManager, Config config, Looper bgLooper,
+            Executor bgExecutor,
             CallbackHandler callbackHandler,
             AccessPointControllerImpl accessPointController,
             DataUsageController dataUsageController,
@@ -241,6 +251,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mTelephonyListenerManager = telephonyListenerManager;
         mConfig = config;
         mReceiverHandler = new Handler(bgLooper);
+        mBgLooper = bgLooper;
+        mBgExecutor = bgExecutor;
         mCallbackHandler = callbackHandler;
         mDataSaverController = new DataSaverControllerImpl(context);
         mBroadcastDispatcher = broadcastDispatcher;
@@ -377,21 +389,23 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // TODO: Move off of the deprecated CONNECTIVITY_ACTION broadcast and rely on callbacks
         // exclusively for status bar icons.
         mConnectivityManager.registerDefaultNetworkCallback(callback, mReceiverHandler);
-        // Register the listener on our bg looper
+        // Run the listener on our bg looper
         mPhoneStateListener = subId -> {
-            // For data switching from A to B, we assume B is validated for up to 2 seconds iff:
-            // 1) A and B are in the same subscription group e.g. CBRS data switch. And
-            // 2) A was validated before the switch.
-            // This is to provide smooth transition for UI without showing cross during data
-            // switch.
-            if (keepCellularValidationBitInSwitch(mActiveMobileDataSubscription, subId)) {
-                if (DEBUG) Log.d(TAG, ": mForceCellularValidated to true.");
-                mForceCellularValidated = true;
-                mReceiverHandler.removeCallbacks(mClearForceValidated);
-                mReceiverHandler.postDelayed(mClearForceValidated, 2000);
-            }
-            mActiveMobileDataSubscription = subId;
-            doUpdateMobileControllers();
+            mBgExecutor.execute(() -> {
+                // For data switching from A to B, we assume B is validated for up to 2 seconds if:
+                // 1) A and B are in the same subscription group e.g. CBRS data switch. And
+                // 2) A was validated before the switch.
+                // This is to provide smooth transition for UI without showing cross during data
+                // switch.
+                if (keepCellularValidationBitInSwitch(mActiveMobileDataSubscription, subId)) {
+                    if (DEBUG) Log.d(TAG, ": mForceCellularValidated to true.");
+                    mForceCellularValidated = true;
+                    mReceiverHandler.removeCallbacks(mClearForceValidated);
+                    mReceiverHandler.postDelayed(mClearForceValidated, 2000);
+                }
+                mActiveMobileDataSubscription = subId;
+                doUpdateMobileControllers();
+            });
         };
 
         mDemoModeController.addCallback(this);
@@ -428,7 +442,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mobileSignalController.registerListener();
         }
         if (mSubscriptionListener == null) {
-            mSubscriptionListener = new SubListener();
+            mSubscriptionListener = new SubListener(mBgLooper);
         }
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
         mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
@@ -1336,6 +1350,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private class SubListener extends OnSubscriptionsChangedListener {
+        SubListener(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void onSubscriptionsChanged() {
             updateMobileControllers();
@@ -1346,10 +1364,5 @@ public class NetworkControllerImpl extends BroadcastReceiver
      * Used to register listeners from the BG Looper, this way the PhoneStateListeners that
      * get created will also run on the BG Looper.
      */
-    private final Runnable mRegisterListeners = new Runnable() {
-        @Override
-        public void run() {
-            registerListeners();
-        }
-    };
+    private final Runnable mRegisterListeners = () -> registerListeners();
 }

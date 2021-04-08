@@ -18,14 +18,17 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"ਪੈਕੇਜ ਸਥਾਪਨਾਕਾਰ"</string>
     <string name="install" msgid="711829760615509273">"ਸਥਾਪਤ ਕਰੋ"</string>
+    <!-- no translation found for update (3932142540719227615) -->
+    <skip />
     <string name="done" msgid="6632441120016885253">"ਹੋ ਗਿਆ"</string>
     <string name="cancel" msgid="1018267193425558088">"ਰੱਦ ਕਰੋ"</string>
     <string name="installing" msgid="4921993079741206516">"ਸਥਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਸਥਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="install_done" msgid="5987363587661783896">"ਐਪ ਸਥਾਪਤ ਕੀਤੀ ਗਈ।"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"ਕੀ ਤੁਸੀਂ ਇਹ ਐਪਲੀਕੇਸ਼ਨ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"ਕੀ ਤੁਸੀਂ ਇਸ ਮੌਜੂਦਾ ਐਪਲੀਕੇਸ਼ਨ ਵਿੱਚ ਇੱਕ ਅੱਪਡੇਟ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਤੁਹਾਡਾ ਮੌਜੂਦਾ ਡਾਟਾ ਨਸ਼ਟ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"ਕੀ ਤੁਸੀਂ ਇਸ ਬਿਲਟ-ਇਨ ਐਪਲੀਕੇਸ਼ਨ ਵਿੱਚ ਇੱਕ ਅੱਪਡੇਟ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਤੁਹਾਡਾ ਮੌਜੂਦਾ ਡਾਟਾ ਨਸ਼ਟ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <!-- no translation found for install_confirm_question (7663733664476363311) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update (3348888852318388584) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ਪੈਕੇਜ ਨੂੰ ਸਥਾਪਤ ਹੋਣ ਤੋਂ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ਪੈਕੇਜ ਦੇ ਇੱਕ ਮੌਜੂਦਾ ਪੈਕੇਜ ਨਾਲ ਵਿਵਾਦ ਹੋਣ ਕਰਕੇ ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
@@ -80,9 +83,12 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear \'ਤੇ ਸਥਾਪਤ ਜਾਂ ਅਣਸਥਾਪਤ ਕਰਨ ਦੀਆਂ ਕਾਰਵਾਈਆਂ ਸਮਰਥਿਤ ਨਹੀਂ ਹਨ।"</string>
     <string name="message_staging" msgid="8032722385658438567">"ਐਪ ਨੂੰ ਸਟੇਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"ਅਗਿਆਤ"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"ਤੁਹਾਡੀ ਸੁਰੱਖਿਆ ਲਈ, ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ ਨੂੰ ਇਸ ਸਰੋਤ ਤੋਂ ਅਗਿਆਤ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ।"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"ਤੁਹਾਡੀ ਸੁਰੱਖਿਆ ਲਈ, ਤੁਹਾਡੇ ਟੀਵੀ ਨੂੰ ਇਸ ਸਰੋਤ ਤੋਂ ਅਗਿਆਤ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ।"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"ਤੁਹਾਡੀ ਸੁਰੱਖਿਆ ਲਈ, ਤੁਹਾਡੇ ਫ਼ੋਨ ਨੂੰ ਇਸ ਸਰੋਤ ਤੋਂ ਅਗਿਆਤ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ।"</string>
+    <!-- no translation found for untrusted_external_source_warning (7067510047443133095) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (7057271609532508035) -->
+    <skip />
+    <!-- no translation found for untrusted_external_source_warning (8444191224459138919) -->
+    <skip />
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਟੈਬਲੈੱਟ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ਤੁਹਾਡਾ ਟੀਵੀ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਟੀਵੀ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>

@@ -84,11 +84,15 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     }
 
     void removeFiltered(IRemoteTransition remote) {
-        remote.asBinder().unlinkToDeath(mTransitionDeathRecipient, 0 /* flags */);
+        boolean removed = false;
         for (int i = mFilters.size() - 1; i >= 0; --i) {
             if (mFilters.get(i).second == remote) {
                 mFilters.remove(i);
+                removed = true;
             }
+        }
+        if (removed) {
+            remote.asBinder().unlinkToDeath(mTransitionDeathRecipient, 0 /* flags */);
         }
     }
 

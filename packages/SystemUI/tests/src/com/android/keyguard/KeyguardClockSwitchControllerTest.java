@@ -18,26 +18,34 @@ package com.android.keyguard;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
@@ -49,6 +57,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
+
+import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -78,6 +88,12 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     ContentResolver mContentResolver;
     @Mock
     BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private PluginManager mPluginManager;
+    @Mock
+    private FeatureFlags mFeatureFlags;
+    @Mock
+    private Executor mExecutor;
 
     private KeyguardClockSwitchController mController;
 
@@ -87,6 +103,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         when(mView.findViewById(com.android.systemui.R.id.left_aligned_notification_icon_container))
                 .thenReturn(mNotificationIcons);
+        when(mView.getContext()).thenReturn(getContext());
+        when(mFeatureFlags.isSmartspaceEnabled()).thenReturn(true);
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mResources.getString(anyInt())).thenReturn("h:mm");
         mController = new KeyguardClockSwitchController(
@@ -98,7 +116,10 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mKeyguardSliceViewController,
                 mNotificationIconAreaController,
                 mContentResolver,
-                mBroadcastDispatcher);
+                mBroadcastDispatcher,
+                mPluginManager,
+                mFeatureFlags,
+                mExecutor);
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
@@ -182,6 +203,45 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verify(mView).setClockPlugin(mClockPlugin, StatusBarState.SHADE);
     }
 
+    @Test
+    public void testSmartspacePluginConnectedRemovesKeyguardStatusArea() {
+        mController.init();
+
+        View statusArea = mock(View.class);
+        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(statusArea);
+
+        View nic = mock(View.class);
+        when(mView.findViewById(R.id.left_aligned_notification_icon_container)).thenReturn(nic);
+        when(nic.getLayoutParams()).thenReturn(mock(RelativeLayout.LayoutParams.class));
+
+        BcSmartspaceDataPlugin plugin = mock(BcSmartspaceDataPlugin.class);
+        TestView view = mock(TestView.class);
+        when(plugin.getView(any())).thenReturn(view);
+
+        mController.mPluginListener.onPluginConnected(plugin, mContext);
+        verify(statusArea).setVisibility(View.GONE);
+    }
+
+    @Test
+    public void testSmartspacePluginDisconnectedShowsKeyguardStatusArea() {
+        mController.init();
+
+        View statusArea = mock(View.class);
+        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(statusArea);
+
+        View nic = mock(View.class);
+        when(mView.findViewById(R.id.left_aligned_notification_icon_container)).thenReturn(nic);
+        when(nic.getLayoutParams()).thenReturn(mock(RelativeLayout.LayoutParams.class));
+
+        BcSmartspaceDataPlugin plugin = mock(BcSmartspaceDataPlugin.class);
+        TestView view = mock(TestView.class);
+        when(plugin.getView(any())).thenReturn(view);
+
+        mController.mPluginListener.onPluginConnected(plugin, mContext);
+        mController.mPluginListener.onPluginDisconnected(plugin);
+        verify(statusArea).setVisibility(View.VISIBLE);
+    }
+
     private void verifyAttachment(VerificationMode times) {
         verify(mClockManager, times).addOnClockChangedListener(
                 any(ClockManager.ClockChangedListener.class));
@@ -190,5 +250,13 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verify(mColorExtractor, times).addOnColorsChangedListener(
                 any(ColorExtractor.OnColorsChangedListener.class));
         verify(mView, times).updateColors(mGradientColors);
+    }
+
+    private static class TestView extends View implements BcSmartspaceDataPlugin.SmartspaceView {
+        TestView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public void registerDataProvider(BcSmartspaceDataPlugin plugin) { }
     }
 }

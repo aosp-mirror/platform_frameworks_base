@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 
@@ -66,6 +67,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -719,5 +721,47 @@ public final class PermissionControllerManager {
     public void notifyOneTimePermissionSessionTimeout(@NonNull String packageName) {
         mRemoteService.run(
                 service -> service.notifyOneTimePermissionSessionTimeout(packageName));
+    }
+
+    /**
+     * Get the platform permissions which belong to a particular permission group
+     *
+     * @param permissionGroupName The permission group whose permissions are desired
+     * @return A list of the platform permissions in the group, or empty if the group is not a valid
+     * platform group.
+     */
+    public @NonNull Set<String> getPlatformPermissionsForGroup(
+            @NonNull String permissionGroupName) {
+        try {
+            return new ArraySet<>(mRemoteService.postAsync(service -> {
+                AndroidFuture<List<String>> future = new AndroidFuture<>();
+                service.getPlatformPermissionsForGroup(permissionGroupName, future);
+                return future;
+            }).get(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get permissions of " + permissionGroupName, e);
+            return null;
+        }
+    }
+
+    /**
+     * Get the platform group of a particular permission, if the permission is a platform permission
+     *
+     * @param permissionName The permission name whose group is desired
+     * @return The name of the permission group this permission belongs to, or null if it has no
+     * group, or is not a platform permission
+     */
+    public @Nullable String getGroupOfPlatformPermission(
+            @NonNull String permissionName) {
+        try {
+            return mRemoteService.postAsync(service -> {
+                AndroidFuture<String> future = new AndroidFuture<>();
+                service.getGroupOfPlatformPermission(permissionName, future);
+                return future;
+            }).get(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get group of " + permissionName, e);
+            return null;
+        }
     }
 }

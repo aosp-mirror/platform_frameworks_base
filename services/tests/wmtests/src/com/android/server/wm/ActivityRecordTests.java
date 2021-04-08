@@ -1033,6 +1033,27 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     /**
+     * Verify that finish request for the last activity in a task will request a shell transition
+     * with that task as a trigger.
+     */
+    @Test
+    public void testFinishActivityIfPossible_lastInTaskRequestsTransitionWithTrigger() {
+        // Set-up mock shell transitions
+        final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
+                mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
+        mAtm.getTransitionController().registerTransitionPlayer(testPlayer);
+
+        final ActivityRecord activity = createActivityWithTask();
+        activity.finishing = false;
+        activity.mVisibleRequested = true;
+        activity.setState(RESUMED, "test");
+        activity.finishIfPossible("test", false /* oomAdj */);
+
+        verify(activity).setVisibility(eq(false));
+        assertEquals(activity.getTask().mTaskId, testPlayer.mLastRequest.getTriggerTask().taskId);
+    }
+
+    /**
      * Verify that complete finish request for non-finishing activity is invalid.
      */
     @Test(expected = IllegalArgumentException.class)
@@ -2136,6 +2157,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         attrs.setTitle("AppWindow");
         final TestWindowState appWindow = createWindowState(attrs, activity);
         activity.addWindow(appWindow);
+        spyOn(appWindow);
+        doNothing().when(appWindow).onStartFreezingScreen();
 
         // Set initial orientation and update.
         activity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
@@ -2172,6 +2195,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         attrs.setTitle("RotationByPolicy");
         final TestWindowState appWindow = createWindowState(attrs, activity);
         activity.addWindow(appWindow);
+        spyOn(appWindow);
+        doNothing().when(appWindow).onStartFreezingScreen();
 
         // Set initial orientation and update.
         performRotation(displayRotation, Surface.ROTATION_90);
@@ -2324,7 +2349,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false);
+                false, false);
         waitUntilHandlersIdle();
         assertHasStartingWindow(activity);
         activity.removeStartingWindow();
@@ -2340,7 +2365,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         for (int i = 0; i < 1000; i++) {
             appToken.addStartingWindow(mPackageName,
                     android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                    false);
+                    false, false);
             appToken.removeStartingWindow();
             waitUntilHandlersIdle();
             assertNoStartingWindow(appToken);
@@ -2354,11 +2379,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false);
+                false, false);
         waitUntilHandlersIdle();
         activity2.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1.appToken.asBinder(),
-                true, true, false, true, false);
+                true, true, false, true, false, false);
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
         assertHasStartingWindow(activity2);
@@ -2375,11 +2400,11 @@ public class ActivityRecordTests extends WindowTestsBase {
                     activity2.addStartingWindow(mPackageName,
                             android.R.style.Theme, null, "Test", 0, 0, 0, 0,
                             activity1.appToken.asBinder(), true, true, false,
-                            true, false);
+                            true, false, false);
                 });
         activity1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false);
+                false, false);
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
         assertHasStartingWindow(activity2);
@@ -2392,11 +2417,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false);
+                false, false);
         waitUntilHandlersIdle();
         activity2.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1.appToken.asBinder(),
-                true, true, false, true, false);
+                true, true, false, true, false, false);
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
         assertHasStartingWindow(activity2);
@@ -2418,20 +2443,21 @@ public class ActivityRecordTests extends WindowTestsBase {
                 "Test", 0 /* labelRes */, 0 /* icon */, 0 /* logo */, 0 /* windowFlags */,
                 null /* transferFrom */, true /* newTask */, true /* taskSwitch */,
                 false /* processRunning */, false /* allowTaskSnapshot */,
-                false /* activityCreate */);
+                false /* activityCreate */, false /* samePackage */);
         waitUntilHandlersIdle();
         assertHasStartingWindow(activity);
         activity.mStartingWindowState = ActivityRecord.STARTING_WINDOW_SHOWN;
 
         doCallRealMethod().when(task).startActivityLocked(
-                any(), any(), anyBoolean(), anyBoolean(), any());
+                any(), any(), anyBoolean(), anyBoolean(), any(), anyBoolean());
         // In normal case, resumeFocusedTasksTopActivities() should be called after
         // startActivityLocked(). So skip resumeFocusedTasksTopActivities() in ActivityBuilder.
         doReturn(false).when(mRootWindowContainer).resumeFocusedTasksTopActivities();
         // Make mVisibleSetFromTransferredStartingWindow true.
         final ActivityRecord middle = new ActivityBuilder(mAtm).setTask(task).build();
         task.startActivityLocked(middle, null /* focusedTopActivity */,
-                false /* newTask */, false /* keepCurTransition */, null /* options */);
+                false /* newTask */, false /* keepCurTransition */, null /* options */,
+                false /* samePackage */);
         middle.makeFinishingLocked();
 
         assertNull(activity.mStartingWindow);
@@ -2443,7 +2469,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         top.setVisible(false);
         // The finishing middle should be able to transfer starting window to top.
         task.startActivityLocked(top, null /* focusedTopActivity */,
-                false /* newTask */, false /* keepCurTransition */, null /* options */);
+                false /* newTask */, false /* keepCurTransition */, null /* options */,
+                false /* samePackage */);
 
         assertNull(middle.mStartingWindow);
         assertHasStartingWindow(top);
@@ -2463,7 +2490,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         task.positionChildAt(topActivity, POSITION_TOP);
         activity.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false);
+                false, false);
         waitUntilHandlersIdle();
 
         // Make activities to have different rotation from it display and set fixed rotation
@@ -2480,7 +2507,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // on activity2.
         topActivity.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity.appToken.asBinder(),
-                false, false, false, true, false);
+                false, false, false, true, false, false);
         waitUntilHandlersIdle();
         assertTrue(topActivity.hasFixedRotationTransform());
     }
@@ -2496,7 +2523,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Add a starting window.
         activityTop.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false);
+                false, false);
         waitUntilHandlersIdle();
 
         // Make the top one invisible, and try transferring the starting window from the top to the

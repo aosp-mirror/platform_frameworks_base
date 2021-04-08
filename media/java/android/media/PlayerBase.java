@@ -19,12 +19,10 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
@@ -50,10 +48,6 @@ public abstract class PlayerBase {
     private static final boolean DEBUG_APP_OPS = false;
     private static final boolean DEBUG = DEBUG_APP_OPS || false;
     private static IAudioService sService; //lazy initialization, use getService()
-
-    /** if true, only use OP_PLAY_AUDIO monitoring for logging, and rely on muting to happen
-     *  in AudioFlinger */
-    private static final boolean USE_AUDIOFLINGER_MUTING_FOR_OP = true;
 
     // parameters of the player that affect AppOps
     protected AudioAttributes mAttributes;
@@ -112,21 +106,6 @@ public abstract class PlayerBase {
      * Call from derived class when instantiation / initialization is successful
      */
     protected void baseRegisterPlayer(int sessionId) {
-        if (!USE_AUDIOFLINGER_MUTING_FOR_OP) {
-            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-            mAppOps = IAppOpsService.Stub.asInterface(b);
-            // initialize mHasAppOpsPlayAudio
-            updateAppOpsPlayAudio();
-            // register a callback to monitor whether the OP_PLAY_AUDIO is still allowed
-            mAppOpsCallback = new IAppOpsCallbackWrapper(this);
-            try {
-                mAppOps.startWatchingMode(AppOpsManager.OP_PLAY_AUDIO,
-                        ActivityThread.currentPackageName(), mAppOpsCallback);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error registering appOps callback", e);
-                mHasAppOpsPlayAudio = false;
-            }
-        }
         try {
             mPlayerIId = getService().trackPlayer(
                     new PlayerIdCard(mImplType, mAttributes, new IPlayerWrapper(this),
@@ -150,9 +129,7 @@ public abstract class PlayerBase {
             Log.e(TAG, "Error talking to audio service, audio attributes will not be updated", e);
         }
         synchronized (mLock) {
-            boolean attributesChanged = (mAttributes != attr);
             mAttributes = attr;
-            updateAppOpsPlayAudio_sync(attributesChanged);
         }
     }
 
@@ -209,11 +186,6 @@ public abstract class PlayerBase {
             Log.v(TAG, "baseStart() piid=" + mPlayerIId + " deviceId=" + deviceId);
         }
         updateState(AudioPlaybackConfiguration.PLAYER_STATE_STARTED, deviceId);
-        synchronized (mLock) {
-            if (isRestricted_sync()) {
-                playerSetVolume(true/*muting*/,0, 0);
-            }
-        }
     }
 
     void baseSetStartDelayMs(int delayMs) {
@@ -254,13 +226,11 @@ public abstract class PlayerBase {
 
     private void updatePlayerVolume() {
         final float finalLeftVol, finalRightVol;
-        final boolean isRestricted;
         synchronized (mLock) {
             finalLeftVol = mVolMultiplier * mLeftVolume * mPanMultiplierL;
             finalRightVol = mVolMultiplier * mRightVolume * mPanMultiplierR;
-            isRestricted = isRestricted_sync();
         }
-        playerSetVolume(isRestricted /*muting*/, finalLeftVol, finalRightVol);
+        playerSetVolume(false /*muting*/, finalLeftVol, finalRightVol);
     }
 
     void setVolumeMultiplier(float vol) {
@@ -281,9 +251,6 @@ public abstract class PlayerBase {
     int baseSetAuxEffectSendLevel(float level) {
         synchronized (mLock) {
             mAuxEffectSendLevel = level;
-            if (isRestricted_sync()) {
-                return AudioSystem.SUCCESS;
-            }
         }
         return playerSetAuxEffectSendLevel(false/*muting*/, level);
     }
@@ -315,98 +282,6 @@ public abstract class PlayerBase {
         } catch (Exception e) {
             // nothing to do here, the object is supposed to be released anyway
         }
-    }
-
-    private void updateAppOpsPlayAudio() {
-        synchronized (mLock) {
-            updateAppOpsPlayAudio_sync(false);
-        }
-    }
-
-    /**
-     * To be called whenever a condition that might affect audibility of this player is updated.
-     * Must be called synchronized on mLock.
-     */
-    void updateAppOpsPlayAudio_sync(boolean attributesChanged) {
-        if (USE_AUDIOFLINGER_MUTING_FOR_OP) {
-            return;
-        }
-        boolean oldHasAppOpsPlayAudio = mHasAppOpsPlayAudio;
-        try {
-            int mode = AppOpsManager.MODE_IGNORED;
-            if (mAppOps != null) {
-                mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
-                    mAttributes.getUsage(),
-                    Process.myUid(), ActivityThread.currentPackageName());
-            }
-            mHasAppOpsPlayAudio = (mode == AppOpsManager.MODE_ALLOWED);
-        } catch (RemoteException e) {
-            mHasAppOpsPlayAudio = false;
-        }
-
-        // AppsOps alters a player's volume; when the restriction changes, reflect it on the actual
-        // volume used by the player
-        try {
-            if (oldHasAppOpsPlayAudio != mHasAppOpsPlayAudio ||
-                    attributesChanged) {
-                getService().playerHasOpPlayAudio(mPlayerIId, mHasAppOpsPlayAudio);
-                if (!isRestricted_sync()) {
-                    if (DEBUG_APP_OPS) {
-                        Log.v(TAG, "updateAppOpsPlayAudio: unmuting player, vol=" + mLeftVolume
-                                + "/" + mRightVolume);
-                    }
-                    playerSetVolume(false/*muting*/,
-                            mLeftVolume * mPanMultiplierL, mRightVolume * mPanMultiplierR);
-                    playerSetAuxEffectSendLevel(false/*muting*/, mAuxEffectSendLevel);
-                } else {
-                    if (DEBUG_APP_OPS) {
-                        Log.v(TAG, "updateAppOpsPlayAudio: muting player");
-                    }
-                    playerSetVolume(true/*muting*/, 0.0f, 0.0f);
-                    playerSetAuxEffectSendLevel(true/*muting*/, 0.0f);
-                }
-            }
-        } catch (Exception e) {
-            // failing silently, player might not be in right state
-        }
-    }
-
-    /**
-     * To be called by the subclass whenever an operation is potentially restricted.
-     * As the media player-common behavior are incorporated into this class, the subclass's need
-     * to call this method should be removed, and this method could become private.
-     * FIXME can this method be private so subclasses don't have to worry about when to check
-     *    the restrictions.
-     * @return
-     */
-    boolean isRestricted_sync() {
-        if (USE_AUDIOFLINGER_MUTING_FOR_OP) {
-            return false;
-        }
-        // check app ops
-        if (mHasAppOpsPlayAudio) {
-            return false;
-        }
-        // check bypass flag
-        if ((mAttributes.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
-            return false;
-        }
-        // check force audibility flag and camera restriction
-        if (((mAttributes.getAllFlags() & AudioAttributes.FLAG_AUDIBILITY_ENFORCED) != 0)
-                && (mAttributes.getUsage() == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)) {
-            boolean cameraSoundForced = false;
-            try {
-                cameraSoundForced = getService().isCameraSoundForced();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot access AudioService in isRestricted_sync()");
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Null AudioService in isRestricted_sync()");
-            }
-            if (cameraSoundForced) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static IAudioService getService()
@@ -476,26 +351,6 @@ public abstract class PlayerBase {
     abstract void playerStart();
     abstract void playerPause();
     abstract void playerStop();
-
-    //=====================================================================
-    private static class IAppOpsCallbackWrapper extends IAppOpsCallback.Stub {
-        private final WeakReference<PlayerBase> mWeakPB;
-
-        public IAppOpsCallbackWrapper(PlayerBase pb) {
-            mWeakPB = new WeakReference<PlayerBase>(pb);
-        }
-
-        @Override
-        public void opChanged(int op, int uid, String packageName) {
-            if (op == AppOpsManager.OP_PLAY_AUDIO) {
-                if (DEBUG_APP_OPS) { Log.v(TAG, "opChanged: op=PLAY_AUDIO pack=" + packageName); }
-                final PlayerBase pb = mWeakPB.get();
-                if (pb != null) {
-                    pb.updateAppOpsPlayAudio();
-                }
-            }
-        }
-    }
 
     //=====================================================================
     /**

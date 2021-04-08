@@ -91,6 +91,7 @@ private:
         SkISize size;
         uint32_t bufferFormat;
         android_dataspace dataspace;
+        sk_sp<SkColorSpace> colorspace;
         int transform;
         size_t bufferCount;
         uint64_t windowUsageFlags;

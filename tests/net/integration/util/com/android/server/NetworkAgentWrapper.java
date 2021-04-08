@@ -52,7 +52,6 @@ import android.util.Log;
 import android.util.Range;
 
 import com.android.net.module.util.ArrayTrackRecord;
-import com.android.server.connectivity.ConnectivityConstants;
 import com.android.testutils.HandlerUtils;
 import com.android.testutils.TestableNetworkCallback;
 
@@ -70,7 +69,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     private final ConditionVariable mDisconnected = new ConditionVariable();
     private final ConditionVariable mPreventReconnectReceived = new ConditionVariable();
     private final AtomicBoolean mConnected = new AtomicBoolean(false);
-    private int mScore;
+    private NetworkScore mScore;
     private NetworkAgent mNetworkAgent;
     private int mStartKeepaliveError = SocketKeepalive.ERROR_UNSUPPORTED;
     private int mStopKeepaliveError = SocketKeepalive.NO_KEEPALIVE;
@@ -91,23 +90,23 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         mNetworkCapabilities.addTransportType(transport);
         switch (transport) {
             case TRANSPORT_ETHERNET:
-                mScore = 70;
+                mScore = new NetworkScore.Builder().setLegacyInt(70).build();
                 break;
             case TRANSPORT_WIFI:
-                mScore = 60;
+                mScore = new NetworkScore.Builder().setLegacyInt(60).build();
                 break;
             case TRANSPORT_CELLULAR:
-                mScore = 50;
+                mScore = new NetworkScore.Builder().setLegacyInt(50).build();
                 break;
             case TRANSPORT_WIFI_AWARE:
-                mScore = 20;
+                mScore = new NetworkScore.Builder().setLegacyInt(20).build();
                 break;
             case TRANSPORT_VPN:
                 mNetworkCapabilities.removeCapability(NET_CAPABILITY_NOT_VPN);
                 // VPNs deduce the SUSPENDED capability from their underlying networks and there
                 // is no public API to let VPN services set it.
                 mNetworkCapabilities.removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
-                mScore = ConnectivityConstants.VPN_DEFAULT_SCORE;
+                mScore = new NetworkScore.Builder().setLegacyInt(101).build();
                 break;
             default:
                 throw new UnsupportedOperationException("unimplemented network type");
@@ -201,16 +200,22 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     }
 
     public void setScore(@NonNull final NetworkScore score) {
-        mScore = score.getLegacyInt();
+        mScore = score;
         mNetworkAgent.sendNetworkScore(score);
     }
 
     public void adjustScore(int change) {
-        mScore += change;
+        final int newLegacyScore = mScore.getLegacyInt() + change;
+        final NetworkScore.Builder builder = new NetworkScore.Builder()
+                .setLegacyInt(newLegacyScore);
+        if (mNetworkCapabilities.hasTransport(TRANSPORT_WIFI) && newLegacyScore < 50) {
+            builder.setExiting(true);
+        }
+        mScore = builder.build();
         mNetworkAgent.sendNetworkScore(mScore);
     }
 
-    public int getScore() {
+    public NetworkScore getScore() {
         return mScore;
     }
 

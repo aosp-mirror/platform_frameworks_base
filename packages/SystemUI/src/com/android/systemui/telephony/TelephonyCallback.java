@@ -54,9 +54,11 @@ class TelephonyCallback extends android.telephony.TelephonyCallback
 
     @Override
     public void onActiveDataSubscriptionIdChanged(int subId) {
-        mActiveDataSubscriptionIdListeners.forEach(listener -> {
-            listener.onActiveDataSubscriptionIdChanged(subId);
-        });
+        List<ActiveDataSubscriptionIdListener> listeners;
+        synchronized (mActiveDataSubscriptionIdListeners) {
+            listeners = new ArrayList<>(mActiveDataSubscriptionIdListeners);
+        }
+        listeners.forEach(listener -> listener.onActiveDataSubscriptionIdChanged(subId));
     }
 
     void addActiveDataSubscriptionIdListener(ActiveDataSubscriptionIdListener listener) {
@@ -69,9 +71,11 @@ class TelephonyCallback extends android.telephony.TelephonyCallback
 
     @Override
     public void onCallStateChanged(int state) {
-        mCallStateListeners.forEach(listener -> {
-            listener.onCallStateChanged(state);
-        });
+        List<CallStateListener> listeners;
+        synchronized (mCallStateListeners) {
+            listeners = new ArrayList<>(mCallStateListeners);
+        }
+        listeners.forEach(listener -> listener.onCallStateChanged(state));
     }
 
     void addCallStateListener(CallStateListener listener) {
@@ -84,9 +88,11 @@ class TelephonyCallback extends android.telephony.TelephonyCallback
 
     @Override
     public void onServiceStateChanged(@NonNull ServiceState serviceState) {
-        mServiceStateListeners.forEach(listener -> {
-            listener.onServiceStateChanged(serviceState);
-        });
+        List<ServiceStateListener> listeners;
+        synchronized (mServiceStateListeners) {
+            listeners = new ArrayList<>(mServiceStateListeners);
+        }
+        listeners.forEach(listener -> listener.onServiceStateChanged(serviceState));
     }
 
     void addServiceStateListener(ServiceStateListener listener) {

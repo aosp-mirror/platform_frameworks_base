@@ -267,13 +267,15 @@ public class PackageDexOptimizer {
                                 mArtStatsLogger,
                                 sessionId,
                                 compilerFilter,
-                                sharedGid,
+                                pkg.getUid(),
                                 packageStats.getCompileTime(path),
                                 dexMetadataPath,
                                 options.getCompilationReason(),
                                 newResult,
-                                ArtStatsLogUtils.getApkType(path),
-                                dexCodeIsa);
+                                ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
+                                        pkg.getSplitCodePaths()),
+                                dexCodeIsa,
+                                path);
                     } finally {
                         Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
                     }
@@ -488,9 +490,9 @@ public class PackageDexOptimizer {
         String classLoaderContext = null;
         if (dexUseInfo.isUnsupportedClassLoaderContext()
                 || dexUseInfo.isVariableClassLoaderContext()) {
-            // If we have an unknown (not yet set), or a variable class loader chain. Just extract
+            // If we have an unknown (not yet set), or a variable class loader chain. Just verify
             // the dex file.
-            compilerFilter = "extract";
+            compilerFilter = "verify";
         } else {
             classLoaderContext = dexUseInfo.getClassLoaderContext();
         }

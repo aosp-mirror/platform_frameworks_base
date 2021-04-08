@@ -99,274 +99,6 @@ license {
 }
 
 filegroup {
-    name: "framework-core-sources",
-    srcs: [
-        "core/java/**/*.java",
-        "core/java/**/*.aidl",
-    ],
-    path: "core/java",
-}
-
-// These are subset of framework-core-sources that are needed by the
-// android.test.mock library. The implementation of android.test.mock references
-// private members of various components to allow mocking of classes that cannot
-// be mocked without access to those internal implementation details.
-filegroup {
-    name: "framework-core-sources-for-test-mock",
-    srcs: [
-        "core/java/android/accounts/AccountManagerCallback.java",
-        "core/java/android/accounts/AccountManagerFuture.java",
-        "core/java/android/accounts/AccountManager.java",
-        "core/java/android/accounts/AccountsException.java",
-        "core/java/android/accounts/AuthenticatorException.java",
-        "core/java/android/accounts/OperationCanceledException.java",
-        "core/java/android/annotation/AnimatorRes.java",
-        "core/java/android/annotation/AnimRes.java",
-        "core/java/android/annotation/AnyRes.java",
-        "core/java/android/annotation/ArrayRes.java",
-        "core/java/android/annotation/AttrRes.java",
-        "core/java/android/annotation/BoolRes.java",
-        "core/java/android/annotation/BroadcastBehavior.java",
-        "core/java/android/annotation/CallbackExecutor.java",
-        "core/java/android/annotation/CallSuper.java",
-        "core/java/android/annotation/CheckResult.java",
-        "core/java/android/annotation/ColorInt.java",
-        "core/java/android/annotation/ColorRes.java",
-        "core/java/android/annotation/DimenRes.java",
-        "core/java/android/annotation/DrawableRes.java",
-        "core/java/android/annotation/FontRes.java",
-        "core/java/android/annotation/FractionRes.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntegerRes.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/LayoutRes.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/PluralsRes.java",
-        "core/java/android/annotation/RawRes.java",
-        "core/java/android/annotation/RequiresPermission.java",
-        "core/java/android/annotation/SdkConstant.java",
-        "core/java/android/annotation/Size.java",
-        "core/java/android/annotation/StringDef.java",
-        "core/java/android/annotation/StringRes.java",
-        "core/java/android/annotation/StyleableRes.java",
-        "core/java/android/annotation/StyleRes.java",
-        "core/java/android/annotation/SuppressLint.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/SystemService.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/android/annotation/UserIdInt.java",
-        "core/java/android/annotation/XmlRes.java",
-        "core/java/android/app/Application.java",
-        "core/java/android/app/IApplicationThread.aidl",
-        "core/java/android/app/IServiceConnection.aidl",
-        "core/java/android/app/PackageDeleteObserver.java",
-        "core/java/android/content/ComponentCallbacks2.java",
-        "core/java/android/content/ComponentCallbacks.java",
-        "core/java/android/content/ContentInterface.java",
-        "core/java/android/content/ContentProvider.java",
-        "core/java/android/content/ContentProviderNative.java",
-        "core/java/android/content/ContentResolver.java",
-        "core/java/android/content/Context.java",
-        "core/java/android/content/ContextWrapper.java",
-        "core/java/android/content/DialogInterface.java",
-        "core/java/android/content/IContentProvider.java",
-        "core/java/android/content/Intent.java",
-        "core/java/android/content/IntentSender.java",
-        "core/java/android/content/OperationApplicationException.java",
-        "core/java/android/content/pm/ActivityInfo.java",
-        "core/java/android/content/pm/ApplicationInfo.java",
-        "core/java/android/content/pm/InstantAppInfo.java",
-        "core/java/android/content/pm/IPackageDataObserver.aidl",
-        "core/java/android/content/pm/KeySet.java",
-        "core/java/android/content/pm/PackageManager.java",
-        "core/java/android/content/pm/VerifierDeviceIdentity.java",
-        "core/java/android/content/res/Resources.java",
-        "core/java/android/database/CrossProcessCursor.java",
-        "core/java/android/database/CrossProcessCursorWrapper.java",
-        "core/java/android/database/Cursor.java",
-        "core/java/android/database/CursorWrapper.java",
-        "core/java/android/os/Binder.java",
-        "core/java/android/os/Bundle.java",
-        "core/java/android/os/IBinder.java",
-        "core/java/android/os/IInterface.java",
-        "core/java/android/os/Parcelable.java",
-        "core/java/android/os/ParcelFileDescriptor.java",
-        "core/java/android/os/RemoteException.java",
-        "core/java/android/os/storage/VolumeInfo.java",
-        "core/java/android/util/AndroidException.java",
-        "core/java/android/view/DisplayAdjustments.java",
-        "core/java/android/view/ViewDebug.java",
-        "core/java/com/android/internal/annotations/VisibleForTesting.java",
-    ],
-    path: "core/java",
-    visibility: ["//frameworks/base/test-mock"],
-}
-
-filegroup {
-    name: "framework-drm-sources",
-    srcs: [
-        "drm/java/**/*.java",
-    ],
-    path: "drm/java",
-}
-
-filegroup {
-    name: "framework-graphics-nonupdatable-sources",
-    srcs: [
-        "graphics/java/**/*.java",
-        "graphics/java/**/*.aidl",
-    ],
-    path: "graphics/java",
-}
-
-filegroup {
-    name: "framework-identity-sources",
-    srcs: [
-        "identity/java/**/*.java",
-    ],
-    path: "identity/java",
-}
-
-filegroup {
-    name: "framework-keystore-sources",
-    srcs: [
-        "keystore/java/**/*.java",
-        "keystore/java/**/*.aidl",
-    ],
-    path: "keystore/java",
-}
-
-filegroup {
-    name: "framework-location-sources",
-    srcs: [
-        "location/java/**/*.java",
-        "location/java/**/*.aidl",
-    ],
-    path: "location/java",
-}
-
-filegroup {
-    name: "framework-lowpan-sources",
-    srcs: [
-        "lowpan/java/**/*.java",
-        "lowpan/java/**/*.aidl",
-    ],
-    path: "lowpan/java",
-}
-
-filegroup {
-    name: "framework-media-sources",
-    srcs: [
-        "media/java/**/*.java",
-        "media/java/**/*.aidl",
-    ],
-    exclude_srcs: [
-        ":framework-media-tv-tunerresourcemanager-sources-aidl",
-    ],
-    path: "media/java",
-}
-
-filegroup {
-    name: "framework-mca-effect-sources",
-    srcs: [
-        "media/mca/effect/java/**/*.java",
-    ],
-    path: "media/mca/effect/java",
-}
-
-filegroup {
-    name: "framework-mca-filterfw-sources",
-    srcs: [
-        "media/mca/filterfw/java/**/*.java",
-    ],
-    path: "media/mca/filterfw/java",
-}
-
-filegroup {
-    name: "framework-mca-filterpacks-sources",
-    srcs: [
-        "media/mca/filterpacks/java/**/*.java",
-    ],
-    path: "media/mca/filterpacks/java",
-}
-
-filegroup {
-    name: "framework-mime-sources",
-    srcs: [
-        "mime/java/**/*.java",
-    ],
-    path: "mime/java",
-}
-
-filegroup {
-    name: "framework-opengl-sources",
-    srcs: [
-        "opengl/java/**/*.java",
-    ],
-    path: "opengl/java",
-}
-
-filegroup {
-    name: "framework-rs-sources",
-    srcs: [
-        "rs/java/**/*.java",
-    ],
-    path: "rs/java",
-}
-
-filegroup {
-    name: "framework-sax-sources",
-    srcs: [
-        "sax/java/**/*.java",
-    ],
-    path: "sax/java",
-}
-
-filegroup {
-    name: "framework-telecomm-sources",
-    srcs: [
-        "telecomm/java/**/*.java",
-        "telecomm/java/**/*.aidl",
-    ],
-    path: "telecomm/java",
-}
-
-filegroup {
-    name: "framework-telephony-sources",
-    srcs: [
-        "telephony/java/**/*.java",
-        "telephony/java/**/*.aidl",
-    ],
-    path: "telephony/java",
-}
-
-genrule {
-    name: "statslog-telephony-common-java-gen",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --module telephony_common" +
-        " --javaPackage com.android.internal.telephony --javaClass TelephonyCommonStatsLog",
-    out: ["com/android/internal/telephony/TelephonyCommonStatsLog.java"],
-}
-
-filegroup {
-    name: "framework-telephony-common-sources",
-    srcs: [
-        "telephony/common/**/*.java",
-        ":statslog-telephony-common-java-gen",
-    ],
-}
-
-filegroup {
-    name: "framework-mms-sources",
-    srcs: [
-        "mms/java/**/*.java",
-        "mms/java/**/*.aidl",
-    ],
-    path: "mms/java",
-}
-
-filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
@@ -418,7 +150,6 @@ filegroup {
         ":incidentcompanion_aidl",
         ":inputconstants_aidl",
         ":installd_aidl",
-        ":keystore_aidl",
         ":libaudioclient_aidl",
         ":libbinder_aidl",
         ":libbluetooth-binder-aidl",
@@ -439,26 +170,6 @@ filegroup {
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
         ":audio_policy_configuration_V7_0",
     ],
-}
-
-filegroup {
-    name: "framework-updatable-sources",
-    srcs: [
-        ":framework-appsearch-sources",
-        ":framework-connectivity-sources",
-        ":framework-graphics-srcs",
-        ":framework-mediaprovider-sources",
-        ":framework-permission-sources",
-        ":framework-permission-s-sources",
-        ":framework-scheduling-sources",
-        ":framework-sdkextensions-sources",
-        ":framework-statsd-sources",
-        ":framework-tethering-srcs",
-        ":framework-wifi-updatable-sources",
-        ":ike-srcs",
-        ":updatable-media-srcs",
-    ],
-    visibility: ["//visibility:private"],
 }
 
 java_library {
@@ -639,8 +350,6 @@ java_defaults {
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
     ],
-    // See comment on framework-atb-backward-compatibility module below
-    exclude_srcs: ["core/java/android/content/pm/AndroidTestBaseUpdater.java"],
     aidl: {
         generate_get_transaction_name: true,
         local_include_dirs: [
@@ -751,20 +460,6 @@ platform_compat_config {
     src: ":framework-minus-apex",
 }
 
-// A temporary build target that is conditionally included on the bootclasspath if
-// android.test.base library has been removed and which provides support for
-// maintaining backwards compatibility for APKs that target pre-P and depend on
-// android.test.base classes. This is used iff REMOVE_ATB_FROM_BCP=true is
-// specified on the build command line.
-java_library {
-    name: "framework-atb-backward-compatibility",
-    installable: true,
-    libs: ["app-compat-annotations"],
-    srcs: [
-        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
-    ],
-}
-
 genrule {
     name: "statslog-framework-java-gen",
     tools: ["stats-log-api-gen"],
@@ -868,7 +563,6 @@ filegroup {
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/StringDef.java",
-        "core/java/android/annotation/SuppressLint.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",
@@ -1293,38 +987,6 @@ aidl_interface {
     },
 }
 
-// TODO(b/77285514): remove this once the last few hidl interfaces have been
-// updated to use hwbinder.stubs.
-java_library {
-    name: "hwbinder",
-    sdk_version: "core_platform",
-
-    srcs: [
-        "core/java/android/os/HidlSupport.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/android/os/HidlMemory.java",
-        "core/java/android/os/HwBinder.java",
-        "core/java/android/os/HwBlob.java",
-        "core/java/android/os/HwParcel.java",
-        "core/java/android/os/IHwBinder.java",
-        "core/java/android/os/IHwInterface.java",
-        "core/java/android/os/DeadObjectException.java",
-        "core/java/android/os/DeadSystemException.java",
-        "core/java/android/os/NativeHandle.java",
-        "core/java/android/os/RemoteException.java",
-        "core/java/android/util/AndroidException.java",
-    ],
-    libs: ["unsupportedappusage"],
-
-    dxflags: ["--core-library"],
-    installable: false,
-}
-
 python_defaults {
     name: "base_default",
     version: {
@@ -1477,6 +1139,19 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--api-lint-ignore-prefix java. " +
     "--api-lint-ignore-prefix junit. " +
     "--api-lint-ignore-prefix org. "
+
+filegroup {
+    name: "framework-non-updatable-stub-sources",
+    srcs: [
+        ":framework-mime-sources", // mimemap builds separately but has no separate droidstubs.
+        ":framework-non-updatable-sources",
+        ":opt-telephony-srcs",
+        ":opt-net-voip-srcs",
+        "core/java/**/*.logtags",
+        "**/package.html",
+    ],
+    visibility: ["//visibility:private"],
+}
 
 build = [
     "StubLibraries.bp",

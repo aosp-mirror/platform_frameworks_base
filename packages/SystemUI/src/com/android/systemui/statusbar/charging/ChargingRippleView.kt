@@ -20,28 +20,29 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
 
-private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
+private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
 
 /**
  * Expanding ripple effect that shows when charging begins.
  */
 class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
-    private var rippleInProgress: Boolean = false
     private val rippleShader = RippleShader()
     private val defaultColor: Int = 0xffffffff.toInt()
     private val ripplePaint = Paint()
 
+    var rippleInProgress: Boolean = false
     var radius: Float = 0.0f
         set(value) { rippleShader.radius = value }
     var origin: PointF = PointF()
         set(value) { rippleShader.origin = value }
-    var duration: Long = 1500
+    var duration: Long = 1750
 
     init {
         rippleShader.color = defaultColor
@@ -51,7 +52,18 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         visibility = View.GONE
     }
 
-    fun startRipple() {
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        rippleShader.pixelDensity = resources.displayMetrics.density
+        super.onConfigurationChanged(newConfig)
+    }
+
+    override fun onAttachedToWindow() {
+        rippleShader.pixelDensity = resources.displayMetrics.density
+        super.onAttachedToWindow()
+    }
+
+    @JvmOverloads
+    fun startRipple(onAnimationEnd: Runnable? = null) {
         if (rippleInProgress) {
             return // Ignore if ripple effect is already playing
         }
@@ -59,15 +71,17 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         animator.duration = duration
         animator.addUpdateListener { animator ->
             val now = animator.currentPlayTime
-            val phase = now / 30000f
-            rippleShader.progress = animator.animatedValue as Float
-            rippleShader.noisePhase = phase
+            val progress = animator.animatedValue as Float
+            rippleShader.progress = progress
+            rippleShader.distortionStrength = 1 - progress
+            rippleShader.time = now.toFloat()
             invalidate()
         }
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 rippleInProgress = false
                 visibility = View.GONE
+                onAnimationEnd?.run()
             }
         })
         animator.start()

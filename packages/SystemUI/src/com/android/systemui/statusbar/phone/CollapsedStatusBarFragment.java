@@ -37,6 +37,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -44,6 +45,8 @@ import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -72,6 +75,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private DarkIconManager mDarkIconManager;
     private View mOperatorNameFrame;
     private CommandQueue mCommandQueue;
+    private OngoingCallController mOngoingCallController;
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
@@ -81,6 +85,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mCommandQueue.recomputeDisableFlags(getContext().getDisplayId(), true /* animate */);
         }
     };
+
+    @Inject
+    public CollapsedStatusBarFragment(OngoingCallController ongoingCallController) {
+        mOngoingCallController = ongoingCallController;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,7 +119,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mDarkIconManager.setShouldLog(true);
         mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_volume));
         mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_alarm_clock));
-        mBlockedIcons.add(getString(com.android.internal.R.string.status_bar_call_strength));
         mDarkIconManager.setBlockList(mBlockedIcons);
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);

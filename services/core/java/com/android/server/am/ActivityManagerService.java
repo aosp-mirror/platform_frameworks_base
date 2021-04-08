@@ -179,6 +179,8 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.PropertyInvalidatedCache;
+import android.app.RemoteServiceException;
+import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
@@ -232,6 +234,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
 import android.media.audiofx.AudioEffect;
+import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.Uri;
 import android.os.AppZygote;
@@ -344,7 +347,6 @@ import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.DeviceIdleInternal;
@@ -2744,7 +2746,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private boolean hasUsageStatsPermission(String callingPackage) {
         final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
-                Binder.getCallingUid(), callingPackage, null, false, "", false);
+                Binder.getCallingUid(), callingPackage, null, false, "", false).getOpMode();
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
                     == PackageManager.PERMISSION_GRANTED;
@@ -2935,6 +2937,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void crashApplication(int uid, int initialPid, String packageName, int userId,
             String message, boolean force) {
+        crashApplicationWithType(uid, initialPid, packageName, userId, message, force,
+                RemoteServiceException.TYPE_ID);
+    }
+
+    @Override
+    public void crashApplicationWithType(int uid, int initialPid, String packageName, int userId,
+            String message, boolean force, int exceptionTypeId) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: crashApplication() from pid="
@@ -2947,7 +2956,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId,
-                    message, force);
+                    message, force, exceptionTypeId);
         }
     }
 
@@ -3481,9 +3490,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     // Clear its scheduled jobs
                     JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
-                    // Clearing data is akin to uninstalling. The app is force stopped before we
-                    // get to this point, so the reason won't be checked by the app.
-                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER, "clear data");
+                    // Clearing data is a user-initiated action.
+                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER,
+                            JobParameters.DEBUG_REASON_DATA_CLEARED, "clear data");
 
                     // Clear its pending alarms
                     AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
@@ -5244,7 +5253,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // TODO moltmann: Allow to specify featureId
             return mActivityManagerService.mAppOpsService
                     .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName, null,
-                            false, "", false);
+                            false, "", false).getOpMode();
         }
 
         @Override
@@ -6126,9 +6135,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // in the same security/privacy sandbox.
                 final AndroidPackage androidPackage = mPackageManagerInt
                         .getPackage(Binder.getCallingUid());
-                if (androidPackage == null) {
-                    return null;
-                }
                 final AttributionSource attributionSource = new AttributionSource(
                         Binder.getCallingUid(), androidPackage.getPackageName(), null);
                 pfd = cph.provider.openFile(attributionSource, uri, "r", null);
@@ -8392,6 +8398,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAppProfiler.setMemFactorOverrideLocked(level);
             // Kick off an oom adj update since we forced a mem factor update.
             updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+        }
+    }
+
+    /**
+     * Toggle service restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    void setServiceRestartBackoffEnabled(@NonNull String packageName, boolean enable,
+            @NonNull String reason) {
+        synchronized (this) {
+            mServices.setServiceRestartBackoffEnabledLocked(packageName, enable, reason);
+        }
+    }
+
+    /**
+     * @return {@code false} if the given package has been disable from enforcing the service
+     * restart backoff policy, used by {@link ActivityManagerShellCommand}.
+     */
+    boolean isServiceRestartBackoffEnabled(@NonNull String packageName) {
+        synchronized (this) {
+            return mServices.isServiceRestartBackoffEnabledLocked(packageName);
         }
     }
 
@@ -12919,7 +12945,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     mBatteryStatsService.noteCurrentTimeChanged();
                     break;
-                case Intent.ACTION_CLEAR_DNS_CACHE:
+                case ConnectivityManager.ACTION_CLEAR_DNS_CACHE:
                     mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
                     break;
                 case Proxy.PROXY_CHANGE_ACTION:
@@ -16531,6 +16557,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
+    public List<String> getDelegatedShellPermissions() {
+        if (UserHandle.getCallingAppId() != Process.SHELL_UID
+                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
+            throw new SecurityException("Only the shell can get delegated permissions");
+        }
+        synchronized (mProcLock) {
+            return getPermissionManagerInternal().getDelegatedShellPermissions();
+        }
+    }
+
     private class ShellDelegate implements CheckOpsDelegate {
         private final int mTargetUid;
         @Nullable
@@ -16578,11 +16615,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int noteOperation(int code, int uid, @Nullable String packageName,
+        public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
                 @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
-                        Integer> superImpl) {
+                        SyncNotedAppOp> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
@@ -16599,11 +16636,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
-                boolean shouldCollectAsyncNotedOp, @Nullable String message,
-                boolean shouldCollectMessage, boolean skiProxyOperation,
+        public SyncNotedAppOp noteProxyOperation(int code,
+                @NonNull AttributionSource attributionSource, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage, boolean skiProxyOperation,
                 @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
-                                Boolean, Integer> superImpl) {
+                                Boolean, SyncNotedAppOp> superImpl) {
             if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(
                         attributionSource.getUid()), Process.SHELL_UID);
@@ -16623,12 +16660,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int startProxyOperation(IBinder token, int code,
+        public SyncNotedAppOp startProxyOperation(IBinder token, int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
                 boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
                 boolean skipProsyOperation, @NonNull OctFunction<IBinder, Integer,
                         AttributionSource, Boolean, Boolean, String, Boolean, Boolean,
-                        Integer> superImpl) {
+                        SyncNotedAppOp> superImpl) {
             if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(
                         attributionSource.getUid()), Process.SHELL_UID);

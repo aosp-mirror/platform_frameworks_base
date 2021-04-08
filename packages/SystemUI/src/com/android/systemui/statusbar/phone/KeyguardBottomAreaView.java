@@ -73,6 +73,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.IntentButtonProvider;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
@@ -110,11 +111,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private static final String RIGHT_BUTTON_PLUGIN
             = "com.android.systemui.action.PLUGIN_LOCKSCREEN_RIGHT_BUTTON";
 
-    private static final Intent SECURE_CAMERA_INTENT =
-            new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE)
-                    .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-    public static final Intent INSECURE_CAMERA_INTENT =
-            new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
     private static final Intent PHONE_INTENT = new Intent(Intent.ACTION_DIAL);
     private static final int DOZE_ANIMATION_STAGGER_DELAY = 48;
     private static final int DOZE_ANIMATION_ELEMENT_DURATION = 250;
@@ -498,7 +494,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         intent.putExtra(EXTRA_CAMERA_LAUNCH_SOURCE, source);
         boolean wouldLaunchResolverActivity = mActivityIntentHelper.wouldLaunchResolverActivity(
                 intent, KeyguardUpdateMonitor.getCurrentUser());
-        if (intent == SECURE_CAMERA_INTENT && !wouldLaunchResolverActivity) {
+        if (CameraIntents.isSecureCameraIntent(intent) && !wouldLaunchResolverActivity) {
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -855,7 +851,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public Intent getIntent() {
             boolean canDismissLs = mKeyguardStateController.canDismissLockScreen();
             boolean secure = mKeyguardStateController.isMethodSecure();
-            return (secure && !canDismissLs) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
+            if (secure && !canDismissLs) {
+                return CameraIntents.getSecureCameraIntent(getContext());
+            } else {
+                return CameraIntents.getInsecureCameraIntent(getContext());
+            }
         }
     }
 

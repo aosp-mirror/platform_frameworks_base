@@ -479,7 +479,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      * Returns the broadcast receiver that is providing this widget.
      */
     @NonNull
-    public ActivityInfo getProviderInfo() {
+    public ActivityInfo getActivityInfo() {
         return providerInfo;
     }
 

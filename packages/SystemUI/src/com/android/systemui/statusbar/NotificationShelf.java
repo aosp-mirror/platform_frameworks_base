@@ -173,7 +173,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     getFullyClosedTranslation());
             viewState.zTranslation = ambientState.getBaseZHeight();
             viewState.clipTopAmount = 0;
-            viewState.alpha = 1;
+            viewState.alpha = 1f - ambientState.getHideAmount();
             viewState.belowSpeedBump = mHostLayoutController.getSpeedBumpIndex() == 0;
             viewState.hideSensitive = false;
             viewState.xTranslation = getTranslationX();

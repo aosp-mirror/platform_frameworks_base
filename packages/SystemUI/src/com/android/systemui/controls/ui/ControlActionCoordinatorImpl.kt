@@ -63,7 +63,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     private var actionsInProgress = mutableSetOf<String>()
     private val isLocked: Boolean
         get() = !keyguardStateController.isUnlocked()
-    override var activityContext: Context? = null
+    override lateinit var activityContext: Context
 
     companion object {
         private const val RESPONSE_TIMEOUT_IN_MILLIS = 3000L
@@ -153,14 +153,9 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 // pending actions will only run after the control state has been refreshed
                 pendingAction = action
             }
-            val wasLocked = isLocked
             activityStarter.dismissKeyguardThenExecute({
                 Log.d(ControlsUiController.TAG, "Device unlocked, invoking controls action")
-                if (wasLocked && activityContext == null) {
-                    globalActionsComponent.handleShowGlobalActionsMenu()
-                } else {
-                    action.invoke()
-                }
+                action.invoke()
                 true
             }, { pendingAction = null }, true /* afterKeyguardGone */)
         } else {

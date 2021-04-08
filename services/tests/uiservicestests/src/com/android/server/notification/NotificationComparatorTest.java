@@ -31,6 +31,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -193,7 +194,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n11 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         mRecordCheaterColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "cheater", uid2, uid2, n11, new UserHandle(userId),
@@ -202,7 +203,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n12 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .setStyle(new Notification.MediaStyle())
                 .build();
         mNoMediaSessionMedia = new NotificationRecord(mContext, new StatusBarNotification(
@@ -212,7 +213,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n13 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
-                .setColorized(true /* colorized */)
+                .setColorized(true).setColor(Color.WHITE)
                 .build();
         mRecordColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "colorized", uid2, uid2, n13,
@@ -221,7 +222,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n14 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         mRecordColorizedCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,

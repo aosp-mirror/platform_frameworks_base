@@ -31,8 +31,6 @@ import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -42,9 +40,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -61,7 +59,9 @@ final class UpdatableFontDir {
 
     /** Interface to mock font file access in tests. */
     interface FontFileParser {
-        String getCanonicalFileName(File file) throws IOException;
+        String getPostScriptName(File file) throws IOException;
+
+        String buildFontFileName(File file) throws IOException;
 
         long getRevision(File file) throws IOException;
     }
@@ -78,15 +78,21 @@ final class UpdatableFontDir {
     /** Data class to hold font file path and revision. */
     private static final class FontFileInfo {
         private final File mFile;
+        private final String mPsName;
         private final long mRevision;
 
-        FontFileInfo(File file, long revision) {
+        FontFileInfo(File file, String psName, long revision) {
             mFile = file;
+            mPsName = psName;
             mRevision = revision;
         }
 
         public File getFile() {
             return mFile;
+        }
+
+        public String getPostScriptName() {
+            return mPsName;
         }
 
         /** Returns the unique randomized font dir containing this font file. */
@@ -96,6 +102,13 @@ final class UpdatableFontDir {
 
         public long getRevision() {
             return mRevision;
+        }
+
+        @Override
+        public String toString() {
+            return "FontFileInfo{mFile=" + mFile
+                    + ", psName=" + mPsName
+                    + ", mRevision=" + mRevision + '}';
         }
     }
 
@@ -121,12 +134,6 @@ final class UpdatableFontDir {
      */
     private final ArrayMap<String, FontFileInfo> mFontFileInfoMap = new ArrayMap<>();
 
-    /**
-     * A mutable map containing mapping from font family name to {@link FontConfig.FontFamily}.
-     * The FontFamily entries only reference font files in {@link #mFontFileInfoMap}.
-     */
-    private final ArrayMap<String, FontConfig.FontFamily> mFontFamilyMap = new ArrayMap<>();
-
     UpdatableFontDir(File filesDir, List<File> preinstalledFontDirs, FontFileParser parser,
             FsverityUtil fsverityUtil) {
         this(filesDir, preinstalledFontDirs, parser, fsverityUtil, new File(CONFIG_XML_FILE),
@@ -147,7 +154,6 @@ final class UpdatableFontDir {
 
     /* package */ void loadFontFileMap() {
         mFontFileInfoMap.clear();
-        mFontFamilyMap.clear();
         mLastModifiedMillis = 0;
         boolean success = false;
         try {
@@ -155,7 +161,7 @@ final class UpdatableFontDir {
             try (FileInputStream fis = new FileInputStream(mConfigFile)) {
                 PersistentSystemFontConfig.loadFromXml(fis, config);
             } catch (IOException | XmlPullParserException e) {
-                Slog.e(TAG, "Failed to load config xml file", e);
+                // The font config file is missing on the first boot. Just do nothing.
                 return;
             }
             mLastModifiedMillis = config.lastModifiedMillis;
@@ -180,17 +186,6 @@ final class UpdatableFontDir {
                 FontFileInfo fontFileInfo = validateFontFile(files[0]);
                 addFileToMapIfNewer(fontFileInfo, true /* deleteOldFile */);
             }
-            // Resolve font file paths.
-            List<FontConfig.FontFamily> fontFamilies = config.fontFamilies;
-            for (int i = 0; i < fontFamilies.size(); i++) {
-                FontConfig.FontFamily fontFamily = fontFamilies.get(i);
-                try {
-                    addFontFamily(fontFamily);
-                } catch (SystemFontException e) {
-                    // Ignore failures as updated fonts may be obsoleted by system OTA update.
-                    Slog.i(TAG, "Obsolete font family: " + fontFamily.getName());
-                }
-            }
             success = true;
         } catch (Throwable t) {
             // If something happened during loading system fonts, clear all contents in finally
@@ -200,7 +195,6 @@ final class UpdatableFontDir {
             // Delete all files just in case if we find a problematic file.
             if (!success) {
                 mFontFileInfoMap.clear();
-                mFontFamilyMap.clear();
                 mLastModifiedMillis = 0;
                 FileUtils.deleteContents(mFilesDir);
             }
@@ -210,11 +204,12 @@ final class UpdatableFontDir {
     /* package */ void clearUpdates() throws SystemFontException {
         mFontFileInfoMap.clear();
         FileUtils.deleteContents(mFilesDir);
-        mFontFamilyMap.clear();
 
         mLastModifiedMillis = mCurrentTimeSupplier.get();
         try (FileOutputStream fos = new FileOutputStream(mConfigFile)) {
-            PersistentSystemFontConfig.writeToXml(fos, createPersistentConfig());
+            PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
+            config.lastModifiedMillis = mLastModifiedMillis;
+            PersistentSystemFontConfig.writeToXml(fos, config);
         } catch (Exception e) {
             throw new SystemFontException(
                     FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
@@ -231,7 +226,13 @@ final class UpdatableFontDir {
     public void update(List<FontUpdateRequest> requests) throws SystemFontException {
         // Backup the mapping for rollback.
         ArrayMap<String, FontFileInfo> backupMap = new ArrayMap<>(mFontFileInfoMap);
-        ArrayMap<String, FontConfig.FontFamily> backupFamilies = new ArrayMap<>(mFontFamilyMap);
+        PersistentSystemFontConfig.Config curConfig = readPersistentConfig();
+        Map<String, FontUpdateRequest.Family> familyMap = new HashMap<>();
+        for (int i = 0; i < curConfig.fontFamilies.size(); ++i) {
+            FontUpdateRequest.Family family = curConfig.fontFamilies.get(i);
+            familyMap.put(family.getName(), family);
+        }
+
         long backupLastModifiedDate = mLastModifiedMillis;
         boolean success = false;
         try {
@@ -242,15 +243,33 @@ final class UpdatableFontDir {
                                 request.getFd().getFileDescriptor(), request.getSignature());
                         break;
                     case FontUpdateRequest.TYPE_UPDATE_FONT_FAMILY:
-                        addFontFamily(request.getFontFamily());
+                        FontUpdateRequest.Family family = request.getFontFamily();
+                        familyMap.put(family.getName(), family);
                         break;
+                }
+            }
+
+            // Before processing font family update, check all family points the available fonts.
+            for (FontUpdateRequest.Family family : familyMap.values()) {
+                if (resolveFontFiles(family) == null) {
+                    throw new SystemFontException(
+                            FontManager.RESULT_ERROR_FONT_NOT_FOUND,
+                            "Required fonts are not available");
                 }
             }
 
             // Write config file.
             mLastModifiedMillis = mCurrentTimeSupplier.get();
+
+            curConfig.lastModifiedMillis = mLastModifiedMillis;
+            for (FontFileInfo info : mFontFileInfoMap.values()) {
+                curConfig.updatedFontDirs.add(info.getRandomizedFontDir().getName());
+            }
+            curConfig.fontFamilies.clear();
+            curConfig.fontFamilies.addAll(familyMap.values());
+
             try (FileOutputStream fos = new FileOutputStream(mTmpConfigFile)) {
-                PersistentSystemFontConfig.writeToXml(fos, createPersistentConfig());
+                PersistentSystemFontConfig.writeToXml(fos, curConfig);
             } catch (Exception e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
@@ -268,8 +287,6 @@ final class UpdatableFontDir {
             if (!success) {
                 mFontFileInfoMap.clear();
                 mFontFileInfoMap.putAll(backupMap);
-                mFontFamilyMap.clear();
-                mFontFamilyMap.putAll(backupFamilies);
                 mLastModifiedMillis = backupLastModifiedDate;
             }
         }
@@ -322,20 +339,20 @@ final class UpdatableFontDir {
                         FontManager.RESULT_ERROR_VERIFICATION_FAILURE,
                         "Failed to setup fs-verity.", e);
             }
-            String canonicalFileName;
+            String fontFileName;
             try {
-                canonicalFileName = mParser.getCanonicalFileName(tempNewFontFile);
+                fontFileName = mParser.buildFontFileName(tempNewFontFile);
             } catch (IOException e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_FONT_FILE,
                         "Failed to read PostScript name from font file", e);
             }
-            if (canonicalFileName == null) {
+            if (fontFileName == null) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_FONT_NAME,
                         "Failed to read PostScript name from font file");
             }
-            File newFontFile = new File(newDir, canonicalFileName);
+            File newFontFile = new File(newDir, fontFileName);
             if (!mFsverityUtil.rename(tempNewFontFile, newFontFile)) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE,
@@ -381,22 +398,12 @@ final class UpdatableFontDir {
         return dir;
     }
 
-    private FontFileInfo lookupFontFileInfo(File file) {
-        String name = file.getName();
-
-        if (!name.endsWith(".ttf") && !name.endsWith(".otf") && !name.endsWith(".ttc")
-                && !name.endsWith(".otc")) {
-            return null;
-        }
-        String key = name.substring(0, name.length() - 4);
-        return mFontFileInfoMap.get(key);
+    private FontFileInfo lookupFontFileInfo(String psName) {
+        return mFontFileInfoMap.get(psName);
     }
 
     private void putFontFileInfo(FontFileInfo info) {
-        String name = info.getFile().getName();
-        // The file name in FontFileInfo is already validated. Thus, just strip last 4 chars.
-        String key = name.substring(0, name.length() - 4);
-        mFontFileInfoMap.put(key, info);
+        mFontFileInfoMap.put(info.getPostScriptName(), info);
     }
 
     /**
@@ -405,7 +412,7 @@ final class UpdatableFontDir {
      * #mPreinstalledFontDirs}).
      */
     private boolean addFileToMapIfNewer(FontFileInfo fontFileInfo, boolean deleteOldFile) {
-        FontFileInfo existingInfo = lookupFontFileInfo(fontFileInfo.getFile());
+        FontFileInfo existingInfo = lookupFontFileInfo(fontFileInfo.getPostScriptName());
         final boolean shouldAddToMap;
         if (existingInfo == null) {
             // We got a new updatable font. We need to check if it's newer than preinstalled fonts.
@@ -458,10 +465,13 @@ final class UpdatableFontDir {
                     FontManager.RESULT_ERROR_VERIFICATION_FAILURE,
                     "Font validation failed. Fs-verity is not enabled: " + file);
         }
-        if (!validateFontFileName(file)) {
+        final String psName;
+        try {
+            psName = mParser.getPostScriptName(file);
+        } catch (IOException e) {
             throw new SystemFontException(
                     FontManager.RESULT_ERROR_INVALID_FONT_NAME,
-                    "Font validation failed. Could not validate font file name: " + file);
+                    "Font validation failed. Could not read PostScript name name: " + file);
         }
         long revision = getFontRevision(file);
         if (revision == -1) {
@@ -469,38 +479,8 @@ final class UpdatableFontDir {
                     FontManager.RESULT_ERROR_INVALID_FONT_FILE,
                     "Font validation failed. Could not read font revision: " + file);
         }
-        return new FontFileInfo(file, revision);
+        return new FontFileInfo(file, psName, revision);
     }
-
-    /**
-     * Returns true if the font file's file name matches with the PostScript name metadata in the
-     * font file.
-     *
-     * <p>We check the font file names because apps use file name to look up fonts.
-     * <p>Because PostScript name does not include extension, the extension is appended for
-     * comparison. For example, if the file name is "NotoColorEmoji.ttf", the PostScript name should
-     * be "NotoColorEmoji".
-     */
-    private boolean validateFontFileName(File file) {
-        String fileName = file.getName();
-        String canonicalFileName = getCanonicalFileName(file);
-        if (canonicalFileName == null) {
-            return false;
-        }
-        return canonicalFileName.equals(fileName);
-    }
-
-    /** Returns the PostScript name of the given font file, or null. */
-    @Nullable
-    private String getCanonicalFileName(File file) {
-        try {
-            return mParser.getCanonicalFileName(file);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to read font file", e);
-            return null;
-        }
-    }
-
     /** Returns the non-negative font revision of the given font file, or -1. */
     private long getFontRevision(File file) {
         try {
@@ -511,50 +491,22 @@ final class UpdatableFontDir {
         }
     }
 
-    /**
-     * Adds a font family to {@link #mFontFamilyMap} and returns true on success.
-     *
-     * <p>This method only accepts adding or updating a font family with a name.
-     * This is to prevent bad font family update from removing glyphs from font fallback chains.
-     * Unnamed font families are used as other named font family's fallback fonts to guarantee a
-     * complete glyph coverage.
-     */
-    private void addFontFamily(FontConfig.FontFamily fontFamily) throws SystemFontException {
-        Objects.requireNonNull(fontFamily.getName());
-        FontConfig.FontFamily resolvedFontFamily = resolveFontFiles(fontFamily);
-        if (resolvedFontFamily == null) {
-            throw new SystemFontException(
-                    FontManager.RESULT_ERROR_FONT_NOT_FOUND,
-                    "Required fonts are not available");
-        }
-        mFontFamilyMap.put(resolvedFontFamily.getName(), resolvedFontFamily);
-    }
-
     @Nullable
-    private FontConfig.FontFamily resolveFontFiles(FontConfig.FontFamily fontFamily) {
-        List<FontConfig.Font> resolvedFonts = new ArrayList<>(fontFamily.getFontList().size());
-        List<FontConfig.Font> fontList = fontFamily.getFontList();
+    private FontConfig.FontFamily resolveFontFiles(FontUpdateRequest.Family fontFamily) {
+        List<FontUpdateRequest.Font> fontList = fontFamily.getFonts();
+        List<FontConfig.Font> resolvedFonts = new ArrayList<>(fontList.size());
         for (int i = 0; i < fontList.size(); i++) {
-            FontConfig.Font font = fontList.get(i);
-            FontFileInfo info = lookupFontFileInfo(font.getFile());
+            FontUpdateRequest.Font font = fontList.get(i);
+            FontFileInfo info = mFontFileInfoMap.get(font.getPostScriptName());
             if (info == null) {
+                Slog.e(TAG, "Failed to lookup font file that has " + font.getPostScriptName());
                 return null;
             }
-            resolvedFonts.add(new FontConfig.Font(info.mFile, null, font.getStyle(),
-                    font.getTtcIndex(), font.getFontVariationSettings(), font.getFontFamilyName()));
+            resolvedFonts.add(new FontConfig.Font(info.mFile, null, font.getFontStyle(),
+                    font.getIndex(), font.getFontVariationSettings(), null));
         }
         return new FontConfig.FontFamily(resolvedFonts, fontFamily.getName(),
-                fontFamily.getLocaleList(), fontFamily.getVariant());
-    }
-
-    private PersistentSystemFontConfig.Config createPersistentConfig() {
-        PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
-        config.lastModifiedMillis = mLastModifiedMillis;
-        for (FontFileInfo info : mFontFileInfoMap.values()) {
-            config.updatedFontDirs.add(info.getRandomizedFontDir().getName());
-        }
-        config.fontFamilies.addAll(mFontFamilyMap.values());
-        return config;
+                null, FontConfig.FontFamily.VARIANT_DEFAULT);
     }
 
     Map<String, File> getFontFileMap() {
@@ -566,27 +518,54 @@ final class UpdatableFontDir {
         return map;
     }
 
-    @VisibleForTesting
-    Map<String, FontConfig.FontFamily> getFontFamilyMap() {
-        return mFontFamilyMap;
-    }
-
     /* package */ FontConfig getSystemFontConfig() {
         FontConfig config = SystemFonts.getSystemFontConfig(getFontFileMap(), 0, 0);
+        PersistentSystemFontConfig.Config persistentConfig = readPersistentConfig();
+        List<FontUpdateRequest.Family> families = persistentConfig.fontFamilies;
+
         List<FontConfig.FontFamily> mergedFamilies =
-                new ArrayList<>(config.getFontFamilies().size() + mFontFamilyMap.size());
+                new ArrayList<>(config.getFontFamilies().size() + families.size());
         // We should keep the first font family (config.getFontFamilies().get(0)) because it's used
         // as a fallback font. See SystemFonts.java.
         mergedFamilies.addAll(config.getFontFamilies());
         // When building Typeface, a latter font family definition will override the previous font
         // family definition with the same name. An exception is config.getFontFamilies.get(0),
         // which will be used as a fallback font without being overridden.
-        mergedFamilies.addAll(mFontFamilyMap.values());
+        for (int i = 0; i < families.size(); ++i) {
+            FontConfig.FontFamily family = resolveFontFiles(families.get(i));
+            if (family != null) {
+                mergedFamilies.add(family);
+            }
+        }
+
         return new FontConfig(
                 mergedFamilies, config.getAliases(), mLastModifiedMillis, mConfigVersion);
     }
 
+    private PersistentSystemFontConfig.Config readPersistentConfig() {
+        PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
+        try (FileInputStream fis = new FileInputStream(mConfigFile)) {
+            PersistentSystemFontConfig.loadFromXml(fis, config);
+        } catch (IOException | XmlPullParserException e) {
+            // The font config file is missing on the first boot. Just do nothing.
+        }
+        return config;
+    }
+
     /* package */ int getConfigVersion() {
         return mConfigVersion;
+    }
+
+    public Map<String, FontConfig.FontFamily> getFontFamilyMap() {
+        PersistentSystemFontConfig.Config curConfig = readPersistentConfig();
+        Map<String, FontConfig.FontFamily> familyMap = new HashMap<>();
+        for (int i = 0; i < curConfig.fontFamilies.size(); ++i) {
+            FontUpdateRequest.Family family = curConfig.fontFamilies.get(i);
+            FontConfig.FontFamily resolvedFamily = resolveFontFiles(family);
+            if (resolvedFamily != null) {
+                familyMap.put(family.getName(), resolvedFamily);
+            }
+        }
+        return familyMap;
     }
 }

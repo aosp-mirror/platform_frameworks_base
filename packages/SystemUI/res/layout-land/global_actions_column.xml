@@ -22,7 +22,7 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:clipToPadding="false"
-    android:theme="@style/qs_theme"
+    android:theme="@style/Theme.SystemUI.QuickSettings"
     android:gravity="center_horizontal | top"
     android:clipChildren="false"
 >

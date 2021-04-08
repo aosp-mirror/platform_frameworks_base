@@ -61,6 +61,7 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.ServiceState;
@@ -163,6 +164,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private PowerManager mPowerManager;
     @Mock
     private TelephonyListenerManager mTelephonyListenerManager;
     @Mock
@@ -518,6 +521,46 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testFingerprintCancelAodInterrupt_onAuthenticationFailed() {
+        // GIVEN on keyguard and listening for fingerprint authentication
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        ArgumentCaptor<FingerprintManager.AuthenticationCallback> fingerprintCallbackCaptor =
+                ArgumentCaptor.forClass(FingerprintManager.AuthenticationCallback.class);
+        verify(mFingerprintManager).authenticate(any(), any(), fingerprintCallbackCaptor.capture(),
+                any(), anyInt(), anyInt());
+        FingerprintManager.AuthenticationCallback authCallback =
+                fingerprintCallbackCaptor.getValue();
+
+        // WHEN authentication fails
+        authCallback.onAuthenticationFailed();
+
+        // THEN aod interrupt is cancelled
+        verify(mAuthController).onCancelAodInterrupt();
+    }
+
+    @Test
+    public void testFingerprintCancelAodInterrupt_onAuthenticationError() {
+        // GIVEN on keyguard and listening for fingerprint authentication
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        ArgumentCaptor<FingerprintManager.AuthenticationCallback> fingerprintCallbackCaptor =
+                ArgumentCaptor.forClass(FingerprintManager.AuthenticationCallback.class);
+        verify(mFingerprintManager).authenticate(any(), any(), fingerprintCallbackCaptor.capture(),
+                any(), anyInt(), anyInt());
+        FingerprintManager.AuthenticationCallback authCallback =
+                fingerprintCallbackCaptor.getValue();
+
+        // WHEN authentication errors
+        authCallback.onAuthenticationError(0, "");
+
+        // THEN aod interrupt is cancelled
+        verify(mAuthController).onCancelAodInterrupt();
+    }
+
+    @Test
     public void skipsAuthentication_whenStatusBarShadeLocked() {
         mStatusBarStateListener.onStateChanged(StatusBarState.SHADE_LOCKED);
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
@@ -838,6 +881,51 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldNotListenForUdfps_whenTrustEnabled() {
+        // GIVEN a "we should listen for udfps" state
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN trust is enabled (ie: via smartlock)
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
+    public void testShouldNotListenForUdfps_whenFaceAuthenticated() {
+        // GIVEN a "we should listen for udfps" state
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN face authenticated
+        mKeyguardUpdateMonitor.onFaceAuthenticated(
+                KeyguardUpdateMonitor.getCurrentUser(), false);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
+    public void testShouldNotListenForUdfps_whenInLockDown() {
+        // GIVEN a "we should listen for udfps" state
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN device in lock down
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
     public void testRequireUnlockForNfc_Broadcast() {
         KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
         mKeyguardUpdateMonitor.registerCallback(callback);
@@ -886,7 +974,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBroadcastDispatcher, mDumpManager,
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
-                    mAuthController, mTelephonyListenerManager, mFeatureFlags);
+                    mAuthController, mTelephonyListenerManager, mPowerManager, mFeatureFlags);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

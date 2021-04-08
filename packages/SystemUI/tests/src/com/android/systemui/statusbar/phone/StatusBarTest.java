@@ -132,6 +132,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -142,6 +143,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
@@ -263,6 +265,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
+    @Mock private OngoingCallController mOngoingCallController;
+    @Mock private TunerService mTunerService;
     @Mock private FeatureFlags mFeatureFlags;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -296,7 +300,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         when(mCommandQueue.asBinder()).thenReturn(new Binder());
 
-        mContext.setTheme(R.style.Theme_SystemUI_Light);
+        mContext.setTheme(R.style.Theme_SystemUI_LightWallpaper);
 
         when(mStackScroller.getController()).thenReturn(mStackScrollerController);
         when(mStackScrollerController.getView()).thenReturn(mStackScroller);
@@ -427,6 +431,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationIconAreaController,
                 mBrightnessSliderFactory,
                 mWiredChargingRippleController,
+                mOngoingCallController,
+                mTunerService,
                 mFeatureFlags);
 
         when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(

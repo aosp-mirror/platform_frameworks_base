@@ -25,6 +25,7 @@ import android.content.pm.DataLoaderParams;
 import android.content.pm.IPackageLoadingProgressCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -285,7 +286,7 @@ public final class IncrementalManager {
      * Unbinds the target dir and deletes the corresponding storage instance.
      * Deletes the package name and associated storage id from maps.
      */
-    public void onPackageRemoved(@NonNull File codeFile) {
+    public void rmPackageDir(@NonNull File codeFile) {
         try {
             final String codePath = codeFile.getAbsolutePath();
             final IncrementalStorage storage = openStorage(codePath);
@@ -294,11 +295,9 @@ public final class IncrementalManager {
             }
             mLoadingProgressCallbacks.cleanUpCallbacks(storage);
             unregisterHealthListener(codePath);
-
-            // Parent since we bind-mount a folder one level above.
-            mService.deleteBindMount(storage.getId(), codeFile.getParent());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            storage.unBind(codePath);
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to remove code path", e);
         }
     }
 

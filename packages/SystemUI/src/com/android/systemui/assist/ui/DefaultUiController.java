@@ -37,12 +37,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistLogger;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.assist.AssistantSessionEvent;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.navigationbar.NavigationBarController;
 
 import java.util.Locale;
 
@@ -113,7 +111,6 @@ public class DefaultUiController implements AssistManager.UiController {
             if (!mInvocationInProgress) {
                 attach();
                 mInvocationInProgress = true;
-                updateAssistHandleVisibility();
             }
             setProgressInternal(type, progress);
         }
@@ -136,7 +133,6 @@ public class DefaultUiController implements AssistManager.UiController {
         }
         mInvocationLightsView.hide();
         mInvocationInProgress = false;
-        updateAssistHandleVisibility();
     }
 
     protected void logInvocationProgressMetrics(
@@ -171,17 +167,6 @@ public class DefaultUiController implements AssistManager.UiController {
             MetricsLogger.action(new LogMaker(MetricsEvent.ASSISTANT)
                     .setType(MetricsEvent.TYPE_DISMISS)
                     .setSubtype(DISMISS_REASON_INVOCATION_CANCELLED));
-        }
-    }
-
-    private void updateAssistHandleVisibility() {
-        NavigationBarController navigationBarController =
-                Dependency.get(NavigationBarController.class);
-        AssistHandleViewController controller =
-                navigationBarController == null
-                        ? null : navigationBarController.getAssistHandlerViewController();
-        if (controller != null) {
-            controller.setAssistHintBlocked(mInvocationInProgress);
         }
     }
 

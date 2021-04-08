@@ -183,6 +183,22 @@ public class NotificationHistoryManager {
         }
     }
 
+    public void deleteNotificationChannel(String pkg, int uid, String channelId) {
+        synchronized (mLock) {
+            int userId = UserHandle.getUserId(uid);
+            final NotificationHistoryDatabase userHistory =
+                    getUserHistoryAndInitializeIfNeededLocked(userId);
+            // TODO: it shouldn't be possible to delete a notification entry while the user is
+            // locked but we should handle it
+            if (userHistory == null) {
+                Slog.w(TAG, "Attempted to remove channel for locked/gone/disabled user "
+                        + userId);
+                return;
+            }
+            userHistory.deleteNotificationChannel(pkg, channelId);
+        }
+    }
+
     public void triggerWriteToDisk() {
         synchronized (mLock) {
             final int userCount = mUserState.size();

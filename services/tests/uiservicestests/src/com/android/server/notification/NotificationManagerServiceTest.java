@@ -56,6 +56,9 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 
@@ -90,6 +93,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
@@ -124,6 +128,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
+import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
@@ -183,11 +188,14 @@ import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.After;
 import org.junit.Before;
@@ -300,6 +308,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NotificationHistoryManager mHistoryManager;
     @Mock
     StatsManager mStatsManager;
+    @Mock
+    AlarmManager mAlarmManager;
     @Mock
     MultiRateLimiter mToastRateLimiter;
     BroadcastReceiver mPackageIntentReceiver;
@@ -422,6 +432,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.addService(DeviceIdleInternal.class, deviceIdleInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmi);
+        mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
@@ -896,6 +907,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(3, notifsAfter.length);
 
         return nrSummary;
+    }
+
+    @Test
+    public void testLimitTimeOutBroadcast() {
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setTimeoutAfter(1);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, channel);
+
+        mService.scheduleTimeoutLocked(r);
+        ArgumentCaptor<PendingIntent> captor = ArgumentCaptor.forClass(PendingIntent.class);
+        verify(mAlarmManager).setExactAndAllowWhileIdle(anyInt(), anyLong(), captor.capture());
+        assertEquals(PackageManagerService.PLATFORM_PACKAGE_NAME,
+                captor.getValue().getIntent().getPackage());
     }
 
     @Test
@@ -3284,7 +3315,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification.Builder nb = new Notification.Builder(mContext,
                 mTestNotificationChannel.getId())
                 .setContentTitle("foo")
-                .setColorized(true)
+                .setColorized(true).setColor(Color.WHITE)
                 .setFlag(Notification.FLAG_CAN_COLORIZE, true)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
@@ -4704,6 +4735,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testUserRejectsBubblesForPackage() throws Exception {
         mBinderService.setBubblesAllowed(PKG, mUid, BUBBLE_PREFERENCE_NONE);
         assertFalse(mBinderService.areBubblesAllowed(PKG));
+    }
+
+    @Test
+    public void testAreBubblesEnabled() throws Exception {
+        assertTrue(mBinderService.areBubblesEnabled(UserHandle.getUserHandleForUid(mUid)));
+    }
+
+    @Test
+    public void testAreBubblesEnabled_false() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.NOTIFICATION_BUBBLES, 0);
+        mService.mPreferencesHelper.updateBubblesEnabled();
+        assertFalse(mBinderService.areBubblesEnabled(UserHandle.getUserHandleForUid(mUid)));
+    }
+
+    @Test
+    public void testAreBubblesEnabled_exception() throws Exception {
+        try {
+            assertTrue(mBinderService.areBubblesEnabled(
+                    UserHandle.getUserHandleForUid(mUid + UserHandle.PER_USER_RANGE)));
+            fail("Cannot call cross user without permission");
+        } catch (SecurityException e) {
+            // pass
+        }
+        // cross user, with permission, no problem
+        enableInteractAcrossUsers();
+        assertTrue(mBinderService.areBubblesEnabled(
+                UserHandle.getUserHandleForUid(mUid + UserHandle.PER_USER_RANGE)));
     }
 
     @Test
@@ -7556,5 +7615,107 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(), r.getSbn().getId(),
                     r.getSbn().getTag(), r,false);
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_migrationAllAllowed() throws Exception {
+        int uid = 9000;
+        int[] userIds = new int[] {UserHandle.getUserId(mUid), 1000};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples", "bananas", "cherries");
+        for (int userId : userIds) {
+            for (String pkg : disallowedApps) {
+                when(mPackageManager.getPackageUid(pkg, 0, userId)).thenReturn(uid++);
+            }
+        }
+
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(
+                new NotificationListenerFilter());
+
+        mBinderService.migrateNotificationFilter(null,
+                FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ONGOING,
+                captor.getValue().getTypes());
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 9000)));
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("cherries", 9002)));
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 9003)));
+
+        // hypothetical other user untouched
+        assertTrue(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 10000)));
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_noPreexistingFilter() throws Exception {
+        int[] userIds = new int[] {UserHandle.getUserId(mUid)};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples");
+        when(mPackageManager.getPackageUid("apples", 0, UserHandle.getUserId(mUid)))
+                .thenReturn(1001);
+
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(null);
+
+        mBinderService.migrateNotificationFilter(null, FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        assertEquals(FLAG_FILTER_TYPE_ONGOING, captor.getValue().getTypes());
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 1001)));
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_existingTypeFilter() throws Exception {
+        int[] userIds = new int[] {UserHandle.getUserId(mUid)};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples");
+        when(mPackageManager.getPackageUid("apples", 0, UserHandle.getUserId(mUid)))
+                .thenReturn(1001);
+
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(
+                new NotificationListenerFilter(FLAG_FILTER_TYPE_CONVERSATIONS, new ArraySet<>()));
+
+        mBinderService.migrateNotificationFilter(null, FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        // type isn't saved but pkg list is
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, captor.getValue().getTypes());
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 1001)));
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_existingPkgFilter() throws Exception {
+        int[] userIds = new int[] {UserHandle.getUserId(mUid)};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples");
+        when(mPackageManager.getPackageUid("apples", 0, UserHandle.getUserId(mUid)))
+                .thenReturn(1001);
+
+        NotificationListenerFilter preexisting = new NotificationListenerFilter();
+        preexisting.addPackage(new VersionedPackage("test", 1002));
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(preexisting);
+
+        mBinderService.migrateNotificationFilter(null, FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        // type is saved but pkg list isn't
+        assertEquals(FLAG_FILTER_TYPE_ONGOING, captor.getValue().getTypes());
+        assertTrue(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 1001)));
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("test", 1002)));
     }
 }

@@ -94,11 +94,14 @@ public class PipSurfaceTransactionHelper {
     public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
             Rect sourceBounds, Rect destinationBounds, float degrees) {
         mTmpSourceRectF.set(sourceBounds);
+        // We want the matrix to position the surface relative to the screen coordinates so offset
+        // the source to 0,0
+        mTmpSourceRectF.offsetTo(0, 0);
         mTmpDestinationRectF.set(destinationBounds);
         mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
-        mTmpTransform.postRotate(degrees);
-        tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
-                .setPosition(leash, mTmpDestinationRectF.left, mTmpDestinationRectF.top);
+        mTmpTransform.postRotate(degrees,
+                mTmpDestinationRectF.centerX(), mTmpDestinationRectF.centerY());
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9);
         return this;
     }
 

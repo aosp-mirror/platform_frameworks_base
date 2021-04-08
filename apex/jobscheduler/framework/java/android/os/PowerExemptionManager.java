@@ -183,6 +183,10 @@ public class PowerExemptionManager {
     public static final int REASON_APPOP = 66;
     /** @hide */
     public static final int REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD = 67;
+    /** @hide */
+    public static final int REASON_OP_ACTIVATE_VPN = 68;
+    /** @hide */
+    public static final int REASON_OP_ACTIVATE_PLATFORM_VPN = 69;
 
     /* BG-FGS-launch is allowed by temp-allow-list or system-allow-list.
        Reason code for temp and system allow list starts here.
@@ -344,6 +348,8 @@ public class PowerExemptionManager {
             REASON_ALLOWLISTED_PACKAGE,
             REASON_APPOP,
             REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD,
+            REASON_OP_ACTIVATE_VPN,
+            REASON_OP_ACTIVATE_PLATFORM_VPN,
             // temp and system allow list reasons.
             REASON_GEOFENCING,
             REASON_PUSH_MESSAGING,
@@ -603,6 +609,10 @@ public class PowerExemptionManager {
                 return "APPOP";
             case REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD:
                 return "ACTIVITY_VISIBILITY_GRACE_PERIOD";
+            case REASON_OP_ACTIVATE_VPN:
+                return "OP_ACTIVATE_VPN";
+            case REASON_OP_ACTIVATE_PLATFORM_VPN:
+                return "OP_ACTIVATE_PLATFORM_VPN";
             case REASON_GEOFENCING:
                 return "GEOFENCING";
             case REASON_PUSH_MESSAGING:

@@ -199,8 +199,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(mShortcutInfo.getLabel()).thenReturn("Convo name");
         List<ShortcutInfo> shortcuts = Arrays.asList(mShortcutInfo);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcuts);
-        when(mIconFactory.getConversationDrawable(
-                any(ShortcutInfo.class), anyString(), anyInt(), anyBoolean()))
+        when(mIconFactory.getBaseIconDrawable(any(ShortcutInfo.class)))
                 .thenReturn(mIconDrawable);
 
         mNotificationChannel = new NotificationChannel(

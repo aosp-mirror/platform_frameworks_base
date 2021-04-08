@@ -1,0 +1,78 @@
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/top_level"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:clipToOutline="true">
+    <TextView
+        android:id="@+id/select_conversation_title"
+        android:gravity="center"
+        android:text="@string/select_conversation_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="24sp"
+        android:layout_alignParentTop="true" />
+
+    <TextView
+        android:id="@+id/select_conversation"
+        android:gravity="center"
+        android:text="@string/no_conversations_text"
+        android:layout_width="match_parent"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="24dp"
+        android:layout_marginTop="26dp"
+        android:layout_below="@id/select_conversation_title"/>
+
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:id="@+id/okay_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/rounded_bg_full_large_radius"
+        android:onClick="dismissActivity"
+        android:text="@string/okay"
+        android:layout_marginBottom="60dp"
+        android:layout_alignParentBottom="true" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/okay_button"
+        android:layout_below="@id/select_conversation"
+        android:layout_centerInParent="true"
+        android:clipToOutline="true">
+        <LinearLayout
+            android:id="@+id/widget_initial_layout"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:background="@drawable/rounded_bg_full_large_radius"
+            android:layout_above="@id/okay_button">
+            <include layout="@layout/people_space_placeholder_layout" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

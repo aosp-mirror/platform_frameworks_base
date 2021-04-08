@@ -649,7 +649,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         if (mFooter != null) {
             int footerMargin = 0;
             int indicatorMargin = 0;
-            if (mUsingHorizontalLayout) {
+            if (mUsingHorizontalLayout && !mSideLabels) {
                 footerMargin = mFooterMarginStartHorizontal;
                 indicatorMargin = footerMargin - mVisualMarginEnd;
             }
@@ -677,15 +677,19 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     public Pair<Integer, Integer> getVisualSideMargins() {
-        return new Pair(mVisualMarginStart, mUsingHorizontalLayout ? 0 : mVisualMarginEnd);
+        if (mSideLabels) {
+            return new Pair(0, 0);
+        } else {
+            return new Pair(mVisualMarginStart, mUsingHorizontalLayout ? 0 : mVisualMarginEnd);
+        }
     }
 
     private void updateTileLayoutMargins() {
         int marginEnd = mVisualMarginEnd;
-        if (mUsingHorizontalLayout) {
+        if (mUsingHorizontalLayout || mSideLabels) {
             marginEnd = 0;
         }
-        updateMargins((View) mTileLayout, mVisualMarginStart, marginEnd);
+        updateMargins((View) mTileLayout, mSideLabels ? 0 : mVisualMarginStart, marginEnd);
     }
 
     private void updateDividerMargin() {

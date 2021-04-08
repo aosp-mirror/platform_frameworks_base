@@ -1300,8 +1300,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     if (callbacks == null) return;
                     callbacks.broadcast(c -> {
                         try {
-                            int targetDisplayId =
+                            Integer targetDisplayId =
                                     callbackDisplayIds.get(c.asBinder());
+                            if (targetDisplayId == null) return;
                             if (targetDisplayId == displayId) c.onColorsChanged(area, colors);
                         } catch (RemoteException e) {
                             e.printStackTrace();
@@ -2389,13 +2390,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private IWallpaperEngine getEngine(int which, int userId, int displayId) {
         WallpaperData wallpaperData = findWallpaperAtDisplay(userId, displayId);
         if (wallpaperData == null) return null;
+        WallpaperConnection connection = wallpaperData.connection;
+        if (connection == null) return null;
         IWallpaperEngine engine = null;
         synchronized (mLock) {
-            for (int i = 0; i < wallpaperData.connection.mDisplayConnector.size(); i++) {
-                int id = wallpaperData.connection.mDisplayConnector.get(i).mDisplayId;
-                int currentWhich = wallpaperData.connection.mDisplayConnector.get(i).mDisplayId;
+            for (int i = 0; i < connection.mDisplayConnector.size(); i++) {
+                int id = connection.mDisplayConnector.get(i).mDisplayId;
+                int currentWhich = connection.mDisplayConnector.get(i).mDisplayId;
                 if (id != displayId && currentWhich != which) continue;
-                engine = wallpaperData.connection.mDisplayConnector.get(i).mEngine;
+                engine = connection.mDisplayConnector.get(i).mEngine;
                 break;
             }
         }

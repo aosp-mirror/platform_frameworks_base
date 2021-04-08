@@ -1684,7 +1684,6 @@ final public class MediaCodec {
     private MediaCodecInfo mCodecInfo;
     private final Object mCodecInfoLock = new Object();
     private MediaCrypto mCrypto;
-    private String mPlaybackId;
 
     private static final int EVENT_CALLBACK = 1;
     private static final int EVENT_SET_CALLBACK = 2;
@@ -4499,14 +4498,25 @@ final public class MediaCodec {
 
         int i = 0;
         for (final String key: params.keySet()) {
-            keys[i] = key;
-            Object value = params.get(key);
-
-            // Bundle's byte array is a byte[], JNI layer only takes ByteBuffer
-            if (value instanceof byte[]) {
-                values[i] = ByteBuffer.wrap((byte[])value);
+            if (key.equals(MediaFormat.KEY_AUDIO_SESSION_ID)) {
+                int sessionId = 0;
+                try {
+                    sessionId = (Integer)params.get(key);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Wrong Session ID Parameter!");
+                }
+                keys[i] = "audio-hw-sync";
+                values[i] = AudioSystem.getAudioHwSyncForSession(sessionId);
             } else {
-                values[i] = value;
+                keys[i] = key;
+                Object value = params.get(key);
+
+                // Bundle's byte array is a byte[], JNI layer only takes ByteBuffer
+                if (value instanceof byte[]) {
+                    values[i] = ByteBuffer.wrap((byte[])value);
+                } else {
+                    values[i] = value;
+                }
             }
             ++i;
         }

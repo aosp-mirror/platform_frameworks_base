@@ -106,6 +106,7 @@ public final class AppHibernationService extends SystemService {
     private final HibernationStateDiskStore<GlobalLevelState> mGlobalLevelHibernationDiskStore;
     private final Injector mInjector;
     private final Executor mBackgroundExecutor;
+    private final boolean mOatArtifactDeletionEnabled;
 
     @VisibleForTesting
     boolean mIsServiceEnabled;
@@ -133,6 +134,7 @@ public final class AppHibernationService extends SystemService {
         mUserManager = injector.getUserManager();
         mGlobalLevelHibernationDiskStore = injector.getGlobalLevelDiskStore();
         mBackgroundExecutor = injector.getBackgroundExecutor();
+        mOatArtifactDeletionEnabled = injector.isOatArtifactDeletionEnabled();
         mInjector = injector;
 
         final Context userAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
@@ -362,6 +364,7 @@ public final class AppHibernationService extends SystemService {
             UserLevelState pkgState) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
         pkgState.hibernated = false;
+        pkgState.lastUnhibernatedMs = System.currentTimeMillis();
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
@@ -371,7 +374,9 @@ public final class AppHibernationService extends SystemService {
     @GuardedBy("mLock")
     private void hibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackageGlobally");
-        mPackageManagerInternal.deleteOatArtifactsOfPackage(packageName);
+        if (mOatArtifactDeletionEnabled) {
+            mPackageManagerInternal.deleteOatArtifactsOfPackage(packageName);
+        }
         state.hibernated = true;
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
@@ -383,6 +388,7 @@ public final class AppHibernationService extends SystemService {
     private void unhibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackageGlobally");
         state.hibernated = false;
+        state.lastUnhibernatedMs = System.currentTimeMillis();
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
@@ -744,6 +750,8 @@ public final class AppHibernationService extends SystemService {
         HibernationStateDiskStore<GlobalLevelState> getGlobalLevelDiskStore();
 
         HibernationStateDiskStore<UserLevelState> getUserLevelDiskStore(int userId);
+
+        boolean isOatArtifactDeletionEnabled();
     }
 
     private static final class InjectorImpl implements Injector {
@@ -800,6 +808,12 @@ public final class AppHibernationService extends SystemService {
             File dir = new File(Environment.getDataSystemCeDirectory(userId), HIBERNATION_DIR_NAME);
             return new HibernationStateDiskStore<>(
                     dir, mUserLevelHibernationProto, mScheduledExecutorService);
+        }
+
+        @Override
+        public boolean isOatArtifactDeletionEnabled() {
+            return mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_hibernationDeletesOatArtifactsEnabled);
         }
     }
 }

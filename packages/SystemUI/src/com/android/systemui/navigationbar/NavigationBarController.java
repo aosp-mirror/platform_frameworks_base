@@ -45,7 +45,6 @@ import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
-import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
@@ -397,13 +396,6 @@ public class NavigationBarController implements Callbacks,
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
         return mNavigationBars.get(DEFAULT_DISPLAY);
-    }
-
-    /** @return {@link AssistHandleViewController} (only on the default display). */
-    @Nullable
-    public AssistHandleViewController getAssistHandlerViewController() {
-        NavigationBar navBar = getDefaultNavigationBar();
-        return navBar == null ? null : navBar.getAssistHandlerViewController();
     }
 
     @Override

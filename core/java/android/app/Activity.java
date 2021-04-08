@@ -5254,32 +5254,17 @@ public class Activity extends ContextThemeWrapper
             return;
         }
 
-        List<String> filteredPermissions = null;
-
         if (!getAttributionSource().getRenouncedPermissions().isEmpty()) {
             final int permissionCount = permissions.length;
             for (int i = 0; i < permissionCount; i++) {
                 if (getAttributionSource().getRenouncedPermissions().contains(permissions[i])) {
-                    if (filteredPermissions == null) {
-                        filteredPermissions = new ArrayList<>(i);
-                        for (int j = 0; j < i; j++) {
-                            filteredPermissions.add(permissions[i]);
-                        }
-                    }
-                } else if (filteredPermissions != null) {
-                    filteredPermissions.add(permissions[i]);
+                    throw new IllegalArgumentException("Cannot request renounced permission: "
+                            + permissions[i]);
                 }
             }
         }
 
-        final Intent intent;
-        if (filteredPermissions == null) {
-            intent = getPackageManager().buildRequestPermissionsIntent(permissions);
-        } else {
-            intent = getPackageManager().buildRequestPermissionsIntent(
-                    filteredPermissions.toArray(new String[0]));
-        }
-
+        final Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
         startActivityForResult(REQUEST_PERMISSIONS_WHO_PREFIX, intent, requestCode, null);
         mHasCurrentPermissionsRequest = true;
     }

@@ -320,6 +320,7 @@ public class StackScrollAlgorithm {
         }
         int childHeight = getMaxAllowedChildHeight(child);
         childViewState.yTranslation = currentYPosition;
+        childViewState.alpha = 1f - ambientState.getHideAmount();
 
         boolean isFooterView = child instanceof FooterView;
         boolean isEmptyShadeView = child instanceof EmptyShadeView;

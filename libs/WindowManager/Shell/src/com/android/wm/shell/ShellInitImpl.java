@@ -19,6 +19,7 @@ package com.android.wm.shell;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 
 import com.android.wm.shell.apppairs.AppPairsController;
+import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -40,6 +41,7 @@ public class ShellInitImpl {
     private final DisplayImeController mDisplayImeController;
     private final DragAndDropController mDragAndDropController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
+    private final Optional<BubbleController> mBubblesOptional;
     private final Optional<LegacySplitScreenController> mLegacySplitScreenOptional;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<AppPairsController> mAppPairsOptional;
@@ -54,6 +56,7 @@ public class ShellInitImpl {
     public ShellInitImpl(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
+            Optional<BubbleController> bubblesOptional,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
@@ -65,6 +68,7 @@ public class ShellInitImpl {
         mDisplayImeController = displayImeController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
+        mBubblesOptional = bubblesOptional;
         mLegacySplitScreenOptional = legacySplitScreenOptional;
         mSplitScreenOptional = splitScreenOptional;
         mAppPairsOptional = appPairsOptional;
@@ -91,6 +95,7 @@ public class ShellInitImpl {
 
         mAppPairsOptional.ifPresent(AppPairsController::onOrganizerRegistered);
         mSplitScreenOptional.ifPresent(SplitScreenController::onOrganizerRegistered);
+        mBubblesOptional.ifPresent(BubbleController::initialize);
 
         // Bind the splitscreen impl to the drag drop controller
         mDragAndDropController.initialize(mSplitScreenOptional);

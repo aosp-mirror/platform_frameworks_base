@@ -103,6 +103,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.art.ArtManagerLocal;
 import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.AuthService;
@@ -441,16 +442,21 @@ public final class SystemServer implements Dumpable {
 
     private final SystemServerDumper mDumper = new SystemServerDumper();
 
-
     /**
      * The pending WTF to be logged into dropbox.
      */
     private static LinkedList<Pair<String, ApplicationErrorReport.CrashInfo>> sPendingWtfs;
 
-    /**
-     * Start the sensor service. This is a blocking call and can take time.
-     */
+    /** Start the IStats services. This is a blocking call and can take time. */
+    private static native void startIStatsService();
+
+    /** Start the sensor service. This is a blocking call and can take time. */
     private static native void startSensorService();
+
+    /**
+     * Start the memtrack proxy service.
+     */
+    private static native void startMemtrackProxyService();
 
     /**
      * Start all HIDL services that are run inside the system server. This may take some time.
@@ -1021,6 +1027,16 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartPowerStatsService");
         // Tracks rail data to be used for power statistics.
         mSystemServiceManager.startService(PowerStatsService.class);
+        t.traceEnd();
+
+        t.traceBegin("StartIStatsService");
+        startIStatsService();
+        t.traceEnd();
+
+        // Start MemtrackProxyService before ActivityManager, so that early calls
+        // to Memtrack::getMemory() don't fail.
+        t.traceBegin("MemtrackProxyService");
+        startMemtrackProxyService();
         t.traceEnd();
 
         // Activity manager runs the show.
@@ -2610,6 +2626,10 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(GAME_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
+        t.traceBegin("ArtManagerLocal");
+        LocalManagerRegistry.addManager(ArtManagerLocal.class, new ArtManagerLocal());
+        t.traceEnd();
+
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");
         mSystemServiceManager.startBootPhase(t, SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
         t.traceEnd();
@@ -2662,7 +2682,7 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("RegisterAppOpsPolicy");
             try {
-                mActivityManagerService.setAppOpsPolicy(new AppOpsPolicy());
+                mActivityManagerService.setAppOpsPolicy(new AppOpsPolicy(mSystemContext));
             } catch (Throwable e) {
                 reportWtf("registering app ops policy", e);
             }

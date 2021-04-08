@@ -59,15 +59,18 @@ enum class AssistantInvocationEvent(private val id: Int) : UiEventLogger.UiEvent
     ASSISTANT_INVOCATION_START_TOUCH_GESTURE(531),
 
     @UiEvent(doc = "Assistant invocation started by physical gesture")
-    ASSISTANT_INVOCATION_START_PHYSICAL_GESTURE(532);
+    ASSISTANT_INVOCATION_START_PHYSICAL_GESTURE(532),
+
+    @UiEvent(doc = "Assistant invoked by long press on the physical power button")
+    ASSISTANT_INVOCATION_POWER_LONG_PRESS(758);
 
     override fun getId(): Int {
         return id
     }
 
     companion object {
-        fun eventFromLegacyInvocationType(legacyInvocationType: Int, isInvocationComplete: Boolean)
-                : AssistantInvocationEvent {
+        fun eventFromLegacyInvocationType(legacyInvocationType: Int, isInvocationComplete: Boolean):
+                AssistantInvocationEvent {
             return if (isInvocationComplete) {
                 when (legacyInvocationType) {
                     AssistManager.INVOCATION_TYPE_GESTURE ->
@@ -82,8 +85,11 @@ enum class AssistantInvocationEvent(private val id: Int) : UiEventLogger.UiEvent
                     AssistManager.INVOCATION_TYPE_QUICK_SEARCH_BAR ->
                         ASSISTANT_INVOCATION_QUICK_SEARCH_BAR
 
-                    AssistManager.INVOCATION_HOME_BUTTON_LONG_PRESS ->
+                    AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS ->
                         ASSISTANT_INVOCATION_HOME_LONG_PRESS
+
+                    AssistManager.INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS ->
+                        ASSISTANT_INVOCATION_POWER_LONG_PRESS
 
                     else ->
                         ASSISTANT_INVOCATION_UNKNOWN

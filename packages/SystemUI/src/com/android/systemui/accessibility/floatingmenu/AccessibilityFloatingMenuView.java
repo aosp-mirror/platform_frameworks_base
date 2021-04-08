@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -39,6 +40,8 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 
@@ -284,6 +287,58 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         // Do Nothing
     }
 
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        setupAccessibilityActions(info);
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (super.performAccessibilityAction(action, arguments)) {
+            return true;
+        }
+
+        fadeIn();
+
+        final Rect bounds = getAvailableBounds();
+        if (action == R.id.action_move_top_left) {
+            setShapeType(ShapeType.OVAL);
+            snapToLocation(bounds.left, bounds.top);
+            return true;
+        }
+
+        if (action == R.id.action_move_top_right) {
+            setShapeType(ShapeType.OVAL);
+            snapToLocation(bounds.right, bounds.top);
+            return true;
+        }
+
+        if (action == R.id.action_move_bottom_left) {
+            setShapeType(ShapeType.OVAL);
+            snapToLocation(bounds.left, bounds.bottom);
+            return true;
+        }
+
+        if (action == R.id.action_move_bottom_right) {
+            setShapeType(ShapeType.OVAL);
+            snapToLocation(bounds.right, bounds.bottom);
+            return true;
+        }
+
+        if (action == R.id.action_move_to_edge_and_hide) {
+            setShapeType(ShapeType.HALF_OVAL);
+            return true;
+        }
+
+        if (action == R.id.action_move_out_edge_and_show) {
+            setShapeType(ShapeType.OVAL);
+            return true;
+        }
+
+        return false;
+    }
+
     void show() {
         if (isShowing()) {
             return;
@@ -378,6 +433,43 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         }
 
         mUiHandler.postDelayed(() -> mFadeOutAnimator.start(), FADE_EFFECT_DURATION_MS);
+    }
+
+    private void setupAccessibilityActions(AccessibilityNodeInfo info) {
+        final Resources res = mContext.getResources();
+        final AccessibilityAction moveTopLeft =
+                new AccessibilityAction(R.id.action_move_top_left,
+                        res.getString(
+                                R.string.accessibility_floating_button_action_move_top_left));
+        info.addAction(moveTopLeft);
+
+        final AccessibilityAction moveTopRight =
+                new AccessibilityAction(R.id.action_move_top_right,
+                        res.getString(
+                                R.string.accessibility_floating_button_action_move_top_right));
+        info.addAction(moveTopRight);
+
+        final AccessibilityAction moveBottomLeft =
+                new AccessibilityAction(R.id.action_move_bottom_left,
+                        res.getString(
+                                R.string.accessibility_floating_button_action_move_bottom_left));
+        info.addAction(moveBottomLeft);
+
+        final AccessibilityAction moveBottomRight =
+                new AccessibilityAction(R.id.action_move_bottom_right,
+                        res.getString(
+                                R.string.accessibility_floating_button_action_move_bottom_right));
+        info.addAction(moveBottomRight);
+
+        final int moveEdgeId = mShapeType == ShapeType.OVAL
+                ? R.id.action_move_to_edge_and_hide
+                : R.id.action_move_out_edge_and_show;
+        final int moveEdgeTextResId = mShapeType == ShapeType.OVAL
+                ? R.string.accessibility_floating_button_action_move_to_edge_and_hide_to_half
+                : R.string.accessibility_floating_button_action_move_out_edge_and_show;
+        final AccessibilityAction moveToOrOutEdge =
+                new AccessibilityAction(moveEdgeId, res.getString(moveEdgeTextResId));
+        info.addAction(moveToOrOutEdge);
     }
 
     private boolean onTouched(MotionEvent event) {
@@ -524,7 +616,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         updateLocationWith(mAlignment, mPercentageY);
     }
 
-    private void snapToLocation(int endX, int endY) {
+    @VisibleForTesting
+    void snapToLocation(int endX, int endY) {
         mDragAnimator.cancel();
         mDragAnimator.removeAllUpdateListeners();
         mDragAnimator.addUpdateListener(anim -> onDragAnimationUpdate(anim, endX, endY));
@@ -660,6 +753,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         return itemCount > 1
                 ? R.dimen.accessibility_floating_menu_large_multiple_radius
                 : R.dimen.accessibility_floating_menu_large_single_radius;
+    }
+
+    @VisibleForTesting
+    Rect getAvailableBounds() {
+        return new Rect(0, 0, mScreenWidth - getWindowWidth(), mScreenHeight - getWindowHeight());
     }
 
     private int getLayoutWidth() {

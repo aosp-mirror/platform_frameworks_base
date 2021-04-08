@@ -65,12 +65,10 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     }
 
     @Override
-    public void onRemoved(@Nullable BiometricAuthenticator.Identifier identifier, int remaining) {
+    public void onRemoved(@NonNull BiometricAuthenticator.Identifier identifier, int remaining) {
         Slog.d(TAG, "onRemoved: " + identifier.getBiometricId() + " remaining: " + remaining);
-        if (identifier != null) {
-            mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
-                    identifier.getBiometricId());
-        }
+        mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
+                identifier.getBiometricId());
 
         try {
             if (getListener() != null) {

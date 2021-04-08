@@ -18,6 +18,7 @@ package com.android.internal.inputmethod;
 
 import android.annotation.AnyThread;
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.IBinder;
@@ -27,6 +28,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
+
+import java.util.Objects;
 
 /**
  * A utility class to take care of boilerplate code around IPCs.
@@ -47,7 +50,7 @@ public final class InputMethodPrivilegedOperations {
          * @param privOps Binder interface to be set
          */
         @AnyThread
-        public synchronized void set(IInputMethodPrivilegedOperations privOps) {
+        public synchronized void set(@NonNull IInputMethodPrivilegedOperations privOps) {
             if (mPrivOps != null) {
                 throw new IllegalStateException(
                         "IInputMethodPrivilegedOperations must be set at most once."
@@ -90,13 +93,13 @@ public final class InputMethodPrivilegedOperations {
      * @param privOps Binder interface to be set
      */
     @AnyThread
-    public void set(IInputMethodPrivilegedOperations privOps) {
+    public void set(@NonNull IInputMethodPrivilegedOperations privOps) {
+        Objects.requireNonNull(privOps, "privOps must not be null");
         mOps.set(privOps);
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatus(int, int,
-     * IVoidResultCallback)}.
+     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatusAsync(int, int}.
      *
      * @param vis visibility flags
      * @param backDisposition disposition flags
@@ -107,15 +110,13 @@ public final class InputMethodPrivilegedOperations {
      * @see android.inputmethodservice.InputMethodService#BACK_DISPOSITION_ADJUST_NOTHING
      */
     @AnyThread
-    public void setImeWindowStatus(int vis, int backDisposition) {
+    public void setImeWindowStatusAsync(int vis, int backDisposition) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            final Completable.Void value = Completable.createVoid();
-            ops.setImeWindowStatus(vis, backDisposition, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            ops.setImeWindowStatusAsync(vis, backDisposition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

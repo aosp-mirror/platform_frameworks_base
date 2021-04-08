@@ -21,15 +21,12 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.AppGlobals;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
-import android.os.RemoteException;
-import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.util.ArraySet;
 
@@ -93,6 +90,8 @@ import java.util.Set;
 // TODO: Codegen applies method level annotations to argument vs the generated member (@SystemApi)
 // TODO: Codegen doesn't properly read/write IBinder members
 // TODO: Codegen doesn't properly handle Set arguments
+// TODO: Codegen requires @SystemApi annotations on fields which breaks
+//      android.signature.cts.api.AnnotationTest (need to update the test)
 // @DataClass(genEqualsHashCode = true, genConstructor = false, genBuilder = true)
 public final class AttributionSource implements Parcelable {
     /**
@@ -153,8 +152,6 @@ public final class AttributionSource implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
     @DataClass.ParcelWith(RenouncedPermissionsParcelling.class)
     private @Nullable Set<String> mRenouncedPermissions = null;
 
@@ -176,6 +173,15 @@ public final class AttributionSource implements Parcelable {
             @Nullable String attributionTag, @Nullable AttributionSource next) {
         this(uid, packageName, attributionTag, /*token*/ null,
                 /*renouncedPermissions*/ null, next);
+    }
+
+    /** @hide */
+    @TestApi
+    public AttributionSource(int uid, @Nullable String packageName,
+            @Nullable String attributionTag, @Nullable Set<String> renouncedPermissions,
+            @Nullable AttributionSource next) {
+        this(uid, packageName, attributionTag, /*token*/ null,
+                renouncedPermissions, next);
     }
 
     /** @hide */
@@ -507,7 +513,7 @@ public final class AttributionSource implements Parcelable {
         private @Nullable String mPackageName;
         private @Nullable String mAttributionTag;
         private @Nullable IBinder mToken;
-        private @SystemApi @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) @Nullable Set<String> mRenouncedPermissions;
+        private @Nullable Set<String> mRenouncedPermissions;
         private @Nullable AttributionSource mNext;
 
         private long mBuilderFieldsSet = 0L;
@@ -526,7 +532,7 @@ public final class AttributionSource implements Parcelable {
         /**
          * The package that is accessing the permission protected data.
          */
-        public @NonNull Builder setPackageName(@NonNull String value) {
+        public @NonNull Builder setPackageName(@Nullable String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2;
             mPackageName = value;
@@ -536,7 +542,7 @@ public final class AttributionSource implements Parcelable {
         /**
          * The attribution tag of the app accessing the permission protected data.
          */
-        public @NonNull Builder setAttributionTag(@NonNull String value) {
+        public @NonNull Builder setAttributionTag(@Nullable String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4;
             mAttributionTag = value;
@@ -550,7 +556,7 @@ public final class AttributionSource implements Parcelable {
          */
         @SystemApi
         @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS)
-        public @NonNull Builder setRenouncedPermissions(@NonNull Set<String> value) {
+        public @NonNull Builder setRenouncedPermissions(@Nullable Set<String> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x10;
             mRenouncedPermissions = value;
@@ -560,7 +566,7 @@ public final class AttributionSource implements Parcelable {
         /**
          * The next app to receive the permission protected data.
          */
-        public @NonNull Builder setNext(@NonNull AttributionSource value) {
+        public @NonNull Builder setNext(@Nullable AttributionSource value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x20;
             mNext = value;

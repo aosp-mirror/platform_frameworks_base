@@ -77,6 +77,8 @@ import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -123,10 +125,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected DeviceProvisionedListener mUserCallback;
     protected Instrumentation mInstrumentation;
     protected DemoModeController mDemoModeController;
+    protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     protected int mSubId;
 
     private NetworkCapabilities mNetCapabilities;
+    private Network mNetwork;
     private ConnectivityManager.NetworkCallback mDefaultCallbackInWifiTracker;
     private ConnectivityManager.NetworkCallback mDefaultCallbackInNetworkController;
     private ConnectivityManager.NetworkCallback mNetworkCallback;
@@ -171,8 +175,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockCm = mock(ConnectivityManager.class);
         mMockBd = mock(BroadcastDispatcher.class);
         mMockNsm = mock(NetworkScoreManager.class);
+        mNetwork = mock(Network.class);
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mNetCapabilities = new NetworkCapabilities();
+        when(mNetwork.getNetId()).thenReturn(0);
         when(mMockTm.isDataCapable()).thenReturn(true);
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
         doAnswer(invocation -> {
@@ -222,6 +228,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mMockSm,
                 mConfig,
                 TestableLooper.get(this).getLooper(),
+                mFakeExecutor,
                 mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class),
@@ -291,7 +298,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         NetworkControllerImpl networkControllerNoMobile =
                 new NetworkControllerImpl(mContext, mMockCm, mMockTm, mTelephonyListenerManager,
                         mMockWm, mMockNsm, mMockSm,
-                        mConfig, TestableLooper.get(this).getLooper(), mCallbackHandler,
+                        mConfig, TestableLooper.get(this).getLooper(), mFakeExecutor,
+                        mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
                         mock(DeviceProvisionedController.class), mMockBd, mDemoModeController);
@@ -318,7 +326,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mNetCapabilities.setTransportInfo(info);
         setConnectivityCommon(networkType, validated, isConnected);
         mDefaultCallbackInNetworkController.onCapabilitiesChanged(
-                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                mNetwork, new NetworkCapabilities(mNetCapabilities));
     }
 
     public void setConnectivityViaCallbackInNetworkController(
@@ -328,7 +336,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         }
         setConnectivityCommon(networkType, validated, isConnected);
         mDefaultCallbackInNetworkController.onCapabilitiesChanged(
-                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                mNetwork, new NetworkCapabilities(mNetCapabilities));
     }
 
     public void setConnectivityViaCallbackInWifiTracker(
@@ -339,12 +347,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setConnectivityCommon(networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
             if (isConnected) {
-                mNetworkCallback.onAvailable(mock(Network.class),
+                mNetworkCallback.onAvailable(mNetwork,
                         new NetworkCapabilities(mNetCapabilities), new LinkProperties(), false);
                 mNetworkCallback.onCapabilitiesChanged(
-                        mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                        mNetwork, new NetworkCapabilities(mNetCapabilities));
             } else {
-                mNetworkCallback.onLost(mock(Network.class));
+                mNetworkCallback.onLost(mNetwork);
             }
         }
     }
@@ -355,14 +363,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setConnectivityCommon(networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_CELLULAR) {
             if (isConnected) {
-                mNetworkCallback.onAvailable(mock(Network.class),
+                mNetworkCallback.onAvailable(mNetwork,
                         new NetworkCapabilities(mNetCapabilities), new LinkProperties(), false);
                 mNetworkCallback.onCapabilitiesChanged(
-                        mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                        mNetwork, new NetworkCapabilities(mNetCapabilities));
                 mDefaultCallbackInWifiTracker.onCapabilitiesChanged(
-                        mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                        mNetwork, new NetworkCapabilities(mNetCapabilities));
             } else {
-                mNetworkCallback.onLost(mock(Network.class));
+                mNetworkCallback.onLost(mNetwork);
             }
         }
     }
@@ -374,7 +382,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         }
         setConnectivityCommon(networkType, validated, isConnected);
         mDefaultCallbackInWifiTracker.onCapabilitiesChanged(
-                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                mNetwork, new NetworkCapabilities(mNetCapabilities));
     }
 
     private void setConnectivityCommon(

@@ -54,6 +54,13 @@
     <color name="global_actions_emergency_background">@color/GM2_red_400</color>
     <color name="global_actions_emergency_text">@color/GM2_grey_100</color>
 
+    <!-- Colors for Power Menu Lite -->
+    <color name="global_actions_lite_background">#191C18</color>
+    <color name="global_actions_lite_button_background">#303030</color>
+    <color name="global_actions_lite_text">#F0F0F0</color>
+    <color name="global_actions_lite_emergency_background">#F85D4D</color>
+    <color name="global_actions_lite_emergency_icon">@color/GM2_grey_900</color>
+
     <color name="global_actions_shutdown_ui_text">@color/control_primary_text</color>
 
     <!-- Tint color for the content on the notification overflow card. -->
@@ -72,7 +79,7 @@
          (e.g. cannot be switched to) -->
     <color name="kg_user_switcher_restricted_avatar_icon_color">@color/GM2_grey_600</color>
     <!-- Color of background circle of user avatars in keyguard user switcher -->
-    <color name="kg_user_switcher_avatar_background">@color/GM2_grey_300</color>
+    <color name="kg_user_switcher_avatar_background">?android:attr/colorBackgroundFloating</color>
 
     <!-- Icon color for user avatars in user switcher quick settings -->
     <color name="qs_user_switcher_avatar_icon_color">#3C4043</color>
@@ -177,7 +184,7 @@
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_dim_color">#80000000</color>              <!-- 50% black -->
     <color name="biometric_dialog_gray">#ff757575</color>
-    <color name="biometric_dialog_accent">#ff008577</color>                 <!-- dark teal -->
+    <color name="biometric_dialog_accent">@android:color/system_accent1_600</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
 
     <!-- UDFPS colors -->
@@ -243,6 +250,10 @@
     <color name="magnification_border_color">#FF9900</color>
     <color name="magnification_switch_button_color">#7F000000</color>
 
+    <!-- Volume dialog colors -->
+    <color name="volume_dialog_background_color">@android:color/transparent</color>
+    <color name="volume_dialog_background_color_above_blur">@android:color/transparent</color>
+
     <!-- media -->
     <color name="media_disabled">#80ffffff</color>
     <color name="media_seamless_border">?android:attr/colorAccent</color>
@@ -277,4 +288,9 @@
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#CCFFFFFF</color> <!-- 80% -->
     <color name="accessibility_floating_menu_stroke_dark">#26FFFFFF</color> <!-- 15% -->
+
+    <!-- Wallet screen -->
+    <color name="wallet_white">#FFFFFF</color>
+    <color name="wallet_card_border">#33FFFFFF</color>
+    <color name="wallet_primary_text">@color/GM2_grey_900</color>
 </resources>

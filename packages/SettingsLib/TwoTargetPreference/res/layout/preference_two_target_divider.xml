@@ -22,10 +22,12 @@
     android:layout_height="match_parent"
     android:gravity="start|center_vertical"
     android:orientation="horizontal"
+    android:duplicateParentState="true"
     android:paddingTop="16dp"
     android:paddingBottom="16dp">
     <View
         android:layout_width="1dp"
         android:layout_height="match_parent"
+        android:duplicateParentState="true"
         android:background="?android:attr/listDivider" />
 </LinearLayout>

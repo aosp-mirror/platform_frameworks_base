@@ -316,7 +316,7 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="Theme.SystemUI" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+    <style name="Theme.SystemUI" parent="@*android:style/Theme.DeviceDefault.SystemUI">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
@@ -335,7 +335,7 @@
         <item name="*android:isLightTheme">false</item>
     </style>
 
-    <style name="Theme.SystemUI.Light">
+    <style name="Theme.SystemUI.LightWallpaper">
         <item name="wallpaperTextColor">@*android:color/primary_text_material_light</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
         <item name="wallpaperTextColorAccent">@*android:color/system_accent2_600</item>
@@ -375,16 +375,17 @@
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+    <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
     </style>
 
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
-    <style name="volume_dialog_theme" parent="qs_theme"/>
+    <style name="volume_dialog_theme" parent="Theme.SystemUI"/>
 
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
 
@@ -393,6 +394,13 @@
     <style name="Theme.SystemUI.Dialog.GlobalActions" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog.GlobalActionsLite" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
     <style name="Theme.SystemUI.Dialog.MediaOutput">
@@ -445,7 +453,7 @@
         <item name="singleToneColor">@color/dark_mode_qs_icon_color_single_tone</item>
     </style>
 
-    <style name="QSHeaderTheme" parent="@style/Theme.SystemUI">
+    <style name="Theme.SystemUI.QuickSettings.Header">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
         <item name="darkIconTheme">@style/QSHeaderDarkTheme</item>
     </style>
@@ -580,7 +588,7 @@
         <item name="android:elevation">10dp</item>
     </style>
 
-    <style name="edit_theme" parent="qs_theme">
+    <style name="Theme.SystemUI.QuickSettings.Edit">
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>
 
@@ -615,6 +623,8 @@
     <!-- Screenshots -->
     <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
     <!-- Privacy dialog -->
@@ -665,6 +675,11 @@
     <style name="Theme.CreateUser" parent="@style/Theme.SystemUI">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">#33000000</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.PeopleTileConfigActivity" parent="@style/Theme.SystemUI">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
@@ -779,5 +794,19 @@
         <item name="android:max">10000</item>
         <item name="android:mirrorForRtl">false</item>
         <item name="android:progressDrawable">@drawable/udfps_progress_bar</item>
+    </style>
+
+    <!-- Wallet styles -->
+    <style name="Wallet" />
+
+    <style name="Wallet.TextAppearance">
+      <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+      <item name="android:textColor">@color/wallet_primary_text</item>
+      <item name="android:singleLine">true</item>
+      <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Wallet.Theme">
+      <item name="android:colorControlHighlight">@*android:color/primary_text_material_dark</item>
     </style>
 </resources>

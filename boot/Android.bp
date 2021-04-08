@@ -23,7 +23,24 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-boot_image {
-    name: "framework-boot-image",
-    image_name: "boot",
+// This module provides access to information Soong has related to the
+// whole platform bootclasspath. Currently, that information is provided solely
+// through configuration but additional information will be added here.
+//
+// This will provide support for the following:
+// * Hidden API processing for those parts of the bootclasspath that are not
+//   part of an APEX.
+// * Compatibility checking to ensure that the hidden API bits encoded into the
+//   dex files by the modularized hidden API processing is compatible with the
+//   runtimes of earlier releases which expect the bits to have been computed
+//   over the entirety of the bootclasspath in one go not separately.
+// * Dexpreopting apps and other libraries not on the platform bootclasspath.
+// * Generating and installing the appropriate files to the device which will
+//   allow it to generate the bootclasspath related environment variables
+//   dynamically.
+//
+// This module needs to be present in the build for the above processing to be
+// done correctly.
+platform_bootclasspath {
+    name: "platform-bootclasspath",
 }

@@ -16,7 +16,7 @@
 
 package com.android.frameworks.core.batterystatsloadtests;
 
-import android.util.Log;
+import android.os.BatteryConsumer;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,14 +59,15 @@ public class WiFiLoadTest {
             }
         }
 
-        mPowerMetricsCollector.dumpMetrics();
+        mPowerMetricsCollector.reportMetrics();
 
-        Log.i(TAG, "==");
-        Log.i(TAG, "WiFi running time: " + (long) mPowerMetricsCollector.getMetric(
-                PowerMetrics.METRIC_WIFI_RUNNING_TIME).value);
-        Log.i(TAG, "Total bytes read over WiFi: " + totalBytesRead);
+        mPowerMetricsCollector.report(
+                "WiFi running time: " + (long) mPowerMetricsCollector.getTimeMetric(
+                        BatteryConsumer.POWER_COMPONENT_WIFI).value);
 
-        mPowerMetricsCollector.dumpMetricAsPercentageOfDrainedPower(
-                PowerMetrics.METRIC_WIFI_POWER);
+        mPowerMetricsCollector.report("Total bytes read over WiFi: " + totalBytesRead);
+
+        mPowerMetricsCollector.reportMetricAsPercentageOfDrainedPower(
+                        BatteryConsumer.POWER_COMPONENT_WIFI);
     }
 }

@@ -353,7 +353,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             boolean userPresenceRequired,
             byte[] attestationChallenge,
             boolean devicePropertiesAttestationIncluded,
-            int[] attestationIds,
+            @NonNull int[] attestationIds,
             boolean uniqueIdIncluded,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
@@ -446,13 +446,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     @UnsupportedAppUsage
     @Deprecated
     public int getUid() {
-        if (!AndroidKeyStoreProvider.isKeystore2Enabled()) {
-            // If Keystore2 has not been enabled we have to behave as if mNamespace is actually
-            // a UID, because we are still being used with the old Keystore SPI.
-            // TODO This if statement and body can be removed when the Keystore 2 migration is
-            //      complete. b/171563717
-            return mNamespace;
-        }
         try {
             return KeyProperties.namespaceToLegacyUid(mNamespace);
         } catch (IllegalArgumentException e) {
@@ -786,9 +779,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      * @return integer array representing the requested device IDs to attest.
      */
     @SystemApi
-    @Nullable
-    public int[] getAttestationIds() {
-        return Utils.cloneIfNotNull(mAttestationIds);
+    public @NonNull int[] getAttestationIds() {
+        return mAttestationIds.clone();
     }
 
     /**
@@ -918,7 +910,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private boolean mUserPresenceRequired = false;
         private byte[] mAttestationChallenge = null;
         private boolean mDevicePropertiesAttestationIncluded = false;
-        private int[] mAttestationIds = null;
+        private int[] mAttestationIds = new int[0];
         private boolean mUniqueIdIncluded = false;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
@@ -1021,14 +1013,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         @NonNull
         @Deprecated
         public Builder setUid(int uid) {
-            if (!AndroidKeyStoreProvider.isKeystore2Enabled()) {
-                // If Keystore2 has not been enabled we have to behave as if mNamespace is actually
-                // a UID, because we are still being used with the old Keystore SPI.
-                // TODO This if statement and body can be removed when the Keystore 2 migration is
-                //      complete. b/171563717
-                mNamespace = uid;
-                return this;
-            }
             mNamespace = KeyProperties.legacyUidToNamespace(uid);
             return this;
         }
@@ -1666,9 +1650,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * Set whether this key is critical to the device encryption flow
          *
          * This is a special flag only available to system servers to indicate the current key
-         * is part of the device encryption flow.
+         * is part of the device encryption flow. Setting this flag causes the key to not
+         * be cryptographically bound to the LSKF even if the key is otherwise authentication
+         * bound.
          *
-         * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
          * @hide
          */
         public Builder setCriticalToDeviceEncryption(boolean critical) {

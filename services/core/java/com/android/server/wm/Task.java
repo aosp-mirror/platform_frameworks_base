@@ -6060,12 +6060,10 @@ class Task extends WindowContainer<WindowContainer> {
                 int idx = mChildren.size() - 1;
                 while (idx >= 0) {
                     final Task child = (Task) getChildAt(idx--);
-                    if (!child.isFocusableAndVisible()) {
-                        break;
+                    if (!child.isTopActivityFocusable()) {
+                        continue;
                     }
-
-                    // Only allow one activity to be resumed among sibling tasks in split-screen.
-                    if (inSplitScreenWindowingMode() && someActivityResumed) {
+                    if (child.getVisibility(null /* starting */) != TASK_VISIBILITY_VISIBLE) {
                         break;
                     }
 
@@ -6527,7 +6525,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void startActivityLocked(ActivityRecord r, @Nullable ActivityRecord focusedTopActivity,
-            boolean newTask, boolean keepCurTransition, ActivityOptions options) {
+            boolean newTask, boolean keepCurTransition, ActivityOptions options,
+            boolean samePackage) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
         final boolean isOrhasTask = rTask == this || hasChild(rTask);
@@ -6649,7 +6648,7 @@ class Task extends WindowContainer<WindowContainer> {
                 final int splashScreenThemeResId = options != null
                         ? options.getSplashScreenThemeResId() : 0;
                 r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity),
-                        splashScreenThemeResId);
+                        splashScreenThemeResId, samePackage);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,

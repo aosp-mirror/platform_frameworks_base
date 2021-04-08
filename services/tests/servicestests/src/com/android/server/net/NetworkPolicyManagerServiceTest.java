@@ -18,6 +18,12 @@ package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.NETWORK_STACK;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
+import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
@@ -29,16 +35,17 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_FOREGROUND;
+import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_SYSTEM;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_FOREGROUND;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
-import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
-import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
-import static android.net.NetworkPolicyManager.RULE_NONE;
-import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
-import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
-import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
+import static android.net.NetworkPolicyManager.allowedReasonsToString;
+import static android.net.NetworkPolicyManager.blockedReasonsToString;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
@@ -49,7 +56,6 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
-import static android.os.Process.SYSTEM_UID;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEFAULT;
@@ -66,6 +72,7 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
+import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -144,6 +151,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
 import android.util.RecurrenceRule;
+import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
@@ -1844,68 +1852,6 @@ public class NetworkPolicyManagerServiceTest {
         reset(mStatsService);
     }
 
-    /**
-     * Exhaustively test checkUidNetworkingBlocked to output the expected results based on external
-     * conditions.
-     */
-    @Test
-    public void testCheckUidNetworkingBlocked() {
-        final ArrayList<Pair<Boolean, Integer>> expectedBlockedStates = new ArrayList<>();
-
-        // Metered network. Data saver on.
-        expectedBlockedStates.add(new Pair<>(true, RULE_NONE));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_METERED));
-        expectedBlockedStates.add(new Pair<>(true, RULE_ALLOW_ALL));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
-        verifyNetworkBlockedState(
-                true /* metered */, true /* backgroundRestricted */, expectedBlockedStates);
-        expectedBlockedStates.clear();
-
-        // Metered network. Data saver off.
-        expectedBlockedStates.add(new Pair<>(false, RULE_NONE));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_ALL));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
-        verifyNetworkBlockedState(
-                true /* metered */, false /* backgroundRestricted */, expectedBlockedStates);
-        expectedBlockedStates.clear();
-
-        // Non-metered network. Data saver on.
-        expectedBlockedStates.add(new Pair<>(false, RULE_NONE));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_REJECT_METERED));
-        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_ALL));
-        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
-        verifyNetworkBlockedState(
-                false /* metered */, true /* backgroundRestricted */, expectedBlockedStates);
-
-        // Non-metered network. Data saver off. The result is the same as previous case since
-        // the network is blocked only for RULE_REJECT_ALL regardless of data saver.
-        verifyNetworkBlockedState(
-                false /* metered */, false /* backgroundRestricted */, expectedBlockedStates);
-        expectedBlockedStates.clear();
-    }
-
-    private void verifyNetworkBlockedState(boolean metered, boolean backgroundRestricted,
-            ArrayList<Pair<Boolean, Integer>> expectedBlockedStateForRules) {
-
-        for (Pair<Boolean, Integer> pair : expectedBlockedStateForRules) {
-            final boolean expectedResult = pair.first;
-            final int rule = pair.second;
-            assertEquals(formatBlockedStateError(UID_A, rule, metered, backgroundRestricted),
-                    expectedResult, mService.checkUidNetworkingBlocked(UID_A, rule,
-                            metered, backgroundRestricted));
-            assertFalse(formatBlockedStateError(SYSTEM_UID, rule, metered, backgroundRestricted),
-                    mService.checkUidNetworkingBlocked(SYSTEM_UID, rule, metered,
-                            backgroundRestricted));
-        }
-    }
-
     private void enableRestrictedMode(boolean enable) throws Exception {
         mService.mRestrictedNetworkingMode = enable;
         mService.updateRestrictedModeAllowlistUL();
@@ -1964,6 +1910,65 @@ public class NetworkPolicyManagerServiceTest {
         verify(mNetworkManager).setFirewallUidRule(FIREWALL_CHAIN_RESTRICTED, UID_E,
                 FIREWALL_RULE_ALLOW);
         assertFalse(mService.isUidNetworkingBlocked(UID_E, false));
+    }
+
+    @Test
+    public void testUpdateEffectiveBlockedReasons() {
+        final SparseArray<Pair<Integer, Integer>> effectiveBlockedReasons = new SparseArray<>();
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_NONE, ALLOWED_REASON_NONE));
+
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER, ALLOWED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_REASON_DOZE,
+                        ALLOWED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER,
+                        ALLOWED_METERED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER
+                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                        ALLOWED_METERED_REASON_SYSTEM));
+
+        effectiveBlockedReasons.put(BLOCKED_METERED_REASON_DATA_SAVER,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_METERED_REASON_DATA_SAVER,
+                        ALLOWED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(BLOCKED_REASON_APP_STANDBY,
+                Pair.create(BLOCKED_REASON_APP_STANDBY | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                        ALLOWED_METERED_REASON_SYSTEM));
+
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER, ALLOWED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_REASON_DOZE,
+                        ALLOWED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER, ALLOWED_METERED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER
+                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                        ALLOWED_METERED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_METERED_REASON_DATA_SAVER,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_METERED_REASON_DATA_SAVER,
+                        ALLOWED_REASON_FOREGROUND));
+        effectiveBlockedReasons.put(BLOCKED_REASON_BATTERY_SAVER,
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER
+                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                        ALLOWED_METERED_REASON_FOREGROUND));
+        // TODO: test more combinations of blocked reasons.
+
+        for (int i = 0; i < effectiveBlockedReasons.size(); ++i) {
+            final int expectedEffectiveBlockedReasons = effectiveBlockedReasons.keyAt(i);
+            final int blockedReasons = effectiveBlockedReasons.valueAt(i).first;
+            final int allowedReasons = effectiveBlockedReasons.valueAt(i).second;
+            final String errorMsg = "Expected="
+                    + blockedReasonsToString(expectedEffectiveBlockedReasons)
+                    + "; blockedReasons=" + blockedReasonsToString(blockedReasons)
+                    + ", allowedReasons=" + allowedReasonsToString(allowedReasons);
+            assertEquals(errorMsg, expectedEffectiveBlockedReasons,
+                    getEffectiveBlockedReasons(blockedReasons, allowedReasons));
+        }
     }
 
     private String formatBlockedStateError(int uid, int rule, boolean metered,

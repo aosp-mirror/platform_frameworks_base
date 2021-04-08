@@ -38,6 +38,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.globalactions.GlobalActionsDialogLite;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
@@ -91,6 +93,8 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     private MultiUserSwitch mMultiUserSwitch;
     @Mock
     private View mPowerMenuLiteView;
+    @Mock
+    private GlobalActionsDialogLite mGlobalActionsDialog;
 
     private QSFooterViewController mController;
 
@@ -118,7 +122,7 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         mController = new QSFooterViewController(mView, mUserManager, mUserInfoController,
                 mActivityStarter, mDeviceProvisionedController, mUserTracker, mQSPanelController,
                 new QSDetailDisplayer(), mQuickQSPanelController, mFakeTunerService,
-                mMetricsLogger, false);
+                mMetricsLogger, new FalsingManagerFake(), false, mGlobalActionsDialog);
 
         mController.init();
     }

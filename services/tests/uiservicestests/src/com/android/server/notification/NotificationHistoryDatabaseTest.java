@@ -350,6 +350,52 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testRemoveChannelRunnable() throws Exception {
+        NotificationHistory nh = mock(NotificationHistory.class);
+        NotificationHistoryDatabase.RemoveChannelRunnable rcr =
+                mDataBase.new RemoveChannelRunnable("pkg", "channel");
+        rcr.setNotificationHistory(nh);
+
+        AtomicFile af = mock(AtomicFile.class);
+        when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
+        mDataBase.mHistoryFiles.addLast(af);
+
+        when(nh.removeChannelFromWrite("pkg", "channel")).thenReturn(true);
+
+        mDataBase.mBuffer = mock(NotificationHistory.class);
+
+        rcr.run();
+
+        verify(mDataBase.mBuffer).removeChannelFromWrite("pkg", "channel");
+        verify(af).openRead();
+        verify(nh).removeChannelFromWrite("pkg", "channel");
+        verify(af).startWrite();
+    }
+
+    @Test
+    public void testRemoveChannelRunnable_noChanges() throws Exception {
+        NotificationHistory nh = mock(NotificationHistory.class);
+        NotificationHistoryDatabase.RemoveChannelRunnable rcr =
+                mDataBase.new RemoveChannelRunnable("pkg", "channel");
+        rcr.setNotificationHistory(nh);
+
+        AtomicFile af = mock(AtomicFile.class);
+        when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
+        mDataBase.mHistoryFiles.addLast(af);
+
+        when(nh.removeChannelFromWrite("pkg", "channel")).thenReturn(false);
+
+        mDataBase.mBuffer = mock(NotificationHistory.class);
+
+        rcr.run();
+
+        verify(mDataBase.mBuffer).removeChannelFromWrite("pkg", "channel");
+        verify(af).openRead();
+        verify(nh).removeChannelFromWrite("pkg", "channel");
+        verify(af, never()).startWrite();
+    }
+
+    @Test
     public void testWriteBufferRunnable() throws Exception {
         NotificationHistory nh = mock(NotificationHistory.class);
         when(nh.getPooledStringsToWrite()).thenReturn(new String[]{});

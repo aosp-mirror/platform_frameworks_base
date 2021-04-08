@@ -1059,7 +1059,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
          *
          * @param face The face template that was removed.
          */
-        public void onRemovalSucceeded(Face face, int remaining) {
+        public void onRemovalSucceeded(@Nullable Face face, int remaining) {
         }
     }
 
@@ -1256,10 +1256,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
     private void sendRemovedResult(Face face, int remaining) {
         if (mRemovalCallback == null) {
-            return;
-        }
-        if (face == null) {
-            Slog.e(TAG, "Received MSG_REMOVED, but face is null");
             return;
         }
         mRemovalCallback.onRemovalSucceeded(face, remaining);

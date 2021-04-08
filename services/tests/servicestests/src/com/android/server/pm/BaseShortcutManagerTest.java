@@ -2041,11 +2041,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return mService.getPackageShortcutForTest(packageName, shortcutId, userId);
     }
 
-    protected void updatePackageShortcut(String packageName, String shortcutId, int userId,
-            Consumer<ShortcutInfo> cb) {
-        mService.updatePackageShortcutForTest(packageName, shortcutId, userId, cb);
-    }
-
     protected void assertShortcutExists(String packageName, String shortcutId, int userId) {
         assertTrue(getPackageShortcut(packageName, shortcutId, userId) != null);
     }
@@ -2241,10 +2236,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return getPackageShortcut(getCallingPackage(), shortcutId, getCallingUserId());
     }
 
-    protected void updateCallerShortcut(String shortcutId, Consumer<ShortcutInfo> cb) {
-        updatePackageShortcut(getCallingPackage(), shortcutId, getCallingUserId(), cb);
-    }
-
     protected List<ShortcutInfo> getLauncherShortcuts(String launcher, int userId, int queryFlags) {
         final List<ShortcutInfo>[] ret = new List[1];
         runWithCaller(launcher, userId, () -> {
@@ -2403,8 +2394,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         shutdownServices();
 
         deleteAllSavedFiles();
-
-        mMockAppSearchManager.removeShortcuts();
 
         initService();
         mService.applyRestore(payload, USER_0);

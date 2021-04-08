@@ -471,10 +471,9 @@ public final class Settings {
      * <p>
      * Output: Nothing.
      */
-    @SuppressLint("ActionValue")
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_OPEN_BY_DEFAULT_SETTINGS =
-            "com.android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
+            "android.settings.APP_OPEN_BY_DEFAULT_SETTINGS";
 
     /**
      * Activity Action: Show trusted credentials settings, opening to the user tab,
@@ -6745,9 +6744,8 @@ public final class Settings {
         /**
          * The current location time zone detection enabled state for the user.
          *
-         * See {@link
-         * android.app.timezonedetector.TimeZoneDetector#getCapabilities} for access. See {@link
-         * android.app.timezonedetector.TimeZoneDetector#updateConfiguration} to update.
+         * See {@link android.app.time.TimeManager#getTimeZoneCapabilitiesAndConfig} for access.
+         * See {@link android.app.time.TimeManager#updateTimeZoneConfiguration} to update.
          * @hide
          */
         public static final String LOCATION_TIME_ZONE_DETECTION_ENABLED =

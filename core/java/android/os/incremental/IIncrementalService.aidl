@@ -53,6 +53,11 @@ interface IIncrementalService {
                          in PerUidReadTimeouts[] perUidReadTimeouts);
 
     /**
+     * PM/system is done with this storage, ok to increase timeouts.
+     */
+    void onInstallationComplete(int storageId);
+
+    /**
      * Bind-mounts a path under a storage to a full path. Can be permanent or temporary.
      */
     const int BIND_TEMPORARY = 0;

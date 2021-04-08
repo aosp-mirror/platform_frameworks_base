@@ -823,9 +823,9 @@
     <string name="permgroupdesc_camera">take pictures and record video</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_nearby_devices">Nearby Bluetooth Devices</string>
+    <string name="permgrouplab_nearby_devices">Nearby devices</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permgroupdesc_nearby_devices">discover and connect to nearby Bluetooth devices</string>
+    <string name="permgroupdesc_nearby_devices">discover and connect to nearby devices</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calllog">Call logs</string>
@@ -1485,6 +1485,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
     <string name="permdesc_bluetooth_connect" product="default">Allows the app to connect to paired Bluetooth devices</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
+    <string name="permlab_uwb_ranging">determine relative position between nearby Ultra-Wideband devices</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <string name="permdesc_uwb_ranging">Allow the app to determine relative position between nearby Ultra-Wideband devices</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_preferredPaymentInfo">Preferred NFC Payment Service Information</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1576,7 +1581,7 @@
     <!-- Name for an app setting that lets the user authenticate for that app with their screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=30] -->
     <string name="screen_lock_app_setting_name">Use screen lock</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
-    <string name="screen_lock_dialog_default_subtitle">Enter your device credential to continue</string>
+    <string name="screen_lock_dialog_default_subtitle">Enter your screen lock to continue</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Partial fingerprint detected</string>
@@ -1746,7 +1751,7 @@
     <!-- Name for an app setting that lets the user authenticate for that app with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=70] -->
     <string name="face_or_screen_lock_app_setting_name">Use face or screen lock</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face. [CHAR LIMIT=70] -->
-    <string name="face_dialog_default_subtitle">Use face unlock to continue</string>
+    <string name="face_dialog_default_subtitle">Use your face to continue</string>
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=90] -->
     <string name="face_or_screen_lock_dialog_default_subtitle">Use your face or screen lock to continue</string>
 

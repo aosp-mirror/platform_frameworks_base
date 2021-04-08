@@ -58,19 +58,30 @@ framework_docs_only_libs = [
 stubs_defaults {
     name: "framework-doc-stubs-default",
     srcs: [
-        ":framework-mime-sources",
-        ":framework-non-updatable-sources",
-        ":framework-updatable-sources",
-        "core/java/**/*.logtags",
-        "test-base/src/**/*.java",
-        ":opt-telephony-srcs",
-        ":opt-net-voip-srcs",
+        ":framework-non-updatable-stub-sources",
+
+        // Module sources
         ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
+        ":framework-appsearch-sources",
+        ":framework-connectivity-sources",
+        ":framework-graphics-srcs",
+        ":framework-mediaprovider-sources",
+        ":framework-permission-sources",
+        ":framework-permission-s-sources",
+        ":framework-scheduling-sources",
+        ":framework-sdkextensions-sources",
+        ":framework-statsd-sources",
+        ":framework-tethering-srcs",
+        ":framework-wifi-updatable-sources",
         ":i18n.module.public.api{.public.stubs.source}",
+        ":ike-srcs",
+        ":updatable-media-srcs",
+
+        // No longer part of the stubs, but are included in the docs.
+        "test-base/src/**/*.java",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
-        "**/package.html",
     ],
     libs: framework_docs_only_libs,
     create_doc_stubs: true,

@@ -78,10 +78,18 @@ class PrimitiveMember : public ClassMember {
     ClassMember::Print(final, printer, strip_api_annotations);
 
     printer->Print("public static ");
-    if (final && !staged_api_) {
+    if (final) {
       printer->Print("final ");
     }
-    printer->Print("int ").Print(name_).Print("=").Print(to_string(val_)).Print(";");
+    printer->Print("int ").Print(name_);
+    if (staged_api_) {
+      // Prevent references to staged apis from being inline by setting their value out-of-line.
+      printer->Print("; static { ").Print(name_);
+    }
+    printer->Print("=").Print(to_string(val_)).Print(";");
+    if (staged_api_) {
+      printer->Print(" }");
+    }
   }
 
  private:

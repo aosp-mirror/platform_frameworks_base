@@ -725,7 +725,8 @@ public class EditorInfo implements InputType, Parcelable {
      * protocol.
      */
     @Nullable
-    public CharSequence getInitialTextBeforeCursor(int length, int flags) {
+    public CharSequence getInitialTextBeforeCursor(
+            @IntRange(from = 0) int length, @InputConnection.GetTextType int flags) {
         if (mInitialSurroundingText == null) {
             return null;
         }
@@ -750,7 +751,7 @@ public class EditorInfo implements InputType, Parcelable {
      * this protocol is not supported.
      */
     @Nullable
-    public CharSequence getInitialSelectedText(int flags) {
+    public CharSequence getInitialSelectedText(@InputConnection.GetTextType int flags) {
         if (mInitialSurroundingText == null) {
             return null;
         }
@@ -792,7 +793,8 @@ public class EditorInfo implements InputType, Parcelable {
      * protocol.
      */
     @Nullable
-    public CharSequence getInitialTextAfterCursor(int length, int flags) {
+    public CharSequence getInitialTextAfterCursor(
+            @IntRange(from = 0) int length, @InputConnection.GetTextType  int flags) {
         if (mInitialSurroundingText == null) {
             return null;
         }

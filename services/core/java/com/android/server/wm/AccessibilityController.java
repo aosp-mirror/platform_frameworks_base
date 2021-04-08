@@ -1903,6 +1903,14 @@ final class AccessibilityController {
                 StackTraceElement[] stackTrace) {
             mTracing.logState(where, callingParams, a11yDump, callingUid, stackTrace);
         }
+
+        @Override
+        public void logTrace(
+                String where, String callingParams, byte[] a11yDump, int callingUid,
+                StackTraceElement[] callStack, long timeStamp, int processId, long threadId) {
+            mTracing.logState(where, callingParams, a11yDump, callingUid, callStack, timeStamp,
+                    processId, threadId);
+        }
     }
 
     private static final class AccessibilityTracing {
@@ -1916,7 +1924,7 @@ final class AccessibilityController {
             }
         }
 
-        private static final int BUFFER_CAPACITY = 4096 * 1024;
+        private static final int BUFFER_CAPACITY = 1024 * 1024 * 12;
         private static final String TRACE_FILENAME = "/data/misc/a11ytrace/a11y_trace.pb";
         private static final String TRACE_DIRECTORY = "/data/misc/a11ytrace/";
         private static final String TAG = "AccessibilityTracing";
@@ -2034,7 +2042,22 @@ final class AccessibilityController {
                 return;
             }
 
-            log(where, callingParams, a11yDump, callingUid, stackTrace);
+            log(where, callingParams, a11yDump, callingUid, stackTrace,
+                    SystemClock.elapsedRealtimeNanos(),
+                    Process.myPid() + ":" + Application.getProcessName(),
+                    Thread.currentThread().getId() + ":" + Thread.currentThread().getName());
+        }
+
+        /**
+         * Write an accessibility trace log entry.
+         */
+        void logState(String where, String callingParams, byte[] a11yDump, int callingUid,
+                StackTraceElement[] callingStack, long timeStamp, int processId, long threadId) {
+            if (!mEnabled) {
+                return;
+            }
+            log(where, callingParams, a11yDump, callingUid, callingStack, timeStamp,
+                    String.valueOf(processId), String.valueOf(threadId));
         }
 
         private  String toStackTraceString(StackTraceElement[] stackTraceElements) {
@@ -2058,18 +2081,17 @@ final class AccessibilityController {
          * Write the current state to the buffer
          */
         private void log(String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] stackTrace) {
-            SimpleDateFormat fm = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+                StackTraceElement[] callingStack, long timeStamp, String processName,
+                String threadName) {
             SomeArgs args = SomeArgs.obtain();
-            args.arg1 = SystemClock.elapsedRealtimeNanos();
-            args.arg2 = fm.format(new Date()).toString();
-            args.arg3 = where;
-            args.arg4 = Process.myPid() + ":" + Application.getProcessName();
-            args.arg5 = Thread.currentThread().getId() + ":" + Thread.currentThread().getName();
-            args.arg6 = callingUid;
-            args.arg7 = callingParams;
-            args.arg8 = stackTrace;
-            args.arg9 = a11yDump;
+            args.arg1 = timeStamp;
+            args.arg2 = where;
+            args.arg3 = processName;
+            args.arg4 = threadName;
+            args.arg5 = callingUid;
+            args.arg6 = callingParams;
+            args.arg7 = callingStack;
+            args.arg8 = a11yDump;
             mHandler.obtainMessage(LogHandler.MESSAGE_LOG_TRACE_ENTRY, args).sendToTarget();
         }
 
@@ -2100,17 +2122,26 @@ final class AccessibilityController {
 
                             long tokenOuter = os.start(ENTRY);
                             String callingStack =
-                                    toStackTraceString((StackTraceElement[]) args.arg8);
+                                    toStackTraceString((StackTraceElement[]) args.arg7);
 
-                            os.write(ELAPSED_REALTIME_NANOS, (long) args.arg1);
-                            os.write(CALENDAR_TIME, (String) args.arg2);
-                            os.write(WHERE, (String) args.arg3);
-                            os.write(PROCESS_NAME, (String) args.arg4);
-                            os.write(THREAD_ID_NAME, (String) args.arg5);
-                            os.write(CALLING_PKG, pmInternal.getNameForUid((int) args.arg6));
-                            os.write(CALLING_PARAMS, (String) args.arg7);
+                            long reportedTimeStampNanos = (long) args.arg1;
+                            long currentElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
+                            long timeDiffNanos =
+                                    currentElapsedRealtimeNanos - reportedTimeStampNanos;
+                            long currentTimeMillis = (new Date()).getTime();
+                            long reportedTimeMillis =
+                                    currentTimeMillis - (long) (timeDiffNanos / 1000000);
+                            SimpleDateFormat fm = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+
+                            os.write(ELAPSED_REALTIME_NANOS, reportedTimeStampNanos);
+                            os.write(CALENDAR_TIME, fm.format(reportedTimeMillis).toString());
+                            os.write(WHERE, (String) args.arg2);
+                            os.write(PROCESS_NAME, (String) args.arg3);
+                            os.write(THREAD_ID_NAME, (String) args.arg4);
+                            os.write(CALLING_PKG, pmInternal.getNameForUid((int) args.arg5));
+                            os.write(CALLING_PARAMS, (String) args.arg6);
                             os.write(CALLING_STACKS, callingStack);
-                            os.write(ACCESSIBILITY_SERVICE, (byte[]) args.arg9);
+                            os.write(ACCESSIBILITY_SERVICE, (byte[]) args.arg8);
 
                             long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
                             synchronized (mService.mGlobalLock) {

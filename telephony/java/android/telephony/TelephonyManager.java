@@ -1907,14 +1907,14 @@ public class TelephonyManager {
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
      * <p>
-     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
+     * Requires Permission: READ_PHONE_STATE.
      *
      * @param slotIndex of which deviceID is returned
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @Nullable
     public String getDeviceSoftwareVersion(int slotIndex) {
         ITelephony telephony = getITelephony();
@@ -8968,6 +8968,9 @@ public class TelephonyManager {
      * call will return true. This access is granted by the owner of the UICC
      * card and does not depend on the registered carrier.
      *
+     * Note that this API applies to both physical and embedded subscriptions and
+     * is a superset of the checks done in SubscriptionManager#canManageSubscription.
+     *
      * @return true if the app has carrier privileges.
      */
     public boolean hasCarrierPrivileges() {
@@ -8980,6 +8983,9 @@ public class TelephonyManager {
      * If any of the packages in the calling UID has carrier privileges, the
      * call will return true. This access is granted by the owner of the UICC
      * card and does not depend on the registered carrier.
+     *
+     * Note that this API applies to both physical and embedded subscriptions and
+     * is a superset of the checks done in SubscriptionManager#canManageSubscription.
      *
      * @param subId The subscription to use.
      * @return true if the app has carrier privileges.

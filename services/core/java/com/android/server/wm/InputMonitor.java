@@ -404,8 +404,8 @@ final class InputMonitor {
         }
 
         if (!focus.mWinAnimator.hasSurface() || !focus.mInputWindowHandle.isFocusable()) {
-            Slog.v(TAG_WM, "Focus not requested for window=%" + focus
-                    + " because it has no surface or is not focusable.");
+            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Focus not requested for window=%s"
+                    + " because it has no surface or is not focusable.", focus);
             mInputFocus = null;
             return;
         }

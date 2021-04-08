@@ -59,6 +59,7 @@ import android.permission.PermissionManager;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.telecom.TelecomManager;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.view.IWindowManager;
 import android.view.ViewConfiguration;
@@ -324,6 +325,12 @@ public class FrameworkServicesModule {
     @Singleton
     static StatsManager provideStatsManager(Context context) {
         return context.getSystemService(StatsManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static SubscriptionManager provideSubcriptionManager(Context context) {
+        return context.getSystemService(SubscriptionManager.class);
     }
 
     @Provides

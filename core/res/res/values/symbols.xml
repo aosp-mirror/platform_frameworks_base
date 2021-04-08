@@ -480,6 +480,7 @@
   <java-symbol type="string" name="config_bandwidthEstimateSource" />
   <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
   <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
+  <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -1888,7 +1889,6 @@
   <java-symbol type="bool" name="config_notificationHeaderClickableForExpand" />
   <java-symbol type="bool" name="config_enableNightMode" />
   <java-symbol type="bool" name="config_tintNotificationActionButtons" />
-  <java-symbol type="bool" name="config_tintNotificationsWithTheme" />
   <java-symbol type="bool" name="config_dozeAfterScreenOffByDefault" />
   <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />
@@ -2180,10 +2180,8 @@
   <java-symbol type="bool" name="config_enableGnssTimeUpdateService" />
   <java-symbol type="bool" name="config_enableGeolocationTimeZoneDetection" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneProvider" />
-  <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneProvider" />
-  <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
 
   <java-symbol type="layout" name="resolver_list" />
@@ -2558,6 +2556,7 @@
   <java-symbol type="array" name="config_biometric_sensors" />
   <java-symbol type="bool" name="allow_test_udfps" />
   <java-symbol type="array" name="config_udfps_sensor_props" />
+  <java-symbol type="bool" name="config_is_powerbutton_fps" />
 
   <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />
@@ -2973,7 +2972,6 @@
   <java-symbol type="string" name="status_bar_clock" />
   <java-symbol type="string" name="status_bar_airplane" />
   <java-symbol type="string" name="status_bar_no_calling" />
-  <java-symbol type="string" name="status_bar_call_strength" />
   <java-symbol type="string" name="status_bar_mobile" />
   <java-symbol type="string" name="status_bar_ethernet" />
   <java-symbol type="string" name="status_bar_vpn" />
@@ -3570,7 +3568,7 @@
 
   <java-symbol type="bool" name="config_quickSettingsSupported" />
 
-  <java-symbol type="style" name="Theme.DeviceDefault.QuickSettings" />
+  <java-symbol type="style" name="Theme.DeviceDefault.SystemUI" />
 
   <java-symbol type="integer" name="default_data_warning_level_mb" />
   <java-symbol type="bool" name="config_useVideoPauseWorkaround" />
