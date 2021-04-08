@@ -1825,7 +1825,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isFalsingThresholdNeeded() {
-        return mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        return true;
     }
 
     /**

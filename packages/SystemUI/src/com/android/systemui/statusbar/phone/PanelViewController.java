@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
+import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
 
@@ -430,9 +431,9 @@ public abstract class PanelViewController {
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_UNLOCK, heightDp, velocityDp);
                 mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_UNLOCK);
             }
-            @Classifier.InteractionType int interactionType = vel > 0
-                    ? QUICK_SETTINGS : (
-                            mKeyguardStateController.canDismissLockScreen()
+            @Classifier.InteractionType int interactionType = vel == 0 ? GENERIC
+                    : vel > 0 ? QUICK_SETTINGS
+                            : (mKeyguardStateController.canDismissLockScreen()
                                     ? UNLOCK : BOUNCER_UNLOCK);
 
             fling(vel, expand, isFalseTouch(x, y, interactionType));
