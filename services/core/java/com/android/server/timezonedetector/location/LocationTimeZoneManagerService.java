@@ -77,15 +77,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * bound (ensuring no real location events will be received) and simulated events / behaviors
  * can be injected via the command line.
  *
- * <p>To enter simulation mode for a provider, use {@code adb shell cmd location_time_zone_manager
- * set_provider_mode_override &lt;provider name&gt; simulated} and restart the service with {@code
- * adb shell cmd location_time_zone_manager stop} and {@code adb shell cmd
- * location_time_zone_manager start}.
- *
- * <p>e.g. {@code adb shell cmd location_time_zone_manager set_provider_mode_override primary
- * simulated}.
- *
- * <p>See {@code adb shell cmd location_time_zone_manager help}" for more options.
+ * <p>See {@code adb shell cmd location_time_zone_manager help}" for details and more options.
  */
 public class LocationTimeZoneManagerService extends Binder {
 
