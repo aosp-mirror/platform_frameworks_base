@@ -223,7 +223,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
                 new Intent(ACTION_EVALUATE)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                         .putExtra(EXTRA_TIME, time),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         alarms.cancel(pendingIntent);
         if (time > now) {
             if (DEBUG) Slog.d(TAG, String.format("Scheduling evaluate for %s, in %s, now=%s",
