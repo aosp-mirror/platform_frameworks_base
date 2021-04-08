@@ -83,6 +83,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private final AccessibilityManager mAccessibilityManager;
     private final DisplayController mDisplayController;
     private final OneHandedSettingsUtil mOneHandedSettingsUtil;
+    private final OneHandedAccessibilityUtil mOneHandedAccessibilityUtil;
     private final OneHandedTimeoutHandler mTimeoutHandler;
     private final OneHandedTouchHandler mTouchHandler;
     private final OneHandedTutorialHandler mTutorialHandler;
@@ -193,6 +194,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             return null;
         }
 
+        OneHandedSettingsUtil settingsUtil = new OneHandedSettingsUtil();
+        OneHandedAccessibilityUtil accessibilityUtil = new OneHandedAccessibilityUtil(context);
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
                 windowManager, mainExecutor);
@@ -205,16 +208,16 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         OneHandedBackgroundPanelOrganizer oneHandedBackgroundPanelOrganizer =
                 new OneHandedBackgroundPanelOrganizer(context, displayLayout, mainExecutor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
-                context, displayLayout, animationController, tutorialHandler,
+                context, displayLayout, settingsUtil, animationController, tutorialHandler,
                 oneHandedBackgroundPanelOrganizer, mainExecutor);
-        OneHandedSettingsUtil settingsUtil = new OneHandedSettingsUtil();
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         return new OneHandedController(context, displayController,
                 oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
-                gestureHandler, settingsUtil, timeoutHandler, oneHandedUiEventsLogger,
-                overlayManager, taskStackListener, mainExecutor, mainHandler);
+                gestureHandler, settingsUtil, accessibilityUtil, timeoutHandler,
+                oneHandedUiEventsLogger, overlayManager, taskStackListener, mainExecutor,
+                mainHandler);
     }
 
     @VisibleForTesting
@@ -226,6 +229,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             OneHandedTutorialHandler tutorialHandler,
             OneHandedGestureHandler gestureHandler,
             OneHandedSettingsUtil settingsUtil,
+            OneHandedAccessibilityUtil oneHandedAccessibilityUtil,
             OneHandedTimeoutHandler timeoutHandler,
             OneHandedUiEventLogger uiEventsLogger,
             IOverlayManager overlayManager,
@@ -234,6 +238,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
             Handler mainHandler) {
         mContext = context;
         mOneHandedSettingsUtil = settingsUtil;
+        mOneHandedAccessibilityUtil = oneHandedAccessibilityUtil;
         mBackgroundPanelOrganizer = backgroundPanelOrganizer;
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mDisplayController = displayController;
@@ -334,6 +339,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         if (!mDisplayAreaOrganizer.isInOneHanded()) {
             final int yOffSet = Math.round(
                     mDisplayAreaOrganizer.getDisplayLayout().height() * mOffSetFraction);
+            mOneHandedAccessibilityUtil.announcementForScreenReader(
+                    mOneHandedAccessibilityUtil.getOneHandedStartDescription());
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
             mTimeoutHandler.resetTimer();
             mOneHandedUiEventLogger.writeEvent(
@@ -344,6 +351,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     @VisibleForTesting
     void stopOneHanded() {
         if (mDisplayAreaOrganizer.isInOneHanded()) {
+            mOneHandedAccessibilityUtil.announcementForScreenReader(
+                    mOneHandedAccessibilityUtil.getOneHandedStopDescription());
             mDisplayAreaOrganizer.scheduleOffset(0, 0);
             mTimeoutHandler.removeTimer();
             //  Log metrics for Gesture navigation mode.
@@ -354,6 +363,8 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     private void stopOneHanded(int uiEvent) {
         if (mDisplayAreaOrganizer.isInOneHanded()) {
+            mOneHandedAccessibilityUtil.announcementForScreenReader(
+                    mOneHandedAccessibilityUtil.getOneHandedStopDescription());
             mDisplayAreaOrganizer.scheduleOffset(0, 0);
             mTimeoutHandler.removeTimer();
             mOneHandedUiEventLogger.writeEvent(uiEvent);
@@ -629,6 +640,10 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
         if (mTutorialHandler != null) {
             mTutorialHandler.dump(pw);
+        }
+
+        if (mOneHandedAccessibilityUtil != null) {
+            mOneHandedAccessibilityUtil.dump(pw);
         }
 
         mOneHandedSettingsUtil.dump(pw, innerPrefix, mContext.getContentResolver(), mUserId);
