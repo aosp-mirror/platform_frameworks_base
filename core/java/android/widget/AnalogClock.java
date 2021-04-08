@@ -212,6 +212,9 @@ public class AnalogClock extends View {
         mDial = icon.loadDrawable(getContext());
         mDialWidth = mDial.getIntrinsicWidth();
         mDialHeight = mDial.getIntrinsicHeight();
+        if (mDialTintInfo.mHasTintList || mDialTintInfo.mHasTintBlendMode) {
+            mDial = mDialTintInfo.apply(mDial);
+        }
 
         mChanged = true;
         invalidate();
@@ -283,6 +286,9 @@ public class AnalogClock extends View {
     @RemotableViewMethod
     public void setHourHand(@NonNull Icon icon) {
         mHourHand = icon.loadDrawable(getContext());
+        if (mHourHandTintInfo.mHasTintList || mHourHandTintInfo.mHasTintBlendMode) {
+            mHourHand = mHourHandTintInfo.apply(mHourHand);
+        }
 
         mChanged = true;
         invalidate();
@@ -357,6 +363,9 @@ public class AnalogClock extends View {
     @RemotableViewMethod
     public void setMinuteHand(@NonNull Icon icon) {
         mMinuteHand = icon.loadDrawable(getContext());
+        if (mMinuteHandTintInfo.mHasTintList || mMinuteHandTintInfo.mHasTintBlendMode) {
+            mMinuteHand = mMinuteHandTintInfo.apply(mMinuteHand);
+        }
 
         mChanged = true;
         invalidate();
@@ -434,6 +443,9 @@ public class AnalogClock extends View {
     @RemotableViewMethod
     public void setSecondHand(@Nullable Icon icon) {
         mSecondHand = icon == null ? null : icon.loadDrawable(getContext());
+        if (mSecondHandTintInfo.mHasTintList || mSecondHandTintInfo.mHasTintBlendMode) {
+            mSecondHand = mSecondHandTintInfo.apply(mSecondHand);
+        }
         mSecondsTick.run();
 
         mChanged = true;
