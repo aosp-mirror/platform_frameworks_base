@@ -497,7 +497,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             return;
         }
         shiftNotificationsScrim(qsPanelBottomY);
-        updateNotificationsScrimAlpha(qsPanelBottomY);
+        updateNotificationsScrimAlpha(expansionFraction, qsPanelBottomY);
         if (mQsExpansion != expansionFraction) {
             mQsExpansion = expansionFraction;
             Log.d(TAG, "set qs fraction");
@@ -520,14 +520,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
     }
 
-    private void updateNotificationsScrimAlpha(int qsPanelBottomY) {
+    private void updateNotificationsScrimAlpha(float qsExpansion, int qsPanelBottomY) {
         float newAlpha = 0;
         if (qsPanelBottomY > 0) {
             float interpolator = 0;
             if (mState == ScrimState.UNLOCKED || mState == ScrimState.SHADE_LOCKED) {
                 interpolator = getInterpolatedFraction();
             } else {
-                interpolator = mQsExpansion;
+                interpolator = qsExpansion;
             }
             newAlpha = MathUtils.lerp(0, 1, interpolator);
         }
