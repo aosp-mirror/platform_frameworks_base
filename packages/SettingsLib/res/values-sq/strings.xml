@@ -243,7 +243,7 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Shkyçja e OEM-së"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Lejo shkyçjen e ngarkimit të sistemit"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Të lejohet shkyçja e OEM-së?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PARALAJMËRIM! Funksionet e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PARALAJMËRIM! Veçoritë e mbrojtjes së pajisjes nuk do të punojnë në këtë pajisje gjatë kohës që ky cilësim është i aktivizuar."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Zgjidh apl. që simulon vendndodhjen"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nuk është vendosur asnjë aplikacion që simulon vendndodhjen"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacioni për simulimin e vendndodhjes: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
