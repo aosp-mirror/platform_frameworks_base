@@ -71,6 +71,7 @@ public class CropView extends View {
     private int mImageWidth;
 
     private CropBoundary mCurrentDraggingBoundary = CropBoundary.NONE;
+    private int mActivePointerId;
     // The starting value of mCurrentDraggingBoundary's crop, used to compute touch deltas.
     private float mMovementStartValue;
     private float mStartingY;  // y coordinate of ACTION_DOWN
@@ -138,35 +139,60 @@ public class CropView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         int topPx = fractionToVerticalPixels(mCrop.top);
         int bottomPx = fractionToVerticalPixels(mCrop.bottom);
-        switch (event.getAction()) {
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mCurrentDraggingBoundary = nearestBoundary(event, topPx, bottomPx,
                         fractionToHorizontalPixels(mCrop.left),
                         fractionToHorizontalPixels(mCrop.right));
                 if (mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    mActivePointerId = event.getPointerId(0);
                     mStartingY = event.getY();
                     mStartingX = event.getX();
                     mMovementStartValue = getBoundaryPosition(mCurrentDraggingBoundary);
-                    updateListener(event);
+                    updateListener(MotionEvent.ACTION_DOWN, event.getX());
                     mMotionRange = getAllowedValues(mCurrentDraggingBoundary);
                 }
                 return true;
             case MotionEvent.ACTION_MOVE:
                 if (mCurrentDraggingBoundary != CropBoundary.NONE) {
-                    float deltaPx = isVertical(mCurrentDraggingBoundary) ? event.getY() - mStartingY
-                            : event.getX() - mStartingX;
-                    float delta = pixelDistanceToFraction((int) deltaPx, mCurrentDraggingBoundary);
-                    setBoundaryPosition(mCurrentDraggingBoundary,
-                            mMotionRange.clamp(mMovementStartValue + delta));
-                    updateListener(event);
-                    invalidate();
+                    int pointerIndex = event.findPointerIndex(mActivePointerId);
+                    if (pointerIndex >= 0) {
+                        // Original pointer still active, do the move.
+                        float deltaPx = isVertical(mCurrentDraggingBoundary)
+                                ? event.getY(pointerIndex) - mStartingY
+                                : event.getX(pointerIndex) - mStartingX;
+                        float delta = pixelDistanceToFraction((int) deltaPx,
+                                mCurrentDraggingBoundary);
+                        setBoundaryPosition(mCurrentDraggingBoundary,
+                                mMotionRange.clamp(mMovementStartValue + delta));
+                        updateListener(MotionEvent.ACTION_MOVE, event.getX(pointerIndex));
+                        invalidate();
+                    }
                     return true;
                 }
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (mActivePointerId == event.getPointerId(event.getActionIndex())
+                        && mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    updateListener(MotionEvent.ACTION_DOWN, event.getX(event.getActionIndex()));
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                if (mActivePointerId == event.getPointerId(event.getActionIndex())
+                        && mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    updateListener(MotionEvent.ACTION_UP, event.getX(event.getActionIndex()));
+                    return true;
+                }
+                break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                if (mCurrentDraggingBoundary != CropBoundary.NONE) {
-                    updateListener(event);
+                if (mCurrentDraggingBoundary != CropBoundary.NONE
+                        && mActivePointerId == event.getPointerId(mActivePointerId)) {
+                    updateListener(MotionEvent.ACTION_UP, event.getX(0));
+                    return true;
                 }
+                break;
         }
         return super.onTouchEvent(event);
     }
@@ -308,12 +334,29 @@ public class CropView extends View {
         return null;
     }
 
-    private void updateListener(MotionEvent event) {
-        if (mCropInteractionListener != null && (isVertical(mCurrentDraggingBoundary))) {
+    /**
+     * @param action either ACTION_DOWN, ACTION_UP or ACTION_MOVE.
+     * @param x coordinate of the relevant pointer.
+     */
+    private void updateListener(int action, float x) {
+        if (mCropInteractionListener != null && isVertical(mCurrentDraggingBoundary)) {
             float boundaryPosition = getBoundaryPosition(mCurrentDraggingBoundary);
-            mCropInteractionListener.onCropMotionEvent(event, mCurrentDraggingBoundary,
-                    boundaryPosition, fractionToVerticalPixels(boundaryPosition),
-                    (mCrop.left + mCrop.right) / 2);
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    mCropInteractionListener.onCropDragStarted(mCurrentDraggingBoundary,
+                            boundaryPosition, fractionToVerticalPixels(boundaryPosition),
+                            (mCrop.left + mCrop.right) / 2, x);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mCropInteractionListener.onCropDragMoved(mCurrentDraggingBoundary,
+                            boundaryPosition, fractionToVerticalPixels(boundaryPosition),
+                            (mCrop.left + mCrop.right) / 2, x);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mCropInteractionListener.onCropDragComplete();
+                    break;
+
+            }
         }
     }
 
@@ -545,12 +588,11 @@ public class CropView extends View {
      * Listen for crop motion events and state.
      */
     public interface CropInteractionListener {
-        /**
-         * Called whenever CropView has a MotionEvent that can impact the position of the crop
-         * boundaries.
-         */
-        void onCropMotionEvent(MotionEvent event, CropBoundary boundary, float boundaryPosition,
-                int boundaryPositionPx, float horizontalCenter);
+        void onCropDragStarted(CropBoundary boundary, float boundaryPosition,
+                int boundaryPositionPx, float horizontalCenter, float x);
+        void onCropDragMoved(CropBoundary boundary, float boundaryPosition,
+                int boundaryPositionPx, float horizontalCenter, float x);
+        void onCropDragComplete();
     }
 
     static class SavedState extends BaseSavedState {
