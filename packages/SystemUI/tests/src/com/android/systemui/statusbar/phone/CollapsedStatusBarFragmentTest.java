@@ -38,11 +38,15 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.util.Objects;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -53,6 +57,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private View mNotificationAreaInner;
     private View mCenteredNotificationAreaView;
     private StatusBarStateController mStatusBarStateController;
+    private OngoingCallController mOngoingCallController;
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -162,8 +167,51 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
     }
 
+    @Test
+    public void onOngoingCallStarted_notificationsHiddenAndOngoingCallChipDisplayed() {
+        mFragments.dispatchResume();
+        processAllMessages();
+
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+        fragment.initNotificationIconArea(mMockNotificiationAreaController);
+
+        ArgumentCaptor<OngoingCallListener> ongoingCallListenerCaptor = ArgumentCaptor.forClass(
+                OngoingCallListener.class);
+        Mockito.verify(mOngoingCallController).addCallback(ongoingCallListenerCaptor.capture());
+        OngoingCallListener listener = Objects.requireNonNull(ongoingCallListenerCaptor.getValue());
+
+        when(mOngoingCallController.getHasOngoingCall()).thenReturn(true);
+        listener.onOngoingCallStarted(/* animate= */ false);
+
+        assertEquals(View.VISIBLE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+    }
+
+    @Test
+    public void onOngoingCallEnded_notificationsDisplayedAndOngoingCallChipHidden() {
+        mFragments.dispatchResume();
+        processAllMessages();
+
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+        fragment.initNotificationIconArea(mMockNotificiationAreaController);
+
+        ArgumentCaptor<OngoingCallListener> ongoingCallListenerCaptor = ArgumentCaptor.forClass(
+                OngoingCallListener.class);
+        Mockito.verify(mOngoingCallController).addCallback(ongoingCallListenerCaptor.capture());
+        OngoingCallListener listener = Objects.requireNonNull(ongoingCallListenerCaptor.getValue());
+
+        when(mOngoingCallController.getHasOngoingCall()).thenReturn(false);
+        listener.onOngoingCallEnded(/* animate= */ false);
+
+        assertEquals(View.GONE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
-        return new CollapsedStatusBarFragment(mock(OngoingCallController.class));
+        mOngoingCallController = mock(OngoingCallController.class);
+        return new CollapsedStatusBarFragment(mOngoingCallController);
     }
 }

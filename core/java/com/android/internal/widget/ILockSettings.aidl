@@ -95,4 +95,5 @@ interface ILockSettings {
     boolean hasSecureLockScreen();
     boolean tryUnlockWithCachedUnifiedChallenge(int userId);
     void removeCachedUnifiedChallenge(int userId);
+    void updateEncryptionPassword(int type, in byte[] password);
 }

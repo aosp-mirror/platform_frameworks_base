@@ -234,6 +234,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
 import android.media.audiofx.AudioEffect;
+import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.Uri;
 import android.os.AppZygote;
@@ -3489,9 +3490,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     // Clear its scheduled jobs
                     JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
-                    // Clearing data is akin to uninstalling. The app is force stopped before we
-                    // get to this point, so the reason won't be checked by the app.
-                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER, "clear data");
+                    // Clearing data is a user-initiated action.
+                    js.cancelJobsForUid(appInfo.uid, JobParameters.STOP_REASON_USER,
+                            JobParameters.DEBUG_REASON_DATA_CLEARED, "clear data");
 
                     // Clear its pending alarms
                     AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
@@ -12944,7 +12945,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     mBatteryStatsService.noteCurrentTimeChanged();
                     break;
-                case Intent.ACTION_CLEAR_DNS_CACHE:
+                case ConnectivityManager.ACTION_CLEAR_DNS_CACHE:
                     mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
                     break;
                 case Proxy.PROXY_CHANGE_ACTION:

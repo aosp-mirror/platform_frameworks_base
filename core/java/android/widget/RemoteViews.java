@@ -3263,16 +3263,14 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * Create a new RemoteViews object that will display the views contained
-     * in the specified layout file.
+     * in the specified layout file and change the id of the root view to the specified one.
      *
-     * @param packageName Name of the package that contains the layout resource.
-     * @param userId The user under which the package is running.
-     * @param layoutId The id of the layout resource.
-     *
-     * @hide
+     * @param packageName Name of the package that contains the layout resource
+     * @param layoutId The id of the layout resource
      */
-    public RemoteViews(String packageName, int userId, @LayoutRes int layoutId) {
-        this(getApplicationInfo(packageName, userId), layoutId);
+    public RemoteViews(@NonNull String packageName, @LayoutRes int layoutId, @IdRes int viewId) {
+        this(packageName, layoutId);
+        this.mViewId = viewId;
     }
 
     /**
@@ -3727,7 +3725,7 @@ public class RemoteViews implements Parcelable, Filter {
      * The {@code stableId} will be used to identify a potential view to recycled when the remote
      * view is inflated. Views can be re-used if inserted in the same order, potentially with
      * some views appearing / disappearing. To be recycled the view must not change the layout
-     * used to inflate it or its view id (see {@link RemoteViews#setViewId}).
+     * used to inflate it or its view id (see {@link RemoteViews#RemoteViews(String, int, int)}).
      *
      * Note: if a view is re-used, all the actions will be re-applied on it. However, its properties
      * are not reset, so what was applied in previous round will have an effect. As a view may be
@@ -6340,25 +6338,9 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Set the ID of the top-level view of the XML layout.
-     *
-     * The view's ID is changed right after inflation, before it gets added to its parent. The ID
-     * of a given view can never change after the initial inflation.
-     *
-     * Set to {@link View#NO_ID} to reset and simply keep the id defined in the XML layout.
-     *
-     * @throws UnsupportedOperationException if the method is called on a RemoteViews defined in
-     * term of other RemoteViews (e.g. {@link #RemoteViews(RemoteViews, RemoteViews)}).
+     * Get the ID of the top-level view of the XML layout, if set using
+     * {@link RemoteViews#RemoteViews(String, int, int)}.
      */
-    public void setViewId(@IdRes int viewId) {
-        if (hasMultipleLayouts()) {
-            throw new UnsupportedOperationException(
-                    "The viewId can only be set on RemoteViews defined from a XML layout.");
-        }
-        mViewId = viewId;
-    }
-
-    /** Get the ID of the top-level view of the XML layout, as set by {@link #setViewId}. */
     public @IdRes int getViewId() {
         return mViewId;
     }

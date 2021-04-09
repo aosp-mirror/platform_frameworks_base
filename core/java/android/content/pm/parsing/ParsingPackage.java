@@ -259,8 +259,8 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setNativeHeapZeroInitialized(
             @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized);
 
-    ParsingPackage setRequestOptimizedExternalStorageAccess(
-            @Nullable Boolean requestOptimizedExternalStorageAccess);
+    ParsingPackage setRequestRawExternalStorageAccess(
+            @Nullable Boolean requestRawExternalStorageAccess);
 
     ParsingPackage setCrossProfile(boolean crossProfile);
 

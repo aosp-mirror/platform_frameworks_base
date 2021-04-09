@@ -655,7 +655,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             }
 
             int[] idTypes = mSpec.getAttestationIds();
-            if (idTypes == null) {
+            if (idTypes.length == 0) {
                 return;
             }
             final Set<Integer> idTypesSet = new ArraySet<>(idTypes.length);

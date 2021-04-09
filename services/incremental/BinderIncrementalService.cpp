@@ -150,6 +150,11 @@ binder::Status BinderIncrementalService::startLoading(
     return ok();
 }
 
+binder::Status BinderIncrementalService::onInstallationComplete(int32_t storageId) {
+    mImpl.onInstallationComplete(storageId);
+    return ok();
+}
+
 binder::Status BinderIncrementalService::makeBindMount(int32_t storageId,
                                                        const std::string& sourcePath,
                                                        const std::string& targetFullPath,

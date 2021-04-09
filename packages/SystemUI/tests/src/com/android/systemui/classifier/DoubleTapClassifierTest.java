@@ -18,6 +18,7 @@ package com.android.systemui.classifier;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
@@ -78,7 +79,7 @@ public class DoubleTapClassifierTest extends ClassifierTest {
 
     @Test
     public void testSingleTap() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mFalsedResult);
+        when(mSingleTapClassifier.isTap(anyList(), anyDouble())).thenReturn(mFalsedResult);
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, TOUCH_SLOP, 1);
 
@@ -88,7 +89,7 @@ public class DoubleTapClassifierTest extends ClassifierTest {
 
     @Test
     public void testDoubleTap() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mPassedResult);
+        when(mSingleTapClassifier.isTap(anyList(), anyDouble())).thenReturn(mPassedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -104,7 +105,8 @@ public class DoubleTapClassifierTest extends ClassifierTest {
 
     @Test
     public void testBadFirstTap() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mPassedResult, mFalsedResult);
+        when(mSingleTapClassifier.isTap(anyList(), anyDouble()))
+                .thenReturn(mPassedResult, mFalsedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -120,7 +122,8 @@ public class DoubleTapClassifierTest extends ClassifierTest {
 
     @Test
     public void testBadSecondTap() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mFalsedResult, mPassedResult);
+        when(mSingleTapClassifier.isTap(anyList(), anyDouble()))
+                .thenReturn(mFalsedResult, mPassedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -136,7 +139,7 @@ public class DoubleTapClassifierTest extends ClassifierTest {
 
     @Test
     public void testBadTouchSlop() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mFalsedResult);
+        when(mSingleTapClassifier.isTap(anyList(), anyDouble())).thenReturn(mFalsedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -152,7 +155,7 @@ public class DoubleTapClassifierTest extends ClassifierTest {
 
     @Test
     public void testBadTouchSlow() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mFalsedResult);
+        when(mSingleTapClassifier.isTap(anyList(), anyDouble())).thenReturn(mFalsedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);

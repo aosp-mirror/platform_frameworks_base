@@ -16,6 +16,9 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.systemui.plugins.FalsingManager.HIGH_PENALTY;
+import static com.android.systemui.plugins.FalsingManager.NO_PENALTY;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -55,8 +58,6 @@ import java.util.Set;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class BrightLineClassifierTest extends SysuiTestCase {
-    private static final long DOUBLE_TAP_TIMEOUT_MS = 1000;
-
     private BrightLineFalsingManager mBrightLineFalsingManager;
     @Mock
     private FalsingDataProvider mFalsingDataProvider;
@@ -91,7 +92,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
                 .thenReturn(mPassedResult);
         when(mClassifierB.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mPassedResult);
-        when(mSingleTapClassfier.isTap(any(List.class))).thenReturn(mPassedResult);
+        when(mSingleTapClassfier.isTap(any(List.class), anyDouble())).thenReturn(mPassedResult);
         when(mDoubleTapClassifier.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mPassedResult);
         mClassifiers.add(mClassifierA);
@@ -170,13 +171,13 @@ public class BrightLineClassifierTest extends SysuiTestCase {
 
     @Test
     public void testIsFalseTap_BasicCheck() {
-        when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mFalsedResult);
+        when(mSingleTapClassfier.isTap(mMotionEventList, 0)).thenReturn(mFalsedResult);
 
-        assertThat(mBrightLineFalsingManager.isFalseTap(false, 0)).isTrue();
+        assertThat(mBrightLineFalsingManager.isSimpleTap()).isFalse();
 
-        when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mPassedResult);
+        when(mSingleTapClassfier.isTap(mMotionEventList, 0)).thenReturn(mPassedResult);
 
-        assertThat(mBrightLineFalsingManager.isFalseTap(false, 0)).isFalse();
+        assertThat(mBrightLineFalsingManager.isSimpleTap()).isTrue();
     }
 
     @Test
@@ -185,26 +186,26 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(new ArrayList<>());
         when(mFalsingDataProvider.getPriorMotionEvents()).thenReturn(mMotionEventList);
 
-        mBrightLineFalsingManager.isFalseTap(false, 0);
-        verify(mSingleTapClassfier).isTap(mMotionEventList);
+        mBrightLineFalsingManager.isFalseTap(0);
+        verify(mSingleTapClassfier).isTap(mMotionEventList, 0);
     }
 
 
     @Test
     public void testIsFalseTap_RobustCheck_NoFaceAuth() {
-        when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mPassedResult);
+        when(mSingleTapClassfier.isTap(mMotionEventList, 0)).thenReturn(mPassedResult);
         when(mDoubleTapClassifier.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mFalsedResult);
         when(mHistoryTracker.falseBelief()).thenReturn(1.0);
         mFalsingDataProvider.setJustUnlockedWithFace(false);
-        assertThat(mBrightLineFalsingManager.isFalseTap(true, 0)).isTrue();
+        assertThat(mBrightLineFalsingManager.isFalseTap(NO_PENALTY)).isTrue();
     }
 
     @Test
     public void testIsFalseTap_RobustCheck_FaceAuth() {
-        when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mPassedResult);
+        when(mSingleTapClassfier.isTap(mMotionEventList, 0)).thenReturn(mPassedResult);
         when(mFalsingDataProvider.isJustUnlockedWithFace()).thenReturn(true);
-        assertThat(mBrightLineFalsingManager.isFalseTap(true, 0)).isFalse();
+        assertThat(mBrightLineFalsingManager.isFalseTap(NO_PENALTY)).isFalse();
     }
 
     @Test
@@ -230,7 +231,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     @Test
     public void testHistory_singleTap() {
         // When trying to classify single taps, we don't immediately add results to history.
-        mBrightLineFalsingManager.isFalseTap(false, 0);
+        mBrightLineFalsingManager.isFalseTap(HIGH_PENALTY);
         mGestureFinalizedListener.onGestureFinalized(1000);
         verify(mHistoryTracker).addResults(anyCollection(), eq(1000L));
     }
@@ -238,9 +239,9 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     @Test
     public void testHistory_multipleSingleTaps() {
         // When trying to classify single taps, we don't immediately add results to history.
-        mBrightLineFalsingManager.isFalseTap(false, 0);
+        mBrightLineFalsingManager.isFalseTap(HIGH_PENALTY);
         mGestureFinalizedListener.onGestureFinalized(1000);
-        mBrightLineFalsingManager.isFalseTap(false, 0);
+        mBrightLineFalsingManager.isFalseTap(HIGH_PENALTY);
         mGestureFinalizedListener.onGestureFinalized(2000);
         verify(mHistoryTracker).addResults(anyCollection(), eq(1000L));
         verify(mHistoryTracker).addResults(anyCollection(), eq(2000L));
@@ -249,10 +250,10 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     @Test
     public void testHistory_doubleTap() {
         // When trying to classify single taps, we don't immediately add results to history.
-        mBrightLineFalsingManager.isFalseTap(false, 0);
+        mBrightLineFalsingManager.isFalseTap(HIGH_PENALTY);
         mGestureFinalizedListener.onGestureFinalized(1000);
         // Before checking for double tap, we may check for single-tap on the second gesture.
-        mBrightLineFalsingManager.isFalseTap(false, 0);
+        mBrightLineFalsingManager.isFalseTap(HIGH_PENALTY);
         mBrightLineFalsingManager.isFalseDoubleTap();
         mGestureFinalizedListener.onGestureFinalized(2000);
 
@@ -270,8 +271,8 @@ public class BrightLineClassifierTest extends SysuiTestCase {
                 .thenReturn(mFalsedResult);
         assertThat(mBrightLineFalsingManager.isFalseTouch(0)).isFalse();
 
-        when(mSingleTapClassfier.isTap(mMotionEventList)).thenReturn(mFalsedResult);
-        assertThat(mBrightLineFalsingManager.isFalseTap(false, 0)).isFalse();
+        when(mSingleTapClassfier.isTap(mMotionEventList, 0)).thenReturn(mFalsedResult);
+        assertThat(mBrightLineFalsingManager.isSimpleTap()).isFalse();
 
         when(mDoubleTapClassifier.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mFalsedResult);

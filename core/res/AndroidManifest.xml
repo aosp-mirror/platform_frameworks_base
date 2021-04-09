@@ -345,7 +345,7 @@
     <protected-broadcast android:name="android.nfc.handover.intent.action.HANDOVER_SEND_MULTIPLE" />
     <protected-broadcast android:name="com.android.nfc.handover.action.CANCEL_HANDOVER_TRANSFER" />
 
-    <protected-broadcast android:name="android.intent.action.CLEAR_DNS_CACHE" />
+    <protected-broadcast android:name="android.net.action.CLEAR_DNS_CACHE" />
     <protected-broadcast android:name="android.intent.action.PROXY_CHANGE" />
 
     <protected-broadcast android:name="android.os.UpdateLock.UPDATE_LOCK_CHANGED" />
@@ -1390,7 +1390,7 @@
     <!-- Required to be able to discover and connect to nearby Bluetooth devices.
          <p>Protection level: dangerous -->
     <permission-group android:name="android.permission-group.NEARBY_DEVICES"
-        android:icon="@drawable/ic_qs_bluetooth"
+        android:icon="@drawable/perm_group_nearby_devices"
         android:label="@string/permgrouplab_nearby_devices"
         android:description="@string/permgroupdesc_nearby_devices"
         android:priority="750" />
@@ -4239,6 +4239,15 @@
          @hide -->
     <permission android:name="android.permission.MANAGE_ROLE_HOLDERS"
                 android:protectionLevel="signature|installer" />
+
+    <!-- @SystemApi Allows an application to bypass role qualification. This allows switching role
+         holders to otherwise non eligible holders. Only the shell is allowed to do this, the
+         qualification for the shell role itself cannot be bypassed, and each role needs to
+         explicitly allow bypassing qualification in its definition. The bypass state will not be
+         persisted across reboot.
+     @hide -->
+    <permission android:name="android.permission.BYPASS_ROLE_QUALIFICATION"
+                android:protectionLevel="internal|role" />
 
     <!-- @SystemApi Allows an application to observe role holder changes.
          @hide -->
