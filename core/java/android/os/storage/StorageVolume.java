@@ -20,6 +20,7 @@ import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -551,4 +552,82 @@ public final class StorageVolume implements Parcelable {
         parcel.writeString8(mFsUuid);
         parcel.writeString8(mState);
     }
+
+    /** @hide */
+    // This class is used by the mainline test suite, so we have to keep these APIs around across
+    // releases. Consider making this class public to help external developers to write tests as
+    // well.
+    @TestApi
+    public static final class Builder {
+        private String mId;
+        private File mPath;
+        private String mDescription;
+        private boolean mPrimary;
+        private boolean mRemovable;
+        private boolean mEmulated;
+        private UserHandle mOwner;
+        private UUID mStorageUuid;
+        private String mUuid;
+        private String mState;
+
+        @SuppressLint("StreamFiles")
+        public Builder(
+                @NonNull String id, @NonNull File path, @NonNull String description,
+                @NonNull UserHandle owner, @NonNull String state) {
+            mId = id;
+            mPath = path;
+            mDescription = description;
+            mOwner = owner;
+            mState = state;
+        }
+
+        @NonNull
+        public Builder setStorageUuid(@Nullable UUID storageUuid) {
+            mStorageUuid = storageUuid;
+            return this;
+        }
+
+        @NonNull
+        public Builder setUuid(@Nullable String uuid) {
+            mUuid = uuid;
+            return this;
+        }
+
+        @NonNull
+        public Builder setPrimary(boolean primary) {
+            mPrimary = primary;
+            return this;
+        }
+
+        @NonNull
+        public Builder setRemovable(boolean removable) {
+            mRemovable = removable;
+            return this;
+        }
+
+        @NonNull
+        public Builder setEmulated(boolean emulated) {
+            mEmulated = emulated;
+            return this;
+        }
+
+        @NonNull
+        public StorageVolume build() {
+            return new StorageVolume(
+                    mId,
+                    mPath,
+                    /* internalPath= */ mPath,
+                    mDescription,
+                    mPrimary,
+                    mRemovable,
+                    mEmulated,
+                    /* allowMassStorage= */ false,
+                    /* maxFileSize= */ 0,
+                    mOwner,
+                    mStorageUuid,
+                    mUuid,
+                    mState);
+        }
+    }
+
 }
