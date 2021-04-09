@@ -81,7 +81,6 @@ import android.telephony.TelephonyManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.net.module.util.LocationPermissionChecker;
 import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.VcnManagementService.VcnStatusCallbackInfo;
 import com.android.server.vcn.TelephonySubscriptionTracker;
@@ -162,8 +161,6 @@ public class VcnManagementServiceTest {
             mock(PersistableBundleUtils.LockingReadWriteHelper.class);
     private final TelephonySubscriptionTracker mSubscriptionTracker =
             mock(TelephonySubscriptionTracker.class);
-    private final LocationPermissionChecker mLocationPermissionChecker =
-            mock(LocationPermissionChecker.class);
 
     private final ArgumentCaptor<VcnCallback> mVcnCallbackCaptor =
             ArgumentCaptor.forClass(VcnCallback.class);
@@ -207,9 +204,6 @@ public class VcnManagementServiceTest {
         doReturn(mConfigReadWriteHelper)
                 .when(mMockDeps)
                 .newPersistableBundleLockingReadWriteHelper(any());
-        doReturn(mLocationPermissionChecker)
-                .when(mMockDeps)
-                .newLocationPermissionChecker(eq(mMockContext));
 
         // Setup VCN instance generation
         doAnswer((invocation) -> {
@@ -521,10 +515,6 @@ public class VcnManagementServiceTest {
 
     @Test
     public void testSetVcnConfigNotifiesStatusCallback() throws Exception {
-        mVcnMgmtSvc.systemReady();
-        doReturn(true)
-                .when(mLocationPermissionChecker)
-                .checkLocationPermission(eq(TEST_PACKAGE_NAME), any(), eq(TEST_UID), any());
         triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_2));
 
         mVcnMgmtSvc.registerVcnStatusCallback(TEST_UUID_2, mMockStatusCallback, TEST_PACKAGE_NAME);
@@ -697,10 +687,6 @@ public class VcnManagementServiceTest {
         doReturn(isVcnActive ? VCN_STATUS_CODE_ACTIVE : VCN_STATUS_CODE_SAFE_MODE)
                 .when(vcn)
                 .getStatus();
-
-        doReturn(true)
-                .when(mLocationPermissionChecker)
-                .checkLocationPermission(eq(TEST_PACKAGE_NAME), any(), eq(TEST_UID), any());
     }
 
     private NetworkCapabilities.Builder getNetworkCapabilitiesBuilderForTransport(
@@ -933,8 +919,7 @@ public class VcnManagementServiceTest {
             @NonNull ParcelUuid subGroup,
             @NonNull String pkgName,
             int uid,
-            boolean hasPermissionsforSubGroup,
-            boolean hasLocationPermission)
+            boolean hasPermissionsforSubGroup)
             throws Exception {
         TelephonySubscriptionSnapshot snapshot =
                 triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(subGroup));
@@ -946,10 +931,6 @@ public class VcnManagementServiceTest {
                 .when(snapshot)
                 .packageHasPermissionsForSubscriptionGroup(eq(subGroup), eq(pkgName));
 
-        doReturn(hasLocationPermission)
-                .when(mLocationPermissionChecker)
-                .checkLocationPermission(eq(pkgName), any(), eq(uid), any());
-
         mVcnMgmtSvc.registerVcnStatusCallback(subGroup, mMockStatusCallback, pkgName);
 
         triggerVcnSafeMode(subGroup, snapshot, true /* enterSafeMode */);
@@ -959,11 +940,7 @@ public class VcnManagementServiceTest {
     public void testVcnStatusCallbackOnSafeModeStatusChangedWithCarrierPrivileges()
             throws Exception {
         triggerVcnStatusCallbackOnSafeModeStatusChanged(
-                TEST_UUID_1,
-                TEST_PACKAGE_NAME,
-                TEST_UID,
-                true /* hasPermissionsforSubGroup */,
-                true /* hasLocationPermission */);
+                TEST_UUID_1, TEST_PACKAGE_NAME, TEST_UID, true /* hasPermissionsforSubGroup */);
 
         verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
     }
@@ -972,25 +949,7 @@ public class VcnManagementServiceTest {
     public void testVcnStatusCallbackOnSafeModeStatusChangedWithoutCarrierPrivileges()
             throws Exception {
         triggerVcnStatusCallbackOnSafeModeStatusChanged(
-                TEST_UUID_1,
-                TEST_PACKAGE_NAME,
-                TEST_UID,
-                false /* hasPermissionsforSubGroup */,
-                true /* hasLocationPermission */);
-
-        verify(mMockStatusCallback, never())
-                .onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
-    }
-
-    @Test
-    public void testVcnStatusCallbackOnSafeModeStatusChangedWithoutLocationPermission()
-            throws Exception {
-        triggerVcnStatusCallbackOnSafeModeStatusChanged(
-                TEST_UUID_1,
-                TEST_PACKAGE_NAME,
-                TEST_UID,
-                true /* hasPermissionsforSubGroup */,
-                false /* hasLocationPermission */);
+                TEST_UUID_1, TEST_PACKAGE_NAME, TEST_UID, false /* hasPermissionsforSubGroup */);
 
         verify(mMockStatusCallback, never())
                 .onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
@@ -1052,9 +1011,6 @@ public class VcnManagementServiceTest {
                 .when(snapshot)
                 .packageHasPermissionsForSubscriptionGroup(
                         eq(TEST_UUID_1), eq(TEST_CB_PACKAGE_NAME));
-        doReturn(true)
-                .when(mLocationPermissionChecker)
-                .checkLocationPermission(eq(TEST_CB_PACKAGE_NAME), any(), eq(TEST_UID), any());
 
         mVcnMgmtSvc.registerVcnStatusCallback(
                 TEST_UUID_1, mMockStatusCallback, TEST_CB_PACKAGE_NAME);

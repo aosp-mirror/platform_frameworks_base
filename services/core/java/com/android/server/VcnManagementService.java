@@ -172,9 +172,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull
     private final TrackingNetworkCallback mTrackingNetworkCallback = new TrackingNetworkCallback();
 
-    /** Can only be assigned when {@link #systemReady()} is called, since it uses AppOpsManager. */
-    @Nullable private LocationPermissionChecker mLocationPermissionChecker;
-
     @GuardedBy("mLock")
     @NonNull
     private final Map<ParcelUuid, VcnConfig> mConfigs = new ArrayMap<>();
@@ -372,7 +369,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         new NetworkRequest.Builder().clearCapabilities().build(),
                         mTrackingNetworkCallback);
         mTelephonySubscriptionTracker.register();
-        mLocationPermissionChecker = mDeps.newLocationPermissionChecker(mVcnContext.getContext());
     }
 
     private void enforcePrimaryUser() {
@@ -839,13 +835,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             return false;
         }
 
-        if (!mLocationPermissionChecker.checkLocationPermission(
-                cbInfo.mPkgName,
-                "VcnStatusCallback" /* featureId */,
-                cbInfo.mUid,
-                null /* message */)) {
-            return false;
-        }
         return true;
     }
 
