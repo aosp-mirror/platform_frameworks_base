@@ -478,8 +478,8 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Pokaži profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodaj korisnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite li ukloniti gosta?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i svi podaci iz ove sesije bit će izbrisani."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ukloniti gosta?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci iz ove sesije će se izbrisati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ukloni"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Zdravo! Lijepo je opet vidjeti goste."</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Želite li nastaviti sesiju?"</string>
@@ -491,7 +491,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Odjavi korisnika"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Odjavi trenutnog korisnika"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ODJAVI KORISNIKA"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Želite dodati novog korisnika?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Dodati novog korisnika?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Kada dodate novog korisnika, ta osoba treba postaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dostignut limit za broj korisnika"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

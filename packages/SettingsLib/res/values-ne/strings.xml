@@ -389,7 +389,7 @@
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"जोसिलो (पूर्व निर्धारित)"</item>
     <item msgid="9112200311983078311">"प्राकृतिक"</item>
-    <item msgid="6564241960833766170">"मानक"</item>
+    <item msgid="6564241960833766170">"डिफल्ट"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"परिष्कृत रङ्गहरू"</item>

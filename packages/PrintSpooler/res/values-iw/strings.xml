@@ -32,10 +32,10 @@
     <string name="template_page_range" msgid="428638530038286328">"טווח של <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"למשל 1–5‏,8,‏11–13"</string>
     <string name="print_preview" msgid="8010217796057763343">"תצוגה מקדימה של הדפסה"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"‏התקן מציג PDF ליצירת תצוגה מקדימה"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"‏התקנה של PDF viewer‏ ליצירת תצוגה מקדימה"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"אפליקציית ההדפסה קרסה"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"יוצר עבודת הדפסה"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"‏שמור כ-PDF"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"‏שמירה כ-PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"כל המדפסות…"</string>
     <string name="print_dialog" msgid="32628687461331979">"תיבת דו שיח של מדפסת"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
@@ -44,7 +44,7 @@
     <string name="expand_handle" msgid="7282974448109280522">"ידית הרחבה"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"ידית כיווץ"</string>
     <string name="print_button" msgid="645164566271246268">"הדפס"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"‏שמור כ-PDF"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"‏שמירה כ-PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"אפשרויות ההדפסה הורחבו"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"אפשרויות ההדפסה כווצו"</string>
     <string name="search" msgid="5421724265322228497">"חיפוש"</string>
@@ -91,7 +91,7 @@
     <string name="restart" msgid="2472034227037808749">"הפעלה מחדש"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"אין חיבור למדפסת"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"לא ידוע"</string>
-    <string name="print_service_security_warning_title" msgid="2160752291246775320">"האם להשתמש ב-<xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"האם להשתמש בשירות <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"ייתכן שהמסמך שלך יעבור בשרת אחד או יותר בדרכו למדפסת."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"שחור ולבן"</item>
@@ -107,7 +107,7 @@
     <item msgid="3199660090246166812">"לרוחב"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"לא ניתן היה לכתוב לקובץ"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"מצטערים, אך זה לא עבד. נסה שוב."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"מצטערים, הפעולה לא בוצעה. אפשר לנסות שוב."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"כדאי לנסות שוב"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"המדפסת הזו אינה זמינה כעת."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"לא ניתן להציג תצוגה מקדימה"</string>

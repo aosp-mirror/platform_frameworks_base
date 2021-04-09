@@ -482,7 +482,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ಮತ್ತೆ ಸುಸ್ವಾಗತ, ಅತಿಥಿ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ನಿಮ್ಮ ಸೆಷನ್‌ ಮುಂದುವರಿಸಲು ಇಚ್ಚಿಸುವಿರಾ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ಪ್ರಾರಂಭಿಸಿ"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ಹೌದು, ಮುಂದುವರಿ"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ಹೌದು, ಮುಂದುವರಿಸಿ"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"ಅತಿಥಿ ಬಳಕೆದಾರ"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾ ಅಳಿಸಲು, ಅತಿಥಿ ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
