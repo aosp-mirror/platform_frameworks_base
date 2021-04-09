@@ -369,6 +369,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mDownX;
     private float mDownY;
     private int mDisplayCutoutTopInset = 0; // in pixels
+    private int mSplitShadeNotificationsTopPadding;
 
     private final KeyguardClockPositionAlgorithm
             mClockPositionAlgorithm =
@@ -858,6 +859,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void updateResources() {
+        mSplitShadeNotificationsTopPadding =
+                mResources.getDimensionPixelSize(R.dimen.notifications_top_padding_split_shade);
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
         mShouldUseSplitNotificationShade =
@@ -2033,10 +2036,9 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private float calculateQsTopPadding() {
-        // in split shade mode we want notifications to be directly below status bar
+    private float calculateNotificationsTopPadding() {
         if (mShouldUseSplitNotificationShade && !mKeyguardShowing) {
-            return 0f;
+            return mSplitShadeNotificationsTopPadding;
         }
         if (mKeyguardShowing && (mQsExpandImmediate
                 || mIsExpanding && mQsExpandedWhenExpandingStarted)) {
@@ -2090,7 +2092,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
 
     protected void requestScrollerTopPaddingUpdate(boolean animate) {
-        mNotificationStackScrollLayoutController.updateTopPadding(calculateQsTopPadding(), animate);
+        mNotificationStackScrollLayoutController.updateTopPadding(
+                calculateNotificationsTopPadding(), animate);
         if (mKeyguardShowing && mKeyguardBypassController.getBypassEnabled()) {
             // update the position of the header
             updateQsExpansion();
@@ -4098,7 +4101,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     calculatePanelHeightShade(), p);
             p.setColor(Color.MAGENTA);
             canvas.drawLine(
-                    0, calculateQsTopPadding(), mView.getWidth(), calculateQsTopPadding(), p);
+                    0, calculateNotificationsTopPadding(), mView.getWidth(),
+                    calculateNotificationsTopPadding(), p);
             p.setColor(Color.CYAN);
             canvas.drawLine(0, mClockPositionResult.stackScrollerPadding, mView.getWidth(),
                     mNotificationStackScrollLayoutController.getTopPadding(), p);

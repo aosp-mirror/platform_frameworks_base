@@ -40,4 +40,9 @@
     <dimen name="qs_tile_margin_top">32dp</dimen>
     <dimen name="qs_brightness_padding_top">6dp</dimen>
     <dimen name="qs_detail_margin_top">28dp</dimen>
+
+    <!-- In split shade mode notifications should be aligned to QS header so the value should be
+     adjusted to qs header height and height of centered content inside of it:
+    (quick_qs_offset_height (48dp) - ongoing_appops_chip_height (24dp) ) / 2 -->
+    <dimen name="notifications_top_padding_split_shade">12dp</dimen>
 </resources>
