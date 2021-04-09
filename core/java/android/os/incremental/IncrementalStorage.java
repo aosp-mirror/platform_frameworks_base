@@ -398,7 +398,7 @@ public final class IncrementalStorage {
     }
 
     /**
-     * Iinitializes and starts the DataLoader.
+     * Initializes and starts the DataLoader.
      * This makes sure all install-time parameters are applied.
      * Does not affect persistent DataLoader params.
      * @return True if start request was successfully queued.
@@ -418,6 +418,18 @@ public final class IncrementalStorage {
             return false;
         }
     }
+
+    /**
+     * Marks the completion of installation.
+     */
+    public void onInstallationComplete() {
+        try {
+            mService.onInstallationComplete(mId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
 
     private static final int UUID_BYTE_SIZE = 16;
 

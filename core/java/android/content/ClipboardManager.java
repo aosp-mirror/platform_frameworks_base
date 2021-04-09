@@ -51,6 +51,25 @@ import java.util.Objects;
  */
 @SystemService(Context.CLIPBOARD_SERVICE)
 public class ClipboardManager extends android.text.ClipboardManager {
+
+    /**
+     * DeviceConfig property, within the clipboard namespace, that determines whether notifications
+     * are shown when an app accesses clipboard. This may be overridden by a user-controlled
+     * setting.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_SHOW_ACCESS_NOTIFICATIONS =
+            "show_access_notifications";
+
+    /**
+     * Default value for the DeviceConfig property that determines whether notifications are shown
+     * when an app accesses clipboard.
+     *
+     * @hide
+     */
+    public static final boolean DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS = true;
+
     private final Context mContext;
     private final Handler mHandler;
     private final IClipboard mService;

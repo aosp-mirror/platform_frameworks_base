@@ -735,6 +735,7 @@ public final class QuotaController extends StateController {
         mTempAllowlistCache.delete(uid);
         mTempAllowlistGraceCache.delete(uid);
         mTopAppCache.delete(uid);
+        mTopAppTrackers.delete(uid);
         mTopAppGraceCache.delete(uid);
     }
 

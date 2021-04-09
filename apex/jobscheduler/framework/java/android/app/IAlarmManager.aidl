@@ -42,4 +42,5 @@ interface IAlarmManager {
     AlarmManager.AlarmClockInfo getNextAlarmClock(int userId);
     long currentNetworkTimeMillis();
     boolean canScheduleExactAlarms();
+    int getConfigVersion();
 }

@@ -128,8 +128,8 @@ public class RangingManagerTest {
         rangingManager.onRangingReconfigureFailed(handle, REASON, PARAMS);
         verify(callback, times(1)).onReconfigureFailed(eq(REASON), eq(PARAMS));
 
-        rangingManager.onRangingStopped(handle);
-        verify(callback, times(1)).onStopped();
+        rangingManager.onRangingStopped(handle, REASON, PARAMS);
+        verify(callback, times(1)).onStopped(eq(REASON), eq(PARAMS));
 
         rangingManager.onRangingStopFailed(handle, REASON, PARAMS);
         verify(callback, times(1)).onStopFailed(eq(REASON), eq(PARAMS));

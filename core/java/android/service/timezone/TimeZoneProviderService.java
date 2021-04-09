@@ -50,34 +50,48 @@ import java.util.Objects;
  *
  * <p>Once stopped or failed, providers are required to stop generating callbacks.
  *
- * <p>Provider discovery:
- *
- * <p>You must declare the service in your manifest file with the
- * {@link android.Manifest.permission#BIND_TIME_ZONE_PROVIDER_SERVICE} permission,
- * and include an intent filter with the necessary action indicating what type of provider it is.
- *
- * <p>Device configuration can influence how {@link TimeZoneProviderService}s are discovered.
- * In one mode, there can be multiple {@link TimeZoneProviderService}s configured with the same
- * action, and the one with the highest "serviceVersion" metadata will be used.
- *
- * <p>{@link TimeZoneProviderService}s may be deployed into processes that run once-per-user
- * or once-per-device (i.e. they service multiple users). The "serviceIsMultiuser" metadata must
- * be set accordingly.
- *
  * <p>Provider types:
  *
  * <p>Android supports up to two <em>location-derived</em> time zone providers. These are called the
- * "primary" and "secondary" location time zone provider. The primary location time zone provider is
- * started first and will be used until it becomes uncertain or fails, at which point the secondary
- * provider will be started.
+ * "primary" and "secondary" location time zone providers. When a location-derived time zone is
+ * required, the primary location time zone provider is started first and used until it becomes
+ * uncertain or fails, at which point the secondary provider will be started. The secondary will be
+ * started and stopped as needed.
  *
- * <p>Location-derived time zone providers are configured using {@link
- * #PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE} and {@link
- * #SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE} intent-filter actions respectively.
- * Besides declaring the android:permission attribute mentioned above, the application supplying a
- * location provider must be granted the {@link
+ * <p>Provider discovery:
+ *
+ * <p>Each provider is optional and can be disabled. When enabled, a provider's package name must
+ * be explicitly configured in the system server, see {@code
+ * config_primaryLocationTimeZoneProviderPackageName} and {@code
+ * config_secondaryLocationTimeZoneProviderPackageName} for details.
+ *
+ * <p>You must declare the service in the AndroidManifest of the app hosting the provider with the
+ * {@link android.Manifest.permission#BIND_TIME_ZONE_PROVIDER_SERVICE} permission,
+ * and include an intent filter with the necessary action indicating that it is the primary
+ * provider ({@link #PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE}) or the secondary
+ * provider ({@link #SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE}).
+ *
+ * <p>Besides declaring the android:permission attribute mentioned above, the application supplying
+ * a location provider must be granted the {@link
  * android.Manifest.permission#INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE} permission to be
  * accepted by the system server.
+ *
+ * <p>{@link TimeZoneProviderService}s may be deployed into processes that run once-per-user
+ * or once-per-device (i.e. they service multiple users). See serviceIsMultiuser metadata below for
+ * configuration details.
+ *
+ * <p>The service may specify metadata on its capabilities:
+ *
+ * <ul>
+ *     <li>
+ *         "serviceIsMultiuser": A boolean property, indicating if the service wishes to take
+ *         responsibility for handling changes to the current user on the device. If true, the
+ *         service will always be bound from the system user. If false, the service will always be
+ *         bound from the current user. If the current user changes, the old binding will be
+ *         released, and a new binding established under the new user. Assumed to be false if not
+ *         specified.
+ *     </li>
+ * </ul>
  *
  * <p>For example:
  * <pre>
@@ -86,7 +100,7 @@ import java.util.Objects;
  *
  * ...
  *
- *     &lt;service android:name=".FooTimeZoneProviderService"
+ *     &lt;service android:name=".ExampleTimeZoneProviderService"
  *             android:exported="true"
  *             android:permission="android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE"&gt;
  *         &lt;intent-filter&gt;
@@ -94,7 +108,6 @@ import java.util.Objects;
  *             android:name="android.service.timezone.SecondaryLocationTimeZoneProviderService"
  *             /&gt;
  *         &lt;/intent-filter&gt;
- *         &lt;meta-data android:name="serviceVersion" android:value="1" /&gt;
  *         &lt;meta-data android:name="serviceIsMultiuser" android:value="true" /&gt;
  *     &lt;/service&gt;
  * </pre>

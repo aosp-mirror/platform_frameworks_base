@@ -154,6 +154,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private static final long DEVICE_DISAPPEARED_TIMEOUT_MS = 10 * 1000;
     private static final long DEVICE_DISAPPEARED_UNBIND_TIMEOUT_MS = 10 * 60 * 1000;
 
+    private static final long DEVICE_LISTENER_DIED_REBIND_TIMEOUT_MS = 10 * 1000;
+
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "CompanionDeviceManagerService";
 
@@ -1130,6 +1132,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             protected long getAutoDisconnectTimeoutMs() {
                 // Service binding is managed manually based on corresponding device being nearby
                 return Long.MAX_VALUE;
+            }
+
+            @Override
+            public void binderDied() {
+                super.binderDied();
+
+                // Re-connect to the service if process gets killed
+                mMainHandler.postDelayed(this::connect, DEVICE_LISTENER_DIED_REBIND_TIMEOUT_MS);
             }
         };
     }

@@ -22,6 +22,9 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHT
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DISTANCE_VELOCITY_TO_DISTANCE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DISTANCE_VERTICAL_FLING_THRESHOLD_IN;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DISTANCE_VERTICAL_SWIPE_THRESHOLD_IN;
+import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
+import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
+import static com.android.systemui.classifier.Classifier.SHADE_DRAG;
 
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
@@ -148,7 +151,9 @@ class DistanceClassifier extends FalsingClassifier {
     Result calculateFalsingResult(
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
-        if (interactionType == Classifier.BRIGHTNESS_SLIDER
+        if (interactionType == BRIGHTNESS_SLIDER
+                || interactionType == SHADE_DRAG
+                || interactionType == QS_COLLAPSE
                 || interactionType == Classifier.UDFPS_AUTHENTICATION
                 || interactionType == Classifier.DISABLED_UDFPS_AFFORDANCE) {
             return Result.passed(0);
