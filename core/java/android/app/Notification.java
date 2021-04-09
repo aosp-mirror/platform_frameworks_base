@@ -9908,7 +9908,7 @@ public class Notification implements Parcelable
          *
          * @hide
          */
-        public static final int FLAG_SHOULD_SUPPRESS_BUBBLE = 0x00000004;
+        public static final int FLAG_SUPPRESSABLE_BUBBLE = 0x00000004;
 
         /**
          * Indicates whether the bubble is visually suppressed from the bubble stack.
@@ -10070,19 +10070,63 @@ public class Notification implements Parcelable
          * @return whether this bubble should be suppressed when the same content is visible
          * outside of the bubble.
          *
-         * @see BubbleMetadata.Builder#setSuppressBubble(boolean)
+         * @see BubbleMetadata.Builder#setSuppressableBubble(boolean)
          */
         public boolean isBubbleSuppressable() {
-            return (mFlags & FLAG_SHOULD_SUPPRESS_BUBBLE) != 0;
+            return (mFlags & FLAG_SUPPRESSABLE_BUBBLE) != 0;
         }
 
         /**
          * Indicates whether the bubble is currently visually suppressed from the bubble stack.
          *
-         * @see BubbleMetadata.Builder#setSuppressBubble(boolean)
+         * @see BubbleMetadata.Builder#setSuppressableBubble(boolean)
          */
         public boolean isBubbleSuppressed() {
             return (mFlags & FLAG_SUPPRESS_BUBBLE) != 0;
+        }
+
+        /**
+         * Sets whether the notification associated with the bubble is being visually
+         * suppressed from the notification shade. When <code>true</code> the notification is
+         * hidden, when <code>false</code> the notification shows as normal.
+         *
+         * @hide
+         */
+        public void setSuppressNotification(boolean suppressed) {
+            if (suppressed) {
+                mFlags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            } else {
+                mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            }
+        }
+
+        /**
+         * Sets whether the bubble should be visually suppressed from the bubble stack if the
+         * user is viewing the same content outside of the bubble. For example, the user has a
+         * bubble with Alice and then opens up the main app and navigates to Alice's page.
+         *
+         * @hide
+         */
+        public void setSuppressBubble(boolean suppressed) {
+            if (suppressed) {
+                mFlags |= Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+            } else {
+                mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public void setFlags(int flags) {
+            mFlags = flags;
+        }
+
+        /**
+         * @hide
+         */
+        public int getFlags() {
+            return mFlags;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<BubbleMetadata> CREATOR =
@@ -10125,20 +10169,6 @@ public class Notification implements Parcelable
             if (!TextUtils.isEmpty(mShortcutId)) {
                 out.writeString8(mShortcutId);
             }
-        }
-
-        /**
-         * @hide
-         */
-        public void setFlags(int flags) {
-            mFlags = flags;
-        }
-
-        /**
-         * @hide
-         */
-        public int getFlags() {
-            return mFlags;
         }
 
         /**
@@ -10438,8 +10468,8 @@ public class Notification implements Parcelable
              * {@link Activity#setLocusContext(LocusId, Bundle)}
              */
             @NonNull
-            public BubbleMetadata.Builder setSuppressBubble(boolean suppressBubble) {
-                setFlag(FLAG_SHOULD_SUPPRESS_BUBBLE, suppressBubble);
+            public BubbleMetadata.Builder setSuppressableBubble(boolean suppressBubble) {
+                setFlag(FLAG_SUPPRESSABLE_BUBBLE, suppressBubble);
                 return this;
             }
 
