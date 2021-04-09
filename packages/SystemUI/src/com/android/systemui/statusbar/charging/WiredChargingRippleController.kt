@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.leak.RotationUtils
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -122,13 +123,30 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     private fun layoutRipple() {
-        // TODO(shanh): Set origin base on phone orientation.
         val displayMetrics = DisplayMetrics()
         context.display.getRealMetrics(displayMetrics)
         val width = displayMetrics.widthPixels
         val height = displayMetrics.heightPixels
-        rippleView.origin = PointF(width / 2f, height.toFloat())
         rippleView.radius = Integer.max(width, height).toFloat()
+
+        // Always show the ripple from the charging cable location.
+        // Currently assuming the charging cable is at the bottom of the screen.
+        // TODO(shanh): Pull charging port location into configurations.
+        rippleView.origin = when (RotationUtils.getRotation(context)) {
+            RotationUtils.ROTATION_LANDSCAPE -> {
+                PointF(width.toFloat(), height / 2f)
+            }
+            RotationUtils.ROTATION_UPSIDE_DOWN -> {
+                PointF(width / 2f, 0f)
+            }
+            RotationUtils.ROTATION_SEASCAPE -> {
+                PointF(0f, height / 2f)
+            }
+            else -> {
+                // ROTATION_NONE
+                PointF(width / 2f, height.toFloat())
+            }
+        }
     }
 
     private fun updateRippleColor() {
