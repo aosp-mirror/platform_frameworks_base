@@ -8594,6 +8594,12 @@ public final class ContactsContract {
      * <p>
      * Contacts-specific settings for various {@link Account}'s.
      * </p>
+     * <p>
+     * A settings entry for an account is created automatically when a raw contact or group
+     * is inserted that references it. Settings entries cannot be deleted as long as raw
+     * contacts or groups continue to reference it; in order to delete a settings entry all
+     * raw contacts and groups referencing the account must be deleted first.
+     * </p>
      * <h2>Columns</h2>
      * <table class="jd-sumtable">
      * <tr>
