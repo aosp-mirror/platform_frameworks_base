@@ -281,7 +281,7 @@ public class NavigationBarView extends FrameLayout implements
         // When in gestural and the IME is showing, don't use the nearest region since it will take
         // gesture space away from the IME
         info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-        info.touchableRegion.set(getButtonLocations(false /* includeFloatingRotationButton */,
+        info.touchableRegion.set(getButtonLocations(false /* includeFloatingButtons */,
                 false /* inScreen */, false /* useNearestRegion */));
     };
 
@@ -982,7 +982,7 @@ public class NavigationBarView extends FrameLayout implements
      */
     public void notifyActiveTouchRegions() {
         mOverviewProxyService.onActiveNavBarRegionChanges(
-                getButtonLocations(true /* includeFloatingRotationButton */, true /* inScreen */,
+                getButtonLocations(true /* includeFloatingButtons */, true /* inScreen */,
                         true /* useNearestRegion */));
     }
 
@@ -995,14 +995,14 @@ public class NavigationBarView extends FrameLayout implements
     }
 
     /**
-     * @param includeFloatingRotationButton Whether to include the floating rotation button in the
-     *                                      region for all the buttons
+     * @param includeFloatingButtons Whether to include the floating rotation and overlay button in
+     *                               the region for all the buttons
      * @param inScreenSpace Whether to return values in screen space or window space
      * @param useNearestRegion Whether to use the nearest region instead of the actual button bounds
      * @return
      */
-    private Region getButtonLocations(boolean includeFloatingRotationButton,
-            boolean inScreenSpace, boolean useNearestRegion) {
+    private Region getButtonLocations(boolean includeFloatingButtons, boolean inScreenSpace,
+            boolean useNearestRegion) {
         if (useNearestRegion && !inScreenSpace) {
             // We currently don't support getting the nearest region in anything but screen space
             useNearestRegion = false;
@@ -1014,13 +1014,13 @@ public class NavigationBarView extends FrameLayout implements
         updateButtonLocation(getRecentsButton(), inScreenSpace, useNearestRegion);
         updateButtonLocation(getImeSwitchButton(), inScreenSpace, useNearestRegion);
         updateButtonLocation(getAccessibilityButton(), inScreenSpace, useNearestRegion);
-        if (includeFloatingRotationButton && mFloatingRotationButton.isVisible()) {
+        if (includeFloatingButtons && mFloatingRotationButton.isVisible()) {
             // Note: this button is floating so the nearest region doesn't apply
             updateButtonLocation(mFloatingRotationButton.getCurrentView(), inScreenSpace);
         } else {
             updateButtonLocation(getRotateSuggestionButton(), inScreenSpace, useNearestRegion);
         }
-        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()
+        if (includeFloatingButtons && mNavBarOverlayController.isNavigationBarOverlayEnabled()
                 && mNavBarOverlayController.isVisible()) {
             // Note: this button is floating so the nearest region doesn't apply
             updateButtonLocation(mNavBarOverlayController.getCurrentView(), inScreenSpace);
