@@ -465,7 +465,7 @@
     <item msgid="8894873528875953317">"۵۰٪"</item>
     <item msgid="7529124349186240216">"۱۰۰٪"</item>
   </string-array>
-    <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> قبل"</string>
+    <string name="charge_length_format" msgid="6941645744588690932">"‫<xliff:g id="ID_1">%1$s</xliff:g> پیش"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> باقی مانده است"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"کوچک"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"پیش‌فرض"</string>
