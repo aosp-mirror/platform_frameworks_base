@@ -339,11 +339,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     SparseIntArray mProfileOwners;
 
-    @GuardedBy("this")
-    private CheckOpsDelegate mAppOpsPolicy;
-
-    @GuardedBy("this")
-    private CheckOpsDelegateDispatcher mCheckOpsDelegateDispatcher;
+    private volatile CheckOpsDelegateDispatcher mCheckOpsDelegateDispatcher =
+            new CheckOpsDelegateDispatcher(/*policy*/ null, /*delegate*/ null);
 
     /**
       * Reverse lookup for {@link AppOpsManager#opToSwitch(int)}. Initialized once and never
@@ -1781,12 +1778,13 @@ public class AppOpsService extends IAppOpsService.Stub {
     /**
      * Sets a policy for handling app ops.
      *
-     * @param appOpsPolicy The policy.
+     * @param policy The policy.
      */
-    public void setAppOpsPolicy(@Nullable CheckOpsDelegate appOpsPolicy) {
-        synchronized (AppOpsService.this) {
-            mAppOpsPolicy = appOpsPolicy;
-        }
+    public void setAppOpsPolicy(@Nullable CheckOpsDelegate policy) {
+        final CheckOpsDelegateDispatcher oldDispatcher = mCheckOpsDelegateDispatcher;
+        final CheckOpsDelegate delegate = (oldDispatcher != null)
+                ? oldDispatcher.mCheckOpsDelegate : null;
+        mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(policy, delegate);
     }
 
     public void packageRemoved(int uid, String packageName) {
@@ -2909,53 +2907,28 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     public CheckOpsDelegate getAppOpsServiceDelegate() {
-        synchronized (this) {
-            return (mCheckOpsDelegateDispatcher != null)
-                    ? mCheckOpsDelegateDispatcher.getCheckOpsDelegate()
-                    : null;
+        synchronized (AppOpsService.this) {
+            final CheckOpsDelegateDispatcher dispatcher = mCheckOpsDelegateDispatcher;
+            return (dispatcher != null) ? dispatcher.getCheckOpsDelegate() : null;
         }
     }
 
     public void setAppOpsServiceDelegate(CheckOpsDelegate delegate) {
-        synchronized (this) {
-            if (delegate != null) {
-                mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(delegate);
-            } else {
-                mCheckOpsDelegateDispatcher = null;
-            }
+        synchronized (AppOpsService.this) {
+            final CheckOpsDelegateDispatcher oldDispatcher = mCheckOpsDelegateDispatcher;
+            final CheckOpsDelegate policy = (oldDispatcher != null) ? oldDispatcher.mPolicy : null;
+            mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(policy, delegate);
         }
     }
 
     @Override
     public int checkOperationRaw(int code, int uid, String packageName) {
-        return checkOperationInternal(code, uid, packageName, true /*raw*/);
+        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, true /*raw*/);
     }
 
     @Override
     public int checkOperation(int code, int uid, String packageName) {
-        return checkOperationInternal(code, uid, packageName, false /*raw*/);
-    }
-
-    private int checkOperationInternal(int code, int uid, String packageName, boolean raw) {
-        final CheckOpsDelegate policy;
-        final CheckOpsDelegateDispatcher delegateDispatcher;
-        synchronized (AppOpsService.this) {
-            policy = mAppOpsPolicy;
-            delegateDispatcher = mCheckOpsDelegateDispatcher;
-        }
-        if (policy != null) {
-            if (delegateDispatcher != null) {
-                return policy.checkOperation(code, uid, packageName, raw,
-                        delegateDispatcher::checkOperationImpl);
-            } else {
-                return policy.checkOperation(code, uid, packageName, raw,
-                        AppOpsService.this::checkOperationImpl);
-            }
-        } else if (delegateDispatcher != null) {
-            delegateDispatcher.getCheckOpsDelegate().checkOperation(code, uid,
-                    packageName, raw, AppOpsService.this::checkOperationImpl);
-        }
-        return checkOperationImpl(code, uid, packageName, raw);
+        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, false /*raw*/);
     }
 
     private int checkOperationImpl(int code, int uid, String packageName, boolean raw) {
@@ -3013,25 +2986,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkAudioOperation(int code, int usage, int uid, String packageName) {
-        final CheckOpsDelegate policy;
-        final CheckOpsDelegateDispatcher delegateDispatcher;
-        synchronized (AppOpsService.this) {
-            policy = mAppOpsPolicy;
-            delegateDispatcher = mCheckOpsDelegateDispatcher;
-        }
-        if (policy != null) {
-            if (delegateDispatcher != null) {
-                return policy.checkAudioOperation(code, usage, uid, packageName,
-                        delegateDispatcher::checkAudioOperationImpl);
-            } else {
-                return policy.checkAudioOperation(code, usage, uid, packageName,
-                        AppOpsService.this::checkAudioOperationImpl);
-            }
-        } else if (delegateDispatcher != null) {
-            delegateDispatcher.getCheckOpsDelegate().checkAudioOperation(code, usage,
-                    uid, packageName, AppOpsService.this::checkAudioOperationImpl);
-        }
-        return checkAudioOperationImpl(code, usage, uid, packageName);
+        return mCheckOpsDelegateDispatcher.checkAudioOperation(code, usage, uid, packageName);
     }
 
     private int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
@@ -3102,30 +3057,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     public SyncNotedAppOp noteProxyOperation(int code, AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation) {
-        final CheckOpsDelegate policy;
-        final CheckOpsDelegateDispatcher delegateDispatcher;
-        synchronized (AppOpsService.this) {
-            policy = mAppOpsPolicy;
-            delegateDispatcher = mCheckOpsDelegateDispatcher;
-        }
-        if (policy != null) {
-            if (delegateDispatcher != null) {
-                return policy.noteProxyOperation(code, attributionSource,
-                        shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                        skipProxyOperation, delegateDispatcher::noteProxyOperationImpl);
-            } else {
-                return policy.noteProxyOperation(code, attributionSource,
-                        shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                        skipProxyOperation, AppOpsService.this::noteProxyOperationImpl);
-            }
-        } else if (delegateDispatcher != null) {
-            delegateDispatcher.getCheckOpsDelegate().noteProxyOperation(code,
-                    attributionSource, shouldCollectAsyncNotedOp, message,
-                    shouldCollectMessage, skipProxyOperation,
-                    AppOpsService.this::noteProxyOperationImpl);
-        }
-        return noteProxyOperationImpl(code, attributionSource, shouldCollectAsyncNotedOp,
-                message, shouldCollectMessage,skipProxyOperation);
+        return mCheckOpsDelegateDispatcher.noteProxyOperation(code, attributionSource,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
     }
 
     private SyncNotedAppOp noteProxyOperationImpl(int code, AttributionSource attributionSource,
@@ -3185,29 +3118,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
             String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage) {
-        final CheckOpsDelegate policy;
-        final CheckOpsDelegateDispatcher delegateDispatcher;
-        synchronized (AppOpsService.this) {
-            policy = mAppOpsPolicy;
-            delegateDispatcher = mCheckOpsDelegateDispatcher;
-        }
-        if (policy != null) {
-            if (delegateDispatcher != null) {
-                return policy.noteOperation(code, uid, packageName, attributionTag,
-                        shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                        delegateDispatcher::noteOperationImpl);
-            } else {
-                return policy.noteOperation(code, uid, packageName, attributionTag,
-                        shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                        AppOpsService.this::noteOperationImpl);
-            }
-        } else if (delegateDispatcher != null) {
-            delegateDispatcher.getCheckOpsDelegate().noteOperation(code, uid, packageName,
-                    attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    AppOpsService.this::noteOperationImpl);
-        }
-        return noteOperationImpl(code, uid, packageName, attributionTag,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+        return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
+                attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
     }
 
     private SyncNotedAppOp noteOperationImpl(int code, int uid, @Nullable String packageName,
@@ -3627,32 +3539,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation) {
-        final CheckOpsDelegate policy;
-        final CheckOpsDelegateDispatcher delegateDispatcher;
-        synchronized (AppOpsService.this) {
-            policy = mAppOpsPolicy;
-            delegateDispatcher = mCheckOpsDelegateDispatcher;
-        }
-        if (policy != null) {
-            if (delegateDispatcher != null) {
-                return policy.startProxyOperation(clientId, code, attributionSource,
-                        startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                        shouldCollectMessage, skipProxyOperation,
-                        delegateDispatcher::startProxyOperationImpl);
-            } else {
-                return policy.startProxyOperation(clientId, code, attributionSource,
-                        startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                        shouldCollectMessage, skipProxyOperation,
-                        AppOpsService.this::startProxyOperationImpl);
-            }
-        } else if (delegateDispatcher != null) {
-            delegateDispatcher.getCheckOpsDelegate().startProxyOperation(clientId, code,
-                    attributionSource, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                    shouldCollectMessage, skipProxyOperation,
-                    AppOpsService.this::startProxyOperationImpl);
-        }
-        return startProxyOperationImpl(clientId, code, attributionSource, startIfModeDefault,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
+        return mCheckOpsDelegateDispatcher.startProxyOperation(clientId, code, attributionSource,
+                startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                skipProxyOperation);
     }
 
     private SyncNotedAppOp startProxyOperationImpl(IBinder clientId, int code,
@@ -3835,25 +3724,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void finishProxyOperation(IBinder clientId, int code,
             @NonNull AttributionSource attributionSource) {
-        final CheckOpsDelegate policy;
-        final CheckOpsDelegateDispatcher delegateDispatcher;
-        synchronized (AppOpsService.this) {
-            policy = mAppOpsPolicy;
-            delegateDispatcher = mCheckOpsDelegateDispatcher;
-        }
-        if (policy != null) {
-            if (delegateDispatcher != null) {
-                policy.finishProxyOperation(clientId, code, attributionSource,
-                        delegateDispatcher::finishProxyOperationImpl);
-            } else {
-                policy.finishProxyOperation(clientId, code, attributionSource,
-                        AppOpsService.this::finishProxyOperationImpl);
-            }
-        } else if (delegateDispatcher != null) {
-            delegateDispatcher.getCheckOpsDelegate().finishProxyOperation(clientId, code,
-                    attributionSource, AppOpsService.this::finishProxyOperationImpl);
-        }
-        finishProxyOperationImpl(clientId, code, attributionSource);
+        mCheckOpsDelegateDispatcher.finishProxyOperation(clientId, code, attributionSource);
     }
 
     private Void finishProxyOperationImpl(IBinder clientId, int code,
@@ -7011,10 +6882,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    @Immutable
     private final class CheckOpsDelegateDispatcher {
-        private final @NonNull CheckOpsDelegate mCheckOpsDelegate;
+        private final @Nullable CheckOpsDelegate mPolicy;
+        private final @Nullable CheckOpsDelegate mCheckOpsDelegate;
 
-        CheckOpsDelegateDispatcher(@NonNull CheckOpsDelegate checkOpsDelegate) {
+        CheckOpsDelegateDispatcher(@Nullable CheckOpsDelegate policy,
+                @Nullable CheckOpsDelegate checkOpsDelegate) {
+            mPolicy = policy;
             mCheckOpsDelegate = checkOpsDelegate;
         }
 
@@ -7022,25 +6897,100 @@ public class AppOpsService extends IAppOpsService.Stub {
             return mCheckOpsDelegate;
         }
 
-        public int checkOperationImpl(int code, int uid, String packageName, boolean raw) {
+        public int checkOperation(int code, int uid, String packageName, boolean raw) {
+            if (mPolicy != null) {
+                if (mCheckOpsDelegate != null) {
+                    return mPolicy.checkOperation(code, uid, packageName, raw,
+                            this::checkDelegateOperationImpl);
+                } else {
+                    return mPolicy.checkOperation(code, uid, packageName, raw,
+                            AppOpsService.this::checkOperationImpl);
+                }
+            } else if (mCheckOpsDelegate != null) {
+                return checkDelegateOperationImpl(code, uid, packageName, raw);
+            }
+            return checkOperationImpl(code, uid, packageName, raw);
+        }
+
+        private int checkDelegateOperationImpl(int code, int uid, String packageName, boolean raw) {
             return mCheckOpsDelegate.checkOperation(code, uid, packageName, raw,
                     AppOpsService.this::checkOperationImpl);
         }
 
-        public int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
+        public int checkAudioOperation(int code, int usage, int uid, String packageName) {
+            if (mPolicy != null) {
+                if (mCheckOpsDelegate != null) {
+                    return mPolicy.checkAudioOperation(code, usage, uid, packageName,
+                            this::checkDelegateAudioOperationImpl);
+                } else {
+                    return mPolicy.checkAudioOperation(code, usage, uid, packageName,
+                            AppOpsService.this::checkAudioOperationImpl);
+                }
+            } else if (mCheckOpsDelegate != null) {
+                return checkDelegateAudioOperationImpl(code, usage, uid, packageName);
+            }
+            return checkAudioOperationImpl(code, usage, uid, packageName);
+        }
+
+        private int checkDelegateAudioOperationImpl(int code, int usage, int uid,
+                String packageName) {
             return mCheckOpsDelegate.checkAudioOperation(code, usage, uid, packageName,
                     AppOpsService.this::checkAudioOperationImpl);
         }
 
-        public SyncNotedAppOp noteOperationImpl(int code, int uid, @Nullable String packageName,
-                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage) {
+        public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
+                String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
+                boolean shouldCollectMessage) {
+            if (mPolicy != null) {
+                if (mCheckOpsDelegate != null) {
+                    return mPolicy.noteOperation(code, uid, packageName, attributionTag,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            this::noteDelegateOperationImpl);
+                } else {
+                    return mPolicy.noteOperation(code, uid, packageName, attributionTag,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            AppOpsService.this::noteOperationImpl);
+                }
+            } else if (mCheckOpsDelegate != null) {
+                return noteDelegateOperationImpl(code, uid, packageName,
+                        attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+            }
+            return noteOperationImpl(code, uid, packageName, attributionTag,
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+        }
+
+        private SyncNotedAppOp noteDelegateOperationImpl(int code, int uid,
+                @Nullable String packageName, @Nullable String featureId,
+                boolean shouldCollectAsyncNotedOp, @Nullable String message,
+                boolean shouldCollectMessage) {
             return mCheckOpsDelegate.noteOperation(code, uid, packageName, featureId,
                     shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                     AppOpsService.this::noteOperationImpl);
         }
 
-        public SyncNotedAppOp noteProxyOperationImpl(int code,
+        public SyncNotedAppOp noteProxyOperation(int code, AttributionSource attributionSource,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                boolean skipProxyOperation) {
+            if (mPolicy != null) {
+                if (mCheckOpsDelegate != null) {
+                    return mPolicy.noteProxyOperation(code, attributionSource,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            skipProxyOperation, this::noteDelegateProxyOperationImpl);
+                } else {
+                    return mPolicy.noteProxyOperation(code, attributionSource,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            skipProxyOperation, AppOpsService.this::noteProxyOperationImpl);
+                }
+            } else if (mCheckOpsDelegate != null) {
+                return noteDelegateProxyOperationImpl(code,
+                        attributionSource, shouldCollectAsyncNotedOp, message,
+                        shouldCollectMessage, skipProxyOperation);
+            }
+            return noteProxyOperationImpl(code, attributionSource, shouldCollectAsyncNotedOp,
+                    message, shouldCollectMessage,skipProxyOperation);
+        }
+
+        private SyncNotedAppOp noteDelegateProxyOperationImpl(int code,
                 @NonNull AttributionSource attributionSource, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 boolean skipProxyOperation) {
@@ -7049,7 +6999,33 @@ public class AppOpsService extends IAppOpsService.Stub {
                     AppOpsService.this::noteProxyOperationImpl);
         }
 
-        public SyncNotedAppOp startProxyOperationImpl(IBinder token, int code,
+        public SyncNotedAppOp startProxyOperation(IBinder clientId, int code,
+                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                boolean skipProxyOperation) {
+            if (mPolicy != null) {
+                if (mCheckOpsDelegate != null) {
+                    return mPolicy.startProxyOperation(clientId, code, attributionSource,
+                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, skipProxyOperation,
+                            this::startDelegateProxyOperationImpl);
+                } else {
+                    return mPolicy.startProxyOperation(clientId, code, attributionSource,
+                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, skipProxyOperation,
+                            AppOpsService.this::startProxyOperationImpl);
+                }
+            } else if (mCheckOpsDelegate != null) {
+                return startDelegateProxyOperationImpl(clientId, code,
+                        attributionSource, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                        shouldCollectMessage, skipProxyOperation);
+            }
+            return startProxyOperationImpl(clientId, code, attributionSource, startIfModeDefault,
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
+        }
+
+
+        private SyncNotedAppOp startDelegateProxyOperationImpl(IBinder token, int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
                 boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
                 boolean skipProxyOperation) {
@@ -7058,7 +7034,23 @@ public class AppOpsService extends IAppOpsService.Stub {
                     skipProxyOperation, AppOpsService.this::startProxyOperationImpl);
         }
 
-        public Void finishProxyOperationImpl(IBinder clientId, int code,
+        public void finishProxyOperation(IBinder clientId, int code,
+                @NonNull AttributionSource attributionSource) {
+            if (mPolicy != null) {
+                if (mCheckOpsDelegate != null) {
+                    mPolicy.finishProxyOperation(clientId, code, attributionSource,
+                            this::finishDelegateProxyOperationImpl);
+                } else {
+                    mPolicy.finishProxyOperation(clientId, code, attributionSource,
+                            AppOpsService.this::finishProxyOperationImpl);
+                }
+            } else if (mCheckOpsDelegate != null) {
+                finishDelegateProxyOperationImpl(clientId, code, attributionSource);
+            }
+            finishProxyOperationImpl(clientId, code, attributionSource);
+        }
+
+        private Void finishDelegateProxyOperationImpl(IBinder clientId, int code,
                 @NonNull AttributionSource attributionSource) {
             mCheckOpsDelegate.finishProxyOperation(clientId, code, attributionSource,
                     AppOpsService.this::finishProxyOperationImpl);
