@@ -17,9 +17,10 @@ android_library {
         "androidx.annotation_annotation",
         "androidx.core_core",
         "com.google.android.material_material",
+        "SettingsLibSettingsTransition",
     ],
     sdk_version: "system_current",
-    min_sdk_version: "21",
+    min_sdk_version: "29",
     apex_available: [
         "//apex_available:platform",
         "com.android.cellbroadcast",
