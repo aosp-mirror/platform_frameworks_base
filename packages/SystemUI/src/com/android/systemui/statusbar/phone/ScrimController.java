@@ -500,7 +500,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         updateNotificationsScrimAlpha(qsPanelBottomY);
         if (mQsExpansion != expansionFraction) {
             mQsExpansion = expansionFraction;
-            Log.d(TAG, "set qs fraction");
             boolean relevantState = (mState == ScrimState.SHADE_LOCKED
                     || mState == ScrimState.KEYGUARD
                     || mState == ScrimState.PULSING
