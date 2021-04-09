@@ -93,6 +93,10 @@ public final class NetworkScore implements Parcelable {
         mKeepConnectedReason = in.readInt();
     }
 
+    /**
+     * Get the legacy int score embedded in this NetworkScore.
+     * @see Builder#setLegacyInt(int)
+     */
     public int getLegacyInt() {
         return mLegacyInt;
     }
@@ -212,7 +216,9 @@ public final class NetworkScore implements Parcelable {
         /**
          * Sets the legacy int for this score.
          *
-         * Do not rely on this. It will be gone by the time S is released.
+         * This will be used for measurements and logs, but will no longer be used for ranking
+         * networks against each other. Callers that existed before Android S should send what
+         * they used to send as the int score.
          *
          * @param score the legacy int
          * @return this
