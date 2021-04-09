@@ -4539,6 +4539,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testLockTaskPolicyForProfileOwner() throws Exception {
+        mockPolicyExemptApps();
+        mockVendorPolicyExemptApps();
+
         // Setup a PO
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
         setAsProfileOwner(admin1);

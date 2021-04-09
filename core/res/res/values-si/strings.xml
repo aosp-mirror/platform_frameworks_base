@@ -538,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"අව‍ට ඇති බ්ලූටූත් උපාංග සොයා ගැනීමට සහ යුගල කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"යුගල කළ බ්ලූටූත් උපාංගවලට සම්බන්ධ වන්න"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"යුගල කළ බ්ලූටූත් උපාංග සමඟ සම්බන්ධ වීමට යෙදුමට ඉඩ දෙයි"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"කැමති NFC ගෙවීම් සේවා තොරතුරු"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ලියාපදිංචි කළ ආධාර සහ ගමන් මාර්ග ගමනාන්ත වැනි කැමති nfc ගෙවීම් සේවා තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
@@ -576,8 +576,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"රහස් අංක, රටා, හෝ මුරපද කිසිවක් සකසා නැත"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"සත්‍යාපනය කිරීමේ දෝෂයකි"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"තිර අගුල භාවිත කරන්න"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ඉදිරියට යාමට ඔබගේ තිර අගුල ඇතුළත් කරන්න"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"අර්ධ ඇඟිලි සලකුණක් අනාවරණය කරන ලදි"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"සංවේදකය පිරිසිදු කරන්න"</string>
@@ -657,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"මුහුණු <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"මුහුණු අගුලු හැරීම භාවිත කරන්න"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"මුහුණු අගුලු හැරීම හෝ තිර අගුල භාවිත කරන්න"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ඉදිරියට යාමට ඔබගේ මුහුණ භාවිත කරන්න"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ඉදිරියට යාමට ඔබගේ මුහුණු හෝ තිර අගුල භාවිත කරන්න"</string>
   <string-array name="face_error_vendor">
   </string-array>

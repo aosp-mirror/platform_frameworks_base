@@ -67,6 +67,9 @@ public final class AssociationRequest implements Parcelable {
      * Using it requires declaring uses-permission
      * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_WATCH} in the manifest.
      *
+     * <a href="{@docRoot}about/versions/12/features#cdm-profiles">Learn more</a>
+     * about device profiles.
+     *
      * @see AssociationRequest.Builder#setDeviceProfile
      */
     public static final String DEVICE_PROFILE_WATCH = "android.app.role.COMPANION_DEVICE_WATCH";

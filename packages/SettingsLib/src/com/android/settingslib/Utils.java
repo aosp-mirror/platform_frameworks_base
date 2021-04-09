@@ -204,18 +204,23 @@ public class Utils {
             statusString = res.getString(R.string.battery_info_status_full);
         } else {
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-                switch (batteryStatus.getChargingSpeed(context)) {
-                    case BatteryStatus.CHARGING_FAST:
-                        statusString = res.getString(R.string.battery_info_status_charging_fast);
-                        break;
-                    case BatteryStatus.CHARGING_SLOWLY:
-                        statusString = res.getString(R.string.battery_info_status_charging_slow);
-                        break;
-                    default:
-                        statusString = res.getString(R.string.battery_info_status_charging);
-                        break;
+                if (batteryStatus.isPluggedInWired()) {
+                    switch (batteryStatus.getChargingSpeed(context)) {
+                        case BatteryStatus.CHARGING_FAST:
+                            statusString = res.getString(
+                                    R.string.battery_info_status_charging_fast);
+                            break;
+                        case BatteryStatus.CHARGING_SLOWLY:
+                            statusString = res.getString(
+                                    R.string.battery_info_status_charging_slow);
+                            break;
+                        default:
+                            statusString = res.getString(R.string.battery_info_status_charging);
+                            break;
+                    }
+                } else {
+                    statusString = res.getString(R.string.battery_info_status_charging_wireless);
                 }
-
             } else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) {
                 statusString = res.getString(R.string.battery_info_status_discharging);
             } else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {

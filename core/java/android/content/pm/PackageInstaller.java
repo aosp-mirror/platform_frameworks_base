@@ -1808,7 +1808,10 @@ public class PackageInstaller {
          * If user explicitly enabled or disabled it via settings, this call is ignored.
          *
          * @param shouldAutoRevoke whether permissions should be auto-revoked.
+         *
+         * @deprecated No longer used
          */
+        @Deprecated
         public void setAutoRevokePermissionsMode(boolean shouldAutoRevoke) {
             autoRevokePermissionsMode = shouldAutoRevoke ? MODE_ALLOWED : MODE_IGNORED;
         }

@@ -2839,10 +2839,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void updateLockTaskPackagesLocked(List<String> packages, int userId) {
+        String[] packagesArray = null;
+
+        if (!packages.isEmpty()) {
+            // When adding packages, we need to include the exempt apps so they can still be
+            // launched (ideally we should use a different AM API as these apps don't need to use
+            // lock-task mode).
+            // They're not added when the packages is empty though, as in that case we're disabling
+            // lock-task mode.
+            List<String> exemptApps = listPolicyExemptAppsUnchecked();
+            if (!exemptApps.isEmpty()) {
+                // TODO(b/175377361): add unit test to verify it (cannot be CTS because the policy-
+                // -exempt apps are provided by OEM and the test would have no control over it) once
+                // tests are migrated to the new infra-structure
+                HashSet<String> updatedPackages = new HashSet<>(packages);
+                updatedPackages.addAll(exemptApps);
+                if (VERBOSE_LOG) {
+                    Slogf.v(LOG_TAG, "added %d policy-exempt apps to %d lock task packages. Final "
+                            + "list: %s", exemptApps.size(), packages.size(), updatedPackages);
+                }
+                packagesArray = updatedPackages.toArray(new String[updatedPackages.size()]);
+            }
+        }
+
+        if (packagesArray == null) {
+            packagesArray = packages.toArray(new String[packages.size()]);
+        }
+
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            mInjector.getIActivityManager()
-                    .updateLockTaskPackages(userId, packages.toArray(new String[packages.size()]));
+            mInjector.getIActivityManager().updateLockTaskPackages(userId, packagesArray);
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {

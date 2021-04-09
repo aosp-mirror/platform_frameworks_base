@@ -1250,4 +1250,15 @@ public class ContextWrapper extends Context {
         }
         return mBase.isUiContext();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isConfigurationContext() {
+        if (mBase == null) {
+            return false;
+        }
+        return mBase.isConfigurationContext();
+    }
 }

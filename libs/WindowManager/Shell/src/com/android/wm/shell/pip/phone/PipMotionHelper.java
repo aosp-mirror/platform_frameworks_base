@@ -16,6 +16,10 @@
 
 package com.android.wm.shell.pip.phone;
 
+import static androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_NO_BOUNCY;
+import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW;
+import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_MEDIUM;
+
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
 
@@ -31,7 +35,6 @@ import android.view.Choreographer;
 
 import androidx.dynamicanimation.animation.AnimationHandler;
 import androidx.dynamicanimation.animation.AnimationHandler.FrameCallbackScheduler;
-import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.animation.PhysicsAnimator;
@@ -61,9 +64,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private static final int UNSTASH_DURATION = 250;
     private static final int LEAVE_PIP_DURATION = 300;
     private static final int SHIFT_DURATION = 300;
-
-    private static final float PIP_STIFFNESS = 700f;
-    private static final float PIP_DAMPING_RATIO = SpringForce.DAMPING_RATIO_NO_BOUNCY;
 
     /** Friction to use for PIP when it moves via physics fling animations. */
     private static final float DEFAULT_FRICTION = 1.9f;
@@ -120,13 +120,27 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** SpringConfig to use for fling-then-spring animations. */
     private final PhysicsAnimator.SpringConfig mSpringConfig =
-            new PhysicsAnimator.SpringConfig(PIP_STIFFNESS, PIP_DAMPING_RATIO);
+            new PhysicsAnimator.SpringConfig(700f, DAMPING_RATIO_NO_BOUNCY);
+
+    /** SpringConfig used for animating into the dismiss region, matches the one in
+     * {@link MagnetizedObject}. */
+    private final PhysicsAnimator.SpringConfig mAnimateToDismissSpringConfig =
+            new PhysicsAnimator.SpringConfig(STIFFNESS_MEDIUM, DAMPING_RATIO_NO_BOUNCY);
+
+    /** SpringConfig used for animating the pip to catch up to the finger once it leaves the dismiss
+     * drag region. */
+    private final PhysicsAnimator.SpringConfig mCatchUpSpringConfig =
+            new PhysicsAnimator.SpringConfig(5000f, DAMPING_RATIO_NO_BOUNCY);
 
     /** SpringConfig to use for springing PIP away from conflicting floating content. */
     private final PhysicsAnimator.SpringConfig mConflictResolutionSpringConfig =
-                new PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_LOW, PIP_DAMPING_RATIO);
+            new PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_NO_BOUNCY);
 
     private final Consumer<Rect> mUpdateBoundsCallback = (Rect newBounds) -> {
+        if (mPipBoundsState.getBounds().equals(newBounds)) {
+            return;
+        }
+
         mMenuController.updateMenuLayout(newBounds);
         mPipBoundsState.setBounds(newBounds);
     };
@@ -262,10 +276,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             // If PIP is 'catching up' after being stuck in the dismiss target, update the animation
             // to spring towards the new touch location.
             mTemporaryBoundsPhysicsAnimator
-                    .spring(FloatProperties.RECT_WIDTH, getBounds().width(), mSpringConfig)
-                    .spring(FloatProperties.RECT_HEIGHT, getBounds().height(), mSpringConfig)
-                    .spring(FloatProperties.RECT_X, toBounds.left, mSpringConfig)
-                    .spring(FloatProperties.RECT_Y, toBounds.top, mSpringConfig);
+                    .spring(FloatProperties.RECT_WIDTH, getBounds().width(), mCatchUpSpringConfig)
+                    .spring(FloatProperties.RECT_HEIGHT, getBounds().height(), mCatchUpSpringConfig)
+                    .spring(FloatProperties.RECT_X, toBounds.left, mCatchUpSpringConfig)
+                    .spring(FloatProperties.RECT_Y, toBounds.top, mCatchUpSpringConfig);
 
             startBoundsAnimator(toBounds.left /* toX */, toBounds.top /* toY */);
         }
@@ -290,10 +304,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             mPipBoundsState.getMotionBoundsState().setBoundsInMotion(getBounds());
         }
         mTemporaryBoundsPhysicsAnimator
-                .spring(FloatProperties.RECT_X, destinationX, velX, mSpringConfig)
-                .spring(FloatProperties.RECT_Y, destinationY, velY, mSpringConfig)
-                .spring(FloatProperties.RECT_WIDTH, desiredWidth, mSpringConfig)
-                .spring(FloatProperties.RECT_HEIGHT, desiredHeight, mSpringConfig)
+                .spring(FloatProperties.RECT_X, destinationX, velX, mAnimateToDismissSpringConfig)
+                .spring(FloatProperties.RECT_Y, destinationY, velY, mAnimateToDismissSpringConfig)
+                .spring(FloatProperties.RECT_WIDTH, desiredWidth, mAnimateToDismissSpringConfig)
+                .spring(FloatProperties.RECT_HEIGHT, desiredHeight, mAnimateToDismissSpringConfig)
                 .withEndActions(after);
 
         startBoundsAnimator(destinationX, destinationY);

@@ -300,8 +300,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Приложение активно"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Приложения, расходующие заряд"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увеличение"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Сервисы специальных возможностей"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" расходует заряд"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Несколько приложений (<xliff:g id="NUMBER">%1$d</xliff:g>) расходуют заряд"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Нажмите, чтобы проверить энергопотребление и трафик"</string>
@@ -545,9 +544,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Приложение сможет находить устройства Bluetooth поблизости и подключаться к ним."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"доступ к подключенным устройствам Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"У приложения будет доступ к подключенным устройствам Bluetooth."</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сведения о предпочтительном платежном сервисе NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Приложение сможет получать сведения о предпочтительном платежном сервисе NFC (например, зарегистрированные идентификаторы AID и конечный пункт маршрута)."</string>
@@ -583,30 +582,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Укажите PIN-код, пароль или графический ключ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ошибка аутентификации."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Использовать блокировку экрана"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Чтобы продолжить, разблокируйте экран."</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Отсканирована только часть отпечатка."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не удалось распознать отпечаток. Повторите попытку."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Очистите сканер."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Вы убрали палец слишком быстро."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Вы перемещали палец слишком медленно. Повторите попытку."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Попробуйте сохранить отпечаток другого пальца."</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Слишком светло."</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Попробуйте изменить положение пальца."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечаток пальца проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицо распознано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицо распознано, нажмите кнопку \"Подтвердить\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Сканер недоступен"</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Не удалось сохранить отпечаток."</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Превышено время ожидания. Повторите попытку."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Операция с отпечатком отменена."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Операция с отпечатком пальца отменена пользователем."</string>
@@ -671,8 +662,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Лицо <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Использовать фейсконтроль"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Использовать фейсконтроль или блокировку экрана"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Чтобы продолжить, используйте функцию фейсконтроля."</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Чтобы продолжить, посмотрите на экран или используйте данные для разблокировки."</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -766,7 +756,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Шифровать данные приложений в хранилище."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Отключение камер"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Запретить использование камер на устройстве."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Отключение функций"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Отключение функций блокировки"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Запретить использовать некоторые функции блокировки экрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Домашний"</item>

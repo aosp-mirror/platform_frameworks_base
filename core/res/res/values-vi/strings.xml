@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Ứng dụng đang chạy"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Các ứng dụng tiêu thụ pin"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Phóng to"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Việc sử dụng tính năng hỗ trợ tiếp cận"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang sử dụng pin"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ứng dụng đang sử dụng pin"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
@@ -402,7 +401,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Cho phép ứng dụng sử dụng các dịch vụ trên nền trước."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"đo dung lượng lưu trữ ứng dụng"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Cho phép ứng dụng truy xuất mã, dữ liệu và kích thước bộ nhớ đệm của chính ứng dụng"</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"sửa đổi các tùy chọn cài đặt hệ thống"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"sửa đổi các chế độ cài đặt hệ thống"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Cho phép ứng dụng sửa đổi dữ liệu cài đặt của hệ thống. Ứng dụng độc hại có thể làm hỏng cấu hình hệ thống của bạn."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"chạy khi khởi động"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"Cho phép ứng dụng tự chạy ngay khi hệ thống khởi động xong. Quyền này có thể khiến máy tính bảng mất nhiều thời gian khởi động hơn và cho phép ứng dụng làm chậm toàn bộ máy tính bảng do ứng dụng luôn chạy."</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Cho phép ứng dụng khám phá và ghép nối với các thiết bị Bluetooth ở gần"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"kết nối với các thiết bị Bluetooth đã ghép nối"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Cho phép ứng dụng kết nối với thiết bị Bluetooth đã ghép nối"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Chưa đặt mã PIN, hình mở khóa hoặc mật khẩu"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Lỗi khi xác thực"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Dùng phương thức khóa màn hình"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Hãy nhập phương thức khóa màn hình của bạn để tiếp tục"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Phát hiện thấy một phần vân tay"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Hãy vệ sinh cảm biến"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Di chuyển ngón tay quá nhanh"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Di chuyển ngón tay quá chậm. Vui lòng thử lại."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Hãy thử một vân tay khác"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Quá sáng"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Hãy thử điều chỉnh"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Đã xác thực vân tay"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Đã xác thực khuôn mặt"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Đã xác thực khuôn mặt, vui lòng nhấn để xác nhận"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Phần cứng vân tay không khả dụng."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Không thể thiết lập vân tay"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Đã hết thời gian chờ vân tay. Hãy thử lại."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Thao tác dùng dấu vân tay bị hủy."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Người dùng đã hủy thao tác dùng dấu vân tay."</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Khuôn mặt <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Dùng tính năng mở khóa bằng khuôn mặt"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Dùng khuôn mặt hoặc phương thức khóa màn hình"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Hãy dùng khuôn mặt của bạn để tiếp tục"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Dùng khuôn mặt của bạn hoặc phương thức khóa màn hình để tiếp tục"</string>
   <string-array name="face_error_vendor">
   </string-array>

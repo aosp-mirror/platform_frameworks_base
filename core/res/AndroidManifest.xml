@@ -1953,7 +1953,15 @@
         android:label="@string/permlab_bluetooth_connect"
         android:protectionLevel="dangerous" />
 
-    <!-- Required to be able to range to devices using uwb.
+    <!-- Required to be able to advertise to nearby Bluetooth devices.
+         <p>Protection level: dangerous -->
+    <permission android:name="android.permission.BLUETOOTH_ADVERTISE"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:description="@string/permdesc_bluetooth_advertise"
+        android:label="@string/permlab_bluetooth_advertise"
+        android:protectionLevel="dangerous" />
+
+    <!-- Required to be able to range to devices using ultra-wideband.
          <p>Protection level: dangerous -->
     <permission android:name="android.permission.UWB_RANGING"
         android:permissionGroup="android.permission-group.UNDEFINED"

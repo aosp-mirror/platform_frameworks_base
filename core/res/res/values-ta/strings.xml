@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ஆப்ஸ் இயங்குகிறது"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"பேட்டரியைப் பயன்படுத்தும் ஆப்ஸ்"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"பெரிதாக்கல்"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"அணுகல்தன்மை உபயோகம்"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் பேட்டரியைப் பயன்படுத்துகிறது"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ஆப்ஸ் பேட்டரியைப் பயன்படுத்துகின்றன"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"பேட்டரி மற்றும் டேட்டா உபயோக விவரங்களைக் காண, தட்டவும்"</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"அருகிலுள்ள புளூடூத் சாதனங்களைக் கண்டறிந்து அவற்றுடன் இணைவதற்கு ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"இணைக்கப்பட்ட புளூடூத் சாதனங்களுடன் இணைத்தல்"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"இணைக்கப்பட்ட புளூடூத் சாதனங்களுடன் இணைவதற்கு ஆப்ஸை அனுமதிக்கும்"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்கள்"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"பின்னோ, பேட்டர்னோ, கடவுச்சொல்லோ அமைக்கப்படவில்லை"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"அங்கீகரிப்பதில் பிழை"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"திரைப் பூட்டைப் பயன்படுத்து"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"தொடர்வதற்கு உங்கள் திரைப் பூட்டை உள்ளிடுங்கள்"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"பகுதியளவு கைரேகை கண்டறியப்பட்டது"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"சென்சாரைச் சுத்தம் செய்யவும்"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"விரலை வேகமாக நகர்த்திவிட்டீர்கள்"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"விரலை மிகவும் மெதுவாக நகர்த்திவிட்டீர்கள். மீண்டும் முயற்சிக்கவும்."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"வேறு கைரேகையை முயலவும்"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"அதிக வெளிச்சமாக உள்ளது"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"விரலைச் சரியாக வைக்கவும்"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"கைரேகை அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"முகம் அங்கீகரிக்கப்பட்டது. ’உறுதிப்படுத்துக’ என்பதை அழுத்துக"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"கைரேகை வன்பொருள் இல்லை."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"கைரேகையை அமைக்க முடியவில்லை"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"கைரேகைக்கான நேரம் முடிந்தது. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"கைரேகை செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"பயனர், கைரேகை உறுதிப்படுத்துதலை ரத்துசெய்தார்."</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"முகம் <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"முகம் காட்டித் திறத்தலை உபயோகி"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"முகத்தையோ திரைப் பூட்டையோ பயன்படுத்து"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"தொடர்வதற்கு உங்கள் முகத்தைப் பயன்படுத்துங்கள்"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"தொடர, உங்கள் முகத்தையோ திரைப் பூட்டையோ பயன்படுத்துங்கள்"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -740,7 +730,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"திரையைத் திறக்கும் போது, எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிக்கிறது மற்றும் கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால், டேப்லெட்டைப் பூட்டும் அல்லது இந்தப் பயனரின் எல்லா தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"திரையைத் திறக்கும் போது எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிப்பதோடு கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால் Android TVயைப் பூட்டும் அல்லது இந்தப் பயனரின் அனைத்துத் தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"திரையைத் திறக்கும் போது, எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிக்கிறது மற்றும் கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால், ஃபோனைப் பூட்டும் அல்லது இந்தப் பயனரின் எல்லா தரவையும் அழிக்கும்."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"திரைப் பூட்டை மாற்று"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"திரைப் பூட்டை மாற்றுதல்"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"திரைப் பூட்டை மாற்றும்."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"திரையைப் பூட்டு"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"திரை எப்படி, எப்போது பூட்டப்படுகிறது என்பதைக் கட்டுப்படுத்தலாம்."</string>

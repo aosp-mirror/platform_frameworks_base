@@ -76,6 +76,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
     private Context mContext;
     protected List<ScanResult> mLastScanResult;
     protected Object mWifiScanResultLock = new Object();
+    public TetheringManager mTetheringManager;
 
     /* Control Wifi States */
     public WifiManager mWifiManager;
@@ -129,6 +130,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         mCm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         // Get an instance of WifiManager
         mWifiManager =(WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
+        mTetheringManager = mContext.getSystemService(TetheringManager.class);
 
         // register a connectivity receiver for CONNECTIVITY_ACTION;
         mConnectivityReceiver = new ConnectivityReceiver();
@@ -216,13 +218,13 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
      */
     protected boolean waitForTetherStateChange(long timeout) {
         long startTime = SystemClock.uptimeMillis();
-        String[] wifiRegexes = mCm.getTetherableWifiRegexs();
+        String[] wifiRegexes = mTetheringManager.getTetherableWifiRegexs();
         while (true) {
             if ((SystemClock.uptimeMillis() - startTime) > timeout) {
                 return false;
             }
-            String[] active = mCm.getTetheredIfaces();
-            String[] error = mCm.getTetheringErroredIfaces();
+            String[] active = mTetheringManager.getTetheredIfaces();
+            String[] error = mTetheringManager.getTetheringErroredIfaces();
             for (String iface: active) {
                 for (String regex: wifiRegexes) {
                     if (iface.matches(regex)) {

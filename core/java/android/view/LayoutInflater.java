@@ -32,6 +32,7 @@ import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -94,6 +95,7 @@ public abstract class LayoutInflater {
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    // TODO(b/182007470): Use @ConfigurationContext instead
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     @UiContext
     protected final Context mContext;
@@ -255,6 +257,7 @@ public abstract class LayoutInflater {
      * values for their attributes are retrieved.
      */
     protected LayoutInflater(Context context) {
+        StrictMode.assertConfigurationContext(context, "LayoutInflater");
         mContext = context;
         initPrecompiledViews();
     }
@@ -268,6 +271,7 @@ public abstract class LayoutInflater {
      * @param newContext The new Context to use.
      */
     protected LayoutInflater(LayoutInflater original, Context newContext) {
+        StrictMode.assertConfigurationContext(newContext, "LayoutInflater");
         mContext = newContext;
         mFactory = original.mFactory;
         mFactory2 = original.mFactory2;

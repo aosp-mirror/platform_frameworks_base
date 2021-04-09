@@ -28,16 +28,16 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioFormat;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.util.Log;
-
-import com.android.internal.app.IHotwordRecognitionStatusCallback;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -58,6 +58,8 @@ public abstract class HotwordDetectionService extends Service {
     private static final boolean DBG = true;
 
     private static final long UPDATE_TIMEOUT_MILLIS = 5000;
+    /** @hide */
+    public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -141,7 +143,7 @@ public abstract class HotwordDetectionService extends Service {
 
         @Override
         public void updateState(PersistableBundle options, SharedMemory sharedMemory,
-                IHotwordRecognitionStatusCallback callback) throws RemoteException {
+                IRemoteCallback callback) throws RemoteException {
             if (DBG) {
                 Log.d(TAG, "#updateState");
             }
@@ -314,14 +316,15 @@ public abstract class HotwordDetectionService extends Service {
     }
 
     private void onUpdateStateInternal(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory, IHotwordRecognitionStatusCallback callback) {
-        // TODO (b/183684347): Implement timeout case.
+            @Nullable SharedMemory sharedMemory, IRemoteCallback callback) {
         IntConsumer intConsumer = null;
         if (callback != null) {
             intConsumer =
                     value -> {
                         try {
-                            callback.onStatusReported(value);
+                            Bundle status = new Bundle();
+                            status.putInt(KEY_INITIALIZATION_STATUS, value);
+                            callback.sendResult(status);
                         } catch (RemoteException e) {
                             throw e.rethrowFromSystemServer();
                         }

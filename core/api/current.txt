@@ -55,6 +55,7 @@ package android {
     field public static final String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final String BLUETOOTH = "android.permission.BLUETOOTH";
     field public static final String BLUETOOTH_ADMIN = "android.permission.BLUETOOTH_ADMIN";
+    field public static final String BLUETOOTH_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE";
     field public static final String BLUETOOTH_CONNECT = "android.permission.BLUETOOTH_CONNECT";
     field public static final String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
     field public static final String BLUETOOTH_SCAN = "android.permission.BLUETOOTH_SCAN";
@@ -12441,7 +12442,7 @@ package android.content.pm {
     method public void setAppIcon(@Nullable android.graphics.Bitmap);
     method public void setAppLabel(@Nullable CharSequence);
     method public void setAppPackageName(@Nullable String);
-    method public void setAutoRevokePermissionsMode(boolean);
+    method @Deprecated public void setAutoRevokePermissionsMode(boolean);
     method public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
@@ -20474,6 +20475,7 @@ package android.media {
     field public static final int ENCODED_SURROUND_OUTPUT_AUTO = 0; // 0x0
     field public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3; // 0x3
     field public static final int ENCODED_SURROUND_OUTPUT_NEVER = 1; // 0x1
+    field public static final int ENCODED_SURROUND_OUTPUT_UNKNOWN = -1; // 0xffffffff
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_DEAD_OBJECT = -6; // 0xfffffffa
     field public static final String EXTRA_AUDIO_PLUG_STATE = "android.media.extra.AUDIO_PLUG_STATE";
@@ -30677,7 +30679,6 @@ package android.os {
     field public static final String HARDWARE;
     field public static final String HOST;
     field public static final String ID;
-    field public static final boolean IS_DEBUGGABLE;
     field public static final String MANUFACTURER;
     field public static final String MODEL;
     field @NonNull public static final String ODM_SKU;
@@ -39180,19 +39181,21 @@ package android.speech {
   }
 
   public class SpeechRecognizer {
-    method public void cancel();
-    method @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
-    method public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
-    method public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
+    method @MainThread public void cancel();
+    method @MainThread @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
+    method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
+    method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
     method public void destroy();
     method public static boolean isRecognitionAvailable(android.content.Context);
-    method public void setRecognitionListener(android.speech.RecognitionListener);
-    method public void startListening(android.content.Intent);
-    method public void stopListening();
+    method @MainThread public void setRecognitionListener(android.speech.RecognitionListener);
+    method @MainThread public void startListening(android.content.Intent);
+    method @MainThread public void stopListening();
     field public static final String CONFIDENCE_SCORES = "confidence_scores";
     field public static final int ERROR_AUDIO = 3; // 0x3
     field public static final int ERROR_CLIENT = 5; // 0x5
     field public static final int ERROR_INSUFFICIENT_PERMISSIONS = 9; // 0x9
+    field public static final int ERROR_LANGUAGE_NOT_SUPPORTED = 12; // 0xc
+    field public static final int ERROR_LANGUAGE_UNAVAILABLE = 13; // 0xd
     field public static final int ERROR_NETWORK = 2; // 0x2
     field public static final int ERROR_NETWORK_TIMEOUT = 1; // 0x1
     field public static final int ERROR_NO_MATCH = 7; // 0x7
