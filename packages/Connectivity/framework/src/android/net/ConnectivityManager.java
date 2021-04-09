@@ -44,6 +44,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityDiagnosticsManager.DataStallReport.DetectionMethod;
 import android.net.IpSecManager.UdpEncapsulationSocket;
 import android.net.SocketKeepalive.Callback;
 import android.net.TetheringManager.StartTetheringCallback;
@@ -5159,10 +5160,13 @@ public class ConnectivityManager {
      *
      * <p>This method should only be used for tests.
      *
-     * <p>The caller must be the owner of the specified Network.
+     * <p>The caller must be the owner of the specified Network. This simulates a data stall to
+     * have the system behave as if it had happened, but does not actually stall connectivity.
      *
      * @param detectionMethod The detection method used to identify the Data Stall.
-     * @param timestampMillis The timestamp at which the stall 'occurred', in milliseconds.
+     *                        See ConnectivityDiagnosticsManager.DataStallReport.DETECTION_METHOD_*.
+     * @param timestampMillis The timestamp at which the stall 'occurred', in milliseconds, as per
+     *                        SystemClock.elapsedRealtime.
      * @param network The Network for which a Data Stall is being simluated.
      * @param extras The PersistableBundle of extras included in the Data Stall notification.
      * @throws SecurityException if the caller is not the owner of the given network.
@@ -5171,7 +5175,7 @@ public class ConnectivityManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_TEST_NETWORKS,
             android.Manifest.permission.NETWORK_STACK})
-    public void simulateDataStall(int detectionMethod, long timestampMillis,
+    public void simulateDataStall(@DetectionMethod int detectionMethod, long timestampMillis,
             @NonNull Network network, @NonNull PersistableBundle extras) {
         try {
             mService.simulateDataStall(detectionMethod, timestampMillis, network, extras);
