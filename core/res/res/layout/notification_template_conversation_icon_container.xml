@@ -23,8 +23,8 @@
     android:gravity="start|top"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="16dp"
     android:importantForAccessibility="no"
     >
 
