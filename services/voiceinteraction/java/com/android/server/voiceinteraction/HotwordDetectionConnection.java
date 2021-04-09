@@ -434,7 +434,7 @@ final class HotwordDetectionConnection {
         }
         try {
             AudioRecord audioRecord = new AudioRecord(
-                    new AudioAttributes.Builder().setHotwordMode().build(),
+                    new AudioAttributes.Builder().setHotwordModeEnabled(true).build(),
                     audioFormat,
                     getBufferSizeInBytes(
                             audioFormat.getSampleRate(),
