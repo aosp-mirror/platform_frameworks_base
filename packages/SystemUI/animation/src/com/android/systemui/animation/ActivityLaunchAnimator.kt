@@ -223,8 +223,13 @@ class ActivityLaunchAnimator(context: Context) {
         var backgroundAlpha: Float = 1f
     ) {
         private val startTop = top
+        private val startBottom = bottom
         private val startLeft = left
         private val startRight = right
+        private val startWidth = width
+        private val startHeight = height
+        val startCenterX = centerX
+        val startCenterY = centerY
 
         val width: Int
             get() = right - left
@@ -235,11 +240,26 @@ class ActivityLaunchAnimator(context: Context) {
         open val topChange: Int
             get() = top - startTop
 
+        open val bottomChange: Int
+            get() = bottom - startBottom
+
         val leftChange: Int
             get() = left - startLeft
 
         val rightChange: Int
             get() = right - startRight
+
+        val widthRatio: Float
+            get() = width.toFloat() / startWidth
+
+        val heightRatio: Float
+            get() = height.toFloat() / startHeight
+
+        val centerX: Float
+            get() = left + width / 2f
+
+        val centerY: Float
+            get() = top + height / 2f
     }
 
     @VisibleForTesting
