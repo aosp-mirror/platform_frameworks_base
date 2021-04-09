@@ -87,5 +87,9 @@
         <permission name="android.car.permission.STORAGE_MONITORING"/>
         <permission name="android.car.permission.VMS_PUBLISHER"/>
         <permission name="android.car.permission.VMS_SUBSCRIBER"/>
+        <permission name="android.car.permission.REQUEST_CAR_EVS_ACTIVITY" />
+        <permission name="android.car.permission.CONTROL_CAR_EVS_ACTIVITY" />
+        <permission name="android.car.permission.USE_CAR_EVS_CAMERA" />
+        <permission name="android.car.permission.MONITOR_CAR_EVS_STATUS" />
     </privapp-permissions>
 </permissions>
