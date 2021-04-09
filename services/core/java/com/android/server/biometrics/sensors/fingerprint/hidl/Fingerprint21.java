@@ -143,7 +143,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                             && !client.isAlreadyDone()) {
                         Slog.e(TAG, "Stopping background authentication, top: "
                                 + topPackage + " currentClient: " + client);
-                        mScheduler.cancelAuthentication(client.getToken());
+                        mScheduler.cancelAuthenticationOrDetection(client.getToken());
                     }
                 }
             });
@@ -644,7 +644,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
-        mHandler.post(() -> mScheduler.cancelAuthentication(token));
+        mHandler.post(() -> mScheduler.cancelAuthenticationOrDetection(token));
     }
 
     @Override
