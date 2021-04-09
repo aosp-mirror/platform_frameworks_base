@@ -18,8 +18,11 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageUserState
+import android.content.pm.Signature
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.verify.domain.DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_SUCCESS
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_UNMODIFIABLE
@@ -35,12 +38,12 @@ import android.util.ArraySet
 import android.util.Xml
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
@@ -54,6 +57,10 @@ class DomainVerificationPackageTest {
         private const val PKG_TWO = "com.test.two"
         private val UUID_ONE = UUID.fromString("1b041c96-8d37-4932-a858-561bfac5947c")
         private val UUID_TWO = UUID.fromString("a3389c16-7f9f-4e86-85e3-500d1249c74c")
+        private const val SIGNATURE_ONE = "AA"
+        private const val DIGEST_ONE =
+            "BCEEF655B5A034911F1C3718CE056531B45EF03B4C7B1F15629E867294011A7D"
+        private const val SIGNATURE_TWO = "BB"
 
         private val DOMAIN_BASE = DomainVerificationPackageTest::class.java.packageName
         private val DOMAIN_1 = "one.$DOMAIN_BASE"
@@ -64,8 +71,8 @@ class DomainVerificationPackageTest {
         private const val USER_ID = 0
     }
 
-    private val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE)
-    private val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO)
+    private val pkg1 = mockPkgSetting(PKG_ONE, UUID_ONE, SIGNATURE_ONE)
+    private val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, SIGNATURE_TWO)
 
     @Test
     fun addPackageFirstTime() {
@@ -91,6 +98,104 @@ class DomainVerificationPackageTest {
 
         assertThat(service.queryValidVerificationPackageNames())
                 .containsExactly(pkg1.getName())
+    }
+
+    @Test
+    fun addPackageRestoredMatchingSignature() {
+        // language=XML
+        val xml = """
+            <?xml?>
+            <domain-verifications>
+                <active>
+                    <package-state
+                        packageName="${pkg1.getName()}"
+                        id="${pkg1.domainSetId}"
+                        signature="$DIGEST_ONE"
+                        >
+                        <state>
+                            <domain name="$DOMAIN_1" state="1"/>
+                        </state>
+                    </package-state>
+                </active>
+            </domain-verifications>
+        """
+
+        val service = makeService(pkg1, pkg2)
+        service.restoreSettings(Xml.resolvePullParser(xml.byteInputStream()))
+        service.addPackage(pkg1)
+        val info = service.getInfo(pkg1.getName())
+        assertThat(info.packageName).isEqualTo(pkg1.getName())
+        assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
+        assertThat(info.hostToStateMap).containsExactlyEntriesIn(
+            mapOf(
+                DOMAIN_1 to STATE_MODIFIABLE_VERIFIED,
+                DOMAIN_2 to STATE_NO_RESPONSE,
+            )
+        )
+
+        val userState = service.getUserState(pkg1.getName())
+        assertThat(userState.packageName).isEqualTo(pkg1.getName())
+        assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
+        assertThat(userState.isLinkHandlingAllowed).isEqualTo(true)
+        assertThat(userState.user.identifier).isEqualTo(USER_ID)
+        assertThat(userState.hostToStateMap).containsExactlyEntriesIn(
+            mapOf(
+                DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                DOMAIN_2 to DOMAIN_STATE_NONE,
+            )
+        )
+
+        assertThat(service.queryValidVerificationPackageNames())
+            .containsExactly(pkg1.getName())
+    }
+
+    @Test
+    fun addPackageRestoredMismatchSignature() {
+        // language=XML
+        val xml = """
+            <?xml?>
+            <domain-verifications>
+                <active>
+                    <package-state
+                        packageName="${pkg1.getName()}"
+                        id="${pkg1.domainSetId}"
+                        signature="INVALID_SIGNATURE"
+                        >
+                        <state>
+                            <domain name="$DOMAIN_1" state="1"/>
+                        </state>
+                    </package-state>
+                </active>
+            </domain-verifications>
+        """
+
+        val service = makeService(pkg1, pkg2)
+        service.restoreSettings(Xml.resolvePullParser(xml.byteInputStream()))
+        service.addPackage(pkg1)
+        val info = service.getInfo(pkg1.getName())
+        assertThat(info.packageName).isEqualTo(pkg1.getName())
+        assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
+        assertThat(info.hostToStateMap).containsExactlyEntriesIn(
+            mapOf(
+                DOMAIN_1 to STATE_NO_RESPONSE,
+                DOMAIN_2 to STATE_NO_RESPONSE,
+            )
+        )
+
+        val userState = service.getUserState(pkg1.getName())
+        assertThat(userState.packageName).isEqualTo(pkg1.getName())
+        assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
+        assertThat(userState.isLinkHandlingAllowed).isEqualTo(true)
+        assertThat(userState.user.identifier).isEqualTo(USER_ID)
+        assertThat(userState.hostToStateMap).containsExactlyEntriesIn(
+            mapOf(
+                DOMAIN_1 to DOMAIN_STATE_NONE,
+                DOMAIN_2 to DOMAIN_STATE_NONE,
+            )
+        )
+
+        assertThat(service.queryValidVerificationPackageNames())
+            .containsExactly(pkg1.getName())
     }
 
     @Test
@@ -151,10 +256,9 @@ class DomainVerificationPackageTest {
     @Test
     fun migratePackageDropDomain() {
         val pkgName = PKG_ONE
-        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE,
-                listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3, DOMAIN_4))
-        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO,
-                listOf(DOMAIN_1, DOMAIN_2))
+        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE,
+            listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3, DOMAIN_4))
+        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO, listOf(DOMAIN_1, DOMAIN_2))
 
         // Test 4 domains:
         // 1 will be approved and preserved, 2 will be selected and preserved,
@@ -213,8 +317,8 @@ class DomainVerificationPackageTest {
     @Test
     fun migratePackageDropAll() {
         val pkgName = PKG_ONE
-        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, listOf(DOMAIN_1, DOMAIN_2))
-        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, emptyList())
+        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO, emptyList())
 
         val map = mutableMapOf<String, PackageSetting>()
         val service = makeService { map[it] }
@@ -255,10 +359,9 @@ class DomainVerificationPackageTest {
     @Test
     fun migratePackageAddDomain() {
         val pkgName = PKG_ONE
-        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE,
-                listOf(DOMAIN_1, DOMAIN_2))
-        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO,
-                listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3))
+        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO,
+            listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3))
 
         // Test 3 domains:
         // 1 will be verified and preserved, 2 will be selected and preserved,
@@ -307,8 +410,8 @@ class DomainVerificationPackageTest {
     @Test
     fun migratePackageAddAll() {
         val pkgName = PKG_ONE
-        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, emptyList())
-        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, listOf(DOMAIN_1, DOMAIN_2))
+        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE, emptyList())
+        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO, listOf(DOMAIN_1, DOMAIN_2))
 
         val map = mutableMapOf<String, PackageSetting>()
         val service = makeService { map[it] }
@@ -379,21 +482,22 @@ class DomainVerificationPackageTest {
                     whenever(callingUid) { Process.ROOT_UID }
                     whenever(callingUserId) { 0 }
 
-                    whenever(getPackageSettingLocked(anyString())) {
-                        pkgSettingFunction(arguments[0] as String)!!
-                    }
-                    whenever(getPackageLocked(anyString())) {
-                        pkgSettingFunction(arguments[0] as String)!!.getPkg()
+                    mockPackageSettings {
+                        pkgSettingFunction(it)
                     }
                 })
             }
 
-    private fun mockPkgSetting(pkgName: String, domainSetId: UUID, domains: List<String> = listOf(
-            DOMAIN_1, DOMAIN_2
-    )) = mockThrowOnUnmocked<PackageSetting> {
+    private fun mockPkgSetting(
+        pkgName: String,
+        domainSetId: UUID,
+        signature: String,
+        domains: List<String> = listOf(DOMAIN_1, DOMAIN_2)
+    ) = mockThrowOnUnmocked<PackageSetting> {
         val pkg = mockThrowOnUnmocked<AndroidPackage> {
             whenever(packageName) { pkgName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+            whenever(isEnabled) { true }
 
             val activityList = listOf(
                     ParsedActivity().apply {
@@ -422,5 +526,7 @@ class DomainVerificationPackageTest {
         whenever(this.domainSetId) { domainSetId }
         whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
+        whenever(readUserState(USER_ID)) { PackageUserState() }
+        whenever(signatures) { arrayOf(Signature(signature)) }
     }
 }
