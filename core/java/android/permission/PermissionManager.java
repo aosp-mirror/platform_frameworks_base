@@ -35,6 +35,7 @@ import android.app.IActivityManager;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -42,9 +43,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
-import android.location.LocationManager;
 import android.media.AudioManager;
-import android.content.AttributionSource;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -52,8 +51,8 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -102,6 +101,20 @@ public final class PermissionManager {
     @ChangeId
     @EnabledAfter(targetSdkVersion = S)
     public static final long CANNOT_INSTALL_WITH_BAD_PERMISSION_GROUPS = 146211400;
+
+    /**
+     * The time to wait in between refreshing the exempted indicator role packages
+     */
+    private static final long EXEMPTED_INDICATOR_ROLE_UPDATE_FREQUENCY_MS = 15000;
+
+    private static long sLastIndicatorUpdateTime = -1;
+
+    private static final int[] EXEMPTED_ROLES = {R.string.config_systemAmbientAudioIntelligence,
+        R.string.config_systemUiIntelligence, R.string.config_systemAudioIntelligence,
+        R.string.config_systemNotificationIntelligence, R.string.config_systemTextIntelligence,
+        R.string.config_systemVisualIntelligence};
+
+    private static final String[] INDICATOR_EXEMPTED_PACKAGES = new String[EXEMPTED_ROLES.length];
 
     /**
      * Note: Changing this won't do anything on its own - you should also change the filtering in
@@ -873,21 +886,31 @@ public final class PermissionManager {
     }
 
     /**
-     * Check if this package/op combination is exempted from indicators
-     * @return
+     * Determine if a package should be shown in indicators. Only a select few roles, and the
+     * system app itself, are hidden. These values are updated at most every 15 seconds.
      * @hide
      */
-    public static boolean isSpecialCaseShownIndicator(@NonNull Context context,
+    public static boolean shouldShowPackageForIndicatorCached(@NonNull Context context,
             @NonNull String packageName) {
-
-        if (packageName.equals(SYSTEM_PKG)) {
+        if (SYSTEM_PKG.equals(packageName)) {
             return false;
         }
+        long now = SystemClock.elapsedRealtime();
+        if (sLastIndicatorUpdateTime == -1
+                || (now - sLastIndicatorUpdateTime) > EXEMPTED_INDICATOR_ROLE_UPDATE_FREQUENCY_MS) {
+            sLastIndicatorUpdateTime = now;
+            for (int i = 0; i < EXEMPTED_ROLES.length; i++) {
+                INDICATOR_EXEMPTED_PACKAGES[i] = context.getString(EXEMPTED_ROLES[i]);
+            }
+        }
+        for (int i = 0; i < EXEMPTED_ROLES.length; i++) {
+            String exemptedPackage = INDICATOR_EXEMPTED_PACKAGES[i];
+            if (exemptedPackage != null && exemptedPackage.equals(packageName)) {
+                return false;
+            }
+        }
 
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY, "permissions_hub_2_enabled",
-                false)
-                || packageName.equals(context.getString(R.string.config_systemSpeechRecognizer))
-                || context.getSystemService(LocationManager.class).isProviderPackage(packageName);
+        return true;
     }
     /**
      * Gets the list of packages that have permissions that specified

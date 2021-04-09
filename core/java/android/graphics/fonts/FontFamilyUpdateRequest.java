@@ -275,7 +275,7 @@ public final class FontFamilyUpdateRequest {
          * Returns the index of collection
          */
         public @IntRange(from = 0) int getIndex() {
-            return 0;
+            return mIndex;
         }
     }
 

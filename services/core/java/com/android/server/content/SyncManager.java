@@ -268,10 +268,6 @@ public class SyncManager {
 
     private final SyncLogger mLogger;
 
-    // NOTE: this is a temporary allow-list for testing purposes; it will be removed before release.
-    private final String[] mEjSyncAllowedPackages = new String[]{
-            "com.google.android.google", "com.android.frameworks.servicestests"};
-
     private boolean isJobIdInUseLockedH(int jobId, List<JobInfo> pendingJobs) {
         for (JobInfo job: pendingJobs) {
             if (job.getId() == jobId) {
@@ -989,14 +985,6 @@ public class SyncManager {
                 // a non-forced two-way sync on a specific url.
                 source = SyncStorageEngine.SOURCE_OTHER;
             }
-        }
-
-        final boolean scheduleAsEj =
-                extras.getBoolean(ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB, false);
-        // NOTE: this is a temporary check for internal testing - to be removed before release.
-        if (scheduleAsEj && !ArrayUtils.contains(mEjSyncAllowedPackages, callingPackage)) {
-            throw new IllegalArgumentException(
-                    callingPackage + " is not allowed to schedule a sync as an EJ yet.");
         }
 
         for (AccountAndUser account : accounts) {

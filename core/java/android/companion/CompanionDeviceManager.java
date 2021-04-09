@@ -375,6 +375,14 @@ public final class CompanionDeviceManager {
      * Calling app must check for feature presence of
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.
      *
+     * For Bluetooth LE devices this is based on scanning for device with the given address.
+     * For Bluetooth classic devices this is triggered when the device connects/disconnects.
+     * WiFi devices are not supported.
+     *
+     * If a Bluetooth LE device wants to use a rotating mac address, it is recommended to use
+     * Resolvable Private Address, and ensure the device is bonded to the phone so that android OS
+     * is able to resolve the address.
+     *
      * @param deviceAddress a previously-associated companion device's address
      *
      * @throws DeviceNotAssociatedException if the given device was not previously associated

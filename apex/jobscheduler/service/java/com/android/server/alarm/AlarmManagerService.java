@@ -538,11 +538,18 @@ public class AlarmManagerService extends SystemService {
         public long PRIORITY_ALARM_DELAY = DEFAULT_PRIORITY_ALARM_DELAY;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
+        private int mVersion = 0;
 
         Constants() {
             updateAllowWhileIdleWhitelistDurationLocked();
             for (int i = 0; i < APP_STANDBY_QUOTAS.length; i++) {
                 APP_STANDBY_QUOTAS[i] = DEFAULT_APP_STANDBY_QUOTAS[i];
+            }
+        }
+
+        public int getVersion() {
+            synchronized (mLock) {
+                return mVersion;
             }
         }
 
@@ -568,6 +575,7 @@ public class AlarmManagerService extends SystemService {
         public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
             boolean standbyQuotaUpdated = false;
             synchronized (mLock) {
+                mVersion++;
                 for (String name : properties.getKeyset()) {
                     if (name == null) {
                         continue;
@@ -748,6 +756,9 @@ public class AlarmManagerService extends SystemService {
             pw.println("Settings:");
 
             pw.increaseIndent();
+
+            pw.print("version", mVersion);
+            pw.println();
 
             pw.print(KEY_MIN_FUTURITY);
             pw.print("=");
@@ -2216,6 +2227,13 @@ public class AlarmManagerService extends SystemService {
             } else {
                 throw new ParcelableException(new DateTimeException("Missing NTP fix"));
             }
+        }
+
+        @Override
+        public int getConfigVersion() {
+            getContext().enforceCallingOrSelfPermission(Manifest.permission.DUMP,
+                    "getConfigVersion");
+            return mConstants.getVersion();
         }
 
         @Override
@@ -4698,6 +4716,10 @@ public class AlarmManagerService extends SystemService {
                         final String tz = getNextArgRequired();
                         getBinderService().setTimeZone(tz);
                         return 0;
+                    case "get-config-version":
+                        final int version = getBinderService().getConfigVersion();
+                        pw.println(version);
+                        return 0;
                     default:
                         return handleDefaultCommands(cmd);
                 }
@@ -4718,6 +4740,10 @@ public class AlarmManagerService extends SystemService {
             pw.println("    since the Epoch.");
             pw.println("  set-timezone TZ");
             pw.println("    Set the system timezone to TZ where TZ is an Olson id.");
+            pw.println("  get-config-version");
+            pw.println("    Returns an integer denoting the version of device_config keys the"
+                    + " service is sync'ed to. As long as this returns the same version, the values"
+                    + " of the config are guaranteed to remain the same.");
         }
     }
 }

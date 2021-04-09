@@ -4335,17 +4335,10 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private String getBackupAgentName(CreateBackupAgentData data) {
         String agentName = data.appInfo.backupAgentName;
-        if (!UserHandle.isCore(data.appInfo.uid)
-                && data.operationType == BackupManager.OperationType.MIGRATION) {
-            // If this is a migration, use the default backup agent regardless of the app's
-            // preferences.
+        // full backup operation but no app-supplied agent?  use the default implementation
+        if (agentName == null && (data.backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
+                || data.backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL)) {
             agentName = DEFAULT_FULL_BACKUP_AGENT;
-        } else {
-            // full backup operation but no app-supplied agent?  use the default implementation
-            if (agentName == null && (data.backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
-                    || data.backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL)) {
-                agentName = DEFAULT_FULL_BACKUP_AGENT;
-            }
         }
         return agentName;
     }

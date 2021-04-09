@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class FalsingManagerFake implements FalsingManager {
     private boolean mIsFalseTouch;
-    private boolean mIsFalseTap;
+    private boolean mIsSimpleTap;
     private boolean mIsFalseDoubleTap;
     private boolean mIsUnlockingDisabled;
     private boolean mIsClassiferEnabled;
@@ -67,12 +67,12 @@ public class FalsingManagerFake implements FalsingManager {
         return mIsFalseTouch;
     }
 
-    public void setFalseRobustTap(boolean falseRobustTap) {
+    public void setFalseTap(boolean falseRobustTap) {
         mIsFalseRobustTap = falseRobustTap;
     }
 
-    public void setFalseTap(boolean falseTap) {
-        mIsFalseTap = falseTap;
+    public void setSimpleTap(boolean isSimpleTape) {
+        mIsSimpleTap = isSimpleTape;
     }
 
     public void setFalseDoubleTap(boolean falseDoubleTap) {
@@ -80,8 +80,13 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public boolean isFalseTap(boolean robustCheck, double falsePenalty) {
-        return robustCheck ? mIsFalseRobustTap : mIsFalseTap;
+    public boolean isSimpleTap() {
+        return mIsSimpleTap;
+    }
+
+    @Override
+    public boolean isFalseTap(@Penalty int penalty) {
+        return mIsFalseRobustTap;
     }
 
     @Override

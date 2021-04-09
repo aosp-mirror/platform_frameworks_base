@@ -63,6 +63,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -105,6 +106,7 @@ import java.util.function.Function;
 public class DataManager {
 
     private static final String TAG = "DataManager";
+    private static final boolean DEBUG = false;
 
     private static final long RECENT_NOTIFICATIONS_MAX_AGE_MS = 10 * DateUtils.DAY_IN_MILLIS;
     private static final long QUERY_EVENTS_MAX_AGE_MS = 5L * DateUtils.MINUTE_IN_MILLIS;
@@ -217,6 +219,7 @@ public class DataManager {
         List<ShortcutInfo> shortcuts = getShortcuts(packageName, userId,
                 Collections.singletonList(shortcutId));
         if (shortcuts != null && !shortcuts.isEmpty()) {
+            if (DEBUG) Log.d(TAG, "Found shortcut for " + shortcuts.get(0).getLabel());
             return shortcuts.get(0);
         }
         return null;
@@ -258,6 +261,7 @@ public class DataManager {
         }
         ShortcutInfo shortcutInfo = getShortcut(packageName, userId, shortcutId);
         if (shortcutInfo == null) {
+            Slog.e(TAG, " Shortcut no longer found: " + shortcutId);
             return null;
         }
         int uid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
@@ -705,6 +709,7 @@ public class DataManager {
             }
         });
         for (String packageName : packagesToDelete) {
+            if (DEBUG) Log.d(TAG, "Deleting packages data for: " + packageName);
             userData.deletePackageData(packageName);
         }
     }
@@ -716,6 +721,7 @@ public class DataManager {
         @ShortcutQuery.QueryFlags int queryFlags = ShortcutQuery.FLAG_MATCH_DYNAMIC
                 | ShortcutQuery.FLAG_MATCH_PINNED | ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER
                 | ShortcutQuery.FLAG_MATCH_CACHED | ShortcutQuery.FLAG_GET_PERSONS_DATA;
+        if (DEBUG) Log.d(TAG, " Get shortcuts with IDs: " + shortcutIds);
         return mShortcutServiceInternal.getShortcuts(
                 UserHandle.USER_SYSTEM, mContext.getPackageName(),
                 /*changedSince=*/ 0, packageName, shortcutIds, /*locusIds=*/ null,
@@ -742,7 +748,7 @@ public class DataManager {
         TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
         String defaultDialer = telecomManager != null
                 ? telecomManager.getDefaultDialerPackage(
-                        new UserHandle(userData.getUserId())) : null;
+                new UserHandle(userData.getUserId())) : null;
         userData.setDefaultDialer(defaultDialer);
     }
 
@@ -848,6 +854,9 @@ public class DataManager {
         ConversationStore conversationStore = packageData.getConversationStore();
         ConversationInfo oldConversationInfo =
                 conversationStore.getConversation(shortcutInfo.getId());
+        if (oldConversationInfo == null) {
+            if (DEBUG) Log.d(TAG, "Nothing previously stored about conversation.");
+        }
         ConversationInfo.Builder builder = oldConversationInfo != null
                 ? new ConversationInfo.Builder(oldConversationInfo)
                 : new ConversationInfo.Builder();
@@ -1083,6 +1092,7 @@ public class DataManager {
                 Set<String> shortcutIds = new HashSet<>();
                 for (ShortcutInfo shortcutInfo : shortcuts) {
                     if (packageData != null) {
+                        if (DEBUG) Log.d(TAG, "Deleting shortcut: " + shortcutInfo.getId());
                         packageData.deleteDataForConversation(shortcutInfo.getId());
                     }
                     shortcutIds.add(shortcutInfo.getId());
@@ -1309,6 +1319,7 @@ public class DataManager {
             int userId = getChangingUserId();
             UserData userData = getUnlockedUserData(userId);
             if (userData != null) {
+                if (DEBUG) Log.d(TAG, "Delete package data for: " + packageName);
                 userData.deletePackageData(packageName);
             }
         }
