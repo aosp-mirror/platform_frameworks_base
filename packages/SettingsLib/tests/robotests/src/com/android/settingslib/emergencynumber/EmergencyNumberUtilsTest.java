@@ -34,6 +34,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
@@ -62,7 +64,10 @@ public class EmergencyNumberUtilsTest {
     @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
-    ContentResolver mContentResolver;
+    private ContentResolver mContentResolver;
+    @Mock
+    private CarrierConfigManager mCarrierConfigManager;
+
     private EmergencyNumberUtils mUtils;
 
     @Before
@@ -70,6 +75,8 @@ public class EmergencyNumberUtilsTest {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        when(mContext.getSystemService(CarrierConfigManager.class)).thenReturn(
+                mCarrierConfigManager);
     }
 
     @Test
@@ -85,7 +92,7 @@ public class EmergencyNumberUtilsTest {
     public void getDefaultPoliceNumber_hasTelephony_shouldLoadFromTelephony() {
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(true);
         when(mContext.getSystemService(TelephonyManager.class)).thenReturn(mTelephonyManager);
-        addEmergencyNumberToTelephony();
+        addEmergencyNumberToTelephony(TELEPHONY_EMERGENCY_NUMBER);
         mUtils = new EmergencyNumberUtils(mContext);
 
 
@@ -96,7 +103,7 @@ public class EmergencyNumberUtilsTest {
     public void getPoliceNumber_hasUserOverride_shouldLoadFromUserOverride() {
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(true);
         when(mContext.getSystemService(TelephonyManager.class)).thenReturn(mTelephonyManager);
-        addEmergencyNumberToTelephony();
+        addEmergencyNumberToTelephony(TELEPHONY_EMERGENCY_NUMBER);
 
         Bundle bundle = new Bundle();
         bundle.putString(EMERGENCY_GESTURE_CALL_NUMBER, USER_OVERRIDE_EMERGENCY_NUMBER);
@@ -111,14 +118,30 @@ public class EmergencyNumberUtilsTest {
     public void getPoliceNumber_noUserOverride_shouldLoadFromTelephony() {
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(true);
         when(mContext.getSystemService(TelephonyManager.class)).thenReturn(mTelephonyManager);
-        addEmergencyNumberToTelephony();
+        addEmergencyNumberToTelephony(TELEPHONY_EMERGENCY_NUMBER);
 
         mUtils = new EmergencyNumberUtils(mContext);
 
         assertThat(mUtils.getPoliceNumber()).isEqualTo(TELEPHONY_EMERGENCY_NUMBER);
     }
 
-    private void addEmergencyNumberToTelephony() {
+    @Test
+    public void getPoliceNumber_hasCarrierPrefix_shouldRemovePrefix() {
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(true);
+        when(mContext.getSystemService(TelephonyManager.class)).thenReturn(mTelephonyManager);
+        final String prefix = "*272";
+        final PersistableBundle bundle = new PersistableBundle();
+        bundle.putStringArray(CarrierConfigManager.KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY,
+                new String[]{prefix});
+        when(mCarrierConfigManager.getConfigForSubId(anyInt())).thenReturn(bundle);
+        addEmergencyNumberToTelephony(prefix + TELEPHONY_EMERGENCY_NUMBER);
+
+        mUtils = new EmergencyNumberUtils(mContext);
+
+        assertThat(mUtils.getPoliceNumber()).isEqualTo(TELEPHONY_EMERGENCY_NUMBER);
+    }
+
+    private void addEmergencyNumberToTelephony(String number) {
         final int subId = SubscriptionManager.getDefaultSubscriptionId();
         EmergencyNumber emergencyNumber = mock(EmergencyNumber.class);
         when(emergencyNumber.isInEmergencyServiceCategories(EMERGENCY_SERVICE_CATEGORY_POLICE))
@@ -128,6 +151,6 @@ public class EmergencyNumberUtilsTest {
         numbersForSubId.add(emergencyNumber);
         numbers.put(subId, numbersForSubId);
         when(mTelephonyManager.getEmergencyNumberList(anyInt())).thenReturn(numbers);
-        when(emergencyNumber.getNumber()).thenReturn(TELEPHONY_EMERGENCY_NUMBER);
+        when(emergencyNumber.getNumber()).thenReturn(number);
     }
 }
