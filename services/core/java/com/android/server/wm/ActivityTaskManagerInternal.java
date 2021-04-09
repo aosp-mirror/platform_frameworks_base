@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.IntArray;
 import android.util.proto.ProtoOutputStream;
 import android.window.TaskSnapshot;
 
@@ -220,6 +221,11 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void setBackgroundActivityStartCallback(
             @Nullable BackgroundActivityStartCallback callback);
+
+    /**
+     * Sets the list of UIDs that contain an active accessibility service.
+     */
+    public abstract void setAccessibilityServiceUids(IntArray uids);
 
     /**
      * Start activity {@code intent} without calling user-id check.
