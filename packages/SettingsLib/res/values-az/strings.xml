@@ -114,7 +114,7 @@
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Eşitmə Aparatları üçün istifadə edin"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Birləşdir"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"CÜTLƏNDİR"</string>
-    <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Ləğv et"</string>
+    <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Ləğv edin"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Qoşulan zaman kontaktlarınıza və çağrı tarixçəsinə giriş cütlənməsi."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ilə birləşdirmək alınmadı."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Yanlış PIN və ya parola görə <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ilə cütləşmək alınmadı."</string>
@@ -285,7 +285,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Batareya istifadəsini azaldır &amp; şəbəkə performansını yaxşılaşdırır"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Bu rejim deaktiv edildikdə, bu cihaz hər dəfə MAC randomizasiyası aktiv edilmiş şəbəkəyə qoşulanda onun MAC ünvanı dəyişə bilər."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"Ödənişli"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"Tarif sayğacılı"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Limitsiz"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger bufer ölçüləri"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Hər jurnal buferinı Logger ölçüsü seçin"</string>
@@ -493,7 +493,7 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daha çox vaxt."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Daha az vaxt."</string>
-    <string name="cancel" msgid="5665114069455378395">"Ləğv et"</string>
+    <string name="cancel" msgid="5665114069455378395">"Ləğv edin"</string>
     <string name="okay" msgid="949938843324579502">"Ok"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktiv edin"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Narahat Etməyin\" rejimini aktiv edin"</string>
