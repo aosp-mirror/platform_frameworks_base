@@ -370,4 +370,8 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
             }
         }
     }
+
+    public boolean isBypassableVpn() {
+        return mNetworkAgentConfig.isBypassableVpn();
+    }
 }

@@ -133,6 +133,8 @@ import android.net.IpMemoryStore;
 import android.net.IpPrefix;
 import android.net.LinkProperties;
 import android.net.MatchAllNetworkSpecifier;
+import android.net.NativeNetworkConfig;
+import android.net.NativeNetworkType;
 import android.net.NattSocketKeepalive;
 import android.net.Network;
 import android.net.NetworkAgent;
@@ -3804,36 +3806,43 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.onNetworkDestroyed();
     }
 
-    private boolean createNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
+    private boolean createNativeNetwork(@NonNull NetworkAgentInfo nai) {
         try {
             // This should never fail.  Specifying an already in use NetID will cause failure.
-            if (networkAgent.isVPN()) {
-                mNetd.networkCreateVpn(networkAgent.network.getNetId(),
-                        (networkAgent.networkAgentConfig == null
-                                || !networkAgent.networkAgentConfig.allowBypass));
+            final NativeNetworkConfig config;
+            if (nai.isVPN()) {
+                if (getVpnType(nai) == VpnManager.TYPE_VPN_NONE) {
+                    Log.wtf(TAG, "Unable to get VPN type from network " + nai.network.getNetId());
+                    return false;
+                }
+                config = new NativeNetworkConfig(nai.network.getNetId(), NativeNetworkType.VIRTUAL,
+                        INetd.PERMISSION_NONE,
+                        (nai.networkAgentConfig == null || !nai.networkAgentConfig.allowBypass),
+                        getVpnType(nai));
             } else {
-                mNetd.networkCreatePhysical(networkAgent.network.getNetId(),
-                        getNetworkPermission(networkAgent.networkCapabilities));
+                config = new NativeNetworkConfig(nai.network.getNetId(), NativeNetworkType.PHYSICAL,
+                        getNetworkPermission(nai.networkCapabilities), /*secure=*/ false,
+                        VpnManager.TYPE_VPN_NONE);
             }
-            mDnsResolver.createNetworkCache(networkAgent.network.getNetId());
-            mDnsManager.updateTransportsForNetwork(networkAgent.network.getNetId(),
-                    networkAgent.networkCapabilities.getTransportTypes());
+            mNetd.networkCreate(config);
+            mDnsResolver.createNetworkCache(nai.network.getNetId());
+            mDnsManager.updateTransportsForNetwork(nai.network.getNetId(),
+                    nai.networkCapabilities.getTransportTypes());
             return true;
         } catch (RemoteException | ServiceSpecificException e) {
-            loge("Error creating network " + networkAgent.network.getNetId() + ": "
-                    + e.getMessage());
+            loge("Error creating network " + nai.network.getNetId() + ": " + e.getMessage());
             return false;
         }
     }
 
-    private void destroyNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
+    private void destroyNativeNetwork(@NonNull NetworkAgentInfo nai) {
         try {
-            mNetd.networkDestroy(networkAgent.network.getNetId());
+            mNetd.networkDestroy(nai.network.getNetId());
         } catch (RemoteException | ServiceSpecificException e) {
             loge("Exception destroying network(networkDestroy): " + e);
         }
         try {
-            mDnsResolver.destroyNetworkCache(networkAgent.network.getNetId());
+            mDnsResolver.destroyNetworkCache(nai.network.getNetId());
         } catch (RemoteException | ServiceSpecificException e) {
             loge("Exception destroying network: " + e);
         }

@@ -58,6 +58,7 @@ import java.util.List;
  * @see Ikev2VpnProfile
  */
 public class VpnManager {
+    // TODO: add a unit test to ensure that TYPE_VPN_xxx matches android.net.NativeVpnType.
     /** Type representing a lack of VPN @hide */
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int TYPE_VPN_NONE = -1;
