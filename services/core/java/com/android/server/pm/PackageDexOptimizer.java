@@ -267,7 +267,7 @@ public class PackageDexOptimizer {
                                 mArtStatsLogger,
                                 sessionId,
                                 compilerFilter,
-                                sharedGid,
+                                pkg.getUid(),
                                 packageStats.getCompileTime(path),
                                 dexMetadataPath,
                                 options.getCompilationReason(),

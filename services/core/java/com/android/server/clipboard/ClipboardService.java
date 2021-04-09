@@ -31,6 +31,7 @@ import android.app.KeyguardManager;
 import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -57,10 +58,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
-import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
-import android.system.VmSocketAddress;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -82,128 +79,9 @@ import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import java.io.FileDescriptor;
-import java.io.InterruptedIOException;
-import java.net.SocketException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-
-// The following class is Android Emulator specific. It is used to read and
-// write contents of the host system's clipboard.
-class HostClipboardMonitor implements Runnable {
-    public interface HostClipboardCallback {
-        void onHostClipboardUpdated(String contents);
-    }
-
-    private FileDescriptor mPipe = null;
-    private HostClipboardCallback mHostClipboardCallback;
-    private static final String PIPE_NAME = "pipe:clipboard";
-    private static final int HOST_PORT = 5000;
-
-    private static byte[] createOpenHandshake() {
-        // String.getBytes doesn't include the null terminator,
-        // but the QEMU pipe device requires the pipe service name
-        // to be null-terminated.
-
-        final byte[] bits = Arrays.copyOf(PIPE_NAME.getBytes(), PIPE_NAME.length() + 1);
-        bits[PIPE_NAME.length()] = 0;
-        return bits;
-    }
-
-    private boolean openPipe() {
-        try {
-            final FileDescriptor fd = Os.socket(OsConstants.AF_VSOCK, OsConstants.SOCK_STREAM, 0);
-
-            try {
-                Os.connect(fd, new VmSocketAddress(HOST_PORT, OsConstants.VMADDR_CID_HOST));
-
-                final byte[] handshake = createOpenHandshake();
-                Os.write(fd, handshake, 0, handshake.length);
-                mPipe = fd;
-                return true;
-            } catch (ErrnoException | SocketException | InterruptedIOException e) {
-                Os.close(fd);
-            }
-        } catch (ErrnoException e) {
-        }
-
-        return false;
-    }
-
-    private void closePipe() {
-        try {
-            final FileDescriptor fd = mPipe;
-            mPipe = null;
-            if (fd != null) {
-                Os.close(fd);
-            }
-        } catch (ErrnoException ignore) {
-        }
-    }
-
-    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException {
-        final byte[] lengthBits = new byte[4];
-        Os.read(mPipe, lengthBits, 0, lengthBits.length);
-
-        final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
-        bb.order(ByteOrder.LITTLE_ENDIAN);
-        final int msgLen = bb.getInt();
-
-        final byte[] msg = new byte[msgLen];
-        Os.read(mPipe, msg, 0, msg.length);
-
-        return msg;
-    }
-
-    private void sendMessage(byte[] msg) throws ErrnoException, InterruptedIOException {
-        final byte[] lengthBits = new byte[4];
-        final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
-        bb.order(ByteOrder.LITTLE_ENDIAN);
-        bb.putInt(msg.length);
-
-        Os.write(mPipe, lengthBits, 0, lengthBits.length);
-        Os.write(mPipe, msg, 0, msg.length);
-    }
-
-    public HostClipboardMonitor(HostClipboardCallback cb) {
-        mHostClipboardCallback = cb;
-    }
-
-    @Override
-    public void run() {
-        while (!Thread.interrupted()) {
-            try {
-                // There's no guarantee that QEMU pipes will be ready at the moment
-                // this method is invoked. We simply try to get the pipe open and
-                // retry on failure indefinitely.
-                while ((mPipe == null) && !openPipe()) {
-                    Thread.sleep(100);
-                }
-
-                final byte[] receivedData = receiveMessage();
-                mHostClipboardCallback.onHostClipboardUpdated(
-                    new String(receivedData));
-            } catch (ErrnoException | InterruptedIOException e) {
-                closePipe();
-            } catch (InterruptedException e) {
-            }
-        }
-    }
-
-    public void setHostClipboard(String content) {
-        try {
-            if (mPipe != null) {
-                sendMessage(content.getBytes());
-            }
-        } catch (ErrnoException | InterruptedIOException e) {
-            Slog.e("HostClipboardMonitor",
-                   "Failed to set host clipboard " + e.getMessage());
-        }
-    }
-}
+import java.util.function.Consumer;
 
 /**
  * Implementation of the clipboard for copy and paste.
@@ -220,8 +98,6 @@ public class ClipboardService extends SystemService {
             SystemProperties.getBoolean("ro.boot.qemu", false);
 
     // DeviceConfig properties
-    private static final String PROPERTY_SHOW_ACCESS_NOTIFICATIONS = "show_access_notifications";
-    private static final boolean DEFAULT_SHOW_ACCESS_NOTIFICATIONS = true;
     private static final String PROPERTY_MAX_CLASSIFICATION_LENGTH = "max_classification_length";
     private static final int DEFAULT_MAX_CLASSIFICATION_LENGTH = 400;
 
@@ -235,14 +111,15 @@ public class ClipboardService extends SystemService {
     private final ContentCaptureManagerInternal mContentCaptureInternal;
     private final AutofillManagerInternal mAutofillInternal;
     private final IBinder mPermissionOwner;
-    private final HostClipboardMonitor mHostClipboardMonitor;
+    private final Consumer<ClipData> mEmulatorClipboardMonitor;
     private final Handler mWorkerHandler;
 
     @GuardedBy("mLock")
     private final SparseArray<PerUserClipboard> mClipboards = new SparseArray<>();
 
     @GuardedBy("mLock")
-    private boolean mShowAccessNotifications = DEFAULT_SHOW_ACCESS_NOTIFICATIONS;
+    private boolean mShowAccessNotifications =
+            ClipboardManager.DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS;
 
     @GuardedBy("mLock")
     private int mMaxClassificationLength = DEFAULT_MAX_CLASSIFICATION_LENGTH;
@@ -267,24 +144,14 @@ public class ClipboardService extends SystemService {
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (IS_EMULATOR) {
-            mHostClipboardMonitor = new HostClipboardMonitor(
-                new HostClipboardMonitor.HostClipboardCallback() {
-                    @Override
-                    public void onHostClipboardUpdated(String contents){
-                        ClipData clip =
-                            new ClipData("host clipboard",
-                                         new String[]{"text/plain"},
-                                         new ClipData.Item(contents));
-                        synchronized (mLock) {
-                            setPrimaryClipInternalLocked(getClipboardLocked(0), clip,
-                                    android.os.Process.SYSTEM_UID, null);
-                        }
-                    }
-                });
-            Thread hostMonitorThread = new Thread(mHostClipboardMonitor);
-            hostMonitorThread.start();
+            mEmulatorClipboardMonitor = new EmulatorClipboardMonitor((clip) -> {
+                synchronized (mLock) {
+                    setPrimaryClipInternalLocked(getClipboardLocked(0), clip,
+                            android.os.Process.SYSTEM_UID, null);
+                }
+            });
         } else {
-            mHostClipboardMonitor = null;
+            mEmulatorClipboardMonitor = (clip) -> {};
         }
 
         updateConfig();
@@ -310,8 +177,10 @@ public class ClipboardService extends SystemService {
 
     private void updateConfig() {
         synchronized (mLock) {
-            mShowAccessNotifications = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
-                    PROPERTY_SHOW_ACCESS_NOTIFICATIONS, DEFAULT_SHOW_ACCESS_NOTIFICATIONS);
+            mShowAccessNotifications = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CLIPBOARD,
+                    ClipboardManager.DEVICE_CONFIG_SHOW_ACCESS_NOTIFICATIONS,
+                    ClipboardManager.DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS);
             mMaxClassificationLength = DeviceConfig.getInt(DeviceConfig.NAMESPACE_CLIPBOARD,
                     PROPERTY_MAX_CLASSIFICATION_LENGTH, DEFAULT_MAX_CLASSIFICATION_LENGTH);
         }
@@ -643,18 +512,7 @@ public class ClipboardService extends SystemService {
     @GuardedBy("mLock")
     private void setPrimaryClipInternalLocked(
             @Nullable ClipData clip, int uid, @Nullable String sourcePackage) {
-        // Push clipboard to host, if any
-        if (mHostClipboardMonitor != null) {
-            if (clip == null) {
-                // Someone really wants the clipboard cleared, so push empty
-                mHostClipboardMonitor.setHostClipboard("");
-            } else if (clip.getItemCount() > 0) {
-                final CharSequence text = clip.getItemAt(0).getText();
-                if (text != null) {
-                    mHostClipboardMonitor.setHostClipboard(text.toString());
-                }
-            }
-        }
+        mEmulatorClipboardMonitor.accept(clip);
 
         final int userId = UserHandle.getUserId(uid);
         if (clip != null) {
@@ -1056,11 +914,9 @@ public class ClipboardService extends SystemService {
         if (clipboard.primaryClip == null) {
             return;
         }
-        if (!mShowAccessNotifications) {
-            return;
-        }
         if (Settings.Secure.getInt(getContext().getContentResolver(),
-                Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, 1) == 0) {
+                Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS,
+                (mShowAccessNotifications ? 1 : 0)) == 0) {
             return;
         }
         // Don't notify if the app accessing the clipboard is the same as the current owner.

@@ -885,7 +885,11 @@ public class PackageParser {
         if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
             if (p.mSigningDetails != SigningDetails.UNKNOWN) {
                 // only return a valid SigningInfo if there is signing information to report
-                pi.signingInfo = new SigningInfo(p.mSigningDetails);
+                pi.signingInfo = new SigningInfo(
+                        new android.content.pm.SigningDetails(p.mSigningDetails.signatures,
+                                p.mSigningDetails.signatureSchemeVersion,
+                                p.mSigningDetails.publicKeys,
+                                p.mSigningDetails.pastSigningCertificates));
             } else {
                 pi.signingInfo = null;
             }
@@ -1400,7 +1404,7 @@ public class PackageParser {
             // must use v2 signing scheme
             minSignatureScheme = SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2;
         }
-        SigningDetails verified;
+        final android.content.pm.SigningDetails verified;
         if (skipVerify) {
             // systemDir APKs are already trusted, save time by not verifying; since the signature
             // is not verified and some system apps can have their V2+ signatures stripped allow
@@ -1415,9 +1419,13 @@ public class PackageParser {
         // we encountered. Note that for splits, certificates may have
         // already been populated during an earlier parse of a base APK.
         if (pkg.mSigningDetails == SigningDetails.UNKNOWN) {
-            pkg.mSigningDetails = verified;
+            pkg.mSigningDetails = new SigningDetails(verified.getSignatures(),
+                    verified.getSignatureSchemeVersion(),
+                    verified.getPublicKeys(),
+                    verified.getPastSigningCertificates());
         } else {
-            if (!Signature.areExactMatch(pkg.mSigningDetails.signatures, verified.signatures)) {
+            if (!Signature.areExactMatch(pkg.mSigningDetails.signatures,
+                    verified.getSignatures())) {
                 throw new PackageParserException(
                         INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                         apkPath + " has mismatched certificates");

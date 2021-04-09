@@ -23,10 +23,10 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFIC
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
+import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
 import android.os.Trace;
@@ -65,7 +65,7 @@ public class ApkSignatureVerifier {
      *
      * @throws PackageParserException if the APK's signature failed to verify.
      */
-    public static PackageParser.SigningDetails verify(String apkPath,
+    public static SigningDetails verify(String apkPath,
             @SignatureSchemeVersion int minSignatureSchemeVersion)
             throws PackageParserException {
         return verifySignatures(apkPath, minSignatureSchemeVersion, true);
@@ -78,7 +78,7 @@ public class ApkSignatureVerifier {
      *
      * @throws PackageParserException if there was a problem collecting certificates.
      */
-    public static PackageParser.SigningDetails unsafeGetCertsWithoutVerification(
+    public static SigningDetails unsafeGetCertsWithoutVerification(
             String apkPath, int minSignatureSchemeVersion)
             throws PackageParserException {
         return verifySignatures(apkPath, minSignatureSchemeVersion, false);
@@ -90,7 +90,7 @@ public class ApkSignatureVerifier {
      * @param verifyFull whether to verify all contents of this APK or just collect certificates.
      * @throws PackageParserException if there was a problem collecting certificates
      */
-    private static PackageParser.SigningDetails verifySignatures(String apkPath,
+    private static SigningDetails verifySignatures(String apkPath,
             @SignatureSchemeVersion int minSignatureSchemeVersion, boolean verifyFull)
             throws PackageParserException {
         return verifySignaturesInternal(apkPath, minSignatureSchemeVersion,
@@ -249,7 +249,7 @@ public class ApkSignatureVerifier {
                 }
             }
 
-            return new SigningDetailsWithDigests(new PackageParser.SigningDetails(signerSigs,
+            return new SigningDetailsWithDigests(new SigningDetails(signerSigs,
                     SignatureSchemeVersion.SIGNING_BLOCK_V4), vSigner.contentDigests);
         } catch (SignatureNotFoundException e) {
             throw e;
@@ -290,7 +290,7 @@ public class ApkSignatureVerifier {
                     pastSignerSigs[i].setFlags(vSigner.por.flagsList.get(i));
                 }
             }
-            return new SigningDetailsWithDigests(new PackageParser.SigningDetails(signerSigs,
+            return new SigningDetailsWithDigests(new SigningDetails(signerSigs,
                     SignatureSchemeVersion.SIGNING_BLOCK_V3, pastSignerSigs),
                     vSigner.contentDigests);
         } catch (SignatureNotFoundException e) {
@@ -321,7 +321,7 @@ public class ApkSignatureVerifier {
                     ApkSignatureSchemeV2Verifier.verify(apkPath, verifyFull);
             Certificate[][] signerCerts = vSigner.certs;
             Signature[] signerSigs = convertToSignatures(signerCerts);
-            return new SigningDetailsWithDigests(new PackageParser.SigningDetails(signerSigs,
+            return new SigningDetailsWithDigests(new SigningDetails(signerSigs,
                     SignatureSchemeVersion.SIGNING_BLOCK_V2), vSigner.contentDigests);
         } catch (SignatureNotFoundException e) {
             throw e;
@@ -408,7 +408,7 @@ public class ApkSignatureVerifier {
                 }
             }
             return new SigningDetailsWithDigests(
-                    new PackageParser.SigningDetails(lastSigs, SignatureSchemeVersion.JAR), null);
+                    new SigningDetails(lastSigs, SignatureSchemeVersion.JAR), null);
         } catch (GeneralSecurityException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
                     "Failed to collect certificates from " + apkPath, e);
@@ -565,7 +565,7 @@ public class ApkSignatureVerifier {
      * @hide for internal use only.
      */
     public static class SigningDetailsWithDigests {
-        public final PackageParser.SigningDetails signingDetails;
+        public final SigningDetails signingDetails;
 
         /**
          * APK Signature Schemes v2/v3/v4 might contain multiple content digests.
@@ -576,7 +576,7 @@ public class ApkSignatureVerifier {
          */
         public final Map<Integer, byte[]> contentDigests;
 
-        SigningDetailsWithDigests(PackageParser.SigningDetails signingDetails,
+        SigningDetailsWithDigests(SigningDetails signingDetails,
                 Map<Integer, byte[]> contentDigests) {
             this.signingDetails = signingDetails;
             this.contentDigests = contentDigests;

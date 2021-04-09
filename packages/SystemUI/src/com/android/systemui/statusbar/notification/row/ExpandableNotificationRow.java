@@ -881,7 +881,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // Other parts of the system may intercept and handle all the falsing.
         // Otherwise, if we see motion and follow-on events, try to classify them as a tap.
         if (ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
-            mFalsingManager.isFalseTap(true, 0.3);
+            mFalsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY);
         }
         return super.onInterceptTouchEvent(ev);
     }

@@ -419,6 +419,14 @@ public class NotificationManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Importance {}
 
+    /** @hide */
+    @IntDef(prefix = { "BUBBLE_PREFERENCE_" }, value = {
+            BUBBLE_PREFERENCE_NONE, BUBBLE_PREFERENCE_SELECTED,
+            BUBBLE_PREFERENCE_ALL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BubblePreference {}
+
     /**
      * Activity Action: Launch an Automatic Zen Rule configuration screen
      * <p>
@@ -1379,7 +1387,7 @@ public class NotificationManager {
      * @see Notification#getBubbleMetadata()
      * @return the users' bubble preference for the app.
      */
-    public int getBubblePreference() {
+    public @BubblePreference int getBubblePreference() {
         INotificationManager service = getService();
         try {
             return service.getBubblePreferenceForPackage(mContext.getPackageName(),

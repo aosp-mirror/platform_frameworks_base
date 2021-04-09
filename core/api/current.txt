@@ -1182,7 +1182,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int requestLegacyExternalStorage = 16844291; // 0x1010603
-    field public static final int requestOptimizedExternalStorageAccess;
+    field public static final int requestRawExternalStorageAccess;
     field public static final int requireDeviceScreenOn;
     field public static final int requireDeviceUnlock = 16843756; // 0x10103ec
     field public static final int required = 16843406; // 0x101028e
@@ -8552,8 +8552,8 @@ package android.appwidget {
     ctor public AppWidgetProviderInfo(android.os.Parcel);
     method public android.appwidget.AppWidgetProviderInfo clone();
     method public int describeContents();
+    method @NonNull public android.content.pm.ActivityInfo getActivityInfo();
     method public final android.os.UserHandle getProfile();
-    method @NonNull public android.content.pm.ActivityInfo getProviderInfo();
     method @Nullable public final CharSequence loadDescription(@NonNull android.content.Context);
     method public final android.graphics.drawable.Drawable loadIcon(@NonNull android.content.Context, int);
     method public final String loadLabel(android.content.pm.PackageManager);
@@ -12441,7 +12441,7 @@ package android.content.pm {
     method public void setAppIcon(@Nullable android.graphics.Bitmap);
     method public void setAppLabel(@Nullable CharSequence);
     method public void setAppPackageName(@Nullable String);
-    method public void setAutoRevokePermissionsMode(boolean);
+    method @Deprecated public void setAutoRevokePermissionsMode(boolean);
     method public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
@@ -20333,6 +20333,7 @@ package android.media {
     field public static final int ENCODING_DOLBY_TRUEHD = 14; // 0xe
     field public static final int ENCODING_DTS = 7; // 0x7
     field public static final int ENCODING_DTS_HD = 8; // 0x8
+    field public static final int ENCODING_DTS_UHD = 27; // 0x1b
     field public static final int ENCODING_E_AC3 = 6; // 0x6
     field public static final int ENCODING_E_AC3_JOC = 18; // 0x12
     field public static final int ENCODING_IEC61937 = 13; // 0xd
@@ -52857,7 +52858,7 @@ package android.view.translation {
     method @NonNull public android.view.translation.TranslationResponse.Builder setFinalResponse(boolean);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int, @NonNull android.view.translation.TranslationResponseValue);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValues(@NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue>);
-    method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
+    method @Deprecated @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
     method @NonNull public android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int, @NonNull android.view.translation.ViewTranslationResponse);
     method @NonNull public android.view.translation.TranslationResponse.Builder setViewTranslationResponses(@NonNull android.util.SparseArray<android.view.translation.ViewTranslationResponse>);
   }
@@ -55492,6 +55493,7 @@ package android.widget {
 
   public class RemoteViews implements android.view.LayoutInflater.Filter android.os.Parcelable {
     ctor public RemoteViews(String, int);
+    ctor public RemoteViews(@NonNull String, @LayoutRes int, @IdRes int);
     ctor public RemoteViews(android.widget.RemoteViews, android.widget.RemoteViews);
     ctor public RemoteViews(@NonNull java.util.Map<android.util.SizeF,android.widget.RemoteViews>);
     ctor public RemoteViews(android.widget.RemoteViews);
@@ -55565,7 +55567,6 @@ package android.widget {
     method public void setTextViewText(@IdRes int, CharSequence);
     method public void setTextViewTextSize(@IdRes int, int, float);
     method public void setUri(@IdRes int, String, android.net.Uri);
-    method public void setViewId(@IdRes int);
     method public void setViewLayoutHeight(@IdRes int, float, int);
     method public void setViewLayoutHeightDimen(@IdRes int, @DimenRes int);
     method public void setViewLayoutMargin(@IdRes int, int, float, int);

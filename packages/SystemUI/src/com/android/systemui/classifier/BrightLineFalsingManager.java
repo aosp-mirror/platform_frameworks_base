@@ -218,18 +218,43 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public boolean isFalseTap(boolean robustCheck, double falsePenalty) {
+    public boolean isSimpleTap() {
+        FalsingClassifier.Result result = mSingleTapClassifier.isTap(
+                mDataProvider.getRecentMotionEvents(), 0);
+        mPriorResults = Collections.singleton(result);
+
+        return !result.isFalse();
+    }
+
+    @Override
+    public boolean isFalseTap(@Penalty int penalty) {
         if (skipFalsing()) {
             return false;
+        }
+
+        double falsePenalty = 0;
+        switch(penalty) {
+            case NO_PENALTY:
+                falsePenalty = 0;
+                break;
+            case LOW_PENALTY:
+                falsePenalty = 0.1;
+                break;
+            case MODERATE_PENALTY:
+                falsePenalty = 0.3;
+                break;
+            case HIGH_PENALTY:
+                falsePenalty = 0.6;
+                break;
         }
 
         FalsingClassifier.Result singleTapResult =
                 mSingleTapClassifier.isTap(mDataProvider.getRecentMotionEvents().isEmpty()
                         ? mDataProvider.getPriorMotionEvents()
-                        : mDataProvider.getRecentMotionEvents());
+                        : mDataProvider.getRecentMotionEvents(), falsePenalty);
         mPriorResults = Collections.singleton(singleTapResult);
 
-        if (!singleTapResult.isFalse() && robustCheck) {
+        if (!singleTapResult.isFalse()) {
             if (mDataProvider.isJustUnlockedWithFace()) {
                 // Immediately pass if a face is detected.
                 mPriorResults = Collections.singleton(FalsingClassifier.Result.passed(1));

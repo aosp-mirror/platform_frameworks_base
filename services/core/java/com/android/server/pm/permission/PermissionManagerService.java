@@ -69,8 +69,10 @@ import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PermissionGroupInfoFlags;
 import android.content.pm.PackageManager.PermissionInfoFlags;
@@ -80,12 +82,12 @@ import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
-import android.content.AttributionSource;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
@@ -177,6 +179,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private static final long BACKUP_TIMEOUT_MILLIS = SECONDS.toMillis(60);
 
+    // For automotive products, CarService enforces allow-listing of the privileged permissions
+    // com.android.car is the package name which declares auto specific permissions
+    private static final String CAR_PACKAGE_NAME = "com.android.car";
+
     /** Cap the size of permission trees that 3rd party apps can define; in characters of text */
     private static final int MAX_PERMISSION_TREE_FOOTPRINT = 32768;
     /** Empty array to avoid allocations */
@@ -209,6 +215,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
     }
+
+    /** Set of source package names for Privileged Permission Allowlist */
+    private final ArraySet<String> mPrivilegedPermissionAllowlistSourcePackageNames =
+            new ArraySet<>();
 
     /** Lock to protect internal data access */
     private final Object mLock = new Object();
@@ -356,7 +366,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     };
 
-    PermissionManagerService(@NonNull Context context) {
+    PermissionManagerService(@NonNull Context context,
+            @NonNull ArrayMap<String, FeatureInfo> availableFeatures) {
         // The package info cache is the cache for package and permission information.
         // Disable the package info and package permission caches locally but leave the
         // checkPermission cache active.
@@ -367,6 +378,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
+
+        mPrivilegedPermissionAllowlistSourcePackageNames.add(PLATFORM_PACKAGE_NAME);
+        // PackageManager.hasSystemFeature() is not used here because PackageManagerService
+        // isn't ready yet.
+        if (availableFeatures.containsKey(PackageManager.FEATURE_AUTOMOTIVE)) {
+            mPrivilegedPermissionAllowlistSourcePackageNames.add(CAR_PACKAGE_NAME);
+        }
 
         mHandlerThread = new ServiceThread(TAG,
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
@@ -422,7 +440,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * lock created by the permission manager itself.
      */
     @NonNull
-    public static PermissionManagerServiceInternal create(@NonNull Context context) {
+    public static PermissionManagerServiceInternal create(@NonNull Context context,
+            ArrayMap<String, FeatureInfo> availableFeatures) {
         final PermissionManagerServiceInternal permMgrInt =
                 LocalServices.getService(PermissionManagerServiceInternal.class);
         if (permMgrInt != null) {
@@ -431,7 +450,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         PermissionManagerService permissionService =
                 (PermissionManagerService) ServiceManager.getService("permissionmgr");
         if (permissionService == null) {
-            permissionService = new PermissionManagerService(context);
+            permissionService = new PermissionManagerService(context, availableFeatures);
             ServiceManager.addService("permissionmgr", permissionService);
         }
         return LocalServices.getService(PermissionManagerServiceInternal.class);
@@ -3318,7 +3337,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (!pkg.isPrivileged()) {
             return true;
         }
-        if (!Objects.equals(permission.getPackageName(), PLATFORM_PACKAGE_NAME)) {
+        if (!mPrivilegedPermissionAllowlistSourcePackageNames
+                .contains(permission.getPackageName())) {
             return true;
         }
         final String permissionName = permission.getName();
@@ -3415,15 +3435,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         //     - or it shares a common signing certificate in its lineage with the defining package,
         //       and the defining package still trusts the old certificate for permissions
         //     - or it shares the above relationships with the system package
-        final PackageParser.SigningDetails sourceSigningDetails =
+        final SigningDetails sourceSigningDetails =
                 getSourcePackageSigningDetails(bp);
         return sourceSigningDetails.hasCommonSignerWithCapability(
                         pkg.getSigningDetails(),
-                        PackageParser.SigningDetails.CertCapabilities.PERMISSION)
+                        SigningDetails.CertCapabilities.PERMISSION)
                 || pkg.getSigningDetails().hasAncestorOrSelf(systemPackage.getSigningDetails())
                 || systemPackage.getSigningDetails().checkCapability(
                         pkg.getSigningDetails(),
-                        PackageParser.SigningDetails.CertCapabilities.PERMISSION);
+                        SigningDetails.CertCapabilities.PERMISSION);
     }
 
     private boolean shouldGrantPermissionByProtectionFlags(@NonNull AndroidPackage pkg,
@@ -3581,11 +3601,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @NonNull
-    private PackageParser.SigningDetails getSourcePackageSigningDetails(
+    private SigningDetails getSourcePackageSigningDetails(
             @NonNull Permission bp) {
         final PackageSetting ps = getSourcePackageSetting(bp);
         if (ps == null) {
-            return PackageParser.SigningDetails.UNKNOWN;
+            return SigningDetails.UNKNOWN;
         }
         return ps.getSigningDetails();
     }

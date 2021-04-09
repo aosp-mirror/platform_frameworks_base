@@ -15,19 +15,18 @@
  */
 package android.content.pm;
 
-import static android.content.pm.PackageParser.SigningDetails.CertCapabilities.AUTH;
-import static android.content.pm.PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA;
-import static android.content.pm.PackageParser.SigningDetails.CertCapabilities.PERMISSION;
-import static android.content.pm.PackageParser.SigningDetails.CertCapabilities.ROLLBACK;
-import static android.content.pm.PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID;
-import static android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3;
+import static android.content.pm.SigningDetails.CertCapabilities.AUTH;
+import static android.content.pm.SigningDetails.CertCapabilities.INSTALLED_DATA;
+import static android.content.pm.SigningDetails.CertCapabilities.PERMISSION;
+import static android.content.pm.SigningDetails.CertCapabilities.ROLLBACK;
+import static android.content.pm.SigningDetails.CertCapabilities.SHARED_USER_ID;
+import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.content.pm.PackageParser.SigningDetails;
 import android.util.ArraySet;
 import android.util.PackageUtils;
 
@@ -990,11 +989,11 @@ public class SigningDetailsTest {
     private void assertSigningDetailsContainsLineage(SigningDetails details,
             String... pastSigners) {
         // This method should only be invoked for results that contain a single signer.
-        assertEquals(1, details.signatures.length);
-        assertTrue(details.signatures[0].toCharsString().equalsIgnoreCase(
+        assertEquals(1, details.getSignatures().length);
+        assertTrue(details.getSignatures()[0].toCharsString().equalsIgnoreCase(
                 pastSigners[pastSigners.length - 1]));
         Set<String> signatures = new ArraySet<>(pastSigners);
-        for (Signature pastSignature : details.pastSigningCertificates) {
+        for (Signature pastSignature : details.getPastSigningCertificates()) {
             assertTrue(signatures.remove(pastSignature.toCharsString()));
         }
         assertEquals(0, signatures.size());

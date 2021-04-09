@@ -21,10 +21,10 @@ import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.FallbackCategoryProvider
 import android.content.pm.FeatureInfo
-import android.content.pm.PackageParser.SigningDetails
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
 import android.content.pm.Signature
+import android.content.pm.SigningDetails
 import android.content.pm.UserInfo
 import android.content.pm.parsing.ParsingPackage
 import android.content.pm.parsing.ParsingPackageUtils

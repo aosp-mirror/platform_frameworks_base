@@ -50,31 +50,6 @@ public final class LocationTimeZoneManager {
     public static final String SHELL_COMMAND_STOP = "stop";
 
     /**
-     * A shell command that can put providers into different modes. Takes effect next time the
-     * service is started.
-     */
-    public static final String SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE =
-            "set_provider_mode_override";
-
-    /**
-     * The default provider mode.
-     * For use with {@link #SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE}.
-     */
-    public static final String PROVIDER_MODE_OVERRIDE_NONE = "none";
-
-    /**
-     * The "simulated" provider mode.
-     * For use with {@link #SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE}.
-     */
-    public static final String PROVIDER_MODE_OVERRIDE_SIMULATED = "simulated";
-
-    /**
-     * The "disabled" provider mode (equivalent to there being no provider configured).
-     * For use with {@link #SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE}.
-     */
-    public static final String PROVIDER_MODE_OVERRIDE_DISABLED = "disabled";
-
-    /**
      * A shell command that tells the service to record state information during tests. The next
      * argument value is "true" or "false".
      */

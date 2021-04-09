@@ -27,6 +27,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
+import android.util.Log;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -122,8 +123,11 @@ public class ZenLog {
 
     public static void traceSetNotificationPolicy(String pkg, int targetSdk,
             NotificationManager.Policy policy) {
-        append(TYPE_SET_NOTIFICATION_POLICY, "pkg=" + pkg + " targetSdk=" + targetSdk
-                + " NotificationPolicy=" + policy.toString());
+        String policyLog = "pkg=" + pkg + " targetSdk=" + targetSdk
+                + " NotificationPolicy=" + policy.toString();
+        append(TYPE_SET_NOTIFICATION_POLICY, policyLog);
+        // TODO(b/180205791): remove when we can better surface apps that are changing policy
+        Log.d(TAG, "Zen Policy Changed: " + policyLog);
     }
 
     public static void traceSubscribe(Uri uri, IConditionProvider provider, RemoteException e) {

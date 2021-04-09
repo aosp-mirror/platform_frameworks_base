@@ -16,19 +16,25 @@
 package com.android.server.timezonedetector.location;
 
 import static android.app.time.LocationTimeZoneManager.DUMP_STATE_OPTION_PROTO;
-import static android.app.time.LocationTimeZoneManager.PRIMARY_PROVIDER_NAME;
-import static android.app.time.LocationTimeZoneManager.PROVIDER_MODE_OVERRIDE_DISABLED;
-import static android.app.time.LocationTimeZoneManager.PROVIDER_MODE_OVERRIDE_NONE;
-import static android.app.time.LocationTimeZoneManager.PROVIDER_MODE_OVERRIDE_SIMULATED;
-import static android.app.time.LocationTimeZoneManager.SECONDARY_PROVIDER_NAME;
 import static android.app.time.LocationTimeZoneManager.SERVICE_NAME;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_DUMP_STATE;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_RECORD_PROVIDER_STATES;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND;
-import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_START;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_STOP;
+import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS;
+import static com.android.server.timedetector.ServerFlags.KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE;
+import static com.android.server.timedetector.ServerFlags.KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE;
+import static com.android.server.timezonedetector.ServiceConfigAccessor.PROVIDER_MODE_DISABLED;
+import static com.android.server.timezonedetector.ServiceConfigAccessor.PROVIDER_MODE_ENABLED;
+import static com.android.server.timezonedetector.ServiceConfigAccessor.PROVIDER_MODE_SIMULATED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
@@ -53,15 +59,11 @@ import com.android.server.timezonedetector.location.LocationTimeZoneProvider.Pro
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 /** Implements the shell command interface for {@link LocationTimeZoneManagerService}. */
 class LocationTimeZoneManagerShellCommand extends ShellCommand {
-
-    private static final List<String> VALID_PROVIDER_NAMES =
-            Arrays.asList(PRIMARY_PROVIDER_NAME, SECONDARY_PROVIDER_NAME);
 
     private final LocationTimeZoneManagerService mService;
 
@@ -81,9 +83,6 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
             }
             case SHELL_COMMAND_STOP: {
                 return runStop();
-            }
-            case SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE: {
-                return runSetProviderModeOverride();
             }
             case SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND: {
                 return runSendProviderTestCommand();
@@ -110,10 +109,6 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         pw.println("    Starts the location_time_zone_manager, creating time zone providers.");
         pw.printf("  %s\n", SHELL_COMMAND_STOP);
         pw.println("    Stops the location_time_zone_manager, destroying time zone providers.");
-        pw.printf("  %s <provider name> <mode>\n", SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE);
-        pw.println("    Sets a provider into a test mode next time the service started.");
-        pw.printf("    Values: %s|%s|%s\n", PROVIDER_MODE_OVERRIDE_NONE,
-                PROVIDER_MODE_OVERRIDE_DISABLED, PROVIDER_MODE_OVERRIDE_SIMULATED);
         pw.printf("  %s (true|false)\n", SHELL_COMMAND_RECORD_PROVIDER_STATES);
         pw.printf("    Enables / disables provider state recording mode. See also %s. The default"
                 + " state is always \"false\".\n", SHELL_COMMAND_DUMP_STATE);
@@ -126,11 +121,11 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         pw.println("    Dumps Location Time Zone Manager state for tests as text or binary proto"
                 + " form.");
         pw.println("    See the LocationTimeZoneManagerServiceStateProto definition for details.");
-        pw.printf("  %s <provider name> <test command>\n",
+        pw.printf("  %s <provider index> <test command>\n",
                 SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND);
         pw.println("    Passes a test command to the named provider.");
         pw.println();
-        pw.printf("<provider name> = One of %s\n", VALID_PROVIDER_NAMES);
+        pw.println("<provider index> = 0 (primary), 1 (secondary)");
         pw.println();
         pw.printf("%s details:\n", SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND);
         pw.println();
@@ -145,6 +140,47 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         SimulatedLocationTimeZoneProviderProxy.printTestCommandShellHelp(pw);
         pw.println();
         pw.println("Test commands cannot currently be passed to real provider implementations.");
+        pw.println();
+        pw.printf("This service is also affected by the following device_config flags in the"
+                + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);
+        pw.printf("    %s - [default=true], only observed if the feature is enabled in config,"
+                        + "set this to false to disable the feature\n",
+                KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED);
+        pw.printf("    %s - [default=false]. Only used if the device does not have an explicit"
+                        + " 'location time zone detection enabled' setting configured [*].\n",
+                KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT);
+        pw.printf("    %s - [default=<unset>]. Used to override the device's 'location time zone"
+                        + " detection enabled' setting [*]\n",
+                KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE);
+        pw.printf("    %s - Overrides the mode of the primary provider. Values=%s|%s|%s\n",
+                KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
+                PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED, PROVIDER_MODE_SIMULATED);
+        pw.printf("    %s - Overrides the mode of the secondary provider. Values=%s|%s|%s\n",
+                KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
+                PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED, PROVIDER_MODE_SIMULATED);
+        pw.printf("    %s - \n",
+                KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE);
+        pw.printf("    %s - Sets the amount of time the service waits when uncertain before making"
+                        + " an 'uncertain' suggestion to the time zone detector.\n",
+                KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS);
+        pw.printf("    %s - Sets the initialization time passed to the location time zone providers"
+                        + "\n",
+                KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS);
+        pw.printf("    %s - Sets the amount of extra time added to the location time zone providers"
+                        + " initialization time\n",
+                KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS);
+        pw.println();
+        pw.println("[*] The user must still have location = on / auto time zone detection = on");
+        pw.println();
+        pw.printf("Typically, use '%s' to stop the service before setting individual"
+                + " flags and '%s' after to restart it.\n",
+                SHELL_COMMAND_STOP, SHELL_COMMAND_START);
+        pw.println();
+        pw.println("Example:");
+        pw.printf("    $ adb shell cmd device_config put %s %s %s\n",
+                NAMESPACE_SYSTEM_TIME, KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
+                "true");
+        pw.println("See adb shell cmd device_config for more information.");
         pw.println();
     }
 
@@ -169,21 +205,6 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         }
         PrintWriter outPrintWriter = getOutPrintWriter();
         outPrintWriter.println("Service stopped");
-        return 0;
-    }
-
-    private int runSetProviderModeOverride() {
-        PrintWriter outPrintWriter = getOutPrintWriter();
-        try {
-            String providerName = getNextArgRequired();
-            String modeOverride = getNextArgRequired();
-            outPrintWriter.println("Setting provider mode override for " + providerName
-                    + " to " + modeOverride);
-            mService.setProviderModeOverride(providerName, modeOverride);
-        } catch (RuntimeException e) {
-            reportError(e);
-            return 1;
-        }
         return 0;
     }
 
@@ -215,6 +236,11 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         } catch (RuntimeException e) {
             reportError(e);
             return 1;
+        }
+
+        if (state == null) {
+            // Controller is stopped.
+            return 0;
         }
 
         DualDumpOutputStream outputStream;
@@ -288,10 +314,10 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
     private int runSendProviderTestCommand() {
         PrintWriter outPrintWriter = getOutPrintWriter();
 
-        String providerName;
+        int providerIndex;
         TestCommand testCommand;
         try {
-            providerName = validateProviderName(getNextArgRequired());
+            providerIndex = parseProviderIndex(getNextArgRequired());
             testCommand = createTestCommandFromNextShellArg();
         } catch (RuntimeException e) {
             reportError(e);
@@ -299,9 +325,9 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         }
 
         outPrintWriter.println("Injecting testCommand=" + testCommand
-                + " to providerName=" + providerName);
+                + " to providerIndex=" + providerIndex);
         try {
-            Bundle result = mService.handleProviderTestCommand(providerName, testCommand);
+            Bundle result = mService.handleProviderTestCommand(providerIndex, testCommand);
             outPrintWriter.println(result);
         } catch (RuntimeException e) {
             reportError(e);
@@ -321,11 +347,11 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         e.printStackTrace(errPrintWriter);
     }
 
-    @NonNull
-    static String validateProviderName(@NonNull String value) {
-        if (!VALID_PROVIDER_NAMES.contains(value)) {
-            throw new IllegalArgumentException("Unknown provider name=" + value);
+    private static int parseProviderIndex(@NonNull String providerIndexString) {
+        int providerIndex = Integer.parseInt(providerIndexString);
+        if (providerIndex < 0 || providerIndex > 1) {
+            throw new IllegalArgumentException(providerIndexString);
         }
-        return value;
+        return providerIndex;
     }
 }

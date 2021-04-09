@@ -125,7 +125,7 @@ public class ActivatableNotificationViewController
                 result = mNotificationTapHelper.onTouchEvent(ev, mView.getActualHeight());
             } else if (ev.getAction() == MotionEvent.ACTION_UP) {
                 // If this is a false tap, capture the even so it doesn't result in a click.
-                return mFalsingManager.isFalseTap(true, 0.1);
+                return mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY);
             }
             return result;
         }

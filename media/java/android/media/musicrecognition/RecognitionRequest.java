@@ -120,7 +120,10 @@ public final class RecognitionRequest implements Parcelable {
             return this;
         }
 
-        /** Number of samples to drop from the start of the stream. */
+        /**
+         * Number of frames to drop from the start of the stream
+         * (if recording is PCM stereo, one frame is two samples).
+         **/
         @NonNull
         public Builder setIgnoreBeginningFrames(int ignoreBeginningFrames) {
             mIgnoreBeginningFrames = ignoreBeginningFrames;

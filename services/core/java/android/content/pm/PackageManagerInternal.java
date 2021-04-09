@@ -30,6 +30,7 @@ import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
+import android.content.pm.SigningDetails.CertCapabilities;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.Bundle;
@@ -730,7 +731,7 @@ public abstract class PackageManagerInternal {
      * signing history for {@code serverUid} and with the {@code capability} specified.
      */
     public abstract boolean hasSignatureCapability(int serverUid, int clientUid,
-            @PackageParser.SigningDetails.CertCapabilities int capability);
+            @CertCapabilities int capability);
 
     /**
      * Get appIds of all available apps which specified android:sharedUserId in the manifest.

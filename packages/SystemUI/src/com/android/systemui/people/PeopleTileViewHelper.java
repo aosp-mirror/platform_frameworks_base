@@ -391,6 +391,7 @@ class PeopleTileViewHelper {
             statusText = getStatusTextByType(status.getActivity());
         }
         views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
+        views.setViewVisibility(R.id.messages_count, View.GONE);
         setMaxLines(views);
         // Secondary text color for statuses.
         TypedValue typedValue = new TypedValue();
@@ -530,6 +531,7 @@ class PeopleTileViewHelper {
         if (mLayoutSize == LAYOUT_SMALL) {
             views.setViewVisibility(R.id.predefined_icon, View.VISIBLE);
             views.setViewVisibility(R.id.name, View.GONE);
+            views.setViewVisibility(R.id.messages_count, View.GONE);
         } else {
             views.setViewVisibility(R.id.predefined_icon, View.GONE);
             views.setViewVisibility(R.id.name, View.VISIBLE);
@@ -544,6 +546,7 @@ class PeopleTileViewHelper {
         if (mLayoutSize == LAYOUT_SMALL) {
             views.setViewVisibility(R.id.name, View.VISIBLE);
             views.setViewVisibility(R.id.predefined_icon, View.GONE);
+            views.setViewVisibility(R.id.messages_count, View.GONE);
         }
         String status = PeopleSpaceUtils.getLastInteractionString(mContext,
                 mTile.getLastInteractionTimestamp());

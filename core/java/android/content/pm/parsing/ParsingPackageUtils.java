@@ -47,8 +47,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityUtils;
@@ -2019,9 +2019,9 @@ public class ParsingPackageUtils {
                         v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED);
             }
             if (sa.hasValue(
-                    R.styleable.AndroidManifestApplication_requestOptimizedExternalStorageAccess)) {
-                pkg.setRequestOptimizedExternalStorageAccess(sa.getBoolean(R.styleable
-                                .AndroidManifestApplication_requestOptimizedExternalStorageAccess,
+                    R.styleable.AndroidManifestApplication_requestRawExternalStorageAccess)) {
+                pkg.setRequestRawExternalStorageAccess(sa.getBoolean(R.styleable
+                                .AndroidManifestApplication_requestRawExternalStorageAccess,
                         false));
             }
         } finally {
@@ -2800,12 +2800,6 @@ public class ParsingPackageUtils {
     }
 
     private void convertSplitPermissions(ParsingPackage pkg) {
-        // STOPSHIP(b/183905675): REMOVE THIS TERRIBLE, HORRIBLE, NO GOOD, VERY BAD HACK
-        if ("com.android.chrome".equals(pkg.getPackageName())
-                && 445500383 == pkg.getVersionCode()) {
-            pkg.setTargetSdkVersion(Build.VERSION_CODES.R);
-        }
-
         final int listSize = mSplitPermissionInfos.size();
         for (int is = 0; is < listSize; is++) {
             final PermissionManager.SplitPermissionInfo spi = mSplitPermissionInfos.get(is);
@@ -3044,7 +3038,8 @@ public class ParsingPackageUtils {
         if (existingSigningDetails == SigningDetails.UNKNOWN) {
             return input.success(verified);
         } else {
-            if (!Signature.areExactMatch(existingSigningDetails.signatures, verified.signatures)) {
+            if (!Signature.areExactMatch(existingSigningDetails.getSignatures(),
+                    verified.getSignatures())) {
                 return input.error(INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                         baseCodePath + " has mismatched certificates");
             }
