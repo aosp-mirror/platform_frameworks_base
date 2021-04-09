@@ -6142,6 +6142,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public int registerNetworkProvider(Messenger messenger, String name) {
         enforceNetworkFactoryOrSettingsPermission();
+        Objects.requireNonNull(messenger, "messenger must be non-null");
         NetworkProviderInfo npi = new NetworkProviderInfo(name, messenger,
                 nextNetworkProviderId(), () -> unregisterNetworkProvider(messenger));
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_PROVIDER, npi));
@@ -9074,6 +9075,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void unregisterConnectivityDiagnosticsCallback(
             @NonNull IConnectivityDiagnosticsCallback callback) {
+        Objects.requireNonNull(callback, "callback must be non-null");
         mConnectivityDiagnosticsHandler.sendMessage(
                 mConnectivityDiagnosticsHandler.obtainMessage(
                         ConnectivityDiagnosticsHandler
@@ -9444,6 +9446,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     @Override
     public void unregisterQosCallback(@NonNull final IQosCallback callback) {
+        Objects.requireNonNull(callback, "callback must be non-null");
         mQosCallbackTracker.unregisterCallback(callback);
     }
 
