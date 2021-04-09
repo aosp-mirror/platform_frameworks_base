@@ -51,18 +51,26 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
 
     private static final Pattern PATTERN_FONT = Pattern.compile("path = ([^, \n]*)");
     private static final String NOTO_COLOR_EMOJI_TTF = "NotoColorEmoji.ttf";
-    private static final String TEST_NOTO_COLOR_EMOJI_V1_TTF =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV1.ttf";
-    private static final String TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV1.ttf.fsv_sig";
-    private static final String TEST_NOTO_COLOR_EMOJI_V2_TTF =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV2.ttf";
-    private static final String TEST_NOTO_COLOR_EMOJI_V2_TTF_FSV_SIG =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV2.ttf.fsv_sig";
+
     private static final String ORIGINAL_NOTO_COLOR_EMOJI_TTF =
             "/data/local/tmp/NotoColorEmoji.ttf";
     private static final String ORIGINAL_NOTO_COLOR_EMOJI_TTF_FSV_SIG =
             "/data/local/tmp/UpdatableSystemFontTestNotoColorEmoji.ttf.fsv_sig";
+    // A font with revision == 0.
+    private static final String TEST_NOTO_COLOR_EMOJI_V0_TTF =
+            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV0.ttf";
+    private static final String TEST_NOTO_COLOR_EMOJI_V0_TTF_FSV_SIG =
+            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV0.ttf.fsv_sig";
+    // A font with revision == original + 1
+    private static final String TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF =
+            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf";
+    private static final String TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG =
+            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf.fsv_sig";
+    // A font with revision == original + 2
+    private static final String TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF =
+            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf";
+    private static final String TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG =
+            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf.fsv_sig";
 
     @Rule
     public final AddFsVerityCertRule mAddFsverityCertRule =
@@ -81,7 +89,7 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
     @Test
     public void updateFont() throws Exception {
         expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
         assertThat(fontPath).startsWith("/data/fonts/files/");
     }
@@ -89,19 +97,39 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
     @Test
     public void updateFont_twice() throws Exception {
         expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
         expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V2_TTF, TEST_NOTO_COLOR_EMOJI_V2_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG));
         String fontPath2 = getFontPath(NOTO_COLOR_EMOJI_TTF);
         assertThat(fontPath2).startsWith("/data/fonts/files/");
         assertThat(fontPath2).isNotEqualTo(fontPath);
     }
 
     @Test
+    public void updateFont_allowSameVersion() throws Exception {
+        // Update original font to the same version
+        expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
+                ORIGINAL_NOTO_COLOR_EMOJI_TTF, ORIGINAL_NOTO_COLOR_EMOJI_TTF_FSV_SIG));
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
+        String fontPath2 = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        // Update updated font to the same version
+        expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
+        String fontPath3 = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(fontPath).startsWith("/data/fonts/files/");
+        assertThat(fontPath2).isNotEqualTo(fontPath);
+        assertThat(fontPath2).startsWith("/data/fonts/files/");
+        assertThat(fontPath3).startsWith("/data/fonts/files/");
+        assertThat(fontPath3).isNotEqualTo(fontPath);
+    }
+
+    @Test
     public void updatedFont_dataFileIsImmutableAndReadable() throws Exception {
         expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
         assertThat(fontPath).startsWith("/data");
 
@@ -112,27 +140,27 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
     @Test
     public void updateFont_invalidCert() throws Exception {
         expectRemoteCommandToFail(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V2_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG));
     }
 
     @Test
     public void updateFont_downgradeFromSystem() throws Exception {
         expectRemoteCommandToFail(String.format("cmd font update %s %s",
-                ORIGINAL_NOTO_COLOR_EMOJI_TTF, ORIGINAL_NOTO_COLOR_EMOJI_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_V0_TTF, TEST_NOTO_COLOR_EMOJI_V0_TTF_FSV_SIG));
     }
 
     @Test
     public void updateFont_downgradeFromData() throws Exception {
         expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V2_TTF, TEST_NOTO_COLOR_EMOJI_V2_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG));
         expectRemoteCommandToFail(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
     }
 
     @Test
     public void reboot() throws Exception {
         expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
         assertThat(fontPath).startsWith("/data/fonts/files/");
 
@@ -176,17 +204,6 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
             try {
                 return getDevice().executeShellV2Command("cmd font status").getStatus()
                         == CommandStatus.SUCCESS;
-            } catch (DeviceNotAvailableException e) {
-                return false;
-            }
-        });
-    }
-
-    private void waitUntilSystemServerIsGone() {
-        waitUntil(TimeUnit.SECONDS.toMillis(30), () -> {
-            try {
-                return getDevice().executeShellV2Command("pid system_server").getStatus()
-                        == CommandStatus.FAILED;
             } catch (DeviceNotAvailableException e) {
                 return false;
             }
