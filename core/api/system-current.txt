@@ -2344,6 +2344,7 @@ package android.content {
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final String ACTION_ACTIVITY_RECOGNIZER = "android.intent.action.ACTIVITY_RECOGNIZER";
     field public static final String ACTION_BATTERY_LEVEL_CHANGED = "android.intent.action.BATTERY_LEVEL_CHANGED";
     field public static final String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     field public static final String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
