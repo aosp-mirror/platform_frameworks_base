@@ -140,7 +140,7 @@ public interface Bubbles {
      * @return true if we want to intercept the dismissal of the entry, else false.
      */
     boolean handleDismissalInterception(BubbleEntry entry, @Nullable List<BubbleEntry> children,
-            IntConsumer removeCallback);
+            IntConsumer removeCallback, Executor callbackExecutor);
 
     /** Set the proxy to commnuicate with SysUi side components. */
     void setSysuiProxy(SysuiProxy proxy);
