@@ -13316,23 +13316,27 @@ public final class Settings {
                 "adb_allowed_connection_time";
 
         /**
-         * Scaling factor for normal window animations. Setting to 0 will
-         * disable window animations.
+         * Scaling factor for normal window animations.
+         *
+         * The value is a float. Setting to 0.0f will disable window animations.
          */
         @Readable
         public static final String WINDOW_ANIMATION_SCALE = "window_animation_scale";
 
         /**
-         * Scaling factor for activity transition animations. Setting to 0 will
-         * disable window animations.
+         * Scaling factor for activity transition animations.
+         *
+         * The value is a float. Setting to 0.0f will disable window animations.
          */
         @Readable
         public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
 
         /**
          * Scaling factor for Animator-based animations. This affects both the
-         * start delay and duration of all such animations. Setting to 0 will
-         * cause animations to end immediately. The default value is 1.
+         * start delay and duration of all such animations.
+         *
+         * The value is a float. Setting to 0.0f will cause animations to end immediately.
+         * The default value is 1.0f.
          */
         @Readable
         public static final String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
