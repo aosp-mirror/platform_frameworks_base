@@ -870,8 +870,12 @@ public final class AudioAttributes implements Parcelable {
          */
         @SystemApi
         @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD)
-        public @NonNull Builder setHotwordMode() {
-            mFlags |= FLAG_HW_HOTWORD;
+        public @NonNull Builder setHotwordModeEnabled(boolean enable) {
+            if (enable) {
+                mFlags |= FLAG_HW_HOTWORD;
+            } else {
+                mFlags &= ~FLAG_HW_HOTWORD;
+            }
             return this;
         }
 
