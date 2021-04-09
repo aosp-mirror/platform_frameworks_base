@@ -638,6 +638,20 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
+    public void scheduleFaceDetect(int sensorId, @NonNull IBinder token,
+            int userId, @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull String opPackageName, int statsClient) {
+        throw new IllegalStateException("Face detect not supported by IBiometricsFace@1.0. Did you"
+                + "forget to check the supportsFaceDetection flag?");
+    }
+
+    @Override
+    public void cancelFaceDetect(int sensorId, @NonNull IBinder token) {
+        throw new IllegalStateException("Face detect not supported by IBiometricsFace@1.0. Did you"
+                + "forget to check the supportsFaceDetection flag?");
+    }
+
+    @Override
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
             @NonNull String opPackageName, boolean restricted, int statsClient,
@@ -657,7 +671,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @Override
     public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
         mHandler.post(() -> {
-            mScheduler.cancelAuthentication(token);
+            mScheduler.cancelAuthenticationOrDetection(token);
         });
     }
 

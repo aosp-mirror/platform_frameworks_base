@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.aidl;
+package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.fingerprint.ISession;
-import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.hardware.biometrics.face.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -30,31 +29,26 @@ import android.util.Slog;
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
+import com.android.server.biometrics.sensors.DetectionConsumer;
 
 /**
- * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
- * have the same haptic, lockout counter is not increased).
+ * Performs face detection without exposing any matching information (e.g. accept/reject have the
+ * same haptic, lockout counter is not increased).
  */
-class FingerprintDetectClient extends AcquisitionClient<ISession> {
+public class FaceDetectClient extends AcquisitionClient<ISession> implements DetectionConsumer {
 
-    private static final String TAG = "FingerprintDetectClient";
+    private static final String TAG = "FaceDetectClient";
 
     private final boolean mIsStrongBiometric;
-    @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
-
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    FingerprintDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    public FaceDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int sensorId,
-            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric,
-            int statsClient) {
+            @NonNull String owner, int sensorId, boolean isStrongBiometric, int statsClient) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT, BiometricsProtoEnums.ACTION_AUTHENTICATE,
+                BiometricsProtoEnums.MODALITY_FACE, BiometricsProtoEnums.ACTION_AUTHENTICATE,
                 statsClient);
         mIsStrongBiometric = isStrongBiometric;
-        mUdfpsOverlayController = udfpsOverlayController;
     }
 
     @Override
@@ -65,7 +59,6 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> {
 
     @Override
     protected void stopHalOperation() {
-        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
         try {
             mCancellationSignal.cancel();
         } catch (RemoteException e) {
@@ -76,19 +69,16 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> {
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(),
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD,
-                mUdfpsOverlayController, this);
         try {
             mCancellationSignal = getFreshDaemon().detectInteraction();
         } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception when requesting finger detect", e);
-            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+            Slog.e(TAG, "Remote exception when requesting face detect", e);
             mCallback.onClientFinished(this, false /* success */);
         }
     }
 
-    void onInteractionDetected() {
+    @Override
+    public void onInteractionDetected() {
         vibrateSuccess();
 
         try {
