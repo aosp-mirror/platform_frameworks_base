@@ -315,6 +315,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mLogoutEnabled;
     // cached value to avoid IPCs
     private boolean mIsUdfpsEnrolled;
+    private boolean mIsFaceEnrolled;
     // If the user long pressed the lock icon, disabling face auth for the current session.
     private boolean mLockIconPressed;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -1944,15 +1945,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mIsUdfpsEnrolled = mAuthController.isUdfpsEnrolled(userId);
     }
 
-    /**
-     * Whether to show the lock icon on lock screen and bouncer.
-     */
-    public boolean canShowLockIcon() {
-        if (mLockScreenMode == LOCK_SCREEN_MODE_LAYOUT_1) {
-            return isFaceAuthEnabledForUser(KeyguardUpdateMonitor.getCurrentUser())
-                    && !isUdfpsEnrolled();
-        }
-        return true;
+    private void updateFaceEnrolled(int userId) {
+        mIsFaceEnrolled = whitelistIpcs(
+                () -> mFaceManager != null && mFaceManager.isHardwareDetected()
+                        && mFaceManager.hasEnrolledTemplates(userId)
+                        && mFaceSettingEnabledForUser.get(userId));
     }
 
     /**
@@ -1960,6 +1957,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public boolean isUdfpsEnrolled() {
         return mIsUdfpsEnrolled;
+    }
+
+    /**
+     * @return true if there's at least one face enrolled
+     */
+    public boolean isFaceEnrolled() {
+        return mIsFaceEnrolled;
     }
 
     private final UserSwitchObserver mUserSwitchObserver = new UserSwitchObserver() {
@@ -2279,10 +2283,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * If face hardware is available, user has enrolled and enabled auth via setting.
      */
     public boolean isFaceAuthEnabledForUser(int userId) {
-        // TODO(b/140034352)
-        return whitelistIpcs(() -> mFaceManager != null && mFaceManager.isHardwareDetected()
-                && mFaceManager.hasEnrolledTemplates(userId)
-                && mFaceSettingEnabledForUser.get(userId));
+        updateFaceEnrolled(userId);
+        return mIsFaceEnrolled;
     }
 
     private void stopListeningForFingerprint() {

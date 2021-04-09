@@ -80,23 +80,13 @@
         sysui:ignoreRightInset="true"
     />
 
-    <LinearLayout
-        android:id="@+id/lock_icon_container"
-        android:orientation="vertical"
+    <!-- Keyguard messages -->
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/status_bar_height"
         android:layout_gravity="top|center_horizontal"
         android:gravity="center_horizontal">
-        <com.android.systemui.statusbar.phone.LockIcon
-            android:id="@+id/lock_icon"
-            android:layout_width="@dimen/keyguard_lock_width"
-            android:layout_height="@dimen/keyguard_lock_height"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/keyguard_lock_padding"
-            android:contentDescription="@string/accessibility_unlock_button"
-            android:src="@*android:drawable/ic_lock"
-            android:scaleType="center" />
         <com.android.keyguard.KeyguardMessageArea
             android:id="@+id/keyguard_message_area"
             style="@style/Keyguard.TextView"
@@ -107,7 +97,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:focusable="true" />
-    </LinearLayout>
+    </FrameLayout>
 
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"

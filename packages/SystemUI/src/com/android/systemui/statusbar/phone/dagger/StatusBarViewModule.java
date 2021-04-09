@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.phone.dagger;
 
 import android.annotation.Nullable;
 
+import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthRippleView;
-import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 
@@ -40,10 +40,9 @@ public abstract class StatusBarViewModule {
     /** */
     @Provides
     @StatusBarComponent.StatusBarScope
-    @Nullable
-    public static LockIcon getLockIcon(
+    public static LockIconView getLockIconView(
             NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.lock_icon);
+        return notificationShadeWindowView.findViewById(R.id.lock_icon_view);
     }
 
     /** */
