@@ -26,17 +26,13 @@ import static com.android.systemui.statusbar.phone.BiometricUnlockController.MOD
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
-import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -47,7 +43,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
@@ -56,11 +51,9 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
-import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.RemoteInputController;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
@@ -112,7 +105,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         public void onFullyShown() {
             updateStates();
             mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mContainer, "BOUNCER_VISIBLE");
-            updateLockIcon();
         }
 
         @Override
@@ -123,18 +115,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         @Override
         public void onStartingToShow() {
             updateStates();
-            updateLockIcon();
         }
 
         @Override
         public void onFullyHidden() {
             updateStates();
-            updateLockIcon();
-        }
-
-        @Override
-        public void onExpansionChanged(float hideAmount) {
-            mStatusBar.setBouncerHideAmount(hideAmount);
         }
     };
     private final DockManager.DockEventListener mDockEventListener =
@@ -157,7 +142,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private BiometricUnlockController mBiometricUnlockController;
 
     private ViewGroup mContainer;
-    private ViewGroup mLockIconContainer;
     private View mNotificationContainer;
 
     protected KeyguardBouncer mBouncer;
@@ -170,8 +154,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mPulsing;
     private boolean mGesturalNav;
     private boolean mIsDocked;
-    private boolean mIsPortraitMode;
-    private int mScreenWidthDp;
 
     protected boolean mFirstUpdate = true;
     protected boolean mLastShowing;
@@ -185,8 +167,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastIsDocked;
     private boolean mLastPulsing;
     private int mLastBiometricMode;
-    private boolean mLastLockVisible;
-    private boolean mLastLockOrientationIsPortrait;
     private boolean mQsExpanded;
 
     private OnDismissAction mAfterKeyguardGoneAction;
@@ -251,14 +231,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             ViewGroup container,
             NotificationPanelViewController notificationPanelViewController,
             BiometricUnlockController biometricUnlockController,
-            ViewGroup lockIconContainer, View notificationContainer,
+            View notificationContainer,
             KeyguardBypassController bypassController) {
         mStatusBar = statusBar;
         mContainer = container;
-        mLockIconContainer = lockIconContainer;
-        if (mLockIconContainer != null) {
-            mLastLockVisible = mLockIconContainer.getVisibility() == View.VISIBLE;
-        }
         mBiometricUnlockController = biometricUnlockController;
         mBouncer = mKeyguardBouncerFactory.create(container, mExpansionCallback);
         mNotificationPanelViewController = notificationPanelViewController;
@@ -282,9 +258,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardUpdateManager.registerCallback(mUpdateMonitorCallback);
         mStatusBarStateController.addCallback(this);
         mConfigurationController.addCallback(this);
-        mIsPortraitMode = mContext.getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_PORTRAIT;
-        mScreenWidthDp = mContext.getResources().getConfiguration().screenWidthDp;
         mGesturalNav = QuickStepContract.isGesturalMode(
                 mNavigationModeController.addListener(this));
         if (mDockManager != null) {
@@ -296,13 +269,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Override
     public void onDensityOrFontScaleChanged() {
         hideBouncer(true /* destroyView */);
-    }
-
-    @Override
-    public void onConfigChanged(Configuration newConfig) {
-        mIsPortraitMode = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT;
-        mScreenWidthDp = newConfig.screenWidthDp;
-        updateLockIcon();
     }
 
     @Override
@@ -333,66 +299,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
-    @Override
-    public void onQsExpansionChanged(float expansion) {
-        updateLockIcon();
-    }
-
     /**
      * Update the global actions visibility state in order to show the navBar when active.
      */
     public void setGlobalActionsVisible(boolean isVisible) {
         mGlobalActionsVisible = isVisible;
         updateStates();
-    }
-
-    private void updateLockIcon() {
-        // Not all form factors have a lock icon
-        if (mLockIconContainer == null) {
-            return;
-        }
-
-        boolean keyguardWithoutQs = mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                && !mNotificationPanelViewController.isQsExpanded();
-        boolean lockVisible = (mBouncer.isShowing() || keyguardWithoutQs)
-                && !mBouncer.isAnimatingAway() && !mKeyguardStateController.isKeyguardFadingAway();
-        boolean orientationChange =
-                lockVisible && (mLastLockOrientationIsPortrait != mIsPortraitMode);
-
-        if (mLastLockVisible != lockVisible || orientationChange) {
-            mLastLockVisible = lockVisible;
-            mLastLockOrientationIsPortrait = mIsPortraitMode;
-            if (lockVisible) {
-                FrameLayout.LayoutParams lp =
-                        (FrameLayout.LayoutParams) mLockIconContainer.getLayoutParams();
-                if (mIsPortraitMode) {
-                    lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-                } else {
-                    final int width = (int) TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_DIP,
-                            mScreenWidthDp,
-                            mContext.getResources().getDisplayMetrics()) / 3;
-                    mLockIconContainer.setMinimumWidth(width);
-                    lp.gravity = Gravity.TOP | Gravity.LEFT;
-                }
-                mLockIconContainer.setLayoutParams(lp);
-
-                CrossFadeHelper.fadeIn(mLockIconContainer,
-                        AppearAnimationUtils.DEFAULT_APPEAR_DURATION /* duration */,
-                        0 /* delay */);
-            } else {
-                final long duration;
-                final int delay;
-                if (needsBypassFading()) {
-                    duration = KeyguardBypassController.BYPASS_PANEL_FADE_DURATION;
-                    delay = 0;
-                } else {
-                    duration = AppearAnimationUtils.DEFAULT_APPEAR_DURATION / 2;
-                    delay = 120;
-                }
-                CrossFadeHelper.fadeOut(mLockIconContainer, duration, delay, null /* runnable */);
-            }
-        }
     }
 
     /**
@@ -646,7 +558,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             finishRunnable.run();
         }
         mNotificationPanelViewController.blockExpansionForCurrentTouch();
-        updateLockIcon();
     }
 
     @Override
@@ -736,7 +647,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     mBiometricUnlockController.finishKeyguardFadingAway();
                 }
             }
-            updateLockIcon();
             updateStates();
             mNotificationShadeWindowController.setKeyguardShowing(false);
             mViewMediatorCallback.keyguardGone();
@@ -918,7 +828,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
             mNotificationShadeWindowController.setBouncerShowing(bouncerShowing);
             mStatusBar.setBouncerShowing(bouncerShowing);
-            updateLockIcon();
         }
 
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
@@ -1116,11 +1025,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             pw.println("AltAuthInterceptor: ");
             mAlternateAuthInterceptor.dump(pw);
         }
-    }
-
-    @Override
-    public void onStateChanged(int newState) {
-        updateLockIcon();
     }
 
     @Override
