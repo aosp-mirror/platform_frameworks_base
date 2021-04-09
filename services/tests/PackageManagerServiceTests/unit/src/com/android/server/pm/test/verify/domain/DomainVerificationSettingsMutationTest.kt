@@ -29,6 +29,7 @@ import android.util.ArraySet
 import android.util.SparseArray
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
@@ -192,6 +193,7 @@ class DomainVerificationSettingsMutationTest {
         fun mockPkg() = mockThrowOnUnmocked<AndroidPackage> {
             whenever(packageName) { TEST_PKG }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+            whenever(isEnabled) { true }
             whenever(activities) {
                 listOf(
                     ParsedActivity().apply {
@@ -233,11 +235,8 @@ class DomainVerificationSettingsMutationTest {
             whenever(getName()) { TEST_PKG }
             whenever(getPkg()) { mockPkg() }
             whenever(domainSetId) { TEST_UUID }
-            whenever(userState) {
-                SparseArray<PackageUserState>().apply {
-                    this[0] = PackageUserState()
-                }
-            }
+            whenever(readUserState(0)) { PackageUserState() }
+            whenever(readUserState(10)) { PackageUserState() }
             whenever(getInstantApp(anyInt())) { false }
         }
     }
@@ -258,8 +257,12 @@ class DomainVerificationSettingsMutationTest {
         mockThrowOnUnmocked {
             whenever(callingUid) { TEST_UID }
             whenever(callingUserId) { TEST_USER_ID }
-            whenever(getPackageSettingLocked(TEST_PKG)) { mockPkgSetting() }
-            whenever(getPackageLocked(TEST_PKG)) { mockPkg() }
+            mockPackageSettings {
+                when (it) {
+                    TEST_PKG -> mockPkgSetting()
+                    else -> null
+                }
+            }
             whenever(schedule(anyInt(), any()))
             whenever(scheduleWriteSettings())
 

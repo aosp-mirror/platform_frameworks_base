@@ -31,6 +31,7 @@ import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
 import com.android.server.pm.verify.domain.DomainVerificationEnforcer
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
@@ -98,10 +99,13 @@ class DomainVerificationEnforcerTest {
                     mockThrowOnUnmocked {
                         whenever(callingUid) { callingUidInt.get() }
                         whenever(callingUserId) { callingUserIdInt.get() }
-                        whenever(getPackageSettingLocked(VISIBLE_PKG)) { visiblePkgSetting }
-                        whenever(getPackageLocked(VISIBLE_PKG)) { visiblePkg }
-                        whenever(getPackageSettingLocked(INVISIBLE_PKG)) { invisiblePkgSetting }
-                        whenever(getPackageLocked(INVISIBLE_PKG)) { invisiblePkg }
+                        mockPackageSettings {
+                            when (it) {
+                                VISIBLE_PKG -> visiblePkgSetting
+                                INVISIBLE_PKG -> invisiblePkgSetting
+                                else -> null
+                            }
+                        }
                         whenever(schedule(anyInt(), any()))
                         whenever(scheduleWriteSettings())
                         whenever(filterAppAccess(eq(VISIBLE_PKG), anyInt(), anyInt())) { false }
@@ -290,6 +294,7 @@ class DomainVerificationEnforcerTest {
         fun mockPkg(packageName: String) = mockThrowOnUnmocked<AndroidPackage> {
             whenever(this.packageName) { packageName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+            whenever(isEnabled) { true }
             whenever(activities) {
                 listOf(
                     ParsedActivity().apply {
@@ -330,11 +335,8 @@ class DomainVerificationEnforcerTest {
             whenever(getName()) { packageName }
             whenever(getPkg()) { mockPkg(packageName) }
             whenever(this.domainSetId) { domainSetId }
-            whenever(userState) {
-                SparseArray<PackageUserState>().apply {
-                    this[0] = PackageUserState()
-                }
-            }
+            whenever(readUserState(0)) { PackageUserState() }
+            whenever(readUserState(1)) { PackageUserState() }
             whenever(getInstantApp(anyInt())) { false }
         }
     }
