@@ -3970,7 +3970,7 @@ static jint android_media_tv_Tuner_descrambler_add_pid(
     if (descramblerClient == NULL) {
         return (jint) Result::NOT_INITIALIZED;
     }
-    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    sp<FilterClient> filterClient = (filter == NULL) ? NULL : getFilterClient(env, filter);
     Result result = descramblerClient->addPid(getDemuxPid((int)pidType, (int)pid), filterClient);
     return (jint) result;
 }
@@ -3981,7 +3981,7 @@ static jint android_media_tv_Tuner_descrambler_remove_pid(
     if (descramblerClient == NULL) {
         return (jint) Result::NOT_INITIALIZED;
     }
-    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    sp<FilterClient> filterClient = (filter == NULL) ? NULL : getFilterClient(env, filter);
     Result result = descramblerClient->removePid(getDemuxPid((int)pidType, (int)pid), filterClient);
     return (jint) result;
 }
