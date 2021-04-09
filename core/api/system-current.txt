@@ -12568,7 +12568,7 @@ package android.uwb {
     method public void onStartFailed(int, @NonNull android.os.PersistableBundle);
     method public void onStarted(@NonNull android.os.PersistableBundle);
     method public void onStopFailed(int, @NonNull android.os.PersistableBundle);
-    method public void onStopped();
+    method public void onStopped(int, @NonNull android.os.PersistableBundle);
     field public static final int REASON_BAD_PARAMETERS = 3; // 0x3
     field public static final int REASON_GENERIC_ERROR = 4; // 0x4
     field public static final int REASON_LOCAL_REQUEST = 1; // 0x1
