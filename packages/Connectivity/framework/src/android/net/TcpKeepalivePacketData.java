@@ -32,22 +32,39 @@ import java.util.Objects;
 public final class TcpKeepalivePacketData extends KeepalivePacketData implements Parcelable {
     private static final String TAG = "TcpKeepalivePacketData";
 
-    /** TCP sequence number. */
+    /**
+     * TCP sequence number.
+     * @hide
+     */
     public final int tcpSeq;
 
-    /** TCP ACK number. */
+    /**
+     * TCP ACK number.
+     * @hide
+     */
     public final int tcpAck;
 
-    /** TCP RCV window. */
+    /**
+     * TCP RCV window.
+     * @hide
+     */
     public final int tcpWindow;
 
-    /** TCP RCV window scale. */
+    /** TCP RCV window scale.
+     * @hide
+     */
     public final int tcpWindowScale;
 
-    /** IP TOS. */
+    /**
+     * IP TOS.
+     * @hide
+     */
     public final int ipTos;
 
-    /** IP TTL. */
+    /**
+     * IP TTL.
+     * @hide
+     */
     public final int ipTtl;
 
     public TcpKeepalivePacketData(@NonNull final InetAddress srcAddress, int srcPort,
@@ -61,6 +78,56 @@ public final class TcpKeepalivePacketData extends KeepalivePacketData implements
         this.tcpWindowScale = tcpWindowScale;
         this.ipTos = ipTos;
         this.ipTtl = ipTtl;
+    }
+
+    /**
+     * Get the TCP sequence number.
+     *
+     * See https://tools.ietf.org/html/rfc793#page-15.
+     */
+    public int getTcpSeq() {
+        return tcpSeq;
+    }
+
+    /**
+     * Get the TCP ACK number.
+     *
+     * See https://tools.ietf.org/html/rfc793#page-15.
+     */
+    public int getTcpAck() {
+        return tcpAck;
+    }
+
+    /**
+     * Get the TCP RCV window.
+     *
+     * See https://tools.ietf.org/html/rfc793#page-15.
+     */
+    public int getTcpWindow() {
+        return tcpWindow;
+    }
+
+    /**
+     * Get the TCP RCV window scale.
+     *
+     * See https://tools.ietf.org/html/rfc793#page-15.
+     */
+    public int getTcpWindowScale() {
+        return tcpWindowScale;
+    }
+
+    /**
+     * Get the IP type of service.
+     */
+    public int getIpTos() {
+        return ipTos;
+    }
+
+    /**
+     * Get the IP TTL.
+     */
+    public int getIpTtl() {
+        return ipTtl;
     }
 
     @Override
