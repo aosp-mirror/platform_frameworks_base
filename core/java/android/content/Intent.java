@@ -2401,14 +2401,6 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TIMEZONE_CHANGED = "android.intent.action.TIMEZONE_CHANGED";
     /**
-     * Clear DNS Cache Action: This is broadcast when networks have changed and old
-     * DNS entries should be tossed.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final String ACTION_CLEAR_DNS_CACHE = "android.intent.action.CLEAR_DNS_CACHE";
-    /**
      * Alarm Changed Action: This is broadcast when the AlarmClock
      * application's alarm is set or unset.  It is used by the
      * AlarmClock application and the StatusBar service.
@@ -6569,6 +6561,10 @@ public class Intent implements Parcelable, Cloneable {
      * any affinities needed to have that task in the proper state (either
      * moving activities to or from it), or simply resetting that task to
      * its initial state if needed.
+     *
+     * @see android.R.attr#allowTaskReparenting
+     * @see android.R.attr#clearTaskOnLaunch
+     * @see android.R.attr#finishOnTaskLaunch
      */
     public static final int FLAG_ACTIVITY_RESET_TASK_IF_NEEDED = 0x00200000;
     /**

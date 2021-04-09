@@ -62,15 +62,17 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy im
     RealLocationTimeZoneProviderProxy(
             @NonNull Context context, @NonNull Handler handler,
             @NonNull ThreadingDomain threadingDomain, @NonNull String action,
-            int enableOverlayResId, int nonOverlayPackageResId) {
+            @NonNull String providerPackageName) {
         super(context, threadingDomain);
         mManagerProxy = null;
         mRequest = TimeZoneProviderRequest.createStopUpdatesRequest();
+
+        Objects.requireNonNull(providerPackageName);
         mServiceWatcher = ServiceWatcher.create(context,
                 handler,
                 "RealLocationTimeZoneProviderProxy",
-                new CurrentUserServiceSupplier(context, action, enableOverlayResId,
-                        nonOverlayPackageResId, BIND_TIME_ZONE_PROVIDER_SERVICE,
+                new CurrentUserServiceSupplier(context, action,
+                        providerPackageName, BIND_TIME_ZONE_PROVIDER_SERVICE,
                         INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE),
                 this);
     }

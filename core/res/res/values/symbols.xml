@@ -350,7 +350,6 @@
   <java-symbol type="bool" name="config_camera_sound_forced" />
   <java-symbol type="bool" name="config_dontPreferApn" />
   <java-symbol type="bool" name="config_restartRadioAfterProvisioning" />
-  <java-symbol type="bool" name="config_requireRadioPowerOffOnSimRefreshReset" />
   <java-symbol type="bool" name="config_speed_up_audio_on_mt_calls" />
   <java-symbol type="bool" name="config_useFixedVolume" />
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
@@ -2180,10 +2179,8 @@
   <java-symbol type="bool" name="config_enableGnssTimeUpdateService" />
   <java-symbol type="bool" name="config_enableGeolocationTimeZoneDetection" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneProvider" />
-  <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneProvider" />
-  <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
 
   <java-symbol type="layout" name="resolver_list" />

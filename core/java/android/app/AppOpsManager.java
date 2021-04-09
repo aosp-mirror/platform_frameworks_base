@@ -1225,9 +1225,19 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_UWB_RANGING = AppProtoEnums.APP_OP_UWB_RANGING;
 
+    /**
+     * Activity recognition being accessed by an activity recognition source, which
+     * is a component that already has access since it is the one that detects
+     * activity recognition.
+     *
+     * @hide
+     */
+    public static final int OP_ACTIVITY_RECOGNITION_SOURCE =
+            AppProtoEnums.APP_OP_ACTIVITY_RECOGNITION_SOURCE;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 113;
+    public static final int _NUM_OP = 114;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1478,6 +1488,7 @@ public class AppOpsManager {
     public static final String OPSTR_USE_BIOMETRIC = "android:use_biometric";
 
     /** @hide Recognize physical activity. */
+    @TestApi
     public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
 
     /** @hide Financial app read sms. */
@@ -1642,6 +1653,17 @@ public class AppOpsManager {
     public static final String OPSTR_MANAGE_MEDIA = "android:manage_media";
     /** @hide */
     public static final String OPSTR_UWB_RANGING = "android:uwb_ranging";
+
+    /**
+     * Activity recognition being accessed by an activity recognition source, which
+     * is a component that already has access since it is the one that detects
+     * activity recognition.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE =
+            "android:activity_recognition_source";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -1853,6 +1875,7 @@ public class AppOpsManager {
             OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
             OP_BLUETOOTH_CONNECT,               // OP_BLUETOOTH_CONNECT
             OP_UWB_RANGING,                     // OP_UWB_RANGING
+            OP_ACTIVITY_RECOGNITION_SOURCE      // OP_ACTIVITY_RECOGNITION_SOURCE
     };
 
     /**
@@ -1972,6 +1995,7 @@ public class AppOpsManager {
             OPSTR_MANAGE_MEDIA,
             OPSTR_BLUETOOTH_CONNECT,
             OPSTR_UWB_RANGING,
+            OPSTR_ACTIVITY_RECOGNITION_SOURCE
     };
 
     /**
@@ -2091,7 +2115,8 @@ public class AppOpsManager {
             "COARSE_LOCATION_SOURCE",
             "MANAGE_MEDIA",
             "BLUETOOTH_CONNECT",
-            "UWB_RANGING"
+            "UWB_RANGING",
+            "ACTIVITY_RECOGNITION_SOURCE"
     };
 
     /**
@@ -2213,6 +2238,7 @@ public class AppOpsManager {
             Manifest.permission.MANAGE_MEDIA,
             Manifest.permission.BLUETOOTH_CONNECT,
             Manifest.permission.UWB_RANGING,
+            null, // no permission for OP_ACTIVITY_RECOGNITION_SOURCE,
     };
 
     /**
@@ -2334,6 +2360,7 @@ public class AppOpsManager {
             null, // MANAGE_MEDIA
             null, // BLUETOOTH_CONNECT
             null, // UWB_RANGING
+            null, // ACTIVITY_RECOGNITION_SOURCE
     };
 
     /**
@@ -2454,6 +2481,7 @@ public class AppOpsManager {
             null, // MANAGE_MEDIA
             null, // BLUETOOTH_CONNECT
             null, // UWB_RANGING
+            null  // ACTIVITY_RECOGNITION_SOURCE
     };
 
     /**
@@ -2573,6 +2601,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // MANAGE_MEDIA
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_CONNECT
             AppOpsManager.MODE_ALLOWED, // UWB_RANGING
+            AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION_SOURCE
     };
 
     /**
@@ -2696,6 +2725,7 @@ public class AppOpsManager {
             false, // MANAGE_MEDIA
             false, // BLUETOOTH_CONNECT
             false, // UWB_RANGING
+            false, // ACTIVITY_RECOGNITION_SOURCE
     };
 
     /**

@@ -53,7 +53,7 @@ public:
     StretchEffect& operator=(const StretchEffect& other) {
         this->stretchArea = other.stretchArea;
         this->mStretchDirection = other.mStretchDirection;
-        this->mStretchFilter = nullptr;
+        this->mStretchShader = other.mStretchShader;
         this->maxStretchAmountX = other.maxStretchAmountX;
         this->maxStretchAmountY = other.maxStretchAmountY;
         return *this;
@@ -76,14 +76,14 @@ public:
         maxStretchAmountY = std::max(maxStretchAmountY, other.maxStretchAmountY);
     }
 
-    sk_sp<SkImageFilter> getImageFilter(const sk_sp<SkImage>& snapshotImage) const;
+    sk_sp<SkShader> getShader(const sk_sp<SkImage>& snapshotImage) const;
 
     SkRect stretchArea {0, 0, 0, 0};
     float maxStretchAmountX = 0;
     float maxStretchAmountY = 0;
 
     void setStretchDirection(const SkVector& direction) {
-        mStretchFilter = nullptr;
+        mStretchShader = nullptr;
         mStretchDirection = direction;
     }
 
@@ -93,7 +93,7 @@ private:
     static sk_sp<SkRuntimeEffect> getStretchEffect();
     mutable SkVector mStretchDirection{0, 0};
     mutable std::unique_ptr<SkRuntimeShaderBuilder> mBuilder;
-    mutable sk_sp<SkImageFilter> mStretchFilter;
+    mutable sk_sp<SkShader> mStretchShader;
 };
 
 } // namespace android::uirenderer

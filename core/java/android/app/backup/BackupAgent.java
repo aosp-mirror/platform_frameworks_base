@@ -544,20 +544,11 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     private Set<String> getExtraExcludeDirsIfAny(Context context) throws IOException {
-        if (isDeviceToDeviceMigration()) {
-            return Collections.emptySet();
-        }
-
-        // If this is not a migration, also exclude no-backup and cache dirs.
         Set<String> excludedDirs = new HashSet<>();
         excludedDirs.add(context.getCacheDir().getCanonicalPath());
         excludedDirs.add(context.getCodeCacheDir().getCanonicalPath());
         excludedDirs.add(context.getNoBackupFilesDir().getCanonicalPath());
         return Collections.unmodifiableSet(excludedDirs);
-    }
-
-    private boolean isDeviceToDeviceMigration() {
-        return mOperationType == OperationType.MIGRATION;
     }
 
     /** @hide */
@@ -905,11 +896,6 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     private boolean isFileEligibleForRestore(File destination) throws IOException {
-        if (isDeviceToDeviceMigration()) {
-            // Everything is eligible for device-to-device migration.
-            return true;
-        }
-
         FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this, mOperationType);
         if (!bs.isFullRestoreEnabled()) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {

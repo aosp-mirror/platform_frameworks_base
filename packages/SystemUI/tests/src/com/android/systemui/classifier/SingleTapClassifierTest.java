@@ -142,12 +142,12 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
 
-        assertThat(mClassifier.isTap(mMotionEvents).isFalse()).isFalse();
+        assertThat(mClassifier.isTap(mMotionEvents, 0.5).isFalse()).isFalse();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, TOUCH_SLOP + 1);
 
-        assertThat(mClassifier.isTap(mMotionEvents).isFalse()).isTrue();
+        assertThat(mClassifier.isTap(mMotionEvents, 0.5).isFalse()).isTrue();
 
     }
 

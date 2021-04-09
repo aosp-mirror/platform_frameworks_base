@@ -26,8 +26,6 @@ import static android.app.AppOpsManager.OPSTR_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OPSTR_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OPSTR_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
-import static android.app.AppOpsManager.opToPermission;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED;
 import static android.media.AudioSystem.MODE_IN_COMMUNICATION;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 
@@ -284,10 +282,6 @@ public class PermissionUsageHelper {
                         continue;
                     }
 
-                    if (!shouldShowPermissionsHub() && !isUserSensitive(packageName, user, op)) {
-                        continue;
-                    }
-
                     boolean isRunning = attrOpEntry.isRunning()
                             || lastAccessTime >= runningThreshold;
 
@@ -375,7 +369,7 @@ public class PermissionUsageHelper {
             // for it's uid and package name, save it.
             int usageId = usage.getPackageIdHash();
             OpUsage lastMostRecent = mostRecentUsages.get(usageId);
-            if (!usage.packageName.equals(SYSTEM_PKG) && (lastMostRecent == null
+            if (shouldShowPackage(usage.packageName) && (lastMostRecent == null
                     || usage.lastAccessTime > lastMostRecent.lastAccessTime)) {
                 mostRecentUsages.put(usageId, usage);
             }
@@ -401,8 +395,7 @@ public class PermissionUsageHelper {
                     // We are missing the proxy usage. This may be because it's a one-step trusted
                     // proxy. Check if we should show the proxy label, and show it, if so.
                     OpUsage proxy = currentUsage.proxy;
-                    if (PermissionManager.isSpecialCaseShownIndicator(mContext, proxy.packageName)
-                            || isUserSensitive(proxy.packageName, proxy.getUser(), proxy.op)) {
+                    if (shouldShowPackage(proxy.packageName)) {
                         currentUsage = proxy;
                         // We've effectively added one usage, so increment the max number of usages
                         maxUsages++;
@@ -410,7 +403,6 @@ public class PermissionUsageHelper {
                         break;
                     }
                 }
-
 
                 if (currentUsage == null || iterNum == maxUsages
                         || currentUsage.getPackageIdHash() == start.getPackageIdHash()) {
@@ -421,7 +413,7 @@ public class PermissionUsageHelper {
                 proxyPackages.add(currentUsage.getPackageIdHash());
                 // Don't add an app label for the main app, or the system app
                 if (!currentUsage.packageName.equals(start.packageName)
-                        && !currentUsage.packageName.equals(SYSTEM_PKG)) {
+                        && shouldShowPackage(currentUsage.packageName)) {
                     try {
                         PackageManager userPkgManager =
                                 getUserContext(currentUsage.getUser()).getPackageManager();
@@ -451,17 +443,8 @@ public class PermissionUsageHelper {
         return usagesAndLabels;
     }
 
-    private boolean isUserSensitive(String packageName, UserHandle user, String op) {
-        if (op.equals(OPSTR_PHONE_CALL_CAMERA) || op.equals(OPSTR_PHONE_CALL_MICROPHONE)) {
-            return true;
-        }
-
-        if (opToPermission(op) == null) {
-            return false;
-        }
-
-        int permFlags = mPkgManager.getPermissionFlags(opToPermission(op), packageName, user);
-        return (permFlags & FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) != 0;
+    private boolean shouldShowPackage(String packageName) {
+        return PermissionManager.shouldShowPackageForIndicatorCached(mContext, packageName);
     }
 
     /**

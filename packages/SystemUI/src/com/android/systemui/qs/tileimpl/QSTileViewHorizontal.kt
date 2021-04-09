@@ -118,7 +118,11 @@ open class QSTileViewHorizontal(
     override fun setClickable(clickable: Boolean) {
         super.setClickable(clickable)
         background = if (clickable && mShowRippleEffect) {
-            mTileBackground
+            mRipple?.also {
+                // In case that the colorBackgroundDrawable was used as the background, make sure
+                // it has the correct callback instead of null
+                colorBackgroundDrawable?.callback = it
+            }
         } else {
             colorBackgroundDrawable
         }

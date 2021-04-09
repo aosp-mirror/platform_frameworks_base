@@ -162,6 +162,9 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertEquals(View.GONE, smallResult.findViewById(R.id.predefined_icon).getVisibility());
         // Shows person icon.
         assertEquals(View.VISIBLE, smallResult.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
+
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
@@ -220,6 +223,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has person icon.
         assertEquals(View.VISIBLE,
                 smallResult.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
@@ -281,6 +286,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has person icon.
         assertEquals(View.VISIBLE,
                 smallResult.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
@@ -342,6 +349,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         // Has person icon.
         assertEquals(View.VISIBLE,
                 smallResult.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
@@ -404,6 +413,8 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 smallResult.findViewById(R.id.predefined_icon).getVisibility());
         // Has person icon.
         assertEquals(View.VISIBLE, smallResult.findViewById(R.id.person_icon).getVisibility());
+        // No messages count.
+        assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
@@ -471,7 +482,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 smallResult.findViewById(R.id.person_icon).getVisibility());
 
         // Has a single message, no count shown.
-        assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
+        assertEquals(View.GONE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
@@ -497,7 +508,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertThat(statusContent.getMaxLines()).isEqualTo(3);
 
         // Has a single message, no count shown.
-        assertEquals(View.GONE, result.findViewById(R.id.messages_count).getVisibility());
+        assertEquals(View.GONE, largeResult.findViewById(R.id.messages_count).getVisibility());
 
     }
 
@@ -544,7 +555,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
                 smallResult.findViewById(R.id.person_icon).getVisibility());
 
         // Has two messages, show count.
-        assertEquals(View.VISIBLE, result.findViewById(R.id.messages_count).getVisibility());
+        assertEquals(View.VISIBLE, smallResult.findViewById(R.id.messages_count).getVisibility());
 
         mOptions.putInt(OPTION_APPWIDGET_MIN_WIDTH,
                 getSizeInDp(R.dimen.required_width_for_large));
@@ -570,7 +581,7 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         assertThat(statusContent.getMaxLines()).isEqualTo(3);
 
         // Has two messages, show count.
-        assertEquals(View.VISIBLE, result.findViewById(R.id.messages_count).getVisibility());
+        assertEquals(View.VISIBLE, largeResult.findViewById(R.id.messages_count).getVisibility());
     }
 
 

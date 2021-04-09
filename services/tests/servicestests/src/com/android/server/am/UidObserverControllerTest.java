@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_NETWORK;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_RECENT;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
@@ -109,6 +110,7 @@ public class UidObserverControllerTest {
 
     @Test
     public void testMergeWithPendingChange() {
+        // Map of expectedChange -> {(currentChange, pendingChange)}
         final SparseArray<Pair<Integer, Integer>> changesToVerify = new SparseArray<>();
 
         changesToVerify.put(UidRecord.CHANGE_ACTIVE,
@@ -127,6 +129,8 @@ public class UidObserverControllerTest {
                 Pair.create(UidRecord.CHANGE_GONE, UidRecord.CHANGE_ACTIVE));
         changesToVerify.put(UidRecord.CHANGE_GONE,
                 Pair.create(UidRecord.CHANGE_GONE, UidRecord.CHANGE_CACHED));
+        changesToVerify.put(UidRecord.CHANGE_PROCSTATE | UidRecord.CHANGE_CAPABILITY,
+                Pair.create(UidRecord.CHANGE_PROCSTATE, UidRecord.CHANGE_CAPABILITY));
 
         for (int i = 0; i < changesToVerify.size(); ++i) {
             final int expectedChange = changesToVerify.keyAt(i);
@@ -149,7 +153,8 @@ public class UidObserverControllerTest {
                 ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_ACTIVE,
                 PROCESS_STATE_IMPORTANT_FOREGROUND, TEST_PKG2, TEST_UID2);
         final IUidObserver observer2 = mock(IUidObserver.Stub.class);
-        registerObserver(observer2, ActivityManager.UID_OBSERVER_PROCSTATE,
+        registerObserver(observer2,
+                ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_CAPABILITY,
                 PROCESS_STATE_SERVICE, TEST_PKG3, TEST_UID3);
 
         mUidObserverController.dispatchUidsChanged();
@@ -174,6 +179,14 @@ public class UidObserverControllerTest {
         mUidObserverController.dispatchUidsChanged();
         verify(observer2).onUidStateChanged(TEST_UID1, PROCESS_STATE_RECEIVER,
                 111, PROCESS_CAPABILITY_NONE);
+        verifyNoMoreInteractions(observer1);
+        verifyNoMoreInteractions(observer2);
+
+        addPendingChange(TEST_UID1, UidRecord.CHANGE_PROCSTATE | UidRecord.CHANGE_CAPABILITY,
+                PROCESS_STATE_RECEIVER, 111, PROCESS_CAPABILITY_NETWORK, false);
+        mUidObserverController.dispatchUidsChanged();
+        verify(observer2).onUidStateChanged(TEST_UID1, PROCESS_STATE_RECEIVER,
+                111, PROCESS_CAPABILITY_NETWORK);
         verifyNoMoreInteractions(observer1);
         verifyNoMoreInteractions(observer2);
 

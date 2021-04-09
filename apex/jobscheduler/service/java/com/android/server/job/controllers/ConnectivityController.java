@@ -121,54 +121,81 @@ public final class ConnectivityController extends RestrictingController implemen
     private final SparseArray<UidDefaultNetworkCallback> mCurrentDefaultNetworkCallbacks =
             new SparseArray<>();
     private final Comparator<UidStats> mUidStatsComparator = new Comparator<UidStats>() {
-        private int prioritizeExistence(int v1, int v2) {
-            if (v1 > 0 && v2 > 0) {
+        private int prioritizeExistenceOver(int threshold, int v1, int v2) {
+            // Check if they're both on the same side of the threshold.
+            if ((v1 > threshold && v2 > threshold) || (v1 <= threshold && v2 <= threshold)) {
                 return 0;
             }
-            return v2 - v1;
+            // They're on opposite sides of the threshold.
+            if (v1 > threshold) {
+                return -1;
+            }
+            return 1;
         }
 
         @Override
         public int compare(UidStats us1, UidStats us2) {
-            // TODO: build a better prioritization scheme
-            // Some things to use:
-            //   * Proc state
-            //   * IMPORTANT_WHILE_IN_FOREGROUND bit
-            final int runningPriority = prioritizeExistence(us1.numRunning, us2.numRunning);
+            // Prioritize a UID ahead of another based on:
+            //   1. Already running connectivity jobs (so we don't drop the listener)
+            //   2. Waiting connectivity jobs would be ready with connectivity
+            //   3. An existing network satisfies a waiting connectivity job's requirements
+            //   4. TOP proc state
+            //   5. Existence of treat-as-EJ EJs (not just requested EJs)
+            //   6. FGS proc state
+            //   7. EJ enqueue time
+            //   8. Any other important job priorities/proc states
+            //   9. Enqueue time
+            // TODO: maybe consider number of jobs
+            // TODO: consider IMPORTANT_WHILE_FOREGROUND bit
+            final int runningPriority = prioritizeExistenceOver(0, us1.numRunning, us2.numRunning);
             if (runningPriority != 0) {
                 return runningPriority;
             }
             // Prioritize any UIDs that have jobs that would be ready ahead of UIDs that don't.
-            final int readyWithConnPriority =
-                    prioritizeExistence(us1.numReadyWithConnectivity, us2.numReadyWithConnectivity);
+            final int readyWithConnPriority = prioritizeExistenceOver(0,
+                    us1.numReadyWithConnectivity, us2.numReadyWithConnectivity);
             if (readyWithConnPriority != 0) {
                 return readyWithConnPriority;
             }
             // They both have jobs that would be ready. Prioritize the UIDs whose requested
             // network is available ahead of UIDs that don't have their requested network available.
-            final int reqAvailPriority = prioritizeExistence(
+            final int reqAvailPriority = prioritizeExistenceOver(0,
                     us1.numRequestedNetworkAvailable, us2.numRequestedNetworkAvailable);
             if (reqAvailPriority != 0) {
                 return reqAvailPriority;
             }
-            // They both have jobs with available networks. Prioritize based on:
-            //   1. (eventually) proc state
-            //   2. Existence of runnable EJs (not just requested)
-            //   3. Enqueue time
-            // TODO: maybe consider number of jobs
-            final int ejPriority = prioritizeExistence(us1.numEJs, us2.numEJs);
+            // Prioritize the top app. If neither are top apps, then use a later prioritization
+            // check.
+            final int topPriority = prioritizeExistenceOver(JobInfo.PRIORITY_TOP_APP - 1,
+                    us1.basePriority, us2.basePriority);
+            if (topPriority != 0) {
+                return topPriority;
+            }
+            // They're either both TOP or both not TOP. Prioritize the app that has runnable EJs
+            // pending.
+            final int ejPriority = prioritizeExistenceOver(0, us1.numEJs, us2.numEJs);
             if (ejPriority != 0) {
                 return ejPriority;
             }
-            // They both have EJs. Order them by EJ enqueue time to help provide low EJ latency.
+            // They both have runnable EJs.
+            // Prioritize an FGS+ app. If neither are FGS+ apps, then use a later prioritization
+            // check.
+            final int fgsPriority = prioritizeExistenceOver(JobInfo.PRIORITY_FOREGROUND_SERVICE - 1,
+                    us1.basePriority, us2.basePriority);
+            if (fgsPriority != 0) {
+                return fgsPriority;
+            }
+            // Order them by EJ enqueue time to help provide low EJ latency.
             if (us1.earliestEJEnqueueTime < us2.earliestEJEnqueueTime) {
                 return -1;
             } else if (us1.earliestEJEnqueueTime > us2.earliestEJEnqueueTime) {
                 return 1;
             }
+            // Order by any latent important proc states.
             if (us1.basePriority != us2.basePriority) {
                 return us2.basePriority - us1.basePriority;
             }
+            // Order by enqueue time.
             if (us1.earliestEnqueueTime < us2.earliestEnqueueTime) {
                 return -1;
             }
@@ -244,7 +271,10 @@ public final class ConnectivityController extends RestrictingController implemen
                     getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
             uidStats.numReadyWithConnectivity--;
             if (jobStatus.madeActive != 0) {
-                uidStats.numRunning--;
+                // numRunning would be 0 if the UidStats object didn't exist before this method
+                // was called. getUidStats() handles logging, so just make sure we don't save a
+                // negative value.
+                uidStats.numRunning = Math.max(0, uidStats.numRunning - 1);
             }
             maybeRevokeStandbyExceptionLocked(jobStatus);
             postAdjustCallbacks();
@@ -477,7 +507,7 @@ public final class ConnectivityController extends RestrictingController implemen
         UidStats uidStats = mUidStats.get(uid);
         if (uidStats != null && uidStats.basePriority != newPriority) {
             uidStats.basePriority = newPriority;
-            maybeAdjustRegisteredCallbacksLocked();
+            postAdjustCallbacks();
         }
     }
 
