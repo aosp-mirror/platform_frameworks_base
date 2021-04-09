@@ -4220,6 +4220,10 @@
   <java-symbol type="attr" name="colorAccentPrimary" />
   <java-symbol type="attr" name="colorAccentSecondary" />
   <java-symbol type="attr" name="colorAccentTertiary" />
+  <java-symbol type="attr" name="colorSurface" format="color" />
+  <java-symbol type="attr" name="colorSurfaceHighlight" format="color" />
+  <java-symbol type="attr" name="colorSurfaceVariant" format="color" />
+  <java-symbol type="attr" name="colorSurfaceHeader" format="color" />
 
   <!-- CEC Configuration -->
   <java-symbol type="bool" name="config_cecHdmiCecEnabled_userConfigurable" />
