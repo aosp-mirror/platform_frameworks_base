@@ -73,7 +73,8 @@ public interface Watchable {
             return;
         }
         for (Field f : base.getClass().getDeclaredFields()) {
-            if (f.getAnnotation(Watched.class) != null) {
+            final Watched annotation = f.getAnnotation(Watched.class);
+            if (annotation != null) {
                 final String fn = base.getClass().getName() + "." + f.getName();
                 try {
                     f.setAccessible(true);
@@ -81,24 +82,26 @@ public interface Watchable {
                     if (o instanceof Watchable) {
                         Watchable attr = (Watchable) (o);
                         if (attr != null && !attr.isRegisteredObserver(observer)) {
-                            if (logOnly) {
-                                Log.e("Watchable", fn + " missing an observer");
-                            } else {
-                                throw new RuntimeException("Watchable " + fn
-                                                           + " missing an observer");
-                            }
+                            handleVerifyError("Watchable " + fn + " missing an observer", logOnly);
                         }
+                    } else if (!annotation.manual()) {
+                        handleVerifyError("@Watched annotated field " + fn + " is not a watchable"
+                                + " type and is not flagged for manual watching.", logOnly);
                     }
                 } catch (IllegalAccessException e) {
                     // The field is protected; ignore it.  Other exceptions that may be thrown by
                     // Field.get() are allowed to roll up.
-                    if (logOnly) {
-                        Log.e("Watchable", fn + " not visible");
-                    } else {
-                        throw new RuntimeException("Watchable " + fn + " not visible");
-                    }
+                    handleVerifyError("Watchable " + fn + " not visible", logOnly);
                 }
             }
+        }
+    }
+
+    static void handleVerifyError(String errorMessage, boolean logOnly) {
+        if (logOnly) {
+            Log.e("Watchable", errorMessage);
+        } else {
+            throw new RuntimeException(errorMessage);
         }
     }
 
