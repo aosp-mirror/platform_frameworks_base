@@ -133,11 +133,6 @@ package android.net {
     method @NonNull public android.net.NetworkRequest.Builder setUids(@Nullable java.util.Set<android.util.Range<java.lang.Integer>>);
   }
 
-  public class ParseException extends java.lang.RuntimeException {
-    ctor public ParseException(@NonNull String);
-    ctor public ParseException(@NonNull String, @NonNull Throwable);
-  }
-
   public final class TcpRepairWindow {
     ctor public TcpRepairWindow(int, int, int, int, int, int);
     field public final int maxWindow;
