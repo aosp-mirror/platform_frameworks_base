@@ -102,7 +102,7 @@ public class SipDelegateManager {
 
     /**
      * The feature tag associated with the outgoing message does not match any known feature tags
-     * and this message can not be sent.
+     * or it matches a denied tag and this message can not be sent.
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_FEATURE_TAG = 6;
 
