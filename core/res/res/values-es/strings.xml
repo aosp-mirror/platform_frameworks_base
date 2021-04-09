@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplicación en ejecución"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplicaciones que consumen batería"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ampliación"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Uso de accesibilidad"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando la batería"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicaciones están usando la batería"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Toca para ver información detallada sobre el uso de datos y de la batería"</string>
@@ -413,13 +412,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"Permite que la aplicación envíe emisiones que permanecen en el dispositivo una vez finalizadas. Si esta función se utiliza en exceso, podría ralentizar tu dispositivo Android TV o volverlo inestable al hacer que se ocupe demasiada memoria."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Permite que la aplicación envíe emisiones que permanecen en el dispositivo una vez que la emisión ha finalizado. Un uso excesivo podría ralentizar el teléfono o volverlo inestable al hacer que use demasiada memoria."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"consultar tus contactos"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Permite que la aplicación lea datos de los contactos almacenados en tu tablet. Las aplicaciones también podrán acceder a las cuentas de tu tablet que hayan creado contactos, y quizá tengan acceso a las cuentas creadas por aplicaciones que hayas descargado. Las aplicaciones que tengan este permiso pueden guardar los datos de tus contactos, y las aplicaciones maliciosas puede que compartan estos datos sin que lo sepas."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Permite que la aplicación lea datos de los contactos almacenados en tu dispositivo Android TV. Las aplicaciones también podrán acceder a las cuentas de tu dispositivo Android TV que hayan creado contactos, y quizá tengan acceso a las cuentas creadas por aplicaciones que hayas descargado. Las aplicaciones que tengan este permiso pueden guardar los datos de tus contactos, y las aplicaciones maliciosas puede que compartan estos datos sin que lo sepas."</string>
-    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Permite que la aplicación lea datos de los contactos almacenados en tu teléfono. Las aplicaciones también podrán acceder a las cuentas de tu teléfono que hayan creado contactos, y quizá tengan acceso a las cuentas creadas por aplicaciones que hayas descargado. Las aplicaciones que tengan este permiso pueden guardar los datos de tus contactos, y las aplicaciones maliciosas puede que compartan estos datos sin que lo sepas."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"Permite que la aplicación lea datos de los contactos almacenados en tu tablet. Las aplicaciones también podrán acceder a las cuentas de tu tablet que hayan creado contactos, y quizá tengan acceso a las cuentas creadas por aplicaciones que hayas descargado. Las aplicaciones con este permiso este permiso pueden guardar los datos de tus contactos, y las aplicaciones maliciosas puede que compartan estos datos sin que lo sepas."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"Permite que la aplicación lea datos de los contactos almacenados en tu dispositivo Android TV. Las aplicaciones también podrán acceder a las cuentas de tu dispositivo Android TV que hayan creado contactos, y quizá tengan acceso a las cuentas creadas por aplicaciones que hayas descargado. Las aplicaciones con este permiso este permiso pueden guardar los datos de tus contactos, y las aplicaciones maliciosas puede que compartan estos datos sin que lo sepas."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"Permite que la aplicación lea datos de los contactos almacenados en tu teléfono. Las aplicaciones también podrán acceder a las cuentas de tu teléfono que hayan creado contactos, y quizá tengan acceso a las cuentas creadas por aplicaciones que hayas descargado. Las aplicaciones con este permiso este permiso pueden guardar los datos de tus contactos, y las aplicaciones maliciosas puede que compartan estos datos sin que lo sepas."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"modificar tus contactos"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite que la aplicación cambie los datos de los contactos almacenados en tu tablet. Las aplicaciones que tengan este permiso pueden eliminar datos de contactos."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Permite que la aplicación cambie los datos de los contactos almacenados en tu dispositivo Android TV. Las aplicaciones que tengan este permiso pueden eliminar datos de contactos."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que la aplicación cambie los datos de los contactos almacenados en tu teléfono. Las aplicaciones que tengan este permiso pueden eliminar datos de contactos."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Permite que la aplicación cambie los datos de los contactos almacenados en tu tablet. Las aplicaciones con este permiso este permiso pueden eliminar datos de contactos."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Permite que la aplicación cambie los datos de los contactos almacenados en tu dispositivo Android TV. Las aplicaciones con este permiso este permiso pueden eliminar datos de contactos."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que la aplicación cambie los datos de los contactos almacenados en tu teléfono. Las aplicaciones con este permiso este permiso pueden eliminar datos de contactos."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"leer el registro de llamadas"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Esta aplicación puede leer tu historial de llamadas."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"escribir en el registro de llamadas"</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que la aplicación detecte y vincule dispositivos Bluetooth cercanos"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conectarse a dispositivos Bluetooth vinculados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que la aplicación se conecte a dispositivos Bluetooth vinculados"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información sobre el servicio de pago por NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que la aplicación obtenga información sobre el servicio de pago por NFC preferido, como identificadores de aplicación registrados y destinos de rutas."</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No se ha definido el PIN, el patrón o la contraseña"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"No se ha podido autenticar"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueo de pantalla"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduce tu bloqueo de pantalla para continuar"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Huella digital parcial detectada"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se ha podido procesar la huella digital. Vuelve a intentarlo."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Limpia el sensor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Has movido el dedo demasiado rápido"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Has movido el dedo demasiado despacio. Vuelve a intentarlo."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prueba con otra huella digital"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Demasiada luz"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prueba a mover el dedo"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se ha autenticado la huella digital"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Se ha autenticado la cara, pulsa para confirmar"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El hardware de huella digital no está disponible."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"No se puede configurar la huella digital"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Se ha alcanzado el tiempo de espera de la huella digital. Vuelve a intentarlo."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Se ha cancelado la operación de huella digital."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"El usuario ha cancelado la operación de huella digital."</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueo facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar desbloqueo facial o bloqueo de pantalla"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Usa tu cara para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Usa tu cara o tu bloqueo de pantalla para continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1834,7 +1824,7 @@
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"PIN nuevo"</string>
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Confirma tu nuevo PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Crear PIN para modificar restricciones"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"Los números PIN no coinciden. Inténtalo de nuevo."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"Los PINs no coinciden. Inténtalo de nuevo."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"El PIN es demasiado corto. Debe tener al menos 4 dígitos."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other">Vuelve a intentarlo en <xliff:g id="COUNT">%d</xliff:g> segundos</item>
@@ -1856,7 +1846,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para desactivar"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Solicitar patrón de desbloqueo para desactivar"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pedir patrón de desbloqueo para dejar de fijar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Solicitar contraseña para desactivar"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Instalado por el administrador"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado por el administrador"</string>
