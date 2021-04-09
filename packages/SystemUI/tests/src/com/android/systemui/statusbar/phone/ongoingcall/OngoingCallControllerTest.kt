@@ -27,6 +27,7 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -55,6 +56,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     private lateinit var notifCollectionListener: NotifCollectionListener
 
     @Mock private lateinit var mockOngoingCallListener: OngoingCallListener
+    @Mock private lateinit var mockActivityStarter: ActivityStarter
 
     private lateinit var chipView: LinearLayout
 
@@ -71,7 +73,8 @@ class OngoingCallControllerTest : SysuiTestCase() {
         `when`(featureFlags.isOngoingCallStatusBarChipEnabled).thenReturn(true)
         val notificationCollection = mock(CommonNotifCollection::class.java)
 
-        controller = OngoingCallController(notificationCollection, featureFlags, FakeSystemClock())
+        controller = OngoingCallController(
+                notificationCollection, featureFlags, FakeSystemClock(), mockActivityStarter)
         controller.init()
         controller.addCallback(mockOngoingCallListener)
         controller.setChipView(chipView)

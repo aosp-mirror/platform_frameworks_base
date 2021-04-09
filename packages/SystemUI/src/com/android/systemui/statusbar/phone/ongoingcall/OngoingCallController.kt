@@ -22,7 +22,9 @@ import android.util.Log
 import android.view.ViewGroup
 import android.widget.Chronometer
 import com.android.systemui.R
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -38,7 +40,8 @@ import javax.inject.Inject
 class OngoingCallController @Inject constructor(
     private val notifCollection: CommonNotifCollection,
     private val featureFlags: FeatureFlags,
-    private val systemClock: SystemClock
+    private val systemClock: SystemClock,
+    private val activityStarter: ActivityStarter
 ) : CallbackController<OngoingCallListener> {
 
     var hasOngoingCall = false
@@ -50,14 +53,24 @@ class OngoingCallController @Inject constructor(
     private val notifListener = object : NotifCollectionListener {
         override fun onEntryUpdated(entry: NotificationEntry) {
             if (isOngoingCallNotification(entry)) {
-                val timeView = chipView?.findViewById<Chronometer>(R.id.ongoing_call_chip_time)
-                if (timeView != null) {
+                val currentChipView = chipView
+                val timeView =
+                        currentChipView?.findViewById<Chronometer>(R.id.ongoing_call_chip_time)
+
+                if (currentChipView != null && timeView != null) {
                     hasOngoingCall = true
                     val callStartTime = entry.sbn.notification.`when`
                     timeView.base = callStartTime -
                             System.currentTimeMillis() +
                             systemClock.elapsedRealtime()
                     timeView.start()
+
+                    currentChipView.setOnClickListener {
+                        activityStarter.postStartActivityDismissingKeyguard(
+                                entry.sbn.notification.contentIntent.intent, 0,
+                                ActivityLaunchAnimator.Controller.fromView(it))
+                    }
+
                     mListeners.forEach { l -> l.onOngoingCallStarted(animate = true) }
                 } else if (DEBUG) {
                     Log.w(TAG, "Ongoing call chip view could not be found; " +
