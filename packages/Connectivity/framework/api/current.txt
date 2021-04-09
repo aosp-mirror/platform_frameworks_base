@@ -411,6 +411,8 @@ package android.net {
   }
 
   public class ParseException extends java.lang.RuntimeException {
+    ctor public ParseException(@NonNull String);
+    ctor public ParseException(@NonNull String, @NonNull Throwable);
     field public String response;
   }
 
