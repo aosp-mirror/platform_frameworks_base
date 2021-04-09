@@ -1140,6 +1140,8 @@
     <string name="battery_info_status_charging_fast">Charging rapidly</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging speed is slow.  -->
     <string name="battery_info_status_charging_slow">Charging slowly</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging wirelessly.  -->
+    <string name="battery_info_status_charging_wireless">Charging wirelessly</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
