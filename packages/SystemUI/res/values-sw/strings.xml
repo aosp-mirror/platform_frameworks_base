@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Ondoa"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Gusa kitambua alama ya kidole"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Aikoni ya alama ya kidole"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Imeshindwa kutambua uso. Tumia alama ya kidole."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Tumia alama ya kidole chako ili uendelee"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Imeshindwa kutambua alama ya kidole. Tumia mbinu ya kufunga skrini badala yake."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Inakutafuta…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Aikoni ya uso"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Kichupo cha kukuza kwa utangamanifu"</string>
@@ -452,7 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Fungua ili utumie NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Kifaa hiki kinamilikiwa na shirika lako"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Kifaa hiki kinatolewa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Kifaa hiki kimetolewa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telezesha kidole kutoka kwa aikoni ili ufikie simu"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Telezesha kidole kutoka aikoni ili upate mapendekezo ya sauti"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Telezesha kidole kutoka aikoni ili ufikie kamera"</string>
@@ -521,7 +518,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Kifaa hiki kinadhibitiwa na mzazi wako"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Shirika lako linamiliki kifaa hiki na huenda likafuatilia trafiki ya mtandao"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> inamiliki kifaa hiki na huenda ikafuatilia trafiki ya mtandao"</string>
-    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Kifaa hiki kinatolewa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Kifaa hiki kimetolewa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Kifaa hiki kinamilikiwa na shirika lako na kimeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> na kimeunganishwa kwenye <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Kifaa hiki kinamilikiwa na shirika lako"</string>
@@ -536,7 +533,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Wasifu wako wa kazini umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Wasifu wako wa binafsi umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Kifaa hiki kimeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Kifaa hiki kinatolewa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Kifaa hiki kimetolewa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Udhibiti wa kifaa"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Ufuatiliaji wasifu"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Ufuatiliaji wa mtandao"</string>
@@ -660,7 +657,12 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethaneti"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Kengele"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Tayari"</string>
+    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"Onyesha zote"</string>
+    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"Fungua ili ulipe"</string>
+    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Tayari"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Weka njia ya kulipa"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Fungua ili utumie"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Hitilafu imetokea wakati wa kuleta kadi zako, tafadhali jaribu tena baadaye"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Wasifu wa kazini"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Hali ya ndegeni"</string>
     <string name="add_tile" msgid="6239678623873086686">"Ongeza kigae"</string>
@@ -729,9 +731,9 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Imeshushwa Hadhi Kuwa Kimya"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Hali:&lt;/b&gt; Imeorodheshwa Katika Nafasi ya Juu"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Hali:&lt;/b&gt; Imeorodheshwa Katika Nafasi ya Chini"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Huonyeshwa kwenye sehemu ya juu ya mazungumzo, huonekana kama kiputo, huonyesha picha ya wasifu kwenye skrini iliyofungwa"</string>
+    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Huonyeshwa kwenye sehemu ya juu ya arifa zako kila wakati, hata wakati umewasha hali ya Kipaumbele"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mipangilio"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Kipaumbele"</string>
+    <string name="notification_priority_title" msgid="5256226572739882190">"Mazungumzo ya kipaumbele"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> haitumii vipengele vya mazungumzo"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Arifa hizi haziwezi kubadilishwa."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Kikundi hiki cha arifa hakiwezi kuwekewa mipangilio hapa"</string>
@@ -1005,10 +1007,10 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Nenda kwenye mipangilio ili usasishe usogezaji kwenye mfumo"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Hali tuli"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Mazungumzo yamepewa kipaumbele"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Mazungumzo yaliyopewa kipaumbele:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Huonyeshwa kwenye sehemu ya juu ya mazungumzo"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Huonyesha picha ya wasifu kwenye skrini iliyofungwa"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Yataonekana kama kiputo kinachoelea juu ya programu"</string>
+    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Mazungumzo ya kipaumbele"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Mazungumzo haya yanaonyeshwa kwenye sehemu ya juu ya orodha yako na yanaweza kukufikia ukiwa umewasha hali ya Kipaumbele"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Picha za wasifu zinaonyeshwa kwenye skrini iliyofungwa"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Unaweza kupata mazungumzo haya kwa urahisi katika viputo kwenye Skrini yako ya kwanza"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Katiza kipengele cha Usinisumbue"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Nimeelewa"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Mipangilio"</string>
@@ -1026,6 +1028,12 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Swichi"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Kitufe cha zana za ufikivu kimechukua nafasi ya ishara ya ufikivu\n\n"<annotation id="link">"Angalia mipangilio"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Sogeza kitufe kwenye ukingo ili ukifiche kwa muda"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Sogeza juu kushoto"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Sogeza juu kulia"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Sogeza chini kushoto"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Sogeza chini kulia"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Sogeza kwenye ukingo kisha ufiche"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Sogeza nje ya ukingo kisha uonyeshe"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Vidhibiti vya vifaa"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Weka vidhibiti vya vifaa ulivyounganisha"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Weka mipangilio ya vidhibiti vya vifaa"</string>
@@ -1096,31 +1104,35 @@
     <string name="basic_status" msgid="2315371112182658176">"Fungua mazungumzo"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Wijeti za mazungumzo"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Gusa mazungumzo ili uyaweke kwenye Skrini yako ya kwanza"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Angalia hapa tena utakapopokea ujumbe"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Mazungumzo ya kipaumbele"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Mazungumzo ya hivi majuzi"</string>
+    <string name="okay" msgid="6490552955618608554">"Sawa"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> zilizopita"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Chini ya <xliff:g id="DURATION">%1$s</xliff:g> zilizopita"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Zaidi ya <xliff:g id="DURATION">%1$s</xliff:g> zilizopita"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Siku ya kuzaliwa"</string>
+    <string name="birthday_status_content_description" msgid="7677415209545817153">"Ni siku ya kuzaliwa ya <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Siku ya kuzaliwa inakaribia"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"Siku ya kuzaliwa ya <xliff:g id="NAME">%1$s</xliff:g> inakaribia"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Maadhimisho"</string>
+    <string name="anniversary_status_content_description" msgid="6214503393960662875">"Ni maadhimisho ya <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="location_status" msgid="1294990572202541812">"Inashiriki mahali"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> anashiriki maelezo ya mahali"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Habari mpya"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> ameshiriki hadithi mpya"</string>
     <string name="video_status" msgid="4548544654316843225">"Unatazama"</string>
     <string name="audio_status" msgid="4237055636967709208">"Inasikiliza"</string>
     <string name="game_status" msgid="1340694320630973259">"Inacheza"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Marafiki"</string>
     <string name="empty_status" msgid="5938893404951307749">"Tupige gumzo usiku!"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"Maudhui yataonekana hivi karibuni"</string>
     <string name="missed_call" msgid="4228016077700161689">"Simu ambayo hukujibu"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Angalia ujumbe wa hivi majuzi, simu ambazo hukujibu na taarifa za hali"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Mazungumzo"</string>
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ametuma ujumbe"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ametuma picha"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Tatizo la kusoma mita ya betri yako"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Gusa ili upate maelezo zaidi"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Hujaweka kengele"</string>
