@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -67,15 +68,18 @@ import android.os.WorkSource;
 import android.provider.DeviceConfig;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.SparseSetArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
@@ -315,6 +319,9 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Cache of debuggable app status.
      */
     final ArrayMap<String, Boolean> mDebuggableApps = new ArrayMap<>();
+
+    /** Cached mapping of UIDs (for all users) to a list of packages in the UID. */
+    private final SparseSetArray<String> mUidToPackageCache = new SparseSetArray<>();
 
     /**
      * Named indices into standby bucket arrays, for clarity in referring to
@@ -785,12 +792,20 @@ public class JobSchedulerService extends com.android.server.SystemService
                 } else {
                     Slog.w(TAG, "PACKAGE_CHANGED for " + pkgName + " / uid " + pkgUid);
                 }
+            } else if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                    synchronized (mLock) {
+                        mUidToPackageCache.remove(uid);
+                    }
+                }
             } else if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
                 int uidRemoved = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 if (DEBUG) {
                     Slog.d(TAG, "Removing jobs for uid: " + uidRemoved);
                 }
                 synchronized (mLock) {
+                    mUidToPackageCache.remove(uidRemoved);
                     // There's no guarantee that the process has been stopped by the time we
                     // get here, but since this is generally a user-initiated action, it should
                     // be fine to just put USER instead of UNINSTALL or DISABLED.
@@ -815,6 +830,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "Removing jobs for user: " + userId);
                 }
                 synchronized (mLock) {
+                    mUidToPackageCache.clear();
                     cancelJobsForUserLocked(userId);
                     for (int c = 0; c < mControllers.size(); ++c) {
                         mControllers.get(c).onUserRemovedLocked(userId);
@@ -902,6 +918,27 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public boolean isChainedAttributionEnabled() {
         return WorkSource.isChainedBatteryAttributionEnabled(getContext());
+    }
+
+    @Nullable
+    @GuardedBy("mLock")
+    public ArraySet<String> getPackagesForUidLocked(final int uid) {
+        ArraySet<String> packages = mUidToPackageCache.get(uid);
+        if (packages == null) {
+            try {
+                String[] pkgs = AppGlobals.getPackageManager()
+                        .getPackagesForUid(uid);
+                if (pkgs != null) {
+                    for (String pkg : pkgs) {
+                        mUidToPackageCache.add(uid, pkg);
+                    }
+                    packages = mUidToPackageCache.get(uid);
+                }
+            } catch (RemoteException e) {
+                // Shouldn't happen.
+            }
+        }
+        return packages;
     }
 
     @Override
@@ -1484,6 +1521,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+            filter.addAction(Intent.ACTION_PACKAGE_ADDED);
             filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
             filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
             filter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
@@ -3282,6 +3320,26 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
             if (overridePrinted) {
+                pw.decreaseIndent();
+            }
+
+            boolean uidMapPrinted = false;
+            for (int i = 0; i < mUidToPackageCache.size(); ++i) {
+                final int uid = mUidToPackageCache.keyAt(i);
+                if (filterUid != -1 && filterUid != uid) {
+                    continue;
+                }
+                if (!uidMapPrinted) {
+                    uidMapPrinted = true;
+                    pw.println();
+                    pw.println("Cached UID->package map:");
+                    pw.increaseIndent();
+                }
+                pw.print(uid);
+                pw.print(": ");
+                pw.println(mUidToPackageCache.get(uid));
+            }
+            if (uidMapPrinted) {
                 pw.decreaseIndent();
             }
 

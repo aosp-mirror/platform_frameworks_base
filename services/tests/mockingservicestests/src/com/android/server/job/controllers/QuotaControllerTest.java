@@ -81,6 +81,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.LargeTest;
 import android.provider.DeviceConfig;
+import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -254,6 +255,9 @@ public class QuotaControllerTest {
                     any());
             mUidObserver = uidObserverCaptor.getValue();
             mSourceUid = AppGlobals.getPackageManager().getPackageUid(SOURCE_PACKAGE, 0, 0);
+            // Need to do this since we're using a mock JS and not a real object.
+            doReturn(new ArraySet<>(new String[]{SOURCE_PACKAGE}))
+                    .when(mJobSchedulerService).getPackagesForUidLocked(mSourceUid);
         } catch (RemoteException e) {
             fail(e.getMessage());
         }
@@ -1803,12 +1807,10 @@ public class QuotaControllerTest {
         setStandbyBucket(ACTIVE_INDEX, fgStateChanger);
         setProcessState(ActivityManager.PROCESS_STATE_BACKUP, fgChangerUid);
 
-        IPackageManager packageManager = AppGlobals.getPackageManager();
-        spyOn(packageManager);
-        doReturn(new String[]{unaffectedPkgName})
-                .when(packageManager).getPackagesForUid(unaffectedUid);
-        doReturn(new String[]{fgChangerPkgName})
-                .when(packageManager).getPackagesForUid(fgChangerUid);
+        doReturn(new ArraySet<>(new String[]{unaffectedPkgName}))
+                .when(mJobSchedulerService).getPackagesForUidLocked(unaffectedUid);
+        doReturn(new ArraySet<>(new String[]{fgChangerPkgName}))
+                .when(mJobSchedulerService).getPackagesForUidLocked(fgChangerUid);
 
         synchronized (mQuotaController.mLock) {
             mQuotaController.maybeStartTrackingJobLocked(unaffected, null);
