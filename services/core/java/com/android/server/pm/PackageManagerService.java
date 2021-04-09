@@ -1451,21 +1451,21 @@ public class PackageManagerService extends IPackageManager.Stub
     /** Token for keys in mPendingEnableRollback. */
     private int mPendingEnableRollbackToken = 0;
 
-    @Watched
+    @Watched(manual = true)
     volatile boolean mSystemReady;
-    @Watched
+    @Watched(manual = true)
     private volatile boolean mSafeMode;
     volatile boolean mHasSystemUidErrors;
     @Watched
     private final WatchedSparseBooleanArray mWebInstantAppsDisabled =
             new WatchedSparseBooleanArray();
 
-    @Watched
+    @Watched(manual = true)
     private ApplicationInfo mAndroidApplication;
-    @Watched
+    @Watched(manual = true)
     final ActivityInfo mResolveActivity = new ActivityInfo();
     final ResolveInfo mResolveInfo = new ResolveInfo();
-    @Watched
+    @Watched(manual = true)
     private ComponentName mResolveComponentName;
     AndroidPackage mPlatformPackage;
     ComponentName mCustomResolverComponentName;
@@ -1481,9 +1481,9 @@ public class PackageManagerService extends IPackageManager.Stub
     final ComponentName mInstantAppResolverSettingsComponent;
 
     /** Activity used to install instant applications */
-    @Watched
+    @Watched(manual = true)
     private ActivityInfo mInstantAppInstallerActivity;
-    @Watched
+    @Watched(manual = true)
     private final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
 
     private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
