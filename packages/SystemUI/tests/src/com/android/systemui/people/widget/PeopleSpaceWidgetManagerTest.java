@@ -186,11 +186,11 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mLauncherApps = mock(LauncherApps.class);
         mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
         mManager = new PeopleSpaceWidgetManager(mContext);
-        mManager.setAppWidgetManager(mAppWidgetManager, mIPeopleManager, mPeopleManager,
-                mLauncherApps, mNotificationEntryManager, mPackageManager, true);
-        mManager.attach(mListenerService);
         mProvider = new PeopleSpaceWidgetProvider();
         mProvider.setPeopleSpaceWidgetManager(mManager);
+        mManager.setAppWidgetManager(mAppWidgetManager, mIPeopleManager, mPeopleManager,
+                mLauncherApps, mNotificationEntryManager, mPackageManager, true, mProvider);
+        mManager.attach(mListenerService);
 
         verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
         NotificationHandler serviceListener = requireNonNull(mListenerCaptor.getValue());
@@ -840,6 +840,52 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         assertThat(tile.getNotificationDataUri()).isEqualTo(null);
         verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
+    }
+
+
+    @Test
+    public void testAddThenReconfigureWidgetsUpdatesStorageCacheAndListeners()
+            throws Exception {
+        clearStorage();
+        mManager.addNewWidget(WIDGET_ID_WITH_SHORTCUT, PERSON_TILE);
+        // Check storage.
+        SharedPreferences widgetSp = mContext.getSharedPreferences(
+                String.valueOf(WIDGET_ID_WITH_SHORTCUT),
+                Context.MODE_PRIVATE);
+        assertThat(widgetSp.getString(PACKAGE_NAME, null)).isEqualTo(TEST_PACKAGE_A);
+        assertThat(widgetSp.getString(PeopleSpaceUtils.SHORTCUT_ID, null)).isEqualTo(
+                PERSON_TILE.getId());
+        assertThat(widgetSp.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(0);
+        // Check listener and caching.
+        verify(mPeopleManager).registerConversationListener(eq(TEST_PACKAGE_A), anyInt(),
+                eq(SHORTCUT_ID), any(),
+                any());
+        verify(mLauncherApps, times(1)).cacheShortcuts(
+                eq(TEST_PACKAGE_A),
+                eq(Arrays.asList(SHORTCUT_ID)), eq(UserHandle.of(0)),
+                eq(LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS));
+
+        // Reconfigure WIDGET_ID_WITH_SHORTCUT from PERSON_TILE to PERSON_TILE_WITH_SAME_URI
+        mManager.addNewWidget(WIDGET_ID_WITH_SHORTCUT, PERSON_TILE_WITH_SAME_URI);
+
+        // Check listener is removed and shortcut is uncached.
+        verify(mPeopleManager).unregisterConversationListener(any());
+        verify(mLauncherApps).uncacheShortcuts(eq(TEST_PACKAGE_A),
+                eq(Arrays.asList(PERSON_TILE.getId())), eq(UserHandle.of(0)),
+                eq(LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS));
+        // Check reconfigured storage from TEST_PACKAGE_A to B and SHORTCUT_ID to OTHER_SHORTCUT_ID.
+        assertThat(widgetSp.getString(PACKAGE_NAME, null)).isEqualTo(TEST_PACKAGE_B);
+        assertThat(widgetSp.getString(PeopleSpaceUtils.SHORTCUT_ID, null)).isEqualTo(
+                OTHER_SHORTCUT_ID);
+        assertThat(widgetSp.getInt(USER_ID, INVALID_USER_ID)).isEqualTo(0);
+        // Check listener & caching are reconfigured to TEST_PACKAGE_B and OTHER_SHORTCUT_ID.
+        verify(mPeopleManager, times(1)).registerConversationListener(eq(TEST_PACKAGE_B), anyInt(),
+                eq(OTHER_SHORTCUT_ID), any(),
+                any());
+        verify(mLauncherApps, times(1)).cacheShortcuts(
+                eq(TEST_PACKAGE_B),
+                eq(Arrays.asList(OTHER_SHORTCUT_ID)), eq(UserHandle.of(0)),
+                eq(LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS));
     }
 
     @Test

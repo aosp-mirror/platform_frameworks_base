@@ -95,6 +95,7 @@ public class PeopleSpaceWidgetManager {
     private PeopleManager mPeopleManager;
     private NotificationEntryManager mNotificationEntryManager;
     private PackageManager mPackageManager;
+    private PeopleSpaceWidgetProvider mPeopleSpaceWidgetProvider;
     public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
     @GuardedBy("mLock")
     public static Map<PeopleTileKey, PeopleSpaceWidgetProvider.TileConversationListener>
@@ -119,6 +120,7 @@ public class PeopleSpaceWidgetManager {
         mPeopleManager = mContext.getSystemService(PeopleManager.class);
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mPackageManager = mContext.getPackageManager();
+        mPeopleSpaceWidgetProvider = new PeopleSpaceWidgetProvider();
     }
 
     /**
@@ -129,7 +131,7 @@ public class PeopleSpaceWidgetManager {
             AppWidgetManager appWidgetManager, IPeopleManager iPeopleManager,
             PeopleManager peopleManager, LauncherApps launcherApps,
             NotificationEntryManager notificationEntryManager, PackageManager packageManager,
-            boolean isForTesting) {
+            boolean isForTesting, PeopleSpaceWidgetProvider peopleSpaceWidgetProvider) {
         mAppWidgetManager = appWidgetManager;
         mIPeopleManager = iPeopleManager;
         mPeopleManager = peopleManager;
@@ -137,6 +139,7 @@ public class PeopleSpaceWidgetManager {
         mNotificationEntryManager = notificationEntryManager;
         mPackageManager = packageManager;
         mIsForTesting = isForTesting;
+        mPeopleSpaceWidgetProvider = peopleSpaceWidgetProvider;
     }
 
     /**
@@ -616,7 +619,20 @@ public class PeopleSpaceWidgetManager {
             return;
         }
 
-        mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_ADDED);
+        PeopleTileKey existingKeyIfStored;
+        synchronized (mLock) {
+            existingKeyIfStored = getKeyFromStorageByWidgetId(appWidgetId);
+        }
+        // Delete previous storage if the widget already existed and is just reconfigured.
+        if (existingKeyIfStored.isValid()) {
+            if (DEBUG) Log.d(TAG, "Remove previous storage for widget: " + appWidgetId);
+            deleteWidgets(new int[]{appWidgetId});
+        } else {
+            // Widget newly added.
+            mUiEventLogger.log(
+                    PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_ADDED);
+        }
+
         synchronized (mLock) {
             if (DEBUG) Log.d(TAG, "Add storage for : " + tile.getId());
             PeopleTileKey key = new PeopleTileKey(tile);
@@ -634,8 +650,7 @@ public class PeopleSpaceWidgetManager {
 
         PeopleSpaceUtils.updateAppWidgetOptionsAndView(
                 mAppWidgetManager, mContext, appWidgetId, tile);
-        PeopleSpaceWidgetProvider provider = new PeopleSpaceWidgetProvider();
-        provider.onUpdate(mContext, mAppWidgetManager, new int[]{appWidgetId});
+        mPeopleSpaceWidgetProvider.onUpdate(mContext, mAppWidgetManager, new int[]{appWidgetId});
     }
 
     /** Registers a conversation listener for {@code appWidgetId} if not already registered. */
@@ -644,12 +659,7 @@ public class PeopleSpaceWidgetManager {
         // Retrieve storage needed for registration.
         PeopleTileKey key;
         synchronized (mLock) {
-            SharedPreferences widgetSp = mContext.getSharedPreferences(String.valueOf(widgetId),
-                    Context.MODE_PRIVATE);
-            key = new PeopleTileKey(
-                    widgetSp.getString(SHORTCUT_ID, EMPTY_STRING),
-                    widgetSp.getInt(USER_ID, INVALID_USER_ID),
-                    widgetSp.getString(PACKAGE_NAME, EMPTY_STRING));
+            key = getKeyFromStorageByWidgetId(widgetId);
             if (!key.isValid()) {
                 if (DEBUG) Log.w(TAG, "Could not register listener for widget: " + widgetId);
                 return;
@@ -667,6 +677,20 @@ public class PeopleSpaceWidgetManager {
                 key.getUserId(),
                 key.getShortcutId(), newListener,
                 mContext.getMainExecutor());
+    }
+
+    /**
+     * Attempts to get a key from storage for {@code widgetId}, returning null if an invalid key is
+     * found.
+     */
+    private PeopleTileKey getKeyFromStorageByWidgetId(int widgetId) {
+        SharedPreferences widgetSp = mContext.getSharedPreferences(String.valueOf(widgetId),
+                Context.MODE_PRIVATE);
+        PeopleTileKey key = new PeopleTileKey(
+                widgetSp.getString(SHORTCUT_ID, EMPTY_STRING),
+                widgetSp.getInt(USER_ID, INVALID_USER_ID),
+                widgetSp.getString(PACKAGE_NAME, EMPTY_STRING));
+        return key;
     }
 
     /** Deletes all storage, listeners, and caching for {@code appWidgetIds}. */
