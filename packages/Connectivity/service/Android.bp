@@ -113,7 +113,6 @@ java_library {
     ],
     jarjar_rules: "jarjar-rules.txt",
     apex_available: [
-        "//apex_available:platform", // For arc-services
         "com.android.tethering",
     ],
 }
