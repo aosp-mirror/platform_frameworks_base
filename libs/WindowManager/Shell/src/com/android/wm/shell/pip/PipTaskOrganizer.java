@@ -98,9 +98,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private enum State {
         UNDEFINED(0),
         TASK_APPEARED(1),
-        ENTERING_PIP(2),
-        ENTERED_PIP(3),
-        EXITING_PIP(4);
+        ENTRY_SCHEDULED(2),
+        ENTERING_PIP(3),
+        ENTERED_PIP(4),
+        EXITING_PIP(5);
 
         private final int mStateValue;
 
@@ -261,6 +262,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     public boolean isDeferringEnterPipAnimation() {
         return mState.isInPip() && mWaitForFixedRotation;
+    }
+
+    /**
+     * Returns whether the entry animation is waiting to be started.
+     */
+    public boolean isEntryScheduled() {
+        return mState == State.ENTRY_SCHEDULED;
     }
 
     /**
@@ -481,6 +489,19 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
     }
 
+    /**
+     * Called when the display rotation handling is skipped (e.g. when rotation happens while in
+     * the middle of an entry transition).
+     */
+    public void onDisplayRotationSkipped() {
+        if (isEntryScheduled()) {
+            // The PIP animation is scheduled to start with the previous orientation's bounds,
+            // re-calculate the entry bounds and restart the alpha animation.
+            final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
+            enterPipWithAlphaAnimation(destinationBounds, mEnterAnimationDuration);
+        }
+    }
+
     @VisibleForTesting
     void enterPipWithAlphaAnimation(Rect destinationBounds, long durationMs) {
         // If we are fading the PIP in, then we should move the pip to the final location as
@@ -490,6 +511,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.setAlpha(mLeash, 0f);
         tx.apply();
+        mState = State.ENTRY_SCHEDULED;
         applyEnterPipSyncTransaction(destinationBounds, () -> {
             mPipAnimationController
                     .getAnimator(mTaskInfo, mLeash, destinationBounds, 0f, 1f)
