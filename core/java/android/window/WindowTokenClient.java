@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.view.WindowManagerGlobal;
 
 import java.lang.ref.WeakReference;
 
@@ -94,10 +93,5 @@ public class WindowTokenClient extends IWindowToken.Stub {
             context.destroy();
             mContextRef.clear();
         }
-        ActivityThread.currentActivityThread().getHandler().post(() -> {
-            // If the tracked window token is detached, release all views attached to this token.
-            WindowManagerGlobal.getInstance().closeAll(WindowTokenClient.this,
-                    "#onWindowTokenRemoved()", "WindowTokenClient");
-        });
     }
 }
