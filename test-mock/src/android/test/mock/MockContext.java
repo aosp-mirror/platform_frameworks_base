@@ -950,4 +950,10 @@ public class MockContext extends Context {
     public boolean isUiContext() {
         throw new UnsupportedOperationException();
     }
+
+    /** {@hide} */
+    @Override
+    public boolean isConfigurationContext() {
+        throw new UnsupportedOperationException();
+    }
 }
