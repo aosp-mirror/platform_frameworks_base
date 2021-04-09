@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"Idatzi pasahitza eta joan Sistemaren eguneratze dinamikoa eginbidera"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"Prest dago sistema dinamikoa. Erabiltzen hasteko, berrabiarazi gailua."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"Instalatzen"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"Ezin izan da instalatu"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Ezin izan da baliozkotu irudia. Utzi bertan behera instalazioa."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Sistema dinamiko bat abian da. Berrabiarazi Android-en jatorrizko bertsioa erabiltzeko."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"Utzi"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"Baztertu"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"Berrabiarazi"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Berrabiarazi"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Baztertu da sistema dinamikoa"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Ezin da berrabiarazi edo kargatu sistema dinamikoa"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"Ezin izan da desgaitu sistema dinamikoa"</string>
+</resources>

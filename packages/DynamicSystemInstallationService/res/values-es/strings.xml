@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"Introduce la contraseña y entra en Actualización Dinámica del Sistema"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"El sistema dinámico está listo. Para comenzar a usarlo, reinicia el dispositivo."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"Instalación en curso"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"No se ha podido instalar"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"No se ha podido validar la imagen. Anula la instalación."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Se está ejecutando el sistema dinámico. Reinícialo para usar la versión original de Android."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"Cancelar"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"Descartar"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"Reiniciar"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Reiniciar"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Se ha descartado el sistema dinámico"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"No se ha podido reiniciar o cargar el sistema dinámico"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"No se ha podido inhabilitar el sistema dinámico"</string>
+</resources>
