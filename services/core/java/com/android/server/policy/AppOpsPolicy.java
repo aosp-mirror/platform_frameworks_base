@@ -27,8 +27,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.location.LocationManagerInternal;
 import android.net.Uri;
 import android.os.IBinder;
@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -237,25 +238,31 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     private void updateActivityRecognizerTags(@NonNull String activityRecognizer) {
-        try {
-            final ApplicationInfo recognizerAppInfo = mContext.getPackageManager()
-                    .getApplicationInfoAsUser(activityRecognizer, PackageManager.GET_META_DATA,
-                            UserHandle.USER_SYSTEM);
-            if (recognizerAppInfo.metaData == null) {
-                return;
+        final int flags = PackageManager.GET_SERVICES
+                | PackageManager.GET_META_DATA
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
+        final Intent intent = new Intent(Intent.ACTION_ACTIVITY_RECOGNIZER);
+        intent.setPackage(activityRecognizer);
+        final ResolveInfo resolvedService = mContext.getPackageManager()
+                .resolveServiceAsUser(intent, flags, UserHandle.USER_SYSTEM);
+        if (resolvedService == null || resolvedService.serviceInfo == null) {
+            Log.w(LOG_TAG, "Service recognizer doesn't handle "
+                    + Intent.ACTION_ACTIVITY_RECOGNIZER +  ", ignoring!");
+            return;
+        }
+        final String tagsList = resolvedService.serviceInfo.metaData.getString(
+                ACTIVITY_RECOGNITION_TAGS);
+        if (tagsList != null) {
+            final String[] tags = tagsList.split(ACTIVITY_RECOGNITION_TAGS_SEPARATOR);
+            synchronized (mLock) {
+                updateAllowListedTagsForPackageLocked(
+                        resolvedService.serviceInfo.applicationInfo.uid,
+                        resolvedService.serviceInfo.packageName, new ArraySet<>(tags),
+                        mActivityRecognitionTags);
             }
-            final String tagsList = recognizerAppInfo.metaData.getString(ACTIVITY_RECOGNITION_TAGS);
-            if (tagsList != null) {
-                final String[] tags = tagsList.split(ACTIVITY_RECOGNITION_TAGS_SEPARATOR);
-                synchronized (mLock) {
-                    updateAllowListedTagsForPackageLocked(recognizerAppInfo.uid,
-                            recognizerAppInfo.packageName, new ArraySet<>(tags),
-                            mActivityRecognitionTags);
-                }
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.wtf(LOG_TAG, "Missing " + RoleManager.ROLE_SYSTEM_ACTIVITY_RECOGNIZER
-                    + " role holder package " + activityRecognizer);
         }
     }
 
