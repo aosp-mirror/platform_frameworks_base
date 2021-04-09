@@ -111,6 +111,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -1191,6 +1192,10 @@ public class AppStandbyController
             if (mInjector.isWellbeingPackage(packageName)) {
                 return STANDBY_BUCKET_WORKING_SET;
             }
+
+            if (mInjector.hasScheduleExactAlarm(packageName, UserHandle.getUid(userId, appId))) {
+                return STANDBY_BUCKET_WORKING_SET;
+            }
         }
 
         // Check this last, as it can be the most expensive check
@@ -2007,6 +2012,7 @@ public class AppStandbyController
         private PowerManager mPowerManager;
         private IDeviceIdleController mDeviceIdleController;
         private CrossProfileAppsInternal mCrossProfileAppsInternal;
+        private AlarmManagerInternal mAlarmManagerInternal;
         int mBootPhase;
         /**
          * The minimum amount of time required since the last user interaction before an app can be
@@ -2047,6 +2053,7 @@ public class AppStandbyController
                 mBatteryManager = mContext.getSystemService(BatteryManager.class);
                 mCrossProfileAppsInternal = LocalServices.getService(
                         CrossProfileAppsInternal.class);
+                mAlarmManagerInternal = LocalServices.getService(AlarmManagerInternal.class);
 
                 final ActivityManager activityManager =
                         (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -2108,6 +2115,10 @@ public class AppStandbyController
          */
         boolean isWellbeingPackage(String packageName) {
             return mWellbeingApp != null && mWellbeingApp.equals(packageName);
+        }
+
+        boolean hasScheduleExactAlarm(String packageName, int uid) {
+            return mAlarmManagerInternal.hasScheduleExactAlarm(packageName, uid);
         }
 
         void updatePowerWhitelistCache() {

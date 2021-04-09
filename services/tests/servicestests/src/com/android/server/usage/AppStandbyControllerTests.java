@@ -81,6 +81,7 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
@@ -114,8 +115,10 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 public class AppStandbyControllerTests {
 
-    private static final String PACKAGE_1 = "com.example.foo";
+    private static final String PACKAGE_1 = "com.example.foo.1";
     private static final int UID_1 = 10000;
+    private static final String PACKAGE_2 = "com.example.foo.2";
+    private static final int UID_2 = 20000;
     private static final String PACKAGE_EXEMPTED_1 = "com.android.exempted";
     private static final int UID_EXEMPTED_1 = 10001;
     private static final String PACKAGE_SYSTEM_HEADFULL = "com.example.system.headfull";
@@ -196,6 +199,7 @@ public class AppStandbyControllerTests {
         int[] mRunningUsers = new int[] {USER_ID};
         List<UserHandle> mCrossProfileTargets = Collections.emptyList();
         boolean mDeviceIdleMode = false;
+        Set<Pair<String, Integer>> mClockApps = new ArraySet<>();
         DeviceConfig.Properties.Builder mSettingsBuilder =
                 new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_APP_STANDBY)
                         .setLong("screen_threshold_active", 0)
@@ -251,6 +255,11 @@ public class AppStandbyControllerTests {
         @Override
         boolean isWellbeingPackage(String packageName) {
             return PACKAGE_WELLBEING.equals(packageName);
+        }
+
+        @Override
+        boolean hasScheduleExactAlarm(String packageName, int uid) {
+            return mClockApps.contains(Pair.create(packageName, uid));
         }
 
         @Override
@@ -348,6 +357,12 @@ public class AppStandbyControllerTests {
         pi.applicationInfo.uid = UID_1;
         pi.packageName = PACKAGE_1;
         packages.add(pi);
+
+        PackageInfo pInfo = new PackageInfo();
+        pInfo.applicationInfo = new ApplicationInfo();
+        pInfo.applicationInfo.uid = UID_2;
+        pInfo.packageName = PACKAGE_2;
+        packages.add(pInfo);
 
         PackageInfo pie = new PackageInfo();
         pie.applicationInfo = new ApplicationInfo();
@@ -1659,6 +1674,29 @@ public class AppStandbyControllerTests {
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
                 REASON_MAIN_TIMEOUT);
         assertBucket(STANDBY_BUCKET_RARE, PACKAGE_1);
+    }
+
+    @Test
+    public void testClockAppElevated() throws Exception {
+        mInjector.mClockApps.add(Pair.create(PACKAGE_1, UID_1));
+
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
+
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_2);
+        assertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_2);
+
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+
+        // Make sure a clock app does not get lowered below WORKING_SET.
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_WORKING_SET, PACKAGE_1);
+
+        // A non clock app should be able to fall lower than WORKING_SET.
+        mController.setAppStandbyBucket(PACKAGE_2, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_RARE, PACKAGE_2);
     }
 
     @Test
