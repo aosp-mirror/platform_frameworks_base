@@ -51,7 +51,9 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         final boolean[] supportedStandardBuckets =
                 new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
         Arrays.fill(supportedStandardBuckets, true);
-        mGlobalMeasuredEnergyStats = new MeasuredEnergyStats(supportedStandardBuckets, 2);
+        final String[] customBucketNames = {"FOO", "BAR"};
+        mGlobalMeasuredEnergyStats =
+                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
 
         // A no-op handler.
         mHandler = new Handler(Looper.getMainLooper()) {
