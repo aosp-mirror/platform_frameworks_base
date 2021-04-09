@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.os.StrictMode.vmIncorrectContextUseEnabled;
-
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DOUBLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
@@ -34,7 +32,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.util.Log;
 
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -394,6 +391,7 @@ public class GestureDetector {
      *
      * @throws NullPointerException if {@code listener} is null.
      */
+    // TODO(b/182007470): Use @ConfigurationContext instead
     public GestureDetector(@UiContext Context context, OnGestureListener listener) {
         this(context, listener, null);
     }
@@ -467,17 +465,7 @@ public class GestureDetector {
             mMaximumFlingVelocity = ViewConfiguration.getMaximumFlingVelocity();
             mAmbiguousGestureMultiplier = ViewConfiguration.getAmbiguousGestureMultiplier();
         } else {
-            if (!context.isUiContext() && vmIncorrectContextUseEnabled()) {
-                final String errorMessage =
-                        "Tried to access UI constants from a non-visual Context.";
-                final String message = "GestureDetector must be accessed from Activity or other "
-                        + "visual Context. Use an Activity or a Context created with "
-                        + "Context#createWindowContext(int, Bundle), which are adjusted to the "
-                        + "configuration and visual bounds of an area on screen.";
-                final Exception exception = new IllegalArgumentException(errorMessage);
-                StrictMode.onIncorrectContextUsed(message, exception);
-                Log.e(TAG, errorMessage + message, exception);
-            }
+            StrictMode.assertConfigurationContext(context, "GestureDetector#init");
             final ViewConfiguration configuration = ViewConfiguration.get(context);
             touchSlop = configuration.getScaledTouchSlop();
             doubleTapTouchSlop = configuration.getScaledDoubleTapTouchSlop();
