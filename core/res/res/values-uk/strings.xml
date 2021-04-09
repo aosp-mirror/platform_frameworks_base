@@ -300,8 +300,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Працює додаток"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Додатки, що використовують заряд акумулятора"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Збільшення"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Використання спеціальних можливостей"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує заряд акумулятора"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Додатків, що використовують заряд акумулятора: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
@@ -545,6 +544,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дозволяє додатку знаходити поблизу пристрої Bluetooth і створювати з ними пару"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"підключатися до пристроїв із Bluetooth, з якими є пара"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дозволяє додатку підключатися до пристроїв із Bluetooth, з якими створено пару"</string>
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Використання інформації з платіжного NFC-сервісу"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
@@ -579,30 +582,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Не вказано PIN-код, ключ або пароль"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Помилка автентифікації"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Доступ розблокуванням екрана"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Щоб продовжити, введіть дані для розблокування екрана"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Виявлено частковий відбиток пальця"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не вдалось обробити відбиток пальця. Повторіть спробу."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Очистьте сканер"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Ви надто швидко забрали палець"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Ви провели пальцем надто повільно. Повторіть спробу."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Спробуйте інший відбиток пальця"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Надто яскраво"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Спробуйте відкоригувати відбиток пальця"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Відбиток пальця автентифіковано"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Обличчя автентифіковано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Обличчя автентифіковано. Натисніть \"Підтвердити\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Сканер відбитків пальців недоступний."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Не вдалося створити відбиток пальця"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Час очікування відбитка пальця минув. Повторіть спробу."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Дію з відбитком пальця скасовано."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Користувач скасував дію з відбитком пальця."</string>
@@ -667,8 +662,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Доступ через фейсконтроль"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Використовувати фейсконтроль або дані для розблокування екрана"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Щоб продовжити, скористайтеся фейсконтролем"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Щоб продовжити, скористайтеся фейсконтролем або даними для розблокування екрана"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1864,7 +1858,7 @@
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"Скасовано"</string>
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"Помилка записування вмісту"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"невідомо"</string>
-    <string name="reason_service_unavailable" msgid="5288405248063804713">"Службу друку не ввімкнено"</string>
+    <string name="reason_service_unavailable" msgid="5288405248063804713">"Сервіс друку не ввімкнено"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"Установлено службу <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Торкніться, щоб увімкнути"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Введіть PIN-код адміністратора"</string>
@@ -2215,8 +2209,8 @@
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Відкрити в додатку <xliff:g id="APP">%s</xliff:g> в особистому профілі?"</string>
     <string name="miniresolver_open_in_work" msgid="152208044699347924">"Відкрити в додатку <xliff:g id="APP">%s</xliff:g> у робочому профілі?"</string>
-    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використовувати особистий веб-переглядач"</string>
-    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використовувати робочий веб-переглядач"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код розблокування підгрупи мереж SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код розблокування корпоративної SIM-карти"</string>
