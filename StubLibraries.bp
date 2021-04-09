@@ -299,18 +299,55 @@ modules_system_stubs = [
 ]
 
 java_defaults {
-    name: "android_defaults_stubs_current",
-    libs: [ "stub-annotations" ],
-    static_libs: [
-        // License notices from art module
-        "art-notices-for-framework-stubs-jar",
-        "framework-res-package-jar", // Export package of framework-res
-    ],
+    name: "android-non-updatable_defaults_stubs_current",
+    libs: ["stub-annotations"],
+    static_libs: ["framework-res-package-jar"], // Export package of framework-res
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",
         ],
     },
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    compile_dex: true,
+}
+
+java_library_static {
+    name: "android-non-updatable.stubs",
+    defaults: ["android-non-updatable_defaults_stubs_current"],
+    srcs: [":api-stubs-docs-non-updatable"],
+    libs: modules_public_stubs,
+}
+
+java_library_static {
+    name: "android-non-updatable.stubs.system",
+    defaults: ["android-non-updatable_defaults_stubs_current"],
+    srcs: [ ":system-api-stubs-docs-non-updatable" ],
+    libs: modules_system_stubs,
+}
+
+java_library_static {
+    name: "android-non-updatable.stubs.module_lib",
+    defaults: ["android-non-updatable_defaults_stubs_current"],
+    srcs: [":module-lib-api-stubs-docs-non-updatable"],
+    libs: [
+        "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
+    ],
+}
+
+java_library_static {
+    name: "android-non-updatable.stubs.test",
+    defaults: ["android-non-updatable_defaults_stubs_current"],
+    srcs: [":test-api-stubs-docs-non-updatable"],
+    libs: modules_system_stubs,
+}
+
+java_defaults {
+    name: "android_defaults_stubs_current",
+    static_libs: ["art-notices-for-framework-stubs-jar"], // License notices from art module
     sdk_version: "none",
     system_modules: "none",
     java_version: "1.8",
@@ -328,8 +365,8 @@ java_defaults {
 
 java_library_static {
     name: "android_stubs_current",
-    srcs: [ ":api-stubs-docs-non-updatable" ],
     static_libs: modules_public_stubs + [
+        "android-non-updatable.stubs",
         "private-stub-annotations-jar",
     ],
     defaults: ["android_defaults_stubs_current"],
@@ -337,8 +374,8 @@ java_library_static {
 
 java_library_static {
     name: "android_system_stubs_current",
-    srcs: [ ":system-api-stubs-docs-non-updatable" ],
     static_libs: modules_system_stubs + [
+        "android-non-updatable.stubs.system",
         "private-stub-annotations-jar",
     ],
     defaults: [
@@ -360,10 +397,10 @@ java_library_static {
 
 java_library_static {
     name: "android_test_stubs_current",
-    srcs: [ ":test-api-stubs-docs-non-updatable" ],
     // Modules do not have test APIs, but we want to include their SystemApis, like we include
     // the SystemApi of framework-non-updatable-sources.
     static_libs: modules_system_stubs + [
+        "android-non-updatable.stubs.test",
         "private-stub-annotations-jar",
     ],
     defaults: [
@@ -385,17 +422,14 @@ java_library_static {
 
 java_library_static {
     name: "android_module_lib_stubs_current",
-    srcs: [ ":module-lib-api-stubs-docs-non-updatable" ],
     defaults: [
         "android_defaults_stubs_current",
         "android_stubs_dists_default",
     ],
-    libs: [
-        "sdk_system_current_android",
-        // NOTE: The below can be removed once the prebuilt stub contains IKE.
-        "sdk_system_current_android.net.ipsec.ike",
+    static_libs: [
+        "android-non-updatable.stubs.module_lib",
+        "art.module.public.api.stubs",
     ],
-    static_libs: ["art.module.public.api.stubs"],
     dist: {
         dir: "apistubs/android/module-lib",
     },
