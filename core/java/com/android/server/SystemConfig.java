@@ -484,7 +484,7 @@ public class SystemConfig {
         // Vendors are only allowed to customize these
         int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
                 | ALLOW_ASSOCIATIONS;
-        if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1) {
+        if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.O_MR1) {
             // For backward compatibility
             vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
         }
@@ -1252,7 +1252,7 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_APP_ENUMERATION, 0);
         }
 
-        if (Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.Q) {
             addFeature(PackageManager.FEATURE_IPSEC_TUNNELS, 0);
         }
 
