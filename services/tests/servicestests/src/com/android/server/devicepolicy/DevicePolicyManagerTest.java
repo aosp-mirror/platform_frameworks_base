@@ -5090,6 +5090,46 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void resetPasswordWithToken_NumericPin() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        // adding a token
+        final byte[] token = new byte[32];
+        final long handle = 123456;
+        when(getServices().lockPatternUtils.addEscrowToken(eq(token), eq(UserHandle.USER_SYSTEM),
+                nullable(EscrowTokenStateChangeCallback.class)))
+                .thenReturn(handle);
+        assertThat(dpm.setResetPasswordToken(admin1, token)).isTrue();
+
+        // Test resetting with a numeric pin
+        final String pin = "123456";
+        when(getServices().lockPatternUtils.setLockCredentialWithToken(
+                LockscreenCredential.createPin(pin), handle, token,
+                UserHandle.USER_SYSTEM)).thenReturn(true);
+        assertThat(dpm.resetPasswordWithToken(admin1, pin, token, 0)).isTrue();
+    }
+
+    @Test
+    public void resetPasswordWithToken_EmptyPassword() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        // adding a token
+        final byte[] token = new byte[32];
+        final long handle = 123456;
+        when(getServices().lockPatternUtils.addEscrowToken(eq(token), eq(UserHandle.USER_SYSTEM),
+                nullable(EscrowTokenStateChangeCallback.class)))
+                .thenReturn(handle);
+        assertThat(dpm.setResetPasswordToken(admin1, token)).isTrue();
+
+        // Test resetting with an empty password
+        final String password = "";
+        when(getServices().lockPatternUtils.setLockCredentialWithToken(
+                LockscreenCredential.createNone(), handle, token,
+                UserHandle.USER_SYSTEM)).thenReturn(true);
+        assertThat(dpm.resetPasswordWithToken(admin1, password, token, 0)).isTrue();
+    }
+
+    @Test
     public void testIsActivePasswordSufficient() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         mContext.packageName = admin1.getPackageName();
