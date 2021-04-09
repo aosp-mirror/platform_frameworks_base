@@ -3408,8 +3408,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return interceptKeyBeforeQueueing(event, policyFlags);
         }
 
+        // This could prevent some wrong state in multi-displays environment,
+        // the default display may turned off but interactive is true.
+        final boolean isDefaultDisplayOn = Display.isOnState(mDefaultDisplay.getState());
+        final boolean interactiveAndOn = interactive && isDefaultDisplayOn;
         if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-            handleKeyGesture(event, interactive);
+            handleKeyGesture(event, interactiveAndOn);
         }
 
         // Enable haptics if down and virtual key without multiple repetitions. If this is a hard
@@ -3556,8 +3560,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Any activity on the power button stops the accessibility shortcut
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false; // wake-up will be handled separately
-                final boolean isDefaultDisplayOn = Display.isOnState(mDefaultDisplay.getState());
-                final boolean interactiveAndOn = interactive && isDefaultDisplayOn;
                 if (down) {
                     interceptPowerKeyDown(event, interactiveAndOn);
                 } else {
