@@ -16,8 +16,16 @@
 
 package com.android.server.connectivity;
 
-import static com.android.server.connectivity.NetworkNotificationManager.NotificationType.*;
+import static android.app.Notification.FLAG_ONGOING_EVENT;
 
+import static com.android.server.connectivity.NetworkNotificationManager.NotificationType.LOST_INTERNET;
+import static com.android.server.connectivity.NetworkNotificationManager.NotificationType.NETWORK_SWITCH;
+import static com.android.server.connectivity.NetworkNotificationManager.NotificationType.NO_INTERNET;
+import static com.android.server.connectivity.NetworkNotificationManager.NotificationType.PARTIAL_CONNECTIVITY;
+import static com.android.server.connectivity.NetworkNotificationManager.NotificationType.PRIVATE_DNS_BROKEN;
+import static com.android.server.connectivity.NetworkNotificationManager.NotificationType.SIGN_IN;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.clearInvocations;
@@ -230,19 +238,47 @@ public class NetworkNotificationManagerTest {
         verify(mNotificationManager, never()).notify(any(), anyInt(), any());
     }
 
+    private void assertNotification(NotificationType type, boolean ongoing) {
+        final int id = 101;
+        final String tag = NetworkNotificationManager.tagFor(id);
+        final ArgumentCaptor<Notification> noteCaptor = ArgumentCaptor.forClass(Notification.class);
+        mManager.showNotification(id, type, mWifiNai, mCellNai, null, false);
+        verify(mNotificationManager, times(1)).notify(eq(tag), eq(type.eventId),
+                noteCaptor.capture());
+
+        assertEquals("Notification ongoing flag should be " + (ongoing ? "set" : "unset"),
+                ongoing, (noteCaptor.getValue().flags & FLAG_ONGOING_EVENT) != 0);
+    }
+
     @Test
     public void testDuplicatedNotificationsNoInternetThenSignIn() {
         final int id = 101;
         final String tag = NetworkNotificationManager.tagFor(id);
 
         // Show first NO_INTERNET
-        mManager.showNotification(id, NO_INTERNET, mWifiNai, mCellNai, null, false);
-        verify(mNotificationManager, times(1)).notify(eq(tag), eq(NO_INTERNET.eventId), any());
+        assertNotification(NO_INTERNET, false /* ongoing */);
 
         // Captive portal detection triggers SIGN_IN a bit later, clearing the previous NO_INTERNET
-        mManager.showNotification(id, SIGN_IN, mWifiNai, mCellNai, null, false);
+        assertNotification(SIGN_IN, false /* ongoing */);
         verify(mNotificationManager, times(1)).cancel(eq(tag), eq(NO_INTERNET.eventId));
-        verify(mNotificationManager, times(1)).notify(eq(tag), eq(SIGN_IN.eventId), any());
+
+        // Network disconnects
+        mManager.clearNotification(id);
+        verify(mNotificationManager, times(1)).cancel(eq(tag), eq(SIGN_IN.eventId));
+    }
+
+    @Test
+    public void testOngoingSignInNotification() {
+        doReturn(true).when(mResources).getBoolean(R.bool.config_ongoingSignInNotification);
+        final int id = 101;
+        final String tag = NetworkNotificationManager.tagFor(id);
+
+        // Show first NO_INTERNET
+        assertNotification(NO_INTERNET, false /* ongoing */);
+
+        // Captive portal detection triggers SIGN_IN a bit later, clearing the previous NO_INTERNET
+        assertNotification(SIGN_IN, true /* ongoing */);
+        verify(mNotificationManager, times(1)).cancel(eq(tag), eq(NO_INTERNET.eventId));
 
         // Network disconnects
         mManager.clearNotification(id);
