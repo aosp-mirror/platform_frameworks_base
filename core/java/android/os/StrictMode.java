@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.storage.IStorageManager;
@@ -2258,6 +2259,44 @@ public final class StrictMode {
     /** @hide */
     public static void onIncorrectContextUsed(String message, Throwable originStack) {
         onVmPolicyViolation(new IncorrectContextUseViolation(message, originStack));
+    }
+
+    /**
+     * A helper method to verify if the {@code context} has a proper {@link Configuration} to obtain
+     * {@link android.view.LayoutInflater}, {@link android.view.ViewConfiguration} or
+     * {@link android.view.GestureDetector}. Throw {@link IncorrectContextUseViolation} if the
+     * {@code context} doesn't have a proper configuration.
+     * <p>
+     * Note that the context created via {@link Context#createConfigurationContext(Configuration)}
+     * is also regarded as a context with a proper configuration because the {@link Configuration}
+     * is handled by developers.
+     * </p>
+     * @param context The context to verify if it is a display associative context
+     * @param methodName The asserted method name
+     *
+     * @see Context#isConfigurationContext()
+     * @see Context#createConfigurationContext(Configuration)
+     * @see Context#getSystemService(String)
+     * @see Context#LAYOUT_INFLATER_SERVICE
+     * @see android.view.ViewConfiguration#get(Context)
+     * @see android.view.LayoutInflater#from(Context)
+     * @see IncorrectContextUseViolation
+     *
+     * @hide
+     */
+    public static void assertConfigurationContext(@NonNull Context context,
+            @NonNull String methodName) {
+        if (vmIncorrectContextUseEnabled() && !context.isConfigurationContext()) {
+            final String errorMessage = "Tried to access the API:" + methodName + " which needs to"
+                    + " have proper configuration from a non-UI Context:" + context;
+            final String message = "The API:" + methodName + " needs a proper configuration."
+                    + " Use UI contexts such as an activity or a context created"
+                    + " via createWindowContext(Display, int, Bundle) or "
+                    + " createConfigurationContext(Configuration) with a proper configuration.";
+            final Exception exception = new IllegalAccessException(errorMessage);
+            StrictMode.onIncorrectContextUsed(message, exception);
+            Log.e(TAG, errorMessage + " " + message, exception);
+        }
     }
 
     /**

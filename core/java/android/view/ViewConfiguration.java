@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.os.StrictMode.vmIncorrectContextUseEnabled;
-
 import android.annotation.FloatRange;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
@@ -34,7 +32,6 @@ import android.os.RemoteException;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 
@@ -520,20 +517,9 @@ public class ViewConfiguration {
      *                be {@link Activity} or other {@link Context} created with
      *                {@link Context#createWindowContext(int, Bundle)}.
      */
-
+    // TODO(b/182007470): Use @ConfigurationContext instead
     public static ViewConfiguration get(@UiContext Context context) {
-        if (!context.isUiContext() && vmIncorrectContextUseEnabled()) {
-            final String errorMessage = "Tried to access UI constants from a non-visual Context:"
-                    + context;
-            final String message = "UI constants, such as display metrics or window metrics, "
-                    + "must be accessed from Activity or other visual Context. "
-                    + "Use an Activity or a Context created with "
-                    + "Context#createWindowContext(int, Bundle), which are adjusted to the "
-                    + "configuration and visual bounds of an area on screen";
-            final Exception exception = new IllegalArgumentException(errorMessage);
-            StrictMode.onIncorrectContextUsed(message, exception);
-            Log.e(TAG, errorMessage + message, exception);
-        }
+        StrictMode.assertConfigurationContext(context, "ViewConfiguration");
 
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         final int density = (int) (100.0f * metrics.density);

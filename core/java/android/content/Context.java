@@ -6817,4 +6817,25 @@ public abstract class Context {
      * @hide
      */
     public void destroy() { }
+
+    /**
+     * Indicates this {@link Context} has the proper {@link Configuration} to obtain
+     * {@link android.view.LayoutInflater}, {@link android.view.ViewConfiguration} and
+     * {@link android.view.GestureDetector}. Generally, all UI contexts, such as
+     * {@link android.app.Activity} or {@link android.app.WindowContext}, are initialized with base
+     * configuration.
+     * <p>
+     * Note that the context created via {@link Context#createConfigurationContext(Configuration)}
+     * is also regarded as a context that is based on a configuration because the
+     * configuration is explicitly provided via the API.
+     * </p>
+     *
+     * @see #isUiContext()
+     * @see #createConfigurationContext(Configuration)
+     *
+     * @hide
+     */
+    public boolean isConfigurationContext() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 }

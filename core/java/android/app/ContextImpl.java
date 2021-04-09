@@ -243,6 +243,9 @@ class ContextImpl extends Context {
      */
     private boolean mForceDisplayOverrideInResources;
 
+    /** @see Context#isConfigurationContext() */
+    private boolean mIsConfigurationBasedContext;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mFlags;
 
@@ -2002,13 +2005,12 @@ class ContextImpl extends Context {
     public Object getSystemService(String name) {
         if (vmIncorrectContextUseEnabled()) {
             // Check incorrect Context usage.
-            if (isUiComponent(name) && !isUiContext()) {
+            if (WINDOW_SERVICE.equals(name) && !isUiContext()) {
                 final String errorMessage = "Tried to access visual service "
                         + SystemServiceRegistry.getSystemServiceClassName(name)
                         + " from a non-visual Context:" + getOuterContext();
-                final String message = "Visual services, such as WindowManager "
-                        + "or LayoutInflater should be accessed from Activity or another visual "
-                        + "Context. Use an Activity or a Context created with "
+                final String message = "WindowManager should be accessed from Activity or other "
+                        + "visual Context. Use an Activity or a Context created with "
                         + "Context#createWindowContext(int, Bundle), which are adjusted to "
                         + "the configuration and visual bounds of an area on screen.";
                 final Exception exception = new IllegalAccessException(errorMessage);
@@ -2041,6 +2043,12 @@ class ContextImpl extends Context {
         }
     }
 
+    /** @hide */
+    @Override
+    public boolean isConfigurationContext() {
+        return isUiContext() || mIsConfigurationBasedContext;
+    }
+
     /**
      * Temporary workaround to permit incorrect usages of Context by SystemUI.
      * TODO(b/147647877): Fix usages and remove.
@@ -2051,10 +2059,6 @@ class ContextImpl extends Context {
                 "android.permission.STATUS_BAR_SERVICE",
                 Binder.getCallingPid(),
                 Binder.getCallingUid()) == PERMISSION_GRANTED;
-    }
-
-    private static boolean isUiComponent(String name) {
-        return WINDOW_SERVICE.equals(name) || LAYOUT_INFLATER_SERVICE.equals(name);
     }
 
     @Override
@@ -2538,6 +2542,7 @@ class ContextImpl extends Context {
                 mAttributionSource.getAttributionTag(),
                 mAttributionSource.getNext(),
                 mSplitName, mToken, mUser, mFlags, mClassLoader, null);
+        context.mIsConfigurationBasedContext = true;
 
         final int displayId = getDisplayId();
         final Integer overrideDisplayId = mForceDisplayOverrideInResources
@@ -2575,6 +2580,10 @@ class ContextImpl extends Context {
         // the display that would otherwise be inherited from mToken (or the global configuration if
         // mToken is null).
         context.mForceDisplayOverrideInResources = true;
+        // The configuration is overridden by display adjustments' configuration and won't receive
+        // configuration changes. This context won't be regarded as having the proper configuration
+        // anymore.
+        context.mIsConfigurationBasedContext = false;
         return context;
     }
 
@@ -2988,6 +2997,7 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, ContextParams.EMPTY,
                 null, null, activityInfo.splitName, activityToken, null, 0, classLoader, null);
         context.mContextType = CONTEXT_TYPE_ACTIVITY;
+        context.mIsConfigurationBasedContext = true;
 
         // Clamp display ID to DEFAULT_DISPLAY if it is INVALID_DISPLAY.
         displayId = (displayId != Display.INVALID_DISPLAY) ? displayId : Display.DEFAULT_DISPLAY;
@@ -3058,6 +3068,7 @@ class ContextImpl extends Context {
             setResources(container.mResources);
             mDisplay = container.mDisplay;
             mForceDisplayOverrideInResources = container.mForceDisplayOverrideInResources;
+            mIsConfigurationBasedContext = container.mIsConfigurationBasedContext;
             mContextType = container.mContextType;
         } else {
             mBasePackageName = packageInfo.mPackageName;
@@ -3135,6 +3146,7 @@ class ContextImpl extends Context {
         //  WindowContext.
         if (mOuterContext.isUiContext() && mContextType <= CONTEXT_TYPE_DISPLAY_CONTEXT) {
             mContextType = CONTEXT_TYPE_WINDOW_CONTEXT;
+            mIsConfigurationBasedContext = true;
         }
     }
 
