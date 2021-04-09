@@ -337,7 +337,17 @@ public class Sensor {
 
         @Override
         public void onInteractionDetected() {
-            // no-op
+            mHandler.post(() -> {
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
+                if (!(client instanceof FaceDetectClient)) {
+                    Slog.e(mTag, "onInteractionDetected for wrong client: "
+                            + Utils.getClientName(client));
+                    return;
+                }
+
+                final FaceDetectClient detectClient = (FaceDetectClient) client;
+                detectClient.onInteractionDetected();
+            });
         }
 
         @Override
