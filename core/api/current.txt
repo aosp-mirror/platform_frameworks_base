@@ -5664,6 +5664,7 @@ package android.app {
     field public static final String EXTRA_AUDIO_CONTENTS_URI = "android.audioContents";
     field public static final String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
     field public static final String EXTRA_BIG_TEXT = "android.bigText";
+    field public static final String EXTRA_CALL_IS_VIDEO = "android.callIsVideo";
     field public static final String EXTRA_CALL_PERSON = "android.callPerson";
     field public static final String EXTRA_CHANNEL_GROUP_ID = "android.intent.extra.CHANNEL_GROUP_ID";
     field public static final String EXTRA_CHANNEL_ID = "android.intent.extra.CHANNEL_ID";
@@ -5970,6 +5971,7 @@ package android.app {
     method @NonNull public static android.app.Notification.CallStyle forScreeningCall(@NonNull android.app.Person, @NonNull android.app.PendingIntent, @NonNull android.app.PendingIntent);
     method @NonNull public android.app.Notification.CallStyle setAnswerButtonColorHint(@ColorInt int);
     method @NonNull public android.app.Notification.CallStyle setDeclineButtonColorHint(@ColorInt int);
+    method @NonNull public android.app.Notification.CallStyle setIsVideo(boolean);
     method @NonNull public android.app.Notification.CallStyle setVerificationIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.CallStyle setVerificationText(@Nullable CharSequence);
   }

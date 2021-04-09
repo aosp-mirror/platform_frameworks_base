@@ -5147,6 +5147,8 @@
 
     <!-- Action text to be displayed for the "answer" action of an incoming call [CHAR LIMIT=13] -->
     <string name="call_notification_answer_action">Answer</string>
+    <!-- Action text to be displayed for the "answer" action of an incoming VIDEO call [CHAR LIMIT=13] -->
+    <string name="call_notification_answer_video_action">Video</string>
     <!-- Action text to be displayed for the "decline" action of an incoming call [CHAR LIMIT=13] -->
     <string name="call_notification_decline_action">Decline</string>
     <!-- Action text to be displayed for the "hang up" action of an ongoing call [CHAR LIMIT=13] -->
