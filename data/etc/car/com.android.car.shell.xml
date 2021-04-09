@@ -28,5 +28,9 @@
         <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
         <permission name="android.car.permission.CAR_TIRES"/>
         <permission name="android.car.permission.READ_CAR_STEERING"/>
+        <permission name="android.car.permission.REQUEST_CAR_EVS_ACTIVITY" />
+        <permission name="android.car.permission.CONTROL_CAR_EVS_ACTIVITY" />
+        <permission name="android.car.permission.USE_CAR_EVS_CAMERA" />
+        <permission name="android.car.permission.MONITOR_CAR_EVS_STATUS" />
     </privapp-permissions>
 </permissions>
