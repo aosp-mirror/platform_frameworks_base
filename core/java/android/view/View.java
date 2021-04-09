@@ -5260,6 +5260,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     private ViewTranslationCallback mViewTranslationCallback;
 
+    @Nullable
+
+    private ViewTranslationResponse mViewTranslationResponse;
+
     /**
      * Simple constructor to use when creating a view from code.
      *
@@ -30765,57 +30769,50 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns a {@link ViewTranslationRequest} which represents the content to be translated.
-     *
-     * <p>The default implementation does nothing and returns null.</p>
-     *
-     * @param supportedFormats the supported translation formats. For now, the only possible value
-     * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
-     * @return the {@link ViewTranslationRequest} which contains the information to be translated or
-     * {@code null} if this View doesn't support translation.
-     * The {@link AutofillId} must be set on the returned value.
-     */
-    @Nullable
-    public ViewTranslationRequest onCreateTranslationRequest(
-            @NonNull @DataFormat int[] supportedFormats) {
-        return null;
-    }
-
-    /**
-     * Returns a {@link ViewTranslationRequest} list which represents the content to be translated
-     * in the virtual view. This is called if this view returned a virtual view structure
-     * from {@link #onProvideContentCaptureStructure} and the system determined that those virtual
-     * views were relevant for translation.
+     * Collects a {@link ViewTranslationRequest} which represents the content to be translated in
+     * the view.
      *
      * <p>The default implementation does nothing.</p>
      *
-     * @param virtualChildIds the virtual child ids which represents the child views in the virtual
+     * @param supportedFormats the supported translation formats. For now, the only possible value
+     * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
+     * @param requestsCollector a {@link ViewTranslationRequest} collector that can be used to
+     * collect the information to be translated in the view. The {@code requestsCollector} only
+     * accepts one request; an IllegalStateException is thrown if more than one
+     * {@link ViewTranslationRequest} is submitted to it. The {@link AutofillId} must be set on the
+     * {@link ViewTranslationRequest}.
+     */
+    public void onCreateViewTranslationRequest(@NonNull @DataFormat int[] supportedFormats,
+            @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
+    }
+
+    /**
+     * Collects {@link ViewTranslationRequest}s which represents the content to be translated
+     * for the virtual views in the host view. This is called if this view returned a virtual
+     * view structure from {@link #onProvideContentCaptureStructure} and the system determined that
+     * those virtual views were relevant for translation.
+     *
+     * <p>The default implementation does nothing.</p>
+     *
+     * @param virtualIds the virtual view ids which represents the virtual views in the host
      * view.
      * @param supportedFormats the supported translation formats. For now, the only possible value
      * is the {@link android.view.translation.TranslationSpec#DATA_FORMAT_TEXT}.
      * @param requestsCollector a {@link ViewTranslationRequest} collector that can be called
-     * multiple times to collect the information to be translated in the virtual view. One
+     * multiple times to collect the information to be translated in the host view. One
      * {@link ViewTranslationRequest} per virtual child. The {@link ViewTranslationRequest} must
      * contains the {@link AutofillId} corresponding to the virtualChildIds. Do not keep this
      * Consumer after the method returns.
      */
     @SuppressLint("NullableCollection")
-    public void onCreateTranslationRequests(@NonNull long[] virtualChildIds,
+    public void onCreateVirtualViewTranslationRequests(@NonNull long[] virtualIds,
             @NonNull @DataFormat int[] supportedFormats,
             @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
         // no-op
     }
 
     /**
-     * Returns a {@link ViewTranslationCallback} that is used to display/hide the translated
-     * information. If the View supports displaying translated content, it should implement
-     * {@link ViewTranslationCallback}.
-     *
-     * <p>The default implementation returns null if developers don't set the customized
-     * {@link ViewTranslationCallback} by {@link #setViewTranslationCallback} </p>
-     *
-     * @return a {@link ViewTranslationCallback} that is used to control how to display the
-     * translated information or {@code null} if this View doesn't support translation.
+     * @hide
      */
     @Nullable
     public ViewTranslationCallback getViewTranslationCallback() {
@@ -30835,30 +30832,52 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Called when the content from {@link View#onCreateTranslationRequest} had been translated by
-     * the TranslationService.
+     * Clear the {@link ViewTranslationCallback} from this view.
+     */
+    public void clearViewTranslationCallback() {
+        mViewTranslationCallback = null;
+    }
+
+    /**
+     * Returns the {@link ViewTranslationResponse} associated with this view. The response will be
+     * set when the translation is done then {@link #onViewTranslationResponse} is called. The
+     * {@link ViewTranslationCallback} can use to get {@link ViewTranslationResponse} to display the
+     * translated information.
      *
-     * <p> The default implementation does nothing.</p>
+     * @return a {@link ViewTranslationResponse} that contains the translated information associated
+     * with this view or {@code null} if this View doesn't have the translation.
+     */
+    @Nullable
+    public ViewTranslationResponse getViewTranslationResponse() {
+        return mViewTranslationResponse;
+    }
+
+    /**
+     * Called when the content from {@link View#onCreateViewTranslationRequest} had been translated
+     * by the TranslationService.
+     *
+     * <p> The default implementation will set the ViewTranslationResponse that can be get from
+     * {@link View#getViewTranslationResponse}. </p>
      *
      * @param response a {@link ViewTranslationResponse} that contains the translated information
      * which can be shown in the view.
      */
-    public void onTranslationResponse(@NonNull ViewTranslationResponse response) {
-        // no-op
+    public void onViewTranslationResponse(@NonNull ViewTranslationResponse response) {
+        mViewTranslationResponse = response;
     }
 
     /**
-     * Called when the content from {@link View#onCreateTranslationRequest} had been translated by
-     * the TranslationService.
+     * Called when the content from {@link View#onCreateVirtualViewTranslationRequests} had been
+     * translated by the TranslationService.
      *
      * <p> The default implementation does nothing.</p>
      *
      * @param response a {@link ViewTranslationResponse} SparseArray for the request that send by
-     * {@link View#onCreateTranslationRequests} that contains the translated information which can
-     * be shown in the view. The key of SparseArray is
-     * the virtual child ids.
+     * {@link View#onCreateVirtualViewTranslationRequests} that contains the translated information
+     * which can be shown in the view. The key of SparseArray is the virtual child ids.
      */
-    public void onTranslationResponse(@NonNull LongSparseArray<ViewTranslationResponse> response) {
+    public void onVirtualViewTranslationResponses(
+            @NonNull LongSparseArray<ViewTranslationResponse> response) {
         // no-op
     }
 
@@ -30866,16 +30885,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Dispatch to collect the {@link ViewTranslationRequest}s for translation purpose by traversing
      * the hierarchy when the app requests ui translation. Typically, this method should only be
      * overridden by subclasses that provide a view hierarchy (such as {@link ViewGroup}). Other
-     * classes should override {@link View#onCreateTranslationRequest}. When requested to start the
-     * ui translation, the system will call this method to traverse the view hierarchy to call
-     * {@link View#onCreateTranslationRequest} to build {@link ViewTranslationRequest}s and create a
+     * classes should override {@link View#onCreateViewTranslationRequest} for normal view or
+     * override {@link View#onVirtualViewTranslationResponses} for view contains virtual children.
+     * When requested to start the ui translation, the system will call this method to traverse the
+     * view hierarchy to collect {@link ViewTranslationRequest}s and create a
      * {@link android.view.translation.Translator} to translate the requests. All the
      * {@link ViewTranslationRequest}s must be added when the traversal is done.
      *
-     * <p> The default implementation calls {@link View#onCreateTranslationRequest} to build
-     * {@link ViewTranslationRequest} if the view should be translated. The view is marked as having
-     * {@link #setHasTransientState(boolean) transient state} so that recycling of views doesn't
-     * prevent the system from attaching the response to it.</p>
+     * <p> The default implementation calls {@link View#onCreateViewTranslationRequest} for normal
+     * view or calls {@link View#onVirtualViewTranslationResponses} for view contains virtual
+     * children to build {@link ViewTranslationRequest} if the view should be translated.
+     * The view is marked as having {@link #setHasTransientState(boolean) transient state} so that
+     * recycling of views doesn't prevent the system from attaching the response to it.</p>
      *
      * @param viewIds a map for the view's {@link AutofillId} and its virtual child ids or
      * {@code null} if the view doesn't have virtual child that should be translated. The virtual
@@ -30888,27 +30909,47 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void dispatchRequestTranslation(@NonNull Map<AutofillId, long[]> viewIds,
             @NonNull @DataFormat int[] supportedFormats,
-            @Nullable TranslationCapability capability,
+            @NonNull TranslationCapability capability,
             @NonNull List<ViewTranslationRequest> requests) {
         AutofillId autofillId = getAutofillId();
         if (viewIds.containsKey(autofillId)) {
             if (viewIds.get(autofillId) == null) {
-                ViewTranslationRequest request = onCreateTranslationRequest(supportedFormats);
-                if (request != null && request.getKeys().size() > 0) {
-                    requests.add(request);
-                    if (Log.isLoggable(CONTENT_CAPTURE_LOG_TAG, Log.VERBOSE)) {
-                        Log.v(CONTENT_CAPTURE_LOG_TAG, "Calling setHasTransientState(true) for "
-                                + autofillId);
-                    }
-                    // TODO: Add a default ViewTranslationCallback for View that resets this in
-                    // onClearTranslation(). Also update the javadoc for this method to mention
-                    // that.
-                    setHasTransientState(true);
-                }
+                // TODO: avoiding the allocation per view
+                onCreateViewTranslationRequest(supportedFormats,
+                        new ViewTranslationRequestConsumer(requests));
             } else {
-                onCreateTranslationRequests(viewIds.get(autofillId), supportedFormats, request -> {
-                    requests.add(request);
-                });
+                onCreateVirtualViewTranslationRequests(viewIds.get(autofillId), supportedFormats,
+                        request -> {
+                            requests.add(request);
+                        });
+            }
+        }
+    }
+
+    private class ViewTranslationRequestConsumer implements Consumer<ViewTranslationRequest> {
+        private final List<ViewTranslationRequest> mRequests;
+        private boolean mCalled;
+
+        ViewTranslationRequestConsumer(List<ViewTranslationRequest> requests) {
+            mRequests = requests;
+        }
+
+        @Override
+        public void accept(ViewTranslationRequest request) {
+            if (mCalled) {
+                throw new IllegalStateException("The translation Consumer is not reusable.");
+            }
+            mCalled = true;
+            if (request != null && request.getKeys().size() > 0) {
+                mRequests.add(request);
+                if (Log.isLoggable(CONTENT_CAPTURE_LOG_TAG, Log.VERBOSE)) {
+                    Log.v(CONTENT_CAPTURE_LOG_TAG, "Calling setHasTransientState(true) for "
+                            + getAutofillId());
+                }
+                // TODO: Add a default ViewTranslationCallback for View that resets this in
+                // onClearTranslation(). Also update the javadoc for this method to mention
+                // that.
+                setHasTransientState(true);
             }
         }
     }

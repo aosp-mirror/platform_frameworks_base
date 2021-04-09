@@ -48451,6 +48451,7 @@ package android.view {
     method public boolean checkInputConnectionProxy(android.view.View);
     method public void clearAnimation();
     method public void clearFocus();
+    method public void clearViewTranslationCallback();
     method public static int combineMeasuredStates(int, int);
     method protected int computeHorizontalScrollExtent();
     method protected int computeHorizontalScrollOffset();
@@ -48487,7 +48488,7 @@ package android.view {
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public void dispatchProvideAutofillStructure(@NonNull android.view.ViewStructure, int);
     method public void dispatchProvideStructure(android.view.ViewStructure);
-    method public void dispatchRequestTranslation(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @Nullable android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
+    method public void dispatchRequestTranslation(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @NonNull android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method public void dispatchScrollCaptureSearch(@NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull java.util.function.Consumer<android.view.ScrollCaptureTarget>);
@@ -48684,7 +48685,7 @@ package android.view {
     method @Nullable public android.graphics.drawable.Drawable getVerticalScrollbarTrackDrawable();
     method public int getVerticalScrollbarWidth();
     method @Nullable public android.view.ViewRoot getViewRoot();
-    method @Nullable public android.view.translation.ViewTranslationCallback getViewTranslationCallback();
+    method @Nullable public android.view.translation.ViewTranslationResponse getViewTranslationResponse();
     method public android.view.ViewTreeObserver getViewTreeObserver();
     method public int getVisibility();
     method public final int getWidth();
@@ -48784,8 +48785,8 @@ package android.view {
     method protected void onCreateContextMenu(android.view.ContextMenu);
     method protected int[] onCreateDrawableState(int);
     method public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo);
-    method @Nullable public android.view.translation.ViewTranslationRequest onCreateTranslationRequest(@NonNull int[]);
-    method public void onCreateTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
+    method public void onCreateViewTranslationRequest(@NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
+    method public void onCreateVirtualViewTranslationRequests(@NonNull long[], @NonNull int[], @NonNull java.util.function.Consumer<android.view.translation.ViewTranslationRequest>);
     method @CallSuper protected void onDetachedFromWindow();
     method protected void onDisplayHint(int);
     method public boolean onDragEvent(android.view.DragEvent);
@@ -48830,8 +48831,8 @@ package android.view {
     method public void onStartTemporaryDetach();
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
-    method public void onTranslationResponse(@NonNull android.view.translation.ViewTranslationResponse);
-    method public void onTranslationResponse(@NonNull android.util.LongSparseArray<android.view.translation.ViewTranslationResponse>);
+    method public void onViewTranslationResponse(@NonNull android.view.translation.ViewTranslationResponse);
+    method public void onVirtualViewTranslationResponses(@NonNull android.util.LongSparseArray<android.view.translation.ViewTranslationResponse>);
     method @CallSuper public void onVisibilityAggregated(boolean);
     method protected void onVisibilityChanged(@NonNull android.view.View, int);
     method public void onWindowFocusChanged(boolean);

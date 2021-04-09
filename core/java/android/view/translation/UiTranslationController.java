@@ -315,7 +315,7 @@ public class UiTranslationController {
                         }
                         return;
                     }
-                    view.onTranslationResponse(virtualChildResponse);
+                    view.onVirtualViewTranslationResponses(virtualChildResponse);
                     if (view.getViewTranslationCallback() != null) {
                         view.getViewTranslationCallback().onShowTranslation(view);
                     }
@@ -373,8 +373,7 @@ public class UiTranslationController {
 
                     // TODO: Do this for specific views on request only.
                     callback.enableContentPadding();
-
-                    view.onTranslationResponse(response);
+                    view.onViewTranslationResponse(response);
                     callback.onShowTranslation(view);
                 });
             }
