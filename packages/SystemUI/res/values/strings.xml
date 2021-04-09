@@ -1646,10 +1646,10 @@
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->
     <string name="wallet_title">Wallet</string>
-    <!-- Label of the button underneath the card carousel when device is unlocked. [CHAR LIMIT=NONE] -->
-    <string name="wallet_button_label_device_unlocked">Show all</string>
-    <!-- Label of the button underneath the card carousel when device is locked. [CHAR LIMIT=NONE] -->
-    <string name="wallet_button_label_device_locked">Unlock to pay</string>
+    <!-- Label of the button at the bottom prompting user enter wallet app. [CHAR LIMIT=NONE] -->
+    <string name="wallet_app_button_label">Show all</string>
+    <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
+    <string name="wallet_action_button_label_unlock">Unlock to pay</string>
     <!-- Secondary label of the quick access wallet tile if active. [CHAR LIMIT=32] -->
     <string name="wallet_secondary_label_active">Ready</string>
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
