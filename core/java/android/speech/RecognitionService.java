@@ -24,6 +24,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.app.Service;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.ContextParams;
 import android.content.Intent;
@@ -33,7 +34,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.content.AttributionSource;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
@@ -297,7 +297,7 @@ public abstract class RecognitionService extends Service {
          * 
          * @param error code is defined in {@link SpeechRecognizer}
          */
-        public void error(int error) throws RemoteException {
+        public void error(@SpeechRecognizer.RecognitionError int error) throws RemoteException {
             Message.obtain(mHandler, MSG_RESET).sendToTarget();
             mListener.onError(error);
         }
