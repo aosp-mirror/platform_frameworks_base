@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"நிராகரி"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"கைரேகை ஐகான்"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"முகத்தை அடையாளம் காண முடியவில்லை. கைரேகையைப் பயன்படுத்தவும்."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"தொடர்வதற்குக் கைரேகையைப் பயன்படுத்தவும்"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"கைரேகையை அடையாளம் காண முடியவில்லை. அதற்குப் பதிலாகத் திரைப்பூட்டைப் பயன்படுத்தவும்."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"உங்கள் முகத்தைத் தேடுகிறது…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"முக ஐகான்"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"பொருந்துமாறு அளவை மாற்றும் பட்டன்."</string>
@@ -452,7 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCயைப் பயன்படுத்த அன்லாக் செய்யவும்"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு சொந்தமானது"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"இந்த சாதனம் <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> நிறுவனத்துக்கு சொந்தமானது"</string>
-    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"இந்தச் சாதனம் <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> நிறுவனத்தால் வழங்கப்பட்டது"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"இந்தச் சாதனத்தை வழங்கியவர் <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ஃபோனிற்கு ஐகானிலிருந்து ஸ்வைப் செய்யவும்"</string>
     <string name="voice_hint" msgid="7476017460191291417">"குரல் உதவிக்கு ஐகானிலிருந்து ஸ்வைப் செய்யவும்"</string>
     <string name="camera_hint" msgid="4519495795000658637">"கேமராவிற்கு ஐகானிலிருந்து ஸ்வைப் செய்யவும்"</string>
@@ -664,7 +661,12 @@
     <skip />
     <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
     <skip />
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"தயாராக உள்ளது"</string>
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
     <!-- no translation found for wallet_error_generic (257704570182963611) -->
     <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"பணிக் கணக்கு"</string>
@@ -727,7 +729,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"தானியங்கு"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ஒலி / அதிர்வு இல்லை"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ஒலி / அதிர்வு இல்லாமல் உரையாடல் பிரிவின் கீழ்ப் பகுதியில் தோன்றும்"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கவோ அதிரவோ செய்யும்"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கலாம்/அதிரலாம்"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கவோ அதிரவோ செய்யும். <xliff:g id="APP_NAME">%1$s</xliff:g> இலிருந்து வரும் உரையாடல்கள் இயல்பாகவே குமிழாகத் தோன்றும்."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"இந்த உள்ளடக்கத்திற்கான மிதக்கும் ஷார்ட்கட் மூலம் உங்கள் கவனத்தைப் பெற்றிருக்கும்."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"இந்த அறிவிப்பு ஒலி எழுப்ப வேண்டுமா அதிர வேண்டுமா என்பதை சிஸ்டம் தீர்மானிக்கும்"</string>
@@ -735,9 +737,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;நிலை:&lt;/b&gt; நிசப்த நிலைக்குக் குறைத்து அமைக்கப்பட்டது"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;நிலை:&lt;/b&gt; முக்கியத்துவம் உயர்த்தப்பட்டது"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;நிலை:&lt;/b&gt; முக்கியத்துவம் குறைக்கப்பட்டது"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"உரையாடல் பிரிவின் மேற்பகுதியில் மிதக்கும் குமிழாகத் தோன்றும். பூட்டுத் திரையின் மேல் சுயவிவரப் படத்தைக் காட்டும்"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"அமைப்புகள்"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"உரையாடல் அம்சங்களை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காது"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
@@ -1011,10 +1015,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"சிஸ்டம் நேவிகேஷனை மாற்ற ’அமைப்புகளுக்குச்’ செல்லவும்"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"இயக்க நேரம்"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"முன்னுரிமை அளிக்கப்பட்ட உரையாடலாக அமைக்கப்பட்டது"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"முன்னுரிமை அளிக்கப்பட்ட உரையாடல்கள் இவ்வாறு இருக்கும்:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"உரையாடல் பிரிவின் மேல் காட்டும்"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"பூட்டுத் திரையின் மேல் சுயவிவரப் படத்தைக் காட்டும்"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ஆப்ஸின் மேல் மிதக்கும் குமிழாகத் தோன்றும்"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தைக் குறுக்கிடும்"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"சரி"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"அமைப்புகள்"</string>
@@ -1032,6 +1040,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ஸ்விட்ச்"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"அணுகல்தன்மை பட்டன் இப்போது அணுகல்தன்மை சைகையாக மாற்றப்பட்டுள்ளது\n\n"<annotation id="link">"அமைப்புகளில் காண்க"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"பட்டனைத் தற்காலிகமாக மறைக்க ஓரத்திற்கு நகர்த்தும்"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"சாதனக் கட்டுப்பாடுகள்"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"இணைக்கப்பட்ட சாதனங்களில் கட்டுப்பாடுகளைச் சேர்க்கலாம்"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"சாதனக் கட்டுப்பாடுகளை அமைத்தல்"</string>
@@ -1102,31 +1122,43 @@
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"உரையாடல் விட்ஜெட்டுகள்"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ஓர் உரையாடலை உங்கள் முகப்புத் திரையில் சேர்க்க அந்த உரையாடலைத் தட்டுங்கள்"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"செய்திகளைப் பெற்றதும் இங்கே மீண்டும் வரவும்"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"முன்னுரிமை அளிக்கப்பட்ட உரையாடல்கள்"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"சமீபத்திய உரையாடல்கள்"</string>
+    <string name="okay" msgid="6490552955618608554">"சரி"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>க்கு முன்பு"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>க்குக் குறைவாக"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>க்கு முன்பு"</string>
     <string name="birthday_status" msgid="2596961629465396761">"பிறந்தநாள்"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"விரைவில் பிறந்தநாள்"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"ஆண்டு விழா"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"இடத்தைப் பகிர்கிறது"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"புதிய செய்தி"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"பார்க்கிறீர்கள்"</string>
     <string name="audio_status" msgid="4237055636967709208">"ஆடியோ கேட்கிறீர்கள்"</string>
     <string name="game_status" msgid="1340694320630973259">"விளையாடுகிறீர்கள்"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"நண்பர்கள்"</string>
     <string name="empty_status" msgid="5938893404951307749">"இன்றிரவு உரையாடலாம்!"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"தவறிய அழைப்பு"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"சமீபத்திய மெசேஜ்களையும் தவறிய அழைப்புகளையும் ஸ்டேட்டஸ் அப்டேட்களையும் பார்க்கலாம்"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"உரையாடல்"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"பேட்டரி அளவை அறிவதில் சிக்கல்"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"மேலும் தகவல்களுக்கு தட்டவும்"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"அலாரம் எதுவுமில்லை"</string>
