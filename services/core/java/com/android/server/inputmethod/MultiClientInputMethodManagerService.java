@@ -1521,8 +1521,8 @@ public final class MultiClientInputMethodManagerService {
         @BinderThread
         @Override
         public void showSoftInput(
-                IInputMethodClient client, IBinder token, int flags,
-                ResultReceiver resultReceiver, IBooleanResultCallback resultCallback) {
+                IInputMethodClient client, IBinder token, int flags, ResultReceiver resultReceiver,
+                @SoftInputShowHideReason int reason, IBooleanResultCallback resultCallback) {
             CallbackUtils.onResult(resultCallback,
                     () -> showSoftInputInternal(client, token, flags, resultReceiver));
         }
@@ -1577,7 +1577,8 @@ public final class MultiClientInputMethodManagerService {
         @Override
         public void hideSoftInput(
                 IInputMethodClient client, IBinder windowToken, int flags,
-                ResultReceiver resultReceiver, IBooleanResultCallback resultCallback) {
+                ResultReceiver resultReceiver, @SoftInputShowHideReason int reason,
+                IBooleanResultCallback resultCallback) {
             CallbackUtils.onResult(resultCallback,
                     () -> hideSoftInputInternal(client, windowToken, flags, resultReceiver));
 

@@ -257,18 +257,6 @@ final class MultiClientInputMethodClientCallbackAdaptor {
         }
 
         @Override
-        public void toggleSoftInput(int showFlags, int hideFlags) {
-            synchronized (mSessionLock) {
-                if (mCallbackImpl == null || mHandler == null) {
-                    return;
-                }
-                mHandler.sendMessage(PooledLambda.obtainMessage(
-                        CallbackImpl::toggleSoftInput, mCallbackImpl, showFlags,
-                        hideFlags));
-            }
-        }
-
-        @Override
         public void finishSession() {
             synchronized (mSessionLock) {
                 if (mCallbackImpl == null || mHandler == null) {
@@ -417,13 +405,6 @@ final class MultiClientInputMethodClientCallbackAdaptor {
                 return;
             }
             mOriginalCallback.onAppPrivateCommand(action, data);
-        }
-
-        void toggleSoftInput(int showFlags, int hideFlags) {
-            if (mFinished) {
-                return;
-            }
-            mOriginalCallback.onToggleSoftInput(showFlags, hideFlags);
         }
 
         void finishSession() {

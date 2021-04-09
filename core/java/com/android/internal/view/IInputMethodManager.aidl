@@ -52,9 +52,9 @@ interface IInputMethodManager {
     oneway void getLastInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
 
     oneway void showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
-            in ResultReceiver resultReceiver, in IBooleanResultCallback resultCallback);
+            in ResultReceiver resultReceiver, int reason, in IBooleanResultCallback resultCallback);
     oneway void hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
-            in ResultReceiver resultReceiver, in IBooleanResultCallback resultCallback);
+            in ResultReceiver resultReceiver, int reason, in IBooleanResultCallback resultCallback);
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'attribute' is non-null then also does startInput.
     // @NonNull
