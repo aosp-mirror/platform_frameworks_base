@@ -64,6 +64,7 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
+import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -227,14 +228,14 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                         + ", client: " + (client != null ? client.getOwnerString() : null)
                         + ", error: " + error
                         + ", vendorCode: " + vendorCode);
-                if (!(client instanceof Interruptable)) {
+                if (!(client instanceof ErrorConsumer)) {
                     Slog.e(TAG, "onError for non-error consumer: " + Utils.getClientName(
                             client));
                     return;
                 }
 
-                final Interruptable interruptable = (Interruptable) client;
-                interruptable.onError(error, vendorCode);
+                final ErrorConsumer errorConsumer = (ErrorConsumer) client;
+                errorConsumer.onError(error, vendorCode);
 
                 if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
                     Slog.e(TAG, "Got ERROR_HW_UNAVAILABLE");
@@ -379,10 +380,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             mCurrentUserId = UserHandle.USER_NULL;
 
             final BaseClientMonitor client = mScheduler.getCurrentClient();
-            if (client instanceof Interruptable) {
+            if (client instanceof ErrorConsumer) {
                 Slog.e(TAG, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
-                final Interruptable interruptable = (Interruptable) client;
-                interruptable.onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                final ErrorConsumer errorConsumer = (ErrorConsumer) client;
+                errorConsumer.onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
 
                 FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,

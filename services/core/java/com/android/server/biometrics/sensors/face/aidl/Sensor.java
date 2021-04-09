@@ -52,6 +52,7 @@ import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
+import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
@@ -215,14 +216,14 @@ public class Sensor {
                         + ", client: " + Utils.getClientName(client)
                         + ", error: " + error
                         + ", vendorCode: " + vendorCode);
-                if (!(client instanceof Interruptable)) {
+                if (!(client instanceof ErrorConsumer)) {
                     Slog.e(mTag, "onError for non-error consumer: "
                             + Utils.getClientName(client));
                     return;
                 }
 
-                final Interruptable interruptable = (Interruptable) client;
-                interruptable.onError(error, vendorCode);
+                final ErrorConsumer errorConsumer = (ErrorConsumer) client;
+                errorConsumer.onError(error, vendorCode);
 
                 if (error == Error.HW_UNAVAILABLE) {
                     mCallback.onHardwareUnavailable();
@@ -581,8 +582,8 @@ public class Sensor {
         final BaseClientMonitor client = mScheduler.getCurrentClient();
         if (client instanceof Interruptable) {
             Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
-            final Interruptable interruptable = (Interruptable) client;
-            interruptable.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
+            final ErrorConsumer errorConsumer = (ErrorConsumer) client;
+            errorConsumer.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
 
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
