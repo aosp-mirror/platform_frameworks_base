@@ -4954,6 +4954,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             int flags, CallerIdentity caller) {
         final int callingUid = caller.getUid();
         final int userHandle = UserHandle.getUserId(callingUid);
+        final boolean isPin = PasswordMetrics.isNumericOnly(password);
         synchronized (getLockObject()) {
             final PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userHandle);
             final List<PasswordValidationError> validationErrors;
@@ -4961,12 +4962,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // TODO: Consider changing validation API to take LockscreenCredential.
             if (password.isEmpty()) {
                 validationErrors = PasswordMetrics.validatePasswordMetrics(
-                        minMetrics, complexity, false /* isPin */,
+                        minMetrics, complexity, isPin,
                         new PasswordMetrics(CREDENTIAL_TYPE_NONE));
             } else {
                 // TODO(b/120484642): remove getBytes() below
                 validationErrors = PasswordMetrics.validatePassword(
-                        minMetrics, complexity, false, password.getBytes());
+                        minMetrics, complexity, isPin, password.getBytes());
             }
 
             if (!validationErrors.isEmpty()) {
@@ -4992,8 +4993,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
         final long ident = mInjector.binderClearCallingIdentity();
-        final LockscreenCredential newCredential =
-                LockscreenCredential.createPasswordOrNone(password);
+        final LockscreenCredential newCredential;
+        if (isPin) {
+            newCredential = LockscreenCredential.createPin(password);
+        } else {
+            newCredential = LockscreenCredential.createPasswordOrNone(password);
+        }
         try {
             if (tokenHandle == 0 || token == null) {
                 if (!mLockPatternUtils.setLockCredential(newCredential,
