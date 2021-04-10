@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"Համակարգային UI"</string>
+    <string name="app_label" msgid="4811759950673118541">"Համակարգի ինտերֆեյս"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"Մաքրել"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Ծանուցումներ չկան"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Ընթացիկ"</string>
@@ -89,7 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Հավելվածը կամ ձեր կազմակերպությունը չի թույլատրում սքրինշոթի ստացումը"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Փոփոխել"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Փոփոխել սքրինշոթը"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Նկարեք ավելի մեծ տարածք"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Մեծացնել սքրինշոթի տարածքը"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Փակել սքրինշոթը"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Սքրինշոթի նախադիտում"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"Վերևի սահմանագիծ"</string>
@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Փակել"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Հպեք մատնահետքի սկաներին"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Մատնահետքի պատկերակ"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Դեմքը չի հաջողվում ճանաչել։ Օգտագործեք մատնահետքը։"</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Շարունակելու համար անհրաժեշտ է ձեր մատնահետքը"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Մատնահետքը չի հաջողվում ճանաչել։ Օգտագործեք էկրանի կողպումը։"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Դեմքի ճանաչում…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Դեմքի պատկերակ"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Համատեղելիության խոշորացման կոճակը:"</string>
@@ -542,7 +539,7 @@
     <string name="monitoring_title" msgid="4063890083735924568">"Ցանցի մշտադիտարկում"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Ցանցի իրադարձությունների գրանցում"</string>
-    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"ՎԿ հավաստագրեր"</string>
+    <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA հավաստագրեր"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Անջատել VPN-ը"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Անջատել VPN-ը"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Դիտել քաղաքականությունները"</string>
@@ -660,7 +657,18 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Զարթուցիչ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Դրամապանակ"</string>
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Պատրաստ է"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Android for Work-ի պրոֆիլ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Ավիառեժիմ"</string>
     <string name="add_tile" msgid="6239678623873086686">"Սալիկի ավելացում"</string>
@@ -729,9 +737,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Կարգավիճակը․&lt;/b&gt; իջեցվել է և դարձել անձայն"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Կարգավիճակը․&lt;/b&gt; կարևորության մակարդակը բարձրացվել է"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Կարգավիճակը․&lt;/b&gt; կարևորության մակարդակն իջեցվել է"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ցուցադրվում է զրույցների ցանկի վերևում, հայտնվում է լողացող ամպիկի տեսքով, ցուցադրում է պրոֆիլի նկարը կողպէկրանին"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Կարգավորումներ"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Կարևոր"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը զրույցի գործառույթներ չի աջակցում"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Այս ծանուցումները չեն կարող փոփոխվել:"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ծանուցումների տվյալ խումբը հնարավոր չէ կարգավորել այստեղ"</string>
@@ -1005,10 +1015,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Թարմացրեք համակարգի նավիգացիան կարգավորումներում"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Սպասման ռեժիմ"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Զրույցը նշված է որպես կարևոր"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Կարևոր զրույցները՝"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Ցուցադրել զրույցների ցանկի վերևում"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Ցուցադրել պրոֆիլի նկարը կողպէկրանին"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Հայտնվում են որպես լողացող ամպիկ հավելվածների վրայից"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ընդհատել «Չանհանգստացնել» ռեժիմը"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Եղավ"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Կարգավորումներ"</string>
@@ -1026,6 +1040,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Փոխել"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Հատուկ գործառույթների ժեստը փոխարինվել է կոճակով\n\n"<annotation id="link">"Բացել կարգավորումները"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Կոճակը ժամանակավորապես թաքցնելու համար այն տեղափոխեք էկրանի եզր"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Սարքերի կառավարման տարրեր"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ավելացրեք կառավարման տարրեր ձեր միացված սարքերի համար"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Սարքերի կառավարման տարրերի կարգավորում"</string>
@@ -1096,31 +1122,43 @@
     <string name="basic_status" msgid="2315371112182658176">"Բաց զրույց"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Զրույցի վիջեթներ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Հպեք զրույցին՝ այն հիմնական էկրանին ավելացնելու համար"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Վերադարձեք այստեղ, երբ որևէ հաղորդագրություն ստանաք"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Կարևոր զրույցներ"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Վերջին հաղորդագրությունները"</string>
+    <string name="okay" msgid="6490552955618608554">"Եղավ"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> առաջ"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Առավելագույնը <xliff:g id="DURATION">%1$s</xliff:g> առաջ"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Ավելի քան <xliff:g id="DURATION">%1$s</xliff:g> առաջ"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Ծննդյան օր"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Շուտով ծննդյանս օրն է"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"Տարեդարձ"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"Տեղադրության ցուցադրում"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"Նոր հոդված"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"Տեսանյութ եմ դիտում"</string>
     <string name="audio_status" msgid="4237055636967709208">"Բան եմ լսում"</string>
     <string name="game_status" msgid="1340694320630973259">"Խաղ եմ խաղում"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Ընկերներ"</string>
     <string name="empty_status" msgid="5938893404951307749">"Արի այսօր զրուցենք"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"Բաց թողնված զանգ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Տեսեք վերջին հաղորդագրությունները, բաց թողնված զանգերը և կարգավիճակի մասին թարմացումները"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Զրույց"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Մարտկոցի ցուցիչի ցուցմունքը կարդալու հետ կապված խնդիր կա"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Հպեք՝ ավելին իմանալու համար"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Զարթուցիչ դրված չէ"</string>

@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"關閉"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"請輕觸指紋感應器"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"指紋圖示"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"無法辨識面孔，請改用指紋完成驗證。"</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"請使用您的指紋繼續"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"無法辨識指紋，請改用螢幕鎖定完成驗證。"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"正在搜尋您的臉孔…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"面孔圖示"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"相容性縮放按鈕。"</string>
@@ -660,7 +657,18 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"以太網"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"鬧鐘"</string>
     <string name="wallet_title" msgid="5369767670735827105">"電子錢包"</string>
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"已可使用"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"工作設定檔"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"飛行模式"</string>
     <string name="add_tile" msgid="6239678623873086686">"加入圖塊"</string>
@@ -721,7 +729,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"自動"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"無音效或震動"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"無音效或震動，並在對話部分的較低位置顯示"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"可能會根據手機設定發出鈴聲或震動"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"根據手機設定發出鈴聲或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機設定發出鈴聲或震動。「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會預設以對話氣泡顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"為此內容建立浮動捷徑以保持注意力。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"由系統判斷是否要讓此通知發出音效或震動"</string>
@@ -729,9 +737,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;狀態：&lt;/b&gt;已降低為靜音"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;狀態：&lt;/b&gt;已提高次序"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;狀態：&lt;/b&gt;已調低次序"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"在對話部分頂部顯示浮動對話氣泡，並在上鎖畫面上顯示個人檔案相片"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"無法在此設定這組通知"</string>
@@ -1005,10 +1015,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"前往「設定」更新系統導覽"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"對話已設為優先"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"優先對話將會："</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"在對話部分的頂部顯示"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"在上鎖畫面顯示個人檔案相片"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"在應用程式上以浮動小視窗顯示"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"中斷「請勿騷擾」"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"知道了"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"設定"</string>
@@ -1026,6 +1040,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"切換"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"無障礙工具按鈕取代咗無障礙手勢\n\n"<annotation id="link">"睇下設定"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"將按鈕移到邊緣即可暫時隱藏"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"為連接的裝置新增控制選項"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制"</string>
@@ -1096,31 +1122,43 @@
     <string name="basic_status" msgid="2315371112182658176">"開啟對話"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"對話小工具"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"輕按對話即可新增至主畫面"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"待你收到一些訊息後再回來查看"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"優先對話"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"最近的對話"</string>
+    <string name="okay" msgid="6490552955618608554">"確定"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>前"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"最近 <xliff:g id="DURATION">%1$s</xliff:g>內"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"超過 <xliff:g id="DURATION">%1$s</xliff:g>前"</string>
     <string name="birthday_status" msgid="2596961629465396761">"生日之星"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"即將生日"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"週年紀念"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"分享位置資訊"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"最新報導"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"正在觀看"</string>
     <string name="audio_status" msgid="4237055636967709208">"正在聽取音訊"</string>
     <string name="game_status" msgid="1340694320630973259">"正在玩遊戲"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"朋友"</string>
     <string name="empty_status" msgid="5938893404951307749">"今晚聊天吧！"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"未接來電"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"查看最近的訊息、未接來電和狀態更新"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"對話"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"讀取電池計量器時發生問題"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"輕按即可瞭解詳情"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"未設定鬧鐘"</string>

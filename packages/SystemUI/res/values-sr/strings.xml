@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Одбаци"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Додирните сензор за отисак прста"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Икона отиска прста"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Лице није препознато. Користите отисак прста."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Наставите помоћу отиска прста"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Препознавање отиска прста није успело. Користите закључавање екрана уместо тога."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Тражимо вас…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Икона лица"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Дугме Зум компатибилности."</string>
@@ -663,7 +660,18 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Етернет"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Аларм"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Новчаник"</string>
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Спремно"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Пословни профил"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Режим рада у авиону"</string>
     <string name="add_tile" msgid="6239678623873086686">"Додај плочицу"</string>
@@ -732,9 +740,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус:&lt;/b&gt; Деградирано у Нечујно"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус:&lt;/b&gt; Рангирано више"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; Рангирано ниже"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Приказује се у врху одељка за конверзације као плутајући облачић, приказује слику профила на закључаном екрану"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Подешавања"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не подржава функције конверзације"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ова обавештења не могу да се мењају."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ова група обавештења не може да се конфигурише овде"</string>
@@ -1010,10 +1020,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Идите у Подешавања да бисте ажурирали навигацију система"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Стање приправности"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Конверзација је подешена на приоритетну"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетне конверзације:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"се приказују у врху одељка за конверзације"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"приказују слику профила на закључаном екрану"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Приказују се плутајући облачићи преко апликација"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Омета подешавање Не узнемиравај"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Важи"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Подешавања"</string>
@@ -1031,6 +1045,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Пређи"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Дугме Приступачност је заменило покрет за приступачност\n\n"<annotation id="link">"Прикажи подешавања"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Померите дугме до ивице да бисте га привремено сакрили"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Контроле уређаја"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Додајте контроле за повезане уређаје"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Подесите контроле уређаја"</string>
@@ -1102,31 +1128,43 @@
     <string name="basic_status" msgid="2315371112182658176">"Отворите конверзацију"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виџети за конверзацију"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Додирните конверзацију да бисте је додали на почетни екран"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Вратите се овде када добијете неку поруку"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Приоритетне конверзације"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Недавне конверзације"</string>
+    <string name="okay" msgid="6490552955618608554">"Важи"</string>
     <string name="timestamp" msgid="6577851592534538533">"Пре <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Пре мање од <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Пре више од <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Рођендан"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Рођендан је ускоро"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"Годишњица"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"Дели се локација"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"Нова прича"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"Гледа се"</string>
     <string name="audio_status" msgid="4237055636967709208">"Слуша се"</string>
     <string name="game_status" msgid="1340694320630973259">"Игра се"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Пријатељи"</string>
     <string name="empty_status" msgid="5938893404951307749">"Ћаскамо вечерас!"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"Пропуштен позив"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Погледајте недавне поруке, пропуштене позиве и ажурирања статуса"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Конверзација"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Проблем са очитавањем мерача батерије"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Додирните за више информација"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Аларм није подешен"</string>
