@@ -424,6 +424,20 @@ class MediaDataManager(
         foregroundExecutor.executeDelayed({ removeEntry(key) }, delay)
     }
 
+    /**
+     * Called whenever the recommendation has been expired, or swiped from QQS.
+     * This will make the recommendation view to not be shown anymore during this headphone
+     * connection session.
+     */
+    fun dismissSmartspaceRecommendation() {
+        Log.d(TAG, "Dismissing Smartspace media target")
+        // Do not set smartspaceMediaTarget to null. So the instance is preserved during the entire
+        // headphone connection, and will ONLY be set to null when headphones are disconnected.
+        smartspaceMediaTarget?.let {
+            notifySmartspaceMediaDataRemoved(it.smartspaceTargetId)
+        }
+    }
+
     private fun loadMediaDataInBgForResumption(
         userId: Int,
         desc: MediaDescription,
@@ -669,6 +683,7 @@ class MediaDataManager(
             0 -> {
                 Log.d(TAG, "Empty Smartspace media target")
                 smartspaceMediaTarget?.let {
+                    Log.d(TAG, "Setting Smartspace media target to null")
                     notifySmartspaceMediaDataRemoved(it.smartspaceTargetId)
                 }
                 smartspaceMediaTarget = null
