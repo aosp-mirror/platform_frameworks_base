@@ -16,6 +16,13 @@
 
 package com.android.server.recoverysystem;
 
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_NONE;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED;
+import static android.os.RecoverySystem.ResumeOnRebootRebootErrorCode;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import android.annotation.IntDef;
@@ -146,24 +153,6 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             ROR_REQUESTED_NEED_CLEAR,
             ROR_REQUESTED_SKIP_CLEAR})
     private @interface ResumeOnRebootActionsOnClear {}
-
-    /**
-     * The error codes for reboots initiated by resume on reboot clients.
-     */
-    private static final int REBOOT_ERROR_NONE = 0;
-    private static final int REBOOT_ERROR_UNKNOWN = 1;
-    private static final int REBOOT_ERROR_INVALID_PACKAGE_NAME = 2;
-    private static final int REBOOT_ERROR_LSKF_NOT_CAPTURED = 3;
-    private static final int REBOOT_ERROR_SLOT_MISMATCH = 4;
-    private static final int REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE = 5;
-
-    @IntDef({ REBOOT_ERROR_NONE,
-            REBOOT_ERROR_UNKNOWN,
-            REBOOT_ERROR_INVALID_PACKAGE_NAME,
-            REBOOT_ERROR_LSKF_NOT_CAPTURED,
-            REBOOT_ERROR_SLOT_MISMATCH,
-            REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE})
-    private @interface ResumeOnRebootRebootErrorCode {}
 
     /**
      * Manages shared preference, i.e. the storage used for metrics reporting.
@@ -724,14 +713,14 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             boolean slotSwitch) {
         if (packageName == null) {
             Slog.w(TAG, "Missing packageName when rebooting with lskf.");
-            return REBOOT_ERROR_INVALID_PACKAGE_NAME;
+            return RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME;
         }
         if (!isLskfCaptured(packageName)) {
-            return REBOOT_ERROR_LSKF_NOT_CAPTURED;
+            return RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED;
         }
 
         if (!verifySlotForNextBoot(slotSwitch)) {
-            return REBOOT_ERROR_SLOT_MISMATCH;
+            return RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH;
         }
 
         final long origId = Binder.clearCallingIdentity();
@@ -744,10 +733,10 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
         if (!result) {
             Slog.w(TAG, "Failure to escrow key for reboot");
-            return REBOOT_ERROR_ARM_REBOOT_ESCROW_FAILURE;
+            return RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE;
         }
 
-        return REBOOT_ERROR_NONE;
+        return RESUME_ON_REBOOT_REBOOT_ERROR_NONE;
     }
 
     private boolean useServerBasedRoR() {
@@ -788,12 +777,13 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
                 requestCount, slotSwitch, serverBased, durationSeconds, lskfCapturedCount);
     }
 
-    private boolean rebootWithLskfImpl(String packageName, String reason, boolean slotSwitch) {
+    private @ResumeOnRebootRebootErrorCode int rebootWithLskfImpl(String packageName, String reason,
+            boolean slotSwitch) {
         @ResumeOnRebootRebootErrorCode int errorCode = armRebootEscrow(packageName, slotSwitch);
         reportMetricsOnRebootWithLskf(packageName, slotSwitch, errorCode);
 
-        if (errorCode != REBOOT_ERROR_NONE) {
-            return false;
+        if (errorCode != RESUME_ON_REBOOT_REBOOT_ERROR_NONE) {
+            return errorCode;
         }
 
         // Clear the metrics prefs after a successful RoR reboot.
@@ -801,17 +791,19 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
         PowerManager pm = mInjector.getPowerManager();
         pm.reboot(reason);
-        return true;
+        return RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED;
     }
 
     @Override // Binder call for the legacy rebootWithLskf
-    public boolean rebootWithLskfAssumeSlotSwitch(String packageName, String reason) {
+    public @ResumeOnRebootRebootErrorCode int rebootWithLskfAssumeSlotSwitch(String packageName,
+            String reason) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
         return rebootWithLskfImpl(packageName, reason, true);
     }
 
     @Override // Binder call
-    public boolean rebootWithLskf(String packageName, String reason, boolean slotSwitch) {
+    public @ResumeOnRebootRebootErrorCode int rebootWithLskf(String packageName, String reason,
+            boolean slotSwitch) {
         enforcePermissionForResumeOnReboot();
         return rebootWithLskfImpl(packageName, reason, slotSwitch);
     }
