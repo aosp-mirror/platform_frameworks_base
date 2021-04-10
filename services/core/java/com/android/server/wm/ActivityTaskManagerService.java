@@ -214,6 +214,7 @@ import android.telecom.TelecomManager;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -676,6 +677,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Nullable
     private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
+
+    private int[] mAccessibilityServiceUids = new int[0];
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
@@ -2990,18 +2993,24 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return true;
             }
         }
-        // This covers the case where the app is displaying some UI on top of the notification shade
-        // and wants to start an activity. The app then sends the intent in order to move the
-        // notification shade out of the way and show the activity to the user. This is fine since
-        // the caller already has privilege to show a visible window on top of the notification
-        // shade, so it can already prevent the user from accessing the shade if it wants to.
-        // We only allow for targetSdk < S, for S+ we automatically collapse the shade on
-        // startActivity() for these apps.
         if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
             synchronized (mGlobalLock) {
+                // This covers the case where the app is displaying some UI on top of the
+                // notification shade and wants to start an activity. The app then sends the intent
+                // in order to move the notification shade out of the way and show the activity to
+                // the user. This is fine since the caller already has privilege to show a visible
+                // window on top of the notification shade, so it can already prevent the user from
+                // accessing the shade if it wants to. We only allow for targetSdk < S, for S+ we
+                // automatically collapse the shade on startActivity() for these apps.
                 // It's ok that the owner of the shade is not allowed *per this rule* because it has
                 // BROADCAST_CLOSE_SYSTEM_DIALOGS (SystemUI), so it would fall into that rule.
                 if (mRootWindowContainer.hasVisibleWindowAboveButDoesNotOwnNotificationShade(uid)) {
+                    return true;
+                }
+                // Accessibility services are allowed to send the intent unless they are targeting
+                // S+, in which case they should use {@link AccessibilityService
+                // #GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE} to dismiss the notification shade.
+                if (ArrayUtils.contains(mAccessibilityServiceUids, uid)) {
                     return true;
                 }
             }
@@ -5122,9 +5131,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return mVisibleActivityProcessTracker.hasResumedActivity(uid);
         }
 
+        @Override
         public void setBackgroundActivityStartCallback(
                 @Nullable BackgroundActivityStartCallback backgroundActivityStartCallback) {
             mBackgroundActivityStartCallback = backgroundActivityStartCallback;
+        }
+
+        @Override
+        public void setAccessibilityServiceUids(IntArray uids) {
+            synchronized (mGlobalLock) {
+                mAccessibilityServiceUids = uids.toArray();
+            }
         }
 
         @Override

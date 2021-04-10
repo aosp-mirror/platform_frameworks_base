@@ -1484,6 +1484,10 @@
     <string name="permlab_bluetooth_connect">connect to paired Bluetooth devices</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
     <string name="permdesc_bluetooth_connect" product="default">Allows the app to connect to paired Bluetooth devices</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
+    <string name="permlab_bluetooth_advertise">advertise to nearby Bluetooth devices</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <string name="permdesc_bluetooth_advertise" product="default">Allows the app to advertise to nearby Bluetooth devices</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
     <string name="permlab_uwb_ranging">determine relative position between nearby Ultra-Wideband devices</string>
@@ -5941,12 +5945,14 @@ ul.</string>
     <!-- Notification action to dismiss. [CHAR LIMIT=50] -->
     <string name="dismiss_action">Dismiss</string>
 
-    <!--- Content of notification triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
-    <string name="sensor_privacy_start_use_mic_notification_content">To continue, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; needs access to your device microphone.</string>
+    <!--- Title of notification triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_notification_content_title">Unblock device microphone</string>
+    <!--- Title of notification triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_camera_notification_content_title">Unblock device camera</string>
     <!--- Content of notification triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
-    <string name="sensor_privacy_start_use_camera_notification_content">To continue, &lt;b&gt;<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; needs access to your device’s camera.</string>
+    <string name="sensor_privacy_start_use_notification_content_text">For &lt;b&gt;<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; and all apps and services</string>
     <!--- Action button in the dialog triggered if a sensor (e.g. microphone or camera) is disabled but an app tried to access it. [CHAR LIMIT=60] -->
-    <string name="sensor_privacy_start_use_dialog_turn_on_button">Turn on</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button">Unblock</string>
     <!--- Label for notification channel for all sensor privacy related notifications. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_notification_channel_label">Sensor Privacy</string>
 

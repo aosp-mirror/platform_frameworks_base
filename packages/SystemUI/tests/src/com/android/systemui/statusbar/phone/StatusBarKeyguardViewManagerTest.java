@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -32,8 +31,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
-import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -82,8 +79,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private DismissCallbackRegistry mDismissCallbackRegistry;
     @Mock
-    private ViewGroup mLockIconContainer;
-    @Mock
     private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
     private View mNotificationContainer;
@@ -101,11 +96,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mLockIconContainer.getParent()).thenReturn(mock(ViewGroup.class));
-        when(mLockIconContainer.animate()).thenReturn(mock(ViewPropertyAnimator.class,
-                RETURNS_DEEP_STUBS));
-        when(mLockIconContainer.getLayoutParams()).thenReturn(mock(FrameLayout.LayoutParams.class));
-
         when(mKeyguardBouncerFactory.create(
                 any(ViewGroup.class),
                 any(KeyguardBouncer.BouncerExpansionCallback.class)))
@@ -127,7 +117,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mKeyguardBouncerFactory);
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
                 mNotificationPanelView, mBiometrucUnlockController,
-                mLockIconContainer, mNotificationContainer, mBypassController);
+                mNotificationContainer, mBypassController);
         mStatusBarKeyguardViewManager.show(null);
     }
 

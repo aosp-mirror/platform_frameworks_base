@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Uhlelo loksuebenza olusebenzayo"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Izinhlelo zokusebenza ezidla ibhethri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ukukhuliswa"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Ukusetshenziswa kokufinyeleleka"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> isebenzisa ibhethri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> izinhlelo zokusebenza zisebenzisa ibhethri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Thepha ngemininingwane ekusetshenzisweni kwebhethri nedatha"</string>
@@ -402,7 +401,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Vumela uhlelo lokusebenza ukusebenzisa amasevisi wangaphambili."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"linganisa isikhala sokugcina uhlelo lokusebenza"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Ivuela uhlelo lokusebenza ukuthi ithole kabusha ikhodi yayo, i-dat kanye nosayizi abagcinwe okwesikhashana."</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"guqula izilungiselelo zohlelo"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"shintsha amasethingi esistimu"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"Ivumela uhlelo lokusebenza ukuthi iguqule i-data yezisetho zesistimu. Izuhlelo lokusebenza ezinobungozi zingona ukusebenz kwesistimu yakho."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"qalisa esiqalisweni sezinhlelo"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"Ivumela uhlelo lokusebenza ukuthi luziqalise ngokushesha emuva kokuba isistimu isiqedile ukubhutha. Lokhu kwenza ukuthi ithathe isikhathi esithe ukuba side ukuqalise ithebhulethi nokuvumela izinhlelo zokusebenza ukuthi inciphise yonke ithebhulethi ngokuthi isebenze njalo."</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Kuvumela i-app ithole futhi ibhangqe amadivayisi we-Bluetooth aseduze"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"xhuma kumadivayisi we-Bluetooth abhangqiwe"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Kuvumela i-app ixhume kumadivayisi we-Bluetooth abhangqiwe"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Ulwazi Lwesevisi Yenkokhelo Ye-NFC Okhethwayo"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ivuemela uhlelo lokusebenza ukuthola ulwazi lesevisi yenkokhelo ye-nfc njengezinsiza zokubhalisa nezindawo zomzila."</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ayikho iphinikhodi, iphethini, noma iphasiwedi esethiwe"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Iphutha lokufakazela ubuqiniso"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Sebenzisa isikhiya sesikrini"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Faka ukukhiya isikrini kwakho ukuze uqhubeke"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Kutholwe ingxenye yesigxivizo somunwe"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Ayikwazanga ukucubungula izigxivizo zeminwe. Sicela uzame futhi."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Hlanza inzwa"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Umunwe uhambe ngokushesha"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Umnwe uhanjiswe kancane kakhulu. Sicela uzame futhi."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zama ezinye izigxivizo zeminwe"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Kukhanya kakhulu"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Zama ukulungisa"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Izigxivizo zeminwe zigunyaziwe"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ubuso bufakazelwe ubuqiniso"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ukuqinisekiswa kobuso, sicela ucindezele okuthi qinisekisa"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Izingxenyekazi zekhompuyutha zezigxivizo zeminwe azitholakali."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Ayikwazi ukusetha izigxivizo zeminwe"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Kufinyelelwe isikhathi sokuvala sezigxivizo zeminwe. Zama futhi"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Ukusebenza kwezigxivizo zeminwe kukhanseliwe."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Umsebenzi wezigxivizo zomunwe ukhanselwe umsebenzisi."</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Ubuso be-<xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Sebenzisa i-face unlock"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Sebenzisa i-face lock noma ukukhiya isikrini"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Sebenzisa ubuso bakho ukuze uqhubeke"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Sebenzisa ubuso bakho noma ukukhiya isikrini ukuze uqhubeke"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1402,7 +1392,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Thepha ukuze ukhethe ulimi nesakhiwo"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Bonisa ngaphezulu kwezinye izinhlelo zokusebenza"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Bonisa phezu kwamanye ama-app"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> ukubonisa ngaphezu kwezinye izinhlelo zokusebenza"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> ibonisa ngaphezu kwezinye izinhlelo zokusebenza"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Uma ungafuni ukuthi i-<xliff:g id="NAME">%s</xliff:g> isebenzise lesi sici, thepha ukuze uvule izilungiselelo bese usivale."</string>
@@ -1983,7 +1973,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Iphinikhodi engu-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Susa ukuphina"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Susa ukuphina ku-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Ulwazi lohlelo lokusebenza"</string>
+    <string name="app_info" msgid="6113278084877079851">"Ulwazi nge-app"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Iqalisa i-demo..."</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Isetha kabusha idivayisi..."</string>

@@ -79,7 +79,6 @@ import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
-import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -102,8 +101,7 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
     private static final boolean DEBUG_CHARGING_SPEED = false;
 
     private static final int MSG_HIDE_TRANSIENT = 1;
-    private static final int MSG_CLEAR_BIOMETRIC_MSG = 2;
-    private static final int MSG_SWIPE_UP_TO_UNLOCK = 3;
+    private static final int MSG_SWIPE_UP_TO_UNLOCK = 2;
     private static final long TRANSIENT_BIOMETRIC_ERROR_TIMEOUT = 1300;
     private static final float BOUNCE_ANIMATION_FINAL_Y = 0f;
 
@@ -125,7 +123,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
 
     protected KeyguardIndicationRotateTextViewController mRotateTextViewController;
     private BroadcastReceiver mBroadcastReceiver;
-    private LockscreenLockIconController mLockIconController;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private String mRestingIndication;
@@ -223,10 +220,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             intentFilter.addAction(Intent.ACTION_USER_REMOVED);
             mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, intentFilter);
         }
-    }
-
-    public void setLockIconController(LockscreenLockIconController lockIconController) {
-        mLockIconController = lockIconController;
     }
 
     private void handleAlignStateChanged(int alignState) {
@@ -848,10 +841,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         public void handleMessage(Message msg) {
             if (msg.what == MSG_HIDE_TRANSIENT) {
                 hideTransientIndication();
-            } else if (msg.what == MSG_CLEAR_BIOMETRIC_MSG) {
-                if (mLockIconController != null) {
-                    mLockIconController.setTransientBiometricsError(false);
-                }
             } else if (msg.what == MSG_SWIPE_UP_TO_UNLOCK) {
                 showSwipeUpToUnlock();
             }
@@ -972,7 +961,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             if (shouldSuppressBiometricError(msgId, biometricSourceType, mKeyguardUpdateMonitor)) {
                 return;
             }
-            animatePadlockError();
             if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
                 // The face timeout message is not very actionable, let's ask the user to
                 // manually retry.
@@ -986,15 +974,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
             } else {
                 mMessageToShowOnScreenOn = errString;
             }
-        }
-
-        private void animatePadlockError() {
-            if (mLockIconController != null) {
-                mLockIconController.setTransientBiometricsError(true);
-            }
-            mHandler.removeMessages(MSG_CLEAR_BIOMETRIC_MSG);
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_BIOMETRIC_MSG),
-                    TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
         }
 
         private boolean shouldSuppressBiometricError(int msgId,

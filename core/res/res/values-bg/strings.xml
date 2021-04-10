@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Приложението работи"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Приложения, използващи батерията"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увеличение"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Използване на услугите за достъпност"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> използва батерията"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> приложения използват батерията"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Дава възможност на приложението да открива устройства с Bluetooth в близост и да се сдвоява с тях"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"свързване със сдвоените устройства с Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Дава възможност на приложението да се свързва със сдвоените устройства с Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информация за предпочитаната услуга за плащане чрез NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
@@ -578,28 +577,21 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Грешка при удостоверяването"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ползване на заключв. на екрана"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Въведете опцията си за заключване на екрана, за да продължите"</string>
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Установен е частичен отпечатък"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатъкът не бе обработен. Моля, опитайте отново."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Почистете сензора"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Пръстът бе преместен твърде бързо"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Преместихте пръста си твърде бавно. Моля, опитайте отново."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Опитайте с друг отпечатък"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Твърде светло е"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Опитайте да коригирате"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечатъкът е удостоверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицето е удостоверено"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицето е удостоверено. Моля, натиснете „Потвърждаване“"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Хардуерът за отпечатъци не е налице."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Не може да се настрои отпечатък"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Времето за изчакване за отпечатък изтече. Опитайте отново."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Операцията за отпечатък е анулирана."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Операцията за удостоверяване чрез отпечатък бе анулирана от потребителя."</string>

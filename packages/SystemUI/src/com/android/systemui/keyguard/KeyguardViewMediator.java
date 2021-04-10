@@ -2280,18 +2280,16 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * @param container
      * @param panelView
      * @param biometricUnlockController
-     * @param lockIconContainer
      * @param notificationContainer
      * @param bypassController
      * @return the View Controller for the Keyguard View this class is mediating.
      */
     public KeyguardViewController registerStatusBar(StatusBar statusBar,
             ViewGroup container, NotificationPanelViewController panelView,
-            BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer,
+            BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
         mKeyguardViewControllerLazy.get().registerStatusBar(statusBar, container, panelView,
-                biometricUnlockController, lockIconContainer,
-                notificationContainer, bypassController);
+                biometricUnlockController, notificationContainer, bypassController);
         return mKeyguardViewControllerLazy.get();
     }
 

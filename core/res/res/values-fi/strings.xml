@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Sovellus käynnissä"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Akkua kuluttavat sovellukset"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Suurennus"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Esteetön käyttö"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> käyttää akkua."</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> sovellusta käyttää akkua."</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Katso lisätietoja akun ja datan käytöstä napauttamalla."</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Sallii sovelluksen löytää lähellä olevia Bluetooth-laitteita ja muodostaa niistä laitepareja"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"yhdistää pariliitettyihin Bluetooth-laitteisiin"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Sallii sovelluksen muodostaa yhteyden pariliitettyihin Bluetooth-laitteisiin"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Ensisijaiset NFC-maksupalvelutiedot"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Sallii sovelluksen noutaa tietoja rekisteröidyistä sovellustunnuksista, maksureitin kohteesta ja muita ensisijaisia NFC-maksupalvelutietoja."</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN-koodia, kuviota tai salasanaa ei ole asetettu"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Virhe todennuksessa"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Käytä näytön lukitusta"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jatka lisäämällä näytön lukituksen avaustapa"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Osittainen sormenjälki havaittu"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen prosessointi epäonnistui. Yritä uudelleen."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Puhdista anturi"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Sormi liikkui liian nopeasti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Kokeile muuttaa asentoa"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sormenjälki tunnistettu"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Kasvot tunnistettu"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Kasvot tunnistettu, valitse Vahvista"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Sormenjälkilaitteisto ei ole käytettävissä."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Sormenjälkeä ei voi ottaa käyttöön"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Sormenjälkitunnistimen toiminta aikakatkaistiin. Yritä uudelleen."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Sormenjälkitoiminto peruutettiin."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Käyttäjä peruutti sormenjälkitoiminnon."</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Kasvot <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Käytä Face Unlockia"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Käytä Face Unlockia tai näytön lukitusta"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Jatka kasvojesi avulla"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Jatka kasvojentunnistuksen tai näytön lukituksen avulla"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1180,9 +1170,9 @@
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> on käynnissä"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Hanki lisätietoja tai sulje sovellus napauttamalla."</string>
     <string name="ok" msgid="2646370155170753815">"OK"</string>
-    <string name="cancel" msgid="6908697720451760115">"Peruuta"</string>
+    <string name="cancel" msgid="6908697720451760115">"Peru"</string>
     <string name="yes" msgid="9069828999585032361">"OK"</string>
-    <string name="no" msgid="5122037903299899715">"Peruuta"</string>
+    <string name="no" msgid="5122037903299899715">"Peru"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Huomio"</string>
     <string name="loading" msgid="3138021523725055037">"Ladataan…"</string>
     <string name="capital_on" msgid="2770685323900821829">"PÄÄLLÄ"</string>
@@ -1338,7 +1328,7 @@
     <string name="sms_short_code_details" msgid="2723725738333388351">"Tämä "<b>"voi aiheuttaa kuluja"</b>" matkapuhelinliittymälaskuusi."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Tämä aiheuttaa kuluja matkapuhelinliittymälaskuusi."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Lähetä"</string>
-    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Peruuta"</string>
+    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Peru"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Muista valintani"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Muuta kohd. Asetukset &gt; Sovellukset"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Salli aina"</string>
@@ -1559,7 +1549,7 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"Edellinen kuukausi"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Seuraava kuukausi"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Peruuta"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Peru"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Poista"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Valmis"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Tilan muutos"</string>
@@ -1737,7 +1727,7 @@
     <string name="error_message_title" msgid="4082495589294631966">"Virhe"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Järjestelmänvalvoja ei salli tätä muutosta."</string>
     <string name="app_not_found" msgid="3429506115332341800">"Tätä toimintoa käsittelevää sovellusta ei löydy"</string>
-    <string name="revoke" msgid="5526857743819590458">"Peruuta"</string>
+    <string name="revoke" msgid="5526857743819590458">"Peru"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="4063589931031977223">"ISO A1"</string>
     <string name="mediasize_iso_a2" msgid="2779860175680233980">"ISO A2"</string>
@@ -1862,8 +1852,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Järjestelmänvalvoja päivitti tämän."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Järjestelmänvalvoja poisti tämän."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Parantaakseen akunkestoa Virransäästö\n\n•·laittaa tumman teeman päälle\n•·laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Ok Google).\n\n"<annotation id="url">"Lue lisää"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Parantaakseen akunkestoa Virransäästö\n\n•·laittaa tumman teeman päälle\n•·laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Ok Google)."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Parantaakseen akunkestoa Virransäästö\n\n• laittaa tumman teeman päälle\n• laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Ok Google).\n\n"<annotation id="url">"Lue lisää"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Parantaakseen akunkestoa Virransäästö\n\n• laittaa tumman teeman päälle\n• laittaa pois päältä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Ok Google)."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Otetaanko Data Saver käyttöön?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ota käyttöön"</string>

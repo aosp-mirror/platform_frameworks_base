@@ -169,7 +169,6 @@ public final class InputDevice implements Parcelable {
             SOURCE_CLASS_NONE,
             SOURCE_CLASS_BUTTON,
             SOURCE_CLASS_POINTER,
-            SOURCE_CLASS_POINTER,
             SOURCE_CLASS_TRACKBALL,
             SOURCE_CLASS_POSITION,
             SOURCE_CLASS_JOYSTICK

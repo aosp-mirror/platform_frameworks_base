@@ -453,7 +453,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ak chcete použiť NFC, odomknite"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zariadenie patrí vašej organizácii"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Toto zariadení patrí organizácii <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Toto zariadenie poskytla organizácia <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Toto zariadenie poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telefón otvoríte prejdením prstom od ikony"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Hlasového asistenta otvoríte prejdením prstom od ikony"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Fotoaparát otvoríte prejdením prstom od ikony"</string>
@@ -524,7 +524,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Toto zariadenie spravuje tvoj rodič"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Vaša organizácia spravuje toto zariadenie a môže sledovať sieťovú premávku"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> vlastní toto zariadenie a môže sledovať sieťovú premávku"</string>
-    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Toto zariadenie poskytla organizácia <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Toto zariadenie poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Toto zariadenie patrí vašej organizácii a je pripojené k sieti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Toto zariadenie patrí organizácii <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je pripojené k sieti <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Toto zariadenie patrí vašej organizácii"</string>
@@ -539,7 +539,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Váš pracovný profil je pripojený k sieti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Váš osobný profil je pripojený k sieti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Toto zariadenie je pripojené k sieti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Toto zariadenie poskytla organizácia <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Toto zariadenie poskytuje <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Správa zariadení"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Monitorovanie profilu"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Sledovanie siete"</string>
@@ -667,7 +667,12 @@
     <skip />
     <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
     <skip />
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Pripravené"</string>
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
     <!-- no translation found for wallet_error_generic (257704570182963611) -->
     <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Pracovný profil"</string>
@@ -738,9 +743,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Preradené nižšie do kategórie Tiché"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Preradené vyššie"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stav:&lt;/b&gt; Preradené nižšie"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Nájdete ju hore v sekcii konverzácií ako plávajúcu bublinu, zobrazuje profilovú fotku na uzamknutej obrazovke"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavenia"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nepodporuje funkcie konverzácie"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tieto upozornenia sa nedajú upraviť."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Túto skupinu upozornení nejde na tomto mieste konfigurovať"</string>
@@ -1018,10 +1025,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Prejdite do Nastavení a aktualizujte navigáciu v systéme"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostný režim"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Konverzácia je nastavená ako prioritná"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioritné konverzácie:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"sa zobrazujú navrchu sekcie konverzácií"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"zobrazujú profilovú fotku na uzamknutej obrazovke"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Zobrazovať ako plávajúce bubliny nad aplikáciami"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Prerušovať režim bez vyrušení"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Dobre"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Nastavenia"</string>
@@ -1039,6 +1050,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Prepnúť"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Tlačidlo dostupnosti nahradilo gesto dostupnosti\n\n"<annotation id="link">"Zobraziť nastavenia"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Ak chcete tlačidlo dočasne skryť, presuňte ho k okraju"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Ovládanie zariadení"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pridajte si ovládače pripojených zariadení"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavenie ovládania zariadení"</string>
@@ -1119,19 +1142,35 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"Pred menej ako <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Pred viac ako <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Narodeniny"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Blížia sa narodeniny"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"Výročie"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"Zdieľa sa poloha"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"Nová správa"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"Pozerá sa video"</string>
     <string name="audio_status" msgid="4237055636967709208">"Počúvam"</string>
     <string name="game_status" msgid="1340694320630973259">"Hrá sa hra"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Priatelia"</string>
     <string name="empty_status" msgid="5938893404951307749">"Porozprávajme sa."</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Pozrite si nedávne správy, zmeškané hovory a aktualizácie stavu"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konverzácia"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Pri čítaní meradla batérie sa vyskytol problém"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím si zobrazíte ďalšie informácie"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Žiadny budík"</string>

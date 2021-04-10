@@ -571,7 +571,7 @@ public class Bubble implements BubbleViewProvider {
      * hide the bubble when in the same content).
      */
     boolean isSuppressable() {
-        return (mFlags & Notification.BubbleMetadata.FLAG_SHOULD_SUPPRESS_BUBBLE) != 0;
+        return (mFlags & Notification.BubbleMetadata.FLAG_SUPPRESSABLE_BUBBLE) != 0;
     }
 
     /**

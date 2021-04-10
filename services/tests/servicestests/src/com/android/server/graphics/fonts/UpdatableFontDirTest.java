@@ -416,6 +416,21 @@ public final class UpdatableFontDirTest {
     }
 
     @Test
+    public void installFontFile_sameVersion() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier);
+        dir.loadFontFileMap();
+
+        dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1", GOOD_SIGNATURE)));
+        dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1", GOOD_SIGNATURE)));
+        assertThat(dir.getFontFileMap()).containsKey("test.ttf");
+        assertThat(parser.getRevision(dir.getFontFileMap().get("test.ttf"))).isEqualTo(1);
+    }
+
+    @Test
     public void installFontFile_downgrade() throws Exception {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
@@ -494,10 +509,40 @@ public final class UpdatableFontDirTest {
     }
 
     @Test
-    public void installFontFile_olderThanPreinstalledFont() throws Exception {
+    public void installFontFile_preinstalled_upgrade() throws Exception {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"), "test.ttf,1");
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier);
+        dir.loadFontFileMap();
+
+        dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,2", GOOD_SIGNATURE)));
+        assertThat(dir.getFontFileMap()).containsKey("test.ttf");
+        assertThat(parser.getRevision(dir.getFontFileMap().get("test.ttf"))).isEqualTo(2);
+    }
+
+    @Test
+    public void installFontFile_preinstalled_sameVersion() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"), "test.ttf,1");
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier);
+        dir.loadFontFileMap();
+
+        dir.update(Collections.singletonList(newFontUpdateRequest("test.ttf,1", GOOD_SIGNATURE)));
+        assertThat(dir.getFontFileMap()).containsKey("test.ttf");
+        assertThat(parser.getRevision(dir.getFontFileMap().get("test.ttf"))).isEqualTo(1);
+    }
+
+    @Test
+    public void installFontFile_preinstalled_downgrade() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"), "test.ttf,2");
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile, mCurrentTimeSupplier);

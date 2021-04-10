@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
+import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.NETWORK_FACTORY;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
@@ -356,6 +357,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import kotlin.reflect.KClass;
@@ -10049,6 +10052,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testDumpDoesNotCrash() {
+        mServiceContext.setPermission(DUMP, PERMISSION_GRANTED);
         // Filing a couple requests prior to testing the dump.
         final TestNetworkCallback genericNetworkCallback = new TestNetworkCallback();
         final TestNetworkCallback wifiNetworkCallback = new TestNetworkCallback();
@@ -11989,6 +11993,33 @@ public class ConnectivityServiceTest {
                 nc.hasCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED));
 
         // default callbacks will be unregistered in tearDown
+    }
+
+    @Test
+    public void testSetOemNetworkPreferenceLogsRequest() throws Exception {
+        mServiceContext.setPermission(DUMP, PERMISSION_GRANTED);
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final StringWriter stringWriter = new StringWriter();
+        final String logIdentifier = "UPDATE INITIATED: OemNetworkPreferences";
+        final Pattern pattern = Pattern.compile(logIdentifier);
+
+        final int expectedNumLogs = 2;
+        final UidRangeParcel[] uidRanges =
+                toUidRangeStableParcels(uidRangesForUids(TEST_PACKAGE_UID));
+
+        // Call twice to generate two logs.
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
+        mService.dump(new FileDescriptor(), new PrintWriter(stringWriter), new String[0]);
+
+        final String dumpOutput = stringWriter.toString();
+        final Matcher matcher = pattern.matcher(dumpOutput);
+        int count = 0;
+        while (matcher.find()) {
+            count++;
+        }
+        assertEquals(expectedNumLogs, count);
     }
 
     @Test

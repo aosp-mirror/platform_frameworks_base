@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"رد کردن"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"حسگر اثر انگشت را لمس کنید"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"نماد اثر انگشت"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"چهره شناسایی نشد. درعوض از اثر انگشت استفاده کنید."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"برای ادامه، از اثر انگشتتان استفاده کنید"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"اثر انگشت شناسایی نشد. درعوض از قفل صفحه استفاده کنید."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"درحال جستجوی شما…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"نماد چهره"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"دکمه بزرگ‌نمایی سازگار."</string>
@@ -598,16 +595,16 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیرفعال کردن"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"تغییر دستگاه خروجی"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه پین شده است"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن پین، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ممکن است داده‌های شخصی (مانند مخاطبین و محتوای ایمیل) در دسترس باشد."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"برنامه پین‌شده ممکن است برنامه‌های دیگر را باز کند."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"برای برداشتن پین این برنامه، دکمه‌های «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"برای برداشتن پین این برنامه، دکمه‌های «برگشت» و «صفحه اصلی» را لمس کنید و نگه دارید"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"برای برداشتن پین این برنامه، صفحه را تند بالا بکشید و نگه دارید"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"برای برداشتن سنجاق این برنامه، دکمه‌های «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"برای برداشتن سنجاق این برنامه، دکمه‌های «برگشت» و «صفحه اصلی» را لمس کنید و نگه دارید"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"برای برداشتن سنجاق این برنامه، صفحه را تند بالا بکشید و نگه دارید"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"متوجه شدم"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"نه متشکرم"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"برنامه پین شد"</string>
@@ -660,13 +657,12 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"اترنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"زنگ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"کیف‌پول"</string>
-    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
-    <skip />
-    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
-    <skip />
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"آماده"</string>
-    <!-- no translation found for wallet_error_generic (257704570182963611) -->
-    <skip />
+    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"نمایش همه"</string>
+    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"برای پرداخت قفل را باز کنید"</string>
+    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"آماده"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"راه‌اندازی پرداخت"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"برای استفاده، قفل را باز کنید"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"هنگام دریافت کارت‌ها مشکلی پیش آمد، لطفاً بعداً دوباره امتحان کنید"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"نمایه کاری"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"حالت هواپیما"</string>
     <string name="add_tile" msgid="6239678623873086686">"افزودن کاشی"</string>
@@ -735,9 +731,9 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"‏&lt;b&gt;وضعیت:&lt;/b&gt; به «بی‌صدا» تنزل یافت"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"‏&lt;b&gt;وضعیت:&lt;/b&gt; در رده‌بندی بالاتری قرار گرفت"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;وضعیت:&lt;/b&gt; در رده‌بندی پایین‌تری قرار گرفت"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"در بالای بخش مکالمه به‌صورت حبابک شناور نشان داده می‌شود و عکس نمایه را در صفحه قفل نمایش می‌دهد"</string>
+    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"همیشه در بالای اعلان‌ها نشان داده می‌شود، حتی وقتی «حالت اولویت‌دار» روشن است"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"تنظیمات"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
+    <string name="notification_priority_title" msgid="5256226572739882190">"مکالمه‌های اولویت‌دار"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> از ویژگی‌های مکالمه پشتیبانی نمی‌کند"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
@@ -1011,10 +1007,10 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"برای به‌روزرسانی پیمایش سیستم، به «تنظیمات» بروید"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"آماده‌به‌کار"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"مکالمه روی اولویت تنظیم شده است"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"مکالمه‌های اولویت‌دار:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"نمایش در بالای بخش مکالمه"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"عکس نمایه را در صفحه قفل نمایش می‌دهد"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"به‌شکل حبابک شناور روی برنامه‌ها ظاهر می‌شود"</string>
+    <string name="priority_onboarding_behavior" msgid="636826237468953117">"مکالمه‌های اولویت‌دار"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"این مکالمه‌ها در بالای فهرستتان نشان داده می‌شوند و وقتی «حالت اولویت‌دار» روشن است همیشه به دست شما می‌رسند"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"عکس‌های نمایه در صفحه قفل نشان داده می‌شوند"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"به‌راحتی می‌توانید این مکالمه‌ها را به‌صورت حبابک در صفحه اصلی خود پیدا کنید"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"وقفه در «مزاحم نشوید»"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"متوجه‌ام"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"تنظیمات"</string>
@@ -1032,6 +1028,12 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"کلید"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"دکمه دسترس‌پذیری جایگزین اشاره دسترس‌پذیری شد\n\n"<annotation id="link">"مشاهده تنظیمات"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"برای پنهان کردن موقتی دکمه، آن را به لبه ببرید"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"انتقال به بالا سمت راست"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"انتقال به بالا سمت چپ"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"انتقال به پایین سمت راست"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"انتقال به پایین سمت چپ"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"انتقال به لبه و پنهان کردن"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"انتقال به خارج از لبه و نمایش"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"کنترل‌های دستگاه"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"افزودن کنترل‌ها برای دستگاه‌های متصل"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"تنظیم کنترل‌های دستگاه"</string>
@@ -1102,31 +1104,35 @@
     <string name="basic_status" msgid="2315371112182658176">"باز کردن مکالمه"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ابزارک‌های مکالمه"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"روی مکالمه‌ای ضربه بزنید تا به «صفحه اصلی» اضافه شود"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"به‌محض اینکه چند پیام دریافت کردید، به اینجا سربزنید"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"مکالمه‌های اولویت‌دار"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"گفتگوهای اخیر"</string>
+    <string name="okay" msgid="6490552955618608554">"تأیید"</string>
     <string name="timestamp" msgid="6577851592534538533">"‫<xliff:g id="DURATION">%1$s</xliff:g> پیش"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"کمتر از <xliff:g id="DURATION">%1$s</xliff:g> قبل"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"بیش‌از <xliff:g id="DURATION">%1$s</xliff:g> قبل"</string>
     <string name="birthday_status" msgid="2596961629465396761">"تاریخ تولد"</string>
+    <string name="birthday_status_content_description" msgid="7677415209545817153">"امروز تولد <xliff:g id="NAME">%1$s</xliff:g> است"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"تاریخ تولد نزدیک است"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"به‌زودی تولد <xliff:g id="NAME">%1$s</xliff:g> فرا می‌رسد"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"سالگرد"</string>
+    <string name="anniversary_status_content_description" msgid="6214503393960662875">"امروز سالگرد <xliff:g id="NAME">%1$s</xliff:g> است"</string>
     <string name="location_status" msgid="1294990572202541812">"درحال هم‌رسانی مکان"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> درحال هم‌رسانی مکان است"</string>
     <string name="new_story_status" msgid="9012195158584846525">"داستان جدید"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> داستان جدیدی را هم‌رسانی کرد"</string>
     <string name="video_status" msgid="4548544654316843225">"درحال تماشا"</string>
     <string name="audio_status" msgid="4237055636967709208">"درحال گوش کردن"</string>
     <string name="game_status" msgid="1340694320630973259">"درحال پخش"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"دوستان"</string>
     <string name="empty_status" msgid="5938893404951307749">"بیایید امشب گپ بزنیم!"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"محتوا به‌زودی نشان داده می‌شود"</string>
     <string name="missed_call" msgid="4228016077700161689">"تماس بی‌پاسخ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"بیش‌از <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"دیدن به‌روزرسانی‌های وضعیت، تماس‌های بی‌پاسخ، و پیام‌های اخیر"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"مکالمه"</string>
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> پیامی ارسال کرد"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> تصویری ارسال کرد"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"مشکلی در خواندن میزان باتری وجود دارد"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"برای اطلاعات بیشتر ضربه بزنید"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"هشداری تنظیم نشده است"</string>

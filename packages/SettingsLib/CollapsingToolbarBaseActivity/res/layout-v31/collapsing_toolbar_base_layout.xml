@@ -19,8 +19,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/content_parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:transitionGroup="true">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
@@ -47,6 +46,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:theme="?android:attr/actionBarTheme"
+                android:transitionName="shared_element_view"
                 app:layout_collapseMode="pin"/>
 
         </com.android.settingslib.collapsingtoolbar.AdjustableToolbarLayout>

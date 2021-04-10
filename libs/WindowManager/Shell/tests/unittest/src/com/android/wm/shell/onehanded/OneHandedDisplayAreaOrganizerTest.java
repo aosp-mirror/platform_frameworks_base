@@ -97,8 +97,12 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
     @Mock
     ShellExecutor mMockShellMainExecutor;
+    @Mock
+    OneHandedSettingsUtil mMockSettingsUitl;
 
     List<DisplayAreaAppearedInfo> mDisplayAreaAppearedInfoList = new ArrayList<>();
+
+    final boolean mDefaultEnabled = true;
 
     @Before
     public void setUp() throws Exception {
@@ -126,9 +130,12 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         when(mMockAnimator.setTransitionDirection(anyInt())).thenReturn(mFakeAnimator);
         when(mMockLeash.getWidth()).thenReturn(DISPLAY_WIDTH);
         when(mMockLeash.getHeight()).thenReturn(DISPLAY_HEIGHT);
+        when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(
+                mDefaultEnabled);
 
         mSpiedDisplayAreaOrganizer = spy(new OneHandedDisplayAreaOrganizer(mContext,
                 mDisplayLayout,
+                mMockSettingsUitl,
                 mMockAnimationController,
                 mTutorialHandler,
                 mMockBackgroundOrganizer,

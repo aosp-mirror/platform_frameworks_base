@@ -280,7 +280,11 @@ public class NetworkNotificationManager {
                 .setContentTitle(title)
                 .setContentIntent(intent)
                 .setLocalOnly(true)
-                .setOnlyAlertOnce(true);
+                .setOnlyAlertOnce(true)
+                // TODO: consider having action buttons to disconnect on the sign-in notification
+                // especially if it is ongoing
+                .setOngoing(notifyType == NotificationType.SIGN_IN
+                        && r.getBoolean(R.bool.config_ongoingSignInNotification));
 
         if (notifyType == NotificationType.NETWORK_SWITCH) {
             builder.setStyle(new Notification.BigTextStyle().bigText(details));

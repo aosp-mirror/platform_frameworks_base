@@ -32,6 +32,7 @@
             <item type="integer" name="config_networkWakeupPacketMask"/>
             <item type="integer" name="config_networkNotifySwitchType"/>
             <item type="array" name="config_networkNotifySwitches"/>
+            <item type="bool" name="config_ongoingSignInNotification"/>
 
         </policy>
     </overlayable>

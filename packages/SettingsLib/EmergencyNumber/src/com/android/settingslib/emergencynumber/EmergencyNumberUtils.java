@@ -24,6 +24,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
@@ -36,6 +38,7 @@ import androidx.annotation.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Util class to help manage emergency numbers
@@ -66,14 +69,16 @@ public class EmergencyNumberUtils {
 
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
-
+    private final CarrierConfigManager mCarrierConfigManager;
 
     public EmergencyNumberUtils(Context context) {
         mContext = context;
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
             mTelephonyManager = context.getSystemService(TelephonyManager.class);
+            mCarrierConfigManager = context.getSystemService(CarrierConfigManager.class);
         } else {
             mTelephonyManager = null;
+            mCarrierConfigManager = null;
         }
     }
 
@@ -84,12 +89,12 @@ public class EmergencyNumberUtils {
         if (mTelephonyManager == null) {
             return FALL_BACK_NUMBER;
         }
-        final List<EmergencyNumber> promotedPoliceNumber = getPromotedEmergencyNumbers(
+        final List<String> promotedPoliceNumber = getPromotedEmergencyNumbers(
                 EMERGENCY_SERVICE_CATEGORY_POLICE);
         if (promotedPoliceNumber == null || promotedPoliceNumber.isEmpty()) {
             return FALL_BACK_NUMBER;
         }
-        return promotedPoliceNumber.get(0).getNumber();
+        return promotedPoliceNumber.get(0);
     }
 
     /**
@@ -164,18 +169,19 @@ public class EmergencyNumberUtils {
         return bundle == null ? null : bundle.getString(EMERGENCY_GESTURE_CALL_NUMBER);
     }
 
-    private List<EmergencyNumber> getPromotedEmergencyNumbers(int categories) {
+    private List<String> getPromotedEmergencyNumbers(int categories) {
         Map<Integer, List<EmergencyNumber>> allLists = mTelephonyManager.getEmergencyNumberList(
                 categories);
         if (allLists == null || allLists.isEmpty()) {
             Log.w(TAG, "Unable to retrieve emergency number lists!");
             return new ArrayList<>();
         }
-        Map<Integer, List<EmergencyNumber>> promotedEmergencyNumberLists = new ArrayMap<>();
+        Map<Integer, List<String>> promotedEmergencyNumberLists = new ArrayMap<>();
         for (Map.Entry<Integer, List<EmergencyNumber>> entry : allLists.entrySet()) {
             if (entry.getKey() == null || entry.getValue() == null) {
                 continue;
             }
+            int subId = entry.getKey();
             List<EmergencyNumber> emergencyNumberList = entry.getValue();
             Log.d(TAG, "Emergency numbers for subscription id " + entry.getKey());
 
@@ -202,7 +208,8 @@ public class EmergencyNumberUtils {
             promotedList.addAll(tempList);
 
             if (!promotedList.isEmpty()) {
-                promotedEmergencyNumberLists.put(entry.getKey(), promotedList);
+                List<String> sanitizedNumbers = sanitizeEmergencyNumbers(promotedList, subId);
+                promotedEmergencyNumberLists.put(subId, sanitizedNumbers);
             }
         }
 
@@ -210,5 +217,40 @@ public class EmergencyNumberUtils {
             Log.w(TAG, "No promoted emergency number found!");
         }
         return promotedEmergencyNumberLists.get(SubscriptionManager.getDefaultSubscriptionId());
+    }
+
+    private List<String> sanitizeEmergencyNumbers(
+            List<EmergencyNumber> input, int subscriptionId) {
+        // Make a copy of data so we can mutate.
+        List<EmergencyNumber> data = new ArrayList<>(input);
+        String[] carrierPrefixes =
+                getCarrierEmergencyNumberPrefixes(mCarrierConfigManager, subscriptionId);
+        return data.stream()
+                .map(d -> removePrefix(d, carrierPrefixes))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private String removePrefix(EmergencyNumber emergencyNumber, String[] prefixes) {
+        String number = emergencyNumber.getNumber();
+        if (prefixes == null || prefixes.length == 0) {
+            return number;
+        }
+        for (String prefix : prefixes) {
+            int prefixStartIndex = number.indexOf(prefix);
+            if (prefixStartIndex != 0) {
+                continue;
+            }
+            Log.d(TAG, "Removing prefix " + prefix + " from " + number);
+            return number.substring(prefix.length());
+        }
+        return number;
+    }
+
+    private static String[] getCarrierEmergencyNumberPrefixes(
+            CarrierConfigManager carrierConfigManager, int subId) {
+        PersistableBundle b = carrierConfigManager.getConfigForSubId(subId);
+        return b == null
+                ? null
+                : b.getStringArray(CarrierConfigManager.KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY);
     }
 }

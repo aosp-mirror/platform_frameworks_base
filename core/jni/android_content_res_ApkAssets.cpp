@@ -16,6 +16,8 @@
 
 #define ATRACE_TAG ATRACE_TAG_RESOURCES
 
+#include "signal.h"
+
 #include "android-base/logging.h"
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
@@ -353,8 +355,59 @@ static jlong NativeLoadEmpty(JNIEnv* env, jclass /*clazz*/, jint flags, jobject 
   return reinterpret_cast<jlong>(apk_assets.release());
 }
 
+// STOPSHIP (b/159041693): Revert signal handler when reason for issue is found.
+static thread_local std::stringstream destroy_info;
+static struct sigaction old_handler_action;
+
+static void DestroyErrorHandler(int sig, siginfo_t* info, void* ucontext) {
+  if (sig != SIGSEGV) {
+    return;
+  }
+
+  LOG(ERROR) << "(b/159041693) - Failed to destroy ApkAssets " << destroy_info.str();
+  if (old_handler_action.sa_handler == SIG_DFL) {
+      // reset the action to default and re-raise the signal. It will kill the process
+      signal(sig, SIG_DFL);
+      raise(sig);
+      return;
+  }
+  if (old_handler_action.sa_handler == SIG_IGN) {
+      // ignoring SIGBUS won't help us much, as we'll get back right here after retrying.
+      return;
+  }
+  if (old_handler_action.sa_flags & SA_SIGINFO) {
+      old_handler_action.sa_sigaction(sig, info, ucontext);
+  } else {
+      old_handler_action.sa_handler(sig);
+  }
+}
+
 static void NativeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
-  delete reinterpret_cast<ApkAssets*>(ptr);
+  auto apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+  destroy_info << "{ptr=" << apk_assets;
+  if (apk_assets != nullptr) {
+    destroy_info << ", name='" << apk_assets->GetDebugName() << "'"
+                 << ", idmap=" << apk_assets->GetLoadedIdmap()
+                 << ", {arsc=" << apk_assets->GetLoadedArsc();
+    if (auto arsc = apk_assets->GetLoadedArsc()) {
+      destroy_info << ", strings=" << arsc->GetStringPool()
+                   << ", packages=" << &arsc->GetPackages()
+                   << " [";
+      for (auto& package : arsc->GetPackages()) {
+        destroy_info << "{unique_ptr=" << &package
+                     << ", package=" << package.get() << "},";
+      }
+      destroy_info << "]";
+    }
+    destroy_info << "}";
+  }
+  destroy_info << "}";
+
+  delete apk_assets;
+
+  // Deleting the apk assets did not lead to a crash.
+  destroy_info.str("");
+  destroy_info.clear();
 }
 
 static jstring NativeGetAssetPath(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
@@ -506,6 +559,17 @@ int register_android_content_res_ApkAssets(JNIEnv* env) {
 
   jclass parcelFd = FindClassOrDie(env, "android/os/ParcelFileDescriptor");
   gParcelFileDescriptorOffsets.detachFd = GetMethodIDOrDie(env, parcelFd, "detachFd", "()I");
+
+  // STOPSHIP (b/159041693): Revert signal handler when reason for issue is found.
+  sigset_t allowed;
+  sigemptyset(&allowed);
+  sigaddset(&allowed, SIGSEGV);
+  pthread_sigmask(SIG_UNBLOCK, &allowed, nullptr);
+  struct sigaction action = {
+          .sa_flags = SA_SIGINFO,
+          .sa_sigaction = &DestroyErrorHandler,
+  };
+  sigaction(SIGSEGV, &action, &old_handler_action);
 
   return RegisterMethodsOrDie(env, "android/content/res/ApkAssets", gApkAssetsMethods,
                               arraysize(gApkAssetsMethods));
