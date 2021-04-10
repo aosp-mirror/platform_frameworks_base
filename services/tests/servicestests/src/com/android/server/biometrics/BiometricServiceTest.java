@@ -1278,10 +1278,10 @@ public class BiometricServiceTest {
 
         for (int i = 0; i < testCases.length; i++) {
             final BiometricSensor sensor =
-                    new BiometricSensor(mContext, 0 /* id */,
+                    new BiometricSensor(0 /* id */,
                             BiometricAuthenticator.TYPE_FINGERPRINT,
                             testCases[i][0],
-                            mock(IBiometricAuthenticator.class)) {
+                            null /* impl */) {
                         @Override
                         boolean confirmationAlwaysRequired(int userId) {
                             return false;
