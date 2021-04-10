@@ -559,21 +559,22 @@ public class BiometricScheduler {
     }
 
     /**
-     * Requests to cancel authentication or detection.
+     * Requests to cancel authentication.
      * @param token from the caller, should match the token passed in when requesting authentication
      */
-    public void cancelAuthenticationOrDetection(IBinder token) {
+    public void cancelAuthentication(IBinder token) {
         if (mCurrentOperation == null) {
             Slog.e(getTag(), "Unable to cancel authentication, null operation");
             return;
         }
-        final boolean isCorrectClient = isAuthenticationOrDetectionOperation(mCurrentOperation);
+        final boolean isAuthenticating =
+                mCurrentOperation.mClientMonitor instanceof AuthenticationConsumer;
         final boolean tokenMatches = mCurrentOperation.mClientMonitor.getToken() == token;
 
-        if (isCorrectClient && tokenMatches) {
-            Slog.d(getTag(), "Cancelling: " + mCurrentOperation);
+        if (isAuthenticating && tokenMatches) {
+            Slog.d(getTag(), "Cancelling authentication: " + mCurrentOperation);
             cancelInternal(mCurrentOperation);
-        } else if (!isCorrectClient) {
+        } else if (!isAuthenticating) {
             // Look through the current queue for all authentication clients for the specified
             // token, and mark them as STATE_WAITING_IN_QUEUE_CANCELING. Note that we're marking
             // all of them, instead of just the first one, since the API surface currently doesn't
@@ -581,7 +582,7 @@ public class BiometricScheduler {
             // process. However, this generally does not happen anyway, and would be a class of
             // bugs on its own.
             for (Operation operation : mPendingOperations) {
-                if (isAuthenticationOrDetectionOperation(operation)
+                if (operation.mClientMonitor instanceof AuthenticationConsumer
                         && operation.mClientMonitor.getToken() == token) {
                     Slog.d(getTag(), "Marking " + operation
                             + " as STATE_WAITING_IN_QUEUE_CANCELING");
@@ -589,13 +590,6 @@ public class BiometricScheduler {
                 }
             }
         }
-    }
-
-    private boolean isAuthenticationOrDetectionOperation(@NonNull Operation operation) {
-        final boolean isAuthentication = operation.mClientMonitor
-                instanceof AuthenticationConsumer;
-        final boolean isDetection = operation.mClientMonitor instanceof DetectionConsumer;
-        return isAuthentication || isDetection;
     }
 
     /**
