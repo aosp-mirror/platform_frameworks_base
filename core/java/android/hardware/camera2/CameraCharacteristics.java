@@ -3166,6 +3166,33 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryMaximumResolutionStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
 
     /**
+     * <p>Whether the camera device supports multi-resolution input or output streams</p>
+     * <p>A logical multi-camera or an ultra high resolution camera may support multi-resolution
+     * input or output streams. With multi-resolution output streams, the camera device is able
+     * to output different resolution images depending on the current active physical camera or
+     * pixel mode. With multi-resolution input streams, the camera device can reprocess images
+     * of different resolutions from different physical cameras or sensor pixel modes.</p>
+     * <p>When set to TRUE:
+     * * For a logical multi-camera, the camera framework derives
+     * {@link CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP android.scaler.multiResolutionStreamConfigurationMap} by combining the
+     * android.scaler.physicalCameraMultiResolutionStreamConfigurations from its physical
+     * cameras.
+     * * For an ultra-high resolution sensor camera, the camera framework directly copies
+     * the value of android.scaler.physicalCameraMultiResolutionStreamConfigurations to
+     * {@link CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP android.scaler.multiResolutionStreamConfigurationMap}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP
+     * @hide
+     */
+    public static final Key<Boolean> SCALER_MULTI_RESOLUTION_STREAM_SUPPORTED =
+            new Key<Boolean>("android.scaler.multiResolutionStreamSupported", boolean.class);
+
+    /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
      * distortion correction has been applied.</p>
      * <p>This is the rectangle representing the size of the active region of the sensor (i.e.

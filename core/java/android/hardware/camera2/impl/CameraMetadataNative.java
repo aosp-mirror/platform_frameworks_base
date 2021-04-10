@@ -1322,7 +1322,10 @@ public class CameraMetadataNative implements Parcelable {
         return ret;
     }
 
-    private boolean isUltraHighResolutionSensor() {
+    /**
+     * @hide
+     */
+    public boolean isUltraHighResolutionSensor() {
         return isCapabilitySupported(
                 CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR);
 

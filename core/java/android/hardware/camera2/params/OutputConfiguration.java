@@ -353,7 +353,10 @@ public final class OutputConfiguration implements Parcelable {
             config.setPhysicalCameraId(streamInfo.getPhysicalCameraId());
             config.setMultiResolutionOutput();
             configs.add(config);
-            // TODO: Set sensor pixel mode for ultra high resolution sensor camera.
+
+            // No need to call addSensorPixelModeUsed for ultra high resolution sensor camera,
+            // because regular and max resolution output configurations are used for DEFAULT mode
+            // and MAX_RESOLUTION mode respectively by default.
         }
 
         return configs;
