@@ -53,12 +53,16 @@ public class LetterboxTest {
 
     private boolean mAreCornersRounded = false;
     private int mColor = Color.BLACK;
+    private boolean mHasWallpaperBackground = false;
+    private int mBlurRadius = 0;
+    private float mDarkScrimAlpha = 0.5f;
 
     @Before
     public void setUp() throws Exception {
         mSurfaces = new SurfaceControlMocker();
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
-                () -> mAreCornersRounded, () -> Color.valueOf(mColor));
+                () -> mAreCornersRounded, () -> Color.valueOf(mColor),
+                () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha);
         mTransaction = spy(StubTransaction.class);
     }
 
@@ -187,6 +191,22 @@ public class LetterboxTest {
         mLetterbox.applySurfaceChanges(mTransaction);
 
         verify(mTransaction).setColor(mSurfaces.top, new float[]{0, 1, 0});
+    }
+
+    @Test
+    public void testNeedsApplySurfaceChanges_wallpaperBackgroundRequested() {
+        mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
+        mLetterbox.applySurfaceChanges(mTransaction);
+
+        verify(mTransaction).setAlpha(mSurfaces.top, 1.0f);
+        assertFalse(mLetterbox.needsApplySurfaceChanges());
+
+        mHasWallpaperBackground = true;
+
+        assertTrue(mLetterbox.needsApplySurfaceChanges());
+
+        mLetterbox.applySurfaceChanges(mTransaction);
+        verify(mTransaction).setAlpha(mSurfaces.top, mDarkScrimAlpha);
     }
 
     @Test

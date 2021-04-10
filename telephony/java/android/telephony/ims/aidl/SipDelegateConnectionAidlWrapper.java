@@ -200,13 +200,13 @@ public class SipDelegateConnectionAidlWrapper implements SipDelegateConnection,
     }
 
     @Override
-    public void closeDialog(String callId) {
+    public void cleanupSession(String callId) {
         try {
             ISipDelegate conn = getSipDelegateBinder();
             if (conn == null) {
                 return;
             }
-            conn.closeDialog(callId);
+            conn.cleanupSession(callId);
         } catch (RemoteException e) {
             // Nothing to do here, app will eventually get remote death callback.
         }
