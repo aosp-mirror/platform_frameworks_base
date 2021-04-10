@@ -16,7 +16,12 @@
 
 package com.android.server.recoverysystem;
 
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED;
+import static android.os.RecoverySystem.RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH;
+
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -274,8 +279,7 @@ public class RecoverySystemServiceTest {
         verify(intentSender).sendIntent(any(), anyInt(), any(), any(), any());
 
         assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
-        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "foobar", true),
-                is(true));
+        mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "foobar", true);
         verify(mIPowerManager).reboot(anyBoolean(), eq("foobar"), anyBoolean());
     }
 
@@ -373,8 +377,7 @@ public class RecoverySystemServiceTest {
                 anyInt())).thenReturn(3);
         when(mSharedPreferences.getLong(eq(RecoverySystemService.LSKF_CAPTURED_TIMESTAMP_PREF),
                 anyLong())).thenReturn(40_000L);
-        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true),
-                is(true));
+        mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true);
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
         verify(mMetricsReporter).reportRebootEscrowRebootMetrics(eq(0), eq(1000),
                 eq(1) /* client count */, eq(2) /* request count */, eq(true) /* slot switch */,
@@ -386,19 +389,20 @@ public class RecoverySystemServiceTest {
     public void rebootWithLskf_slotMismatch_Failure() throws Exception {
         assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
         mRecoverySystemService.onPreparedForReboot(true);
-        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", false),
-                is(false));
+        assertEquals(RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH,
+                mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", false));
     }
 
     @Test
     public void rebootWithLskf_withoutPrepare_Failure() throws Exception {
-        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true),
-                is(false));
+        assertEquals(RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED,
+                mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true));
     }
 
     @Test
     public void rebootWithLskf_withNullCallerId_Failure() throws Exception {
-        assertThat(mRecoverySystemService.rebootWithLskf(null, null, true), is(false));
+        assertEquals(RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME,
+                mRecoverySystemService.rebootWithLskf(null, null, true));
         verifyNoMoreInteractions(mIPowerManager);
     }
 
@@ -410,8 +414,7 @@ public class RecoverySystemServiceTest {
 
         // Client B's clear won't affect client A's preparation.
         assertThat(mRecoverySystemService.clearLskf(FAKE_OTHER_PACKAGE_NAME), is(true));
-        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true),
-                is(true));
+        mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true);
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
     }
 
@@ -428,8 +431,7 @@ public class RecoverySystemServiceTest {
         when(mSharedPreferences.getLong(eq(RecoverySystemService.LSKF_CAPTURED_TIMESTAMP_PREF),
                 anyLong())).thenReturn(60_000L);
 
-        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true),
-                is(true));
+        mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true);
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
         verify(mMetricsReporter).reportRebootEscrowRebootMetrics(eq(0), eq(1000),
                 eq(2) /* client count */, eq(2) /* request count */, eq(true) /* slot switch */,
@@ -450,17 +452,15 @@ public class RecoverySystemServiceTest {
                 anyLong())).thenReturn(60_000L);
 
         assertThat(mRecoverySystemService.clearLskf(FAKE_OTA_PACKAGE_NAME), is(true));
-        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true),
-                is(false));
+        assertEquals(RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED,
+                mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true));
         verifyNoMoreInteractions(mIPowerManager);
         verify(mMetricsReporter).reportRebootEscrowRebootMetrics(not(eq(0)), eq(1000),
                 eq(1) /* client count */, anyInt() /* request count */, eq(true) /* slot switch */,
                 anyBoolean(), eq(40), eq(1)/* lskf capture count */);
 
         assertThat(mRecoverySystemService.requestLskf(FAKE_OTHER_PACKAGE_NAME, null), is(true));
-        assertThat(
-                mRecoverySystemService.rebootWithLskf(FAKE_OTHER_PACKAGE_NAME, "ab-update", true),
-                is(true));
+        mRecoverySystemService.rebootWithLskf(FAKE_OTHER_PACKAGE_NAME, "ab-update", true);
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
 
         verify(mMetricsReporter).reportRebootEscrowRebootMetrics((eq(0)), eq(2000),
@@ -476,16 +476,15 @@ public class RecoverySystemServiceTest {
 
         // Client A clears
         assertThat(mRecoverySystemService.clearLskf(FAKE_OTA_PACKAGE_NAME), is(true));
-        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true),
-                is(false));
+        assertEquals(RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED,
+                mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, null, true));
         verifyNoMoreInteractions(mIPowerManager);
 
         // Client B clears
         assertThat(mRecoverySystemService.clearLskf(FAKE_OTHER_PACKAGE_NAME), is(true));
         verify(mLockSettingsInternal).clearRebootEscrow();
-        assertThat(
-                mRecoverySystemService.rebootWithLskf(FAKE_OTHER_PACKAGE_NAME, "ab-update", true),
-                is(false));
+        assertEquals(RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED,
+                mRecoverySystemService.rebootWithLskf(FAKE_OTHER_PACKAGE_NAME, "ab-update", true));
         verifyNoMoreInteractions(mIPowerManager);
     }
 
