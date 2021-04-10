@@ -1,6 +1,7 @@
 package com.android.systemui.media
 
 import android.animation.ArgbEvaluator
+import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -201,8 +202,17 @@ class MediaCarouselController @Inject constructor(
                 }
             }
 
+            override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
+                Log.d(TAG, "My Smartspace media update is here")
+                addOrUpdateSmartspaceMediaRecommendations(key, data)
+            }
+
             override fun onMediaDataRemoved(key: String) {
                 removePlayer(key)
+            }
+
+            override fun onSmartspaceMediaDataRemoved(key: String) {
+                Log.d(TAG, "My Smartspace media removal request is received")
             }
         })
         mediaFrame.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
@@ -289,6 +299,10 @@ class MediaCarouselController @Inject constructor(
         if (MediaPlayerData.players().size != mediaContent.childCount) {
             Log.wtf(TAG, "Size of players list and number of views in carousel are out of sync")
         }
+    }
+
+    private fun addOrUpdateSmartspaceMediaRecommendations(key: String, data: SmartspaceTarget) {
+        // TODO(b/182813345): Add Smartspace media recommendation view.
     }
 
     private fun removePlayer(key: String, dismissMediaData: Boolean = true) {
