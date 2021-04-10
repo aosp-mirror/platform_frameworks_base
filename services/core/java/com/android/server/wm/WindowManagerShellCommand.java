@@ -22,6 +22,7 @@ import static android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED;
 import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_WALLPAPER;
 
 import android.graphics.Color;
 import android.graphics.Point;
@@ -134,6 +135,14 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runSetLetterboxBackgroundColor(pw);
                 case "get-letterbox-background-color":
                     return runGetLetterboxBackgroundColor(pw);
+                case "set-letterbox-background-wallpaper-blur-radius":
+                    return runSetLetterboxBackgroundWallpaperBlurRadius(pw);
+                case "get-letterbox-background-wallpaper-blur-radius":
+                    return runGetLetterboxBackgroundWallpaperBlurRadius(pw);
+                case "set-letterbox-background-wallpaper-dark-scrim-alpha":
+                    return runSetLetterboxBackgroundWallpaperDarkScrimAlpha(pw);
+                case "get-letterbox-background-wallpaper-dark-scrim-alpha":
+                    return runGetLetterboxBackgroundWallpaperDarkScrimAlpha(pw);
                 case "reset":
                     return runReset(pw);
                 case "disable-blur":
@@ -566,7 +575,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         try {
             String arg = getNextArgRequired();
             if ("reset".equals(arg)) {
-                mInternal.resetFixedOrientationLetterboxAspectRatio();
+                synchronized (mInternal.mGlobalLock) {
+                    mInternal.resetFixedOrientationLetterboxAspectRatio();
+                }
                 return 0;
             }
             aspectRatio = Float.parseFloat(arg);
@@ -578,17 +589,20 @@ public class WindowManagerShellCommand extends ShellCommand {
                     "Error: 'reset' or aspect ratio should be provided as an argument " + e);
             return -1;
         }
-
-        mInternal.setFixedOrientationLetterboxAspectRatio(aspectRatio);
+        synchronized (mInternal.mGlobalLock) {
+            mInternal.setFixedOrientationLetterboxAspectRatio(aspectRatio);
+        }
         return 0;
     }
 
     private int runGetFixedOrientationLetterboxAspectRatio(PrintWriter pw) throws RemoteException {
-        final float aspectRatio = mInternal.getFixedOrientationLetterboxAspectRatio();
-        if (aspectRatio <= WindowManagerService.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO) {
-            pw.println("Letterbox aspect ratio is not set");
-        } else {
-            pw.println("Letterbox aspect ratio is " + aspectRatio);
+        synchronized (mInternal.mGlobalLock) {
+            final float aspectRatio = mInternal.getFixedOrientationLetterboxAspectRatio();
+            if (aspectRatio <= WindowManagerService.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO) {
+                pw.println("Letterbox aspect ratio is not set");
+            } else {
+                pw.println("Letterbox aspect ratio is " + aspectRatio);
+            }
         }
         return 0;
     }
@@ -598,7 +612,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         try {
             String arg = getNextArgRequired();
             if ("reset".equals(arg)) {
-                mInternal.resetLetterboxActivityCornersRadius();
+                synchronized (mInternal.mGlobalLock) {
+                    mInternal.resetLetterboxActivityCornersRadius();
+                }
                 return 0;
             }
             cornersRadius = Integer.parseInt(arg);
@@ -610,17 +626,20 @@ public class WindowManagerShellCommand extends ShellCommand {
                     "Error: 'reset' or corners radius should be provided as an argument " + e);
             return -1;
         }
-
-        mInternal.setLetterboxActivityCornersRadius(cornersRadius);
+        synchronized (mInternal.mGlobalLock) {
+            mInternal.setLetterboxActivityCornersRadius(cornersRadius);
+        }
         return 0;
     }
 
     private int runGetLetterboxActivityCornersRadius(PrintWriter pw) throws RemoteException {
-        final int cornersRadius = mInternal.getLetterboxActivityCornersRadius();
-        if (cornersRadius < 0) {
-            pw.println("Letterbox corners radius is not set");
-        } else {
-            pw.println("Letterbox corners radius is " + cornersRadius);
+        synchronized (mInternal.mGlobalLock) {
+            final int cornersRadius = mInternal.getLetterboxActivityCornersRadius();
+            if (cornersRadius < 0) {
+                pw.println("Letterbox corners radius is not set");
+            } else {
+                pw.println("Letterbox corners radius is " + cornersRadius);
+            }
         }
         return 0;
     }
@@ -630,7 +649,9 @@ public class WindowManagerShellCommand extends ShellCommand {
 
         String arg = getNextArgRequired();
         if ("reset".equals(arg)) {
-            mInternal.resetLetterboxBackgroundType();
+            synchronized (mInternal.mGlobalLock) {
+                mInternal.resetLetterboxBackgroundType();
+            }
             return 0;
         }
         switch (arg) {
@@ -643,31 +664,42 @@ public class WindowManagerShellCommand extends ShellCommand {
             case "app_color_background_floating":
                 backgroundType = LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
                 break;
+            case "wallpaper":
+                backgroundType = LETTERBOX_BACKGROUND_WALLPAPER;
+                break;
             default:
                 getErrPrintWriter().println(
-                        "Error: 'reset', 'solid_color' or 'app_color_background' should "
-                        + "be provided as an argument");
+                        "Error: 'reset', 'solid_color', 'app_color_background' or "
+                        + "'wallpaper' should be provided as an argument");
                 return -1;
         }
-
-        mInternal.setLetterboxBackgroundType(backgroundType);
+        synchronized (mInternal.mGlobalLock) {
+            mInternal.setLetterboxBackgroundType(backgroundType);
+        }
         return 0;
     }
 
     private int runGetLetterboxBackgroundType(PrintWriter pw) throws RemoteException {
-        @LetterboxBackgroundType final int backgroundType = mInternal.getLetterboxBackgroundType();
-        switch (backgroundType) {
-            case LETTERBOX_BACKGROUND_SOLID_COLOR:
-                pw.println("Letterbox background type is 'solid_color'");
-                break;
-            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:
-                pw.println("Letterbox background type is 'app_color_background'");
-                break;
-            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
-                pw.println("Letterbox background type is 'app_color_background_floating'");
-                break;
-            default:
-                throw new AssertionError("Unexpected letterbox background type: " + backgroundType);
+        synchronized (mInternal.mGlobalLock) {
+            @LetterboxBackgroundType final int backgroundType =
+                    mInternal.getLetterboxBackgroundType();
+            switch (backgroundType) {
+                case LETTERBOX_BACKGROUND_SOLID_COLOR:
+                    pw.println("Letterbox background type is 'solid_color'");
+                    break;
+                case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:
+                    pw.println("Letterbox background type is 'app_color_background'");
+                    break;
+                case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
+                    pw.println("Letterbox background type is 'app_color_background_floating'");
+                    break;
+                case LETTERBOX_BACKGROUND_WALLPAPER:
+                    pw.println("Letterbox background type is 'wallpaper'");
+                    break;
+                default:
+                    throw new AssertionError(
+                            "Unexpected letterbox background type: " + backgroundType);
+            }
         }
         return 0;
     }
@@ -677,7 +709,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         String arg = getNextArgRequired();
         try {
             if ("reset".equals(arg)) {
-                mInternal.resetLetterboxBackgroundColor();
+                synchronized (mInternal.mGlobalLock) {
+                    mInternal.resetLetterboxBackgroundColor();
+                }
                 return 0;
             }
             color = Color.valueOf(Color.parseColor(arg));
@@ -687,14 +721,95 @@ public class WindowManagerShellCommand extends ShellCommand {
                             + "an argument " + e + " but got " + arg);
             return -1;
         }
-
-        mInternal.setLetterboxBackgroundColor(color);
+        synchronized (mInternal.mGlobalLock) {
+            mInternal.setLetterboxBackgroundColor(color);
+        }
         return 0;
     }
 
     private int runGetLetterboxBackgroundColor(PrintWriter pw) throws RemoteException {
-        final Color color = mInternal.getLetterboxBackgroundColor();
-        pw.println("Letterbox background color is " + Integer.toHexString(color.toArgb()));
+        synchronized (mInternal.mGlobalLock) {
+            final Color color = mInternal.getLetterboxBackgroundColor();
+            pw.println("Letterbox background color is " + Integer.toHexString(color.toArgb()));
+        }
+        return 0;
+    }
+
+    private int runSetLetterboxBackgroundWallpaperBlurRadius(PrintWriter pw)
+            throws RemoteException {
+        final int radius;
+        try {
+            String arg = getNextArgRequired();
+            if ("reset".equals(arg)) {
+                synchronized (mInternal.mGlobalLock) {
+                    mInternal.resetLetterboxBackgroundWallpaperBlurRadius();
+                }
+                return 0;
+            }
+            radius = Integer.parseInt(arg);
+        } catch (NumberFormatException  e) {
+            getErrPrintWriter().println("Error: blur radius format " + e);
+            return -1;
+        } catch (IllegalArgumentException  e) {
+            getErrPrintWriter().println(
+                    "Error: 'reset' or blur radius should be provided as an argument " + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mInternal.setLetterboxBackgroundWallpaperBlurRadius(radius);
+        }
+        return 0;
+    }
+
+    private int runGetLetterboxBackgroundWallpaperBlurRadius(PrintWriter pw)
+            throws RemoteException {
+        synchronized (mInternal.mGlobalLock) {
+            final int radius = mInternal.getLetterboxBackgroundWallpaperBlurRadius();
+            if (radius <= 0) {
+                pw.println("Letterbox background wallpaper blur radius is not set");
+            } else {
+                pw.println("Letterbox background wallpaper blur radius is " + radius);
+            }
+        }
+        return 0;
+    }
+
+    private int runSetLetterboxBackgroundWallpaperDarkScrimAlpha(PrintWriter pw)
+            throws RemoteException {
+        final float alpha;
+        try {
+            String arg = getNextArgRequired();
+            if ("reset".equals(arg)) {
+                synchronized (mInternal.mGlobalLock) {
+                    mInternal.resetLetterboxBackgroundWallpaperDarkScrimAlpha();
+                }
+                return 0;
+            }
+            alpha = Float.parseFloat(arg);
+        } catch (NumberFormatException  e) {
+            getErrPrintWriter().println("Error: bad alpha format " + e);
+            return -1;
+        } catch (IllegalArgumentException  e) {
+            getErrPrintWriter().println(
+                    "Error: 'reset' or alpha should be provided as an argument " + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mInternal.setLetterboxBackgroundWallpaperDarkScrimAlpha(alpha);
+        }
+        return 0;
+    }
+
+    private int runGetLetterboxBackgroundWallpaperDarkScrimAlpha(PrintWriter pw)
+            throws RemoteException {
+        synchronized (mInternal.mGlobalLock) {
+            final float alpha = mInternal.getLetterboxBackgroundWallpaperDarkScrimAlpha();
+            if (alpha < 0 || alpha >= 1) {
+                pw.println("Letterbox dark scrim alpha is not set");
+            } else {
+                pw.println("Letterbox dark scrim alpha is " + alpha);
+            }
+        }
         return 0;
     }
 
@@ -733,6 +848,12 @@ public class WindowManagerShellCommand extends ShellCommand {
 
         // set-letterbox-background-color
         mInternal.resetLetterboxBackgroundColor();
+
+        // set-letterbox-background-wallpaper-blur-radius
+        mInternal.resetLetterboxBackgroundWallpaperBlurRadius();
+
+        // set-letterbox-background-wallpaper-dark-scrim-alpha
+        mInternal.resetLetterboxBackgroundWallpaperDarkScrimAlpha();
 
         pw.println("Reset all settings for displayId=" + displayId);
         return 0;
@@ -783,9 +904,20 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    and control letterbox background type. See Color#parseColor for allowed");
         pw.println("    color formats (#RRGGBB and some colors by name, e.g. magenta or olive). ");
         pw.println("  set-letterbox-background-type [reset|solid_color|app_color_background");
-        pw.println("    |app_color_background_floating]");
+        pw.println("    |app_color_background_floating|wallpaper]");
         pw.println("  get-letterbox-background-type");
         pw.println("    Type of background used in the letterbox mode.");
+        pw.println("  set-letterbox-background-wallpaper-blur-radius [reset|radius]");
+        pw.println("  get-letterbox-background-wallpaper-blur-radius");
+        pw.println("    Blur radius for 'wallpaper' letterbox background. If radius <= 0");
+        pw.println("    both it and R.dimen.config_letterboxBackgroundWallpaperBlurRadius are ");
+        pw.println("    ignored and 0 is used.");
+        pw.println("  set-letterbox-background-wallpaper-dark-scrim-alpha [reset|alpha]");
+        pw.println("  get-letterbox-background-wallpaper-dark-scrim-alpha");
+        pw.println("    Alpha of a black translucent scrim shown over 'wallpaper'");
+        pw.println("    letterbox background. If alpha < 0 or >= 1 both it and");
+        pw.println("    R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha are ignored and ");
+        pw.println("    0.0 (transparent) is used instead.");
         pw.println("  reset [-d DISPLAY_ID]");
         pw.println("    Reset all override settings.");
         if (!IS_USER) {
