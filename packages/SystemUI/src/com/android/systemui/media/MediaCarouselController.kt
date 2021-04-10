@@ -204,7 +204,7 @@ class MediaCarouselController @Inject constructor(
 
             override fun onSmartspaceMediaDataLoaded(key: String, data: SmartspaceTarget) {
                 Log.d(TAG, "My Smartspace media update is here")
-                addOrUpdateSmartspaceMediaRecommendations(key, data)
+                addSmartspaceMediaRecommendations(key, data)
             }
 
             override fun onMediaDataRemoved(key: String) {
@@ -213,6 +213,7 @@ class MediaCarouselController @Inject constructor(
 
             override fun onSmartspaceMediaDataRemoved(key: String) {
                 Log.d(TAG, "My Smartspace media removal request is received")
+                removePlayer(key)
             }
         })
         mediaFrame.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
@@ -256,8 +257,10 @@ class MediaCarouselController @Inject constructor(
     private fun reorderAllPlayers() {
         mediaContent.removeAllViews()
         for (mediaPlayer in MediaPlayerData.players()) {
-            mediaPlayer.view?.let {
+            mediaPlayer.playerViewHolder?.let {
                 mediaContent.addView(it.player)
+            } ?: mediaPlayer.recommendationViewHolder?.let {
+                mediaContent.addView(it.recommendations)
             }
         }
         mediaCarouselScrollHandler.onPlayersChanged()
@@ -272,18 +275,19 @@ class MediaCarouselController @Inject constructor(
         val existingPlayer = MediaPlayerData.getMediaPlayer(key, oldKey)
         if (existingPlayer == null) {
             var newPlayer = mediaControlPanelFactory.get()
-            newPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context), mediaContent))
+            newPlayer.attachPlayer(
+                PlayerViewHolder.create(LayoutInflater.from(context), mediaContent))
             newPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
-            newPlayer.view?.player?.setLayoutParams(lp)
-            newPlayer.bind(dataCopy, key)
+            newPlayer.playerViewHolder?.player?.setLayoutParams(lp)
+            newPlayer.bindPlayer(dataCopy, key)
             newPlayer.setListening(currentlyExpanded)
             MediaPlayerData.addMediaPlayer(key, dataCopy, newPlayer)
             updatePlayerToState(newPlayer, noAnimation = true)
             reorderAllPlayers()
         } else {
-            existingPlayer.bind(dataCopy, key)
+            existingPlayer.bindPlayer(dataCopy, key)
             MediaPlayerData.addMediaPlayer(key, dataCopy, existingPlayer)
             if (visualStabilityManager.isReorderingAllowed) {
                 reorderAllPlayers()
@@ -301,15 +305,43 @@ class MediaCarouselController @Inject constructor(
         }
     }
 
-    private fun addOrUpdateSmartspaceMediaRecommendations(key: String, data: SmartspaceTarget) {
-        // TODO(b/182813345): Add Smartspace media recommendation view.
+    private fun addSmartspaceMediaRecommendations(key: String, data: SmartspaceTarget) {
+        Log.d(TAG, "Updating smartspace target in carousel")
+        if (MediaPlayerData.getMediaPlayer(key, null) != null) {
+            Log.w(TAG, "Skip adding smartspace target in carousel")
+            return
+        }
+
+        var newRecs = mediaControlPanelFactory.get()
+        newRecs.attachRecommendation(
+            RecommendationViewHolder.create(LayoutInflater.from(context), mediaContent))
+        newRecs.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
+        val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT)
+        newRecs.recommendationViewHolder?.recommendations?.setLayoutParams(lp)
+        newRecs.bindRecommendation(data, bgColor, { v -> removePlayer(key) })
+        MediaPlayerData.addMediaPlayer(key, newRecs)
+        updatePlayerToState(newRecs, noAnimation = true)
+        reorderAllPlayers()
+        updatePageIndicator()
+        mediaCarousel.requiresRemeasuring = true
+        // Check postcondition: mediaContent should have the same number of children as there are
+        // elements in mediaPlayers.
+        if (MediaPlayerData.players().size != mediaContent.childCount) {
+            Log.wtf(TAG, "Size of players list and number of views in carousel are out of sync")
+        }
     }
 
-    private fun removePlayer(key: String, dismissMediaData: Boolean = true) {
+    private fun removePlayer(
+        key: String,
+        dismissMediaData: Boolean = true,
+        dismissRecommendation: Boolean = true
+    ) {
         val removed = MediaPlayerData.removeMediaPlayer(key)
         removed?.apply {
             mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
-            mediaContent.removeView(removed.view?.player)
+            mediaContent.removeView(removed.playerViewHolder?.player)
+            mediaContent.removeView(removed.recommendationViewHolder?.recommendations)
             removed.onDestroy()
             mediaCarouselScrollHandler.onPlayersChanged()
             updatePageIndicator()
@@ -317,6 +349,10 @@ class MediaCarouselController @Inject constructor(
             if (dismissMediaData) {
                 // Inform the media manager of a potentially late dismissal
                 mediaManager.dismissMediaData(key, 0L)
+            }
+            if (dismissRecommendation) {
+                // Inform the media manager of a potentially late dismissal
+                mediaManager.dismissSmartspaceRecommendation()
             }
         }
     }
@@ -539,23 +575,37 @@ class MediaCarouselController @Inject constructor(
 
 @VisibleForTesting
 internal object MediaPlayerData {
+    private val EMPTY = MediaData(-1, false, 0, null, null, null, null, null,
+        emptyList(), emptyList(), "INVALID", null, null, null, true, null)
+
     private data class MediaSortKey(
+        // Is Smartspace media recommendation. When the Smartspace media is present, it should
+        // always be the first card in carousel.
+        val isSsMediaRec: Boolean,
         val data: MediaData,
         val updateTime: Long = 0
     )
 
     private val comparator =
-        compareByDescending<MediaSortKey> { it.data.isPlaying }
-        .thenByDescending { it.data.isLocalSession }
-        .thenByDescending { !it.data.resumption }
-        .thenByDescending { it.updateTime }
+        compareByDescending<MediaSortKey> { it.isSsMediaRec }
+            .thenByDescending { it.data.isPlaying }
+            .thenByDescending { it.data.isLocalSession }
+            .thenByDescending { !it.data.resumption }
+            .thenByDescending { it.updateTime }
 
     private val mediaPlayers = TreeMap<MediaSortKey, MediaControlPanel>(comparator)
     private val mediaData: MutableMap<String, MediaSortKey> = mutableMapOf()
 
     fun addMediaPlayer(key: String, data: MediaData, player: MediaControlPanel) {
         removeMediaPlayer(key)
-        val sortKey = MediaSortKey(data, System.currentTimeMillis())
+        val sortKey = MediaSortKey(isSsMediaRec = false, data, System.currentTimeMillis())
+        mediaData.put(key, sortKey)
+        mediaPlayers.put(sortKey, player)
+    }
+
+    fun addMediaPlayer(key: String, player: MediaControlPanel) {
+        removeMediaPlayer(key)
+        val sortKey = MediaSortKey(isSsMediaRec = true, EMPTY, System.currentTimeMillis())
         mediaData.put(key, sortKey)
         mediaPlayers.put(sortKey, player)
     }
