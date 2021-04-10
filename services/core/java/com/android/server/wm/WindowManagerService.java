@@ -451,14 +451,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
 
-    /**
-     * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
-     * set-fixed-orientation-letterbox-aspect-ratio or via {@link
-     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored
-     * if it is <= this value.
-     */
-    static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
-
     @VisibleForTesting
     WindowManagerConstants mConstants;
 
@@ -984,14 +976,18 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
-    // Aspect ratio of letterbox for fixed orientation, values <=
-    // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
-    private volatile float mFixedOrientationLetterboxAspectRatio;
+    /**
+     * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
+     * set-fixed-orientation-letterbox-aspect-ratio or via {@link
+     * com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio} will be ignored
+     * if it is <= this value.
+     */
+    static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
 
     /** Enum for Letterbox background type. */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({LETTERBOX_BACKGROUND_SOLID_COLOR, LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
-            LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING})
+            LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING, LETTERBOX_BACKGROUND_WALLPAPER})
     @interface LetterboxBackgroundType {};
     /** Solid background using color specified in R.color.config_letterboxBackgroundColor. */
     static final int LETTERBOX_BACKGROUND_SOLID_COLOR = 0;
@@ -1002,14 +998,30 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Color specified in R.attr.colorBackgroundFloating for the letterboxed application. */
     static final int LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING = 2;
 
+    /** Using wallpaper as a background which can be blurred or dimmed with dark scrim. */
+    static final int LETTERBOX_BACKGROUND_WALLPAPER = 3;
+
+    // Aspect ratio of letterbox for fixed orientation, values <=
+    // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
+    private float mFixedOrientationLetterboxAspectRatio;
+
     // Corners radius for activities presented in the letterbox mode, values < 0 will be ignored.
-    private volatile int mLetterboxActivityCornersRadius;
+    private int mLetterboxActivityCornersRadius;
 
     // Color for {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} letterbox background type.
-    private volatile Color mLetterboxBackgroundColor;
+    private Color mLetterboxBackgroundColor;
 
     @LetterboxBackgroundType
-    private volatile int mLetterboxBackgroundType;
+    private int mLetterboxBackgroundType;
+
+    // Blur radius for LETTERBOX_BACKGROUND_WALLPAPER option in mLetterboxBackgroundType.
+    // Values <= 0 are ignored and 0 is used instead.
+    private int mLetterboxBackgroundWallpaperBlurRadius;
+
+    // Alpha of a black scrim shown over wallpaper letterbox background when
+    // LETTERBOX_BACKGROUND_WALLPAPER option is selected for mLetterboxBackgroundType.
+    // Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead.
+    private float mLetterboxBackgroundWallpaperDarkScrimAlpha;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
@@ -1244,6 +1256,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mLetterboxBackgroundColor = Color.valueOf(context.getResources().getColor(
                 com.android.internal.R.color.config_letterboxBackgroundColor));
         mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(context);
+        mLetterboxBackgroundWallpaperBlurRadius = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
+        mLetterboxBackgroundWallpaperDarkScrimAlpha = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
 
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -1783,7 +1799,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (type == TYPE_WALLPAPER) {
                     displayContent.mWallpaperController.clearLastWallpaperTimeoutTime();
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                } else if ((attrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+                } else if (win.hasWallpaper()) {
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 } else if (displayContent.mWallpaperController.isBelowWallpaperTarget(win)) {
                     // If there is currently a wallpaper being shown, and
@@ -2086,7 +2102,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.mAttrs.type == TYPE_WALLPAPER) {
             dc.mWallpaperController.clearLastWallpaperTimeoutTime();
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-        } else if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+        } else if (win.hasWallpaper()) {
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
         }
 
@@ -2305,7 +2321,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     || (!win.mRelayoutCalled);
 
             boolean wallpaperMayMove = win.mViewVisibility != viewVisibility
-                    && (win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+                    && win.hasWallpaper();
             wallpaperMayMove |= (flagChanges & FLAG_SHOW_WALLPAPER) != 0;
             if ((flagChanges & FLAG_SECURE) != 0 && winAnimator.mSurfaceController != null) {
                 winAnimator.mSurfaceController.setSecure(win.isSecureLocked());
@@ -2634,7 +2650,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 ProtoLog.d(WM_DEBUG_ADD_REMOVE, "finishDrawingWindow: %s mDrawState=%s",
                         win, (win != null ? win.mWinAnimator.drawStateToString() : "null"));
                 if (win != null && win.finishDrawing(postDrawTransaction)) {
-                    if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+                    if (win.hasWallpaper()) {
                         win.getDisplayContent().pendingLayoutChanges |=
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                     }
@@ -3945,6 +3961,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return backgroundType == LETTERBOX_BACKGROUND_SOLID_COLOR
                     || backgroundType == LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND
                     || backgroundType == LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING
+                    || backgroundType == LETTERBOX_BACKGROUND_WALLPAPER
                     ? backgroundType : LETTERBOX_BACKGROUND_SOLID_COLOR;
     }
 
@@ -3958,9 +3975,69 @@ public class WindowManagerService extends IWindowManager.Stub
                 return "LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND";
             case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
                 return "LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING";
+            case LETTERBOX_BACKGROUND_WALLPAPER:
+                return "LETTERBOX_BACKGROUND_WALLPAPER";
             default:
                 return "unknown=" + backgroundType;
         }
+    }
+
+    /**
+     * Overrides alpha of a black scrim shown over wallpaper for {@link
+     * #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link mLetterboxBackgroundType}.
+     *
+     * <p>If given value is < 0 or >= 1, both it and a value of {@link
+     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha} are ignored
+     * and 0.0 (transparent) is instead.
+     */
+    void setLetterboxBackgroundWallpaperDarkScrimAlpha(float alpha) {
+        mLetterboxBackgroundWallpaperDarkScrimAlpha = alpha;
+    }
+
+    /**
+     * Resets alpha of a black scrim shown over wallpaper letterbox background to {@link
+     * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha}.
+     */
+    void resetLetterboxBackgroundWallpaperDarkScrimAlpha() {
+        mLetterboxBackgroundWallpaperDarkScrimAlpha = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
+    }
+
+    /**
+     * Gets alpha of a black scrim shown over wallpaper letterbox background.
+     */
+    float getLetterboxBackgroundWallpaperDarkScrimAlpha() {
+        return mLetterboxBackgroundWallpaperDarkScrimAlpha;
+    }
+
+    /**
+     * Overrides blur radius for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in
+     * {@link mLetterboxBackgroundType}.
+     *
+     * <p> If given value <= 0, both it and a value of {@link
+     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius} are ignored
+     * and 0 is used instead.
+     */
+    void setLetterboxBackgroundWallpaperBlurRadius(int radius) {
+        mLetterboxBackgroundWallpaperBlurRadius = radius;
+    }
+
+    /**
+     * Resets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
+     * mLetterboxBackgroundType} to {@link
+     * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius}.
+     */
+    void resetLetterboxBackgroundWallpaperBlurRadius() {
+        mLetterboxBackgroundWallpaperBlurRadius = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
+    }
+
+    /**
+     * Gets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
+     * mLetterboxBackgroundType}.
+     */
+    int getLetterboxBackgroundWallpaperBlurRadius() {
+        return mLetterboxBackgroundWallpaperBlurRadius;
     }
 
     @Override
