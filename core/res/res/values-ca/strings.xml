@@ -1257,7 +1257,7 @@
     <item msgid="1616528372438698248">"Ethernet"</item>
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
-    <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"una tipus de xarxa desconegut"</string>
+    <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"un tipus de xarxa desconegut"</string>
     <string name="accept" msgid="5447154347815825107">"Accepta"</string>
     <string name="decline" msgid="6490507610282145874">"Rebutja"</string>
     <string name="select_character" msgid="3352797107930786979">"Insereix un caràcter"</string>

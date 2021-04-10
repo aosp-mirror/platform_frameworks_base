@@ -269,7 +269,7 @@
     <string name="notification_hidden_text" msgid="2835519769868187223">"Yeni bildiriş"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtual klaviatura"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fiziki klaviatura"</string>
-    <string name="notification_channel_security" msgid="8516754650348238057">"Təhlükəsizlik"</string>
+    <string name="notification_channel_security" msgid="8516754650348238057">"Güvənlik"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Avtomobil rejimi"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Hesab statusu"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"Developer mesajı"</string>
@@ -295,7 +295,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"İş profilinə keçin"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"kontaktlarınıza daxil olun"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Yer"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Məkan"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"cihazın yerini bilmək"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Təqvim"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"təqvimə daxil olun"</string>
@@ -678,11 +678,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin və planşeti kilidləyin və ya əgər həddən çox yanlış parol yazılıbsa, həmin istifadəçinin bütün verilənlərini silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin, Android TV cihazını kilidləyin və ya həddən çox yanlış parol yazılıbsa, həmin istifadəçinin bütün datasını silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin və telefonu kilidləyin və ya əgər həddən çox yanlış parol yazılıbsa, həmin istifadəçinin bütün verilənlərini silin."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Ekran kilidini dəyiş"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran kilidini dəyiş."</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"Ekranı kilidləyin"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Ekran kilidini dəyişmək"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran kilidini dəyişmək"</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"Ekranı kilidləmək"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Ekranın nə vaxt və necə kilidlənməsinə nəzarət edir."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Bütün məlumatları silin"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Bütün məlumatları silmək"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Planşetin datasını xəbərdarlıq olmadan, zavod data sıfırlaması ilə silin."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Android TV cihazının datasını fabrik sıfırlaması haqqında xəbərdarlıq olmadan silin."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefonun datasını xəbərdarlıq olmadan, zavod data sıfırlaması ilə silin"</string>
@@ -698,7 +698,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Tətbiq məlumatlarının şifrələnməsini tələb edir."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Kameraları dekativ edin"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Bütün cihaz kameralarının istifadəsini əngəllə."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Bəzi ekran kilidi funksiyalarını deaktiv edin"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Ekran kilidini deaktiv etmək"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Bəzi ekran funksiyaları istifadəsinin qarşısını alın."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Ev"</item>
@@ -1113,9 +1113,9 @@
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> işlənir"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Daha çox məlumat üçün və ya tətbiqi dayandırmaq üçün tıklayın."</string>
     <string name="ok" msgid="2646370155170753815">"OK"</string>
-    <string name="cancel" msgid="6908697720451760115">"Ləğv et"</string>
+    <string name="cancel" msgid="6908697720451760115">"Ləğv edin"</string>
     <string name="yes" msgid="9069828999585032361">"OK"</string>
-    <string name="no" msgid="5122037903299899715">"Ləğv et"</string>
+    <string name="no" msgid="5122037903299899715">"Ləğv edin"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Diqqət"</string>
     <string name="loading" msgid="3138021523725055037">"Yüklənir…"</string>
     <string name="capital_on" msgid="2770685323900821829">"AÇIQ"</string>
@@ -1269,7 +1269,7 @@
     <string name="sms_short_code_details" msgid="2723725738333388351">"Bu, mobil cihazınızda "<b>"dəyişikliyə səbəb ola bilər."</b></string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Bu, mobil hesabınızda dəyişikliyə səbəb ola bilər."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Göndər"</string>
-    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Ləğv et"</string>
+    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Ləğv edin"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Mənim seçimimi yadda saxla"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Bunu sonra Ayarlarda dəyişə bilərsiniz &gt; Tətbiqlər"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Həmişə icazə ver"</string>
@@ -1490,7 +1490,7 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"Keçən ay"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Gələn ay"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Ləğv et"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Ləğv edin"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Sil"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Hazırdır"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Rejim dəyişikliyi"</string>
@@ -1527,7 +1527,7 @@
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"Yüksək mobil data istifadəsi"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Tətbiqlər adi halda olduğundan çox data istifadə ediblər"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> adi halda olduğundan çox data istifadə edib"</string>
-    <string name="ssl_certificate" msgid="5690020361307261997">"Təhlükəsizlik sertifikatı"</string>
+    <string name="ssl_certificate" msgid="5690020361307261997">"Güvənlik sertifikatı"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"Bu sertifikat etibarlıdır."</string>
     <string name="issued_to" msgid="5975877665505297662">"Verilib:"</string>
     <string name="common_name" msgid="1486334593631798443">"Ümumi ad:"</string>
@@ -1794,7 +1794,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət funksiyası:\n\n•Qaranlıq temanı aktiv edir\n•Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər funksiyaları deaktiv edir və ya məhdudlaşdırır\n\n"<annotation id="url">"Ətraflı məlumat"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət funksiyası:\n\n•Qaranlıq temanı aktiv edir\n•Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər funksiyaları deaktiv edir və ya məhdudlaşdırır"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq dataya daxil ola bilər, ancaq bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Mobil interneti qənaətlə işlətmək məqsədilə Data Qanaəti bəzi tətbiqlərin fonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq nisbətən az müntəzəmliklə data istifadə edə bilər. Örnək olaraq bu, o deməkdir ki, şəkil fayllarına toxunmadıqca onlar açılmayacaq."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
