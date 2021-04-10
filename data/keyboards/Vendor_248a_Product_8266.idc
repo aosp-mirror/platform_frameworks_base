@@ -21,4 +21,5 @@
 # Due to a memory error on early prototypes of the reference remote control
 # the VID/PID is mapped to 248a/8266 instead of 0957/0001
 keyboard.layout = Vendor_0957_Product_0001
+keyboard.doNotWakeByDefault = 1
 audio.mic = 1

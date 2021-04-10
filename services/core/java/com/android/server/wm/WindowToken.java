@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -346,7 +345,7 @@ class WindowToken extends WindowContainer<WindowState> {
     boolean windowsCanBeWallpaperTarget() {
         for (int j = mChildren.size() - 1; j >= 0; j--) {
             final WindowState w = mChildren.get(j);
-            if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+            if (w.hasWallpaper()) {
                 return true;
             }
         }

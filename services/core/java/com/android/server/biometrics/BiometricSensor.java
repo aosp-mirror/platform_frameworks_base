@@ -19,13 +19,10 @@ package com.android.server.biometrics;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
-import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -65,7 +62,6 @@ public abstract class BiometricSensor {
     @Retention(RetentionPolicy.SOURCE)
     @interface SensorState {}
 
-    @NonNull private final Context mContext;
     public final int id;
     public final @Authenticators.Types int oemStrength; // strength as configured by the OEM
     public final int modality;
@@ -88,9 +84,8 @@ public abstract class BiometricSensor {
      */
     abstract boolean confirmationSupported();
 
-    BiometricSensor(@NonNull Context context, int id, int modality,
-            @Authenticators.Types int strength, IBiometricAuthenticator impl) {
-        this.mContext = context;
+    BiometricSensor(int id, int modality, @Authenticators.Types int strength,
+            IBiometricAuthenticator impl) {
         this.id = id;
         this.modality = modality;
         this.oemStrength = strength;
@@ -174,19 +169,12 @@ public abstract class BiometricSensor {
 
     @Override
     public String toString() {
-        SensorPropertiesInternal properties = null;
-        try {
-            properties = impl.getSensorProperties(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-        }
-
         return "ID(" + id + ")"
                 + ", oemStrength: " + oemStrength
                 + ", updatedStrength: " + mUpdatedStrength
                 + ", modality " + modality
                 + ", state: " + mSensorState
                 + ", cookie: " + mCookie
-                + ", props: " + properties;
+                + ", authenticator: " + impl;
     }
 }

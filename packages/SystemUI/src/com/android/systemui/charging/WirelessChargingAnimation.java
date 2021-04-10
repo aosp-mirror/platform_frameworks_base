@@ -120,10 +120,7 @@ public class WirelessChargingAnimation {
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             params.setFitInsetsTypes(0 /* ignore all system bar insets */);
             params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                    | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-
-            params.dimAmount = .3f;
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 
             if (looper == null) {
                 // Use Looper.myLooper() if looper is not specified.

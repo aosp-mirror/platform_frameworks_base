@@ -296,15 +296,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 return;
             }
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
-            if (provider == null) {
-                Slog.w(TAG, "Null provider for detectFace");
-                return;
-            }
-
-            provider.second.scheduleFaceDetect(provider.first, token, userId,
-                    new ClientMonitorCallbackConverter(receiver), opPackageName,
-                    BiometricsProtoEnums.CLIENT_KEYGUARD);
+            // TODO(b/152413782): Implement this once it's supported in the HAL
         }
 
         @Override // Binder call
@@ -361,13 +353,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 return;
             }
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
-            if (provider == null) {
-                Slog.w(TAG, "Null provider for cancelFaceDetect");
-                return;
-            }
-
-            provider.second.cancelFaceDetect(provider.first, token);
+            // TODO(b/152413782): Implement this once it's supported in the HAL
         }
 
         @Override // Binder call

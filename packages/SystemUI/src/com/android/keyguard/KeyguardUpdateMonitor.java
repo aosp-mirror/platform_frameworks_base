@@ -360,10 +360,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onChanged(BiometricSourceType type, boolean enabled, int userId)
                         throws RemoteException {
-                    if (type == BiometricSourceType.FACE) {
-                        mFaceSettingEnabledForUser.put(userId, enabled);
-                        updateFaceListeningState();
-                    }
+                    mHandler.post(() -> {
+                        if (type == BiometricSourceType.FACE) {
+                            mFaceSettingEnabledForUser.put(userId, enabled);
+                            updateFaceListeningState();
+                        }
+                    });
                 }
             };
 
@@ -2135,14 +2137,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         // Scan even when encrypted or timeout to show a preemptive bouncer when bypassing.
         // Lock-down mode shouldn't scan, since it is more explicit.
-        boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass && !mBouncer);
-
-        // If the device supports face detection (without authentication), allow it to happen
-        // if the device is in lockdown mode. Otherwise, prevent scanning.
-        boolean supportsDetectOnly = mFaceSensorProperties.get(0).supportsFaceDetection;
-        if (isLockDown && !supportsDetectOnly) {
-            strongAuthAllowsScanning = false;
-        }
+        boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass && !mBouncer)
+                && !isLockDown;
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
