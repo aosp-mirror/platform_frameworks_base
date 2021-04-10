@@ -252,7 +252,7 @@ public class UsageStatsService extends SystemService implements
 
         mAppStandby = mInjector.getAppStandbyController(getContext());
 
-        mAppTimeLimit = new AppTimeLimitController(
+        mAppTimeLimit = new AppTimeLimitController(getContext(),
                 new AppTimeLimitController.TimeLimitCallbackListener() {
                     @Override
                     public void onLimitReached(int observerId, int userId, long timeLimit,
