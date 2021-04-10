@@ -6635,7 +6635,9 @@ public class Editor {
                     }
 
                     updateSelection(event);
-                    if (mTextView.hasSelection() && mEndHandle != null) {
+                    if (mTextView.hasSelection() && mEndHandle != null &&
+                        isDragAcceleratorActive()
+                    ) {
                         mEndHandle.updateMagnifier(event);
                     }
                     break;

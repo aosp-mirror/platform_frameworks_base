@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ແອັບກຳລັງເຮັດວຽກ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ແອັບທີ່ກຳລັງໃຊ້ແບັດເຕີຣີ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ການຂະຫຍາຍ"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ການໃຊ້ການຊ່ວຍເຂົ້າເຖິງ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ກຳລັງໃຊ້ແບັດເຕີຣີຢູ່"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ແອັບກຳລັງໃຊ້ແບັດເຕີຣີຢູ່"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ແຕະເພື່ອເບິ່ງລາຍລະອຽດການນຳໃຊ້ແບັດເຕີຣີ ແລະ ອິນເຕີເນັດ"</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ອະນຸຍາດໃຫ້ແອັບຄົ້ນພົບ ແລະ ຈັບຄູ່ອຸປະກອນ Bluetooth ທີ່ຢູ່ໃກ້ຄຽງໄດ້"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ເຊື່ອມຕໍ່ຫາອຸປະກອນ Bluetooth ທີ່ຈັບຄູ່ໄວ້"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ອະນຸຍາດໃຫ້ແອັບເຊື່ອມຕໍ່ຫາອຸປະກອນ Bluetooth ທີ່ຈັບຄູ່ແລ້ວໄດ້"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການໄດ້ ເຊັ່ນ: ການຊ່ວຍເຫຼືອແບບລົງທະບຽນ ແລະ ປາຍທາງເສັ້ນທາງ."</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"ບໍ່ໄດ້ຕັ້ງ PIN, ຮູບແບບປົດລັອກ ຫຼື ລະຫັດຜ່ານ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"ເກີດຄວາມຜິດພາດໃນການພິສູດຢືນຢັນ"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ໃຊ້ການລັອກໜ້າຈໍ"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ໃສ່ການລັອກໜ້າຈໍຂອງທ່ານເພື່ອສືບຕໍ່"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ກວດພົບລາຍນິ້ວມືບາງສ່ວນ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ບໍ່​ສາ​ມາດ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ໄດ້. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ກະລຸນາອະນາໄມເຊັນເຊີ"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ເລື່ອນນິ້ວໄວເກີນໄປ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ຍ້າຍ​ນີ້ວ​ມື​ໄປຊ້າ​ເກີນ​ໄປ. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ລອງໃຊ້ລາຍນິ້ວມືອື່ນ"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ແຈ້ງເກີນໄປ"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ກະລຸນາລອງປັບແກ້"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ພິສູດຢືນຢັນລາຍນິ້ວມືແລ້ວ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ, ກະລຸນາກົດຢືນຢັນ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ບໍ່​ມີ​ຮາດ​ແວລາຍ​ນີ້ວ​ມື​ໃຫ້​ຢູ່."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ບໍ່ສາມາດຕັ້ງຄ່າລາຍນິ້ວມືໄດ້"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ເວ​ລາ​ລາຍ​ນີ້ວ​ມື​ບໍ່​ເຂົ້າ​ເຖິງ​ໄດ້. ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ຍົກ​ເລີກ​ການ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ແລ້ວ."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ຜູ້ໃຊ້ໄດ້ຍົກເລີກຄຳສັ່ງລາຍນິ້ວມືແລ້ວ."</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"ໃບໜ້າ <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"ໃຊ້ການປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ໃຊ້ໃບໜ້າ ຫຼື ການລັອກໜ້າຈໍ"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ໃຊ້ໜ້າທ່ານເພື່ອສືບຕໍ່"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ໃຊ້ໃບໜ້າ ຫຼື ການລັອກໜ້າຈໍຂອງທ່ານເພື່ອດຳເນີນການຕໍ່"</string>
   <string-array name="face_error_vendor">
   </string-array>

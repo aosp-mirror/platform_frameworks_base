@@ -24,7 +24,6 @@ import android.view.ViewGroup;
 import android.widget.Toolbar;
 
 import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
@@ -32,9 +31,10 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
  * A base Activity that has a collapsing toolbar layout is used for the activities intending to
  * enable the collapsing toolbar function.
  */
-public class CollapsingToolbarBaseActivity extends FragmentActivity {
+public class CollapsingToolbarBaseActivity extends SettingsTransitionActivity {
 
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,8 +43,8 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
         super.setContentView(R.layout.collapsing_toolbar_base_layout);
         mCollapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
 
-        final Toolbar toolbar = findViewById(R.id.action_bar);
-        setActionBar(toolbar);
+        mToolbar = findViewById(R.id.action_bar);
+        setActionBar(mToolbar);
 
         // Enable title and home button by default
         final ActionBar actionBar = getActionBar();
@@ -96,6 +96,11 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
             finish();
         }
         return true;
+    }
+
+    @Override
+    public Toolbar getToolbar() {
+        return mToolbar;
     }
 
     /**

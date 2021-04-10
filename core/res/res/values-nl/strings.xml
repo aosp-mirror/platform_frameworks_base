@@ -538,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Hiermee kan de app bluetooth-apparaten in de buurt vinden en koppelen"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"verbinding maken met gekoppelde bluetooth-apparaten"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Hiermee kan de app verbinding maken met gekoppelde bluetooth-apparaten"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informatie over voorkeursservice voor NFC-betaling"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Hiermee kun je zorgen dat de app informatie krijgt over de voorkeursservice voor NFC-betaling, zoals geregistreerde hulpmiddelen en routebestemmingen."</string>
@@ -576,8 +576,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Geen pincode, patroon of wachtwoord ingesteld"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Fout bij verificatie"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Schermvergrendeling gebruiken"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Voer je schermvergrendeling in om door te gaan"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Gedeeltelijke vingerafdruk gedetecteerd"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Maak de sensor schoon"</string>
@@ -657,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Gezicht <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Ontgrendelen via gezichtsherkenning gebruiken"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gezicht of schermgrendeling gebruiken"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gebruik je gezicht om door te gaan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gebruik je gezicht of schermvergrendeling om door te gaan"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -717,7 +715,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Hiermee wordt de houder toegestaan te binden aan de berichteninterface van een provider. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"binden aan providerservices"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Hiermee kan de houder binden aan providerservices. Nooit gebruikt voor normale apps."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"toegang tot \'Niet storen\'"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"toegang tot Niet storen"</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rechtengebruik starten"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Hiermee kan de houder het rechtengebruik voor een app starten. Nooit vereist voor normale apps."</string>

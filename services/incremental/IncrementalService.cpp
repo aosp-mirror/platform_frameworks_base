@@ -390,6 +390,11 @@ static const char* toString(IncrementalService::BindKind kind) {
     }
 }
 
+template <class Duration>
+static long elapsedMcs(Duration start, Duration end) {
+    return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+}
+
 void IncrementalService::onDump(int fd) {
     dprintf(fd, "Incremental is %s\n", incfs::enabled() ? "ENABLED" : "DISABLED");
     dprintf(fd, "Incremental dir: %s\n", mIncrementalDir.c_str());
@@ -407,6 +412,13 @@ void IncrementalService::onDump(int fd) {
             dprintf(fd, "    mountId: %d\n", mnt.mountId);
             dprintf(fd, "    root: %s\n", mnt.root.c_str());
             dprintf(fd, "    nextStorageDirNo: %d\n", mnt.nextStorageDirNo.load());
+            dprintf(fd, "    flags: %d\n", int(mnt.flags));
+            if (mnt.startLoadingTs.time_since_epoch() == Clock::duration::zero()) {
+                dprintf(fd, "    not loading\n");
+            } else {
+                dprintf(fd, "    startLoading: %llds\n",
+                        (long long)(elapsedMcs(mnt.startLoadingTs, Clock::now()) / 1000000));
+            }
             if (mnt.dataLoaderStub) {
                 mnt.dataLoaderStub->onDump(fd);
             } else {
@@ -1764,11 +1776,6 @@ void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderPara
 
         return false;
     });
-}
-
-template <class Duration>
-static long elapsedMcs(Duration start, Duration end) {
-    return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 }
 
 template <class Duration>

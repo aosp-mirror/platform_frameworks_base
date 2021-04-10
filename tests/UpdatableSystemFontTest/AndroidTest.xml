@@ -24,10 +24,12 @@
         <option name="push" value="UpdatableSystemFontTestCert.der->/data/local/tmp/UpdatableSystemFontTestCert.der" />
         <option name="push" value="NotoColorEmoji.ttf->/data/local/tmp/NotoColorEmoji.ttf" />
         <option name="push" value="UpdatableSystemFontTestNotoColorEmoji.ttf.fsv_sig->/data/local/tmp/UpdatableSystemFontTestNotoColorEmoji.ttf.fsv_sig" />
-        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiV1.ttf->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV1.ttf" />
-        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiV1.ttf.fsv_sig->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV1.ttf.fsv_sig" />
-        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiV2.ttf->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV2.ttf" />
-        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiV2.ttf.fsv_sig->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV2.ttf.fsv_sig" />
+        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiV0.ttf->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV0.ttf" />
+        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiV0.ttf.fsv_sig->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV0.ttf.fsv_sig" />
+        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf" />
+        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf.fsv_sig->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf.fsv_sig" />
+        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf" />
+        <option name="push" value="UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf.fsv_sig->/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf.fsv_sig" />
     </target_preparer>
 
     <test class="com.android.compatibility.common.tradefed.testtype.JarHostTest" >

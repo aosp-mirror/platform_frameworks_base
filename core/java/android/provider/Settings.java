@@ -2790,13 +2790,12 @@ public final class Settings {
             // Settings.Global and is not annotated as @Readable.
             // Notice that a key string that is not defined in any of the Settings.* classes will
             // still be regarded as readable.
-            // TODO(b/175024829): provide a register method.
-            if (!Settings.isInSystemServer() && !isSystemOrPrivilegedApp()
+            if (!isCallerExemptFromReadableRestriction()
                     && mAllFields.contains(name) && !mReadableFields.contains(name)) {
                 throw new SecurityException(
-                        "Settings key: <" + name + "> is not readable. From S+, new public "
-                        + "settings keys need to be annotated with @Readable unless they are "
-                        + "annotated with @hide.");
+                        "Settings key: <" + name + "> is not readable. From S+, settings keys "
+                                + "annotated with @hide are restricted to system_server and system "
+                                + "apps only, unless they are annotated with @Readable.");
             }
             final boolean isSelf = (userHandle == UserHandle.myUserId());
             int currentGeneration = -1;
@@ -2972,7 +2971,10 @@ public final class Settings {
             }
         }
 
-        private static boolean isSystemOrPrivilegedApp() {
+        private static boolean isCallerExemptFromReadableRestriction() {
+            if (Settings.isInSystemServer()) {
+                return true;
+            }
             if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
                 return true;
             }
@@ -2981,7 +2983,9 @@ public final class Settings {
                 return false;
             }
             final ApplicationInfo applicationInfo = application.getApplicationInfo();
-            return applicationInfo.isSystemApp() || applicationInfo.isPrivilegedApp()
+            final boolean isTestOnly =
+                    (applicationInfo.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
+            return isTestOnly || applicationInfo.isSystemApp() || applicationInfo.isPrivilegedApp()
                     || applicationInfo.isSignedWithPlatformKey();
         }
 
@@ -13824,6 +13828,12 @@ public final class Settings {
          * @hide
          */
         public static final int ENCODED_SURROUND_OUTPUT_MANUAL = 3;
+
+        /**
+         * The maximum value for surround sound output mode in Android S.
+         * @hide
+         */
+        public static final int ENCODED_SURROUND_SC_MAX = ENCODED_SURROUND_OUTPUT_MANUAL;
 
         /**
          * Set to ENCODED_SURROUND_OUTPUT_AUTO,

@@ -300,8 +300,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Programa paleista"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Programos, naudojančios akumuliatoriaus energiją"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Didinimas"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Pritaikomumo funkcijų naudojimas"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ naudoja akumuliatoriaus energiją"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Programų, naudojančių akumuliatoriaus energiją: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Palieskite ir sužinokite išsamios informacijos apie akumuliatoriaus bei duomenų naudojimą"</string>
@@ -545,9 +544,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Leidžiama programai aptikti ir susieti „Bluetooth“ įrenginius netoliese"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"prisijungimas prie susietų „Bluetooth“ įrenginių"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Leidžiama programai prisijungti prie susietų „Bluetooth“ įrenginių"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Pageidaujama ARL mokėjimo paslaugos informacija"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Programai leidžiama gauti pageidaujamą ARL mokamos paslaugos informaciją, pvz., užregistruotą pagalbą ir maršrutų tikslus."</string>
@@ -583,30 +582,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nenustatytas PIN kodas, atrakinimo piešinys arba slaptažodis"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Autentifikuojant įvyko klaida"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Naudoti ekrano užraktą"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jei norite tęsti, įveskite ekrano užraktą"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Aptiktas dalinis kontrolinis kodas"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nepavyko apdoroti piršto antspaudo. Bandykite dar kartą."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Nuvalykite jutiklį"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Per greitai patraukėte pirštą"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Per lėtai judinate pirštą. Bandykite dar kartą."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Pabandykite kitą kontrolinį kodą"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Per šviesu"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Pabandykite koreguoti"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Piršto antspaudas autentifikuotas"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Veidas autentifikuotas"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Veidas autentifikuotas, paspauskite patvirtinimo mygtuką"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Piršto antspaudo aparatinė įranga nepasiekiama."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nepavyko nustatyti kontrolinio kodo"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Baigėsi piršto antspaudo nustatymo skirtasis laikas. Bandykite dar kartą."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Piršto antspaudo operacija atšaukta."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Piršto antspaudo operaciją atšaukė naudotojas."</string>
@@ -671,8 +662,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> veidas"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Naudoti atrakinimą pagal veidą"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Naudoti atrakinimą pagal veidą arba ekrano užraktą"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Jei norite tęsti, naudokite atpažinimą pagal veidą"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Jei norite tęsti, naudokite veido atpažinimo funkciją arba ekrano užraktą"</string>
   <string-array name="face_error_vendor">
   </string-array>

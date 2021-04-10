@@ -336,11 +336,23 @@ public class UtilsTest {
 
     @Test
     public void getBatteryStatus_batteryLevel99_returnChargingString() {
-        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_STATUS,
-                BatteryManager.BATTERY_STATUS_CHARGING);
+        final Intent intent = new Intent();
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_USB);
         final Resources resources = mContext.getResources();
 
         assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
                 resources.getString(R.string.battery_info_status_charging));
+    }
+
+    @Test
+    public void getBatteryStatus_chargingWireless_returnWirelessChargingString() {
+        final Intent intent = new Intent();
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_WIRELESS);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent)).isEqualTo(
+                resources.getString(R.string.battery_info_status_charging_wireless));
     }
 }

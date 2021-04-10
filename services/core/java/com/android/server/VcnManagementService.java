@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.DUMP;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
@@ -69,6 +70,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.net.module.util.LocationPermissionChecker;
 import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
@@ -76,7 +78,9 @@ import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -167,9 +171,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     @NonNull
     private final TrackingNetworkCallback mTrackingNetworkCallback = new TrackingNetworkCallback();
-
-    /** Can only be assigned when {@link #systemReady()} is called, since it uses AppOpsManager. */
-    @Nullable private LocationPermissionChecker mLocationPermissionChecker;
 
     @GuardedBy("mLock")
     @NonNull
@@ -368,7 +369,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         new NetworkRequest.Builder().clearCapabilities().build(),
                         mTrackingNetworkCallback);
         mTelephonySubscriptionTracker.register();
-        mLocationPermissionChecker = mDeps.newLocationPermissionChecker(mVcnContext.getContext());
     }
 
     private void enforcePrimaryUser() {
@@ -835,13 +835,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             return false;
         }
 
-        if (!mLocationPermissionChecker.checkLocationPermission(
-                cbInfo.mPkgName,
-                "VcnStatusCallback" /* featureId */,
-                cbInfo.mUid,
-                null /* message */)) {
-            return false;
-        }
         return true;
     }
 
@@ -926,6 +919,33 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    /**
+     * Dumps the state of the VcnManagementService for logging and debugging purposes.
+     *
+     * <p>PII and credentials MUST NEVER be dumped here.
+     */
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        mContext.enforceCallingOrSelfPermission(DUMP, TAG);
+
+        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+
+        pw.println("VcnManagementService dump:");
+        pw.increaseIndent();
+
+        mNetworkProvider.dump(pw);
+
+        synchronized (mLock) {
+            pw.println("mVcns:");
+            for (Vcn vcn : mVcns.values()) {
+                vcn.dump(pw);
+            }
+            pw.println();
+        }
+
+        pw.decreaseIndent();
     }
 
     // TODO(b/180452282): Make name more generic and implement directly with VcnManagementService

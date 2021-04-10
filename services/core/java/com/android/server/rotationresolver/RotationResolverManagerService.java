@@ -153,8 +153,8 @@ public class RotationResolverManagerService extends
 
         @Override
         public void resolveRotation(
-                @NonNull RotationResolverCallbackInternal callbackInternal, int proposedRotation,
-                int currentRotation, long timeout,
+                @NonNull RotationResolverCallbackInternal callbackInternal, String packageName,
+                int proposedRotation, int currentRotation, long timeout,
                 @NonNull CancellationSignal cancellationSignalInternal) {
             Objects.requireNonNull(callbackInternal);
             Objects.requireNonNull(cancellationSignalInternal);
@@ -165,8 +165,16 @@ public class RotationResolverManagerService extends
                     final RotationResolverManagerPerUserService service =
                             getServiceForUserLocked(
                                     UserHandle.getCallingUserId());
-                    final RotationResolutionRequest request = new RotationResolutionRequest("",
-                            currentRotation, proposedRotation, true, timeout);
+                    final RotationResolutionRequest request;
+                    if (packageName == null) {
+                        request = new RotationResolutionRequest(/* packageName */ "",
+                                currentRotation, proposedRotation, /* shouldUseCamera */ true,
+                                timeout);
+                    } else {
+                        request = new RotationResolutionRequest(packageName, currentRotation,
+                                proposedRotation, /* shouldUseCamera */ true, timeout);
+                    }
+
                     service.resolveRotationLocked(callbackInternal, request,
                             cancellationSignalInternal);
                 } else {

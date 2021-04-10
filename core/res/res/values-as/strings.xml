@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"এপ্ চলি আছে"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"বেটাৰি খৰচ কৰা এপসমূহ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"বিবৰ্ধন"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"সাধ্য সুবিধাৰ ব্যৱহাৰ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ বেটাৰি ব্যৱহাৰ কৰি আছে"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g>টা এপে বেটাৰি ব্যৱহাৰ কৰি আছে"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"বেটাৰি আৰু ডেটাৰ ব্যৱহাৰৰ বিষয়ে বিশদভাৱে জানিবলৈ টিপক"</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"এপ্‌টোক নিকটৱৰ্তী ব্লুটুথ ডিভাইচ বিচাৰি উলিয়াবলৈ আৰু সেইসমূহৰ সৈতে পেয়াৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰক"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"এপ্‌টোক পেয়াৰ কৰা ব্লুটুথ ডিভাইচৰ সৈতে সংযোগ কৰিবলৈ অনুমতি দিয়ে"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"অগ্ৰাধিকাৰ দিয়া NFC পৰিশোধ সেৱাৰ তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"কোনো পিন, আৰ্হি বা পাছৱৰ্ড ছেট কৰা নাই"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"আসোঁৱাহৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰি থকা হৈছে"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্ৰীন ল\'ক ব্যৱহাৰ কৰক"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"অব্যাহত ৰাখিবলৈ আপোনাৰ স্ক্ৰীন লক দিয়ক"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"আংশিক ফিংগাৰপ্ৰিণ্ট চিনাক্ত কৰা হৈছে"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ফিগাৰপ্ৰিণ্টৰ প্ৰক্ৰিয়া সম্পাদন কৰিবপৰা নগ\'ল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ছেন্সৰটো চাফা কৰক"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"আঙুলিটো অতি দ্ৰুতভাৱে লৈ যোৱা হৈছে"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙুলিৰ গতি অতি মন্থৰ আছিল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"অন্য এটা ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰি চাওক"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অতি উজ্জ্বল"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"মিলাই চাওক"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ফিংগাৰপ্ৰিণ্টৰ সত্যাপন কৰা হ’ল"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল, অনুগ্ৰহ কৰি ‘নিশ্চিত কৰক’ বুটামটো টিপক"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ নাই।"</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ফিংগাৰপ্ৰিণ্ট ছেট আপ কৰিব নোৱাৰি"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ফিংগাৰপ্ৰিণ্ট গ্ৰহণৰ সময়সীমা উকলি গৈছে। আকৌ চেষ্টা কৰক।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ফিংগাৰপ্ৰিণ্ট কাৰ্য বাতিল কৰা হ’ল।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যৱহাৰকাৰীয়ে ফিংগাৰপ্ৰিণ্ট ক্ৰিয়া বাতিল কৰিছে।"</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"মুখমণ্ডল <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"মুখাৱয়বৰে আনলক কৰা ব্যৱহাৰ কৰক"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"মুখাৱয়বৰে আনলক কৰা অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"অব্যাহত ৰাখিবলৈ নিজৰ মুখাৱয়ব ব্যৱহাৰ কৰক"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"অব্যাহত ৰাখিবলৈ আপোনাৰ মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
   <string-array name="face_error_vendor">
   </string-array>

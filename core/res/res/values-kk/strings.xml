@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Қолданба қосулы"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Батареяны пайдаланып жатқан қолданбалар"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ұлғайту"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Арнайы мүмкіндіктерді қолдану"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> батареяны пайдалануда"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> қолданба батареяны пайдалануда"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батарея мен деректер трафигі туралы білу үшін түртіңіз"</string>
@@ -306,7 +305,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Жұмыс профиліне ауысу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контактілер"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"контактілерге кіру"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Орналасу"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Геодерек"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"бұл құрылғының орналасқан жерін көру"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Күнтізбе"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"күнтізбеге кіру"</string>
@@ -439,9 +438,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"қосымша аймақ жабдықтаушы пәрмендеріне қол жетімділік"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Қолданбаға орын жеткізушісінің қосымша пәрмендеріне қатынасуға рұқсат береді. Бұл қолданбаға GPS немесе басқа орын көздерінің жұмысына кедергі келтіруге рұқсат беруі мүмкін."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"нақты орналасқан жер туралы ақпаратқа тек ашық экранда кіру"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Қолданба пайдаланылып жатқанда, ол орынды анықтау қызметтерінен дәл геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған орынды анықтау қызметтері қосулы тұруы керек. Бұл батарея шығынын арттыруы мүмкін."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Қолданба пайдаланылып жатқанда, ол Локация қызметтерінен дәл геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған Локация қызметтері қосулы тұруы керек. Бұл батарея шығынын арттыруы мүмкін."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"болжалды орналасқан жер туралы ақпаратқа тек ашық экранда кіру"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Бұл қолданба пайдаланылып жатқанда, ол орынды анықтау қызметтерінен болжалды геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған орынды анықтау қызметтері қосулы тұруы керек."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Бұл қолданба пайдаланылып жатқанда, ол Локация қызметтерінен болжалды геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған Локация қызметтері қосулы тұруы керек."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"геодеректерді фондық режимде пайдалану"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Бұл қолданба пайдаланылмайтын кезде де, ол геодеректі кез келген уақытта пайдалана алады."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"аудио параметрлерін өзгерту"</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Қолданбаға маңайдағы Bluetooth құрылғыларын анықтап, жұптауға рұқсат береді."</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"жұпталған Bluetooth құрылғыларына қосылу"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Қолданбаға жұпталған Bluetooth құрылғыларына қосылуға рұқсат береді."</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Таңдаулы NFC төлеу қызметі туралы ақпарат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ешқандай PIN коды, өрнек немесе құпия сөз орнатылмаған."</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Аутентификациялауда қате шықты."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Экран құлпын пайдалану"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Жалғастыру үшін экран құлпын енгізіңіз."</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Саусақ ізі жартылай анықталды."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Саусақ ізін өңдеу мүмкін емес. Әрекетті қайталаңыз."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Датчикті тазалаңыз."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Саусақ тым жылдам қозғалды."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Саусағыңызды тым баяу қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Басқа саусақ ізін байқап көріңіз."</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Дұрыстап қойып көріңіз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Саусақ ізі аутентификацияланды"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Бет танылды"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Бет танылды, \"Растау\" түймесін басыңыз"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Саусақ ізі жабдығы қолжетімді емес."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Саусақ ізін орнату мүмкін емес."</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Саусақ ізін күту уақыты бітті. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Саусақ ізі операциясынан бас тартылған."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Пайдаланушы саусақ ізі операциясынан бас тартты."</string>
@@ -610,7 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Саусақ іздері тіркелмеген."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бұл құрылғыда саусақ ізін оқу сканері жоқ."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчик уақытша өшірулі."</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> саусағы"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-саусақ"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Саусақ ізін пайдалану"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Саусақ ізін немесе экран құлпын пайдалану"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Жалғастыру үшін саусақ ізін пайдаланыңыз."</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> беті"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Face Unlock функциясын пайдалану"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Face Lock функциясын немесе экран құлпын пайдалану"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Жалғастыру үшін бетіңізді көрсетіңіз."</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Жалғастыру үшін бетті анықтау функциясын немесе экран құлпын пайдаланыңыз."</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -741,17 +731,17 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және барлық пайдаланушы деректерінен тазарту."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, телефонды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Экран құлпын өзгерту"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Экран құлпын өзгерту."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Экран құлпын өзгерте алады."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Экранды құлыптау"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Экранның қашан және қалай құлыптанатынын басқару."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Экранның қашан және қалай құлыпталатынын басқара алады."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Барлық деректерді өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Зауыттық деректерді қалпына келтіру арқылы Android TV құрылғыңыздың деректерін ескертусіз тазартыңыз."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Зауыттық деректерге қайтару арқылы телефон деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Зауыттық деректерге қайтару арқылы телефон деректерін ескертусіз өшіре алады."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Пайдаланушы деректерін өшіру"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Осы пайдаланушының осы планшеттегі деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Осы пайдаланушының осы планшеттегі деректерін ескертусіз өшіре алады."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Android TV құрылғысын осы пайдаланушы деректерінен ескертусіз тазартыңыз."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Осы пайдаланушының осы телефондағы деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Осы пайдаланушының осы телефондағы деректерін ескертусіз өшіре алады."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Құрылғы жаһандық прокси қызметін орнату"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Саясат қосулы болғанда пайдаланылатын құрылғының ғаламдық прокси-серверін орнатыңыз. Ғаламдық прокси-серверді тек құрылғы иесі орната алады."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Экран бекітпесі құпия сөзінің мерзімін орнату"</string>
@@ -761,7 +751,7 @@
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Камераларды өшіру"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Құрылғыдағы барлық камералар қолданысын бөгеу."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Экран құлпы функцияларын өшіру"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Кейбір экранды құлыптау мүмкіндіктерін пайдалануға тыйым салу."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Кейбір экранды құлыптау функцияларын пайдалануға тыйым сала алады."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Үй"</item>
     <item msgid="7740243458912727194">"Ұялы тел."</item>
@@ -1954,7 +1944,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Арнаулы хабар хабарландыруы"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы (мұндай есептік жазбаға ие пайдаланушы бұрыннан бар) жасауға рұқсат етілсін бе?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы жасауға рұқсат етілсін бе?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"Тілді қосу"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"Тіл қосу"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Аймақ параметрі"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Тіл атауын теріңіз"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Ұсынылған"</string>
@@ -2140,7 +2130,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Жұмыс"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Жеке көру"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Жұмыс деректерін көру"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Әкімшіңіз тарабынан бөгелген"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Әкімшіңіз бөгеген"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Бұл мазмұнды жұмыс қолданбаларымен бөлісу мүмкін емес."</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Бұл мазмұнды жұмыс қолданбаларымен ашу мүмкін емес."</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Бұл мазмұнды жеке қолданбалармен бөлісу мүмкін емес."</string>
@@ -2149,8 +2139,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Қосу үшін түрту"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Жұмыс қолданбалары жоқ."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Жеке қолданбалар жоқ."</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"<xliff:g id="APP">%s</xliff:g> қолданбасында жеке профильде ашу керек пе?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"<xliff:g id="APP">%s</xliff:g> қолданбасында жұмыс профилінде ашу керек пе?"</string>
+    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Жеке профильдегі <xliff:g id="APP">%s</xliff:g> қолданбасында ашу керек пе?"</string>
+    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Жұмыс профиліндегі <xliff:g id="APP">%s</xliff:g> қолданбасында ашу керек пе?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Жеке браузерді пайдалану"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Жұмыс браузерін пайдалану"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM желісінің құлпын ашатын PIN коды"</string>

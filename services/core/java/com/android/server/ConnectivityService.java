@@ -2903,13 +2903,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println();
             pw.println("mNetworkRequestInfoLogs (most recent first):");
             pw.increaseIndent();
-            mNetworkRequestInfoLogs.reverseDump(fd, pw, args);
+            mNetworkRequestInfoLogs.reverseDump(pw);
             pw.decreaseIndent();
 
             pw.println();
             pw.println("mNetworkInfoBlockingLogs (most recent first):");
             pw.increaseIndent();
-            mNetworkInfoBlockingLogs.reverseDump(fd, pw, args);
+            mNetworkInfoBlockingLogs.reverseDump(pw);
             pw.decreaseIndent();
 
             pw.println();
@@ -2923,7 +2923,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 long duration = SystemClock.elapsedRealtime() - mLastWakeLockAcquireTimestamp;
                 pw.println("currently holding WakeLock for: " + (duration / 1000) + "s");
             }
-            mWakelockLogs.reverseDump(fd, pw, args);
+            mWakelockLogs.reverseDump(pw);
 
             pw.println();
             pw.println("bandwidth update requests (by uid):");
@@ -2935,7 +2935,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
             pw.decreaseIndent();
+            pw.decreaseIndent();
 
+            pw.println();
+            pw.println("mOemNetworkPreferencesLogs (most recent first):");
+            pw.increaseIndent();
+            mOemNetworkPreferencesLogs.reverseDump(pw);
             pw.decreaseIndent();
         }
 
@@ -6237,6 +6242,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @NonNull
     private ProfileNetworkPreferences mProfileNetworkPreferences = new ProfileNetworkPreferences();
 
+    // OemNetworkPreferences activity String log entries.
+    private static final int MAX_OEM_NETWORK_PREFERENCE_LOGS = 20;
+    @NonNull
+    private final LocalLog mOemNetworkPreferencesLogs =
+            new LocalLog(MAX_OEM_NETWORK_PREFERENCE_LOGS);
+
     /**
      * Determine whether a given package has a mapping in the current OemNetworkPreferences.
      * @param packageName the package name to check existence of a mapping for.
@@ -7685,7 +7696,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         void addRequestReassignment(@NonNull final RequestReassignment reassignment) {
-            if (Build.IS_DEBUGGABLE) {
+            if (Build.isDebuggable()) {
                 // The code is never supposed to add two reassignments of the same request. Make
                 // sure this stays true, but without imposing this expensive check on all
                 // reassignments on all user devices.
@@ -9739,6 +9750,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
+        mOemNetworkPreferencesLogs.log("UPDATE INITIATED: " + preference);
         final ArraySet<NetworkRequestInfo> nris =
                 new OemNetworkRequestFactory().createNrisFromOemNetworkPreferences(preference);
         replaceDefaultNetworkRequestsForPreference(nris);

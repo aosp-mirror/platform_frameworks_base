@@ -29,6 +29,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.Objects;
 import java.util.Set;
@@ -129,10 +130,50 @@ public class VcnNetworkProvider extends NetworkProvider {
             mScore = score;
             mProviderId = providerId;
         }
+
+        /**
+         * Dumps the state of this NetworkRequestEntry for logging and debugging purposes.
+         *
+         * <p>PII and credentials MUST NEVER be dumped here.
+         */
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("NetworkRequestEntry:");
+            pw.increaseIndent();
+
+            pw.println("mRequest: " + mRequest);
+            pw.println("mScore: " + mScore);
+            pw.println("mProviderId: " + mProviderId);
+
+            pw.decreaseIndent();
+        }
     }
 
     // package-private
     interface NetworkRequestListener {
         void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId);
+    }
+
+    /**
+     * Dumps the state of this VcnNetworkProvider for logging and debugging purposes.
+     *
+     * <p>PII and credentials MUST NEVER be dumped here.
+     */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("VcnNetworkProvider:");
+        pw.increaseIndent();
+
+        pw.println("mListeners:");
+        for (NetworkRequestListener listener : mListeners) {
+            pw.println(listener);
+        }
+        pw.println();
+
+        pw.println("mRequests.values:");
+        for (NetworkRequestEntry entry : mRequests.values()) {
+            entry.dump(pw);
+        }
+        pw.println();
+
+        pw.decreaseIndent();
     }
 }

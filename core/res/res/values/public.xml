@@ -3223,6 +3223,8 @@
     <public name="config_systemTextIntelligence" />
     <!-- @hide @SystemApi -->
     <public name="config_systemVisualIntelligence" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemActivityRecognizer" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01020055">

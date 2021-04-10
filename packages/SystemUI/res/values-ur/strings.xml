@@ -89,8 +89,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ترمیم کریں"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"اسکرین شاٹ میں ترمیم کریں"</string>
-    <!-- no translation found for screenshot_scroll_label (2930198809899329367) -->
-    <skip />
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"مزید کیپچر کریں"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"اسکرین شاٹ برخاست کریں"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"اسکرین شاٹ کا پیش منظر"</string>
     <string name="screenshot_top_boundary" msgid="1500569103321300856">"اوپر کا احاطہ"</string>
@@ -178,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"برخاست کریں"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"فنگر پرنٹ سینسر پر ٹچ کریں"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"فنگر پرنٹ آئیکن"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"چہرے کی شناخت نہیں ہو سکی۔ اس کے بجائے فنگر پرنٹ استعمال کریں۔"</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"جاری رکھنے کے لیے اپنا فنگر پرنٹ استعمال کریں"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"فنگر پرنٹ کی شناخت نہیں کی جا سکی۔ اس کے بجائے اسکرین لاک کا استعمال کریں۔"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"آپ کے لیے تلاش کیا جا رہا ہے…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"چہرے کا آئیکن"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"مطابقت پذیری زوم بٹن۔"</string>
@@ -384,11 +380,9 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"رنگ پلٹیں"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"رنگ کی اصلاح کی وضع"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"مزید ترتیبات"</string>
-    <!-- no translation found for quick_settings_more_user_settings (1064187451100861954) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"صارف کی ترتیبات"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ہو گیا"</string>
-    <!-- no translation found for quick_settings_close_user_panel (5599724542275896849) -->
-    <skip />
+    <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"بند کریں"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"مربوط"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"منسلک ہے، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"مربوط ہو رہا ہے…"</string>
@@ -533,8 +527,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"‏یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے اور VPNs سے منسلک ہے"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"آپ کی تنظیم آپ کے دفتری پروفائل میں نیٹ ورک ٹریفک مانیٹر کر سکتی ہے"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> آپ کے دفتری پروفائل میں نیٹ ورک ٹریفک مانیٹر کر سکتی ہے"</string>
-    <!-- no translation found for quick_settings_disclosure_managed_profile_network_activity (2636594621387832827) -->
-    <skip />
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"‏آپ کا IT منتظم دفتری پروفائل نیٹ ورک کی سرگرمی دیکھ سکتا ہے۔"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"نیٹ ورک کو مانیٹر کیا جا سکتا ہے"</string>
     <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"‏یہ آلہ VPNs سے منسلک ہے"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"آپ کی دفتری پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
@@ -552,7 +545,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"پالیسیاں دیکھیں"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"کنٹرولز دیکھیں"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"‏یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے۔\n\nآپ کا IT منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کی نگرانی اور ان کا نظم کر سکتا ہے۔\n\nمزید معلومات کے لیے اپنے IT منتظم سے رابطہ کریں۔"</string>
-    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> اس آلے سے وابستہ ڈیٹا تک رسائی حاصل، ایپس کا نظم اور ان آلات کی ترتیبات کو تبدیل کر سکتا ہے۔\n\nاگر آپ سوالات پوچھنا چاہتے ہیں تو <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> سے رابطہ کریں۔"</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"‫<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> اس آلے سے وابستہ ڈیٹا تک رسائی حاصل، ایپس کا نظم اور ان آلات کی ترتیبات کو تبدیل کر سکتا ہے۔\n\nاگر آپ سوالات پوچھنا چاہتے ہیں تو <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> سے رابطہ کریں۔"</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"‏یہ آلہ آپ کی تنظیم کا ہے۔\n\nآپ کا IT منتظم ترتیبات، کارپوریٹ رسائی، ایپس، آپ کے آلہ سے وابستہ ڈیٹا اور آپ کے آلہ کے مقام کی معلومات کی نگرانی اور ان کا نظم کر سکتا ہے۔\n\nمزید معلومات کے لیے اپنے IT منتظم سے رابطہ کریں۔"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"آپ کی تنظیم نے اس آلے پر ایک سرٹیفکیٹ کی اتھارٹی کو انسٹال کیا ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"آپ کی تنظیم نے آپ کے دفتری پروفائل میں ایک سرٹیفکیٹ کی اتھارٹی کو انسٹال کیا ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
@@ -668,7 +661,12 @@
     <skip />
     <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
     <skip />
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"تیار ہے"</string>
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
     <!-- no translation found for wallet_error_generic (257704570182963611) -->
     <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"دفتری پروفائل"</string>
@@ -739,9 +737,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو خاموش پر درجہ بند کیا گیا"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو اعلی درجہ دیا گیا"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو کم درجہ دیا گیا"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"گفتگو کے سیکشن کے اوپری حصے پر دکھاتا ہے، تیرتے بلبلے کی طرح ظاہر ہوتا ہے، لاک اسکرین پر پروفائل تصویر دکھاتا ہے"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ترتیبات"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"ترجیح"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> گفتگو کی خصوصیات کو سپورٹ نہیں کرتا ہے"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"اطلاعات کے اس گروپ کو یہاں کنفیگر نہیں کیا جا سکتا"</string>
@@ -1015,10 +1015,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"اسٹینڈ بائی"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"گفتگو کو ترجیح پر سیٹ کیا گیا"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ترجیحی گفتگوئیں:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"گفتگو سیکشن میں سب سے اوپر نظر آئیں گی"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"مقفل سکرین پر پروفائل کی تصویر دکھائیں گی"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ایپس کے سب سے اوپر فلوٹنگ بلبلہ کے طور پر ظاہر ہوں"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ڈسٹرب نہ کریں میں مداخلت کریں"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"سمجھ آ گئی"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ترتیبات"</string>
@@ -1036,6 +1040,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"سوئچ کریں"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ایکسیسبیلٹی بٹن کو ایکسیسبیلٹی اشارے سے بدل دیا گیا\n\n"<annotation id="link">"ترتیبات دیکھیں"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"عارضی طور پر بٹن کو چھپانے کے لئے اسے کنارے پر لے جائیں"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"آلہ کے کنٹرولز"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"اپنے منسلک آلات کے لیے کنٹرولز شامل کریں"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"آلہ کے کنٹرولز سیٹ اپ کریں"</string>
@@ -1106,31 +1122,43 @@
     <string name="basic_status" msgid="2315371112182658176">"گفتگو کھولیں"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"گفتگو ویجیٹس"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"اسے اپنے ہوم اسکرین پر شامل کرنے کے لیے گفتگو پر تھپتھپائیں"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"کچھ پیغامات حاصل کرنے کے بعد یہاں دوبارہ چیک کریں"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"ترجیحی گفتگوئیں"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"حالیہ گفتگوئیں"</string>
+    <string name="okay" msgid="6490552955618608554">"ٹھیک ہے"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> قبل"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g> سے کچھ کم وقت قبل"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g> سے زائد عرصہ قبل"</string>
     <string name="birthday_status" msgid="2596961629465396761">"سالگرہ"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"سالگرہ قریب ہے"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"سالگرہ"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"مقام کا اشتراک کیا جا رہا ہے"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"نئی کہانی"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"دیکھ رہے ہیں"</string>
     <string name="audio_status" msgid="4237055636967709208">"سنی جا رہی ہے"</string>
     <string name="game_status" msgid="1340694320630973259">"کھیلی جا رہی ہے"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"دوست"</string>
     <string name="empty_status" msgid="5938893404951307749">"آج رات چیٹ کرتے ہیں!"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"چھوٹی ہوئی کال"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+<xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"حالیہ پیغامات، چھوٹی ہوئی کالز اور اسٹیٹس اپ ڈیٹس دیکھیں"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"گفتگو"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"آپ کے بیٹری میٹر کو پڑھنے میں دشواری"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"مزید معلومات کے لیے تھپتھپائیں"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"کوئی الارم سیٹ نہیں ہے"</string>

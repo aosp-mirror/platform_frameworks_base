@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Закрыть"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Прикоснитесь к сканеру отпечатков пальцев."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Значок отпечатка пальца"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Не удалось распознать лицо. Используйте отпечаток."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Чтобы продолжить, прикоснитесь пальцем к сканеру."</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Не удалось распознать отпечаток пальца. Используйте другой способ разблокировки экрана."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Поиск лица…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Значок лица"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Кнопка масштабирования (режим совместимости)"</string>
@@ -551,10 +548,10 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Сертификаты ЦС"</string>
     <string name="disable_vpn" msgid="482685974985502922">"Отключить VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Отключить VPN"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Просмотреть политику"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Узнать больше"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Показать элементы управления"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nВаш системный администратор может управлять настройками, приложениями и параметрами доступа к корпоративным ресурсам на этом устройстве, а также связанными с ним данными (например, сведениями о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
-    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"\"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>\" может получать доступ к данным, связанным с этим устройством, изменять его настройки и управлять приложениями.\n\nЕсли у вас есть вопросы, свяжитесь с организацией \"<xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>\"."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"У компании \"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>\" есть доступ к данным, связанным с этим устройством, также она может изменять его настройки и управлять приложениями.\n\nЕсли у вас есть вопросы, обратитесь в компанию \"<xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>\"."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Это устройство принадлежит вашей организации.\n\nСистемный администратор может управлять настройками, приложениями и параметрами доступа к корпоративным ресурсам на этом устройстве, а также связанными с ним данными (например, сведениями о местоположении).\n\nЗа подробной информацией обращайтесь к системному администратору."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ваша организация установила сертификат ЦС на устройство. Она может отслеживать и изменять защищенный сетевой трафик."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ваша организация установила сертификат ЦС в рабочем профиле. Она может отслеживать и изменять защищенный сетевой трафик."</string>
@@ -670,7 +667,12 @@
     <skip />
     <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
     <skip />
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Готово"</string>
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
     <!-- no translation found for wallet_error_generic (257704570182963611) -->
     <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Рабочий профиль"</string>
@@ -741,9 +743,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус:&lt;/b&gt; понижено до уровня \"Без звука\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности повышен"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности понижен"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Появляется в верхней части списка разговоров и как всплывающий чат, фото профиля показывается на заблок. экране"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает функции разговоров."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эти уведомления нельзя изменить."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Эту группу уведомлений нельзя настроить здесь."</string>
@@ -1021,10 +1025,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Чтобы обновить параметры навигации в системе, перейдите в настройки."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Переход в режим ожидания"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Разговор помечен как важный"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Преимущества:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Важные разговоры показываются в верхней части списка разговоров."</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Фото профиля показывается на заблокированном экране."</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Показывать как всплывающий чат над приложениями"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Показывать в режиме \"Не беспокоить\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ОК"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Настройки"</string>
@@ -1042,6 +1050,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Переключить"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Жест заменен на кнопку специальных возможностей\n\n"<annotation id="link">"Открыть настройки"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Чтобы временно скрыть кнопку, переместите ее к краю экрана"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Управление устройствами"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавьте виджеты для управления устройствами."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Настройте виджеты управления устройствами"</string>
@@ -1114,31 +1134,43 @@
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты чатов"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на чат, чтобы добавить его на главный экран"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Здесь вы увидите свои сообщения."</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Важные разговоры"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Недавние разговоры"</string>
+    <string name="okay" msgid="6490552955618608554">"ОК"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> назад"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Прошло не более чем <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Прошло более чем <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="birthday_status" msgid="2596961629465396761">"День рождения"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Скоро день рождения"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"Годовщина"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"Доступ открыт"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"Новая история"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"Просмотр"</string>
     <string name="audio_status" msgid="4237055636967709208">"Прослушивание аудио"</string>
     <string name="game_status" msgid="1340694320630973259">"Игра запущена"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Друзья"</string>
     <string name="empty_status" msgid="5938893404951307749">"Давайте поболтаем!"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"Пропущенный вызов"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Просматривайте недавние сообщения, пропущенные звонки и обновления статуса."</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Чат"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Не удается получить данные об уровне заряда батареи"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Нажмите, чтобы узнать больше."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Будильников нет"</string>

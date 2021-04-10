@@ -518,6 +518,17 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mCurrentDialog = null;
     }
 
+    /**
+     * Whether the passed userId has enrolled face auth.
+     */
+    public boolean isFaceAuthEnrolled(int userId) {
+        if (mFaceProps == null) {
+            return false;
+        }
+
+        return mFaceManager.hasEnrolledTemplates(userId);
+    }
+
    /**
      * Whether the passed userId has enrolled UDFPS.
      */
