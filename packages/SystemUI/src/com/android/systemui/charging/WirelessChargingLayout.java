@@ -21,10 +21,10 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.PointF;
-import android.graphics.drawable.Animatable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
+import android.view.View;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -78,10 +78,6 @@ public class WirelessChargingLayout extends FrameLayout {
 
         inflate(new ContextThemeWrapper(context, style), R.layout.wireless_charging_layout, this);
 
-        // where the circle animation occurs:
-        final ImageView chargingView = findViewById(R.id.wireless_charging_view);
-        final Animatable chargingAnimation = (Animatable) chargingView.getDrawable();
-
         // amount of battery:
         final TextView percentage = findViewById(R.id.wireless_charging_percentage);
 
@@ -126,9 +122,20 @@ public class WirelessChargingLayout extends FrameLayout {
         animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator);
 
         mRippleView = findViewById(R.id.wireless_charging_ripple);
+        OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {
+                mRippleView.setDuration(RIPPLE_ANIMATION_DURATION);
+                mRippleView.startRipple();
+                mRippleView.removeOnAttachStateChangeListener(this);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {}
+        };
+        mRippleView.addOnAttachStateChangeListener(listener);
 
         if (!showTransmittingBatteryLevel) {
-            chargingAnimation.start();
             animatorSet.start();
             return;
         }
@@ -197,7 +204,6 @@ public class WirelessChargingLayout extends FrameLayout {
         AnimatorSet animatorSetIcon = new AnimatorSet();
         animatorSetIcon.playTogether(textOpacityAnimatorIcon, textFadeAnimatorIcon);
 
-        chargingAnimation.start();
         animatorSet.start();
         animatorSetTransmitting.start();
         animatorSetIcon.start();
@@ -213,8 +219,6 @@ public class WirelessChargingLayout extends FrameLayout {
                             android.R.attr.colorAccent).getDefaultColor());
             mRippleView.setOrigin(new PointF(width / 2, height / 2));
             mRippleView.setRadius(Math.max(width, height) * 0.5f);
-            mRippleView.setDuration(RIPPLE_ANIMATION_DURATION);
-            mRippleView.startRipple();
         }
 
         super.onLayout(changed, left, top, right, bottom);
