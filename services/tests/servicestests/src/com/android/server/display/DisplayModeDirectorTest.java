@@ -27,10 +27,13 @@ import static com.android.server.display.DisplayModeDirector.Vote.PRIORITY_FLICK
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,6 +48,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
@@ -61,9 +65,11 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
+import com.android.server.LocalServices;
 import com.android.server.display.DisplayModeDirector.BrightnessObserver;
 import com.android.server.display.DisplayModeDirector.DesiredDisplayModeSpecs;
 import com.android.server.display.DisplayModeDirector.Vote;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.testutils.FakeDeviceConfigInterface;
 
 import org.junit.Before;
@@ -71,6 +77,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -95,6 +102,8 @@ public class DisplayModeDirectorTest {
     private Handler mHandler;
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+    @Mock
+    public StatusBarManagerInternal mStatusBarMock;
 
     @Before
     public void setUp() throws Exception {
@@ -104,6 +113,9 @@ public class DisplayModeDirectorTest {
         when(mContext.getContentResolver()).thenReturn(resolver);
         mInjector = new FakesInjector();
         mHandler = new Handler(Looper.getMainLooper());
+
+        LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
+        LocalServices.addService(StatusBarManagerInternal.class, mStatusBarMock);
     }
 
     private DisplayModeDirector createDirectorFromRefreshRateArray(
@@ -338,7 +350,7 @@ public class DisplayModeDirectorTest {
 
     void verifyBrightnessObserverCall(DisplayModeDirector director, float minFps, float peakFps,
             float defaultFps, float brightnessObserverMin, float brightnessObserverMax) {
-        BrightnessObserver brightnessObserver = Mockito.mock(BrightnessObserver.class);
+        BrightnessObserver brightnessObserver = mock(BrightnessObserver.class);
         director.injectBrightnessObserver(brightnessObserver);
         director.getDesiredDisplayModeSpecsWithInjectedFpsSettings(minFps, peakFps, defaultFps);
         verify(brightnessObserver)
@@ -581,7 +593,7 @@ public class DisplayModeDirectorTest {
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 20 /*lux*/));
 
         Vote vote = director.getVote(Display.DEFAULT_DISPLAY, PRIORITY_FLICKER);
-        assertVoteForRefreshRateLocked(vote, 90 /*fps*/);
+        assertVoteForRefreshRate(vote, 90 /*fps*/);
 
         setBrightness(125);
         // Sensor reads 1000 lux,
@@ -611,7 +623,7 @@ public class DisplayModeDirectorTest {
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
-        Mockito.verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
+        verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
                 .registerListener(
                         listenerCaptor.capture(),
                         eq(lightSensor),
@@ -631,7 +643,7 @@ public class DisplayModeDirectorTest {
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 9000));
 
         vote = director.getVote(Display.DEFAULT_DISPLAY, PRIORITY_FLICKER);
-        assertVoteForRefreshRateLocked(vote, 60 /*fps*/);
+        assertVoteForRefreshRate(vote, 60 /*fps*/);
     }
 
     @Test
@@ -654,21 +666,21 @@ public class DisplayModeDirectorTest {
         director.start(sensorManager);
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
-        Mockito.verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
+        verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
                 .registerListener(
                         listenerCaptor.capture(),
                         eq(lightSensor),
                         anyInt(),
                         any(Handler.class));
 
-        // Dispaly state changed from On to Doze
+        // Display state changed from On to Doze
         director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_DOZE);
-        Mockito.verify(sensorManager)
+        verify(sensorManager)
                 .unregisterListener(listenerCaptor.capture());
 
-        // Dispaly state changed from Doze to On
+        // Display state changed from Doze to On
         director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
-        Mockito.verify(sensorManager, times(2))
+        verify(sensorManager, times(2))
                 .registerListener(
                         listenerCaptor.capture(),
                         eq(lightSensor),
@@ -677,7 +689,42 @@ public class DisplayModeDirectorTest {
 
     }
 
-    private void assertVoteForRefreshRateLocked(Vote vote, float refreshRate) {
+    @Test
+    public void testUdfpsListenerGetsRegistered() {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f, 110.f}, 0);
+        verify(mStatusBarMock, never()).setUdfpsHbmListener(any());
+
+        director.start(createMockSensorManager());
+        verify(mStatusBarMock).setUdfpsHbmListener(eq(director.getUdpfsObserver()));
+    }
+
+    @Test
+    public void testGbhmVotesFor60hz() throws Exception {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f, 110.f}, 0);
+        director.start(createMockSensorManager());
+        ArgumentCaptor<IUdfpsHbmListener> captor =
+                ArgumentCaptor.forClass(IUdfpsHbmListener.class);
+        verify(mStatusBarMock).setUdfpsHbmListener(captor.capture());
+        IUdfpsHbmListener hbmListener = captor.getValue();
+
+        // Should be no vote initially
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
+        assertNull(vote);
+
+        // Enabling GHBM votes for 60hz
+        hbmListener.onHbmEnabled(IUdfpsHbmListener.GLOBAL_HBM, DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
+        assertVoteForRefreshRate(vote, 60.f);
+
+        // Disabling GHBM removes the vote
+        hbmListener.onHbmDisabled(IUdfpsHbmListener.GLOBAL_HBM, DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
+        assertNull(vote);
+    }
+
+    private void assertVoteForRefreshRate(Vote vote, float refreshRate) {
         assertThat(vote).isNotNull();
         final DisplayModeDirector.RefreshRateRange expectedRange =
                 new DisplayModeDirector.RefreshRateRange(refreshRate, refreshRate);
@@ -787,7 +834,7 @@ public class DisplayModeDirectorTest {
     }
 
     private static SensorManager createMockSensorManager(Sensor... sensors) {
-        SensorManager sensorManager = Mockito.mock(SensorManager.class);
+        SensorManager sensorManager = mock(SensorManager.class);
         when(sensorManager.getSensorList(anyInt())).then((invocation) -> {
             List<Sensor> requestedSensors = new ArrayList<>();
             int type = invocation.getArgument(0);
