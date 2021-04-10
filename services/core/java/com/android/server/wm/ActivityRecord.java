@@ -972,6 +972,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 if (lastLaunchTime == 0) pw.print("0");
                 else TimeUtils.formatDuration(lastLaunchTime, now, pw);
                 pw.println();
+        if (mLaunchCookie != null) {
+            pw.print(prefix);
+            pw.print("launchCookie=");
+            pw.println(mLaunchCookie);
+        }
         pw.print(prefix); pw.print("mHaveState="); pw.print(mHaveState);
                 pw.print(" mIcicle="); pw.println(mIcicle);
         pw.print(prefix); pw.print("state="); pw.print(mState);
