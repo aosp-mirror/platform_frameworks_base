@@ -24,6 +24,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -248,6 +249,11 @@ public class NotificationMediaManager implements Dumpable {
             }
 
             @Override
+            public void onSmartspaceMediaDataLoaded(@NonNull String key,
+                    @NonNull SmartspaceTarget data) {
+            }
+
+            @Override
             public void onMediaDataRemoved(@NonNull String key) {
                 mNotifPipeline.getAllNotifs()
                         .stream()
@@ -260,6 +266,9 @@ public class NotificationMediaManager implements Dumpable {
                                     getDismissedByUserStats(entry));
                         });
             }
+
+            @Override
+            public void onSmartspaceMediaDataRemoved(@NonNull String key) {}
         });
     }
 
@@ -313,6 +322,11 @@ public class NotificationMediaManager implements Dumpable {
             }
 
             @Override
+            public void onSmartspaceMediaDataLoaded(@NonNull String key,
+                    @NonNull SmartspaceTarget data) {
+            }
+
+            @Override
             public void onMediaDataRemoved(@NonNull String key) {
                 NotificationEntry entry = mEntryManager.getPendingOrActiveNotif(key);
                 if (entry != null) {
@@ -323,6 +337,9 @@ public class NotificationMediaManager implements Dumpable {
                             NotificationListenerService.REASON_CANCEL);
                 }
             }
+
+            @Override
+            public void onSmartspaceMediaDataRemoved(@NonNull String key) {}
         });
     }
 
