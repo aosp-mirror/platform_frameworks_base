@@ -302,7 +302,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Modo de segurança"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Deslize até o perfil pessoal"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Alternar para o perfil de trabalho"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acesse seus contatos"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Local"</string>
@@ -538,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que o app descubra e se pareie a dispositivos Bluetooth por perto"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conecte-se a dispositivos Bluetooth pareados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que o app se conecte a dispositivos Bluetooth pareados"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informações preferidas de serviço de pagamento por NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que o app acesse as informações preferidas de serviço de pagamento por NFC, como auxílios registrados ou destinos de trajetos."</string>
@@ -576,8 +576,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nenhum PIN, padrão ou senha configurado"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erro na autenticação"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueio de tela"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Insira seu bloqueio de tela para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Impressão digital parcial detectada"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Limpe o sensor"</string>
@@ -657,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Usar desbloqueio facial"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar reconhecimento facial ou bloqueio de tela"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Use seu rosto para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Use seu rosto ou o bloqueio de tela para continuar"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -752,7 +750,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Exige que os dados armazenados do app sejam criptografados."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Desativar câmeras"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Impede o uso de todas as câmeras do dispositivo."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desativar recursos bloq. de tela"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Desativar recursos do bloq. de tela"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Impede o uso de alguns recursos do bloqueio de tela."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Casa"</item>

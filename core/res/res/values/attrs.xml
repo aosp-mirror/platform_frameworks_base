@@ -1134,6 +1134,15 @@
         <!-- Tertiary accent color used on Material NEXT buttons. @hide -->
         <attr name="colorAccentTertiary" format="color" />
 
+        <!-- Darker accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentPrimaryVariant" format="color" />
+
+        <!-- Secondary darker accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentSecondaryVariant" format="color" />
+
+        <!-- Tertiary darker accent color used on Material NEXT buttons. @hide -->
+        <attr name="colorAccentTertiaryVariant" format="color" />
+
         <!-- The color applied to framework controls in their normal state. -->
         <attr name="colorControlNormal" format="color" />
 
@@ -1154,6 +1163,18 @@
 
         <!-- The color applied to the edge effect on scrolling containers. -->
         <attr name="colorEdgeEffect" format="color" />
+
+        <!-- The color applied to surfaces on top of colorBackground. @hide -->
+        <attr name="colorSurface" format="color" />
+
+        <!-- Alternative color applied to surfaces on top of colorBackground. @hide -->
+        <attr name="colorSurfaceHighlight" format="color" />
+
+        <!-- Alternative color applied to surfaces on top of colorBackground. @hide -->
+        <attr name="colorSurfaceVariant" format="color" />
+
+        <!-- Alternative color applied to surfaces on top of colorBackground. @hide -->
+        <attr name="colorSurfaceHeader" format="color" />
 
         <!-- The type of the edge effect. The default is glow. -->
         <attr name="edgeEffectType">

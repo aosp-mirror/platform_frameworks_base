@@ -1925,7 +1925,7 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#setEncodedSurroundMode(int) */
     @Override
-    public boolean setEncodedSurroundMode(int mode) {
+    public boolean setEncodedSurroundMode(@AudioManager.EncodedSurroundOutputMode int mode) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Missing WRITE_SETTINGS permission");
@@ -1936,7 +1936,7 @@ public class AudioService extends IAudioService.Stub
             synchronized (mSettingsLock) {
                 Settings.Global.putInt(mContentResolver,
                         Settings.Global.ENCODED_SURROUND_OUTPUT,
-                        mode);
+                        toEncodedSurroundSetting(mode));
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1946,7 +1946,7 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#getEncodedSurroundMode() */
     @Override
-    public int getEncodedSurroundMode() {
+    public int getEncodedSurroundMode(int targetSdkVersion) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Missing WRITE_SETTINGS permission");
@@ -1955,9 +1955,10 @@ public class AudioService extends IAudioService.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSettingsLock) {
-                return Settings.Global.getInt(mContentResolver,
+                int encodedSurroundSetting = Settings.Global.getInt(mContentResolver,
                         Settings.Global.ENCODED_SURROUND_OUTPUT,
                         AudioManager.ENCODED_SURROUND_OUTPUT_AUTO);
+                return toEncodedSurroundOutputMode(encodedSurroundSetting, targetSdkVersion);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1979,6 +1980,41 @@ public class AudioService extends IAudioService.Stub
             }
         }
         return formats;
+    }
+
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    @AudioManager.EncodedSurroundOutputMode
+    private int toEncodedSurroundOutputMode(int encodedSurroundSetting, int targetSdkVersion) {
+        if (targetSdkVersion <= Build.VERSION_CODES.S
+                && encodedSurroundSetting > Settings.Global.ENCODED_SURROUND_SC_MAX) {
+            return AudioManager.ENCODED_SURROUND_OUTPUT_UNKNOWN;
+        }
+        switch (encodedSurroundSetting) {
+            case Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO:
+                return AudioManager.ENCODED_SURROUND_OUTPUT_AUTO;
+            case Settings.Global.ENCODED_SURROUND_OUTPUT_NEVER:
+                return AudioManager.ENCODED_SURROUND_OUTPUT_NEVER;
+            case Settings.Global.ENCODED_SURROUND_OUTPUT_ALWAYS:
+                return AudioManager.ENCODED_SURROUND_OUTPUT_ALWAYS;
+            case Settings.Global.ENCODED_SURROUND_OUTPUT_MANUAL:
+                return AudioManager.ENCODED_SURROUND_OUTPUT_MANUAL;
+            default:
+                return AudioManager.ENCODED_SURROUND_OUTPUT_UNKNOWN;
+        }
+    }
+
+    private int toEncodedSurroundSetting(
+            @AudioManager.EncodedSurroundOutputMode int encodedSurroundOutputMode) {
+        switch (encodedSurroundOutputMode) {
+            case AudioManager.ENCODED_SURROUND_OUTPUT_NEVER:
+                return Settings.Global.ENCODED_SURROUND_OUTPUT_NEVER;
+            case AudioManager.ENCODED_SURROUND_OUTPUT_ALWAYS:
+                return Settings.Global.ENCODED_SURROUND_OUTPUT_ALWAYS;
+            case AudioManager.ENCODED_SURROUND_OUTPUT_MANUAL:
+                return Settings.Global.ENCODED_SURROUND_OUTPUT_MANUAL;
+            default:
+                return Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO;
+        }
     }
 
     private boolean isSurroundFormat(int audioFormat) {

@@ -42,15 +42,22 @@ public final class EthernetNetworkSpecifier extends NetworkSpecifier implements 
     @NonNull
     private final String mInterfaceName;
 
+    /**
+     * Create a new EthernetNetworkSpecifier.
+     * @param interfaceName Name of the ethernet interface the specifier refers to.
+     */
     public EthernetNetworkSpecifier(@NonNull String interfaceName) {
         Preconditions.checkStringNotEmpty(interfaceName);
         mInterfaceName = interfaceName;
     }
 
-    // This may be null in the future to support specifiers based on data other than the interface
-    // name.
+    /**
+     * Get the name of the ethernet interface the specifier refers to.
+     */
     @Nullable
     public String getInterfaceName() {
+        // This may be null in the future to support specifiers based on data other than the
+        // interface name.
         return mInterfaceName;
     }
 

@@ -657,13 +657,12 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"එලාමය"</string>
     <string name="wallet_title" msgid="5369767670735827105">"පසුම්බිය"</string>
-    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
-    <skip />
-    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
-    <skip />
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"සූදානම්"</string>
-    <!-- no translation found for wallet_error_generic (257704570182963611) -->
-    <skip />
+    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"සියල්ල පෙන්වන්න"</string>
+    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"ගෙවීමට අගුලු හරින්න"</string>
+    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"සූදානම්"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ගෙවීම පිහිටුවන්න"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"භාවිත කිරීමට අගුලු හරින්න"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"ඔබගේ කාඩ්පත ලබා ගැනීමේ ගැටලුවක් විය, කරුණාකර පසුව නැවත උත්සාහ කරන්න"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"කාර්යාල පැතිකඩ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ගුවන්යානා ප්‍රකාරය"</string>
     <string name="add_tile" msgid="6239678623873086686">"ටයිල් එක් කරන්න"</string>
@@ -732,9 +731,9 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;තත්ත්වය:&lt;/b&gt; නිශ්ශබ්ද වෙත පහත දමන ලදි"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;තත්ත්වය:&lt;/b&gt; ඉහළට ශ්‍රේණිගත කරන ලදි"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;තත්ත්වය:&lt;/b&gt; පහළට ශ්‍රේණිගත කරන ලදි"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"සංවාද කොටසේ ඉහළම පෙන්වයි, බුබුළක් ලෙස දිස් වේ, අගුලු තිරයේ පැතිකඩ පින්තූරය සංදර්ශනය වේ"</string>
+    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"ප්‍රමුඛතා ප්‍රකාරය ක්‍රියාත්මක විට පවා, ඔබගේ දැනුම්දීම්වල ඉහළින්ම පෙන්වයි"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"සැකසීම්"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"ප්‍රමුඛතාව"</string>
+    <string name="notification_priority_title" msgid="5256226572739882190">"ප්‍රමුඛතා සංවාද"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> සංවාද විශේෂාංගවලට සහාය නොදක්වයි"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"මෙම දැනුම්දීම් වෙනස් කළ නොහැක."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"මෙම දැනුම්දීම් සමූහය මෙහි වින්‍යාස කළ නොහැක"</string>
@@ -1008,10 +1007,10 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"පද්ධති සංචලනය යාවත්කාලීන කිරීමට සැකසීම් වෙත යන්න"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"පොරොත්තු"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"සංවාදය ප්‍රමුඛතාව වෙත සකසන ලදී"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ප්‍රමුඛතා සංවාද:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"සංවාද කොටසේ ඉහළ දී පෙන්වන්න"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"පැතිකඩ පින්තූරය අගුලු තිරය මත පෙන්වන්න"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"යෙදුම්වල ඉහළම පාවෙන බුබුලක් ලෙස දිස් වේ"</string>
+    <string name="priority_onboarding_behavior" msgid="636826237468953117">"ප්‍රමුඛතා සංවාද"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"මෙම සංවාද ඔබගේ ලැයිස්තුවේ ඉහළින්ම පෙන්වන අතර ප්‍රමුඛතා ප්‍රකාරය ක්‍රියාත්මක විට සෑම විටම ඔබ වෙත ළඟා විය හැකිය"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"අගුලු තිරයේ පැතිකඩ පින්තූර පෙන්වයි"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"ඔබටද ඔබගේ මුල් තිරයේ බුබුළුවල මෙම සංවාද පහසුවෙන් සොයා ගත හැකිය"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"බාධා නොකරන්න හට බාධා කරන්න"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"තේරුණා"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"සැකසීම්"</string>
@@ -1029,6 +1028,12 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ස්විචය"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ප්‍රවේශ්‍යතා බොත්තම ප්‍රවේශ්‍යතා ඉංගිතය ප්‍රතිස්ථාපනය කළේය\n\n"<annotation id="link">"සැකසීම් බලන්න"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"එය තාවකාලිකව සැඟවීමට බොත්තම දාරයට ගෙන යන්න"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ඉහළ වමට ගෙන යන්න"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ඉහළ දකුණට ගෙන යන්න"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"පහළ වමට ගෙන යන්න"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"පහළ දකුණට ගෙන යන්න"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"මායිමට ගෙන යන්න සහ සඟවන්න"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"මායිමෙන් පිටට ගන්න සහ පෙන්වන්න"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"උපාංග පාලන"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ඔබේ සම්බන්ධිත උපාංග සඳහා පාලන එක් කරන්න"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"උපාංග පාලන පිහිටුවන්න"</string>
@@ -1107,19 +1112,27 @@
     <string name="less_than_timestamp" msgid="6598972791137724517">"<xliff:g id="DURATION">%1$s</xliff:g>කට වඩා අඩු කාලයකට පෙර"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"<xliff:g id="DURATION">%1$s</xliff:g>කට වඩා පෙර"</string>
     <string name="birthday_status" msgid="2596961629465396761">"උපන් දිනය"</string>
+    <string name="birthday_status_content_description" msgid="7677415209545817153">"මේ <xliff:g id="NAME">%1$s</xliff:g>ගේ උපන් දිනයයි"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"උපන් දිනය ඉක්මනින්"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"මේ ළඟදීම <xliff:g id="NAME">%1$s</xliff:g>ගේ උපන් දිනයයි"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"සංවත්සරය"</string>
+    <string name="anniversary_status_content_description" msgid="6214503393960662875">"මේ <xliff:g id="NAME">%1$s</xliff:g>ගේ සංවත්සරයයි"</string>
     <string name="location_status" msgid="1294990572202541812">"ස්ථානය බෙදා ගැනීම"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> ස්ථානය බෙදා ගනිමින්"</string>
     <string name="new_story_status" msgid="9012195158584846525">"අලුත් කතාව"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> නව කතාවක් බෙදා ගන්නා ලදි"</string>
     <string name="video_status" msgid="4548544654316843225">"නරඹමින්"</string>
     <string name="audio_status" msgid="4237055636967709208">"සවන් දෙමින්"</string>
     <string name="game_status" msgid="1340694320630973259">"ක්‍රීඩා කරමින්"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"මිතුරන්"</string>
     <string name="empty_status" msgid="5938893404951307749">"අද රෑ කතාබහ කරමු!"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"අන්තර්ගතය ඉක්මනින් පෙන්වනු ඇත"</string>
     <string name="missed_call" msgid="4228016077700161689">"මඟ හැරුණු ඇමතුම"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"මෑත පණිවිඩ, මඟ හැරුණු ඇමතුම් සහ තත්ත්ව යාවත්කාලීන කිරීම් බලන්න"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"සංවාදය"</string>
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> පණිවිඩයක් එවා ඇත"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> රූපයක් යවන ලදී"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"ඔබගේ බැටරි මනුව කියවීමේ දෝෂයකි"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"තවත් තොරතුරු සඳහා තට්ටු කරන්න"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"එලාම සකසා නැත"</string>

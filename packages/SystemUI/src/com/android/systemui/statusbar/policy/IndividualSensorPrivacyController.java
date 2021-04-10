@@ -26,6 +26,8 @@ public interface IndividualSensorPrivacyController extends
 
     void setSensorBlocked(@Sensor int sensor, boolean blocked);
 
+    void suppressSensorPrivacyReminders(String packageName, boolean suppress);
+
     interface Callback {
         void onSensorBlockedChanged(@Sensor int sensor, boolean blocked);
     }

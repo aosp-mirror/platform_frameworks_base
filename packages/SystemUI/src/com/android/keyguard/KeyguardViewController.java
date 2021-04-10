@@ -182,7 +182,6 @@ public interface KeyguardViewController {
      * @param container
      * @param notificationPanelViewController
      * @param biometricUnlockController
-     * @param lockIconContainer
      * @param notificationContainer
      * @param bypassController
      */
@@ -190,6 +189,6 @@ public interface KeyguardViewController {
             ViewGroup container,
             NotificationPanelViewController notificationPanelViewController,
             BiometricUnlockController biometricUnlockController,
-            ViewGroup lockIconContainer, View notificationContainer,
+            View notificationContainer,
             KeyguardBypassController bypassController);
 }

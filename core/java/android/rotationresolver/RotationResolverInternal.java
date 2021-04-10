@@ -44,6 +44,7 @@ public abstract class RotationResolverInternal {
      *
      * @param callback the callback that will be called when the result is computed or an
      *                 error is captured. {@link RotationResolverCallbackInternal}
+     * @param packageName the package name of the fore ground activity.
      * @param proposedRotation the screen rotation that is proposed by the system.
      * @param currentRotation the current screen rotation.
      * @param timeoutMillis the timeout in millisecond for the query. If the query doesn't get
@@ -53,8 +54,10 @@ public abstract class RotationResolverInternal {
      * @param cancellationSignal a cancellation signal that notifies the rotation resolver manger
      */
     public abstract void resolveRotation(@NonNull RotationResolverCallbackInternal callback,
-            @Surface.Rotation int proposedRotation, @Surface.Rotation int currentRotation,
-            @DurationMillisLong long timeoutMillis, @NonNull CancellationSignal cancellationSignal);
+            String packageName, @Surface.Rotation int proposedRotation,
+            @Surface.Rotation int currentRotation, @DurationMillisLong long timeoutMillis,
+            @NonNull CancellationSignal cancellationSignal);
+
 
     /**
      * Internal interfaces for the rotation resolver callback.

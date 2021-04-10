@@ -29,13 +29,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.IdRes;
 import android.app.ActivityManager;
-import android.app.StatusBarManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
@@ -65,6 +63,7 @@ import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
@@ -110,7 +109,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -235,6 +233,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private UserManager mUserManager;
     @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    private LockIconViewController mLockIconViewController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -338,6 +338,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mMediaDataManager,
                 mNotificationShadeDepthController,
                 mAmbientState,
+                mLockIconViewController,
                 mFeatureFlags);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
@@ -368,19 +369,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     public void testSetExpandedHeight() {
         mNotificationPanelViewController.setExpandedHeight(200);
         assertThat((int) mNotificationPanelViewController.getExpandedHeight()).isEqualTo(200);
-    }
-
-    @Test
-    public void testAffordanceLaunchingListener() {
-        Consumer<Boolean> listener = spy((showing) -> { });
-        mNotificationPanelViewController.setExpandedFraction(1f);
-        mNotificationPanelViewController.setLaunchAffordanceListener(listener);
-        mNotificationPanelViewController.launchCamera(false /* animate */,
-                StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
-        verify(listener).accept(eq(true));
-
-        mNotificationPanelViewController.onAffordanceLaunchEnded();
-        verify(listener).accept(eq(false));
     }
 
     @Test

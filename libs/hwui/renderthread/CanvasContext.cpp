@@ -452,6 +452,12 @@ void CanvasContext::notifyFramePending() {
 }
 
 void CanvasContext::draw() {
+    if (auto grContext = getGrContext()) {
+        if (grContext->abandoned()) {
+            LOG_ALWAYS_FATAL("GrContext is abandoned/device lost at start of CanvasContext::draw");
+            return;
+        }
+    }
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 

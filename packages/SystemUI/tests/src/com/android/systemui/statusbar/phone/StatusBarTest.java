@@ -65,7 +65,6 @@ import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -236,7 +235,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
     @Mock private DozeServiceHost mDozeServiceHost;
-    @Mock private LinearLayout mLockIconContainer;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
     @Mock private KeyguardLiftController mKeyguardLiftController;
     @Mock private VolumeComponent mVolumeComponent;
@@ -252,7 +250,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
-    @Mock private LockscreenLockIconController mLockscreenLockIconController;
     @Mock private StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     @Mock private DarkIconDispatcher mDarkIconDispatcher;
@@ -434,13 +431,9 @@ public class StatusBarTest extends SysuiTestCase {
                 mOngoingCallController,
                 mTunerService,
                 mFeatureFlags);
-
-        when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
-                mLockIconContainer);
-
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
-                any(ViewGroup.class), any(ViewGroup.class), any(KeyguardBypassController.class)))
+                any(ViewGroup.class), any(KeyguardBypassController.class)))
                 .thenReturn(mStatusBarKeyguardViewManager);
 
         when(mKeyguardViewMediator.getViewMediatorCallback()).thenReturn(
@@ -450,7 +443,6 @@ public class StatusBarTest extends SysuiTestCase {
         // initialized automatically.
         mStatusBar.mNotificationShadeWindowView = mNotificationShadeWindowView;
         mStatusBar.mNotificationPanelViewController = mNotificationPanelViewController;
-        mStatusBar.mLockscreenLockIconController = mLockscreenLockIconController;
         mStatusBar.mDozeScrimController = mDozeScrimController;
         mStatusBar.mPresenter = mNotificationPresenter;
         mStatusBar.mKeyguardIndicationController = mKeyguardIndicationController;

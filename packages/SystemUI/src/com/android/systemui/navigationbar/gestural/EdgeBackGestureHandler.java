@@ -415,6 +415,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         if (!mIsEnabled) {
             mGestureNavigationSettingsObserver.unregister();
             mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
+            if (DEBUG_MISSING_GESTURE) {
+                Log.d(DEBUG_MISSING_GESTURE_TAG, "Unregister display listener");
+            }
             mPluginManager.removePluginListener(this);
             TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
             DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
@@ -432,6 +435,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             updateDisplaySize();
             mContext.getSystemService(DisplayManager.class).registerDisplayListener(this,
                     mContext.getMainThreadHandler());
+            if (DEBUG_MISSING_GESTURE) {
+                Log.d(DEBUG_MISSING_GESTURE_TAG, "Register display listener");
+            }
             TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                     runnable -> (mContext.getMainThreadHandler()).post(runnable),
@@ -817,6 +823,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             updateDisabledForQuickstep();
         }
 
+        if (DEBUG_MISSING_GESTURE) {
+            Log.d(DEBUG_MISSING_GESTURE_TAG, "Display changed: mDisplayId=" + mDisplayId
+                    + " displayId=" + displayId);
+        }
         if (displayId == mDisplayId) {
             updateDisplaySize();
         }
@@ -824,6 +834,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
 
     private void updateDisplaySize() {
         mContext.getDisplay().getRealSize(mDisplaySize);
+        if (DEBUG_MISSING_GESTURE) {
+            Log.d(DEBUG_MISSING_GESTURE_TAG, "Update display size: mDisplaySize=" + mDisplaySize);
+        }
         if (mEdgeBackPlugin != null) {
             mEdgeBackPlugin.setDisplaySize(mDisplaySize);
         }
