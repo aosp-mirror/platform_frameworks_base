@@ -974,7 +974,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нема да имате пристап до податоците или интернетот преку <xliff:g id="CARRIER">%s</xliff:g>. Интернетот ќе биде достапен само преку Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"вашиот оператор"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Бидејќи апликацијата го прикрива барањето за дозвола, „Поставките“ не може да го потврдат вашиот одговор."</string>
-    <string name="slice_permission_title" msgid="3262615140094151017">"Дали да се дозволи <xliff:g id="APP_0">%1$s</xliff:g> да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_title" msgid="3262615140094151017">"Да се дозволи <xliff:g id="APP_0">%1$s</xliff:g> да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Може да чита информации од <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Може да презема дејства во <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Дозволете <xliff:g id="APP">%1$s</xliff:g> да прикажува делови од која било апликација"</string>

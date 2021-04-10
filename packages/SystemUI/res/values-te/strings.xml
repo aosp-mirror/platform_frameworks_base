@@ -414,7 +414,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> వినియోగించబడింది"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> పరిమితి"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> హెచ్చరిక"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"కార్యాలయ ప్రొఫైల్"</string>
+    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"ఆఫీస్ ప్రొఫైల్"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"రాత్రి కాంతి"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"సూర్యోదయం వరకు"</string>
@@ -653,7 +653,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"డెమో మోడ్ చూపు"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ఈథర్‌నెట్"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"అలారం"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"కార్యాలయ ప్రొఫైల్‌"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ఎయిర్‌ప్లేన్ మోడ్"</string>
     <string name="add_tile" msgid="6239678623873086686">"టైల్‌ను జోడించండి"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"ప్రసార టైల్"</string>
@@ -663,7 +663,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"శీఘ్ర సెట్టింగ్‌లు, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"హాట్‌స్పాట్"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"కార్యాలయ ప్రొఫైల్‌"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"కొందరికి సరదాగా ఉంటుంది కానీ అందరికీ అలాగే ఉండదు"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"సిస్టమ్ UI ట్యూనర్ Android వినియోగదారు ఇంటర్‌ఫేస్‌ను మెరుగుపరచడానికి మరియు అనుకూలీకరించడానికి మీకు మరిన్ని మార్గాలను అందిస్తుంది. ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
@@ -948,9 +948,9 @@
     <string name="notification_channel_battery" msgid="9219995638046695106">"బ్యాటరీ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"స్క్రీన్‌షాట్‌లు"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"సాధారణ సందేశాలు"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"నిల్వ"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"స్టోరేజ్"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"సూచనలు"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"తక్షణ యాప్‌లు"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"ఇన్‌స్టంట్ యాప్‌లు"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> అమలవుతోంది"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ఇన్‌స్టాల్ చేయకుండా యాప్ తెరవబడింది."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ఇన్‌స్టాల్ చేయకుండా యాప్ తెరవబడింది. మరింత తెలుసుకోవడానికి నొక్కండి."</string>

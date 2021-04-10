@@ -106,7 +106,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Lopeta"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Keskeytä"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Jatka"</string>
-    <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Peruuta"</string>
+    <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Peru"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Jaa"</string>
     <string name="screenrecord_delete_label" msgid="1376347010553987058">"Poista"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Näytön tallennus peruutettu"</string>
@@ -138,10 +138,10 @@
     <string name="phone_label" msgid="5715229948920451352">"avaa puhelin"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"Avaa ääniapuri"</string>
     <string name="camera_label" msgid="8253821920931143699">"avaa kamera"</string>
-    <string name="cancel" msgid="1089011503403416730">"Peruuta"</string>
+    <string name="cancel" msgid="1089011503403416730">"Peru"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Vahvista"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Yritä uudelleen"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Peruuta todennus napauttamalla"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Peru todennus napauttamalla"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Yritä uudelleen"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"Kasvojasi katsotaan"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Kasvot tunnistettu"</string>
