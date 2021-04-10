@@ -208,6 +208,7 @@ final class DefaultPermissionGrantPolicy {
 
     private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
     static {
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
     }

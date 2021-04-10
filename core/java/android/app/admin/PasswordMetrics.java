@@ -691,6 +691,19 @@ public final class PasswordMetrics implements Parcelable {
         return minMetrics;
     }
 
+    /**
+     * Returns true if password is non-empty and contains digits only.
+     * @param password
+     * @return
+     */
+    public static boolean isNumericOnly(@NonNull String password) {
+        if (password.length() == 0) return false;
+        for (int i = 0; i < password.length(); i++) {
+            if (categoryChar(password.charAt(i)) != CHAR_DIGIT) return false;
+        }
+        return true;
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;

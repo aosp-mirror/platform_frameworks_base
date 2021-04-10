@@ -188,7 +188,7 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Nga administratori i profilit tënd të punës"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Nga <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"Profili i punës u fshi"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto me administratorin për ndihmë."</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikacioni i administrimit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto me administratorin për ndihmë."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Shumë përpjekje për fjalëkalimin"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratori e refuzoi pajisjen për përdorim personal"</string>
@@ -206,7 +206,7 @@
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Shërbimi i përditësimit të kohës GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Shërbimi i menaxherit të njohjes së muzikës"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Pajisja do të spastrohet"</string>
-    <string name="factory_reset_message" msgid="2657049595153992213">"Aplikacioni i administratorit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
+    <string name="factory_reset_message" msgid="2657049595153992213">"Aplikacioni i administrimit nuk mund të përdoret. Pajisja jote tani do të fshihet.\n\nNëse ke pyetje, kontakto me administratorin e organizatës."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printimi është çaktivizuar nga <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktivizo profilin e punës"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikacionet e tua personale janë bllokuar derisa të aktivizosh profilin tënd të punës"</string>
@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikacioni është në ekzekutim"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacionet që konsumojnë baterinë"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Zmadhimi"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Përdorimi i qasshmërisë"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> po përdor baterinë"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikacione po përdorin baterinë"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Trokit për detaje mbi baterinë dhe përdorimin e të dhënave"</string>
@@ -539,6 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Lejon që aplikacioni të zbulojë dhe të çiftohet me pajisjet me Bluetooth në afërsi"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"të lidhet me pajisjet e çiftuara me Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Lejon që aplikacioni të lidhet me pajisjet e çiftuara me Bluetooth"</string>
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacionet për shërbimin e preferuar të pagesës me NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lejon aplikacionin të marrë informacione për shërbimin e preferuar të pagesës me NFC si p.sh. ndihmat e regjistruara dhe destinacionin e itinerarit."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
@@ -573,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nuk është vendosur kod PIN, motiv ose fjalëkalim"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Gabim gjatë vërtetimit"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Përdor kyçjen e ekranit"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Fut kyçjen e ekranit për të vazhduar"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"U zbulua gjurmë gishti e pjesshme"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Gjurma e gishtit nuk mund të përpunohej. Provo përsëri."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Pastro sensorin"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Gishti lëvizi shumë shpejt"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Gishti lëvizi shumë ngadalë. Provo përsëri."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Provo një gjurmë gishti tjetër"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Me shumë ndriçim"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Provo ta rregullosh"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Gjurma e gishtit u vërtetua"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Fytyra u vërtetua"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Fytyra u vërtetua, shtyp \"Konfirmo\""</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardueri i gjurmës së gishtit nuk mundësohet."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nuk mund të konfigurohet gjurma e gishtit"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Koha e veprimit për gjurmën e gishtit skadoi. Provo përsëri."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operacioni i gjurmës së gishtit u anulua."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Veprimi i gjurmës së gishtit u anulua nga përdoruesi."</string>
@@ -661,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Fytyra <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Përdor shkyçjen me fytyrë"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Përdor kyçjen me fytyrë ose kyçjen e ekranit"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Përdor fytyrën tënde për të vazhduar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Përdor fytyrën tënde ose kyçjen e ekranit për të vazhduar"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -756,8 +750,8 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Kërko që të dhënat e ruajtura të aplikacionit të enkriptohen."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Çaktivizo kamerat"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Parandalo përdorimin e të gjitha kamerave të pajisjes."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Çaktivizimin e disa funksioneve të kyçjes së ekranit"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Parandalo përdorimin e disa funksioneve të kyçjes së ekranit."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Çaktivizimin e disa veçorive të kyçjes së ekranit"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Parandalo përdorimin e disa veçorive të kyçjes së ekranit."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Shtëpia"</item>
     <item msgid="7740243458912727194">"Celulari"</item>
@@ -1852,7 +1846,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> i dytë i punës"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> i tretë i punës"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Zhgozhdimi kërkon PIN-in"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Kërko model shkyçjeje para heqjes së gozhdimit"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Kërko motivin e shkyçjes para heqjes së gozhdimit"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Kërko fjalëkalim para heqjes nga gozhdimi."</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Instaluar nga administratori"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Përditësuar nga administratori"</string>
@@ -2080,7 +2074,7 @@
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Ky njoftim është renditur më poshtë. Trokit për të dhënë komente."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të zgjatur jetëgjatësinë e baterisë"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të rritur kohëzgjatjen e baterisë"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Kursyesi i baterisë"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"\"Kursyesi i baterisë\" është çaktivizuar"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefoni ka nivel të mjaftueshëm baterie. Funksionet nuk janë më të kufizuara."</string>

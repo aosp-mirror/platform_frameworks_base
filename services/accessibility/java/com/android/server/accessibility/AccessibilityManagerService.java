@@ -1882,12 +1882,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mTempIntArray.add(resolveInfo.serviceInfo.applicationInfo.uid);
             }
         }
-        // Calling out with lock held, but to a lower-level service
+        // Calling out with lock held, but to lower-level services
         final AudioManagerInternal audioManager =
                 LocalServices.getService(AudioManagerInternal.class);
         if (audioManager != null) {
             audioManager.setAccessibilityServiceUids(mTempIntArray);
         }
+        mActivityTaskManagerService.setAccessibilityServiceUids(mTempIntArray);
         updateAccessibilityEnabledSettingLocked(userState);
     }
 

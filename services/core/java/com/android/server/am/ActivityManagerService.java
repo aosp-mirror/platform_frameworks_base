@@ -15656,9 +15656,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             final ActivityServiceConnectionsHolder holder =
                     (ActivityServiceConnectionsHolder) connectionHolder;
             synchronized (ActivityManagerService.this) {
-                holder.forEachConnection(cr -> mServices.removeConnectionLocked(
-                        (ConnectionRecord) cr, null /* skipApp */, holder /* skipAct */,
-                        false /* enqueueOomAdj */));
+                synchronized (mProcLock) {
+                    holder.forEachConnection(cr -> mServices.removeConnectionLocked(
+                            (ConnectionRecord) cr, null /* skipApp */, holder /* skipAct */,
+                            false /* enqueueOomAdj */));
+                }
             }
         }
 

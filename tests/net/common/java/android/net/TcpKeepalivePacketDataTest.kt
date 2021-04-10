@@ -92,12 +92,12 @@ class TcpKeepalivePacketDataTest {
         assertTrue(str.contains(data.dstAddress.hostAddress))
         assertTrue(str.contains(data.dstPort.toString()))
         // .packet not included in toString()
-        assertTrue(str.contains(data.tcpSeq.toString()))
-        assertTrue(str.contains(data.tcpAck.toString()))
-        assertTrue(str.contains(data.tcpWindow.toString()))
-        assertTrue(str.contains(data.tcpWindowScale.toString()))
-        assertTrue(str.contains(data.ipTos.toString()))
-        assertTrue(str.contains(data.ipTtl.toString()))
+        assertTrue(str.contains(data.getTcpSeq().toString()))
+        assertTrue(str.contains(data.getTcpAck().toString()))
+        assertTrue(str.contains(data.getTcpWindow().toString()))
+        assertTrue(str.contains(data.getTcpWindowScale().toString()))
+        assertTrue(str.contains(data.getIpTos().toString()))
+        assertTrue(str.contains(data.getIpTtl().toString()))
 
         // Update above assertions if field is added
         assertFieldCountEquals(5, KeepalivePacketData::class.java)

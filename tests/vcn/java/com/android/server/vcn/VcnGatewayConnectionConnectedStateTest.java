@@ -26,6 +26,7 @@ import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
 
 import static com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,14 +47,18 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
+import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.TemporaryFailureException;
+import android.net.vcn.VcnControlPlaneIkeConfig;
 import android.net.vcn.VcnManager.VcnErrorCode;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.vcn.util.MtuUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,13 +78,13 @@ import java.util.function.Consumer;
 @SmallTest
 public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnectionTestBase {
     private VcnIkeSession mIkeSession;
-    private NetworkAgent mNetworkAgent;
+    private VcnNetworkAgent mNetworkAgent;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        mNetworkAgent = mock(NetworkAgent.class);
+        mNetworkAgent = mock(VcnNetworkAgent.class);
         doReturn(mNetworkAgent)
                 .when(mDeps)
                 .newNetworkAgent(any(), any(), any(), any(), anyInt(), any(), any(), any(), any());
@@ -152,7 +157,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     }
 
     @Test
-    public void testMigratedTransformsAreApplied() throws Exception {
+    public void testMigration() throws Exception {
+        triggerChildOpened();
+
         getChildSessionCallback()
                 .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
         mTestLooper.dispatchAll();
@@ -170,6 +177,17 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         }
 
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+
+        final List<ChildSaProposal> saProposals =
+                ((VcnControlPlaneIkeConfig) mConfig.getControlPlaneConfig())
+                        .getChildSessionParams()
+                        .getSaProposals();
+        final int expectedMtu =
+                MtuUtils.getMtu(
+                        saProposals,
+                        mConfig.getMaxMtu(),
+                        TEST_UNDERLYING_NETWORK_RECORD_1.linkProperties.getMtu());
+        verify(mNetworkAgent).sendLinkProperties(argThat(lp -> expectedMtu == lp.getMtu()));
     }
 
     private void triggerChildOpened() {
@@ -299,8 +317,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 .removeAddressFromTunnelInterface(
                         eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(TEST_INTERNAL_ADDR), any());
 
-        // TODO(b/184579891): Also verify link properties updated and sent when sendLinkProperties
-        // is mockable
+        verify(mNetworkAgent).sendLinkProperties(argThat(
+                lp -> newInternalAddrs.equals(lp.getLinkAddresses())
+                        && Collections.singletonList(TEST_DNS_ADDR_2).equals(lp.getDnsServers())));
 
         // Verify that IpSecTunnelInterface only created once
         verify(mIpSecSvc).createTunnelInterface(any(), any(), any(), any(), any());
@@ -321,6 +340,66 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
 
         assertFalse(mGatewayConnection.isInSafeMode());
+    }
+
+    private Consumer<VcnNetworkAgent> setupNetworkAndGetUnwantedCallback() {
+        triggerChildOpened();
+        mTestLooper.dispatchAll();
+
+        final ArgumentCaptor<Consumer<VcnNetworkAgent>> unwantedCallbackCaptor =
+                ArgumentCaptor.forClass(Consumer.class);
+        verify(mDeps)
+                .newNetworkAgent(
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        anyInt(),
+                        any(),
+                        any(),
+                        unwantedCallbackCaptor.capture(),
+                        any());
+
+        return unwantedCallbackCaptor.getValue();
+    }
+
+    @Test
+    public void testUnwantedNetworkAgentTriggersTeardown() throws Exception {
+        final Consumer<VcnNetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
+
+        unwantedCallback.accept(mNetworkAgent);
+        mTestLooper.dispatchAll();
+
+        assertTrue(mGatewayConnection.isQuitting());
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+    }
+
+    @Test
+    public void testUnwantedNetworkAgentWithDisconnectedNetworkAgent() throws Exception {
+        final Consumer<VcnNetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
+
+        mGatewayConnection.setNetworkAgent(null);
+        unwantedCallback.accept(mNetworkAgent);
+        mTestLooper.dispatchAll();
+
+        // Verify that the call was ignored; the state machine is still running, and the state has
+        // not changed.
+        assertFalse(mGatewayConnection.isQuitting());
+        assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+    }
+
+    @Test
+    public void testUnwantedNetworkAgentWithNewNetworkAgent() throws Exception {
+        final Consumer<VcnNetworkAgent> unwantedCallback = setupNetworkAndGetUnwantedCallback();
+        final VcnNetworkAgent testAgent = mock(VcnNetworkAgent.class);
+
+        mGatewayConnection.setNetworkAgent(testAgent);
+        unwantedCallback.accept(mNetworkAgent);
+        mTestLooper.dispatchAll();
+
+        assertFalse(mGatewayConnection.isQuitting());
+        assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+        assertEquals(testAgent, mGatewayConnection.getNetworkAgent());
     }
 
     @Test

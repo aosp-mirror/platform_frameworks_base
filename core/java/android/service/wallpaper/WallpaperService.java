@@ -1982,6 +1982,11 @@ public abstract class WallpaperService extends Service {
             mCaller.sendMessage(msg);
         }
 
+        @Nullable
+        public SurfaceControl mirrorSurfaceControl() {
+            return mEngine == null ? null : SurfaceControl.mirrorSurface(mEngine.mSurfaceControl);
+        }
+
         private void doDetachEngine() {
             mActiveEngines.remove(mEngine);
             mEngine.detach();

@@ -297,8 +297,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aktivna aplikacija"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije koje troše bateriju"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Uvećanje"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Korišćenje Pristupačnosti"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> koristi bateriju"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Aplikacije (<xliff:g id="NUMBER">%1$d</xliff:g>) koriste bateriju"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dodirnite za detalje o bateriji i potrošnji podataka"</string>
@@ -316,7 +315,7 @@
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"šalje i pregleda SMS poruke"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"Datoteke i mediji"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"pristupa slikama, medijima i datotekama na uređaju"</string>
+    <string name="permgroupdesc_storage" msgid="6351503740613026600">"pristupa slikama, medijima i fajlovima na uređaju"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snima zvuk"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fizičke aktivnosti"</string>
@@ -542,6 +541,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Dozvoljava aplikaciji da otkriva Bluetooth uređaje u blizini i uparuje se sa njima"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"povezivanje sa uparenim Bluetooth uređajima"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Dozvoljava aplikaciji da se povezuje sa uparenim Bluetooth uređajima"</string>
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacije o željenoj NFC usluzi za plaćanje"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Dozvoljava aplikaciji da preuzima informacije o željenoj NFC usluzi za plaćanje, poput registrovanih identifikatora aplikacija i odredišta preusmeravanja."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrola komunikacije u užem polju (Near Field Communication)"</string>
@@ -576,30 +579,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Niste podesili ni PIN, ni šablon, ni lozinku"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Greška pri potvrdi identiteta"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Koristite zaključavanje ekrana"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Upotrebite zaključavanje ekrana da biste nastavili"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Otkriven je delimičan otisak prsta"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nije uspela obrada otiska prsta. Probajte ponovo."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Obrišite senzor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"Prst je pomeren prebrzo"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Previše sporo ste pomerili prst. Probajte ponovo."</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Probajte sa drugim otiskom prsta"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Previše je svetlo"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Probajte da prilagodite"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisak prsta je potvrđen"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Lice je potvrđeno"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Lice je potvrđeno. Pritisnite Potvrdi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardver za otiske prstiju nije dostupan."</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Podešavanje otiska prsta nije uspelo"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Vremensko ograničenje za otisak prsta je isteklo. Probajte ponovo."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Radnja sa otiskom prsta je otkazana."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Korisnik je otkazao radnju sa otiskom prsta."</string>
@@ -664,8 +659,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Lice <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Koristite otključavanje licem"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Koristite zaključavanje licem ili zaključavanje ekrana"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Potvrdite identitet licem da biste nastavili"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Koristite lice ili zaključavanje ekrana da biste nastavili"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -740,13 +734,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava Android TV uređaj ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava telefon ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Promena zaključavanja ekrana"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Promenite zaključavanje ekrana."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Menja zaključavanje ekrana."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Zaključavanje ekrana"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Kontrolišite način i vreme zaključavanja ekrana."</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Kontrola načina i vremena zaključavanja ekrana."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje svih podataka"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Brisanje podataka na tabletu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Briše podatke Android TV uređaja bez upozorenja pomoću resetovanja na fabrička podešavanja."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Izbrišite podatke na telefonu bez upozorenja resetovanjem na fabrička podešavanja."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Brisanje podataka na telefonu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Obriši podatke korisnika"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Briše podatke ovog korisnika na ovom tabletu bez upozorenja."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Briše podatke ovog korisnika na ovom Android TV uređaju bez upozorenja."</string>
@@ -1493,7 +1487,7 @@
     <string name="ime_action_previous" msgid="6548799326860401611">"Prethodno"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Izvrši"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Biraj broj\nkoristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="6200708808003692594">"Kreirajte kontakt\nkoristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="6200708808003692594">"Napravite kontakt\nkoristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Sledeće aplikacije zahtevaju dozvolu za pristup nalogu, kako sada, tako i ubuduće."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Želite da odobrite ovaj zahtev?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Zahtev za pristup"</string>

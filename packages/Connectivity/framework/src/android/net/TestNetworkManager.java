@@ -15,8 +15,10 @@
  */
 package android.net;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -58,6 +60,7 @@ public class TestNetworkManager {
      * @param network The test network that should be torn down
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_TEST_NETWORKS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void teardownTestNetwork(@NonNull Network network) {
         try {
@@ -103,6 +106,7 @@ public class TestNetworkManager {
      * @param binder A binder object guarding the lifecycle of this test network.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_TEST_NETWORKS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void setupTestNetwork(@NonNull String iface, @NonNull IBinder binder) {
         setupTestNetwork(iface, null, true, new int[0], binder);
@@ -145,6 +149,7 @@ public class TestNetworkManager {
      *     TUN interface.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_TEST_NETWORKS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
     public TestNetworkInterface createTunInterface(@NonNull Collection<LinkAddress> linkAddrs) {
@@ -163,6 +168,7 @@ public class TestNetworkManager {
      *     TAP interface.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_TEST_NETWORKS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
     public TestNetworkInterface createTapInterface() {

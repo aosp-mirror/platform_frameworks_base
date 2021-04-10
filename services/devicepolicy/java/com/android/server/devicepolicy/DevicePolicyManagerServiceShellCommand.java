@@ -100,8 +100,8 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         int operation = Integer.parseInt(getNextArgRequired());
         int reason = mService.getUnsafeOperationReason(operation);
         boolean safe = reason == DevicePolicyManager.OPERATION_SAFETY_REASON_NONE;
-        pw.printf("Operation %s is %b. Reason: %s\n",
-                DevicePolicyManager.operationToString(operation), safe,
+        pw.printf("Operation %s is %s. Reason: %s\n",
+                DevicePolicyManager.operationToString(operation), safeToString(safe),
                 DevicePolicyManager.operationSafetyReasonToString(reason));
         return 0;
     }
@@ -110,9 +110,12 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         int reason = Integer.parseInt(getNextArgRequired());
         boolean safe = mService.isSafeOperation(reason);
         pw.printf("Operations affected by %s are %s\n",
-                DevicePolicyManager.operationSafetyReasonToString(reason),
-                (safe ? "SAFE" : "UNSAFE"));
+                DevicePolicyManager.operationSafetyReasonToString(reason), safeToString(safe));
         return 0;
+    }
+
+    private static String safeToString(boolean safe) {
+        return safe ? "SAFE" : "UNSAFE";
     }
 
     private int runSetSafeOperation(PrintWriter pw) {

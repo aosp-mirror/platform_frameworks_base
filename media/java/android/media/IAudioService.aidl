@@ -164,7 +164,7 @@ interface IAudioService {
 
     boolean setEncodedSurroundMode(int mode);
 
-    int getEncodedSurroundMode();
+    int getEncodedSurroundMode(int targetSdkVersion);
 
     oneway void avrcpSupportsAbsoluteVolume(String address, boolean support);
 

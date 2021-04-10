@@ -43,13 +43,16 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread)
-        : SkiaPipeline(thread), mVkManager(thread.vulkanManager()) {
+SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread) : SkiaPipeline(thread) {
     thread.renderState().registerContextCallback(this);
 }
 
 SkiaVulkanPipeline::~SkiaVulkanPipeline() {
     mRenderThread.renderState().removeContextCallback(this);
+}
+
+VulkanManager& SkiaVulkanPipeline::vulkanManager() {
+    return mRenderThread.vulkanManager();
 }
 
 MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
@@ -58,7 +61,7 @@ MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
 
 Frame SkiaVulkanPipeline::getFrame() {
     LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr, "getFrame() called on a context with no surface!");
-    return mVkManager.dequeueNextBuffer(mVkSurface);
+    return vulkanManager().dequeueNextBuffer(mVkSurface);
 }
 
 bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
@@ -85,7 +88,7 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
 
     {
         ATRACE_NAME("flush commands");
-        mVkManager.finishFrame(backBuffer.get());
+        vulkanManager().finishFrame(backBuffer.get());
     }
     layerUpdateQueue->clear();
 
@@ -106,7 +109,7 @@ bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
     currentFrameInfo->markSwapBuffers();
 
     if (*requireSwap) {
-        mVkManager.swapBuffers(mVkSurface, screenDirty);
+        vulkanManager().swapBuffers(mVkSurface, screenDirty);
     }
 
     return *requireSwap;
@@ -122,15 +125,15 @@ void SkiaVulkanPipeline::onStop() {}
 
 bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior) {
     if (mVkSurface) {
-        mVkManager.destroySurface(mVkSurface);
+        vulkanManager().destroySurface(mVkSurface);
         mVkSurface = nullptr;
     }
 
     if (surface) {
         mRenderThread.requireVkContext();
         mVkSurface =
-                mVkManager.createSurface(surface, mColorMode, mSurfaceColorSpace, mSurfaceColorType,
-                                         mRenderThread.getGrContext(), 0);
+                vulkanManager().createSurface(surface, mColorMode, mSurfaceColorSpace,
+                                              mSurfaceColorType, mRenderThread.getGrContext(), 0);
     }
 
     return mVkSurface != nullptr;
@@ -141,7 +144,7 @@ bool SkiaVulkanPipeline::isSurfaceReady() {
 }
 
 bool SkiaVulkanPipeline::isContextReady() {
-    return CC_LIKELY(mVkManager.hasVkContext());
+    return CC_LIKELY(vulkanManager().hasVkContext());
 }
 
 void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
@@ -156,7 +159,7 @@ sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThr
 
 void SkiaVulkanPipeline::onContextDestroyed() {
     if (mVkSurface) {
-        mVkManager.destroySurface(mVkSurface);
+        vulkanManager().destroySurface(mVkSurface);
         mVkSurface = nullptr;
     }
 }

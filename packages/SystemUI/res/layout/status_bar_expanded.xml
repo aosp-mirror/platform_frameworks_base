@@ -112,4 +112,9 @@
         android:layout_width="match_parent" />
 
     <include layout="@layout/status_bar_expanded_plugin_frame"/>
+
+    <com.android.keyguard.LockIconView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/lock_icon_view" />
 </com.android.systemui.statusbar.phone.NotificationPanelView>

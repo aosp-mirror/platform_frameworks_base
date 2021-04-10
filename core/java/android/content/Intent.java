@@ -18,6 +18,7 @@ package android.content;
 
 import static android.content.ContentProvider.maybeAddUserId;
 
+import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyRes;
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
@@ -846,6 +847,21 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SHOW_APP_INFO
             = "android.intent.action.SHOW_APP_INFO";
+
+    /**
+     * Activity Action: Placeholder that the component handling it can do activity
+     * recognition. Can be placed on a service. Only one service per package is
+     * supported.
+     *
+     * <p>Input: Nothing.</p>
+     * <p>Output: Nothing </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String ACTION_ACTIVITY_RECOGNIZER =
+            "android.intent.action.ACTIVITY_RECOGNIZER";
 
     /**
      * Represents a shortcut/live folder icon resource.
@@ -2471,6 +2487,8 @@ public class Intent implements Parcelable, Cloneable {
      *     (eg. tests) is still able to use the intent. The platform will automatically collapse
      *     the proper system dialogs in the proper use-cases. For all others, the user is the one in
      *     control of closing dialogs.
+     *
+     * @see AccessibilityService#GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @RequiresPermission(android.Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS)
@@ -4823,31 +4841,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION =
             "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
 
-    /**
-     * Broadcast Action: Indicates that the device's reboot readiness has changed.
-     *
-     * <p>This broadcast will be sent with an extra that indicates whether or not the device is
-     * ready to reboot.
-     * <p>
-     * The receiver <em>must</em> have the {@link android.Manifest.permission#REBOOT} permission.
-     * <p class="note">
-     * This is a protected intent that can only be sent by the system.
-     *
-     * @see #EXTRA_IS_READY_TO_REBOOT
-     * @hide
-     */
-    @SystemApi
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_REBOOT_READY = "android.intent.action.REBOOT_READY";
-
-    /**
-     * A boolean extra used with {@link #ACTION_REBOOT_READY} which indicates if the
-     * device is ready to reboot.
-     * Will be {@code true} if ready to reboot, {@code false} otherwise.
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_IS_READY_TO_REBOOT = "android.intent.extra.IS_READY_TO_REBOOT";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

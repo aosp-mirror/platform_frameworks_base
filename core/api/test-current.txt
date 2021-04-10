@@ -204,6 +204,10 @@ package android.app {
     method public void onTaskRemovalStarted(int);
   }
 
+  public class AlarmManager {
+    method public boolean hasScheduleExactAlarm(@NonNull String, int);
+  }
+
   public class AppDetailsActivity extends android.app.Activity {
     ctor public AppDetailsActivity();
   }
@@ -1587,6 +1591,7 @@ package android.os {
 
   public class Build {
     method public static boolean is64BitAbi(String);
+    method public static boolean isDebuggable();
     field public static final boolean IS_EMULATOR;
   }
 
@@ -2317,7 +2322,7 @@ package android.service.watchdog {
 package android.speech {
 
   public class SpeechRecognizer {
-    method public void setTemporaryOnDeviceRecognizer(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SPEECH_RECOGNITION) public void setTemporaryOnDeviceRecognizer(@Nullable android.content.ComponentName);
   }
 
 }
