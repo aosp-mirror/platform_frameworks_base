@@ -1076,6 +1076,8 @@ public class AppOpsManager {
     public static final int OP_BLUETOOTH_SCAN = AppProtoEnums.APP_OP_BLUETOOTH_SCAN;
     /** @hide */
     public static final int OP_BLUETOOTH_CONNECT = AppProtoEnums.APP_OP_BLUETOOTH_CONNECT;
+    /** @hide */
+    public static final int OP_BLUETOOTH_ADVERTISE = AppProtoEnums.APP_OP_BLUETOOTH_ADVERTISE;
     /** @hide Use the BiometricPrompt/BiometricManager APIs. */
     public static final int OP_USE_BIOMETRIC = AppProtoEnums.APP_OP_USE_BIOMETRIC;
     /** @hide Physical activity recognition. */
@@ -1237,7 +1239,7 @@ public class AppOpsManager {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 114;
+    public static final int _NUM_OP = 115;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1483,6 +1485,8 @@ public class AppOpsManager {
     public static final String OPSTR_BLUETOOTH_SCAN = "android:bluetooth_scan";
     /** @hide */
     public static final String OPSTR_BLUETOOTH_CONNECT = "android:bluetooth_connect";
+    /** @hide */
+    public static final String OPSTR_BLUETOOTH_ADVERTISE = "android:bluetooth_advertise";
 
     /** @hide Use the BiometricPrompt/BiometricManager APIs. */
     public static final String OPSTR_USE_BIOMETRIC = "android:use_biometric";
@@ -1733,6 +1737,7 @@ public class AppOpsManager {
             // Nearby devices
             OP_BLUETOOTH_SCAN,
             OP_BLUETOOTH_CONNECT,
+            OP_BLUETOOTH_ADVERTISE,
             OP_UWB_RANGING,
 
             // APPOP PERMISSIONS
@@ -1875,7 +1880,8 @@ public class AppOpsManager {
             OP_MANAGE_MEDIA,                    // MANAGE_MEDIA
             OP_BLUETOOTH_CONNECT,               // OP_BLUETOOTH_CONNECT
             OP_UWB_RANGING,                     // OP_UWB_RANGING
-            OP_ACTIVITY_RECOGNITION_SOURCE      // OP_ACTIVITY_RECOGNITION_SOURCE
+            OP_ACTIVITY_RECOGNITION_SOURCE,     // OP_ACTIVITY_RECOGNITION_SOURCE
+            OP_BLUETOOTH_ADVERTISE,             // OP_BLUETOOTH_ADVERTISE
     };
 
     /**
@@ -1995,7 +2001,8 @@ public class AppOpsManager {
             OPSTR_MANAGE_MEDIA,
             OPSTR_BLUETOOTH_CONNECT,
             OPSTR_UWB_RANGING,
-            OPSTR_ACTIVITY_RECOGNITION_SOURCE
+            OPSTR_ACTIVITY_RECOGNITION_SOURCE,
+            OPSTR_BLUETOOTH_ADVERTISE,
     };
 
     /**
@@ -2116,7 +2123,8 @@ public class AppOpsManager {
             "MANAGE_MEDIA",
             "BLUETOOTH_CONNECT",
             "UWB_RANGING",
-            "ACTIVITY_RECOGNITION_SOURCE"
+            "ACTIVITY_RECOGNITION_SOURCE",
+            "BLUETOOTH_ADVERTISE",
     };
 
     /**
@@ -2239,6 +2247,7 @@ public class AppOpsManager {
             Manifest.permission.BLUETOOTH_CONNECT,
             Manifest.permission.UWB_RANGING,
             null, // no permission for OP_ACTIVITY_RECOGNITION_SOURCE,
+            Manifest.permission.BLUETOOTH_ADVERTISE,
     };
 
     /**
@@ -2361,6 +2370,7 @@ public class AppOpsManager {
             null, // BLUETOOTH_CONNECT
             null, // UWB_RANGING
             null, // ACTIVITY_RECOGNITION_SOURCE
+            null, // BLUETOOTH_ADVERTISE
     };
 
     /**
@@ -2481,7 +2491,8 @@ public class AppOpsManager {
             null, // MANAGE_MEDIA
             null, // BLUETOOTH_CONNECT
             null, // UWB_RANGING
-            null  // ACTIVITY_RECOGNITION_SOURCE
+            null, // ACTIVITY_RECOGNITION_SOURCE
+            null, // BLUETOOTH_ADVERTISE
     };
 
     /**
@@ -2602,6 +2613,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_CONNECT
             AppOpsManager.MODE_ALLOWED, // UWB_RANGING
             AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION_SOURCE
+            AppOpsManager.MODE_ALLOWED, // BLUETOOTH_ADVERTISE
     };
 
     /**
@@ -2726,6 +2738,7 @@ public class AppOpsManager {
             false, // BLUETOOTH_CONNECT
             false, // UWB_RANGING
             false, // ACTIVITY_RECOGNITION_SOURCE
+            false, // BLUETOOTH_ADVERTISE
     };
 
     /**

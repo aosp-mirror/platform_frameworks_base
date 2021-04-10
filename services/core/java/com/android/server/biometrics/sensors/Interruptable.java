@@ -19,21 +19,13 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 
 /**
- * Interface that {@link BaseClientMonitor} subclasses eligible/interested in error callbacks should
- * implement.
+ * Interface that {@link BaseClientMonitor} subclasses eligible for cancellation should implement.
  */
 public interface Interruptable {
     /**
      * Requests to end the ClientMonitor's lifecycle.
      */
     void cancel();
-
-    /**
-     * Notifies the client of errors from the HAL.
-     * @param errorCode defined by the HIDL interface
-     * @param vendorCode defined by the vendor
-     */
-    void onError(int errorCode, int vendorCode);
 
     /**
      * Notifies the client that it needs to finish before

@@ -184,7 +184,7 @@ final class UpdatableFontDir {
                     return;
                 }
                 FontFileInfo fontFileInfo = validateFontFile(files[0]);
-                addFileToMapIfNewer(fontFileInfo, true /* deleteOldFile */);
+                addFileToMapIfSameOrNewer(fontFileInfo, true /* deleteOldFile */);
             }
             success = true;
         } catch (Throwable t) {
@@ -367,7 +367,7 @@ final class UpdatableFontDir {
                         "Failed to change mode to 711", e);
             }
             FontFileInfo fontFileInfo = validateFontFile(newFontFile);
-            if (!addFileToMapIfNewer(fontFileInfo, false)) {
+            if (!addFileToMapIfSameOrNewer(fontFileInfo, false)) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_DOWNGRADING,
                         "Downgrading font file is forbidden.");
@@ -408,10 +408,10 @@ final class UpdatableFontDir {
 
     /**
      * Add the given {@link FontFileInfo} to {@link #mFontFileInfoMap} if its font revision is
-     * higher than the currently used font file (either in {@link #mFontFileInfoMap} or {@link
-     * #mPreinstalledFontDirs}).
+     * equal to or higher than the revision of currently used font file (either in
+     * {@link #mFontFileInfoMap} or {@link #mPreinstalledFontDirs}).
      */
-    private boolean addFileToMapIfNewer(FontFileInfo fontFileInfo, boolean deleteOldFile) {
+    private boolean addFileToMapIfSameOrNewer(FontFileInfo fontFileInfo, boolean deleteOldFile) {
         FontFileInfo existingInfo = lookupFontFileInfo(fontFileInfo.getPostScriptName());
         final boolean shouldAddToMap;
         if (existingInfo == null) {
@@ -419,9 +419,9 @@ final class UpdatableFontDir {
             // Note that getPreinstalledFontRevision() returns -1 if there is no preinstalled font
             // with 'name'.
             long preInstalledRev = getPreinstalledFontRevision(fontFileInfo.getFile().getName());
-            shouldAddToMap = preInstalledRev < fontFileInfo.getRevision();
+            shouldAddToMap = preInstalledRev <= fontFileInfo.getRevision();
         } else {
-            shouldAddToMap = existingInfo.getRevision() < fontFileInfo.getRevision();
+            shouldAddToMap = existingInfo.getRevision() <= fontFileInfo.getRevision();
         }
         if (shouldAddToMap) {
             if (deleteOldFile && existingInfo != null) {

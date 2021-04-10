@@ -540,9 +540,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Tillader, at appen registrerer og parrer Bluetooth-enheder i nærheden"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"opret forbindelse til parrede Bluetooth-enheder"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Tillader, at appen opretter forbindelse til parrede Bluetooth-enheder"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Foretrukne oplysninger vedrørende NFC-betalingstjeneste"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillader, at appen får foretrukne oplysninger vedrørende NFC-betalingstjeneste, f.eks. registrerede hjælpemidler og rutedestinationer."</string>
@@ -733,7 +733,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås din Android TV-enhed, eller ryd alle brugerens data, hvis adgangskoden angives forkert for mange gange."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås telefonen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Skifte skærmlås"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Skifter skærmlås."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Skifter skærmlåsen."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Låse skærmen"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Administrerer, hvordan og hvornår skærmen låses."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Slette alle data"</string>

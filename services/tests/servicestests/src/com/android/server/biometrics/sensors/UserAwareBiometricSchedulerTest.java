@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -98,7 +97,7 @@ public class UserAwareBiometricSchedulerTest {
         when(nextClient.getTargetUserId()).thenReturn(nextUserId);
 
         mScheduler.scheduleClientMonitor(nextClient);
-        verify(nextClient, never()).start(any());
+
         assertEquals(0, mUserStoppedCallback.numInvocations);
         assertEquals(1, mUserStartedCallback.numInvocations);
 

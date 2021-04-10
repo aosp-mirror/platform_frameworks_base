@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1132,12 +1133,31 @@ public class AlarmManager {
     }
 
     /**
-     * Called to check if the caller has permission to use alarms set via {@link }
-     * @return
+     * Called to check if the caller has the permission
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}.
+     *
+     * Apps can start {@link android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM} to
+     * request this from the user.
+     *
+     * @return {@code true} if the caller has the permission, {@code false} otherwise.
+     * @see android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM
      */
     public boolean canScheduleExactAlarms() {
+        return hasScheduleExactAlarm(mContext.getOpPackageName(), mContext.getUserId());
+    }
+
+    /**
+     * Called to check if the given package in the given user has the permission
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}.
+     *
+     * <p><em>Note: This is only for use by system components.</em>
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean hasScheduleExactAlarm(@NonNull String packageName, int userId) {
         try {
-            return mService.canScheduleExactAlarms();
+            return mService.hasScheduleExactAlarm(packageName, userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

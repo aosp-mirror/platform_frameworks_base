@@ -538,8 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Allows the app to discover and pair nearby Bluetooth devices"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"connect to paired Bluetooth devices"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Allows the app to connect to paired Bluetooth devices"</string>
-    <string name="permlab_uwb_ranging" msgid="1386872477514626447">"range to devices using ultra-wideband"</string>
-    <string name="permdesc_uwb_ranging" product="default" msgid="1583519616137382182">"Allows the app to range to devices using ultra-wideband"</string>
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <skip />
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferred NFC payment service information"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Allows the app to get preferred NFC payment service information, such as registered aids and route destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"control Near-Field Communication"</string>

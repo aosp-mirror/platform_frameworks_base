@@ -28,6 +28,10 @@ import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.app.AlarmManager.WINDOW_EXACT;
 import static android.app.AlarmManager.WINDOW_HEURISTIC;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.MODE_ERRORED;
+import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
@@ -49,6 +53,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.alarm.AlarmManagerService.ACTIVE_INDEX;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.APP_STANDBY_BUCKET_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.CHARGING_STATUS_CHANGED;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.EXACT_ALARM_DENY_LIST_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_ALARMS;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_COMPAT_QUOTA;
@@ -57,6 +62,7 @@ import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_W
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WINDOW;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_CRASH_NON_CLOCK_APPS;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_EXACT_ALARM_DENY_LIST;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LAZY_BATCHING;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
@@ -64,6 +70,7 @@ import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_FUT
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_WINDOW;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_PRIORITY_ALARM_DELAY;
+import static com.android.server.alarm.AlarmManagerService.Constants.MAX_EXACT_ALARM_DENY_LIST_SIZE;
 import static com.android.server.alarm.AlarmManagerService.FREQUENT_INDEX;
 import static com.android.server.alarm.AlarmManagerService.INDEFINITE_DELAY;
 import static com.android.server.alarm.AlarmManagerService.IS_WAKEUP_MASK;
@@ -87,8 +94,10 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -106,6 +115,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
 import android.content.PermissionChecker;
+import android.content.pm.PackageManagerInternal;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -113,13 +123,13 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -176,6 +186,8 @@ public class AlarmManagerServiceTest {
     @Mock
     private IAppOpsService mIAppOpsService;
     @Mock
+    private AppOpsManager mAppOpsManager;
+    @Mock
     private DeviceIdleInternal mDeviceIdleInternal;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
@@ -183,6 +195,8 @@ public class AlarmManagerServiceTest {
     private AppStandbyInternal mAppStandbyInternal;
     @Mock
     private ActivityManagerInternal mActivityManagerInternal;
+    @Mock
+    private PackageManagerInternal mPackageManagerInternal;
     @Mock
     private AppStateTrackerImpl mAppStateTracker;
     @Mock
@@ -270,6 +284,11 @@ public class AlarmManagerServiceTest {
         }
 
         @Override
+        int getCallingUid() {
+            return TEST_CALLING_UID;
+        }
+
+        @Override
         void setAlarm(int type, long millis) {
             mTestTimer.set(type, millis);
         }
@@ -279,7 +298,7 @@ public class AlarmManagerServiceTest {
         }
 
         @Override
-        int getSystemUiUid() {
+        int getSystemUiUid(PackageManagerInternal unused) {
             return SYSTEM_UI_UID;
         }
 
@@ -344,6 +363,8 @@ public class AlarmManagerServiceTest {
                 () -> LocalServices.getService(DeviceIdleInternal.class));
         doReturn(mActivityManagerInternal).when(
                 () -> LocalServices.getService(ActivityManagerInternal.class));
+        doReturn(mPackageManagerInternal).when(
+                () -> LocalServices.getService(PackageManagerInternal.class));
         doReturn(mAppStateTracker).when(() -> LocalServices.getService(AppStateTracker.class));
         doReturn(mAppStandbyInternal).when(
                 () -> LocalServices.getService(AppStandbyInternal.class));
@@ -376,8 +397,10 @@ public class AlarmManagerServiceTest {
                 () -> DeviceConfig.getProperties(
                         eq(DeviceConfig.NAMESPACE_ALARM_MANAGER), ArgumentMatchers.<String>any()));
 
-        when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(
-                mock(AppOpsManager.class));
+        when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManager);
+
+        when(mPackageManagerInternal.getPackageUid(eq(TEST_CALLING_PACKAGE), anyInt(),
+                eq(TEST_CALLING_USER))).thenReturn(TEST_CALLING_UID);
 
         mInjector = new Injector(mMockContext);
         mService = new AlarmManagerService(mMockContext, mInjector);
@@ -464,8 +487,15 @@ public class AlarmManagerServiceTest {
 
     private void setTestAlarm(int type, long triggerTime, long windowLength,
             PendingIntent operation, long interval, int flags, int callingUid, Bundle idleOptions) {
+        setTestAlarm(type, triggerTime, windowLength, operation, interval, flags, callingUid,
+                TEST_CALLING_PACKAGE, idleOptions);
+    }
+
+    private void setTestAlarm(int type, long triggerTime, long windowLength,
+            PendingIntent operation, long interval, int flags, int callingUid,
+            String callingPackage, Bundle idleOptions) {
         mService.setImpl(type, triggerTime, windowLength, interval, operation, null, "test", flags,
-                null, null, callingUid, TEST_CALLING_PACKAGE, idleOptions);
+                null, null, callingUid, callingPackage, idleOptions);
     }
 
     private void setTestAlarmWithListener(int type, long triggerTime, IAlarmListener listener) {
@@ -500,6 +530,12 @@ public class AlarmManagerServiceTest {
     private void setDeviceConfigBoolean(String key, boolean val) {
         mDeviceConfigKeys.add(key);
         doReturn(val).when(mDeviceConfigProperties).getBoolean(eq(key), anyBoolean());
+        mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
+    }
+
+    private void setDeviceConfigString(String key, String val) {
+        mDeviceConfigKeys.add(key);
+        doReturn(val).when(mDeviceConfigProperties).getString(eq(key), anyString());
         mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
     }
 
@@ -599,6 +635,47 @@ public class AlarmManagerServiceTest {
         assertEquals(45, mService.mConstants.LISTENER_TIMEOUT);
         assertEquals(50, mService.mConstants.MIN_WINDOW);
         assertEquals(55, mService.mConstants.PRIORITY_ALARM_DELAY);
+    }
+
+    @Test
+    public void updatingExactAlarmDenyList() {
+        ArraySet<String> denyListed = new ArraySet<>(new String[]{
+                "com.example.package1",
+                "com.example.package2",
+                "com.example.package3",
+        });
+        setDeviceConfigString(KEY_EXACT_ALARM_DENY_LIST,
+                "com.example.package1,com.example.package2,com.example.package3");
+        assertEquals(denyListed, mService.mConstants.EXACT_ALARM_DENY_LIST);
+
+
+        denyListed = new ArraySet<>(new String[]{
+                "com.example.package1",
+                "com.example.package4",
+        });
+        setDeviceConfigString(KEY_EXACT_ALARM_DENY_LIST,
+                "com.example.package1,com.example.package4");
+        assertEquals(denyListed, mService.mConstants.EXACT_ALARM_DENY_LIST);
+
+        setDeviceConfigString(KEY_EXACT_ALARM_DENY_LIST, "");
+        assertEquals(0, mService.mConstants.EXACT_ALARM_DENY_LIST.size());
+    }
+
+    @Test
+    public void exactAlarmDenyListMaxSize() {
+        final ArraySet<String> expectedSet = new ArraySet<>();
+        final StringBuilder sb = new StringBuilder("package1");
+        expectedSet.add("package1");
+        for (int i = 2; i <= 2 * MAX_EXACT_ALARM_DENY_LIST_SIZE; i++) {
+            sb.append(",package");
+            sb.append(i);
+            if (i <= MAX_EXACT_ALARM_DENY_LIST_SIZE) {
+                expectedSet.add("package" + i);
+            }
+        }
+        assertEquals(MAX_EXACT_ALARM_DENY_LIST_SIZE, expectedSet.size());
+        setDeviceConfigString(KEY_EXACT_ALARM_DENY_LIST, sb.toString());
+        assertEquals(expectedSet, mService.mConstants.EXACT_ALARM_DENY_LIST);
     }
 
     @Test
@@ -1717,21 +1794,70 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void canScheduleExactAlarms() throws RemoteException {
+    public void hasScheduleExactAlarmBinderCallEmptyDenyList() throws RemoteException {
         doReturn(PermissionChecker.PERMISSION_GRANTED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
-        assertTrue(mBinder.canScheduleExactAlarms());
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
+        assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
 
         doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
-        assertFalse(mBinder.canScheduleExactAlarms());
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
+        assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+    }
 
-        doReturn(PermissionChecker.PERMISSION_SOFT_DENIED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
-        assertFalse(mBinder.canScheduleExactAlarms());
+    @Test
+    public void hasScheduleExactAlarmBinderCallWithDenyList() throws RemoteException {
+        setDeviceConfigString(KEY_EXACT_ALARM_DENY_LIST, TEST_CALLING_PACKAGE);
+
+        when(mAppOpsManager.checkOpNoThrow(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(MODE_ERRORED);
+
+        assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)), never());
+
+        when(mAppOpsManager.checkOpNoThrow(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(MODE_DEFAULT);
+
+        assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)), never());
+
+        when(mAppOpsManager.checkOpNoThrow(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(MODE_IGNORED);
+
+        assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)), never());
+
+        when(mAppOpsManager.checkOpNoThrow(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(MODE_ALLOWED);
+
+        doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
+
+        assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
+
+        doReturn(PermissionChecker.PERMISSION_GRANTED).when(
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
+
+        assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)), times(2));
     }
 
     @Test
@@ -1757,8 +1883,9 @@ public class AlarmManagerServiceTest {
         mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 1234, WINDOW_HEURISTIC, 0,
                 FLAG_ALLOW_WHILE_IDLE, getNewMockPendingIntent(), null, null, null, null);
 
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM), never());
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)), never());
         verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
     }
 
@@ -1775,7 +1902,7 @@ public class AlarmManagerServiceTest {
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(),
                 eq(FLAG_STANDALONE), isNull(), isNull(),
-                eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), isNull());
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), isNull());
     }
 
     @Test
@@ -1792,7 +1919,7 @@ public class AlarmManagerServiceTest {
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(),
                 eq(FLAG_ALLOW_WHILE_IDLE_COMPAT | FLAG_STANDALONE), isNull(), isNull(),
-                eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
         final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
         final int type = idleOptions.getTemporaryAppAllowlistType();
@@ -1812,7 +1939,7 @@ public class AlarmManagerServiceTest {
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), anyLong(), eq(0L),
                 eq(alarmPi), isNull(), isNull(), eq(FLAG_ALLOW_WHILE_IDLE_COMPAT), isNull(),
-                isNull(), eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
+                isNull(), eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
         final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
         final int type = idleOptions.getTemporaryAppAllowlistType();
@@ -1832,7 +1959,7 @@ public class AlarmManagerServiceTest {
 
         verify(mService).setImpl(eq(RTC_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(), eq(FLAG_STANDALONE | FLAG_WAKE_FROM_IDLE),
-                isNull(), eq(alarmClock), eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), isNull());
+                isNull(), eq(alarmClock), eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), isNull());
     }
 
     @Test
@@ -1842,8 +1969,9 @@ public class AlarmManagerServiceTest {
                         anyString(), any(UserHandle.class)));
 
         doReturn(PermissionChecker.PERMISSION_GRANTED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
         final AlarmManager.AlarmClockInfo alarmClock = mock(AlarmManager.AlarmClockInfo.class);
@@ -1851,14 +1979,15 @@ public class AlarmManagerServiceTest {
                 alarmPi, null, null, null, alarmClock);
 
         // Correct permission checks are invoked.
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
 
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mService).setImpl(eq(RTC_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(), eq(FLAG_STANDALONE | FLAG_WAKE_FROM_IDLE),
-                isNull(), eq(alarmClock), eq(Process.myUid()), eq(TEST_CALLING_PACKAGE),
+                isNull(), eq(alarmClock), eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE),
                 bundleCaptor.capture());
 
         final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
@@ -1874,8 +2003,9 @@ public class AlarmManagerServiceTest {
                         anyString(), any(UserHandle.class)));
 
         doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         when(mDeviceIdleInternal.isAppOnWhitelist(anyInt())).thenReturn(true);
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
@@ -1887,9 +2017,9 @@ public class AlarmManagerServiceTest {
         } catch (SecurityException se) {
             // Expected.
         }
-
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
     }
 
@@ -1904,15 +2034,16 @@ public class AlarmManagerServiceTest {
         mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 1234, WINDOW_EXACT, 0,
                 0, alarmPi, null, null, null, null);
 
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
 
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(),
                 eq(FLAG_STANDALONE), isNull(), isNull(),
-                eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
         final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
         final int type = idleOptions.getTemporaryAppAllowlistType();
@@ -1926,24 +2057,24 @@ public class AlarmManagerServiceTest {
                         anyString(), any(UserHandle.class)));
         // If permission is denied, only then allowlist will be checked.
         doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         when(mDeviceIdleInternal.isAppOnWhitelist(anyInt())).thenReturn(true);
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
         mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 1234, WINDOW_EXACT, 0,
                 0, alarmPi, null, null, null, null);
 
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM));
-        verify(mDeviceIdleInternal).isAppOnWhitelist(UserHandle.getAppId(Process.myUid()));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
+        verify(mDeviceIdleInternal).isAppOnWhitelist(UserHandle.getAppId(TEST_CALLING_UID));
 
-        final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(),
                 eq(FLAG_STANDALONE), isNull(), isNull(),
-                eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
-        System.out.println("what got captured: " + bundleCaptor.getValue());
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), isNull());
     }
 
     @Test
@@ -1957,15 +2088,16 @@ public class AlarmManagerServiceTest {
         mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 1234, WINDOW_EXACT, 0,
                 FLAG_ALLOW_WHILE_IDLE, alarmPi, null, null, null, null);
 
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
 
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(),
                 eq(FLAG_ALLOW_WHILE_IDLE | FLAG_STANDALONE), isNull(), isNull(),
-                eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
         final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
         final int type = idleOptions.getTemporaryAppAllowlistType();
@@ -1979,23 +2111,25 @@ public class AlarmManagerServiceTest {
                         anyString(), any(UserHandle.class)));
         // If permission is denied, only then allowlist will be checked.
         doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         when(mDeviceIdleInternal.isAppOnWhitelist(anyInt())).thenReturn(true);
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
         mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 1234, WINDOW_EXACT, 0,
                 FLAG_ALLOW_WHILE_IDLE, alarmPi, null, null, null, null);
 
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM));
-        verify(mDeviceIdleInternal).isAppOnWhitelist(UserHandle.getAppId(Process.myUid()));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
+        verify(mDeviceIdleInternal).isAppOnWhitelist(UserHandle.getAppId(TEST_CALLING_UID));
 
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(),
                 eq(FLAG_ALLOW_WHILE_IDLE_COMPAT | FLAG_STANDALONE), isNull(), isNull(),
-                eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
         final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
         final int type = idleOptions.getTemporaryAppAllowlistType();
@@ -2011,8 +2145,9 @@ public class AlarmManagerServiceTest {
                         anyString(), any(UserHandle.class)));
 
         doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         when(mDeviceIdleInternal.isAppOnWhitelist(anyInt())).thenReturn(false);
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
@@ -2030,8 +2165,9 @@ public class AlarmManagerServiceTest {
         } catch (SecurityException se) {
             // Expected.
         }
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM), times(2));
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)), times(2));
         verify(mDeviceIdleInternal, times(2)).isAppOnWhitelist(anyInt());
     }
 
@@ -2047,14 +2183,15 @@ public class AlarmManagerServiceTest {
         mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 4321, WINDOW_HEURISTIC, 0,
                 FLAG_ALLOW_WHILE_IDLE, alarmPi, null, null, null, null);
 
-        verify(() -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                Manifest.permission.SCHEDULE_EXACT_ALARM), never());
+        verify(() -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)), never());
         verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
 
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(4321L), anyLong(), eq(0L),
                 eq(alarmPi), isNull(), isNull(), eq(FLAG_ALLOW_WHILE_IDLE_COMPAT), isNull(),
-                isNull(), eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
+                isNull(), eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), bundleCaptor.capture());
 
         final BroadcastOptions idleOptions = new BroadcastOptions(bundleCaptor.getValue());
         final int type = idleOptions.getTemporaryAppAllowlistType();
@@ -2068,10 +2205,11 @@ public class AlarmManagerServiceTest {
                         anyString(), any(UserHandle.class)));
 
         doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
-                () -> PermissionChecker.checkCallingOrSelfPermissionForPreflight(mMockContext,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM));
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         when(mDeviceIdleInternal.isAppOnWhitelist(anyInt())).thenReturn(true);
-        when(mAppStateTracker.isUidPowerSaveUserExempt(Process.myUid())).thenReturn(true);
+        when(mAppStateTracker.isUidPowerSaveUserExempt(TEST_CALLING_UID)).thenReturn(true);
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
         mBinder.set(TEST_CALLING_PACKAGE, ELAPSED_REALTIME_WAKEUP, 1234, WINDOW_EXACT, 0,
@@ -2081,7 +2219,7 @@ public class AlarmManagerServiceTest {
         verify(mService).setImpl(eq(ELAPSED_REALTIME_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
                 eq(alarmPi), isNull(), isNull(),
                 eq(FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED | FLAG_STANDALONE), isNull(), isNull(),
-                eq(Process.myUid()), eq(TEST_CALLING_PACKAGE), isNull());
+                eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE), isNull());
     }
 
     @Test
@@ -2101,9 +2239,79 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
+    public void denyListPackagesAdded() {
+        mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[]{"p1", "p2", "p3"});
+        setDeviceConfigString(KEY_EXACT_ALARM_DENY_LIST, "p2,p4,p5");
+        assertAndHandleMessageSync(EXACT_ALARM_DENY_LIST_CHANGED);
+
+        ArraySet<String> added = new ArraySet<>(new String[]{"p4", "p5"});
+        verify(mService).handlePackagesAddedToExactAlarmsDenyListLocked(eq(added));
+    }
+
+    @Test
+    public void denyListPackagesRemoved() {
+        clearInvocations(mService.mHandler);
+        mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[]{"p1", "p2", "p3"});
+        setDeviceConfigString(KEY_EXACT_ALARM_DENY_LIST, "p2");
+        verifyNoMoreInteractions(mService.mHandler);
+    }
+
+    @Test
+    public void removeExactAlarmsOnPackageAddedToDenyList() {
+        doReturn(true).when(
+                () -> CompatChanges.isChangeEnabled(eq(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION),
+                        anyString(), any(UserHandle.class)));
+
+        // basic exact alarm
+        setTestAlarm(ELAPSED_REALTIME, 1, 0, getNewMockPendingIntent(), 0, 0, TEST_CALLING_UID,
+                null);
+        // exact and allow-while-idle alarm
+        setTestAlarm(ELAPSED_REALTIME, 2, 0, getNewMockPendingIntent(), 0, FLAG_ALLOW_WHILE_IDLE,
+                TEST_CALLING_UID, null);
+        // alarm clock
+        setWakeFromIdle(RTC_WAKEUP, 3, getNewMockPendingIntent());
+
+        final PendingIntent inexact = getNewMockPendingIntent();
+        setTestAlarm(ELAPSED_REALTIME, 4, 10, inexact, 0, 0, TEST_CALLING_UID, null);
+
+        final PendingIntent inexactAwi = getNewMockPendingIntent();
+        setTestAlarm(ELAPSED_REALTIME, 5, 10, inexactAwi, 0, FLAG_ALLOW_WHILE_IDLE,
+                TEST_CALLING_UID, null);
+
+        final String differentPackage = "different.package";
+        final PendingIntent exactButDifferentPackage = getNewMockPendingIntent(
+                TEST_CALLING_UID, differentPackage);
+        setTestAlarm(ELAPSED_REALTIME, 6, 0, exactButDifferentPackage, 0, 0,
+                TEST_CALLING_UID, differentPackage, null);
+        assertEquals(6, mService.mAlarmStore.size());
+
+        when(mAppOpsManager.checkOpNoThrow(eq(OP_SCHEDULE_EXACT_ALARM), anyInt(),
+                anyString())).thenReturn(MODE_DEFAULT);
+        setDeviceConfigString(KEY_EXACT_ALARM_DENY_LIST, TEST_CALLING_PACKAGE);
+        assertAndHandleMessageSync(EXACT_ALARM_DENY_LIST_CHANGED);
+        verify(mService).handlePackagesAddedToExactAlarmsDenyListLocked(
+                argThat(set -> (set.size() == 1 && set.contains(TEST_CALLING_PACKAGE))));
+
+        final ArrayList<Alarm> remaining = mService.mAlarmStore.asList();
+        assertEquals(3, remaining.size());
+        assertTrue("Basic inexact alarm removed",
+                remaining.removeIf(a -> a.matches(inexact, null)));
+        assertTrue("Inexact allow-while-idle alarm removed",
+                remaining.removeIf(a -> a.matches(inexactAwi, null)));
+        assertTrue("Alarm from different package removed",
+                remaining.removeIf(a -> a.matches(exactButDifferentPackage, null)));
+
+        // Mock should return false by default.
+        verify(mDeviceIdleInternal, atLeastOnce()).isAppOnWhitelist(
+                UserHandle.getAppId(TEST_CALLING_UID));
+    }
+
+    @Test
     public void opScheduleExactAlarmRevoked() throws Exception {
-        when(mIAppOpsService.checkOperation(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID,
-                TEST_CALLING_PACKAGE)).thenReturn(AppOpsManager.MODE_ERRORED);
+        doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.SCHEDULE_EXACT_ALARM), anyInt(),
+                        eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE)));
         mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
         assertAndHandleMessageSync(REMOVE_EXACT_ALARMS);
         verify(mService).removeExactAlarmsOnPermissionRevokedLocked(TEST_CALLING_UID,
@@ -2149,7 +2357,8 @@ public class AlarmManagerServiceTest {
                 remaining.removeIf(a -> a.matches(exactButDifferentUid, null)));
 
         // Mock should return false by default.
-        verify(mDeviceIdleInternal).isAppOnWhitelist(UserHandle.getAppId(TEST_CALLING_UID));
+        verify(mDeviceIdleInternal, atLeastOnce()).isAppOnWhitelist(
+                UserHandle.getAppId(TEST_CALLING_UID));
     }
 
     @Test

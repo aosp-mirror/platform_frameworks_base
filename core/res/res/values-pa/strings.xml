@@ -294,8 +294,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ਚੱਲ ਰਹੀ ਐਪ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ਬੈਟਰੀ ਦੀ ਖਪਤ ਕਰਨ ਵਾਲੀਆਂ ਐਪਾਂ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
-    <!-- no translation found for notification_channel_accessibility_security_policy (1727787021725251912) -->
-    <skip />
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ਪਹੁੰਚਯੋਗਤਾ ਵਰਤੋਂ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ਐਪਾਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ਬੈਟਰੀ ਅਤੇ ਡਾਟਾ ਵਰਤੋਂ ਸਬੰਧੀ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -346,7 +345,7 @@
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਪੱਟੀ ਨੂੰ ਚਾਲੂ ਕਰਨ ਜਾਂ ਸਿਸਟਮ ਪ੍ਰਤੀਕਾਂ ਨੂੰ ਜੋੜਨ ਅਤੇ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ਸਥਿਤੀ ਪੱਟੀ ਬਣਨ ਦਿਓ"</string>
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਪੱਟੀ ਹੋਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ਸਥਿਤੀ ਪੱਟੀ ਦਾ ਵਿਸਤਾਰ/ਨਸ਼ਟ ਕਰੋ"</string>
+    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ਸਥਿਤੀ ਪੱਟੀ ਦਾ ਵਿਸਤਾਰ ਕਰੋ/ਸਮੇਟੋ"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਪੱਟੀ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਜਾਂ ਨਸ਼ਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"ਕਿਸੇ ਲਾਕ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਵਾਲੀਆਂ ਸਰਗਰਮੀਆਂ ਵਜੋਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"ਐਪ ਨੂੰ ਕਿਸੇ ਲਾਕ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਵਾਲੀਆਂ ਸਰਗਰਮੀਆਂ ਵਜੋਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਉਣ ਦਿੰਦਾ ਹੈ"</string>
@@ -539,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਨੂੰ ਖੋਜਣ ਅਤੇ ਉਹਨਾਂ ਨਾਲ ਜੋੜਾਬੱਧ ਕਰਨ ਦਿੰਦੀ ਹੈ"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ਜੋੜਾਬੱਧ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ਐਪਾਂ ਨੂੰ ਜੋੜਾਬੱਧ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਦਿੰਦੀ ਹੈ"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ਤਰਜੀਹੀ NFC ਭੁਗਤਾਨਸ਼ੁਦਾ ਸੇਵਾ ਜਾਣਕਾਰੀ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ਐਪ ਨੂੰ ਤਰਜੀਹੀ NFC ਭੁਗਤਾਨਸ਼ੁਦਾ ਸੇਵਾ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਕਿ ਰਜਿਸਟਰ ਕੀਤੇ ਸਾਧਨ ਅਤੇ ਮੰਜ਼ਿਲ ਰਸਤਾ।"</string>
@@ -577,30 +576,22 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"ਕੋਈ ਪਿੰਨ, ਪੈਟਰਨ ਜਾਂ ਪਾਸਵਰਡ ਸੈੱਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"ਗੜਬੜ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (694598777291084823) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣਾ ਸਕ੍ਰੀਨ ਲਾਕ ਦਾਖਲ ਕਰੋ"</string>
+    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ਅੰਸ਼ਕ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਪਤਾ ਲੱਗਿਆ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ਫਿੰਗਰਪ੍ਰਿੰਟ \'ਤੇ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਹੋ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (5236744087471419479) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1254724478300787385) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ਸੈਂਸਰ ਨੂੰ ਸਾਫ਼ ਕਰੋ"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1254724478300787385">"ਉਂਗਲ ਬਹੁਤ ਤੇਜ਼ੀ ਨਾਲ ਚਲਾਈ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ਉਂਗਲ ਕਾਫ਼ੀ ਹੌਲੀ ਮੂਵ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <!-- no translation found for fingerprint_acquired_already_enrolled (2285166003936206785) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_bright (3863560181670915607) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_try_adjusting (3667006071003809364) -->
-    <skip />
+    <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ਕੋਈ ਹੋਰ ਫਿੰਗਰਪ੍ਰਿੰਟ ਵਰਤ ਕੇ ਦੇਖੋ"</string>
+    <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਚਮਕ"</string>
+    <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ਵਿਵਸਥਿਤ ਕਰਕੇ ਦੇਖੋ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਮਾਣਿਤ ਹੋਇਆ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ਚਿਹਰਾ ਪੁਸ਼ਟੀਕਰਨ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ਚਿਹਰਾ ਪੁਸ਼ਟੀਕਰਨ, ਕਿਰਪਾ ਕਰਕੇ \'ਪੁਸ਼ਟੀ ਕਰੋ\' ਦਬਾਓ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
-    <!-- no translation found for fingerprint_error_no_space (7285481581905967580) -->
-    <skip />
+    <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੋ ਗਿਆ ਹੈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਓਪਰੇਸ਼ਨ ਰੱਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਓਪਰੇਸ਼ਨ ਵਰਤੋਂਕਾਰ ਵੱਲੋਂ ਰੱਦ ਕੀਤਾ ਗਿਆ।"</string>
@@ -665,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"ਚਿਹਰਾ <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"ਚਿਹਰਾ ਅਣਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"ਚਿਹਰਾ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣੇ ਚਿਹਰੇ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਆਪਣਾ ਚਿਹਰਾ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਵਰਤੋ"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -991,7 +981,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"ਇਹ ਸਫ਼ਾ ਛੱਡੋ"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ਇਸ ਸ਼ਫ਼ੇ ਤੇ ਰਹੋ"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nਕੀ ਤੁਸੀਂ ਯਕੀਨੀ ਤੌਰ ਤੇ ਇਸ ਪੇਜ ਤੋਂ ਦੂਰ ਜਾਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"ਪੁਸ਼ਟੀ ਕਰੋ"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"ਤਸਦੀਕ ਕਰੋ"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"ਨੁਕਤਾ: ਜ਼ੂਮ ਵਧਾਉਣ ਅਤੇ ਘਟਾਉਣ ਲਈ ਡਬਲ ਟੈਪ ਕਰੋ।"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ਆਟੋਫਿਲ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ਆਟੋਫਿਲ ਸੈਟ ਅਪ ਕਰੋ"</string>
@@ -1402,7 +1392,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ਭਾਸ਼ਾ ਅਤੇ ਖਾਕਾ ਚੁਣਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਤੇ ਦਿਖਾਉਣਾ"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> ਐਪ ਹੋਰ ਐਪਾਂ ਦੇ ਉੱਤੇ ਹੈ"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> ਐਪ ਹੋਰਾਂ ਐਪਾਂ ਦੇ ਉੱਤੇ ਹੈ।"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"ਜੇਕਰ ਤੁਸੀਂ ਨਹੀਂ ਚਾਹੁੰਦੇ ਕਿ <xliff:g id="NAME">%s</xliff:g> ਐਪ ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਦੀ ਵਰਤੋਂ ਕਰੇ, ਤਾਂ ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਇਸਨੂੰ ਬੰਦ ਕਰੋ।"</string>
@@ -1905,7 +1895,7 @@
     <string name="zen_mode_forever" msgid="740585666364912448">"ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਬੰਦ ਨਹੀਂ ਕਰਦੇ ਹੋ"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਨੂੰ ਬੰਦ ਨਹੀਂ ਕਰਦੇ ਹੋ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
-    <string name="toolbar_collapse_description" msgid="8009920446193610996">"ਨਸ਼ਟ ਕਰੋ"</string>
+    <string name="toolbar_collapse_description" msgid="8009920446193610996">"ਸਮੇਟੋ"</string>
     <string name="zen_mode_feature_name" msgid="3785547207263754500">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ਡਾਊਨਟਾਈਮ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ਵੀਕਨਾਈਟ"</string>
@@ -1928,7 +1918,7 @@
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"ਪੁਸ਼ਟੀਕਿਰਤ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ਵਿਸਤਾਰ ਕਰੋ"</string>
-    <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ਸੁੰਗੇੜੋ"</string>
+    <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ਸਮੇਟੋ"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ਟੌਗਲ ਵਿਸਤਾਰ"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB ਪੈਰੀਫੈਰਲ ਪੋਰਟ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>

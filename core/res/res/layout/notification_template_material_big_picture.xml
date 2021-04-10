@@ -58,7 +58,7 @@
             <include layout="@layout/notification_template_text_multiline" />
         </LinearLayout>
 
-        <ImageView
+        <com.android.internal.widget.BigPictureNotificationImageView
             android:id="@+id/big_picture"
             android:layout_width="match_parent"
             android:layout_height="0dp"

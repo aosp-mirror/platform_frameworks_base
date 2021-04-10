@@ -544,9 +544,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Umožňuje aplikácii objaviť zariadenia s rozhraním Bluetooth nablízku a spárovať sa s nimi"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"pripojiť sa k spárovaným zariadeniam Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Umožňuje aplikácii pripojiť sa k spárovaným zariadeniam s rozhraním Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferované informácie platenej služby NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikácii získavať preferované informácie platenej služby NFC, napríklad o registrovanej pomoci a trasách k cieľu."</string>
@@ -582,8 +582,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nie je nastavený PIN, vzor ani heslo"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Chyba overenia"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použiť zámku obrazovky"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadaním zámky obrazovky"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Bol rozpoznaný čiastočný odtlačok prsta"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Vyčistite senzor"</string>
@@ -663,8 +662,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"Tvár <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"Použiť odomknutie tvárou"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Použiť tvár alebo zámku obrazovky"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Pokračujte pomocou tváre"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Pokračujte použitím tváre alebo zámky obrazovky"</string>
   <string-array name="face_error_vendor">
   </string-array>

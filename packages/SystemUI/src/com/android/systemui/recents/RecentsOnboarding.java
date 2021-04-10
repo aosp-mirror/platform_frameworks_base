@@ -139,7 +139,7 @@ public class RecentsOnboarding {
         private void onAppLaunch() {
             ActivityManager.RunningTaskInfo info = ActivityManagerWrapper.getInstance()
                     .getRunningTask();
-            if (info == null) {
+            if (info == null || info.baseActivity == null) {
                 return;
             }
             if (mBlacklistedPackages.contains(info.baseActivity.getPackageName())) {

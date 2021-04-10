@@ -538,9 +538,9 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"付近の Bluetooth デバイスの検出とペア設定をアプリに許可します"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ペア設定された Bluetooth デバイスへの接続"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"ペア設定された Bluetooth デバイスへの接続をアプリに許可します"</string>
-    <!-- no translation found for permlab_uwb_ranging (1386872477514626447) -->
+    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (1583519616137382182) -->
+    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
     <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"優先される NFC お支払いサービスの情報"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"登録されている支援やルートの目的地など、優先される NFC お支払いサービスの情報を取得することをアプリに許可します。"</string>
@@ -576,8 +576,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN、パターン、パスワードが設定されていません"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"エラー認証"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"画面ロックの使用"</string>
-    <!-- no translation found for screen_lock_dialog_default_subtitle (120359538048533695) -->
-    <skip />
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"続行するには画面ロックを入力してください"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"指紋の一部しか検出できません"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"センサーの汚れを取り除いてください"</string>
@@ -657,8 +656,7 @@
     <string name="face_name_template" msgid="3877037340223318119">"顔 <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="8130135875458467243">"顔認証の使用"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"顔認証または画面ロックの使用"</string>
-    <!-- no translation found for face_dialog_default_subtitle (6620492813371195429) -->
-    <skip />
+    <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"続行するには顔認証を使用してください"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"続行するには、顔認証または画面ロックを使用してください"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -717,7 +715,7 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"携帯通信会社のサービスへのバインド"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"携帯通信会社のサービスにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"サイレント モードへのアクセス"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"サイレント モードの利用"</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"表示権限の使用の開始"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"アプリの権限使用の開始を所有者に許可します。通常のアプリでは不要です。"</string>
@@ -1827,7 +1825,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"新しいPINの確認"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"制限を変更するためのPINを作成してください"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PINが一致しません。もう一度お試しください。"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上にしてください。"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で作成してください。"</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください</item>
       <item quantity="one">1秒後にもう一度お試しください</item>

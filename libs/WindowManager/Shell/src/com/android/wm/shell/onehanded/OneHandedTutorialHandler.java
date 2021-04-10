@@ -28,8 +28,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -51,7 +49,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
             "persist.debug.one_handed_offset_percentage";
     private static final int MAX_TUTORIAL_SHOW_COUNT = 2;
     private final WindowManager mWindowManager;
-    private final AccessibilityManager mAccessibilityManager;
     private final String mPackageName;
     private final Rect mDisplaySize;
 
@@ -59,8 +56,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
     private View mTutorialView;
     private ContentResolver mContentResolver;
     private boolean mCanShowTutorial;
-    private String mStartOneHandedDescription;
-    private String mStopOneHandedDescription;
     private boolean mIsOneHandedMode;
 
     private enum ONE_HANDED_TRIGGER_STATE {
@@ -106,11 +101,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         mDisplaySize = windowManager.getCurrentWindowMetrics().getBounds();
         mPackageName = context.getPackageName();
         mContentResolver = context.getContentResolver();
-        mAccessibilityManager = AccessibilityManager.getInstance(context);
-        mStartOneHandedDescription = context.getResources().getString(
-                R.string.accessibility_action_start_one_handed);
-        mStopOneHandedDescription = context.getResources().getString(
-                R.string.accessibility_action_stop_one_handed);
         mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
                 Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0) >= MAX_TUTORIAL_SHOW_COUNT)
                 ? false : true;
@@ -131,14 +121,12 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
     public void onStartFinished(Rect bounds) {
         updateFinished(View.VISIBLE, 0f);
         updateTutorialCount();
-        announcementForScreenReader(true);
         mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
     }
 
     @Override
     public void onStopFinished(Rect bounds) {
         updateFinished(View.INVISIBLE, -mTargetViewContainer.getHeight());
-        announcementForScreenReader(false);
         removeTutorialFromWindowManager();
         mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
     }
@@ -168,17 +156,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         mCanShowTutorial = showCount < MAX_TUTORIAL_SHOW_COUNT;
         Settings.Secure.putInt(mContentResolver,
                 Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, showCount);
-    }
-
-    private void announcementForScreenReader(boolean isStartOneHanded) {
-        if (mAccessibilityManager.isTouchExplorationEnabled()) {
-            final AccessibilityEvent event = AccessibilityEvent.obtain();
-            event.setPackageName(mPackageName);
-            event.setEventType(AccessibilityEvent.TYPE_ANNOUNCEMENT);
-            event.getText().add(isStartOneHanded
-                    ? mStartOneHandedDescription : mStopOneHandedDescription);
-            mAccessibilityManager.sendAccessibilityEvent(event);
-        }
     }
 
     /**

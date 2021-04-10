@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Maak toe"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Raak die vingerafdruksensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Vingerafdrukikoon"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Kan nie gesig herken nie. Gebruik eerder vingerafdruk."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Gebruik jou vingerafdruk om voort te gaan"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Kan nie vingerafdruk herken nie. Gebruik eerder skermslot."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Soek tans vir jou …"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Gesig-ikoon"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Versoenbaarheid-zoem se knoppie."</string>
@@ -660,13 +657,12 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Wekker"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Beursie"</string>
-    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
-    <skip />
-    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
-    <skip />
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Gereed"</string>
-    <!-- no translation found for wallet_error_generic (257704570182963611) -->
-    <skip />
+    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"Wys alles"</string>
+    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"Ontsluit om te betaal"</string>
+    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"Gereed"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"Stel betaling op"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontsluit om te gebruik"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Kon nie jou kaarte kry nie; probeer later weer"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Werkprofiel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuigmodus"</string>
     <string name="add_tile" msgid="6239678623873086686">"Voeg teël by"</string>
@@ -735,9 +731,9 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Gedegradeer na Stil"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Hoër gegradeer"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Laer gegradeer"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wys boaan die gespreksafdeling, verskyn as \'n swewende borrel, wys profielfoto op sluitskerm"</string>
+    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"Word altyd boaan jou kennisgewings gewys, selfs wanneer Prioriteitmodus aan is"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellings"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
+    <string name="notification_priority_title" msgid="5256226572739882190">"Prioriteitgesprekke"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> steun nie gesprekskenmerke nie"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hierdie kennisgewings kan nie gewysig word nie."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Hierdie groep kennisgewings kan nie hier opgestel word nie"</string>
@@ -1011,10 +1007,10 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gaan na Instellings toe om stelselnavigasie op te dateer"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Bystandmodus"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Gesprek is as prioriteit gestel"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioriteitgesprekke sal:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Boaan gespreksafdeling wys"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Profielprent op slotskerm wys"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Verskyn as \'n swewende borrel bo-oor programme"</string>
+    <string name="priority_onboarding_behavior" msgid="636826237468953117">"Prioriteitgesprekke"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"Hierdie gesprekke word boaan jou lys gewys en kan jou altyd bereik wanneer Prioriteitmodus aan is"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"Profielfoto\'s word op die sluitskerm gewys"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"Jy kan hierdie gesprekke maklik in borrels op jou Tuisskerm kry"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Onderbreek Moenie Steur Nie"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Het dit"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Instellings"</string>
@@ -1032,6 +1028,12 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Wissel"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Toeganklikheidknoppie het die toeganklikheidgebaar vervang\n\n"<annotation id="link">"Bekyk instellings"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Skuif knoppie na kant om dit tydelik te versteek"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Beweeg na links bo"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Beweeg na regs bo"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Beweeg na links onder"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Beweeg na regs onder"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Beweeg na rand en versteek"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Beweeg weg van rand en wys"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Toestelkontroles"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Voeg kontroles vir jou gekoppelde toestelle by"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Stel toestelkontroles op"</string>
@@ -1102,31 +1104,35 @@
     <string name="basic_status" msgid="2315371112182658176">"Maak gesprek oop"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Gespreklegstukke"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tik op \'n gesprek om dit by jou tuisskerm te voeg"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Kom kyk weer nadat jy \'n paar boodskappe gekry het"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Prioriteitgesprekke"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Onlangse gesprekke"</string>
+    <string name="okay" msgid="6490552955618608554">"OK"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> gelede"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Minder as <xliff:g id="DURATION">%1$s</xliff:g> gelede"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Meer as <xliff:g id="DURATION">%1$s</xliff:g> gelede"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Verjaarsdag"</string>
+    <string name="birthday_status_content_description" msgid="7677415209545817153">"Dit is <xliff:g id="NAME">%1$s</xliff:g> se verjaarsdag"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Verjaar binnekort"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"Dit is binnekort <xliff:g id="NAME">%1$s</xliff:g> se verjaarsdag"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"Herdenking"</string>
+    <string name="anniversary_status_content_description" msgid="6214503393960662875">"Dit is <xliff:g id="NAME">%1$s</xliff:g> se herdenking"</string>
     <string name="location_status" msgid="1294990572202541812">"Deel tans ligging"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> deel tans ligging"</string>
     <string name="new_story_status" msgid="9012195158584846525">"Nuwe storie"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> het \'n nuwe storie gedeel"</string>
     <string name="video_status" msgid="4548544654316843225">"Kyk tans"</string>
     <string name="audio_status" msgid="4237055636967709208">"Luister tans"</string>
     <string name="game_status" msgid="1340694320630973259">"Speel tans"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Vriende"</string>
     <string name="empty_status" msgid="5938893404951307749">"Kom klets vanaand!"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"Inhoud sal binnekort verskyn"</string>
     <string name="missed_call" msgid="4228016077700161689">"Gemiste oproep"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Sien onlangse boodskappe, gemiste oproepe en statusopdaterings"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Gesprek"</string>
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> het \'n boodskap gestuur"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> het \'n prent gestuur"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Kon nie jou batterymeter lees nie"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tik vir meer inligting"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Geen wekker nie"</string>
