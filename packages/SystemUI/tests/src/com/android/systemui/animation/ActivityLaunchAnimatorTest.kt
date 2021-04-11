@@ -35,7 +35,7 @@ import kotlin.concurrent.thread
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
-    private val activityLaunchAnimator = ActivityLaunchAnimator()
+    private val activityLaunchAnimator = ActivityLaunchAnimator(mContext)
     private val rootView = View(mContext)
     @Spy private val controller = TestLaunchAnimatorController(rootView)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
@@ -96,7 +96,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Test
     fun doesNotStartIfAnimationIsCancelled() {
-        val runner = ActivityLaunchAnimator.Runner(controller)
+        val runner = activityLaunchAnimator.createRunner(controller)
         runner.onAnimationCancelled()
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
@@ -107,7 +107,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Test
     fun abortsIfNoOpeningWindowIsFound() {
-        val runner = ActivityLaunchAnimator.Runner(controller)
+        val runner = activityLaunchAnimator.createRunner(controller)
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
@@ -117,7 +117,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Test
     fun startsAnimationIfWindowIsOpening() {
-        val runner = ActivityLaunchAnimator.Runner(controller)
+        val runner = activityLaunchAnimator.createRunner(controller)
         runner.onAnimationStart(0, arrayOf(fakeWindow()), emptyArray(), emptyArray(), iCallback)
         waitForIdleSync()
         verify(controller).onLaunchAnimationStart(anyBoolean())

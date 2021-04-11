@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.ActivityManager
 import android.app.PendingIntent
+import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.RemoteException
@@ -16,6 +17,7 @@ import android.view.RemoteAnimationTarget
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AnimationUtils
 import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
@@ -25,11 +27,12 @@ import kotlin.math.roundToInt
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
  */
-class ActivityLaunchAnimator {
+class ActivityLaunchAnimator(context: Context) {
     companion object {
-        const val ANIMATION_DURATION = 400L
-        const val ANIMATION_DURATION_FADE_OUT_CONTENT = 67L
-        const val ANIMATION_DURATION_FADE_IN_WINDOW = 200L
+        const val ANIMATION_DURATION = 500L
+        const val ANIMATION_DURATION_FADE_OUT_CONTENT = 183L
+        const val ANIMATION_DURATION_FADE_IN_WINDOW = 216L
+        const val ANIMATION_DELAY_FADE_IN_WINDOW = 166L
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
         private const val ANIMATION_DURATION_NAV_FADE_OUT = 133L
         private const val ANIMATION_DELAY_NAV_FADE_IN =
@@ -52,6 +55,14 @@ class ActivityLaunchAnimator {
             )
         }
     }
+
+    /** The interpolator used for the width, height, Y position and corner radius. */
+    private val animationInterpolator = AnimationUtils.loadInterpolator(context,
+            R.interpolator.launch_animation_interpolator_y)
+
+    /** The interpolator used for the X position. */
+    private val animationInterpolatorX = AnimationUtils.loadInterpolator(context,
+            R.interpolator.launch_animation_interpolator_x)
 
     /**
      * Start an intent and animate the opening window. The intent will be started by running
@@ -103,6 +114,10 @@ class ActivityLaunchAnimator {
     ) {
         startIntentWithAnimation(controller) { intentStarter.startPendingIntent(it) }
     }
+
+    /** Create a new animation [Runner] controlled by [controller]. */
+    @VisibleForTesting
+    fun createRunner(controller: Controller): Runner = Runner(controller)
 
     interface PendingIntentStarter {
         /**
@@ -228,7 +243,7 @@ class ActivityLaunchAnimator {
     }
 
     @VisibleForTesting
-    class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
+    inner class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
         private val rootView = controller.getRootView()
         @PublishedApi internal val context = rootView.context
         private val transactionApplier = SyncRtSurfaceTransactionApplier(rootView)
@@ -308,6 +323,8 @@ class ActivityLaunchAnimator {
             val startBottom = state.bottom
             val startLeft = state.left
             val startRight = state.right
+            val startXCenter = (startLeft + startRight) / 2f
+            val startWidth = startRight - startLeft
 
             val startTopCornerRadius = state.topCornerRadius
             val startBottomCornerRadius = state.bottomCornerRadius
@@ -318,6 +335,8 @@ class ActivityLaunchAnimator {
             val endBottom = windowBounds.bottom
             val endLeft = windowBounds.left
             val endRight = windowBounds.right
+            val endXCenter = (endLeft + endRight) / 2f
+            val endWidth = endRight - endLeft
 
             // TODO(b/184121838): Ensure that we are launching on the same screen.
             val rootViewLocation = rootView.locationOnScreen
@@ -359,14 +378,16 @@ class ActivityLaunchAnimator {
                     return@addUpdateListener
                 }
 
-                // TODO(b/184121838): Use android.R.interpolator.fast_out_extra_slow_in instead.
                 val linearProgress = animation.animatedFraction
-                val progress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(linearProgress)
+                val progress = animationInterpolator.getInterpolation(linearProgress)
+                val xProgress = animationInterpolatorX.getInterpolation(linearProgress)
+                val xCenter = MathUtils.lerp(startXCenter, endXCenter, xProgress)
+                val halfWidth = lerp(startWidth, endWidth, progress) / 2
 
                 state.top = lerp(startTop, endTop, progress).roundToInt()
                 state.bottom = lerp(startBottom, endBottom, progress).roundToInt()
-                state.left = lerp(startLeft, endLeft, progress).roundToInt()
-                state.right = lerp(startRight, endRight, progress).roundToInt()
+                state.left = (xCenter - halfWidth).roundToInt()
+                state.right = (xCenter + halfWidth).roundToInt()
 
                 state.topCornerRadius = MathUtils.lerp(startTopCornerRadius, endRadius, progress)
                 state.bottomCornerRadius =
@@ -378,7 +399,7 @@ class ActivityLaunchAnimator {
                         1 - Interpolators.ALPHA_OUT.getInterpolation(contentAlphaProgress)
 
                 val backgroundAlphaProgress = getProgress(linearProgress,
-                        ANIMATION_DURATION_FADE_OUT_CONTENT, ANIMATION_DURATION_FADE_IN_WINDOW)
+                        ANIMATION_DELAY_FADE_IN_WINDOW, ANIMATION_DURATION_FADE_IN_WINDOW)
                 state.backgroundAlpha =
                         1 - Interpolators.ALPHA_IN.getInterpolation(backgroundAlphaProgress)
 

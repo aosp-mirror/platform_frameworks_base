@@ -21,7 +21,7 @@ package {
     default_applicable_licenses: ["frameworks_base_packages_SystemUI_license"],
 }
 
-java_library {
+android_library {
 
     name: "SystemUIAnimationLib",
 
@@ -30,9 +30,15 @@ java_library {
         "src/**/*.kt",
     ],
 
+    resource_dirs: [
+        "res",
+    ],
+
     static_libs: [
         "PluginCoreLib",
         "SystemUI-sensors",
     ],
+
+    manifest: "AndroidManifest.xml",
 
 }
