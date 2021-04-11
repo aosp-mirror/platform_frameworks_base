@@ -1,4 +1,4 @@
-package com.android.systemui.plugins.animation
+package com.android.systemui.animation
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration

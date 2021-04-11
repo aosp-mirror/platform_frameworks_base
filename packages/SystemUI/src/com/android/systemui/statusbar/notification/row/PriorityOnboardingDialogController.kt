@@ -41,9 +41,9 @@ import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import android.widget.ImageView
 import android.widget.TextView
-import com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN
 import com.android.systemui.Prefs
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators.LINEAR_OUT_SLOW_IN
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.statusbar.notification.row.NotificationConversationInfo.OnConversationSettingsClickListener
 import com.android.systemui.statusbar.phone.ShadeController

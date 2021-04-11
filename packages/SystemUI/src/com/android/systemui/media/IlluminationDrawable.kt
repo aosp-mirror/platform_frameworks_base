@@ -36,8 +36,8 @@ import android.view.View
 import androidx.annotation.Keep
 import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.ColorUtils.blendARGB
-import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 import org.xmlpull.v1.XmlPullParser
 
 private const val BACKGROUND_ANIM_DURATION = 370L

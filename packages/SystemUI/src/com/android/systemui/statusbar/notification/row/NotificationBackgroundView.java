@@ -29,9 +29,9 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 
 /**
