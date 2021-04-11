@@ -991,8 +991,8 @@ public class DevicePolicyManager {
      * <p>Use only for device owner provisioning.
      * @see #ACTION_GET_PROVISIONING_MODE
      */
-    public static final String EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT =
-            "android.app.extra.PROVISIONING_PERMISSION_GRANT_OPT_OUT";
+    public static final String EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT =
+            "android.app.extra.PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT";
 
     /**
      * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
@@ -10963,8 +10963,8 @@ public class DevicePolicyManager {
      * <p>
      * A device owner, by default, may continue granting these permissions. However, for increased
      * user control, the admin may opt out of controlling grants for these permissions by including
-     * {@link #EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters. In that
-     * case the device owner's control will be limited do denying these permissions.
+     * {@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters.
+     * In that case the device owner's control will be limited do denying these permissions.
      * <p>
      * Attempts by the admin to grant these permissions, when the admin is restricted from doing
      * so, will be silently ignored (no exception will be thrown).
