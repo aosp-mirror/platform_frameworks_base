@@ -10644,6 +10644,7 @@ package android.content {
     field public static final String NOTIFICATION_SERVICE = "notification";
     field public static final String NSD_SERVICE = "servicediscovery";
     field public static final String PEOPLE_SERVICE = "people";
+    field public static final String PERFORMANCE_HINT_SERVICE = "performance_hint";
     field public static final String POWER_SERVICE = "power";
     field public static final String PRINT_SERVICE = "print";
     field public static final int RECEIVER_VISIBLE_TO_INSTANT_APPS = 1; // 0x1
@@ -31557,6 +31558,17 @@ package android.os {
     field public static final int PATTERN_PREFIX = 1; // 0x1
     field public static final int PATTERN_SIMPLE_GLOB = 2; // 0x2
     field public static final int PATTERN_SUFFIX = 4; // 0x4
+  }
+
+  public final class PerformanceHintManager {
+    method @Nullable public android.os.PerformanceHintManager.Session createHintSession(@NonNull int[], long);
+    method public long getPreferredUpdateRateNanos();
+  }
+
+  public static class PerformanceHintManager.Session implements java.io.Closeable {
+    method public void close();
+    method public void reportActualWorkDuration(long);
+    method public void updateTargetWorkDuration(long);
   }
 
   public final class PersistableBundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
