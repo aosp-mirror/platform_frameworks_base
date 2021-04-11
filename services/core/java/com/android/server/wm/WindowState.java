@@ -4507,7 +4507,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void requestUpdateWallpaperIfNeeded() {
         final DisplayContent dc = getDisplayContent();
-        if (dc != null && (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
+        if (dc != null && hasWallpaper()) {
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             dc.setLayoutNeeded();
             mWmService.mWindowPlacerLocked.requestTraversal();
@@ -5867,7 +5867,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || inMultiWindowMode()) {
             return false;
         }
-        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+        return hasWallpaper();
+    }
+
+    boolean hasWallpaper() {
+        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
+                || (mActivityRecord != null && mActivityRecord.hasWallpaperBackgroudForLetterbox());
     }
 
     /**
