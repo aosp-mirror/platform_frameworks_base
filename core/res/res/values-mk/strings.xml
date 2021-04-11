@@ -1435,7 +1435,7 @@
     <string name="vpn_text_long" msgid="278540576806169831">"Поврзани сте на <xliff:g id="SESSION">%s</xliff:g>. Допрете за да управувате со мрежата."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Поврзување со секогаш вклучена VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Поврзани со секогаш вклучена VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Исклучено од секогаш вклучената VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Не е поврзано со секогаш вклучената VPN"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Не може да се поврзе на секогаш вклучената VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Променете ја мрежата или поставките за VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"Избери датотека"</string>
@@ -1570,7 +1570,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Префрли екран на уред"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Се бараат уреди..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Поставки"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Исклучи"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Прекини врска"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Скенирање..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Се поврзува..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Достапна"</string>

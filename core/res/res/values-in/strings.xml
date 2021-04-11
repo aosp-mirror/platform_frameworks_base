@@ -1570,7 +1570,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Transmisi layar ke perangkat"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Menelusuri perangkat…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Setelan"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan sambungan"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan koneksi"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Memindai..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Menyambung..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Tersedia"</string>

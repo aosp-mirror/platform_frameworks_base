@@ -692,8 +692,8 @@
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Spastroji të dhënat e këtij përdoruesi në këtë tablet pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Spastroji të dhënat e këtij përdoruesi në këtë pajisje Android TV pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Spastroji të dhënat e këtij përdoruesi në këtë telefon pa paralajmërim."</string>
-    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cakto përfaqësuesin global të pajisjes"</string>
-    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Cakto përfaqësuesin global të pajisjes që të përdoret kur të aktivizohet politika. Vetëm pronari i pajisjes mund ta caktojë përfaqësuesin global."</string>
+    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cakto proxy-in global të pajisjes"</string>
+    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Cakto proxy-in global të pajisjes që të përdoret kur të aktivizohet politika. Vetëm pronari i pajisjes mund ta caktojë proxy-in global."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Cakto skadimin e fjalëkalimit të kyçjes së ekranit"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"Ndrysho se sa shpesh duhet të ndërrohet fjalëkalimi, kodi PIN ose modeli i kyçjes së ekranit."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"Cakto enkriptimin e hapësirës ruajtëse"</string>
