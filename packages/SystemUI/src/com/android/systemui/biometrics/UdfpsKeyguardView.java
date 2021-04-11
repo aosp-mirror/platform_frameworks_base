@@ -30,8 +30,8 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarState;
 
 /**

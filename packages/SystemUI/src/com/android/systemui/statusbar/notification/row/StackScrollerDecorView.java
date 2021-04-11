@@ -23,7 +23,7 @@ import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Interpolators;
+import com.android.systemui.animation.Interpolators;
 
 /**
  * A common base class for all views in the notification stack scroller which don't have a

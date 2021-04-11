@@ -31,7 +31,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Interpolators;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.keyguard.KeyguardIndication;
 
 import java.util.LinkedList;
