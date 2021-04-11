@@ -20,9 +20,9 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;

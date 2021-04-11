@@ -19,7 +19,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.view.View;
 
-import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 /**
