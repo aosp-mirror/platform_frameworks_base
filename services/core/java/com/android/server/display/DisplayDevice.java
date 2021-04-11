@@ -156,10 +156,12 @@ abstract class DisplayDevice {
      *
      * @param state The new display state.
      * @param brightnessState The new display brightnessState.
+     * @param sdrBrightnessState The new display brightnessState for SDR layers.
      * @return A runnable containing work to be deferred until after we have
      * exited the critical section, or null if none.
      */
-    public Runnable requestDisplayStateLocked(int state, float brightnessState) {
+    public Runnable requestDisplayStateLocked(int state, float brightnessState,
+            float sdrBrightnessState) {
         return null;
     }
 
