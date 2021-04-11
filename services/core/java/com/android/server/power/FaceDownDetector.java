@@ -35,6 +35,7 @@ import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.PrintWriter;
@@ -59,6 +60,8 @@ public class FaceDownDetector implements SensorEventListener {
             FrameworkStatsLog.FACE_DOWN_REPORTED__FACE_DOWN_RESPONSE__USER_INTERACTION;
     private static final int UNFLIP =
             FrameworkStatsLog.FACE_DOWN_REPORTED__FACE_DOWN_RESPONSE__UNFLIP;
+    private static final int UNKNOWN =
+            FrameworkStatsLog.FACE_DOWN_REPORTED__FACE_DOWN_RESPONSE__UNKNOWN;
 
     /**
      * Used by the ExponentialMovingAverage accelerations, this determines how quickly the
@@ -130,7 +133,7 @@ public class FaceDownDetector implements SensorEventListener {
 
     /** Values we store for logging purposes. */
     private long mLastFlipTime = 0L;
-    public int mPreviousResultType = 0;
+    public int mPreviousResultType = UNKNOWN;
     public long mPreviousResultTime = 0L;
     private long mMillisSaved = 0L;
 
@@ -151,7 +154,8 @@ public class FaceDownDetector implements SensorEventListener {
 
     private final Handler mHandler;
     private final Runnable mUserActivityRunnable;
-    private final BroadcastReceiver mScreenReceiver;
+    @VisibleForTesting
+    final BroadcastReceiver mScreenReceiver;
 
     private Context mContext;
 
@@ -203,6 +207,10 @@ public class FaceDownDetector implements SensorEventListener {
                     logScreenOff();
                 }
             } else {
+                if (mFaceDown && !mInteractive) {
+                    mPreviousResultType = SCREEN_OFF_RESULT;
+                    mPreviousResultTime = currentTime;
+                }
                 mSensorManager.unregisterListener(this);
                 mFaceDown = false;
                 mOnFlip.accept(false);
@@ -311,15 +319,13 @@ public class FaceDownDetector implements SensorEventListener {
     }
 
     private void logScreenOff() {
-        if (mPreviousResultType == SCREEN_OFF_RESULT) {
-            final long currentTime = SystemClock.uptimeMillis();
-            FrameworkStatsLog.write(FrameworkStatsLog.FACE_DOWN_REPORTED,
-                    mPreviousResultType,
-                    /* millis_since_flip= */ mPreviousResultTime  - mLastFlipTime,
-                    mMillisSaved,
-                    /* millis_until_next_screen_on= */ currentTime - mPreviousResultTime);
-            mPreviousResultType = -1;
-        }
+        final long currentTime = SystemClock.uptimeMillis();
+        FrameworkStatsLog.write(FrameworkStatsLog.FACE_DOWN_REPORTED,
+                SCREEN_OFF_RESULT,
+                /* millis_since_flip= */ mPreviousResultTime  - mLastFlipTime,
+                mMillisSaved,
+                /* millis_until_next_screen_on= */ currentTime - mPreviousResultTime);
+        mPreviousResultType = UNKNOWN;
     }
 
     private boolean isEnabled() {
