@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Opusti"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotaknite se tipala prstnih odtisov"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikona prstnih odtisov"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Obraza ni mogoče prepoznati. Uporabite prstni odtis."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Uporabite prstni odtis, če želite nadaljevati."</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Prstnega odtisa ni mogoče prepoznati. Uporabite odklepanje s poverilnico."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Preverjanje vašega obraza …"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona obraza"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Gumb povečave za združljivost."</string>
@@ -542,7 +539,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Delovni profil je povezan v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Osebni profil je povezan v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Ta naprava je povezava v aplikacijo <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"To napravo zagotavlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"To napravo zagotavlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Upravljanje naprav"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Nadzor nad profilom"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Nadzor omrežja"</string>
@@ -666,7 +663,18 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Opozorilo"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Denarnica"</string>
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Pripravljeno"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profil za Android Work"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Način za letalo"</string>
     <string name="add_tile" msgid="6239678623873086686">"Dodajanje ploščice"</string>
@@ -735,9 +743,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stanje:&lt;/b&gt; Uvrščeno med obvestila brez zvoka"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stanje:&lt;/b&gt; Uvrščeno višje"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stanje:&lt;/b&gt; Uvrščeno nižje"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikaz na vrhu razdelka s pogovorom in v plavajočem oblačku, prikaz profilne slike na zaklenjenem zaslonu"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavitve"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prednost"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Te skupine obvestil ni mogoče konfigurirati tukaj"</string>
@@ -1015,10 +1025,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Če želite posodobiti krmarjenje po sistemu, odprite nastavitve"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje pripravljenosti"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Pogovor je nastavljen kot prednosten"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prednostni pogovori bodo:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazani na vrhu razdelka s pogovorom"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazali profilno sliko na zaklenjenem zaslonu"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Prikazano kot lebdeč oblaček čez druge aplikacije"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Preglasi način »ne moti«"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"V redu"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Nastavitve"</string>
@@ -1036,6 +1050,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Stikalo"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Gumb za funkcije za ljudi s posebnimi potrebami je zamenjal pripadajočo potezo.\n\n"<annotation id="link">"Ogled nastavitev"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Če želite gumb začasno skriti, ga premaknite ob rob."</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrolniki naprave"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodajte kontrolnike za povezane naprave"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavitev kontrolnikov naprave"</string>
@@ -1108,31 +1134,43 @@
     <string name="basic_status" msgid="2315371112182658176">"Odprt pogovor"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Pripomočki za pogovore"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dotaknite se pogovora, da ga dodate na začetni zaslon."</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Znova preverite tukaj, ko boste prejeli kakšno sporočilo."</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Prednostni pogovori"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Nedavni pogovori"</string>
+    <string name="okay" msgid="6490552955618608554">"V redu"</string>
     <string name="timestamp" msgid="6577851592534538533">"pred <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Pred manj kot <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Pred več kot <xliff:g id="DURATION">%1$s</xliff:g>"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Rojstni dan"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Rojstni dan se bliža"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"Obletnica"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"Deljenje lokacije"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"Nova zgodba"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"Gledanje"</string>
     <string name="audio_status" msgid="4237055636967709208">"Poslušanje"</string>
     <string name="game_status" msgid="1340694320630973259">"Igranje"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Prijatelji"</string>
     <string name="empty_status" msgid="5938893404951307749">"Naj se klepet začne!"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"Neodgovorjeni klic"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Več kot <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Ogled nedavnih sporočil, neodgovorjenih klicev in posodobitev stanj"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Pogovor"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Težava z branjem indikatorja stanja napolnjenosti baterije"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Dotaknite se za več informacij"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ni nastavljenih alarmov"</string>

@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -292,7 +290,7 @@ class TaskSnapshotController {
         builder.setContentInsets(contentInsets);
 
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
-        final boolean isShowWallpaper = (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) != 0;
+        final boolean isShowWallpaper = mainWindow.hasWallpaper();
 
         if (pixelFormat == PixelFormat.UNKNOWN) {
             pixelFormat = mPersister.use16BitFormat() && activity.fillsParent()

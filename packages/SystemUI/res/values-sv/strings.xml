@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Stäng"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Tryck på fingeravtryckssensorn"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikon för fingeravtryck"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansiktet kändes inte igen. Använd fingeravtryck."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Fortsätt med hjälp av ditt fingeravtryck"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Fingeravtrycket kändes inte igen. Använd låsskärmen i stället."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Håller utkik efter dig …"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ansiktsikon"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Knapp för kompatibilitetszoom."</string>
@@ -452,7 +449,7 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås upp om du vill använda NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Den här enheten tillhör organisationen"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Den här enheten tillhör <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Den här enheten tillhandahålls av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"Enheten tillhandahålls av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Svep från ikonen och öppna telefonen"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Svep från ikonen och öppna röstassistenten"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Svep från ikonen och öppna kameran"</string>
@@ -521,7 +518,7 @@
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Den här enheten hanteras av din förälder"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisationen äger den här enheten och kan övervaka nätverkstrafiken"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> äger den här enheten och kan övervaka nätverkstrafiken"</string>
-    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Den här enheten tillhandahålls av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Enheten tillhandahålls av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Den här enheten tillhör organisationen och är ansluten till <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Den här enheten tillhör <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> och är ansluten till <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Den här enheten tillhör organisationen"</string>
@@ -536,7 +533,7 @@
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Jobbprofilen är ansluten till <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Din personliga profil är ansluten till <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Den här enheten är ansluten till <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Den här enheten tillhandahålls av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Enheten tillhandahålls av <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Enhetshantering"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profilövervakning"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Nätverksövervakning"</string>
@@ -660,7 +657,18 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Klar"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Jobbprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flygplansläge"</string>
     <string name="add_tile" msgid="6239678623873086686">"Lägg till en ruta"</string>
@@ -729,9 +737,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Ändrad till Tyst"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Höjd"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Sänkt"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla och visar profilbilden på låsskärmen"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för konversationsfunktioner"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Den här aviseringsgruppen kan inte konfigureras här"</string>
@@ -1005,10 +1015,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Öppna inställningarna och uppdatera systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Viloläge"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Konversationen har angetts som prioriterad"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Följande gäller för prioriterade konversationer:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"De visas högst upp bland konversationerna"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Profilbilden visas på låsskärmen"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Visa som en flytande bubbla ovanpå appar"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Avbryt Stör ej"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Inställningar"</string>
@@ -1026,6 +1040,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Reglage"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Tillgänglighetsknappen har ersatt tillgänglighetsrörelsen\n\n"<annotation id="link">"Visa inställningarna"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flytta knappen till kanten för att dölja den tillfälligt"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Enhetsstyrning"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lägg till snabbkontroller för anslutna enheter"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurera enhetsstyrning"</string>
@@ -1096,31 +1122,43 @@
     <string name="basic_status" msgid="2315371112182658176">"Öppen konversation"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Konversationswidgetar"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tryck på en konversation för att lägga till den på startskärmen"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Besök den här sidan igen när du har fått meddelanden"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Prioriterade konversationer"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Aktuella konversationer"</string>
+    <string name="okay" msgid="6490552955618608554">"Okej"</string>
     <string name="timestamp" msgid="6577851592534538533">"För <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Mindre än <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Mer än <xliff:g id="DURATION">%1$s</xliff:g> sedan"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Födelsedag"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Födelsedag inom kort"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"Högtidsdag"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"Delar plats"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"Ny artikel"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"Tittar"</string>
     <string name="audio_status" msgid="4237055636967709208">"Lyssnar"</string>
     <string name="game_status" msgid="1340694320630973259">"Spelar"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Vänner"</string>
     <string name="empty_status" msgid="5938893404951307749">"Vi chattar i kväll!"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"Missat samtal"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"över <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Se de senaste meddelandena, missade samtal och statusuppdateringar"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konversation"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batteriindikatorn visas inte"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tryck för mer information"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Inget inställt alarm"</string>

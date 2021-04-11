@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"ปิด"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"แตะเซ็นเซอร์ลายนิ้วมือ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"ไอคอนลายนิ้วมือ"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ไม่รู้จักใบหน้า ใช้ลายนิ้วมือแทน"</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"ใช้ลายนิ้วมือของคุณเพื่อดำเนินการต่อ"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"ไม่รู้จักลายนิ้วมือ ใช้การล็อกหน้าจอแทน"</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"กำลังหาใบหน้าคุณ…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"ไอคอนใบหน้า"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>
@@ -597,7 +594,7 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"เปิดใช้"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ปิดใช้"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"เปลี่ยนอุปกรณ์เอาต์พุต"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"ตรึงแอปอยู่"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ปักหมุดแอปอยู่"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นแอปบนหน้าจอตลอดจนกว่าจะเลิกตรึง เลื่อนขึ้นค้างไว้เพื่อเลิกตรึง"</string>
@@ -605,13 +602,13 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"อาจมีการเข้าถึงข้อมูลส่วนตัว (เช่น รายชื่อติดต่อและเนื้อหาในอีเมล)"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"แอปที่ตรึงไว้อาจเปิดแอปอื่นๆ"</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"หากต้องการเลิกตรึงแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"ภาพรวม\" ค้างไว้"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"หากต้องการเลิกตรึงแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"หน้าแรก\" ค้างไว้"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"หากต้องการเลิกตรึงแอปนี้ ให้เลื่อนขึ้นค้างไว้"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"หากต้องการเลิกปักหมุดแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"ภาพรวม\" ค้างไว้"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"หากต้องการเลิกปักหมุดแอปนี้ ให้แตะปุ่ม \"กลับ\" และ \"หน้าแรก\" ค้างไว้"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"หากต้องการเลิกปักหมุดแอปนี้ ให้เลื่อนขึ้นค้างไว้"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"รับทราบ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ไม่เป็นไร ขอบคุณ"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"ตรึงแอปแล้ว"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"เลิกตรึงแอปแล้ว"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ปักหมุดแอปแล้ว"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"เลิกปักหมุดแอปแล้ว"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"ซ่อน <xliff:g id="TILE_LABEL">%1$s</xliff:g> ไหม"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"จะปรากฏอีกครั้งเมื่อคุณเปิดใช้ในการตั้งค่าครั้งถัดไป"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"ซ่อน"</string>
@@ -660,7 +657,12 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"อีเทอร์เน็ต"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"การปลุก"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"พร้อม"</string>
+    <string name="wallet_button_label_device_unlocked" msgid="4653372304880486681">"แสดงทั้งหมด"</string>
+    <string name="wallet_button_label_device_locked" msgid="4418473374652969487">"ปลดล็อกเพื่อชำระเงิน"</string>
+    <string name="wallet_secondary_label_active" msgid="4909706168969888137">"พร้อม"</string>
+    <string name="wallet_secondary_label_no_card" msgid="1750103386908123401">"ตั้งค่าการชำระเงิน"</string>
+    <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ปลดล็อกเพื่อใช้"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"เกิดปัญหาในการดึงข้อมูลบัตรของคุณ โปรดลองอีกครั้งในภายหลัง"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"โปรไฟล์งาน"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"โหมดบนเครื่องบิน"</string>
     <string name="add_tile" msgid="6239678623873086686">"เพิ่มไทล์"</string>
@@ -729,9 +731,9 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;สถานะ:&lt;/b&gt; ลดระดับเป็นปิดเสียง"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;สถานะ:&lt;/b&gt; อันดับสูงขึ้น"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;สถานะ:&lt;/b&gt; อันดับต่ำลง"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"แสดงที่ด้านบนของส่วนการสนทนา ปรากฏเป็นบับเบิลแบบลอย แสดงรูปโปรไฟล์บนหน้าจอล็อก"</string>
+    <string name="notification_channel_summary_priority" msgid="4592979359953954258">"แสดงที่ด้านบนของการแจ้งเตือนเสมอแม้ว่าโหมดลำดับความสำคัญสูงจะเปิดอยู่"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"การตั้งค่า"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"ลำดับความสำคัญ"</string>
+    <string name="notification_priority_title" msgid="5256226572739882190">"การสนทนาสำคัญ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่รองรับฟีเจอร์การสนทนา"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"แก้ไขการแจ้งเตือนเหล่านี้ไม่ได้"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"การแจ้งเตือนกลุ่มนี้กำหนดค่าที่นี่ไม่ได้"</string>
@@ -1005,10 +1007,10 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ไปที่การตั้งค่าเพื่ออัปเดตการไปยังส่วนต่างๆ ของระบบ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"สแตนด์บาย"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"ตั้งค่าเป็นการสนทนาสำคัญแล้ว"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"การสนทนาสำคัญจะ:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"แสดงที่ด้านบนของส่วนการสนทนา"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"แสดงรูปโปรไฟล์บนหน้าจอล็อก"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"แสดงเป็นบับเบิลที่ลอยอยู่เหนือแอป"</string>
+    <string name="priority_onboarding_behavior" msgid="636826237468953117">"การสนทนาสำคัญ"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="3861580571311518785">"การสนทนาเหล่านี้จะแสดงที่ด้านบนของรายการและให้คุณเข้าถึงได้อยู่เสมอเมื่อโหมดลำดับความสำคัญสูงเปิดอยู่"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="1781653813573865071">"รูปโปรไฟล์จะแสดงในหน้าจอล็อก"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4359924720680083057">"คุณค้นหาการสนทนาเหล่านี้ได้ง่ายๆ ในบับเบิลบนหน้าจอหลัก"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"แสดงในโหมดห้ามรบกวน"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"รับทราบ"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"การตั้งค่า"</string>
@@ -1026,6 +1028,12 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"เปลี่ยน"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"ปุ่มการช่วยเหลือพิเศษแทนที่ท่าทางสัมผัสการช่วยเหลือพิเศษแล้ว\n\n"<annotation id="link">"ดูการตั้งค่า"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ย้ายปุ่มไปที่ขอบเพื่อซ่อนชั่วคราว"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ย้ายไปด้านซ้ายบน"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ย้ายไปด้านขวาบน"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ย้ายไปด้านซ้ายล่าง"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ย้ายไปด้านขาวล่าง"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ย้ายไปที่ขอบและซ่อน"</string>
+    <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ย้ายออกจากขอบและแสดง"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ระบบควบคุมอุปกรณ์"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"เพิ่มตัวควบคุมของอุปกรณ์ที่เชื่อมต่อ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ตั้งค่าระบบควบคุมอุปกรณ์"</string>
@@ -1096,31 +1104,35 @@
     <string name="basic_status" msgid="2315371112182658176">"เปิดการสนทนา"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"วิดเจ็ตการสนทนา"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"แตะการสนทนาเพื่อเพิ่มไปยังหน้าจอหลัก"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"กลับมาดูที่นี่อีกครั้งเมื่อได้รับข้อความ"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"การสนทนาสำคัญ"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"การสนทนาล่าสุด"</string>
+    <string name="okay" msgid="6490552955618608554">"ตกลง"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g>ที่ผ่านมา"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"ไม่ถึง <xliff:g id="DURATION">%1$s</xliff:g>ที่ผ่านมา"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"นานกว่า <xliff:g id="DURATION">%1$s</xliff:g>ที่ผ่านมา"</string>
     <string name="birthday_status" msgid="2596961629465396761">"วันเกิด"</string>
+    <string name="birthday_status_content_description" msgid="7677415209545817153">"วันนี้เป็นวันเกิดของ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"ใกล้ถึงวันเกิดแล้ว"</string>
+    <string name="upcoming_birthday_status_content_description" msgid="1210885672210845293">"ใกล้ถึงวันเกิดของ <xliff:g id="NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="anniversary_status" msgid="1790034157507590838">"วันครบรอบ"</string>
+    <string name="anniversary_status_content_description" msgid="6214503393960662875">"วันนี้เป็นวันครบรอบของ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="location_status" msgid="1294990572202541812">"กำลังแชร์ตำแหน่ง"</string>
+    <string name="location_status_content_description" msgid="2982386178160071305">"<xliff:g id="NAME">%1$s</xliff:g> กำลังแชร์ตำแหน่ง"</string>
     <string name="new_story_status" msgid="9012195158584846525">"เรื่องราวใหม่"</string>
+    <string name="new_story_status_content_description" msgid="4963137422622516708">"<xliff:g id="NAME">%1$s</xliff:g> แชร์เรื่องราวใหม่"</string>
     <string name="video_status" msgid="4548544654316843225">"กำลังดูวิดีโอ"</string>
     <string name="audio_status" msgid="4237055636967709208">"กำลังฟัง"</string>
     <string name="game_status" msgid="1340694320630973259">"กำลังเล่น"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"เพื่อน"</string>
     <string name="empty_status" msgid="5938893404951307749">"คืนนี้มาแชทกัน"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"เนื้อหาจะแสดงขึ้นเร็วๆ นี้"</string>
     <string name="missed_call" msgid="4228016077700161689">"สายที่ไม่ได้รับ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ดูข้อความล่าสุด สายที่ไม่ได้รับ และการอัปเดตสถานะ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"การสนทนา"</string>
+    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> ส่งข้อความ"</string>
+    <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ส่งรูปภาพ"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"พบปัญหาในการอ่านเครื่องวัดแบตเตอรี่"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"แตะดูข้อมูลเพิ่มเติม"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ไม่มีการตั้งปลุก"</string>

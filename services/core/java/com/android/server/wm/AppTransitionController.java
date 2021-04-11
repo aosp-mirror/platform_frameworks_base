@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
@@ -128,7 +127,7 @@ public class AppTransitionController {
         final ArraySet<WindowContainer> openingWcs = getAnimationTargets(
                 mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps, true /* visible */);
         final boolean showWallpaper = wallpaperTarget != null
-                && ((wallpaperTarget.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
+                && (wallpaperTarget.hasWallpaper()
                 // Update task open transition to wallpaper transition when wallpaper is visible.
                 // (i.e.launching app info activity from recent tasks)
                 || ((firstTransit == TRANSIT_OPEN || firstTransit == TRANSIT_TO_FRONT)

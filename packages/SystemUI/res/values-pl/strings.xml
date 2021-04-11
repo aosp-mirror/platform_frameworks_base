@@ -177,12 +177,9 @@
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Zamknij"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotknij czytnika linii papilarnych"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikona odcisku palca"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (6178228876763024452) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_use_fingerprint (923777032861374285) -->
-    <skip />
-    <!-- no translation found for fingerprint_dialog_cant_recognize_fp_use_screenlock (4805522676254378353) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nie rozpoznaję twarzy. Użyj odcisku palca."</string>
+    <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Użyj odcisku palca, aby kontynuować"</string>
+    <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Nie rozpoznaję odcisku palca. Użyj blokady ekranu."</string>
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Szukam Cię…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona twarzy"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Przycisk powiększenia na potrzeby zgodności."</string>
@@ -666,7 +663,18 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Portfel"</string>
-    <string name="wallet_secondary_label" msgid="2017028770884957543">"Gotowe"</string>
+    <!-- no translation found for wallet_button_label_device_unlocked (4653372304880486681) -->
+    <skip />
+    <!-- no translation found for wallet_button_label_device_locked (4418473374652969487) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_active (4909706168969888137) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_no_card (1750103386908123401) -->
+    <skip />
+    <!-- no translation found for wallet_secondary_label_device_locked (5175862019125370506) -->
+    <skip />
+    <!-- no translation found for wallet_error_generic (257704570182963611) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Profil służbowy"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Tryb samolotowy"</string>
     <string name="add_tile" msgid="6239678623873086686">"Dodaj nazwę"</string>
@@ -735,9 +743,11 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stan:&lt;/b&gt; podniesiono ważność"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stan:&lt;/b&gt; obniżono ważność"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wyświetla się jako pływający dymek u góry sekcji rozmów, pokazuje zdjęcie profilowe na ekranie blokady"</string>
+    <!-- no translation found for notification_channel_summary_priority (4592979359953954258) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
+    <!-- no translation found for notification_priority_title (5256226572739882190) -->
+    <skip />
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tych powiadomień nie można zmodyfikować."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tej grupy powiadomień nie można tu skonfigurować"</string>
@@ -794,7 +804,7 @@
       <item quantity="other">%d minuty</item>
       <item quantity="one">]%d minuta</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Zużycie baterii"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Wykorzystanie baterii"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Oszczędzanie baterii nie jest dostępne podczas ładowania"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Oszczędzanie baterii"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Zmniejsza wydajność i ogranicza dane w tle"</string>
@@ -1015,10 +1025,14 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Otwórz Ustawienia, by zaktualizować nawigację w systemie"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Tryb gotowości"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Rozmowę ustawiono jako priorytetową"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Rozmowy priorytetowe:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Wyświetlają się u góry sekcji rozmów"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Pokazują zdjęcie profilowe na ekranie blokady"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Wyświetlane jako pływający dymek nad aplikacjami"</string>
+    <!-- no translation found for priority_onboarding_behavior (636826237468953117) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_at_top_text (3861580571311518785) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (1781653813573865071) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4359924720680083057) -->
+    <skip />
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ignorują tryb Nie przeszkadzać"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Ustawienia"</string>
@@ -1036,6 +1050,18 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Przełącz"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"Przycisk ułatwień dostępu zastąpił gest ułatwień dostępu\n\n"<annotation id="link">"Wyświetl ustawienia"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Przesuń przycisk do krawędzi, aby ukryć go tymczasowo"</string>
+    <!-- no translation found for accessibility_floating_button_action_move_top_left (6253520703618545705) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_top_right (6106225581993479711) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_left (8063394111137429725) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_bottom_right (6196904373227440500) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_to_edge_and_hide_to_half (662401168245782658) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_action_move_out_edge_and_show (8354760891651663326) -->
+    <skip />
     <string name="quick_controls_title" msgid="6839108006171302273">"Sterowanie urządzeniami"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Dodaj elementy sterujące połączonymi urządzeniami"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfigurowanie sterowania urządzeniami"</string>
@@ -1108,31 +1134,43 @@
     <string name="basic_status" msgid="2315371112182658176">"Otwarta rozmowa"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widżety Rozmowa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Kliknij rozmowę, aby dodać ją do ekranu głównego"</string>
-    <!-- no translation found for no_conversations_text (7362374212649891057) -->
-    <skip />
-    <!-- no translation found for priority_conversations (3967482288896653039) -->
-    <skip />
-    <!-- no translation found for recent_conversations (8531874684782574622) -->
-    <skip />
-    <!-- no translation found for okay (6490552955618608554) -->
-    <skip />
+    <string name="no_conversations_text" msgid="7362374212649891057">"Tu pojawią się otrzymane wiadomości"</string>
+    <string name="priority_conversations" msgid="3967482288896653039">"Rozmowy priorytetowe"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Ostatnie rozmowy"</string>
+    <string name="okay" msgid="6490552955618608554">"OK"</string>
     <string name="timestamp" msgid="6577851592534538533">"<xliff:g id="DURATION">%1$s</xliff:g> temu"</string>
     <string name="less_than_timestamp" msgid="6598972791137724517">"Mniej niż <xliff:g id="DURATION">%1$s</xliff:g> temu"</string>
     <string name="over_timestamp" msgid="4765793502859358634">"Ponad <xliff:g id="DURATION">%1$s</xliff:g> temu"</string>
     <string name="birthday_status" msgid="2596961629465396761">"Urodziny"</string>
+    <!-- no translation found for birthday_status_content_description (7677415209545817153) -->
+    <skip />
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"Wkrótce urodziny"</string>
+    <!-- no translation found for upcoming_birthday_status_content_description (1210885672210845293) -->
+    <skip />
     <string name="anniversary_status" msgid="1790034157507590838">"Rocznica"</string>
+    <!-- no translation found for anniversary_status_content_description (6214503393960662875) -->
+    <skip />
     <string name="location_status" msgid="1294990572202541812">"Udostępniam lokalizację"</string>
+    <!-- no translation found for location_status_content_description (2982386178160071305) -->
+    <skip />
     <string name="new_story_status" msgid="9012195158584846525">"Nowy artykuł"</string>
+    <!-- no translation found for new_story_status_content_description (4963137422622516708) -->
+    <skip />
     <string name="video_status" msgid="4548544654316843225">"Oglądam"</string>
     <string name="audio_status" msgid="4237055636967709208">"Słucham"</string>
     <string name="game_status" msgid="1340694320630973259">"Odtwarzam"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Znajomi"</string>
     <string name="empty_status" msgid="5938893404951307749">"Porozmawiajmy!"</string>
+    <!-- no translation found for status_before_loading (1500477307859631381) -->
+    <skip />
     <string name="missed_call" msgid="4228016077700161689">"Nieodebrane połączenie"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+ <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Zobacz ostatnie wiadomości, nieodebrane połączenia i stany"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Rozmowa"</string>
+    <!-- no translation found for new_notification_text_content_description (5574393603145263727) -->
+    <skip />
+    <!-- no translation found for new_notification_image_content_description (6017506886810813123) -->
+    <skip />
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problem z odczytaniem pomiaru wykorzystania baterii"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Kliknij, aby uzyskać więcej informacji"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nie ustawiono alarmu"</string>
