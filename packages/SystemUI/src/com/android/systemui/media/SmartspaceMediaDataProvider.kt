@@ -21,7 +21,7 @@ class SmartspaceMediaDataProvider @Inject constructor() : BcSmartspaceDataPlugin
     }
 
     /** Updates Smartspace data and propagates it to any listeners.  */
-    fun onTargetsAvailable(targets: List<SmartspaceTarget>) {
+    override fun onTargetsAvailable(targets: List<SmartspaceTarget>) {
         // Filter out non-media targets.
         val mediaTargets = mutableListOf<SmartspaceTarget>()
         for (target in targets) {
