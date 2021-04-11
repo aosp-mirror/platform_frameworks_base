@@ -71,6 +71,8 @@ public:
     void setSwapBehavior(SwapBehavior swapBehavior);
     bool loadSystemProperties();
     void setName(const char* name);
+    void setHintSessionCallbacks(std::function<void(int64_t)> updateTargetWorkDuration,
+                                 std::function<void(int64_t)> reportActualWorkDuration);
 
     void setSurface(ANativeWindow* window, bool enableTimeout = true);
     void setSurfaceControl(ASurfaceControl* surfaceControl);

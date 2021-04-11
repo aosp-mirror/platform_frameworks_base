@@ -34,6 +34,7 @@ java_library {
     static_libs: [
         "PluginCoreLib",
         "SystemUI-sensors",
+        "SystemUIAnimationLib",
     ],
 
 }

@@ -28,8 +28,8 @@ import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.Interpolators
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton

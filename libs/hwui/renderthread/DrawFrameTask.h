@@ -61,6 +61,8 @@ public:
     virtual ~DrawFrameTask();
 
     void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode);
+    void setHintSessionCallbacks(std::function<void(int64_t)> updateTargetWorkDuration,
+                                 std::function<void(int64_t)> reportActualWorkDuration);
     void setContentDrawBounds(int left, int top, int right, int bottom) {
         mContentDrawBounds.set(left, top, right, bottom);
     }
@@ -107,6 +109,10 @@ private:
 
     std::function<void(int64_t)> mFrameCallback;
     std::function<void(int64_t)> mFrameCompleteCallback;
+
+    nsecs_t mLastTargetWorkDuration = 0;
+    std::function<void(int64_t)> mUpdateTargetWorkDuration;
+    std::function<void(int64_t)> mReportActualWorkDuration;
 };
 
 } /* namespace renderthread */

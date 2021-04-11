@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification
 
 import android.animation.ObjectAnimator
 import android.util.FloatProperty
-import com.android.systemui.Interpolators
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
