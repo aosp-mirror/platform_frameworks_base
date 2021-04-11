@@ -5226,6 +5226,14 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.PerformanceHintManager} for accessing the performance hinting service.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String PERFORMANCE_HINT_SERVICE = "performance_hint";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.pm.ShortcutManager} for accessing the launcher shortcut service.
      *
      * @see #getSystemService(String)

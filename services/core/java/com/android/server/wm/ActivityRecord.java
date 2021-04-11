@@ -7008,12 +7008,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             newParentConfiguration = mTmpConfig;
         }
 
-        final int windowingMode = getWindowingMode();
+        // Can't use resolvedConfig.windowConfiguration.getWindowingMode() because it can be
+        // different from windowing mode of the task (PiP) during transition from fullscreen to PiP
+        // and back which can cause visible issues (see b/184078928).
+        final int parentWindowingMode =
+                newParentConfiguration.windowConfiguration.getWindowingMode();
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.
-        if (isSplitScreenWindowingMode(windowingMode)
-                || windowingMode == WINDOWING_MODE_MULTI_WINDOW
-                || windowingMode == WINDOWING_MODE_FULLSCREEN) {
+        if (isSplitScreenWindowingMode(parentWindowingMode)
+                || parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+                || parentWindowingMode == WINDOWING_MODE_FULLSCREEN) {
             resolveFixedOrientationConfiguration(newParentConfiguration);
         }
 

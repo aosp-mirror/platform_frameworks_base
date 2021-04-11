@@ -25,7 +25,7 @@ import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.keyguard.KeyguardConstants;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
-import com.android.systemui.Interpolators;
+import com.android.systemui.animation.Interpolators;
 
 /**
  * The container for the user switcher on Keyguard.

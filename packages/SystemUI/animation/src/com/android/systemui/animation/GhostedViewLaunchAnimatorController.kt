@@ -1,4 +1,4 @@
-package com.android.systemui.plugins.animation
+package com.android.systemui.animation
 
 import android.graphics.Canvas
 import android.graphics.ColorFilter

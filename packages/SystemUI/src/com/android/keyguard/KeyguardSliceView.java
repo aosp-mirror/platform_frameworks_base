@@ -49,8 +49,8 @@ import androidx.slice.widget.SliceContent;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
 import java.io.FileDescriptor;
