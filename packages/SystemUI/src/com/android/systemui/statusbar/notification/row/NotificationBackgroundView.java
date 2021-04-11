@@ -29,9 +29,9 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.plugins.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
 
 /**
@@ -284,7 +284,7 @@ public class NotificationBackgroundView extends View {
         mActualWidth = params.getWidth();
         float alphaProgress = Interpolators.ALPHA_IN.getInterpolation(
                 params.getProgress(
-                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_OUT_CONTENT /* delay */,
+                        ActivityLaunchAnimator.ANIMATION_DELAY_FADE_IN_WINDOW /* delay */,
                         ActivityLaunchAnimator.ANIMATION_DURATION_FADE_IN_WINDOW /* duration */));
         mBackground.setAlpha((int) (mDrawableAlpha * (1.0f - alphaProgress)));
         invalidate();

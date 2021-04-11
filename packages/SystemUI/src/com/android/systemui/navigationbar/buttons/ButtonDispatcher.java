@@ -16,7 +16,7 @@
 
 package com.android.systemui.navigationbar.buttons;
 
-import static com.android.systemui.Interpolators.LINEAR;
+import static com.android.systemui.animation.Interpolators.LINEAR;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

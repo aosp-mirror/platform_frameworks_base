@@ -28,7 +28,7 @@
 namespace android {
 namespace uirenderer {
 
-static constexpr size_t UI_THREAD_FRAME_INFO_SIZE = 10;
+static constexpr size_t UI_THREAD_FRAME_INFO_SIZE = 11;
 
 enum class FrameInfoIndex {
     Flags = 0,
@@ -41,6 +41,7 @@ enum class FrameInfoIndex {
     PerformTraversalsStart,
     DrawStart,
     FrameDeadline,
+    FrameStartTime,
     // End of UI frame info
 
     SyncQueued,

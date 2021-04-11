@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doReturn;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
@@ -129,10 +130,7 @@ public class FaceDownDetectorTest {
         triggerFaceDown();
 
         // Phone flips
-        for (int i = 0; i < 10; i++) {
-            advanceTime(Duration.ofMillis(5));
-            mFaceDownDetector.onSensorChanged(createTestEvent(0.5f, 1.0f, 0.0f));
-        }
+        triggerUnflip();
 
         assertThat(mOnFaceDownCalls).isEqualTo(1);
         assertThat(mOnFaceDownExitCalls).isEqualTo(1);
@@ -182,6 +180,47 @@ public class FaceDownDetectorTest {
         triggerFaceDown();
 
         assertThat(mOnFaceDownCalls).isEqualTo(1);
+    }
+
+    @Test
+    public void faceDownToScreenOff_followedByScreenOnAndUserInteraction_doesNotDisable()
+            throws Exception {
+        mFaceDownDetector.systemReady(sContext);
+        // Face down to screen off
+        triggerFaceDown();
+        mFaceDownDetector.mScreenReceiver.onReceive(sContext, new Intent(Intent.ACTION_SCREEN_OFF));
+
+        // Screen on
+        mFaceDownDetector.mScreenReceiver.onReceive(sContext, new Intent(Intent.ACTION_SCREEN_ON));
+
+        // User interaction
+        mFaceDownDetector.userActivity(PowerManager.USER_ACTIVITY_EVENT_TOUCH);
+        waitForListenerToHandle();
+
+        // Attempt another face down to see if disabled
+        triggerFaceDown();
+
+        assertThat(mOnFaceDownCalls).isEqualTo(2);
+    }
+
+    @Test
+    public void faceDownUserInteraction_disablesDetector()  throws Exception {
+        mFaceDownDetector.systemReady(sContext);
+        triggerFaceDown();
+        mFaceDownDetector.userActivity(PowerManager.USER_ACTIVITY_EVENT_TOUCH);
+        waitForListenerToHandle();
+
+        triggerUnflip();
+        triggerFaceDown();
+
+        assertThat(mOnFaceDownCalls).isEqualTo(1);
+    }
+
+    private void triggerUnflip() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            advanceTime(Duration.ofMillis(5));
+            mFaceDownDetector.onSensorChanged(createTestEvent(0.5f, 1.0f, 0.0f));
+        }
     }
 
     private void triggerFaceDown() throws Exception {

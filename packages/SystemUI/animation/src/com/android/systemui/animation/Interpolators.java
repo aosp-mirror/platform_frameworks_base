@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.animation;
 
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
@@ -23,8 +23,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
-
-import com.android.systemui.statusbar.notification.stack.HeadsUpAppearInterpolator;
 
 /**
  * Utility class to receive interpolators from
@@ -48,12 +46,11 @@ public class Interpolators {
     public static final Interpolator ACCELERATE_DECELERATE = new AccelerateDecelerateInterpolator();
     public static final Interpolator DECELERATE_QUINT = new DecelerateInterpolator(2.5f);
     public static final Interpolator CUSTOM_40_40 = new PathInterpolator(0.4f, 0f, 0.6f, 1f);
-    public static final Interpolator HEADS_UP_APPEAR = new HeadsUpAppearInterpolator();
     public static final Interpolator ICON_OVERSHOT = new PathInterpolator(0.4f, 0f, 0.2f, 1.4f);
-    public static final Interpolator ICON_OVERSHOT_LESS
-            = new PathInterpolator(0.4f, 0f, 0.2f, 1.1f);
-    public static final Interpolator PANEL_CLOSE_ACCELERATED
-            = new PathInterpolator(0.3f, 0, 0.5f, 1);
+    public static final Interpolator ICON_OVERSHOT_LESS = new PathInterpolator(0.4f, 0f, 0.2f,
+            1.1f);
+    public static final Interpolator PANEL_CLOSE_ACCELERATED = new PathInterpolator(0.3f, 0, 0.5f,
+            1);
     public static final Interpolator BOUNCE = new BounceInterpolator();
     /**
      * For state transitions on the control panel that lives in GlobalActions.

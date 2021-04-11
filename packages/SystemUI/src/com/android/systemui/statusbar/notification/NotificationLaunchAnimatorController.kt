@@ -2,11 +2,11 @@ package com.android.systemui.statusbar.notification
 
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
-import com.android.systemui.plugins.animation.ActivityLaunchAnimator
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController
 import kotlin.math.ceil
 import kotlin.math.max
