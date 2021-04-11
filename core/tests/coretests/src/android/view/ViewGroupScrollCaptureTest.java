@@ -33,7 +33,6 @@ import android.os.CancellationSignal;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
@@ -343,6 +342,54 @@ public class ViewGroupScrollCaptureTest {
                 target.getContainingView().getScrollCaptureHint());
     }
 
+    /**
+     * Tests the effect of padding on scroll capture search dispatch.
+     * <p>
+     * Verifies computation of child visible bounds with padding.
+     */
+    @MediumTest
+    @Test
+    public void testOnScrollCaptureSearch_withPadding() {
+        final Context context = getInstrumentation().getContext();
+
+        Rect windowBounds = new Rect(0, 0, 200, 200);
+        Point windowOffset = new Point(0, 0);
+
+        final MockViewGroup parent = new MockViewGroup(context, 0, 0, 200, 200);
+        parent.setPadding(25, 50, 25, 50);
+        parent.setClipToPadding(true); // (default)
+
+        final MockView view1 = new MockView(context, 0, -100, 200, 100);
+        parent.addView(view1);
+
+        final MockView view2 = new MockView(context, 0, 0, 200, 200);
+        parent.addView(view2);
+
+        final MockViewGroup view3 = new MockViewGroup(context, 0, 100, 200, 300);
+        parent.addView(view3);
+        view3.setPadding(25, 25, 25, 25);
+        view3.setClipToPadding(true);
+
+        // Where targets are added
+        final ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(DIRECT_EXECUTOR);
+
+        // Dispatch to the ViewGroup
+        parent.dispatchScrollCaptureSearch(windowBounds, windowOffset, results::addTarget);
+
+        // Verify padding (with clipToPadding) is subtracted from visibleBounds
+        parent.assertOnScrollCaptureSearchLastArgs(new Rect(25, 50, 175, 150), new Point(0, 0));
+
+        view1.assertOnScrollCaptureSearchLastArgs(
+                new Rect(25, 150, 175, 200), new Point(0, -100));
+
+        view2.assertOnScrollCaptureSearchLastArgs(
+                new Rect(25, 50, 175, 150), new Point(0, 0));
+
+        // Account for padding on view3 as well (top == 25px)
+        view3.assertOnScrollCaptureSearchLastArgs(
+                new Rect(25, 25, 175, 50), new Point(0, 100));
+    }
+
     public static final class MockView extends View {
         private ScrollCaptureCallback mInternalCallback;
 
@@ -350,6 +397,8 @@ public class ViewGroupScrollCaptureTest {
         private Rect mDispatchScrollCaptureSearchLastLocalVisibleRect;
         private Point mDispatchScrollCaptureSearchLastWindowOffset;
         private int mCreateScrollCaptureCallbackInternalCount;
+        private Rect mOnScrollCaptureSearchLastLocalVisibleRect;
+        private Point mOnScrollCaptureSearchLastWindowOffset;
 
         MockView(Context context) {
             this(context, /* left */ 0, /* top */0, /* right */ 0, /* bottom */0);
@@ -395,6 +444,21 @@ public class ViewGroupScrollCaptureTest {
         }
 
         @Override
+        public void onScrollCaptureSearch(Rect localVisibleRect, Point windowOffset,
+                Consumer<ScrollCaptureTarget> targets) {
+            super.onScrollCaptureSearch(localVisibleRect, windowOffset, targets);
+            mOnScrollCaptureSearchLastLocalVisibleRect = new Rect(localVisibleRect);
+            mOnScrollCaptureSearchLastWindowOffset = new Point(windowOffset);
+        }
+
+        void assertOnScrollCaptureSearchLastArgs(Rect localVisibleRect, Point windowOffset) {
+            assertEquals("arg localVisibleRect was incorrect.",
+                    localVisibleRect, mOnScrollCaptureSearchLastLocalVisibleRect);
+            assertEquals("arg windowOffset was incorrect.",
+                    windowOffset, mOnScrollCaptureSearchLastWindowOffset);
+        }
+
+        @Override
         public void dispatchScrollCaptureSearch(Rect localVisibleRect, Point windowOffset,
                 Consumer<ScrollCaptureTarget> results) {
             mDispatchScrollCaptureSearchNumCalls++;
@@ -437,6 +501,8 @@ public class ViewGroupScrollCaptureTest {
 
     public static final class MockViewGroup extends ViewGroup {
         private ScrollCaptureCallback mInternalCallback;
+        private Rect mOnScrollCaptureSearchLastLocalVisibleRect;
+        private Point mOnScrollCaptureSearchLastWindowOffset;
 
         MockViewGroup(Context context) {
             this(context, /* left */ 0, /* top */0, /* right */ 0, /* bottom */0);
@@ -462,6 +528,21 @@ public class ViewGroupScrollCaptureTest {
         public ScrollCaptureCallback createScrollCaptureCallbackInternal(Rect localVisibleRect,
                 Point offsetInWindow) {
             return mInternalCallback;
+        }
+
+        @Override
+        public void onScrollCaptureSearch(Rect localVisibleRect, Point windowOffset,
+                Consumer<ScrollCaptureTarget> targets) {
+            super.onScrollCaptureSearch(localVisibleRect, windowOffset, targets);
+            mOnScrollCaptureSearchLastLocalVisibleRect = new Rect(localVisibleRect);
+            mOnScrollCaptureSearchLastWindowOffset = new Point(windowOffset);
+        }
+
+        void assertOnScrollCaptureSearchLastArgs(Rect localVisibleRect, Point windowOffset) {
+            assertEquals("arg localVisibleRect was incorrect.",
+                    localVisibleRect, mOnScrollCaptureSearchLastLocalVisibleRect);
+            assertEquals("arg windowOffset was incorrect.",
+                    windowOffset, mOnScrollCaptureSearchLastWindowOffset);
         }
 
         @Override
