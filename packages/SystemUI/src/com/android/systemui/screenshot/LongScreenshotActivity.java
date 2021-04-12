@@ -207,6 +207,7 @@ public class LongScreenshotActivity extends Activity {
         mLongScreenshot = longScreenshot;
         mPreview.setImageDrawable(mLongScreenshot.getDrawable());
         updateImageDimensions();
+        mCropView.setVisibility(View.VISIBLE);
         mMagnifierView.setDrawable(mLongScreenshot.getDrawable(),
                 mLongScreenshot.getWidth(), mLongScreenshot.getHeight());
         // Original boundaries go from the image tile set's y=0 to y=pageSize, so
@@ -240,6 +241,7 @@ public class LongScreenshotActivity extends Activity {
         mPreview.setImageDrawable(drawable);
         mMagnifierView.setDrawable(drawable, imageResult.bitmap.getWidth(),
                 imageResult.bitmap.getHeight());
+        mCropView.setVisibility(View.VISIBLE);
         mSavedImagePath = imageResult.fileName;
 
         setButtonsEnabled(true);
