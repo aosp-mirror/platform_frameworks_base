@@ -1,26 +1,26 @@
 #include "GraphicsJNI.h"
-#include "SkInterpolator.h"
+#include "SkiaInterpolator.h"
 
 static jlong Interpolator_constructor(JNIEnv* env, jobject clazz, jint valueCount, jint frameCount)
 {
-    return reinterpret_cast<jlong>(new SkInterpolator(valueCount, frameCount));
+    return reinterpret_cast<jlong>(new SkiaInterpolator(valueCount, frameCount));
 }
 
 static void Interpolator_destructor(JNIEnv* env, jobject clazz, jlong interpHandle)
 {
-    SkInterpolator* interp = reinterpret_cast<SkInterpolator*>(interpHandle);
+    SkiaInterpolator* interp = reinterpret_cast<SkiaInterpolator*>(interpHandle);
     delete interp;
 }
 
 static void Interpolator_reset(JNIEnv* env, jobject clazz, jlong interpHandle, jint valueCount, jint frameCount)
 {
-    SkInterpolator* interp = reinterpret_cast<SkInterpolator*>(interpHandle);
+    SkiaInterpolator* interp = reinterpret_cast<SkiaInterpolator*>(interpHandle);
     interp->reset(valueCount, frameCount);
 }
 
 static void Interpolator_setKeyFrame(JNIEnv* env, jobject clazz, jlong interpHandle, jint index, jint msec, jfloatArray valueArray, jfloatArray blendArray)
 {
-    SkInterpolator* interp = reinterpret_cast<SkInterpolator*>(interpHandle);
+    SkiaInterpolator* interp = reinterpret_cast<SkiaInterpolator*>(interpHandle);
 
     AutoJavaFloatArray autoValues(env, valueArray);
     AutoJavaFloatArray autoBlend(env, blendArray, 4);
@@ -36,7 +36,7 @@ static void Interpolator_setKeyFrame(JNIEnv* env, jobject clazz, jlong interpHan
 
 static void Interpolator_setRepeatMirror(JNIEnv* env, jobject clazz, jlong interpHandle, jfloat repeatCount, jboolean mirror)
 {
-    SkInterpolator* interp = reinterpret_cast<SkInterpolator*>(interpHandle);
+    SkiaInterpolator* interp = reinterpret_cast<SkiaInterpolator*>(interpHandle);
     if (repeatCount > 32000)
         repeatCount = 32000;
 
@@ -46,8 +46,8 @@ static void Interpolator_setRepeatMirror(JNIEnv* env, jobject clazz, jlong inter
 
 static jint Interpolator_timeToValues(JNIEnv* env, jobject clazz, jlong interpHandle, jint msec, jfloatArray valueArray)
 {
-    SkInterpolator* interp = reinterpret_cast<SkInterpolator*>(interpHandle);
-    SkInterpolatorBase::Result result;
+    SkiaInterpolator* interp = reinterpret_cast<SkiaInterpolator*>(interpHandle);
+    SkiaInterpolator::Result result;
 
     float* values = valueArray ? env->GetFloatArrayElements(valueArray, NULL) : NULL;
     result = interp->timeToValues(msec, (SkScalar*)values);
