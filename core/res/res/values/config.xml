@@ -4759,7 +4759,7 @@
     <bool name="config_cecHdmiCecVersion20_allowed">true</bool>
     <bool name="config_cecHdmiCecVersion20_default">false</bool>
 
-    <bool name="config_cecSendStandbyOnSleep_userConfigurable">true</bool>
+    <bool name="config_cecPowerControlMode_userConfigurable">true</bool>
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">true</bool>
     <bool name="config_cecPowerControlModeBroadcast_allowed">true</bool>

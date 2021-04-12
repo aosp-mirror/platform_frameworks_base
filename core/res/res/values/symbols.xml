@@ -4240,7 +4240,7 @@
   <java-symbol type="bool" name="config_cecHdmiCecVersion20_allowed" />
   <java-symbol type="bool" name="config_cecHdmiCecVersion20_default" />
 
-  <java-symbol type="bool" name="config_cecSendStandbyOnSleep_userConfigurable" />
+  <java-symbol type="bool" name="config_cecPowerControlMode_userConfigurable" />
   <java-symbol type="bool" name="config_cecPowerControlModeTv_allowed" />
   <java-symbol type="bool" name="config_cecPowerControlModeTv_default" />
   <java-symbol type="bool" name="config_cecPowerControlModeBroadcast_allowed" />
