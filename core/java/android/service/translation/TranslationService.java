@@ -41,6 +41,7 @@ import android.os.ResultReceiver;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.translation.ITranslationDirectManager;
+import android.view.translation.ITranslationServiceCallback;
 import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationContext;
 import android.view.translation.TranslationManager;
@@ -50,6 +51,7 @@ import android.view.translation.TranslationSpec;
 
 import com.android.internal.os.IResultReceiver;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -84,15 +86,17 @@ public abstract class TranslationService extends Service {
     public static final String SERVICE_META_DATA = "android.translation_service";
 
     private Handler mHandler;
+    private ITranslationServiceCallback mCallback;
+
 
     /**
      * Binder to receive calls from system server.
      */
     private final ITranslationService mInterface = new ITranslationService.Stub() {
         @Override
-        public void onConnected() {
-            mHandler.sendMessage(obtainMessage(TranslationService::onConnected,
-                    TranslationService.this));
+        public void onConnected(IBinder callback) {
+            mHandler.sendMessage(obtainMessage(TranslationService::handleOnConnected,
+                    TranslationService.this, callback));
         }
 
         @Override
@@ -272,6 +276,32 @@ public abstract class TranslationService extends Service {
             @TranslationSpec.DataFormat int sourceFormat,
             @TranslationSpec.DataFormat int targetFormat,
             @NonNull Consumer<Set<TranslationCapability>> callback);
+
+    /**
+     * Called by the service to notify an update in existing {@link TranslationCapability}s.
+     *
+     * @param capability the updated {@link TranslationCapability} with its new states and flags.
+     */
+    public final void updateTranslationCapability(@NonNull TranslationCapability capability) {
+        Objects.requireNonNull(capability, "translation capability should not be null");
+
+        final ITranslationServiceCallback callback = mCallback;
+        if (callback == null) {
+            Log.w(TAG, "updateTranslationCapability(): no server callback");
+            return;
+        }
+
+        try {
+            callback.updateTranslationCapability(capability);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    private void handleOnConnected(@NonNull IBinder callback) {
+        mCallback = ITranslationServiceCallback.Stub.asInterface(callback);
+        onConnected();
+    }
 
     // TODO(b/176464808): Need to handle client dying case
 

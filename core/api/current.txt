@@ -52771,6 +52771,7 @@ package android.view.translation {
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationCapability> CREATOR;
     field public static final int STATE_AVAILABLE_TO_DOWNLOAD = 1; // 0x1
     field public static final int STATE_DOWNLOADING = 2; // 0x2
+    field public static final int STATE_NOT_AVAILABLE = 4; // 0x4
     field public static final int STATE_ON_DEVICE = 3; // 0x3
   }
 

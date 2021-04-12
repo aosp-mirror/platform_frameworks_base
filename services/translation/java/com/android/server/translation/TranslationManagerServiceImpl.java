@@ -16,6 +16,7 @@
 
 package com.android.server.translation;
 
+import static android.view.translation.TranslationManager.EXTRA_CAPABILITIES;
 import static android.view.translation.UiTranslationManager.EXTRA_SOURCE_LOCALE;
 import static android.view.translation.UiTranslationManager.EXTRA_STATE;
 import static android.view.translation.UiTranslationManager.EXTRA_TARGET_LOCALE;
@@ -35,6 +36,8 @@ import android.service.translation.TranslationServiceInfo;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.translation.ITranslationServiceCallback;
+import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationManager.UiTranslationState;
@@ -66,6 +69,11 @@ final class TranslationManagerServiceImpl extends
     private TranslationServiceInfo mTranslationServiceInfo;
 
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
+
+    private final TranslationServiceRemoteCallback mRemoteServiceCallback =
+            new TranslationServiceRemoteCallback();
+    private final RemoteCallbackList<IRemoteCallback> mTranslationCapabilityCallbacks =
+            new RemoteCallbackList<>();
 
     protected TranslationManagerServiceImpl(
             @NonNull TranslationManagerService master,
@@ -117,8 +125,8 @@ final class TranslationManagerServiceImpl extends
                 return null;
             }
             final ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
-            mRemoteTranslationService = new RemoteTranslationService(getContext(),
-                    serviceComponent, mUserId, /* isInstantAllowed= */ false);
+            mRemoteTranslationService = new RemoteTranslationService(getContext(), serviceComponent,
+                    mUserId, /* isInstantAllowed= */ false, mRemoteServiceCallback);
         }
         return mRemoteTranslationService;
     }
@@ -241,5 +249,30 @@ final class TranslationManagerServiceImpl extends
         }
         final String packageName = mTranslationServiceInfo.getServiceInfo().packageName;
         return new ComponentName(packageName, activityName);
+    }
+
+    private void notifyClientsTranslationCapability(TranslationCapability capability) {
+        final Bundle res = new Bundle();
+        res.putParcelable(EXTRA_CAPABILITIES, capability);
+        mTranslationCapabilityCallbacks.broadcast((callback, uid) -> {
+            try {
+                callback.sendResult(res);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke UiTranslationStateCallback: " + e);
+            }
+        });
+    }
+
+    private final class TranslationServiceRemoteCallback extends
+            ITranslationServiceCallback.Stub {
+
+        @Override
+        public void updateTranslationCapability(TranslationCapability capability) {
+            if (capability == null) {
+                Slog.wtf(TAG, "received a null TranslationCapability from TranslationService.");
+                return;
+            }
+            notifyClientsTranslationCapability(capability);
+        }
     }
 }
