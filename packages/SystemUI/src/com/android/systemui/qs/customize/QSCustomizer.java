@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -63,7 +62,7 @@ public class QSCustomizer extends LinearLayout {
     private boolean mIsShowingNavBackdrop;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
-        super(new ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings_Edit), attrs);
+        super(context, attrs);
 
         LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
         mClipper = new QSDetailClipper(findViewById(R.id.customize_container));

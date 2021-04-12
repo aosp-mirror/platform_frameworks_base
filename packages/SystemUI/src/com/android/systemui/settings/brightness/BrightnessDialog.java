@@ -25,6 +25,7 @@ import android.view.WindowManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import javax.inject.Inject;
@@ -61,10 +62,10 @@ public class BrightnessDialog extends Activity {
         window.setLayout(
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
 
-
         BrightnessSlider controller = mToggleSliderFactory.create(this, null);
         controller.init();
         setContentView(controller.getRootView());
+        controller.getRootView().setBackgroundResource(R.drawable.brightness_mirror_background);
         mBrightnessController = new BrightnessController(this, controller, mBroadcastDispatcher);
     }
 
