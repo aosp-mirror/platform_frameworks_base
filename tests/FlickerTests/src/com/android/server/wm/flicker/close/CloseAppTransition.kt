@@ -36,8 +36,8 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.wallpaperLayerReplacesAppLayer
-import com.android.server.wm.flicker.wallpaperWindowBecomesVisible
+import com.android.server.wm.flicker.launcherLayerReplacesApp
+import com.android.server.wm.flicker.launcherWindowBecomesVisible
 import org.junit.Test
 
 abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) {
@@ -76,16 +76,16 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
         testSpec.statusBarWindowIsAlwaysVisible()
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun navBarLayerIsAlwaysVisible() {
-        testSpec.navBarLayerIsAlwaysVisible()
+        testSpec.navBarLayerIsAlwaysVisible(rotatesScreen = testSpec.isRotated)
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
     open fun statusBarLayerIsAlwaysVisible() {
-        testSpec.statusBarLayerIsAlwaysVisible()
+        testSpec.statusBarLayerIsAlwaysVisible(rotatesScreen = testSpec.isRotated)
     }
 
     @FlakyTest
@@ -130,13 +130,13 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
 
     @Presubmit
     @Test
-    open fun wallpaperWindowBecomesVisible() {
-        testSpec.wallpaperWindowBecomesVisible()
+    open fun launcherWindowBecomesVisible() {
+        testSpec.launcherWindowBecomesVisible()
     }
 
     @Presubmit
     @Test
-    open fun wallpaperLayerReplacesAppLayer() {
-        testSpec.wallpaperLayerReplacesAppLayer(testApp)
+    open fun launcherLayerReplacesApp() {
+        testSpec.launcherLayerReplacesApp(testApp)
     }
 }

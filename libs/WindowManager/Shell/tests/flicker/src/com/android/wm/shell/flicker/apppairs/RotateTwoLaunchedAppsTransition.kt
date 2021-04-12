@@ -54,6 +54,12 @@ abstract class RotateTwoLaunchedAppsTransition(
 
     @FlakyTest
     @Test
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
+
+    @FlakyTest
+    @Test
     override fun navBarLayerRotatesAndScales() {
         super.navBarLayerRotatesAndScales()
     }
