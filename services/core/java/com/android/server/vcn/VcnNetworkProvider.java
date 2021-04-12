@@ -163,15 +163,19 @@ public class VcnNetworkProvider extends NetworkProvider {
         pw.increaseIndent();
 
         pw.println("mListeners:");
+        pw.increaseIndent();
         for (NetworkRequestListener listener : mListeners) {
             pw.println(listener);
         }
+        pw.decreaseIndent();
         pw.println();
 
         pw.println("mRequests.values:");
+        pw.increaseIndent();
         for (NetworkRequestEntry entry : mRequests.values()) {
             entry.dump(pw);
         }
+        pw.decreaseIndent();
         pw.println();
 
         pw.decreaseIndent();
