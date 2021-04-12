@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"Б"</string>
+    <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
     <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
     <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
@@ -1221,7 +1221,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Поставено ѕвонење на тивко"</string>
     <string name="volume_call" msgid="7625321655265747433">"Јачина на звук на дојдовен повик"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Јачина на звук на дојдовен повик преку Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Јачина на звук на аларм"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Јачина на звук за аларм"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Јачина на звук на известување"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Јачина на звук"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Јачина на звук на Bluetooth"</string>
@@ -1430,7 +1430,7 @@
     <string name="vpn_text_long" msgid="278540576806169831">"Поврзани сте на <xliff:g id="SESSION">%s</xliff:g>. Допрете за да управувате со мрежата."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Поврзување со секогаш вклучена VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Поврзани со секогаш вклучена VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Исклучено од секогаш вклучената VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Не е поврзано со секогаш вклучената VPN"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Не може да се поврзе на секогаш вклучената VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Променете ја мрежата или поставките за VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"Избери датотека"</string>
@@ -1565,7 +1565,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Префрли екран на уред"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Се бараат уреди..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Поставки"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Исклучи"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Прекини врска"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Скенирање..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Се поврзува..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Достапна"</string>
@@ -1900,8 +1900,8 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Допрете за да го отклучите"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Поврзан на <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Допрете за да ги погледнете датотеките"</string>
-    <string name="pin_target" msgid="8036028973110156895">"Прикачете"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"Прикачи <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="pin_target" msgid="8036028973110156895">"Закачи"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"Закачи <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Откачете"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Откачи <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Информации за апликација"</string>

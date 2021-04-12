@@ -490,7 +490,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مرحبًا بك مجددًا في جلسة الضيف"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"هل تريد متابعة جلستك؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"البدء من جديد"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"نعم، متابعة."</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"نعم، متابعة"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"مستخدم ضيف"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"لحذف التطبيقات والبيانات، عليك إزالة حساب الضيف"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"إزالة الضيف"</string>

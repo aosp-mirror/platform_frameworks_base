@@ -685,7 +685,7 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Alle Daten löschen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Tablet ohne Warnung löschen"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Du kannst die Daten auf deinem Android TV-Gerät ohne vorherige Warnung löschen, indem du es auf die Werkseinstellungen zurücksetzt."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Auf Werkseinstellungen zurücksetzen und damit Daten auf dem Telefon ohne Warnung löschen"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Gerät auf Werkseinstellungen zurücksetzen und damit Daten auf dem Telefon ohne Warnung löschen"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Nutzerdaten löschen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Daten dieses Nutzers auf diesem Tablet ohne vorherige Warnung löschen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Daten dieses Nutzers auf diesem Android TV-Gerät werden ohne vorherige Warnung gelöscht."</string>

@@ -1258,7 +1258,7 @@
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="3665696841646851068">"ଏକ ଅଜଣା ନେଟ୍‌ୱର୍କ ପ୍ରକାର"</string>
-    <string name="accept" msgid="5447154347815825107">"ସ୍ୱୀକାର କରନ୍ତୁ"</string>
+    <string name="accept" msgid="5447154347815825107">"ଗ୍ରହଣ କରନ୍ତୁ"</string>
     <string name="decline" msgid="6490507610282145874">"ପ୍ରତ୍ୟାଖ୍ୟାନ"</string>
     <string name="select_character" msgid="3352797107930786979">"ବର୍ଣ୍ଣ ଲେଖନ୍ତୁ"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"SMS ମେସେଜ୍‌ଗୁଡ଼ିକୁ ପଠାଯାଉଛି"</string>
@@ -1661,7 +1661,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ଫିଚରଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବାକୁ, ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ମ୍ୟାଗ୍ନିଫିକେସନ୍‍"</string>
     <string name="user_switched" msgid="7249833311585228097">"ବର୍ତ୍ତମାନର ୟୁଜର୍‌ ହେଉଛନ୍ତି <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> ରେ ସୁଇଚ୍ କରନ୍ତୁ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ରେ ସ୍ୱିଚ୍ କରନ୍ତୁ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ଙ୍କୁ ଲଗଆଉଟ୍‍ କରାଯାଉଛି…"</string>
     <string name="owner_name" msgid="8713560351570795743">"ମାଲିକ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ତ୍ରୁଟି"</string>
