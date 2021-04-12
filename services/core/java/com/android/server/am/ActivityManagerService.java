@@ -11501,6 +11501,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // and it's not isolated, as we'd need the signal to bookkeeping the dying process list.
             restart = app.onCleanupApplicationRecordLSP(mProcessStats, allowRestart,
                     fromBinderDied || app.isolated /* unlinkDeath */);
+
+            // Cancel pending frozen task if there is any.
+            mOomAdjuster.mCachedAppOptimizer.unscheduleFreezeAppLSP(app);
         }
         mAppProfiler.onCleanupApplicationRecordLocked(app);
         skipCurrentReceiverLocked(app);
