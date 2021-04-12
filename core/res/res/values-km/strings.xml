@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ចូលប្រើ​សកម្មភាព​រាងកាយ​របស់អ្នក"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"កាមេរ៉ា"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ថតរូប និងថតវីដេអូ"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"ឧបករណ៍​ប៊្លូធូសដែលនៅជិត"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"ស្វែងរក និងភ្ជាប់ទៅឧបករណ៍​ប៊្លូធូស​ដែលនៅជិត"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"ឧបករណ៍​ដែលនៅជិត"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ស្វែងរក និងភ្ជាប់ទៅ​ឧបករណ៍​ដែលនៅជិត"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"អាន និងសរសេរ​កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ទូរសព្ទ"</string>
@@ -538,10 +538,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"អនុញ្ញាតឱ្យកម្មវិធី​ស្វែងរក និងផ្គូផ្គង​ឧបករណ៍​ប៊្លូធូសដែលនៅជិត"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"ភ្ជាប់ទៅឧបករណ៍​ប៊្លូធូសដែលបានផ្គូផ្គង"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"អនុញ្ញាតឱ្យ​កម្មវិធីភ្ជាប់ទៅ​ឧបករណ៍​ប៊្លូធូសដែលបានផ្គូផ្គង"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
+    <!-- no translation found for permlab_bluetooth_advertise (2781147747928853177) -->
     <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
+    <!-- no translation found for permdesc_bluetooth_advertise (6085174451034210183) -->
     <skip />
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"កំណត់ចម្ងាយពាក់ព័ន្ធរវាងឧបករណ៍ Ultra-Wideband ដែលនៅជិត"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"អនុញ្ញាតឱ្យ​កម្មវិធី​កំណត់ចម្ងាយ​ពាក់ព័ន្ធ​រវាងឧបករណ៍ Ultra-Wideband ដែលនៅជិត"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ព័ត៌មានអំពី​សេវាបង់ប្រាក់តាម NFC ជាអាទិភាព"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"អនុញ្ញាតឱ្យ​កម្មវិធី​ទទួលបាន​ព័ត៌មានអំពី​សេវាបង់ប្រាក់តាម nfc ជាអាទិភាព​ដូចជា គោលដៅផ្លូវ និង​ព័ត៌មាន​កំណត់អត្តសញ្ញាណ​កម្មវិធី ដែលបានចុះឈ្មោះ​ជាដើម។"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ពិនិត្យ​ការ​ទាក់ទង​នៅ​ក្បែរ (NFC)"</string>
@@ -2259,9 +2261,14 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ឥឡូវនេះ អ្នកអាចពង្រីក​ផ្នែកនៃអេក្រង់​របស់អ្នកបានហើយ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"បើកនៅក្នុងការកំណត់"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ច្រានចោល"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"ដើម្បីបន្ត &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ត្រូវការសិទ្ធិចូលប្រើ​មីក្រូហ្វូន​របស់ឧបករណ៍អ្នក។"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ដើម្បីបន្ត &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ត្រូវការសិទ្ធិ​ចូលប្រើ​កាមេរ៉ា​របស់ឧបករណ៍អ្នក។"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"បើក"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content_title (2420858361276370367) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content_title (7287720213963466672) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_notification_content_text (7595608891015777346) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7089318886628390827) -->
+    <skip />
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ឯកជនភាព​ឧបករណ៍​ចាប់សញ្ញា"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"រូប​កម្មវិធី"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"រូបភាព​ផ្សព្វផ្សាយម៉ាក​កម្មវិធី"</string>

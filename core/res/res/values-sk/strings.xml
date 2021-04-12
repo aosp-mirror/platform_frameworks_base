@@ -325,8 +325,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"prístup k vašej fyzickej aktivite"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotenie a natáčanie videí"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Zariadenia Bluetooth nablízku"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"objaviť a pripojiť sa k zariadeniam s rozhraním Bluetooth nablízku"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Zariadenia v okolí"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"objavovať a pripájať zariadenia v okolí"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Zoznam hovorov"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"čítať a zapisovať do zoznamu hovorov"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefón"</string>
@@ -544,10 +544,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Umožňuje aplikácii objaviť zariadenia s rozhraním Bluetooth nablízku a spárovať sa s nimi"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"pripojiť sa k spárovaným zariadeniam Bluetooth"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Umožňuje aplikácii pripojiť sa k spárovaným zariadeniam s rozhraním Bluetooth"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"zobrazovanie reklamy v zariad. Bluetooth v okolí"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Umožňuje aplikácii zobrazovať reklamu v zariadeniach s rozhraním Bluetooth v okolí"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"určovať relatívnu polohu medzi zariadeniami so ultraširokopásmovým pripojením v okolí"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Povoľte aplikácii určovať relatívnu polohu medzi zariadeniami s ultraširokopásmovým pripojením v okolí"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferované informácie platenej služby NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikácii získavať preferované informácie platenej služby NFC, napríklad o registrovanej pomoci a trasách k cieľu."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládať technológiu NFC"</string>
@@ -1900,7 +1900,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Šetrič batérie predlžuje výdrž batérie:\n\n• zapnutím tmavého motívu;\n• vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad kľúčového výrazu „Hey Google“.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Šetrič batérie predlžuje výdrž batérie:\n\n• zapnutím tmavého motívu;\n• vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad kľúčového výrazu „Hey Google“."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Môže to napríklad znamenať, že sa obrázky zobrazia, až keď na ne klepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnúť"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2327,9 +2327,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Teraz môžete zväčšiť časť obrazovky"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Zapnúť v Nastaveniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Zavrieť"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Ak chcete pokračovať, &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; požaduje prístup k mikrofónu zariadenia."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Ak chcete pokračovať, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; požaduje prístup k fotoaparátu zariadenia."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Zapnúť"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Odblokujte mikrofón zariadenia"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokujte fotoaparát zariadenia"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Pre aplikáciu &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; a všetky aplikácie a služby"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Odblokovať"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Ochrana súkromia senzorov"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ikona aplikácie"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Imidž značky aplikácie"</string>

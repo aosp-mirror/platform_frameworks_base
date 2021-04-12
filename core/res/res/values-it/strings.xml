@@ -319,8 +319,8 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"Consente di accedere all\'attività fisica"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"scattare foto e registrare video"</string>
-    <string name="permgrouplab_nearby_devices" msgid="14428105203684587">"Dispositivi Bluetooth nelle vicinanze"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="1146639974734121820">"Rilevamento e connessione a dispositivi Bluetooth nelle vicinanze"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Dispositivi nelle vicinanze"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"Consente di rilevare dispositivi nelle vicinanze e di connettersi a tali dispositivi"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registri chiamate"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"leggere e modificare il registro chiamate del telefono"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefono"</string>
@@ -538,10 +538,10 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Consente all\'app di rilevare e accoppiare dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Connessione a dispositivi Bluetooth accoppiati"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Consente all\'app di connettersi ai dispositivi Bluetooth accoppiati"</string>
-    <!-- no translation found for permlab_uwb_ranging (8141915781475770665) -->
-    <skip />
-    <!-- no translation found for permdesc_uwb_ranging (2519723069604307055) -->
-    <skip />
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Pubblicità su dispositivi Bluetooth vicini"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Consente all\'app di fare pubblicità sui dispositivi Bluetooth nelle vicinanze"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Possibilità di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Consenti all\'app di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informazioni del servizio di pagamento NFC preferito"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Consente all\'app di recuperare informazioni del servizio di pagamento NFC preferito, quali destinazione della route e identificatori applicazione registrati."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controllo Near Field Communication"</string>
@@ -1901,7 +1901,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Notte di un giorno feriale"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fine settimana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sonno"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Notte"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> sta disattivando alcuni suoni"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Si è verificato un problema interno con il dispositivo, che potrebbe essere instabile fino al ripristino dei dati di fabbrica."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Si è verificato un problema interno con il dispositivo. Per informazioni dettagliate, contatta il produttore."</string>
@@ -2259,9 +2259,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Ora puoi ingrandire parte dello schermo"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Attiva nelle Impostazioni"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignora"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Per continuare, l\'app &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; deve accedere al microfono del dispositivo."</string>
-    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Per continuare, l\'app &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; deve accedere alla videocamera del dispositivo."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Attiva"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Sblocca il microfono del dispositivo"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Sblocca la fotocamera del dispositivo"</string>
+    <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Per &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;, nonché per tutti i servizi e le app"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Sblocca"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacy relativa ai sensori"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Icona dell\'applicazione"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Immagine del branding dell\'applicazione"</string>
